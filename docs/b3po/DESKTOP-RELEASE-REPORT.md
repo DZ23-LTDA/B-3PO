@@ -698,3 +698,32 @@ Plano para fechar isso (rodada seguinte):
 2. uma camada de cópia pt por **id de campo** (`settings.configFields.<id>.label/help`) aplicada onde os campos
    de configuração renderizam — o backend continua sendo a fonte do valor, só a apresentação é traduzida;
 3. teste de cobertura: nenhuma chave visível sem pt (mesmo modelo do `overlay-completeness`).
+
+### Rodada 103 — o painel de modelo fala português
+
+Faltava o arquivo de locale: `pt_model_settings.ts` **não existia** (de, es, fr, ja, ru, zh tinham o seu), então todo
+o painel Modelo caía no inglês. Criados três arquivos:
+
+- `pt_model_settings.ts` — as 56 chaves do painel (Provider, Model, Reasoning, Defaults, aviso de backend antigo,
+  modelos auxiliares, Mistura de agentes, subagentes);
+- `pt_aux_tasks.ts` — as 12 tarefas auxiliares (Visão, Compressão, Títulos, Curador…);
+- `pt_delegation_routing.ts` — roteamento de subagentes, **override parcial declarado**: cabeçalho, modos, diálogo
+  de rota e estados de bloqueio traduzidos; cauda longa (descrições raras) herda o inglês por spread, e está dita
+  aqui em vez de disfarçada.
+
+Também entraram `fieldLabels`/`fieldDescriptions` em `pt.ts` (`defineFieldCopy`) para os campos do painel — foi o
+que fez "Janela de contexto do modelo principal (substituir)" e a ajuda dela aparecerem em português na captura
+`docs/b3po/evidence/configuracoes-pt-2.png`.
+
+### O que o teste pegou
+
+`settings.model.staleAuxBefore` usava `${count}` **três** vezes; o inglês usa duas. Compila, passa no typecheck
+(mesma aridade) e renderizaria errado. O `pt-coverage` compara os nomes dentro do template e barrou. Corrigido
+para `[count, count, names]`, na mesma ordem.
+
+### O que NÃO consegui verificar
+
+Duas tentativas de abrir Configurações pela janela empacotada (`Ctrl+,` via AppActivate + SendKeys) voltaram na
+tela de conversa — a captura `configuracoes-modelo-pt.png` é do chat, não do painel. O painel está verificado por
+teste (93 arquivos, 724 testes, incluindo o `pt-coverage`), não por imagem desta vez. Tentar de novo na próxima
+rodada com outro caminho de navegação.

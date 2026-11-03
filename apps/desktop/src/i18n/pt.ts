@@ -9,6 +9,8 @@
  * provider e caminhos. Placeholders e funções mantêm a mesma assinatura do original.
  */
 import { defineLocale, type TranslationOverrides } from './define-locale'
+import { defineFieldCopy } from '@/app/settings/field-copy'
+import { ptModelSettings } from './pt_model_settings'
 
 export const ptOverrides: TranslationOverrides = {
   common: {
@@ -496,6 +498,31 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    model: ptModelSettings,
+    /**
+     * Cópia dos campos de configuração. O inglês vem do `FIELD_LABELS`/`FIELD_DESCRIPTIONS` do módulo de
+     * Configurações; aqui ficam as traduções que o painel realmente mostra. Cobre primeiro o painel Modelo —
+     * as demais seções entram na mesma forma, uma por vez, sem deixar chave órfã.
+     */
+    fieldLabels: defineFieldCopy({
+      model: 'Modelo padrão',
+      modelContextLength: 'Janela de contexto do modelo principal (substituir)',
+      fallbackProviders: 'Modelos de fallback',
+      display: {
+        personality: 'Personalidade',
+        showReasoning: 'Blocos de raciocínio'
+      }
+    }),
+    fieldDescriptions: defineFieldCopy({
+      model: 'Usado em conversas novas, a menos que você escolha outro modelo no compositor.',
+      modelContextLength:
+        'Substitui a janela de contexto detectada do modelo PRINCIPAL do chat (em tokens). Deixe 0 para usar o valor detectado do modelo escolhido. Não afeta modelos auxiliares/MoA.',
+      fallbackProviders: 'Entradas provedor:modelo de reserva, tentadas quando o modelo padrão falha.',
+      display: {
+        personality: 'Estilo padrão do assistente em sessões novas.',
+        showReasoning: 'Mostra as seções de raciocínio quando o backend as fornece.'
+      }
+    }),
     crmPipeline: {
       stageInitial: 'Estágio inicial',
       lostReason: 'Por que foi perdida?',
