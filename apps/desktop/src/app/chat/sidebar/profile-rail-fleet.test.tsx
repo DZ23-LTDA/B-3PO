@@ -49,7 +49,7 @@ vi.mock('@/i18n', () => ({
           installDeviceConfirm: 'Install locally',
           installDeviceDesc:
             'This will install Hermes locally, then open a fresh session on this computer. Nothing is installed until you confirm.',
-          installDeviceTitle: 'Install Hermes on This device?',
+          installDeviceTitle: 'Install B-3PO on This device?',
           localDevice: 'This device (local backend — installs Hermes if missing, otherwise opens a fresh session)',
           onGateway: (name: string, gateway: string) => `${name} · ${gateway}`,
           switchTo: (name: string, gateway: string) => `Open ${name} on ${gateway}`
@@ -123,7 +123,7 @@ vi.mock('./use-profile-rail-refresh-on-active', () => ({
 }))
 
 vi.mock('@/components/remote-setup/first-run', () => ({
-  FirstRunRemoteSetup: () => 'Connect to existing Hermes'
+  FirstRunRemoteSetup: () => 'Connect to existing B-3PO runtime'
 }))
 
 vi.mock('@/hermes', () => ({
@@ -562,7 +562,7 @@ describe('ProfileRail fleet mode', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Connect to existing instead' }))
 
     expect(selectConnection).not.toHaveBeenCalled()
-    expect(await screen.findByText('Connect to existing Hermes')).toBeTruthy()
+    expect(await screen.findByText('Connect to existing B-3PO runtime')).toBeTruthy()
   })
 
   it('keeps the active gateway click on the plain profile path', async () => {

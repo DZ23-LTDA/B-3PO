@@ -290,3 +290,32 @@ caminho do CI principal (o `test:e2e` do repo o executaria).
 
 **O que continua faltando:** a prova visual ponta a ponta. A alternativa segura é rodar
 `npm run test:e2e` num runner Linux (o workflow do B-3PO hoje só roda testes de domínio e typecheck).
+
+## Atualização 23:30 — PRIMEIRA PROVA VISUAL do app real (F5 parcial)
+
+**Causa raiz do fracasso de E2E na rodada anterior:** a sessão do agente exporta
+`ELECTRON_RUN_AS_NODE=1`. Com ela, `electron.exe` roda como Node puro e o bundle ESM morre com
+`The requested module 'electron' does not provide an export named 'BrowserWindow'` — exatamente o
+"Process failed to launch!" do Playwright.
+
+**Com a variável removida o app sobe.** Evidência: `evidence/desktop-b3po-boot.png`.
+
+**E o boot revelou um buraco de marca:** o onboarding dizia "Set up Hermes Desktop", "Connect to
+existing Hermes", "Install Hermes locally". Corrigido em `apps/desktop/src/i18n/en.ts` (16 substituições)
+e comprovado em `evidence/desktop-b3po-onboarding.png`:
+
+- "Set up B-3PO"
+- "Connect this app to a B-3PO runtime you already run, or install it locally…"
+- "Connect to existing B-3PO runtime"
+- "Install B-3PO locally" / "Download the B-3PO runtime…"
+
+Testes atualizados: `desktop-install-overlay.test.tsx` e `profile-rail-fleet.test.tsx` (**48 verdes**).
+
+**Pendências visíveis (não escondidas):**
+
+| Item | Estado |
+|---|---|
+| Título da janela | ainda "Hermes" (`MainWindowTitle`) |
+| Demais idiomas (de/es/fr/ja/ru/zh/zh-hant) | ainda dizem Hermes no mesmo bloco |
+| Caminho de instalação | `AppData\Local\hermes\hermes-agent` — **intencional** (compatibilidade nível 2) |
+| Resto da UI (chat, sidebar, settings) | ainda com cópia "Hermes" — rebranding de texto é incremental |
