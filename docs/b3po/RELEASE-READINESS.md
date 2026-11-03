@@ -99,3 +99,70 @@ aplica porque a instalação limpa no Windows não é possível sem certificado 
 - **Mobile:** decisão RN confirmada; protocolo + cliente de API + sessão segura implementados (26 testes).
 - **Marca:** `BRAND-RISK-REPORT.md` criado.
 - Status por plataforma: ver matriz no `RELEASE-READINESS.md` e a tabela A–H do `EXECUTIVE-REPORT.md`.
+
+---
+
+# REAVALIAÇÃO — rodada 77 (esta seção vale; acima é histórico)
+
+Branch `b3po-brand`, **139 commits** sobre `main`. Os vereditos acima estão **superados**: em particular
+"não há cliente mobile" deixou de ser verdade e o pacote Windows existe (sem assinatura).
+
+## Status geral
+
+**NOT_READY** para lançamento. **Núcleo demonstrável** para revisão do proprietário.
+
+## Por plataforma (o que está provado)
+
+| Critério | Windows | Android | iOS | macOS | Linux |
+|---|---|---|---|---|---|
+| Build | **OK** (`npm run build`) | **OK** (`assembleRelease` + AAB) | — | — | — |
+| Pacote | MSIX + `win-unpacked` | APK release, APK debug, AAB | — | — | — |
+| Assinatura | **NÃO assinado** (Store-only) | **chave de debug** | — | — | — |
+| App abre | **OK** — janela "B-3PO", Home pt-BR | **OK** no emulador `dsh_pixel` | — | — | — |
+| Backend real | **OK** (cliente remoto contra `serve`) | **OK** (`/api/health` + gateway) | — | — | — |
+| Conversas | sidebar com sessões reais | lista por bot + troca de conversa | — | — | — |
+| Envio | turno pelo app não re-testado nesta rodada | **OK** — envio 3× consecutivas | — | — | — |
+| Reconexão | — | **OK** — retry, desconectar, reparear | — | — | — |
+| Dispositivos | seção em Configurações com **teste de DOM** (5); screenshot pendente | pareamento real | — | — | — |
+| Instalação / atualização / desinstalação | **não testadas** | **não testadas** | — | — | — |
+
+## Critérios do GOAL §28
+
+| Área | Status | Evidência / lacuna |
+|---|---|---|
+| Identidade B-3PO | **PARCIAL** | UI pt-BR em imagem; `Med` permanece em inglês (exceção declarada) |
+| Mascotes | **VALIDADO** | catálogo + seleção (`settings-mascotes-oficiais.png`) |
+| Home conforme referência | **VALIDADO** | `desktop-home-pt-br.png` |
+| Bots: criar/editar/persistir | **VALIDADO** | suite do plugin + bots reais nas duas listas |
+| Bots: permissões | **PARCIAL** | allowlist de dispositivo pronta; política por Bot sem E2E |
+| Multiagent | **PARCIAL** | grupos/menções/handoff testados; sem prova visual de delegação completa |
+| Hermes: runtime/sessão/evento/persistência | **VALIDADO** | sessões reais, gateway `running`, transcrição persistida |
+| Hermes: aprovação/cancelamento pela UI | **PARCIAL** | backend coberto; fluxo visual não provado nesta rodada |
+| Hades / Codync: análise + matriz + proveniência | **VALIDADO** | `docs/architecture/*`, `docs/legal/THIRD_PARTY_PROVENANCE.md` |
+| WhatsApp CRM: núcleo | **PARCIAL** | 140 testes em `crm/`; **sem UI** e **sem canal real** |
+| WhatsApp CRM: canal oficial | **BLOCKED_BY_EXTERNAL_DEPENDENCY** | conta WhatsApp Business / Cloud API |
+| Desktop Windows | **PARCIAL** | roda e conversa; instalador não assinado, instalação não testada |
+| Desktop macOS / Linux | **NÃO CONSTRUÍDO** | sem runner nesta máquina |
+| Android | **PARCIAL** | fluxos centrais provados; release em chave de debug |
+| iOS | **BLOCKED_BY_EXTERNAL_DEPENDENCY** | macOS + Xcode + certificado |
+| Testes | **VALIDADO** | gate 14; mobile 153 (+8 pulados); CRM 140; desktop i18n 117; gateway 23 |
+| E2E / acessibilidade / performance | **PARCIAL** | E2E no emulador e no Windows; a11y e performance sem medição formal |
+| Artefatos + checksums | **VALIDADO** | `ARTIFACT-MANIFEST.md` com SHA-256 dos 5 artefatos do build atual |
+| Instalação / atualização | **NÃO TESTADO** | — |
+| Assinatura | **BLOCKED_BY_EXTERNAL_DEPENDENCY** | certificado Windows; keystore Android |
+
+## Bloqueios externos
+
+1. **iOS** — macOS + Xcode + certificado Apple.
+2. **Assinatura Windows** — certificado de code signing / Azure Trusted Signing.
+3. **Keystore Android de release** — arquivo + senha do proprietário.
+4. **WhatsApp oficial** — conta WhatsApp Business / Cloud API.
+5. **macOS / Linux desktop** — sem runner.
+
+## O que falta para READY_FOR_INTERNAL_PILOT
+
+- testar instalação limpa e atualização no Windows e no Android;
+- provar aprovação/cancelamento pela UI;
+- UI mínima de CRM no desktop (hoje o módulo é lógica testada sem tela);
+- homologar o ticket de dispositivo em servidor gated;
+- medir acessibilidade e performance com números.
