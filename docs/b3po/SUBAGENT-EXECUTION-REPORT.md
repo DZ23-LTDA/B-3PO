@@ -29,3 +29,38 @@ resultado. Nada aqui é hipotético: cada linha corresponde a uma chamada que ac
 - `delegate` é assíncrono do ponto de vista do coordenador: o resultado volta na própria chamada, mas
   não há fila para acompanhar tarefas longas — por isso as tarefas foram quebradas em pedaços
   pequenos, cada um com critério verificável.
+
+## Delegação 3 — revisão independente do mobile (rodada 66)
+
+| Campo | Valor |
+|---|---|
+| Ferramenta | `mcp__dz23__delegate` (MCP DZ23 Subagents) |
+| Papel | `reviewer` · task_type `review` · detail `full` |
+| Alvo | `groq` / `qwen/qwen3.8-27b` |
+| `request_id` | `1dabc773-42b8-43bd-a649-7c7e985f9f45` |
+| Projeto / missão | `b3po` / `round66-mobile-review` |
+| Tokens | 1.420 entrada · 1.011 saída |
+| Módulos atribuídos | `mobile/b3po-app/App.tsx`, `src/screens/pair-link-card.tsx`, `src/screens/card-styles.ts`, `src/screens/status-card.ts` |
+
+Perguntas enviadas: buracos na máquina de estados (retry após desconectar), erro antigo mascarando estado,
+caminho inválido no campo, limpeza duplicada do campo, vazamento de token.
+
+### Resultado revisado por mim (não aceito às cegas)
+
+| Achado | Veredito | Ação |
+|---|---|---|
+| **Alto**: `connect()` em voo pode sobrescrever `signed_out` depois do Desconectar | **procede** | gerador de sessão: `connect()` captura `sessionGeneration` e descarta o resultado se mudou; `disconnect()` incrementa. Comparação isolada em `src/api/session-guard.ts` + 3 testes |
+| **Médio**: `error` de pareamento antigo mascara o cartão "Desconectado" | **procede** | `setError(null)` no `disconnect()` |
+| **Médio**: erro pode ecoar o link com token | **não procede** | `pairingFailureMessage()` devolve texto fixo por motivo (`'missing-token'` → "O convite não traz a chave de pareamento."); nenhum caminho inclui a entrada. Conferido no arquivo, não no palpite |
+| Baixo: campo só habilita com texto / limpeza duplicada | sem defeito (concordei) | nada a fazer |
+
+### Ressalva honesta sobre o achado "Alto"
+
+O botão Desconectar só aparece com `status === 'connected'`, então durante um `connect()` pendente ele **não
+está na tela** — na prática a corrida é difícil de disparar hoje. Corrigi mesmo assim: o custo é uma
+comparação, e sem ela o bug nasceria no dia em que a tela deixar desconectar durante "Conectando…".
+
+### Provado no aparelho após a correção
+
+Pareamento por deep link → **"Conectado ao computador"** (guard não dá falso positivo) → **Desconectar** →
+**"Desconectado deste computador"** com campo vazio. Mobile: **146 testes** (+3) e 8 pulados.

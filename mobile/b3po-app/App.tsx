@@ -44,6 +44,7 @@ import {
 } from './src/screens/chat-session'
 import type { ChatBubble, RawMessage } from './src/screens/chat-session'
 import { nextRetryDelay, RETRY_BUTTON_LABEL, retryingCopy } from './src/api/retry'
+import { isStaleSession } from './src/api/session-guard'
 import { PairLinkCard } from './src/screens/pair-link-card'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
@@ -55,6 +56,8 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   // Sem o deep link a mao o usuario ficava sem saida depois de desconectar; aqui ele cola o link.
   const [pairLink, setPairLink] = useState('')
+  // Cada Desconectar invalida os pedidos que ja sairam (senao um connect() em voo ressuscita a sessao).
+  const sessionGeneration = useRef(0)
   // O estado 'failed' guarda so origem+mensagem; para reconectar preciso das credenciais do pareamento.
   const lastCredentials = useRef<{ origin: string; deviceId: string; token: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -80,6 +83,8 @@ export default function App() {
   )
 
   const connect = useCallback(async (origin: string, deviceId: string, token: string) => {
+    const startedAt = sessionGeneration.current
+
     lastCredentials.current = { origin, deviceId, token }
     setConnection({ status: 'connecting', origin })
 
@@ -92,10 +97,19 @@ export default function App() {
       // mostra o estado vazio honesto em vez de inventar bots.
       const profiles = await client.profiles().catch(() => [] as BotProfile[])
 
+      // Desconectar durante o pedido: o resultado chegou tarde e nao pode reabrir a sessao.
+      if (isStaleSession(startedAt, sessionGeneration.current)) {
+        return
+      }
+
       setBots(profiles)
       setAttempt(0)
       setConnection({ status: 'connected', origin, deviceId, token, health, gateway, checkedAt: Date.now() })
     } catch (failure) {
+      if (isStaleSession(startedAt, sessionGeneration.current)) {
+        return
+      }
+
       const detail = failure instanceof Error ? failure.message : String(failure)
 
       setAttempt(previous => previous + 1)
@@ -130,9 +144,13 @@ export default function App() {
 
   /** Desconectar: escolha do usuario, nao falha. Para o retry e esquece as credenciais em memoria. */
   const disconnect = useCallback(() => {
+    // Invalida qualquer connect() em voo: sem isso o pedido antigo sobrescreveria 'signed_out'.
+    sessionGeneration.current += 1
     lastCredentials.current = null
     setAttempt(0)
     setBots([])
+    // Erro de pareamento antigo mascararia o cartao "Desconectado".
+    setError(null)
     // O link antigo nao pode ficar no campo: na proxima conexao ele se mistura com o texto novo.
     setPairLink('')
     setConnection({ status: 'signed_out' })

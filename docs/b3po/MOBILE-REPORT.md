@@ -894,3 +894,17 @@ ficava preso na tela de desconectado.
    Evidência: `mobile-parear-por-link-conectado.png`.
 
 Mobile: **143 testes** + 8 pulados · `tsc` limpo · gate 14 checks ok.
+
+## Rodada 79 — corrida de sessão fechada após revisão independente (MCP DZ23)
+
+A revisão (`request_id 1dabc773`) apontou que um `connect()` já em voo podia terminar **depois** do toque em
+Desconectar e reabrir a sessão sozinho na tela. Corrigido com geração de sessão:
+
+- `connect()` captura `sessionGeneration.current` no início e, ao concluir (sucesso **ou** falha), descarta o
+  resultado se a geração mudou;
+- `disconnect()` incrementa a geração (e limpa `error`, que antes podia mascarar o cartão "Desconectado");
+- a comparação vive em `src/api/session-guard.ts` com 3 testes, porque dentro do componente não haveria
+  como testá-la.
+
+O outro achado (erro de pareamento ecoando o link com token) **não procede**: `pairingFailureMessage()`
+devolve texto fixo por motivo. Registrado como rejeitado com evidência.
