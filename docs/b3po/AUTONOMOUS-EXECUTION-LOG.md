@@ -259,3 +259,34 @@ mascote de volta).
 | 23:21 | `EVIDENCE-INDEX.md` | tabela de provas por arquivo de teste |
 
 Nenhuma submissão, conta, certificado ou pagamento foi feito — e nenhum artefato é chamado de assinado.
+
+## Atualização 23:32 — tentativa de E2E visual (bloqueada no Windows)
+
+Escrevi `e2e/bot-mascot-tab.spec.ts` (boot real: Electron + `hermes serve` + provider mock, clicar em
+"New bot or group chat" → aba "B-3PO" → grade de mascotes). Execução:
+
+```
+npx playwright test e2e/bot-mascot-tab.spec.ts
+→ 1 failed: Error: Process failed to launch!
+   at launchDesktop (e2e/fixtures.ts:294)
+```
+
+Diagnóstico feito:
+
+| Verificação | Resultado |
+|---|---|
+| `dist/electron-main.mjs` e `dist/index.html` | existem |
+| binário do Electron (`v24.22.0`) | executa (`npx electron --version`) |
+| `electron . --disable-gpu --no-sandbox` manual | sobe sem erro |
+| processos Electron residuais do repo | **nenhum** (lock de instância descartado) |
+| `buildAppEnv` herda `process.env` | sim (`stripCredentials(process.env)`) |
+
+**Conclusão:** o harness de e2e do repo é escrito para o devshell nix / CI Linux (o próprio
+`boot.spec.ts` diz "Run from the nix devshell"). Neste Windows o launch do Playwright falha antes de
+qualquer janela.
+
+**Decisão:** removi o spec. Não entrego teste que não rodei, e não deixo um spec não verificado no
+caminho do CI principal (o `test:e2e` do repo o executaria).
+
+**O que continua faltando:** a prova visual ponta a ponta. A alternativa segura é rodar
+`npm run test:e2e` num runner Linux (o workflow do B-3PO hoje só roda testes de domínio e typecheck).
