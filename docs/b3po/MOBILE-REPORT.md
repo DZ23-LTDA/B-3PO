@@ -273,3 +273,25 @@ com ele pelo mesmo `WebSocket` que o app usa. Cinco casos:
 
 Ainda não provado: a conexão contra o **gateway Hermes real** (o endpoint registrado em `gw.json`
 estava com a porta fechada nesta rodada). O contrato está provado; falta o servidor real — item aberto.
+
+## Rodada 46 — investigação do gateway real (resultado honesto)
+
+Subi o gateway do perfil de teste (`hermes gateway ensure --json`) e ele **está de pé**:
+
+```
+state: ready
+endpoint: http://127.0.0.1:54686
+runtime_protocol: 1
+capabilities: durable-admission-v1, event-replay-v1, session-authority-v1
+processo: python.exe -m hermes_c… (-m hermes_core/gateway)
+```
+
+Mas essa porta **não é** o endpoint JSON-RPC do cliente mobile: qualquer caminho (`/`, `/health`,
+`/rpc`) devolve o HTML do **dashboard**, ou seja, é o servidor web do painel. O contrato que o cliente
+mobile precisa falar é o do `serve` backend do desktop (`apps/desktop/electron/main.ts` cria o
+`http.createServer` e o canal RPC), que ainda não foi mapeado rota a rota.
+
+Registrado como próximo passo concreto: enumerar as rotas/canal do `serve` backend e então falar com
+ele pelo `ws-transport.ts` já implementado. **Nada aqui foi declarado funcionando** — a conexão contra
+o servidor real segue sem prova, e o `gw.json` do perfil estava apontando para uma porta antiga já
+fechada (58036), o que também precisa de atenção em outro ciclo.
