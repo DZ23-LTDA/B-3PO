@@ -667,6 +667,16 @@ export const arSettings = {
       clear: 'مسح'
     },
     gateway: {
+      pairedDevicesTitle: 'الأجهزة المقترنة',
+      pairedDevicesIntro: 'هواتف يمكنها التحدث مع البوتات على هذا الكمبيوتر. لكل هاتف مفتاحه الخاص؛ الإلغاء يقطع الوصول نهائيًا.',
+      pairedDevicesEmpty: 'لا يوجد هاتف مقترن بعد. افتح رابط الاقتران على الهاتف لإضافة واحد.',
+      pairedDevicesError: 'تعذّرت قراءة الأجهزة المقترنة.',
+      pairedDevicesRefresh: 'تحديث',
+      pairedDevicesRevoke: 'إلغاء',
+      pairedDevicesRevoked: 'ملغى',
+      pairedDevicesCreated: 'أُضيف',
+      pairedDevicesLastSeen: 'آخر استخدام',
+      pairedDevicesTickets: 'تذاكر',
       loading: 'جار تحميل إعدادات البوابة...',
       unavailableTitle: 'إعدادات البوابة غير متاحة',
       unavailableDesc: 'جسر IPC في سطح المكتب لا يوفّر إعدادات البوابة.',

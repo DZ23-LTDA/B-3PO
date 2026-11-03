@@ -1397,6 +1397,16 @@ export const zhOverrides = {
       scopeNotRestored: (profile: string, error: string) => `Profile“${profile}”未恢复：${error}`
     },
     gateway: {
+      pairedDevicesTitle: '已配对的设备',
+      pairedDevicesIntro: '可以与此电脑上的机器人对话的手机。每台都有独立密钥；撤销后将永久断开。',
+      pairedDevicesEmpty: '还没有配对的手机。在手机上打开配对链接即可添加。',
+      pairedDevicesError: '无法读取已配对的设备。',
+      pairedDevicesRefresh: '刷新',
+      pairedDevicesRevoke: '撤销',
+      pairedDevicesRevoked: '已撤销',
+      pairedDevicesCreated: '添加于',
+      pairedDevicesLastSeen: '最后使用',
+      pairedDevicesTickets: '票据',
       loading: '正在加载网关设置...',
       ...zhGatewayHost,
       title: '网关连接',

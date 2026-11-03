@@ -1065,6 +1065,16 @@ export const ruOverrides = {
       empty: 'Соединения пока не зарегистрированы.'
     },
     gateway: {
+      pairedDevicesTitle: 'Подключённые устройства',
+      pairedDevicesIntro: 'Телефоны, которым разрешено общаться с ботами на этом компьютере. У каждого свой ключ; отзыв закрывает доступ навсегда.',
+      pairedDevicesEmpty: 'Пока нет подключённых телефонов. Откройте ссылку сопряжения на телефоне, чтобы добавить.',
+      pairedDevicesError: 'Не удалось прочитать подключённые устройства.',
+      pairedDevicesRefresh: 'Обновить',
+      pairedDevicesRevoke: 'Отозвать',
+      pairedDevicesRevoked: 'отозвано',
+      pairedDevicesCreated: 'добавлено',
+      pairedDevicesLastSeen: 'последнее использование',
+      pairedDevicesTickets: 'тикеты',
       loading: 'Загрузка настроек шлюза…',
       ...ruGatewayHost,
       title: 'Подключение шлюза',

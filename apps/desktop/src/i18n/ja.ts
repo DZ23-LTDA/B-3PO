@@ -990,6 +990,16 @@ export const jaOverrides = {
       clear: 'クリア'
     },
     gateway: {
+      pairedDevicesTitle: 'ペアリング済みデバイス',
+      pairedDevicesIntro: 'このコンピューターのボットと通信できるスマートフォンです。それぞれ固有のキーを持ち、取り消すと完全に遮断されます。',
+      pairedDevicesEmpty: 'まだペアリングされたスマートフォンはありません。スマートフォンでペアリングリンクを開いて追加してください。',
+      pairedDevicesError: 'ペアリング済みデバイスを読み取れませんでした。',
+      pairedDevicesRefresh: '更新',
+      pairedDevicesRevoke: '取り消す',
+      pairedDevicesRevoked: '取り消し済み',
+      pairedDevicesCreated: '追加日',
+      pairedDevicesLastSeen: '最終使用',
+      pairedDevicesTickets: 'チケット',
       loading: 'ゲートウェイ設定を読み込み中...',
       ...jaGatewayHost,
       title: 'ゲートウェイ接続',

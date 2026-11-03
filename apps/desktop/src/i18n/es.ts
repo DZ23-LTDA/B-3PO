@@ -1695,6 +1695,16 @@ export const esOverrides = {
       scopeNotRestored: (profile: string, error: string) => `No se restauró el perfil “${profile}”: ${error}`
     },
     gateway: {
+      pairedDevicesTitle: 'Dispositivos vinculados',
+      pairedDevicesIntro: 'Teléfonos que pueden hablar con los bots de este equipo. Cada uno tiene su propia clave; revocar corta el acceso para siempre.',
+      pairedDevicesEmpty: 'Aún no hay ningún teléfono vinculado. Abre el enlace de vinculación en el teléfono para añadir uno.',
+      pairedDevicesError: 'No se pudieron leer los dispositivos vinculados.',
+      pairedDevicesRefresh: 'Actualizar',
+      pairedDevicesRevoke: 'Revocar',
+      pairedDevicesRevoked: 'revocado',
+      pairedDevicesCreated: 'añadido',
+      pairedDevicesLastSeen: 'último uso',
+      pairedDevicesTickets: 'tickets',
       loading: 'Cargando ajustes del gateway...',
       ...esGatewayHost,
       title: 'Conexión del gateway',

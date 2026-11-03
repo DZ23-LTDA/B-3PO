@@ -1701,6 +1701,16 @@ export const frOverrides = {
       scopeNotRestored: (profile: string, error: string) => `Profil « ${profile} » non restauré : ${error}`
     },
     gateway: {
+      pairedDevicesTitle: 'Appareils associés',
+      pairedDevicesIntro: 'Téléphones autorisés à parler aux bots de cet ordinateur. Chacun a sa propre clé ; révoquer coupe l’accès définitivement.',
+      pairedDevicesEmpty: 'Aucun téléphone associé pour l’instant. Ouvrez le lien d’association sur le téléphone pour en ajouter un.',
+      pairedDevicesError: 'Impossible de lire les appareils associés.',
+      pairedDevicesRefresh: 'Actualiser',
+      pairedDevicesRevoke: 'Révoquer',
+      pairedDevicesRevoked: 'révoqué',
+      pairedDevicesCreated: 'ajouté',
+      pairedDevicesLastSeen: 'dernier usage',
+      pairedDevicesTickets: 'tickets',
       loading: 'Chargement des paramètres du gateway...',
       ...frGatewayHost,
       title: 'Connexion au gateway',

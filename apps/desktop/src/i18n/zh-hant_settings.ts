@@ -887,6 +887,16 @@ export const zhHantSettings = {
       clear: '清除'
     },
     gateway: {
+      pairedDevicesTitle: '已配對的裝置',
+      pairedDevicesIntro: '可以與此電腦上的機器人對話的手機。每台都有獨立金鑰；撤銷後將永久斷開。',
+      pairedDevicesEmpty: '還沒有配對的手機。在手機上開啟配對連結即可新增。',
+      pairedDevicesError: '無法讀取已配對的裝置。',
+      pairedDevicesRefresh: '重新整理',
+      pairedDevicesRevoke: '撤銷',
+      pairedDevicesRevoked: '已撤銷',
+      pairedDevicesCreated: '新增於',
+      pairedDevicesLastSeen: '最後使用',
+      pairedDevicesTickets: '票據',
       loading: '正在載入閘道設定...',
       unavailableTitle: '閘道設定不可用',
       unavailableDesc: '桌面 IPC 橋接器未公開閘道設定。',

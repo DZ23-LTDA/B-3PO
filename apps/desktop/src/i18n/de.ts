@@ -1697,6 +1697,16 @@ export const deOverrides = {
       scopeNotRestored: (profile: string, error: string) => `Profil „${profile}“ nicht wiederhergestellt: ${error}`
     },
     gateway: {
+      pairedDevicesTitle: 'Gekoppelte Geräte',
+      pairedDevicesIntro: 'Telefone, die mit den Bots auf diesem Computer sprechen dürfen. Jedes hat einen eigenen Schlüssel; Widerrufen sperrt es dauerhaft.',
+      pairedDevicesEmpty: 'Noch kein Telefon gekoppelt. Öffne den Kopplungslink auf dem Telefon, um eines hinzuzufügen.',
+      pairedDevicesError: 'Die gekoppelten Geräte konnten nicht gelesen werden.',
+      pairedDevicesRefresh: 'Aktualisieren',
+      pairedDevicesRevoke: 'Widerrufen',
+      pairedDevicesRevoked: 'widerrufen',
+      pairedDevicesCreated: 'hinzugefügt',
+      pairedDevicesLastSeen: 'zuletzt genutzt',
+      pairedDevicesTickets: 'Tickets',
       loading: 'Gateway-Einstellungen werden geladen…',
       ...deGatewayHost,
       title: 'Gateway-Verbindung',
