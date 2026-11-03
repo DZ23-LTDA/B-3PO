@@ -363,3 +363,11 @@ grande e o rebranding é incremental — não vou afirmar que "a interface está
 | 23:45 | workflow passa a rodar mascotes, grade e look (5 arquivos) | — |
 | 23:48 | `INSTALL.md` criado | Windows real; Linux/macOS/iOS bloqueados; Android só casca |
 | 23:50 | matriz de critérios da Fase K no `RELEASE-READINESS` | veredito NOT_READY |
+
+## Rodada 22 — relatório executivo e conferência de entregas
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 23:52 | app relançado com `HERMES_DESKTOP_HERMES_ROOT` + backend isolado | ainda pede instalção local (quer `<HERMES_HOME>\hermes-agent`) |
+| 23:55 | conferência das 21 entregas + 7 ADRs | **nenhuma faltando** (36 arquivos) |
+| 23:58 | `EXECUTIVE-REPORT.md` | relatório final com números verificados e veredito NOT_READY |
