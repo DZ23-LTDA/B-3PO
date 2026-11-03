@@ -1112,8 +1112,8 @@ def register(ctx) -> None:
     from . import gateway_env  # env -> GatewayConfig bridge (gateway.config_env)
     ctx.register_platform(
         name="whatsapp_cloud", label="WhatsApp Business (Cloud)", adapter_factory=WhatsAppCloudAdapter,
-        dashboard_label="WhatsApp Cloud API",
-        dashboard_description="Use Hermes via Meta's hosted WhatsApp Cloud API (no local bridge).",
+        dashboard_label="WhatsApp Cloud API (official)",
+        dashboard_description="The official Meta WhatsApp Business Platform: no local bridge, no QR pairing, templates and webhooks per Meta policy.",
         docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud",
         check_fn=check_whatsapp_cloud_requirements, is_connected=_is_connected,
         config_connected_fn=config_connected_extra("phone_number_id", "access_token"),

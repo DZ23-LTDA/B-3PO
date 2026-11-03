@@ -318,3 +318,22 @@ O motivo aparece na própria linha depois. O formulário de criação ganhou est
    estágio escolhido vai no payload (`stage: doneStage`).
 
 Testes: 130 verdes (funil + i18n + store do funil); gate 14 ok.
+
+## Rodada 99 — as duas entradas de WhatsApp em Mensageria
+
+O dono estranhou "dois WhatsApp" na lista de Mensageria. Não é duplicata de código: são **dois canais
+diferentes**, e os rótulos não deixavam isso claro.
+
+| Canal | O que é | Estado |
+|---|---|---|
+| `whatsapp` | ponte local que acompanha o produto, pareamento por QR | funciona, mas pode quebrar quando o WhatsApp muda o cliente |
+| `whatsapp_cloud` | WhatsApp Business Platform oficial (Meta), webhooks e templates | adapter pronto; exige conta Meta (bloqueio externo) |
+
+Corrigido no rótulo e na descrição dos dois adapters:
+
+- `WhatsApp (local bridge)` — descrição diz que **não é a API oficial** e recomenda a Cloud API para produção;
+- `WhatsApp Cloud API (official)` — descrição diz que não há ponte local, sem QR, com templates/webhooks
+  conforme a política da Meta.
+
+Se o dono quiser **uma só** entrada, a decisão é de produto (esconder a ponte ou a Cloud API) — não faço isso
+sem confirmar, porque esconder a ponte tiraria o canal que já foi usado nos testes com celular.
