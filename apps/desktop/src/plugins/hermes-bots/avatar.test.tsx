@@ -194,7 +194,7 @@ describe('an SDK that predates blobatarSvg', () => {
 })
 
 it('mascote em PNG pisca por animação e desloca a piscada por nome', () => {
-  const primeiro = render(<BotFace image="/avatars/bit.png" name="Revisor" />)
+  const primeiro = render(<BotFace color="#6c5ce7" image="/avatars/bit.png" name="Revisor" shape="squircle" />)
   const img = primeiro.container.querySelector('img')!
 
   expect(img.className).toContain('hb-mascot-blink')
@@ -204,7 +204,7 @@ it('mascote em PNG pisca por animação e desloca a piscada por nome', () => {
 
   cleanup()
 
-  const segundo = render(<BotFace image="/avatars/bit.png" name="Analista Financeiro" />)
+  const segundo = render(<BotFace color="#6c5ce7" image="/avatars/bit.png" name="Analista Financeiro" shape="squircle" />)
   const outra = segundo.container.querySelector('img')!
 
   expect(outra.style.animationDelay).toBe(mascotDelayForTest('Analista Financeiro'))

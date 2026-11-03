@@ -584,3 +584,26 @@ uníssono. `prefers-reduced-motion: reduce` desliga.
 
 **É aproximação, não pálpebra**: piscada fiel exige frames por mascote (ou o GIF do dono, que ainda não está no
 repositório). Registrado aqui para não vender como mais do que é.
+
+## Rodada 97 — o herói do chat de bot: o robô, e de verdade desta vez
+
+A rodada 95 mexeu em `components/chat/intro.tsx` — o splash do **rascunho novo**. Só que a tela das capturas do
+dono era outra: `plugins/hermes-bots/chat-empty.tsx` (`BotChatEmpty`), que desenhava o rosto pequeno + `.fit-text`
+com o nome do bot. Rebuild + captura provaram que minha mudança não aparecia em lugar nenhum: **corrigi o arquivo
+errado**.
+
+Agora, no chat de bot:
+
+- **arte do robô da marca** quando o bot não escolheu mascote — antes o padrão determinístico sorteava uma
+  **estrela roxa** para o nome "B-3PO";
+- o mascote escolhido, quando existe (`rosterMascotSrc`);
+- **um** rosto, não dois: o `BotFace` pequeno saiu (squircle + estrela juntos parecia defeito);
+- nome do bot em corpo de texto e o "Say something to get started." embaixo;
+- altura limitada por viewport, sem encostar no compositor.
+
+Evidência: `docs/b3po/evidence/hero-mascote-dev.png` — app empacotado contra o backend real.
+
+### Pendente aqui
+
+O robô continua **estático** (só a flutuação CSS). Movimento real pede frames — o GIF do dono não está no
+repositório. E a arte pode ficar maior: ajusto com nova captura.
