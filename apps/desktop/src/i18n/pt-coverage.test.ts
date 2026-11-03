@@ -95,6 +95,31 @@ describe('cobertura pt-BR', () => {
     expect(suspicious).toEqual([])
   })
 
+
+  it('mantém os mesmos placeholders interpolados que o inglês', () => {
+    // Uma tradução que troca `${term}` por `${nome}` compila e passa no typecheck (mesma aridade),
+    // mas renderiza "undefined" na tela. Comparar os nomes usados dentro do template pega isso.
+    const mismatched: string[] = []
+    const names = (value: unknown): string[] => {
+      if (typeof value !== 'function') {
+        return []
+      }
+      const source = value.toString()
+      return [...source.matchAll(/\$\{\s*([A-Za-z_$][\w$]*)/g)].map(match => match[1]).sort()
+    }
+
+    for (const key of translated) {
+      const source = names(valueAt(en as unknown as Tree, key))
+      const target = names(valueAt(ptOverrides as unknown as Tree, key))
+
+      if (source.join(',') !== target.join(',')) {
+        mismatched.push(`${key}: en=[${source}] pt=[${target}]`)
+      }
+    }
+
+    expect(mismatched).toEqual([])
+  })
+
   it('cobre as telas pedidas pelo proprietário', () => {
     // Seções que o app real mostra primeiro: sidebar, setup de modelo, configurações, erros.
     const required = ['common', 'install', 'language', 'errors', 'ui', 'modelPicker']

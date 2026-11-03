@@ -2259,7 +2259,7 @@ cli:
     images_attached_one: "📎 {count} image attached"
     images_attached_other: "📎 {count} images attached"
     command_interrupted: "Command interrupted."
-    welcome: "Welcome to Hermes Agent! Type your message or /help for commands."
+    welcome: "Welcome to B-3PO! Type your message or /help for commands."
     activated_skills_label: "Activated skills:"
     redaction_disabled_title: "⚠  Secret redaction is DISABLED"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value}). API keys and tokens may appear verbatim in chat output, session JSONs, and logs. Set {setting} in config.yaml to re-enable."

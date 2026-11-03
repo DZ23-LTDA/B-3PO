@@ -52,7 +52,16 @@ describe('pt-BR', () => {
   })
 
   it('o override cobre exatamente as seções declaradas', () => {
-    expect(Object.keys(ptOverrides).sort()).toEqual(['common', 'errors', 'install', 'language', 'modelPicker', 'ui'])
+    expect(Object.keys(ptOverrides).sort()).toEqual([
+      'common',
+      'errors',
+      'install',
+      'language',
+      'modelPicker',
+      'settings',
+      'sidebar',
+      'ui'
+    ])
   })
 
   it('traduz as telas de idioma, erro, interface e seletor de modelo', () => {

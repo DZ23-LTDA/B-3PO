@@ -2163,7 +2163,7 @@ cli:
     images_attached_one: "📎 {count} imagem anexada"
     images_attached_other: "📎 {count} imagens anexadas"
     command_interrupted: "Comando interrompido."
-    welcome: "Bem-vindo ao Hermes Agent! Digite sua mensagem ou /help para ver os comandos."
+    welcome: "Bem-vindo ao B-3PO! Digite sua mensagem ou /help para ver os comandos."
     activated_skills_label: "Skills ativadas:"
     redaction_disabled_title: "⚠  A redação de segredos está DESATIVADA"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value}). Chaves de API e tokens podem aparecer sem máscara na saída do chat, nos JSONs de sessão e nos logs. Defina {setting} em config.yaml para reativar."

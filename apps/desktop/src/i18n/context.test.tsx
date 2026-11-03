@@ -82,7 +82,9 @@ describe('I18nProvider', () => {
   it.each([
     ['fr', 'fr'],
     ['de-DE', 'de'],
-    ['es', 'es']
+    ['es', 'es'],
+    ['pt', 'pt'],
+    ['pt-BR', 'pt']
   ] as const)('loads display.language=%s and renders the %s catalog', async (configured, locale) => {
     const configClient: I18nConfigClient = {
       getConfig: vi.fn().mockResolvedValue({ display: { language: configured } }),
