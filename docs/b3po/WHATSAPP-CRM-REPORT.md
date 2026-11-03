@@ -26,3 +26,32 @@ posterior ou igual à mensagem marca como lida. Corrigi os testes para criar a c
 anterior, e deixei o comentário explicando a semântica.
 
 **52 testes** no CRM (37 anteriores + 15 novos), `tsc --noEmit` limpo.
+
+## Rodada 51 — tarefas e Kanban (GOAL 19)
+
+`crm/src/tasks.ts` com **20 testes**. O módulo existe porque o `pendingTasks` do dashboard era `null`
+por falta de fonte — agora há fonte real.
+
+| Regra | Por quê |
+|---|---|
+| dependência aberta **impede** concluir (devolve `dependency_open`) | concluir por cima de bloqueio esconde trabalho não feito |
+| pai não conclui com subtarefa aberta (`children_open`) | idem, no nível da hierarquia |
+| histórico append-only com autor, de/para e quando | sem isso não há auditoria de quem mudou o quê |
+| concluída **nunca** é atrasada, mesmo com prazo no passado | atraso é sinal de trabalho pendente |
+| qualquer tarefa **com** prazo vem antes de tarefa sem prazo; urgência desempata prazo igual | o que tem data manda |
+| subtarefa não vira card solto no Kanban | senão o quadro conta duas vezes |
+| mover para coluna inexistente é erro | no-op silencioso faz a tela mentir |
+
+Também: `assignTask` / `setPriority` registram no histórico, `pendingTaskCount` alimenta o dashboard,
+e `taskSummary` monta o rótulo de acessibilidade do card.
+
+### Erros meus nesta rodada
+
+Dois testes falharam por expectativa **minha** errada, não por bug:
+
+1. passei a mesma tarefa duas vezes (uma delas modificada, mesmo `id`) e esperei três cards;
+2. esperei que tarefa sem prazo e urgente passasse na frente de tarefa com prazo — a regra real (e
+   correta) é: com prazo primeiro, urgência só desempata prazo igual. Corrigi a expectativa e
+   acrescentei um caso de desempate.
+
+**86 testes** no CRM, `tsc --noEmit` limpo.
