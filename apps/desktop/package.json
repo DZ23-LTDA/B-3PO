@@ -1,10 +1,10 @@
 {
   "name": "hermes",
-  "productName": "Hermes",
+  "productName": "B-3PO",
   "private": true,
   "version": "0.0.0",
-  "description": "Native desktop shell for Hermes Agent.",
-  "author": "Nous Research",
+  "description": "B-3PO Bot Platform desktop shell (fork of Hermes Agent, MIT).",
+  "author": "DZ23-LTDA",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NousResearch/hermes-agent.git"

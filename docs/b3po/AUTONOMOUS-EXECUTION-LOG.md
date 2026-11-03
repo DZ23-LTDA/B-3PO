@@ -105,3 +105,21 @@ empacotar ou apontar o cache do electron-builder para fora do checkout.
 | 21:36 | typecheck | exit 0 |
 | 21:37 | suíte completa do plugin | 932 ok, **2 falhas pré-existentes (`cron-*`)** |
 | 21:37 | `python scripts/check` | 14 checks ok |
+
+## Rodada 7 — Fase E parte 1 (identidade do desktop)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:44 | product-identity.cjs, package.json, main.ts, set-exe-identity | rebrand aplicado |
+| 21:45 | teste de identidade | 3 falhas de nome esperado → tabela atualizada → 10/10 |
+| 21:46 | ícones gerados de brand/icons | `icon.ico` + `icon.png` |
+| 21:48 | `npm run pack` | **B-3PO.exe**, ProductName B-3PO |
+| 21:49 | CompanyName ainda Nous Research | corrigido no package.json + set-exe-identity → **DZ23-LTDA** |
+| 21:50 | health gate | **+1 linha em main.ts** (Set-Content) → corrigido, health ok |
+
+**Incidente evitado (registrado):** apaguei `assets/icon.icon/` pensando ser lixo de build; era um
+**bundle versionado** do Icon Composer para macOS. Detectado no `git status` antes do commit e
+**restaurado com `git checkout`**. Nenhum arquivo de terceiro perdido.
+
+**Pendências desta frente:** `assets/icon.icns` e o bundle `icon.icon` ainda têm a arte antiga (macOS
+bloqueado); `cliName` continua `hermes` (nível 2 não autorizado).
