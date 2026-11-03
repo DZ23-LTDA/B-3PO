@@ -620,7 +620,7 @@ Falta a credencial. Sem ela o envio não acontece, e botão que não envia é pr
 correto é o produto ter **autorização de dispositivo** (GOAL §16): chave por dispositivo emitida na
 pareamento, aceita pelo WS. Isso é uma funcionalidade a especificar, não um hack a fazer agora.
 
-**Mobile: 121 testes + 8 pulados**, `tsc` limpo, gate **14 ok**.
+**Mobile: 138 testes + 8 pulados** (medido em 2026-11-03 18:41 UTC), `tsc` limpo, gate **14 ok**.
 
 ### Especificação do desbloqueio
 

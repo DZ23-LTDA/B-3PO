@@ -125,3 +125,44 @@ Reexecução completa após a correção do `title=`:
 | Regressão minha (`no-native-title`) | **eliminada** |
 
 Nenhuma falha nova. As 6 restantes são ambientais e anteriores a esta entrega.
+
+## Medição de 2026-11-03 18:41 UTC (números lidos da saída das suítes, não estimados)
+
+| Suíte | Comando | Resultado |
+|---|---|---|
+| Gate do repositório | `python scripts/check` | **14 checks, ok** |
+| Mobile (`mobile/b3po-app`) | `npx vitest run` | **138 passando**, 8 pulados (146) — os 8 são os testes ao vivo que exigem servidor |
+| CRM (`crm/`) | `npx vitest run` | **140 passando** (9 arquivos) |
+| Desktop — idioma | `npx vitest run src/i18n` | **112 passando** (catálogo, cobertura, pt.test, overlay) |
+| Desktop — placeholder do composer | `npx vitest run src/app/chat/composer/hooks/use-composer-placeholder.test.tsx` | **1 passando** (regressão do locale congelado) |
+| Desktop — áreas tocadas | `npx vitest run src/app/chat/composer src/app/shell/hooks` | **752 passando** |
+| Bots (plugin) | suíte do plugin | 960, com 2 falhas **pré-existentes** de cron (`cron-prompt`, `cron-detail`) documentadas abaixo |
+
+### O que mudou desde a medição anterior
+
+- Mobile passou de 121 para **138** testes (composer, follow-up, `gateway-chat-socket` com 10, `chat-session`
+  com 15).
+- CRM está em **140**.
+- Desktop ganhou **4 testes** novos de idioma nesta série: três do provider (`context.test.tsx`) e um do
+  placeholder que aceita apenas os textos de `pt.composer.newSessionPlaceholders`.
+
+### Como reproduzir
+
+```powershell
+git checkout b3po-brand
+. ./activate.ps1
+python scripts/check
+cd crm; npx vitest run
+cd ../mobile/b3po-app; npx vitest run
+cd ../../apps/desktop; npx vitest run src/i18n src/app/chat/composer src/app/shell/hooks
+```
+
+### Falhas conhecidas (não introduzidas por esta série)
+
+| Teste | Suíte | Situação |
+|---|---|---|
+| `cron-prompt` | plugin de bots | falha pré-existente, registrada antes deste trabalho |
+| `cron-detail` | plugin de bots | idem |
+
+Nenhum teste foi removido ou enfraquecido para a suíte passar; as falhas acima continuam falhando de
+propósito, registradas em vez de escondidas.
