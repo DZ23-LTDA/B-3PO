@@ -309,18 +309,48 @@ distinguir "seu ticket não vale para isto" de "seu payload está errado".
 
 17 testes no arquivo; gate `14 checks, ok`.
 
-### Não comprovado ao vivo (e por quê)
+### A prova ao vivo: causa real do HTTP 403 (diagnóstico corrigido)
 
-Tentei a prova ponta a ponta no servidor real: criei dispositivo por `POST /api/b3po/devices`, troquei a
-chave por ticket em `/api/b3po/device-ticket` (funcionou) e abri `ws://…/api/ws?ticket=…`. O **upgrade**
-foi recusado com **HTTP 403 antes de o ticket ser consumido** — o gate `_close_unless_sidecar_allowed`
-roda primeiro nessa rota. Não insisti nem afrouxei gate para "fazer o teste passar": a recusa está provada
-pelos testes que dirigem o `handle_ws` real, e a prova ao vivo fica pendente de descobrir qual credencial
-aquele gate exige para uma conexão de dispositivo.
+Na rodada anterior eu escrevi que o 403 vinha do "gate de upgrade" e que faltava descobrir a credencial.
+Investiguei o código e o diagnóstico estava **errado**. A causa é outra, e está no fluxo de autenticação:
 
-### Efeito no app atual
+`hermes_cli/web_server_chat.py::_ws_auth_reason` tem duas metades:
 
-O mobile hoje autentica com **session token** (`/api/ws?token=…`), então a regra **não** o atinge — envio
-real no aparelho verificado depois da mudança. Quando o app passar a usar ticket de dispositivo, os verbos
-`session.create`, `session.list` e `session.compress` (que ele já chama) precisarão ser adicionados
-deliberadamente à lista, ou o fluxo quebra — está registrado aqui para não virar surpresa.
+- **modo gated** (`app.state.auth_required`): consome `?ticket=` (linha ~293) — é onde um ticket de
+  dispositivo abre `/api/ws` e onde a allowlist vale;
+- **modo loopback** (o nosso `serve` de desenvolvimento): consome ticket **apenas quando a superfície é
+  webapp** (`... if webapp else None`, linha ~353); fora disso exige `?token=` igual ao `_SESSION_TOKEN`
+  (linha ~359).
+
+Nosso servidor roda loopback com token estático, então `ws://…/api/ws?ticket=…` cai em "no_credential" →
+fecha 4401 no upgrade, que o cliente vê como **HTTP 403**. Não é bug, não é gate de origem, e não dá para
+"consertar afrouxando" nada: é o contrato de credencial do modo loopback.
+
+### Cadeia fechada por teste (o que a prova ao vivo ia mostrar)
+
+`tests/hermes_cli/test_ws_device_ticket_admission.py` dirige o **gate de upgrade real**
+(`web_server_chat._ws_auth_reason`) com um ticket mintado por `ws_tickets.mint_ticket`:
+
+| Teste | O que prova |
+|---|---|
+| gate em modo **gated** + `?ticket=` de dispositivo | `reason is None`, credencial `ticket`, e a identidade carimbada é `{"user_id": "b3po-device:dev-1", "provider": "b3po-device"}` |
+| gate em modo **loopback** + mesmo ticket | recusa com `no_credential` — a causa real do 403, agora presa por teste |
+
+Com o teste de recusa em `tests/tui_gateway/test_device_method_scope.py`, a cadeia fica completa e
+verificada ponta a ponta **em processo**: o gate aceita o ticket e carimba `b3po-device` → o dispatcher
+recusa qualquer verbo fora da lista de sessão.
+
+O que **não** foi feito: subir um servidor em modo gated e conectar um cliente de verdade por `wss`, porque
+isso exige credencial de login no dashboard (não configurada aqui). Fica declarado como pendência de
+homologação, não como funcionalidade comprovada em campo.
+
+### O que isso significa para o produto
+
+| Cenário | Credencial que abre `/api/ws` | Allowlist de dispositivo entra? |
+|---|---|---|
+| `serve` local (loopback, token estático) | `?token=<_SESSION_TOKEN>` | não — identidade não é de dispositivo |
+| implantação **gated** (login no dashboard) | `?ticket=<ticket>` | **sim**, e é para isso que existe |
+| webapp em loopback | ticket de socket do webapp | não |
+
+O app mobile hoje usa `?token=` (loopback), coerente com o modo do servidor. Quando o produto for para
+implantação gated com pareamento por ticket, o caminho já está protegido pela allowlist e testado.
