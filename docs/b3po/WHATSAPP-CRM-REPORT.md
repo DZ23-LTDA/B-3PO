@@ -84,3 +84,27 @@ percebi ao rodar. Removi. O hábito que pegou isso foi rodar a suíte inteira a 
 arquivo novo.
 
 **103 testes** no CRM, `tsc --noEmit` limpo.
+
+## Rodada 53 — contatos em lote: importação, duplicidade, CSV e segmentação (GOAL 14.2)
+
+`crm/src/contacts-bulk.ts` com **19 testes**. Separado de `contacts.ts` de propósito: aquele define o
+contato e o telefone; este cuida do trabalho em lote — onde dado se perde calado.
+
+| Regra | Por quê |
+|---|---|
+| importação **idempotente** (chave = telefone normalizado) | reimportar a mesma planilha não duplica contato |
+| linha inválida volta em `skipped` com motivo | um CPF/telefone errado não pode derrubar o lote inteiro |
+| campo vazio da planilha **não apaga** o que existe | importar coluna faltando não destrói cadastro |
+| duplicidade é **detectada, não apagada** | mesclar é decisão humana; apagar por heurística não se perdoa |
+| duplicidade por telefone, e-mail ou nome+empresa | três sinais reais, não só um |
+| CSV escapa vírgula, aspas e quebra de linha | exportar "ACME, Ltda" sem escape quebra a planilha de quem abre |
+| exportação determinística (nome, depois telefone) | dois exports iguais geram o mesmo arquivo |
+| segmento é filtro declarado (etiquetas E, empresa, origem, consentimento, bloqueio, busca) | nada de "todos menos os que eu não gosto" |
+
+### Nota de implementação
+
+Ao ligar o módulo no `createContact` real descobri que ele **não aceita `id` nem `customFields`** — o
+`id` é gerado e `customFields` não está no input. Ajustei o importador para criar pelo contrato real e
+compor o `id`/campos extras depois, em vez de forçar uma assinatura que não existe.
+
+**122 testes** no CRM, `tsc --noEmit` limpo.
