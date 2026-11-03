@@ -1077,7 +1077,7 @@ export const en: Translations = {
       pet: {
         title: 'Pet',
         intro:
-          'Adopt an animated petdex mascot that floats over the app and reacts to what Hermes is doing — running while tools execute, celebrating on success, sulking on errors.',
+          'Adopt an official B-3PO mascot that floats over the app and reacts to what the agent is doing — running while tools execute, celebrating on success, sulking on errors.',
         restartHint:
           'Pets need a quick restart — the running app started before this feature was added. Quit and reopen Hermes, then come back here.',
         scaleTitle: 'Size',
@@ -1087,7 +1087,7 @@ export const en: Translations = {
         chooseTitle: 'Choose a pet',
         chooseDesc: 'Picking one installs it (if needed) and makes it active.',
         searchPlaceholder: 'Search pets…',
-        unreachable: "Couldn't reach the petdex gallery. Check your connection and reopen this page.",
+        unreachable: "Couldn't load the mascot gallery. Reopen this page.",
         noMatch: query => `No pets match "${query}".`,
         installedTag: 'installed',
         generatedTag: 'Generated',

@@ -75,7 +75,9 @@ export function PetSettings() {
 
   const enabled = gallery?.enabled ?? false
   const active = gallery?.active ?? ''
-  const pets = gallery?.pets ?? []
+  // B-3PO usa os mascotes da marca: o catalogo remoto de terceiros (petdex) nao aparece na
+  // interface. Os 20 mascotes oficiais chegam como pets locais ja instalados.
+  const pets = (gallery?.pets ?? []).filter(pet => pet.installed || pet.generated)
   const staleBackend = status === 'stale'
 
   const selectPet = (slug: string) => {
@@ -112,7 +114,7 @@ export function PetSettings() {
 
   // The petdex catalog is thousands of entries, so rank + cap how many render.
   const RENDER_CAP = 60
-  const sorted = rankedGalleryPets(gallery, query)
+  const sorted = gallery ? rankedGalleryPets({ ...gallery, pets }, query) : []
   const shown = sorted.slice(0, RENDER_CAP)
 
   return (
