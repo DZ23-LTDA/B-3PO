@@ -13,12 +13,16 @@ import { defineFieldCopy } from '@/app/settings/field-copy'
 import { ptBoot } from './pt_boot'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
+import { ptErrorLayers } from './pt_error_layers'
+import { ptMemoryLayers } from './pt_memory_layers'
 import { ptModelSettings } from './pt_model_settings'
+import { ptPluginPreviewAccess } from './pt_plugin_preview_access'
 import { ptThemePicker } from './pt_theme_picker'
 
 export const ptOverrides: TranslationOverrides = {
   cron: { control: ptCronControl },
   ...ptBoot,
+  skills: { plugins: { ...ptPluginPreviewAccess } },
   common: {
     apply: 'Aplicar',
     back: 'Voltar',
@@ -229,6 +233,7 @@ export const ptOverrides: TranslationOverrides = {
     clarify: ptClarify,
     themePicker: ptThemePicker,
     thread: {
+      ...ptErrorLayers,
       stop: 'Parar'
     }
   },
@@ -506,6 +511,7 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    memoryLayers: ptMemoryLayers,
     model: ptModelSettings,
     /**
      * Cópia dos campos de configuração. O inglês vem do `FIELD_LABELS`/`FIELD_DESCRIPTIONS` do módulo de

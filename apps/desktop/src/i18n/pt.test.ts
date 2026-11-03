@@ -65,6 +65,7 @@ describe('pt-BR', () => {
       'settings',
       'shell',
       'sidebar',
+      'skills',
       'statusStack',
       'ui'
     ])

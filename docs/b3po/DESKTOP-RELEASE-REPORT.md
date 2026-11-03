@@ -768,3 +768,20 @@ Progresso do backlog: `boot`, `theme_picker`, `cron_control`, `clarify` feitos �
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes verdes, incluindo `pt-coverage`
 (chaves existentes no inglês, aridade de função e placeholders idênticos). Gate 14 ok.
+
+### Rodada 106 — permissões de plugin, cartão de erro e camadas de memória em pt
+
+Três famílias a mais: **`pt_plugin_preview_access`** (consentimento para um plugin rodar scripts no preview,
+com aviso de risco e revogação por site), **`pt_error_layers`** (as nove camadas do cartão de erro: login,
+créditos, disco, endpoint, gateway, provedor, runtime, streaming) e **`pt_memory_layers`** (provedor ativo,
+pronto/precisa configurar/não instalado, camada embutida).
+
+Onde cada uma mora (achado pelo script de caminho): `skills.plugins`, `assistant.thread` e `settings` —
+três pais diferentes outra vez. A lista de seções do `pt.test.ts` cresce junto, de propósito: ela é o contrato
+de que o override não inventa seção.
+
+Progresso do backlog: **7 de 26** famílias feitas (`boot`, `theme_picker`, `cron_control`, `clarify`,
+`plugin_preview_access`, `error_layers`, `memory_layers`); 19 pendentes, com `desktop_commands`, `error_codes`,
+`notices`, `notifications` e `catalog` na frente.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
