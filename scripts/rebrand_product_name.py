@@ -49,7 +49,7 @@ YAML_VALUE = re.compile(r"^(\s*[A-Za-z0-9_.-]+\s*:\s*)(.+)$")
 
 
 def product_names() -> tuple[str, str]:
-    data = json.loads(BRAND.read_text(encoding="utf-8"))
+    data = json.loads(BRAND.read_text(encoding="utf-8-sig"))
     name = str(data.get("name") or "B-3PO")
     return name, name.upper()
 
@@ -131,7 +131,7 @@ def main() -> int:
             if not path.is_file():
                 continue
 
-            original = path.read_text(encoding="utf-8")
+            original = path.read_text(encoding="utf-8-sig")
             if path.suffix in {".ts", ".tsx"}:
                 updated, count = rebrand_ts(original, product, upper)
             else:
