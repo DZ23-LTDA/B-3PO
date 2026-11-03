@@ -3283,13 +3283,13 @@ export const en: Translations = {
 
   composer: {
     message: 'Message',
-    wakingProfile: profile => `Waking up ${profile}…`,
-    placeholderStarting: 'Starting Hermes...',
-    placeholderReconnecting: 'Reconnecting to Hermes…',
+    wakingProfile: profile => `Acordando ${profile}…`,
+    placeholderStarting: 'Starting B-3PO...',
+    placeholderReconnecting: 'Reconnecting to B-3PO…',
     placeholderFollowUp: 'Send follow-up',
     newSessionPlaceholders: [
       'What are we building?',
-      'Give Hermes a task',
+      'Give B-3PO a task',
       "What's on your mind?",
       'Describe what you need',
       'What should we tackle?',
