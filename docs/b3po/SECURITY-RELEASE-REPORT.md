@@ -66,3 +66,9 @@
 1. triagem das 4 altas com decisão registrada (corrigir ou aceitar com justificativa);
 2. decisão do proprietário sobre `adopt_external_logins` (padrão do upstream, pode não ser aceitável no produto);
 3. SBOM gerado e anexado ao release.
+
+## Resolução — `adopt_external_logins` (2026-11-03)
+
+O risco S7 (empréstimo de credenciais de Codex/Claude ligado por padrão) foi **resolvido por decisão do
+proprietário**: o padrão agora é `false`, opt-in explícito, com falha fechada e testes cobrindo ausência,
+valor inválido e ativação. Detalhe em `PRIVACY-REPORT.md`.

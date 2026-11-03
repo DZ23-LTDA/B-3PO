@@ -65,3 +65,24 @@ consentimento no onboarding.
 Privacidade **adequada por padrão** (telemetria off, dados locais), com **um ponto que exige decisão**:
 `adopt_external_logins`. Nenhuma alegação de conformidade (LGPD/GDPR) é feita — isso exige revisão jurídica,
 que é decisão do proprietário.
+
+---
+
+## Atualização 2026-11-03 — decisão do proprietário aplicada
+
+`auth.adopt_external_logins` passou a ser **`false` por padrão** (era `true`). Mudança em três camadas
+para não deixar buraco:
+
+| Camada | Antes | Depois |
+|---|---|---|
+| `hermes_cli/config_defaults.py` (`DEFAULT_CONFIG`) | `True` | `False` |
+| `agent/credential_sources.py` (leitor) | aceitava ausência como ligado, `bool()` em qualquer valor | só `true` **literal** liga; valor inválido → desligado + warning; config ilegível → desligado (fail-closed) |
+| `cli-config.yaml.example` | `true` | `false`, com o risco documentado |
+
+**Testes:** `tests/agent/test_adopt_external_logins_default.py` (13 casos: ausência, `false`, strings,
+inteiro, `null`, config ilegível, warning) + `test_anthropic_external_login_optout.py` reescrito (padrão,
+`false` explícito, valor inválido, `true` explícito) + `test_auth_codex_self_heal.py` agora exige opt-in
+explícito. **18 testes verdes** e 214 nos 24 arquivos `test_auth*`.
+
+**Funcionalidade preservada:** quem precisa emprestar o login continua podendo — `adopt_external_logins: true`
+em `config.yaml`. A importação interativa em `hermes auth add openai-codex` não muda.
