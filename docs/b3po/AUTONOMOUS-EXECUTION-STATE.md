@@ -7,7 +7,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | 112 |
+| Commits DZ23 | 113 |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
 | Testes | desktop: bots 960 · i18n 104 · store/sdk 2307 · CRM 66 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
@@ -52,3 +52,24 @@ dispositivo, rota de ticket, allowlist de métodos, revogação, 9 critérios de
 2. `python scripts/check` (gate de 14 checks);
 3. ler este arquivo + `AUTONOMOUS-EXECUTION-LOG.md` (última entrada);
 4. pegar o primeiro item dos "critérios abertos".
+
+## PR #1 — atualizado em 2026-11-03
+
+| Campo | Valor |
+|---|---|
+| URL | https://github.com/DZ23-LTDA/B-3PO/pull/1 |
+| estado | OPEN (não mesclar — `main` é espelho do upstream, F2-A) |
+| head → base | `b3po-brand` → `main` |
+| commits no PR | 100 |
+| arquivos | 594 |
+| diff | +42.242 / −1.111 |
+| título | "B-3PO: marca, sistema de Bots, WhatsApp CRM, mobile com envio e autorização de dispositivo [REVISAO - NAO MESCLAR: main e espelho]" |
+| corpo | 4,9 KB / 106 linhas |
+
+O corpo agora traz, em seções: o que está entregue e comprovado (desktop, Bots, CRM com a tabela de
+testes por módulo, mobile com envio comprovado, autorização de dispositivo, documentação), a lista de
+evidências em `docs/b3po/evidence/`, a tabela de **limitações e bloqueios** (MSIX não assinado, iOS
+bloqueado, keystore, cofre seguro, ticket de dispositivo no WS, tool calling, WhatsApp real,
+vulnerabilidades dev) e os comandos de revisão (`scripts/check`, vitest do CRM e do mobile).
+
+Nada de "pronto": o status declarado no PR é **NOT_READY**, com a lista do que falta.
