@@ -52,6 +52,22 @@ describe('pt-BR', () => {
   })
 
   it('o override cobre exatamente as seções declaradas', () => {
-    expect(Object.keys(ptOverrides).sort()).toEqual(['common', 'install'])
+    expect(Object.keys(ptOverrides).sort()).toEqual(['common', 'errors', 'install', 'language', 'modelPicker', 'ui'])
+  })
+
+  it('traduz as telas de idioma, erro, interface e seletor de modelo', () => {
+    expect(pt.language.label).toBe('Idioma')
+    expect(pt.language.description).toBe('Escolha o idioma da interface do aplicativo.')
+    expect(pt.errors.genericFailure).toBe('Algo deu errado')
+    expect(pt.ui.pagination.previous).toBe('Anterior')
+    expect(pt.modelPicker.title).toBe('Trocar de modelo')
+    expect(pt.modelPicker.noModels).toBe('Nenhum modelo encontrado.')
+  })
+
+  it('preserva funções do seletor de modelo', () => {
+    expect(pt.ui.sidebar.toggle(true)).toBe('Mostrar barra lateral')
+    expect(pt.ui.sidebar.toggle(false)).toBe('Ocultar barra lateral')
+    expect(pt.modelPicker.resetsIn('2 h')).toBe('reinicia em 2 h')
+    expect(pt.modelPicker.limitReached('daily')).toBe('Daily: limite atingido')
   })
 })

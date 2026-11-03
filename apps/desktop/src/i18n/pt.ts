@@ -132,7 +132,86 @@ export const ptOverrides: TranslationOverrides = {
     noOutput: 'Nenhuma saída ainda.',
     cancelling: 'Cancelando...',
     cancelInstall: 'Cancelar instalação'
-  }
+  },
+  language: {
+    label: 'Idioma',
+    description: 'Escolha o idioma da interface do aplicativo.',
+    saving: 'Salvando idioma…',
+    saveError: 'Falha ao atualizar o idioma',
+    switchTo: 'Trocar idioma',
+    searchPlaceholder: 'Pesquisar idiomas…',
+    noResults: 'Nenhum idioma encontrado'
+  },
+  errors: {
+    genericFailure: 'Algo deu errado',
+    boundaryTitle: 'Algo quebrou na interface',
+    boundaryDesc: 'A tela encontrou um erro inesperado. Suas conversas e configurações estão seguras.',
+    boundaryDetails: 'Detalhes',
+    sendDiagnostics: 'Enviar diagnóstico',
+    reloadWindow: 'Recarregar janela',
+    openLogs: 'Abrir logs'
+  },
+  ui: {
+    search: {
+      clear: 'Limpar pesquisa'
+    },
+    logs: {
+      bottom: 'Fim do log',
+      search: 'Pesquisar nos logs…',
+      top: 'Início do log'
+    },
+    pagination: {
+      label: 'paginação',
+      previous: 'Anterior',
+      previousAria: 'Ir para a página anterior',
+      next: 'Próxima',
+      nextAria: 'Ir para a próxima página'
+    },
+    sidebar: {
+      title: 'Barra lateral',
+      description: 'Exibe a barra lateral no modo compacto.',
+      toggle: open => `${open ? 'Mostrar' : 'Ocultar'} barra lateral`
+    }
+  },
+  modelPicker: {
+    title: 'Trocar de modelo',
+    current: 'atual:',
+    unknown: '(desconhecido)',
+    search: 'Filtrar provedores e modelos…',
+    noModels: 'Nenhum modelo encontrado.',
+    addProvider: 'Adicionar provedor',
+    loadFailed: 'Não foi possível carregar os modelos',
+    downloading: 'Baixando',
+    localDownloadsHeading: 'Local',
+    noAuthenticatedProviders: 'Nenhum provedor autenticado.',
+    pro: 'Pro',
+    proNeedsSubscription: 'Modelos Pro exigem assinatura paga da Nous.',
+    free: 'Grátis',
+    freeTier: 'Plano gratuito',
+    priceTitle: 'Preço de entrada / saída por milhão de tokens',
+    wasPrice: 'era',
+    customModel: 'Modelo personalizado',
+    addCustomModelAction: 'Adicionar modelo personalizado…',
+    customModelPlaceholder: 'Digite um id de modelo, ex.: openai/gpt-5',
+    today: 'Hoje',
+    week: 'Semana',
+    month: 'Mês',
+    topTier: 'Modelos grandes (mensal)',
+    included: 'Todos os modelos abaixo estão incluídos',
+    pausedRenewal: 'pausado: renovação não paga',
+    pausedOther: 'pausado',
+    includedUsedUp: 'Uso incluído esgotado',
+    limitReached: name => `${name.charAt(0).toUpperCase()}${name.slice(1)}: limite atingido`,
+    limitNames: { day: 'diário', month: 'mensal', top_tier: 'mensal de modelos grandes', week: 'semanal' },
+    limitThenCredits: 'modelos pagos agora usam seus créditos (pague conforme o uso)',
+    limitThenCreditsLarge: 'Modelos grandes agora usam seus créditos (pague conforme o uso)',
+    limitThenWait: 'só modelos grátis até lá',
+    limitThenWaitLarge: 'Modelos grandes pausados até lá',
+    percentUsed: percent => `${percent} usado`,
+    resetsIn: duration => `reinicia em ${duration}`,
+    usageLevels: { free: 'Grátis', top_tier: 'Grande' },
+    sectionRecommended: 'Recomendado'
+  },
 }
 
 export const pt = defineLocale(ptOverrides)
