@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { BrandMark } from '@/components/brand-mark'
+import { BrandHero } from '@/components/chat/brand-hero'
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
@@ -194,7 +194,7 @@ export function Intro({ personality, seed }: IntroProps) {
          * tem altura limitada por viewport e o texto acessível continua no `aria-label`.
          */}
         {isBrand ? (
-          <BrandMark aria-label={WORDMARK} className="mb-1 size-auto h-[min(15rem,34vh)] w-auto" role="img" />
+          <BrandHero alt={WORDMARK} />
         ) : (
           <Wordmark className="mb-1" text={wordmarkText} />
         )}

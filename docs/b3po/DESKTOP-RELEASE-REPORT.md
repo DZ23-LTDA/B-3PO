@@ -648,3 +648,33 @@ lixo. Removi o arquivo e refiz a captura com a janela certa (pid com `MainWindow
 commit `279fbe59` continua no histórico com a afirmação errada — não reescrevo histórico publicado.
 
 Lição que fica no procedimento: **conferir o tamanho do PNG e o pid da janela antes de commitar evidência**.
+
+## Rodada 102 — marca consolidada: um robô, um tamanho, um fundo
+
+As capturas do dono mostravam o robô em **dois tamanhos**, um com halo CSS e outro sem, e inglês sobrando com o
+idioma em português.
+
+### A arte oficial passou a ser a do dono
+
+O GIF que ele mandou chegou aqui como **1 frame** (o anexo vira imagem estática), mas é a arte boa: robô com o
+anel de luz embutido, 640×360. Virou `apps/desktop/public/b3po-hero.png`, com queda elíptica de alfa nas bordas
+para não virar um retângulo preto sobre o tema claro.
+
+### Um só tratamento, nos dois lugares
+
+- `components/chat/brand-hero.tsx` é a **referência**: largura `min(22rem,58vw)` para a arte da marca,
+  `min(9rem,24vh)` para mascote quadrado de bot;
+- o splash do rascunho e o chat vazio do bot passam a usar as mesmas classes (o plugin é outro bundle, então
+  repete a constante de propósito, com comentário apontando a origem);
+- **sem halo CSS** em cima da arte: o anel já está no desenho e dois brilhos parecem erro de montagem;
+- `dark:mix-blend-screen` dissolve o fundo preto da arte no tema escuro.
+
+### Inglês que sobrava
+
+O bloco `pt` do plugin de bots tinha **6 strings**; o resto caía no inglês — inclusive "Say something to get
+started." no chat de bot. Agora cobre roster, seções, bot, avatar e ações comuns (o catálogo inteiro ainda não).
+
+E o aviso "Canonical groups require an explicit connection" era **mensagem de exceção crua** na interface.
+Virou copy traduzida ("Grupos exigem uma conexão e um perfil explícitos."), com genérico para o resto.
+
+Evidência: `docs/b3po/evidence/hero-final.png` (app empacotado, HEAD desta rodada).

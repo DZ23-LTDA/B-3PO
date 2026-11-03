@@ -96,7 +96,8 @@ it('chat genérico mostra a marca (imagem), não o lettering gigante', () => {
   const { container } = render(<Fixture />)
   const img = container.querySelector('img')
 
-  expect(img?.getAttribute('src')).toMatch(/b3po-mark-(dark|light)\.png$/)
+  // A arte oficial do herói (anel de luz embutido), não o crachá pequeno nem o lettering gigante.
+  expect(img?.getAttribute('src')).toMatch(/b3po-hero\.png$/)
   // O lettering gigante só aparece no chat de um bot, onde o nome é a identidade.
   expect(container.querySelector('.wordmark')).toBeNull()
 })

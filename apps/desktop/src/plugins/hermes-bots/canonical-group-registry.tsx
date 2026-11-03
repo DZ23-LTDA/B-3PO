@@ -166,7 +166,13 @@ export function CanonicalGroupList({ onOpen }: { onOpen: (key: string, origin: C
 
   return <div className="grid gap-1 px-2">
     <Button onClick={() => setRefresh(value => value + 1)} variant="ghost">{labels.refreshGroups}</Button>
-    {error && <p role="alert">{error}</p>}
+    {error && (
+          <p role="alert">
+            {error === 'needs-connection'
+              ? 'Grupos exigem uma conexão e um perfil explícitos.'
+              : 'Não foi possível carregar os grupos agora.'}
+          </p>
+        )}
     {rooms.map(room => <CanonicalGroupRow key={room.key} memberCount={room.memberCount} name={room.name}
       onDelete={() => disbandListedRoom(room, labels.disbanded(room.name))} onOpen={() => onOpen(room.key, 'key')} />)}
   </div>

@@ -19,7 +19,7 @@ import { botRosterMeta } from './routing'
 import type { RosterRow } from './types'
 
 /** Robô da marca para bot sem mascote escolhido: identidade B-3PO, não a estrela determinística. */
-const BRAND_ROBOT = `${import.meta.env.BASE_URL}b3po-mark-dark.png`
+const BRAND_ROBOT = `${import.meta.env.BASE_URL}b3po-hero.png`
 
 /** The bot whose canonical chat this session is, if it is one. Matches the
  *  durable registry id or the compression-lineage tip, the same pair the
@@ -90,16 +90,17 @@ export function BotChatEmpty({ sessionId }: { sessionId: string }) {
          * baixa, o nome do bot ocupava meia tela e encostava no compositor. O nome continua ali, em corpo de
          * texto, que é o que o leitor de tela lê.
          */}
-        {/* O halo usa as cores do tema: a arte deixa de parecer um adesivo colado no fundo escuro. */}
-        <span className="relative mx-auto mb-4 flex items-center justify-center">
-          <span
-            aria-hidden
-            className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--ui-accent)_28%,transparent),transparent)] blur-xl"
-          />
+        {/* Mesmo herói do splash: classes de `components/chat/brand-hero.tsx` (outro bundle, repetidas de
+            propósito). A arte da marca já tem o anel de luz — nada de halo CSS em cima. */}
+        <span className="mx-auto mb-4 flex items-center justify-center">
           <img
             alt=""
             aria-hidden
-            className="block h-[min(13rem,32vh)] w-auto rounded-[22%] object-contain"
+            className={
+              meta?.mascot_id
+                ? 'block h-[min(9rem,24vh)] w-auto rounded-[22%] object-contain'
+                : 'block h-auto w-[min(22rem,58vw)] object-contain dark:mix-blend-screen'
+            }
             src={meta?.mascot_id ? rosterMascotSrc(meta.mascot_id, bot.name) : BRAND_ROBOT}
           />
         </span>
