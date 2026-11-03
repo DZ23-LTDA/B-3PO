@@ -572,6 +572,7 @@ export const frOverrides = {
       'nav.profiles': 'Ouvrir les profils',
       'nav.capabilities': 'Ouvrir les skills',
       'nav.messaging': 'Ouvrir la messagerie',
+      'nav.crm': 'Ouvrir le CRM',
       'nav.artifacts': 'Ouvrir les artefacts',
       'nav.cron': 'Ouvrir les tâches planifiées',
       'nav.agents': 'Ouvrir les agents',
@@ -699,6 +700,7 @@ export const frOverrides = {
       unavailable: 'Ce client n’a pas de disque local pour le pipeline.',
     },
     crmContacts: {
+      export: 'Exporter en CSV',
       openCrm: 'Ouvrir la page CRM',
       title: 'Contacts du CRM WhatsApp',
       intro: 'À qui parlent vos bots. Les contacts restent sur cet ordinateur ; rien n’est envoyé à un tiers.',

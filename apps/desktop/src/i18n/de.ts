@@ -572,6 +572,7 @@ export const deOverrides = {
       'nav.profiles': 'Profile öffnen',
       'nav.capabilities': 'Skills öffnen',
       'nav.messaging': 'Messaging öffnen',
+      'nav.crm': 'CRM öffnen',
       'nav.artifacts': 'Artefakte öffnen',
       'nav.cron': 'Geplante Jobs öffnen',
       'nav.agents': 'Agenten öffnen',
@@ -699,6 +700,7 @@ export const deOverrides = {
       unavailable: 'Dieser Client hat keine lokale Festplatte für den Trichter.',
     },
     crmContacts: {
+      export: 'CSV exportieren',
       openCrm: 'CRM-Seite öffnen',
       title: 'WhatsApp-CRM-Kontakte',
       intro: 'Mit wem deine Bots sprechen. Die Kontakte liegen auf diesem Computer; nichts geht an Dritte.',

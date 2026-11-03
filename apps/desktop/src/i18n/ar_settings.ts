@@ -29,6 +29,7 @@ export const arSettings = {
       unavailable: 'هذا العميل لا يملك قرصًا محليًا للمسار.',
     },
     crmContacts: {
+      export: 'تصدير CSV',
       openCrm: 'فتح صفحة CRM',
       title: 'جهات اتصال WhatsApp CRM',
       intro: 'من تتحدث معهم بوتاتك. تُحفظ جهات الاتصال على هذا الكمبيوتر ولا يُرسل شيء إلى طرف ثالث.',

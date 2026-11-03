@@ -228,6 +228,7 @@ export const ruOverrides = {
       'nav.profiles': 'Открыть профили',
       'nav.capabilities': 'Открыть навыки',
       'nav.messaging': 'Открыть мессенджеры',
+      'nav.crm': 'Открыть CRM',
       'nav.artifacts': 'Открыть артефакты',
       'nav.cron': 'Открыть запланированные задачи',
       'nav.agents': 'Открыть агенты',
@@ -349,6 +350,7 @@ export const ruOverrides = {
       unavailable: 'У этого клиента нет локального диска для воронки.',
     },
     crmContacts: {
+      export: 'Экспорт CSV',
       openCrm: 'Открыть страницу CRM',
       title: 'Контакты WhatsApp CRM',
       intro: 'С кем общаются ваши боты. Контакты хранятся на этом компьютере; третьим лицам ничего не отправляется.',

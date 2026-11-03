@@ -272,3 +272,20 @@ abrindo no Playwright. Resultado: **página em branco** — o renderer exige `wi
 processo principal injeta. E o CDP do Electron só abre em modo dev (`HERMES_DESKTOP_DEV_SERVER`), nunca no
 pacote. Registro os dois caminhos tentados para ninguém repetir: captura de rota do desktop nesta máquina segue
 indisponível; a prova da página é por teste de DOM e build.
+
+### Exportação ligada na tela (rodada 91)
+
+O módulo de CSV existia sem consumidor — código morto, por definição. Agora o painel de contatos mostra
+**Exportar CSV** quando há contatos: monta o texto e baixa com `Blob` + âncora (funciona no Electron e no
+navegador), revogando o object URL depois.
+
+Também completei o i18n do `nav.crm`, que faltava em 6 overlays (de, es, fr, ru, zh, ar) — o teste de
+overlay-completeness acusou 8 lacunas novas e eu tinha publicado o item de sidebar só com en/pt. `ja` e
+`zh-hant` nunca tiveram chaves `nav.*`, então caem no inglês por design.
+
+### Dois erros meus nesta rodada, os dois pegos pela verificação
+
+1. A inserção do tipo `export: string` caiu em **outro bloco** do `types.ts` (a checagem achou "export: string"
+   de outra interface e se deu por satisfeita). O `tsc` mostrou; refiz mirando o bloco `crmContacts`.
+2. O mesmo tipo de erro no i18n: o guard `if "export:" in raw` encontrava a palavra em outro lugar e pulava o
+   arquivo. Refiz por bloco, com verificação dentro do intervalo.

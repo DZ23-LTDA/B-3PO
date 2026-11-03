@@ -9,11 +9,27 @@ import {
   saveCrmContact
 } from '@/api/crm-contacts'
 import { CRM_ROUTE } from '@/app/routes'
+import { contactsToCsv, csvFileName } from '@/lib/crm-csv'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
 import { CrmPipelineSection } from './crm-pipeline-section'
+
+/**
+ * Baixa um texto como arquivo. `URL.createObjectURL` + âncora é o caminho que funciona tanto no Electron
+ * quanto no navegador; o `revokeObjectURL` evita segurar o blob na memória.
+ */
+function downloadText(fileName: string, text: string, mime: string): void {
+  const blob = new Blob([text], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = fileName
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 /**
  * Contatos do WhatsApp CRM.
@@ -90,6 +106,18 @@ export function CrmContactsSection() {
       <p className="mb-4 text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         {copy.intro}
       </p>
+
+      {contacts !== null && contacts.length > 0 ? (
+        <div className="mb-3">
+          <Button
+            onClick={() => downloadText(csvFileName(new Date()), contactsToCsv(contacts), 'text/csv;charset=utf-8')}
+            size="sm"
+            variant="ghost"
+          >
+            {copy.export}
+          </Button>
+        </div>
+      ) : null}
 
       {failure ? <p className="mb-3 text-sm text-(--ui-text-secondary)">{failure}</p> : null}
 

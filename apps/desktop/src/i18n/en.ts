@@ -702,6 +702,7 @@ export const en: Translations = {
       unavailable: 'This client has no local disk for the pipeline.',
     },
     crmContacts: {
+      export: 'Export CSV',
       openCrm: 'Open the CRM page',
       title: 'WhatsApp CRM contacts',
       intro: 'Who your bots talk to. Contacts live on this computer; nothing is sent to a third party.',

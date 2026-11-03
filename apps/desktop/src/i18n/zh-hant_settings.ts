@@ -32,6 +32,7 @@ export const zhHantSettings = {
       unavailable: '此用戶端沒有用於漏斗的本機磁碟。',
     },
     crmContacts: {
+      export: '匯出 CSV',
       openCrm: '開啟 CRM 頁面',
       title: 'WhatsApp CRM 聯絡人',
       intro: '你的機器人對話的對象。聯絡人保存在本機，不會傳送給第三方。',

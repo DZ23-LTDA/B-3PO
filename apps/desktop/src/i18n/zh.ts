@@ -353,6 +353,7 @@ export const zhOverrides = {
       'nav.profiles': '打开配置',
       'nav.capabilities': '打开技能',
       'nav.messaging': '打开消息',
+      'nav.crm': '打开 CRM',
       'nav.artifacts': '打开制品',
       'nav.cron': '打开定时任务',
       'nav.agents': '打开智能体',
@@ -470,6 +471,7 @@ export const zhOverrides = {
       unavailable: '此客户端没有用于漏斗的本地磁盘。',
     },
     crmContacts: {
+      export: '导出 CSV',
       openCrm: '打开 CRM 页面',
       title: 'WhatsApp CRM 联系人',
       intro: '你的机器人对话的对象。联系人保存在本机，不会发送给第三方。',

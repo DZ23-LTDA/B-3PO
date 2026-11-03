@@ -615,6 +615,7 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     },
     crmContacts: {
+      export: string
       openCrm: string
       title: string
       intro: string

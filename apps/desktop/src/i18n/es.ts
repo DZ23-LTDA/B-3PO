@@ -575,6 +575,7 @@ export const esOverrides = {
       'nav.profiles': 'Abrir perfiles',
       'nav.capabilities': 'Abrir skills',
       'nav.messaging': 'Abrir mensajería',
+      'nav.crm': 'Abrir el CRM',
       'nav.artifacts': 'Abrir artefactos',
       'nav.cron': 'Abrir tareas programadas',
       'nav.agents': 'Abrir agentes',
@@ -702,6 +703,7 @@ export const esOverrides = {
       unavailable: 'Este cliente no tiene disco local para el embudo.',
     },
     crmContacts: {
+      export: 'Exportar CSV',
       openCrm: 'Abrir la página del CRM',
       title: 'Contactos del CRM de WhatsApp',
       intro: 'Con quién hablan tus bots. Los contactos se guardan en este equipo; nada se envía a terceros.',
