@@ -178,3 +178,17 @@ catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de t
 | Reproduzir | `cd mobile/b3po-app/android && gradlew.bat assembleDebug` |
 | Limitações | não assinado para loja; sem navegação nem cofre (ver MOBILE-REPORT); iOS bloqueado por macOS/Xcode |
 | Onde está | `mobile/b3po-app/android/app/build/outputs/apk/debug/app-debug.apk` (build local, fora do Git) |
+
+## Mobile — APK release (Android, JS embutido)
+
+| Campo | Valor |
+|---|---|
+| Formato | APK release (JS embutido, 888 KB de bundle) |
+| Versão | 1.0 (versionCode 1) · pacote com.dz23.b3po · minSdk 24 · targetSdk 36 |
+| Tamanho | 44,2 MB |
+| SHA-256 | F6C343D45EC23E02D2D170098FEE53287154104A69F6CF393FC00ACA29F13268 |
+| Assinatura | **Android Debug** (chave do template; NÃO é distribuição) |
+| Reproduzir | `cd mobile/b3po-app/android && gradlew.bat assembleRelease` |
+| Provado | instalado e aberto no emulador (`com.dz23.b3po/.MainActivity`); texto em pt-BR na tela |
+| Limitação | assinado com chave de debug; AAB/loja exigem keystore de release (BLOCKED) |
+| Onde está | `mobile/b3po-app/android/app/build/outputs/apk/release/app-release.apk` (fora do Git) |

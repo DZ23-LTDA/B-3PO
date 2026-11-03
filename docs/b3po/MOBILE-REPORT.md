@@ -113,3 +113,63 @@ APK sair. **Reintroduzir exige versão compatível com o codegen do RN 0.81** �
 | Conexão JSON-RPC/WebSocket real | cliente existe em `src/api`, falta ligar na tela |
 | APK release / AAB | BLOCKED_BY_EXTERNAL_DEPENDENCY (keystore de release) |
 | iOS / IPA | BLOCKED_BY_EXTERNAL_DEPENDENCY (macOS + Xcode + certificado) |
+
+## Rodada 43 — APK **release com JS embutido**, instalado e rodando no emulador
+
+### Navegação própria (decisão com evidência)
+
+`@react-navigation` + `react-native-screens` **não compilam** neste ambiente: o codegen da Nova
+Arquitetura do RN 0.81 falha em
+
+```
+:react-native-screens:generateCodegenSchemaFromJavaScript
+Error: The first argument of method showColumn must be of type React.ElementRef<>
+```
+
+Evidências coletadas antes de decidir:
+
+| Tentativa | Resultado |
+|---|---|
+| `react-native-screens` 4.30.0 / 4.30.1 | falha (spec usa `React.ComponentRef`, RN 0.82+) |
+| 4.16.0, 4.13.0, 4.11.0 | falha igual |
+| `newArchEnabled=false` | a tarefa de codegen continua rodando |
+| Node 24 em vez de 26 no PATH do Gradle | falha igual |
+| cache de build apagado | falha igual |
+| `react-native-keychain` 10.0.0 isolado | falha igual |
+
+Como o app tem três telas, a navegação foi escrita à mão em `src/app/router.ts` (pilha, voltar,
+toque duplo não empilha, rótulo de acessibilidade) — **6 testes**. Quando o RN for atualizado, a troca
+volta a ser local: as telas consomem esta interface. CoFre seguro real segue pendente pelo mesmo motivo.
+
+### Artefatos Android
+
+| Arquivo | Tamanho | SHA-256 | Observação |
+|---|---|---|---|
+| `app-debug.apk` | 93,2 MB | `10DB8315…32ACA5` | **não embute o JS** (espera Metro) |
+| `app-release.apk` | 44,2 MB | `F6C343D4…13268` | **JS embutido (888 KB)**, assinado com a chave de debug do template |
+
+O debug não muda de hash ao alterar `App.tsx` — foi assim que descobri que ele não empacota o bundle;
+o release é o artefato utilizável fora do Metro.
+
+### Prova de execução real (emulador)
+
+```
+adb install -r app-release.apk        -> Success
+adb shell am start -n com.dz23.b3po/.MainActivity
+topResumedActivity = com.dz23.b3po/.MainActivity
+uiautomator dump -> "B-3PO"
+                    "Seus bots, no seu computador."
+                    "Sem conexão com o computador"
+                    "Verifique se o B-3PO está aberto na mesma rede. Suas ações continuam
+                     pendentes até reconectar."
+```
+
+Screenshot: `docs/b3po/evidence/mobile-apk-running.png`. O bundle embutido contém o texto do app
+(`B-3PO`, `Seus bots, no seu computador`, `Voltar para a lista de bots`) — conferido descompactando o
+APK, não por suposição.
+
+### Limite honesto
+
+O APK release está assinado com a **chave de debug** que o template do RN traz, porque não existe
+keystore de release. É instalável e roda, mas **não é artefato de publicação**: AAB/loja exigem chave
+de release — `BLOCKED_BY_EXTERNAL_DEPENDENCY`.
