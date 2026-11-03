@@ -211,4 +211,3 @@ export class ExecutionLog {
     return this.statusValue
   }
 }
-
