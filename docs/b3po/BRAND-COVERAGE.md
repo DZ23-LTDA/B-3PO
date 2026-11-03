@@ -35,3 +35,27 @@ Mapa das superfícies visíveis. `Hermes` continua sendo o nome do **runtime** (
 - O rebrand é aplicado por `scripts/rebrand_product_name.py` (idempotente) e **travado** pelo teste
   `tests/brand/test_product_name_guard.py`: reintroduzir "Hermes Agent" na interface falha o gate.
 - Identificadores, imports, caminhos, comandos `hermes` e `HERMES_*` **não** são tocados.
+
+## Rodada 38 — chrome do site (docs.docusaurus)
+
+`website/docusaurus.config.ts` ainda anunciava o produto errado:
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `title` | Hermes Agent | **B-3PO** |
+| `tagline` | The self-improving AI agent | **Bots that do real work — built on Hermes Agent** |
+| `navbar.title` / `logo.alt` | Hermes Agent | **B-3PO** |
+| `logo.src` / `srcDark` | `img/logo.png` / `img/logo-dark.png` | **`img/b3po-logo.png` / `img/b3po-logo-dark.png`** (já existiam em `website/static/img/`) |
+| rodapé | "Built by Nous Research · MIT" | **"DZ23 · MIT License · built on Hermes Agent by Nous Research"** |
+
+A atribuição upstream **permanece** (rodapé + tagline): remover seria violação da MIT, e o corpo da
+documentação continua chamando o runtime de Hermes — o que ali é correto.
+
+**Limite desta rodada:** o site **não foi buildado**. `website/node_modules` não está instalado e um
+`npm install` completo do Docusaurus ficaria fora do orçamento da rodada; portanto a prova visual do
+navbar/rodapé fica para quando o site for compilado. O que está verificado aqui é o conteúdo do
+config e a existência dos dois arquivos de logo (`17208` e `17495` bytes, não placeholders).
+
+**Nota de processo:** tentei primeiro um teste Python em `tests/brand/` que lia o `.ts` do config —
+`tests/AGENTS.md` proíbe teste que lê código-fonte (e teste Python sobre TS não roda no lane JS).
+Removi o teste em vez de contrariar a regra; a validação do chrome fica dependente do build do site.
