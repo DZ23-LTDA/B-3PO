@@ -101,3 +101,55 @@ npm run dist:win
 ```
 
 Gate voltou a **14 checks ok**.
+
+## Rodada 66 — CORREÇÃO: o app Windows abre. O "sai com código 0" era o meu ambiente.
+
+### O que eu afirmei errado antes
+
+Em rodadas anteriores registrei que `release/win-unpacked/B-3PO.exe` "sai com código 0 e não valida a
+instalação". **Isso estava errado.** A causa era uma variável de ambiente da minha própria sessão:
+
+```
+ELECTRON_RUN_AS_NODE=1
+```
+
+Com ela, **qualquer** binário Electron se comporta como `node` puro. Foi por isso que:
+
+- `B-3PO.exe --help` imprimiu o *usage* do Node;
+- `B-3PO.exe --version` respondeu `v24.22.0` (versão do Node, não do Electron);
+- executar sem argumentos terminou com código 0 sem janela.
+
+Cheguei a concluir, nesta mesma rodada, que o exe "era um binário Node e não Electron". **Também estava
+errado** — o arquivo tem 235,4 MB, exatamente o tamanho do `node_modules/electron/dist/electron.exe`.
+Corrigi o diagnóstico antes de escrever relatório.
+
+### O que acontece de verdade (comprovado)
+
+Sem `ELECTRON_RUN_AS_NODE`:
+
+```
+processo raiz vivo: False        (o launcher termina e entrega ao processo principal)
+B-3PO     pid 35380   janela "B-3PO"   128 MB
+electron  pid 47112   janela "B-3PO"   122 MB
++ 2 processos auxiliares (GPU/utility)
+```
+
+Ou seja: **o aplicativo empacotado abre e cria a própria janela**, com árvore de processos correta
+(main + renderer + auxiliares). Evidência: `docs/b3po/evidence/desktop-app-window.png`.
+
+### O que ainda falta (bloqueio real, agora bem descrito)
+
+A janela abre no splash e fica em **`CONNECTING ▒`**: o renderer não alcança o backend. No formato
+empacotado não há sidecar `hermes` configurado neste ambiente, e o app espera o gateway para sair do
+boot. Isso substitui o diagnóstico anterior ("não abre") por um bloqueio concreto e testável:
+
+1. definir no pacote como o app localiza/inicia o runtime (`hermes serve`) — caminho do sidecar;
+2. ou aceitar `HERMES_DASHBOARD_URL` + token no primeiro boot;
+3. repetir esta captura e exigir a Home renderizada antes de chamar a instalação de validada.
+
+### Regra que tiro disso
+
+Antes de declarar um binário "quebrado", conferir o ambiente do shell
+(`Get-ChildItem Env: | Where-Object Name -match 'ELECTRON'`). `ELECTRON_RUN_AS_NODE` e
+`ELECTRON_NO_ATTACH_CONSOLE` mudam o comportamento de qualquer app Electron e já me custaram um
+diagnóstico falso.
