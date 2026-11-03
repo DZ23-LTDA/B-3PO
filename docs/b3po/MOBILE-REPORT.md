@@ -232,3 +232,44 @@ Screenshots: `docs/b3po/evidence/mobile-pair-ok.png` e `mobile-pair-insecure.png
 
 O **AAB** agora existe (o GOAL pedia "quando possível"), gerado com a mesma chave de debug do
 template: serve para validar o empacotamento, **não** para publicar — loja exige chave de release.
+
+## Rodada 45 — transporte WebSocket real e teste de contrato sobre socket
+
+### O que faltava
+
+`GatewayClient` recebia o transporte por injeção e **nada o implementava** para produção: a tela não
+tinha como falar com o gateway. Isso é código sem consumidor real — exatamente o que não deve ficar.
+
+`src/api/ws-transport.ts` implementa o transporte sobre o `WebSocket` global (existe no React Native e
+no Node 22+), com duas decisões explícitas:
+
+- **token no handshake, como subprotocolo** (`["b3po.v1", "token.<token>"]`), nunca na query string —
+  query string vaza em log de proxy, histórico e crash report;
+- **fila de envio antes do `open`**: `send` antes do handshake perde o frame, então o frame espera; o
+  chamador não precisa conhecer o estado do socket.
+
+### Prova sobre socket de verdade
+
+`src/api/ws-transport.integration.test.ts` sobe um servidor WebSocket real em `127.0.0.1` e conversa
+com ele pelo mesmo `WebSocket` que o app usa. Cinco casos:
+
+| Caso | Prova |
+|---|---|
+| pedido/resultado | JSON-RPC completo pelo socket, sem mock |
+| handshake | `sec-websocket-protocol` chega com `b3po.v1` + `token.…`, e a URL não carrega token |
+| erro do servidor | vira `GatewayError` com código `-32601` |
+| dois pedidos simultâneos | respostas correlacionadas por id, sem troca |
+| queda de conexão | pendente rejeitado com `connection_lost` e `pendingCount() === 0` |
+
+**90 testes** no pacote (26 originais preservados), `tsc --noEmit` limpo.
+
+### Dois erros meus nesta rodada, corrigidos
+
+1. O teste de queda usava um método que o servidor respondia na hora, então a promise **resolvia** em
+   vez de rejeitar. Corrigi com um método `hang` que nunca responde — o pendente tem de existir de
+   verdade quando o socket cai.
+2. `afterAll` estourava o timeout de 10 s porque `server.close()` espera sockets pendentes. Agora os
+   sockets são terminados antes do close.
+
+Ainda não provado: a conexão contra o **gateway Hermes real** (o endpoint registrado em `gw.json`
+estava com a porta fechada nesta rodada). O contrato está provado; falta o servidor real — item aberto.
