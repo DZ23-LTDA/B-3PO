@@ -153,3 +153,43 @@ Antes de declarar um binário "quebrado", conferir o ambiente do shell
 (`Get-ChildItem Env: | Where-Object Name -match 'ELECTRON'`). `ELECTRON_RUN_AS_NODE` e
 `ELECTRON_NO_ATTACH_CONSOLE` mudam o comportamento de qualquer app Electron e já me custaram um
 diagnóstico falso.
+
+## Rodada 67 — o app empacotado renderiza a tela de setup B-3PO (não é mais CONNECTING sem saída)
+
+Continuando a correção da rodada 66: apontei o app para o checkout com a variável que o próprio main
+honra (lida em `resolveHermesBackend`, `apps/desktop/electron/main.ts:4837`):
+
+```
+HERMES_DESKTOP_HERMES_ROOT = D:\IA-Workspace\Deepseek\projects\C-3PO BOT
+HERMES_HOME                = %TEMP%\b3po-desktop-home
+(e sem ELECTRON_RUN_AS_NODE)
+```
+
+Resultado: a janela **sai do splash** e mostra a tela de primeiro uso, com identidade própria:
+
+- mascote **B-3PO** no cartão (não é emoji: é o asset do catálogo);
+- título **“Set up B-3PO”**;
+- texto: “Connect this app to a B-3PO runtime you already run, or install it locally on this computer.”;
+- dois caminhos reais: **“Connect to existing B-3PO runtime”** (backend remoto com token de sessão) e
+  **“Install B-3PO locally”** (baixa o runtime, cria o ambiente Python e sobe o backend);
+- rodapé: “Will install to `…\hermes-agent`” — caminho real, derivado de `HERMES_HOME`.
+
+Evidências: `desktop-app-com-backend.png` (2302×1385) e `desktop-connect-form.png` (1152×1385, mais
+legível). Comparar com `desktop-app-window.png` (rodada 66), que mostrava só `CONNECTING ▒`.
+
+### O que NÃO foi validado
+
+O clique nos cartões não foi registrado: `SetForegroundWindow` é recusado nesta sessão, então os cliques
+sintéticos (`mouse_event`) e o `SendKeys` não chegam ao renderer com foco real. Portanto:
+
+| Passo | Estado |
+|---|---|
+| app abre e renderiza | ✅ comprovado |
+| tela de setup em B-3PO, com mascote | ✅ comprovado |
+| escolher “Connect to existing” e preencher URL + token | ❌ não validado (foco de janela bloqueado aqui) |
+| Home com bots reais carregados no app empacotado | ❌ não validado |
+
+Para validar os dois últimos passos, o caminho é: (a) pré-semear a conexão no arquivo de configuração
+de userData do app; ou (b) rodar em uma sessão interativa com foco de janela permitido; ou (c) usar
+`HERMES_DESKTOP_HERMES_ROOT` com um `hermes` já instalado e deixar o app subir o backend sozinho.
+Não vou declarar “instalação validada” sem ver a Home com dados.
