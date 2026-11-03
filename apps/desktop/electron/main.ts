@@ -66,12 +66,7 @@ import {
 import { runAppInstallerChecker } from './appinstaller-checker'
 import { installApplicationMenuAfterFirstWindow } from './application-menu-startup'
 import { stopBackendChild as stopBackendChildImpl, waitForBackendExit } from './backend-child'
-import {
-  execText,
-  isPidOnlyStartMarker,
-  processStartMarker,
-  REAP_PROBE_TIMEOUT_MS
-} from './backend-claim'
+import { execText, isPidOnlyStartMarker, processStartMarker, REAP_PROBE_TIMEOUT_MS } from './backend-claim'
 import { createBackendConnectionState } from './backend-connection-state'
 import { assertDescriptorStillOwned, forgetFailedDescriptor } from './backend-descriptor-cache'
 import { BackendDialClaims } from './backend-dial-claim'
@@ -243,8 +238,7 @@ import {
   uninstallArgsForMode,
   type UninstallSummaryDetails
 } from './desktop-uninstall'
-import { registerCrmContactsIpc } from './crm-contacts-ipc'
-import { CrmContactStore, crmStorePath } from './crm-contacts-store'
+import { mountCrmContacts } from './crm-contacts-ipc'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -17507,7 +17501,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
   return { ok: true, mode, willRemoveAppBundle: Boolean(removeBundle), scriptPath }
 }
 
-registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(app.getPath('userData'))))
+mountCrmContacts(ipcMain, app.getPath('userData'))
 
 registerDesktopUninstallIpc({
   ipcMain,

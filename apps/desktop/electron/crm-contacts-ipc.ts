@@ -6,7 +6,7 @@
 
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
-import type { CrmContact } from './crm-contacts-store'
+import { CrmContactStore, crmStorePath, type CrmContact } from './crm-contacts-store'
 
 export type CrmContactsResult = { contacts: CrmContact[] } | { error: string }
 
@@ -30,4 +30,9 @@ export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: 
     (_event: IpcMainInvokeEvent, phone: unknown): Promise<{ contacts: CrmContact[] }> =>
       store.remove(typeof phone === 'string' ? phone : '')
   )
+}
+
+/** Monta o store do usuário e registra os handlers: `main.ts` só precisa de uma chamada. */
+export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
+  registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
 }
