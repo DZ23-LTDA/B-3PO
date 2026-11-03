@@ -21,7 +21,7 @@ roteiro visual ponta a ponta do desktop.
 | Item | Valor |
 |---|---|
 | Branch de trabalho | `b3po-brand` |
-| Commits DZ23 | **31** |
+| Commits DZ23 | **32** (este relatório incluso) |
 | `main` | `f4cf411f` — **0 commits DZ23** (política F2-A mantida) |
 | Pull Request | `DZ23-LTDA/B-3PO#1` (draft, "NÃO MESCLAR") |
 | Worktree | limpo |
@@ -56,7 +56,7 @@ Nenhum artefato é chamado de assinado, notarizado ou pronto para loja.
 | Testes de i18n | **84 verdes** |
 | Build + typecheck + lint | exit 0 |
 | Turno real do agente (CLI, provider local) | **13,4 s**, resposta `B-3PO online` |
-| CI GitHub (branch de produto) | **verde** em todos os pushes desde `a33eda00` |
+| CI GitHub (branch de produto) | **verde** em todos os pushes desde `a33eda00` (gate de marca + 47 testes de domínio + typecheck) |
 | App Electron em execução | **validado por screenshot** (onboarding B-3PO) |
 
 ## 6. Segurança
@@ -128,3 +128,19 @@ certificado; demais plataformas bloqueadas.
 multiplataforma, e nada aqui deve ser lido como "100% pronto", "produção" ou "pronto para lançamento".
 
 NOT_READY: faltam instalação limpa assinada (Windows), cliente mobile (Android/iOS), artefatos Linux/macOS/iOS e a execução ponta a ponta do roteiro F5; existem ainda 4 vulnerabilidades altas de dependência e a interface não está integralmente rebrandada.
+
+---
+
+## Encerramento da execução autônoma (2026-11-03 00:20)
+
+**O que ficou provado:** identidade de marca com gates, contratos de domínio (schema v1 + orquestração) com 47
+testes, persistência de `mascot_id` nos fluxos de criação e edição, catálogo de 20 mascotes, app desktop
+rebrandado e executando (evidência por screenshot), MSIX gerado e verificado como `NotSigned`, casca Android
+instalada, CI verde e 36 documentos de engenharia.
+
+**O que impede o `READY_FOR_OWNER_REVIEW`:** certificado de assinatura Windows (bloqueia instalação limpa),
+macOS/Xcode (bloqueia `.app`/`.dmg`/iOS), toolchain Linux (Docker parado, WSL sem Node), ausência de cliente
+mobile funcional, 4 vulnerabilidades altas de dependência e o roteiro visual do F5 não executado no app.
+
+Esses bloqueios persistiram por mais de 10 rodadas sem alteração de ambiente — são dependências externas, não
+trabalho pendente de código.
