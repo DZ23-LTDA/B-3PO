@@ -53,6 +53,8 @@ jobs:
           src/plugins/hermes-bots/mascot-grid.test.tsx
           src/plugins/hermes-bots/edit-profile-look.test.ts
 
+      - name: testes do CRM (consentimento, webhook, contatos)
+        run: npx vitest run --root crm
       - name: typecheck do desktop
         working-directory: apps/desktop
         run: npm run typecheck
