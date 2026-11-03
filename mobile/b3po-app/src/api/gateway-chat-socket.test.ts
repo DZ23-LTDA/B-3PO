@@ -166,7 +166,9 @@ describe('conversa', () => {
     await opening
 
     await expect(h.socket.sendPrompt('   ')).resolves.toEqual({ accepted: false })
-    expect(h.sent).toHaveLength(0)
+    // O cliente agora anuncia `client.capabilities` ao abrir; a garantia aqui e que prompt vazio
+    // nao vira `prompt.submit`. Contar frames esconderia essa intencao.
+    expect(h.sent.filter(frame => frame.method === 'prompt.submit')).toHaveLength(0)
   })
 
   it('erro do servidor vira rejeição tipada', async () => {

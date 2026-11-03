@@ -47,6 +47,8 @@ import type { ChatBubble, RawMessage, SessionRow } from './src/screens/chat-sess
 import { nextRetryDelay, RETRY_BUTTON_LABEL, retryingCopy } from './src/api/retry'
 import { isStaleSession } from './src/api/session-guard'
 import { PairLinkCard } from './src/screens/pair-link-card'
+import type { ApprovalRequest } from './src/api/approval'
+import { ApprovalBar } from './src/screens/approval-bar'
 import { ChatChrome } from './src/screens/chat-chrome'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
@@ -70,6 +72,7 @@ export default function App() {
   const [bots, setBots] = useState<BotProfile[]>([])
   const [bubbles, setBubbles] = useState<ChatBubble[]>([])
   const [chatNote, setChatNote] = useState<string | null>(null)
+  const [approval, setApproval] = useState<ApprovalRequest | null>(null)
   const [chatLoading, setChatLoading] = useState(false)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -228,11 +231,16 @@ export default function App() {
           }
 
           return new Impl(url, [], options) as unknown as never
-        })
+        }, { onApproval: setApproval })
       }
     },
     [connection]
   )
+
+  /** Responde o pedido de aprovacao aberto: sem pedido, nao finge que decidiu. */
+  const chooseApproval = useCallback((choice: string) => {
+    socketRef.current?.respondApproval(choice)
+  }, [])
 
   /** Abre uma conversa especifica do bot aberto (escolhida na lista). */
   const openSession = useCallback(
@@ -409,6 +417,8 @@ export default function App() {
           title={route.name === 'chat' ? headerTitle(route) : ''}
           wordmark="B-3PO"
         />
+
+      {approval ? <ApprovalBar onChoose={chooseApproval} request={approval} /> : null}
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

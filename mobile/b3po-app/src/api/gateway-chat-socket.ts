@@ -29,6 +29,8 @@ export interface SocketLike {
   onclose: ((event: unknown) => void) | null
 }
 
+import { approvalResponseFrame, parseApprovalFrame, type ApprovalRequest } from './approval'
+
 export type SocketFactory = (url: string, options: { headers: Record<string, string> }) => SocketLike
 
 export type ChatSocketState = 'idle' | 'connecting' | 'ready' | 'error' | 'closed'
@@ -39,6 +41,8 @@ export interface ChatSocketCallbacks {
   onAccepted?: (text: string) => void
   /** Erro de RPC com código e mensagem do servidor, para a tela poder explicar. */
   onError?: (code: number | null, message: string) => void
+  /** Pedido de aprovação do computador (ou `null` quando ele foi resolvido/retirado). */
+  onApproval?: (request: ApprovalRequest | null) => void
 }
 
 interface Pending {
@@ -60,6 +64,8 @@ export class GatewayChatSocket {
   private canonicalId: string | null = null
   /** Id do socket para `prompt.submit`: o curto devolvido por `session.create` (ex.: d26bcd90). */
   private promptId: string | null = null
+  /** Aprovação aguardando decisão humana; uma por vez, como o backend enfileira. */
+  private approval: ApprovalRequest | null = null
 
   constructor(
     private readonly origin: string,
@@ -80,6 +86,29 @@ export class GatewayChatSocket {
   /** Id que `prompt.submit` aceita nesta versão (o curto de `session.create`). */
   getPromptId(): string | null {
     return this.promptId
+  }
+
+  /** Pedido de aprovação em aberto, se houver. */
+  getPendingApproval(): ApprovalRequest | null {
+    return this.approval
+  }
+
+  /**
+   * Responde o pedido de aprovação no `id` do frame. Devolve `false` quando não há pedido aberto —
+   * a tela usa isso para não fingir que decidiu algo que já foi retirado.
+   */
+  respondApproval(choice: string): boolean {
+    const open = this.approval
+
+    if (!open) {
+      return false
+    }
+
+    this.approval = null
+    this.socket?.send(JSON.stringify(approvalResponseFrame(open.wireId, choice)))
+    this.callbacks.onApproval?.(null)
+
+    return true
   }
 
   private setState(state: ChatSocketState): void {
@@ -112,6 +141,8 @@ export class GatewayChatSocket {
         this.setState('ready')
         settled = true
         resolve()
+        // Sem isto o gateway falha rápido todo pedido de aprovação e o turno fica sem decisão.
+        void this.request('client.capabilities', { server_requests: true }).catch(() => undefined)
       }
 
       this.socket.onmessage = event => {
@@ -139,6 +170,15 @@ export class GatewayChatSocket {
     try {
       frame = JSON.parse(typeof raw === 'string' ? raw : String(raw)) as Record<string, unknown>
     } catch {
+      return
+    }
+
+    const approval = parseApprovalFrame(frame)
+
+    if (approval) {
+      this.approval = approval
+      this.callbacks.onApproval?.(approval)
+
       return
     }
 
