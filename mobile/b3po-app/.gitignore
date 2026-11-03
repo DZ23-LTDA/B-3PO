@@ -83,4 +83,3 @@ android/build/
 
 # GOAL 15.2: keystore nunca no Git (o Gradle gera o debug localmente)
 android/app/debug.keystore
-
