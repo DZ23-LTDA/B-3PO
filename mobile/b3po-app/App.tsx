@@ -308,30 +308,6 @@ export default function App() {
               </View>
             ) : null}
 
-            <View style={styles.composer}>
-              <TextInput
-                accessibilityLabel="Mensagem para o bot"
-                multiline
-                onChangeText={setDraft}
-                onSubmitEditing={() => void sendDraft()}
-                returnKeyType="send"
-                placeholder="Escreva para o bot"
-                placeholderTextColor="#5b6478"
-                style={styles.composerInput}
-                value={draft}
-              />
-              <TouchableOpacity
-                accessibilityLabel="Enviar mensagem"
-                accessibilityRole="button"
-                activeOpacity={0.7}
-                disabled={sending || draft.trim().length === 0}
-                onPress={() => void sendDraft()}
-                style={[styles.sendButton, (sending || draft.trim().length === 0) && styles.sendButtonDisabled]}
-              >
-                <Text style={styles.sendButtonText}>{sending ? 'Enviando…' : 'Enviar'}</Text>
-              </TouchableOpacity>
-            </View>
-
             {bubbles.map(bubble => (
               <View
                 accessibilityLabel={`${bubble.label}: ${bubble.body}`}
@@ -345,6 +321,32 @@ export default function App() {
           </View>
         )}
       </ScrollView>
+
+      {route.name === 'chat' ? (
+        <View style={styles.composer}>
+          <TextInput
+            accessibilityLabel="Mensagem para o bot"
+            blurOnSubmit
+            onChangeText={setDraft}
+            onSubmitEditing={() => void sendDraft()}
+            returnKeyType="send"
+            placeholder="Escreva para o bot"
+            placeholderTextColor="#5b6478"
+            style={styles.composerInput}
+            value={draft}
+          />
+          <TouchableOpacity
+            accessibilityLabel="Enviar mensagem"
+            accessibilityRole="button"
+            activeOpacity={0.7}
+            disabled={sending || draft.trim().length === 0}
+            onPress={() => void sendDraft()}
+            style={[styles.sendButton, (sending || draft.trim().length === 0) && styles.sendButtonDisabled]}
+          >
+            <Text style={styles.sendButtonText}>{sending ? 'Enviando…' : 'Enviar'}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </SafeAreaView>
   )
 }

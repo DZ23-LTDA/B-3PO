@@ -187,4 +187,27 @@ describe('conversa', () => {
 
     await expect(h.socket.sendPrompt('oi')).rejects.toMatchObject({ message: 'sem conexão com o computador' })
   })
+
+  it('submit usa o id curto do socket; resume usa o canonico', async () => {
+    const h = harness()
+    const opening = h.socket.connect()
+    h.fireOpen()
+    await opening
+
+    const sending = h.socket.sendPrompt('oi')
+    const createFrame = h.sent.at(-1)!
+
+    h.reply(createFrame.id, { session_id: 'd26bcd90', stored_session_id: '20261103_140104_f5df78' })
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const submitFrame = h.sent.at(-1)!
+
+    expect(submitFrame.method).toBe('prompt.submit')
+    // o servidor recusa o canonico aqui ("session not found"); o socket quer o id curto
+    expect(submitFrame.params['session_id']).toBe('d26bcd90')
+    expect(h.socket.getSessionId()).toBe('20261103_140104_f5df78')
+
+    h.reply(submitFrame.id, { status: 'streaming' })
+    await expect(sending).resolves.toEqual({ accepted: true })
+  })
 })

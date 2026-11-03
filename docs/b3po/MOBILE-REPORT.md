@@ -681,3 +681,42 @@ O transporte funciona: um cliente Node com `?token=` + `Origin` + zero subprotoc
 criou sessão, enviou `prompt.submit` com `{session_id, text}` e o gateway respondeu
 `{"status":"streaming"}`; a sessão `20261103_140104_f5` tem a mensagem e a resposta do modelo
 ("B-3PO do celular funcionando. ✅"). O que falta é a **tela** disparar esse caminho.
+
+## Rodada 63 — ENVIO PELO CELULAR FUNCIONANDO (comprovado)
+
+O celular enviou e o bot respondeu. Sessão criada pelo app: `20261103_142614_79…`.
+
+```
+[user]      Teste do celular
+[assistant] Estou entendendo que você tem um teste de celular/celular relacionado ao botão "Teste de c…
+```
+
+Evidência: `docs/b3po/evidence/mobile-envio-do-celular.jpg` (bolha "Você / Teste do celular" à direita,
+composer limpo depois do envio) e `mobile-envio-transcript.txt` (transcript lido do servidor).
+
+### As três causas, em ordem em que apareceram
+
+1. **`onChangeText` não dispara com texto injetado por ADB.** Enquanto eu digitava com
+   `adb shell input text`, o estado `draft` continuava vazio: o botão seguia `disabled` e o toque não
+   fazia nada. Não era bug do app — era o **método de teste**. Digitar tocando no campo (evento real) faz
+   o estado atualizar. Registro porque gastei várias rodadas culpando o `Pressable`.
+2. **Composer dentro do `ScrollView`.** Com a resposta do bot em ~1700 px, o botão ficava no meio do
+   conteúdo rolável. Movido para **fora** do `ScrollView`, fixo no rodapé — também o layout correto.
+3. **Dois identificadores de sessão.** `session.resume` exige o id **canônico**
+   (`20261103_142614_79…`); `prompt.submit` desta versão exige o id **curto** devolvido por
+   `session.create` (`d26bcd90`). Passar o canônico no submit devolvia `4007 session not found` — erro
+   que apareceu na tela como "Não foi possível enviar: session not found" e foi o que destravou o
+   diagnóstico. `GatewayChatSocket` passou a guardar os dois (`getSessionId()` = canônico,
+   `getPromptId()` = curto), com teste específico.
+
+### Estado do mobile agora
+
+| Capacidade | Estado |
+|---|---|
+| lista de bots real | ✅ comprovado (rodada 55) |
+| conversa real (leitura) | ✅ comprovado (rodada 56) |
+| **enviar mensagem** | ✅ **comprovado nesta rodada** |
+| composer limpa após envio | ✅ (screenshot) |
+| resposta do bot aparece | ✅ no servidor; a tela recarrega do servidor após o aceite |
+
+Testes: `gateway-chat-socket` com **10 testes** (incluindo o do id curto no submit).

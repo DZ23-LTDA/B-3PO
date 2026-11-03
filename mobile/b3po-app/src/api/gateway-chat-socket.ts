@@ -56,7 +56,10 @@ export class GatewayChatSocket {
   private nextId = 1
   private pending = new Map<number, Pending>()
   private state: ChatSocketState = 'idle'
+  /** Id canônico: o que `session.resume` reconhece (ex.: 20261103_140104_f5df78). */
   private canonicalId: string | null = null
+  /** Id do socket para `prompt.submit`: o curto devolvido por `session.create` (ex.: d26bcd90). */
+  private promptId: string | null = null
 
   constructor(
     private readonly origin: string,
@@ -72,6 +75,11 @@ export class GatewayChatSocket {
   /** Id canônico da conversa em uso (o que `session.list`/`resume` reconhecem). */
   getSessionId(): string | null {
     return this.canonicalId
+  }
+
+  /** Id que `prompt.submit` aceita nesta versão (o curto de `session.create`). */
+  getPromptId(): string | null {
+    return this.promptId
   }
 
   private setState(state: ChatSocketState): void {
@@ -202,6 +210,8 @@ export class GatewayChatSocket {
       try {
         await this.request('session.resume', { session_id: existingSessionId })
         this.canonicalId = existingSessionId
+        // retomada não devolve id curto: o próprio id retomado serve para o submit
+        this.promptId = existingSessionId
 
         return existingSessionId
       } catch {
@@ -211,12 +221,14 @@ export class GatewayChatSocket {
 
     const created = await this.request('session.create', { title: 'Do celular' })
     const canonical = canonicalSessionId(created)
+    const shortId = typeof created['session_id'] === 'string' ? created['session_id'] : canonical
 
     if (!canonical) {
       throw { code: null, message: 'servidor não devolveu id de sessão' }
     }
 
     this.canonicalId = canonical
+    this.promptId = shortId || canonical
 
     return canonical
   }
@@ -229,8 +241,16 @@ export class GatewayChatSocket {
       return { accepted: false }
     }
 
-    const sessionId = await this.ensureSession(existingSessionId)
-    const result = await this.request('prompt.submit', { session_id: sessionId, text: trimmed })
+    await this.ensureSession(existingSessionId)
+
+    // `session.resume` quer o canônico; `prompt.submit` desta versão quer o id do socket.
+    const submitId = this.promptId ?? this.canonicalId
+
+    if (!submitId) {
+      throw { code: null, message: 'sem id de conversa' }
+    }
+
+    const result = await this.request('prompt.submit', { session_id: submitId, text: trimmed })
     const accepted = promptAccepted(result)
 
     if (accepted) {
