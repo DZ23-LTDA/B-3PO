@@ -3,15 +3,15 @@
 Manifesto dos artefatos **deste** build. Manifesto com dado velho engana mais do que ajuda: os
 hashes abaixo foram calculados nesta máquina a partir dos arquivos listados; nada é estimado.
 
-commit `e1995f0f01` · branch `b3po-brand` · 141 commits sobre `main` · gerado em 2026-11-03 20:20 UTC
+commit `7391977387` · branch `b3po-brand` · 144 commits sobre `main` · gerado em 2026-11-03 20:29 UTC
 
 | Plataforma | Formato | Arquivo | Tamanho | SHA-256 | Construído |
 |---|---|---|---|---|---|
-| Windows x64 | MSIX (Store-only, NAO assinado) | `B3PO-0.0.0-win-x64.msix` | 190.9 MB | `30992b1922a362c671c421e34c6fbb9d3ac6b91dc95e3a336509e1f5d5c4e0ae` | 2026-11-03 20:02 UTC |
-| Windows x64 | executavel (win-unpacked) | `B-3PO.exe` | 235.4 MB | `15584fc64fca82b1756e1cded580464f94b701b604ffa648280e87be44ad7933` | 2026-11-03 20:01 UTC |
-| Android | APK release (chave de debug) | `app-release.apk` | 44.2 MB | `72e102eec2b2c2940c29fa1db987d22c38b5cc0b8c83af0294cfecf0ae060761` | 2026-11-03 20:18 UTC |
+| Windows x64 | MSIX (Store-only, NAO assinado) | `B3PO-0.0.0-win-x64.msix` | 190.9 MB | `03d14a20fc6b370c851759e9a987d887f0f7d753f9d87a2003220aea000a667b` | 2026-11-03 20:29 UTC |
+| Windows x64 | executavel (win-unpacked) | `B-3PO.exe` | 235.4 MB | `7fa6b5a7d52535380e673a73d45869bf1b8d94f23ca53f2c1495e8da8c7c6643` | 2026-11-03 20:28 UTC |
+| Android | APK release (chave de debug) | `app-release.apk` | 44.2 MB | `3a337404ce6c2391b5339fe6aa6a85149ee7fc282f04422c01599abeadfe68eb` | 2026-11-03 20:27 UTC |
 | Android | APK debug | `app-debug.apk` | 93.5 MB | `8548a635904760483eeadfad5b0f43114aca90d3a447f782e2f9c38dc8c3ca98` | 2026-11-03 19:46 UTC |
-| Android | AAB release (chave de debug) | `app-release.aab` | 19.0 MB | `9283719e6acf4599864f8e204cc072ced84fde1a6eba077a7da80c87c9344b3e` | 2026-11-03 20:18 UTC |
+| Android | AAB release (chave de debug) | `app-release.aab` | 19.0 MB | `47fdfe557cf61a765287533d08abe38357a371a3cf227c22c5b67a97c8df8f61` | 2026-11-03 20:27 UTC |
 
 ## Assinatura e limites (declarado, não presumido)
 

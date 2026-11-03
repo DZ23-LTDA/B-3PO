@@ -529,3 +529,25 @@ celular”). Evidência atualizada: `docs/b3po/evidence/desktop-home-pt-br.png`.
 A captura é da Home, **não** da tela de Configurações → Conexões salvas: não há automação confiável para
 clicar dentro da janela Electron nesta sessão (o `SetForegroundWindow` é recusado aqui). A seção está provada
 por teste de componente; a captura de tela dela fica pendente e declarada como tal.
+
+## Rodada 82 — artefatos reconstruídos no commit corrente (e um EPERM explicado)
+
+O APK e o MSIX estavam atrás do HEAD: o app Android não tinha a correção de reconexão da aprovação, e o
+manifesto atribuía todos os artefatos ao commit novo mesmo quando o binário era de um commit anterior.
+
+Reconstruí **os dois** no commit `7391977387` e gerei o manifesto de novo (5 artefatos, hashes novos).
+
+### O que deu errado no caminho
+
+`electron-builder` falhou com `EPERM: unlink ...\win-unpacked\dxcompiler.dll`: o **B-3PO.exe aberto** segurava
+os arquivos do `win-unpacked`. Fechei os processos e repeti — passou. Registro porque é a segunda armadilha de
+empacotamento nesta entrega (a outra foi o `.cache` de ~400 MB quebrando o check de profile-archives).
+
+### Nuance honesta do manifesto
+
+O manifesto carrega **uma** coluna "commit" (o HEAD no momento da geração) e uma coluna "Construído" por
+artefato. Quando só uma plataforma é reconstruída, o commit do topo não prova que aquele binário é daquele
+commit — a data de build é a prova real. Está escrito aqui para o leitor não superinterpretar o cabeçalho.
+
+`assembleDebug` continua produzindo o **mesmo** APK (16:46) porque debug não embute JS: o hash não muda e isso
+é esperado, não é esquecimento.
