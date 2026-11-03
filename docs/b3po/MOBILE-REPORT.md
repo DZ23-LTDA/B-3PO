@@ -581,3 +581,43 @@ token de dispositivo). Não implementei composer com botão que não envia: bot�
 GOAL.
 
 O que o usuário tem hoje no celular, comprovado: lista de bots real e conversa real (leitura).
+
+## Rodada 60 — caminho de envio implementado e testado; credencial continua faltando
+
+Corrigi a leitura do contrato: **não existe** `?token=` para o WebSocket neste build.
+
+`web_server_chat.py::_consume_ws_ticket` aceita exatamente duas credenciais:
+
+| Credencial | Como chega | Quem pode usar |
+|---|---|---|
+| ticket de uso único | subprotocolo `hermes-gateway-ticket.<t>` ou `?ticket=` | quem mintou via `POST /api/auth/ws-ticket` (exige login do dashboard) |
+| credencial interna do processo | `?internal=` | somente filho gerado pelo próprio servidor (env), nunca exposto por REST |
+
+`ws_tickets.py::internal_ws_credential` diz textualmente: *"Never injected into the SPA or returned
+over REST — only passed to a spawned child via its environment."* Ou seja: o close 1006 da rodada 59
+não foi bug de rede — foi credencial do tipo errado.
+
+### O que passou a existir no repositório
+
+`mobile/b3po-app/src/api/gateway-rpc.ts` — **10 testes**:
+
+| Regra | Por quê |
+|---|---|
+| ticket vai no query **e** no subprotocolo | é o par que o servidor espera |
+| credencial interna vai em `?internal=`, sem subprotocolo de ticket | assinatura diferente |
+| `prompt.submit` só usa `session_id`/`text`/`submission_id` | o servidor recusa qualquer chave fora da lista permitida |
+| recusa local quando texto/id vazio | falhar aqui é melhor que o servidor responder `invalid_params` |
+| `session.resume` **antes** de `prompt.submit` | o socket precisa estar subscrito à sessão |
+| socket que falha devolve `socket_failed` | nunca engole erro |
+| submissão com id único | retry não duplica turno |
+
+Inclui teste de integração com servidor WS real (`ws`) que aplica o contrato e confere a ordem dos
+frames e as respostas `id: 1` e `id: 2`.
+
+### Por que não há composer na tela
+
+Falta a credencial. Sem ela o envio não acontece, e botão que não envia é proibido pelo GOAL. O caminho
+correto é o produto ter **autorização de dispositivo** (GOAL §16): chave por dispositivo emitida na
+pareamento, aceita pelo WS. Isso é uma funcionalidade a especificar, não um hack a fazer agora.
+
+**Mobile: 121 testes + 8 pulados**, `tsc` limpo, gate **14 ok**.
