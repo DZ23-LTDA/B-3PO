@@ -56,9 +56,14 @@ def _wings(*glyphs) -> list[list[str]]:
             for g in glyphs]
 
 
-# Branding shared by every Hermes-named built-in (mono/daylight override help_header).
+# Branding shared by every built-in skin. The product this fork ships is B-3PO: `agent_name` here is
+# what the CLI, the TUI, the gateway and the desktop Bot Mode show as the agent/bot name, so it is the
+# single place the product name is decided for those surfaces (the runtime keeps the Hermes module and
+# command names). Localized copy lives in locales/*.yaml; these are the fallbacks.
 _HERMES_BRANDING: dict[str, str] = _branding(
-    "Hermes", "☤", "Goodbye! ☤", prompt="❯", help_header="(^_^)? Available Commands")
+    "B-3PO", "☤", "Goodbye! ☤", prompt="❯", help_header="(^_^)? Available Commands")
+_HERMES_BRANDING["agent_name"] = "B-3PO"
+_HERMES_BRANDING["welcome"] = "Welcome to B-3PO! Type your message or /help for commands."
 
 _BUILTIN_SKINS: dict[str, dict[str, Any]] = {
     "default": {

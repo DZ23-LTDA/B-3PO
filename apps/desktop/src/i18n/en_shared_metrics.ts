@@ -4,7 +4,7 @@ export const enSharedMetrics: Translations['sharedMetrics'] = {
   consentTitle: 'Share usage stats?',
   dialogTitle: 'Usage stats',
   consentBody:
-    'Hermes can count how you use it: session length, which models and tools run, and when something fails. It never records your messages, files, paths or error text.',
+    'B-3PO can count how you use it: session length, which models and tools run, and when something fails. It never records your messages, files, paths or error text.',
   whatIsCollected: 'What is counted',
   collectedActivity: 'Sessions: length, outcome, error type, active time per day',
   collectedModels: 'Models: which ones, token totals',
@@ -14,17 +14,17 @@ export const enSharedMetrics: Translations['sharedMetrics'] = {
   collectedUsage: 'Agent quality: missed edits, broken tool calls, stuck loops, cost per task',
   collectedMachine: 'Machine: OS, RAM range, GPU type, Hermes version, local model use',
   sending:
-    'If you share, Hermes sends stats to Nous once a day with a random ID for this profile. Apart from a one-time note that Hermes was installed, stats from before you opt in are never sent. Change this anytime in Settings.',
+    'If you share, B-3PO sends anonymous stats once a day with a random ID for this profile. Apart from a one-time note that Hermes was installed, stats from before you opt in are never sent. Change this anytime in Settings.',
   readDocs: 'Read the full details',
-  share: 'Share with Nous',
+  share: 'Share anonymously',
   off: 'No thanks',
   saveFailed: 'Couldn’t save your choice',
-  sendLabel: 'Share usage stats with Nous',
+  sendLabel: 'Share anonymous usage stats',
   sendDesc:
     'Counts only, sent once a day with a random ID for this profile. Never your messages, files, paths or error text.',
-  unavailable: 'Update the Hermes backend to change this setting.',
+  unavailable: 'Update the B-3PO backend to change this setting.',
   stripBody: 'Counts only. Never your messages or files.',
   stripReaskBody: 'Asking once more: an earlier version could save “No thanks” before you saw this.',
-  stripChoices: { share: 'Share with Nous', off: 'No thanks' },
+  stripChoices: { share: 'Share anonymously', off: 'No thanks' },
   stripDetails: 'Details'
 }

@@ -64,3 +64,18 @@ export function mascotById(id: string | null | undefined): Mascot | null {
 
   return MASCOTS.find(mascot => mascot.id === id) ?? null
 }
+
+/**
+ * Mascote padrão de um bot sem `mascot_id`: um dos 20 oficiais, escolhido de forma determinística
+ * pelo nome (o mesmo bot sempre recebe o mesmo mascote). Sem isso o roster caía no sigilo gerado,
+ * ignorando a identidade visual da marca.
+ */
+export function defaultMascotFor(name: string): Mascot {
+  let hash = 0
+
+  for (const char of name) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  }
+
+  return MASCOTS[hash % MASCOTS.length]
+}
