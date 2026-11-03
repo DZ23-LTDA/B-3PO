@@ -28,6 +28,7 @@ import { SafeAreaView } from 'react-native'
 import { back, backLabel, currentRoute, headerTitle, initialNav, openChat } from './src/app/router'
 import type { NavState } from './src/app/router'
 import { RestClient, restFailureMessage } from './src/api/rest-client'
+import type { BotProfile } from './src/api/rest-client'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
@@ -36,20 +37,33 @@ export default function App() {
   const [connection, setConnection] = useState<ConnectionState>({ status: 'disconnected' })
   const [error, setError] = useState<string | null>(null)
   const [nav, setNav] = useState<NavState>(initialNav)
+  const [bots, setBots] = useState<BotProfile[]>([])
 
   const route = currentRoute(nav)
   const card = statusCard(connection, error)
-  const botItems = useMemo(() => [] as { name: string; title: string; description: string }[], [])
+  const botItems = useMemo(
+    () =>
+      bots.map(bot => ({
+        name: bot.name,
+        title: bot.title,
+        description: bot.description || `${bot.provider ?? 'provider'} · ${bot.model ?? 'modelo não definido'}`
+      })),
+    [bots]
+  )
 
-  const connect = useCallback(async (origin: string, deviceId: string) => {
+  const connect = useCallback(async (origin: string, deviceId: string, token: string) => {
     setConnection({ status: 'connecting', origin })
 
-    const client = new RestClient({ origin })
+    const client = new RestClient({ origin, token })
 
     try {
       const health = await client.health()
       const gateway = await client.status().catch(() => null)
+      // A lista de bots NÃO é pública: com token vem de /api/profiles; sem token, fica vazia e a tela
+      // mostra o estado vazio honesto em vez de inventar bots.
+      const profiles = await client.profiles().catch(() => [] as BotProfile[])
 
+      setBots(profiles)
       setConnection({ status: 'connected', origin, deviceId, health, gateway, checkedAt: Date.now() })
     } catch (failure) {
       const detail = failure instanceof Error ? failure.message : String(failure)
@@ -74,7 +88,7 @@ export default function App() {
       }
 
       setError(null)
-      void connect(result.request.gatewayUrl, result.request.deviceId)
+      void connect(result.request.gatewayUrl, result.request.deviceId, result.request.token)
     },
     [connect]
   )

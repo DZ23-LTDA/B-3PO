@@ -30,6 +30,17 @@ export interface HealthInfo {
   authRequired: boolean
 }
 
+/** Um bot = um perfil do runtime. Vem de `/api/profiles` (contrato real do backend local). */
+export interface BotProfile {
+  name: string
+  title: string
+  description: string
+  model: string | null
+  provider: string | null
+  gatewayRunning: boolean
+  isDefault: boolean
+}
+
 export interface StatusInfo {
   gatewayRunning: boolean
   gatewayState: string | null
@@ -136,6 +147,48 @@ export class RestClient {
       commit: typeof raw['commit'] === 'string' ? raw['commit'] : null,
       authRequired: raw['auth_required'] === true
     }
+  }
+
+  /**
+   * `/api/profiles` — a lista de bots.
+   *
+   * Descoberto na prática: `/api/agents` é do portal cloud (dá 404 no backend local); o backend local
+   * publica os perfis em `/api/profiles`, autenticado por `x-hermes-session-token`.
+   */
+  async profiles(): Promise<BotProfile[]> {
+    const raw = await this.get<{ profiles?: unknown }>('/api/profiles')
+    const list = Array.isArray(raw.profiles) ? raw.profiles : []
+
+    return list.flatMap(item => {
+      if (!item || typeof item !== 'object') {
+        return []
+      }
+
+      const profile = item as Record<string, unknown>
+      const name = typeof profile['name'] === 'string' ? profile['name'] : ''
+
+      if (!name) {
+        return []
+      }
+
+      const title = typeof profile['bot_title'] === 'string' && profile['bot_title'].trim()
+        ? profile['bot_title'].trim()
+        : typeof profile['display_name'] === 'string' && profile['display_name'].trim()
+          ? profile['display_name'].trim()
+          : name
+
+      return [
+        {
+          name,
+          title,
+          description: typeof profile['description'] === 'string' ? profile['description'] : '',
+          model: typeof profile['model'] === 'string' ? profile['model'] : null,
+          provider: typeof profile['provider'] === 'string' ? profile['provider'] : null,
+          gatewayRunning: profile['gateway_running'] === true,
+          isDefault: profile['is_default'] === true
+        }
+      ]
+    })
   }
 
   /** `/api/status` — estado do gateway. */

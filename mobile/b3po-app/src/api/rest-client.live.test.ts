@@ -13,7 +13,9 @@ import { describe, expect, it } from 'vitest'
 import { RestClient, RestError, SESSION_HEADER } from './rest-client'
 
 const ORIGIN = process.env['B3PO_LIVE_ORIGIN'] ?? ''
+const TOKEN = process.env['B3PO_LIVE_TOKEN'] ?? ''
 const LIVE = ORIGIN.trim().length > 0
+const AUTHED = LIVE && TOKEN.trim().length > 0
 
 describe.skipIf(!LIVE)('servidor real (B3PO_LIVE_ORIGIN)', () => {
   it('/api/health responde e diz se exige token', async () => {
@@ -64,5 +66,32 @@ describe.skipIf(!LIVE)('servidor real (B3PO_LIVE_ORIGIN)', () => {
     const client = new RestClient({ origin: 'http://127.0.0.1:9', timeoutMs: 1500 })
 
     await expect(client.health()).rejects.toBeInstanceOf(RestError)
+  })
+})
+
+describe.skipIf(!AUTHED)('servidor real — endpoints autenticados', () => {
+  it('/api/profiles devolve a lista de bots com o token do cofre', async () => {
+    const client = new RestClient({ origin: ORIGIN, token: TOKEN })
+    const profiles = await client.profiles()
+
+    expect(Array.isArray(profiles)).toBe(true)
+    // o perfil de teste sempre existe neste ambiente
+    expect(profiles.length).toBeGreaterThan(0)
+    expect(profiles[0]?.name.length).toBeGreaterThan(0)
+    expect(typeof profiles[0]?.gatewayRunning).toBe('boolean')
+  })
+
+  it('sem token o mesmo endpoint recusa (a lista de bots não é pública)', async () => {
+    const anonymous = new RestClient({ origin: ORIGIN })
+
+    await expect(anonymous.profiles()).rejects.toMatchObject({ failure: 'unauthorized' })
+  })
+
+  it('/api/sessions responde com o token e traz a estrutura de paginação', async () => {
+    const client = new RestClient({ origin: ORIGIN, token: TOKEN })
+    const payload = await client.get<{ sessions: unknown[]; total: number }>('/api/sessions')
+
+    expect(Array.isArray(payload.sessions)).toBe(true)
+    expect(typeof payload.total).toBe('number')
   })
 })

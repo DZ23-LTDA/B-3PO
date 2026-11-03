@@ -434,3 +434,51 @@ Nenhum bot ainda
 Evidências: `docs/b3po/evidence/mobile-conectado-servidor-real.png` e `.txt`.
 
 **101 testes + 5 pulados**, `tsc --noEmit` limpo.
+
+## Rodada 55 — a lista de bots aparece no celular (401 resolvido)
+
+O bloqueio de três rodadas tinha **duas causas**, e nenhuma era "falta de permissão":
+
+1. **endpoint errado**: eu batia em `/api/agents`, que é do *portal cloud* e dá **404** no backend
+   local. O backend local publica os bots em **`/api/profiles`**;
+2. **token aleatório**: o gateway gera um `HERMES_DASHBOARD_SESSION_TOKEN` por processo. Rodando
+   `hermes serve` em foreground com o token definido, o valor é conhecido e estável.
+
+Prova com `curl` no servidor real (porta 9119):
+
+```
+/api/health   -> 200 {"ok":true,…,"auth_required":false}
+/api/profiles -> 200 {"profiles":[{"name":"default","model":"qwen3.5:4b","provider":"custom",
+                                    "gateway_running":true,"bot_title":…}, …]}
+/api/sessions -> 200 {"sessions":[],"total":1,…}
+/api/agents   -> 404  (não existe no backend local)
+```
+
+### No aparelho
+
+Depois de parear com `b3po://pair?url=http://127.0.0.1:9119&token=…`, a tela mostra **os bots reais**
+do servidor, com título e descrição que estão no perfil:
+
+```
+Conectado ao computador
+Servidor: http://127.0.0.1:9119 · Compilação: 98695c0c… · Gateway: rodando · Estado: running
+default                          custom · qwen3.5:4b
+analista-financeiro              Analista Financeiro - le planilhas e aponta desvios de orcamento.
+Revisor de Código                Revisor de Código — Revisa diffs, aponta riscos e sugere testes…
+```
+
+Evidência: `docs/b3po/evidence/mobile-bots-reais.png` e `.txt`.
+
+### Testes ao vivo (8 verdes contra o servidor real)
+
+`B3PO_LIVE_ORIGIN=http://127.0.0.1:9119 B3PO_LIVE_TOKEN=…`:
+
+| Caso | Resultado |
+|---|---|
+| `/api/profiles` **com** token | 200, lista com nome/título/modelo/provider |
+| `/api/profiles` **sem** token | 401 — a lista de bots **não é pública** |
+| `/api/sessions` com token | 200 com estrutura de paginação |
+
+Sem servidor no ar esses testes são pulados (nunca verdes por omissão).
+
+**101 testes + 8 pulados** no mobile, `tsc` limpo.

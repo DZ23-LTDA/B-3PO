@@ -7,7 +7,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | 98 |
+| Commits DZ23 | 99 |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
 | Testes | desktop: bots 960 · i18n 104 · store/sdk 2307 · CRM 66 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
@@ -22,14 +22,13 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | WhatsApp CRM: consentimento, webhook, contatos, funil, inbox, métricas, tarefas/Kanban, automações, contatos em lote, funil completo | ✅ núcleo | `WHATSAPP-CRM-REPORT.md`, 140 testes |
 | Envio real WhatsApp | 🔒 BLOCKED (conta Meta) | `WHATSAPP-CRM-SETUP.md` |
 | Android: projeto nativo, APK, AAB, pareamento, conexão REST real | ✅ | `MOBILE-REPORT.md` (rodadas 42–49) |
-| Android: lista de bots na tela | ⬜ aberto (401 de ticket) | `MOBILE-REPORT.md` rodada 50 |
+| Android: lista de bots na tela | ✅ | `MOBILE-REPORT.md` rodada 55 + `mobile-bots-reais.png` |
 | Desktop Windows: instalador e MSIX | 🟡 artefatos prontos, não assinados | `ARTIFACT-MANIFEST.md` |
 | macOS / iOS | 🔒 BLOCKED (macOS/Xcode/certificado) | `RELEASE-READINESS.md` |
 | Tool calling ponta a ponta (F5 passo 12) | ⬜ aberto (modelo local sem tool calling ≥64k) | `F5-EVIDENCE-REPORT.md` |
 
 ## Critérios abertos (ordenados por valor)
 
-1. lista de bots no mobile (descobrir ticket de gateway para `/api/agents`);
 2. cofre seguro no mobile (`react-native-keychain` não compila no RN 0.81 deste ambiente);
 3. keystore de release para APK/AAB publicáveis;
 4. tool calling com modelo ≥64k;
