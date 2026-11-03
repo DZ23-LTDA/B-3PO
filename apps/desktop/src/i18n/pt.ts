@@ -212,7 +212,39 @@ export const ptOverrides: TranslationOverrides = {
     usageLevels: { free: 'Grátis', top_tier: 'Grande' },
     sectionRecommended: 'Recomendado'
   },
+  statusStack: {
+    stop: 'Parar',
+    running: 'Em execução',
+    dismiss: 'Dispensar'
+  },
+  assistant: {
+    thread: {
+      stop: 'Parar'
+    }
+  },
   composer: {
+    startVoice: 'Iniciar conversa por voz',
+    openDirective: 'Abrir',
+    queueMessage: 'Enfileirar mensagem',
+    steer: 'Conduzir a execução atual',
+    redirect: 'Redirecionar a execução atual',
+    stop: 'Parar',
+    send: 'Enviar',
+    speaking: 'Falando',
+    transcribing: 'Transcrevendo',
+    thinking: 'Pensando',
+    muted: 'Sem áudio',
+    listening: 'Ouvindo',
+    muteMic: 'Silenciar microfone',
+    unmuteMic: 'Ativar microfone',
+    stopListening: 'Parar de ouvir e enviar',
+    stopShort: 'Parar',
+    endConversation: 'Encerrar conversa por voz',
+    endShort: 'Encerrar',
+    stopDictation: 'Parar ditado',
+    transcribingDictation: 'Transcrevendo ditado',
+    voiceControls: 'Voz',
+    voiceEngine: 'Motor de conversa por voz',
     commandDescs: {
       '/help': 'Mostrar os comandos de barra do desktop',
       '/clear': 'iniciar uma nova sessão',

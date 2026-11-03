@@ -53,6 +53,7 @@ describe('pt-BR', () => {
 
   it('o override cobre exatamente as seções declaradas', () => {
     expect(Object.keys(ptOverrides).sort()).toEqual([
+      'assistant',
       'common',
       'composer',
       'errors',
@@ -61,8 +62,16 @@ describe('pt-BR', () => {
       'modelPicker',
       'settings',
       'sidebar',
+      'statusStack',
       'ui'
     ])
+  })
+
+  it('traduz o controle de parar em todas as superficies', () => {
+    expect(pt.composer.stop).toBe('Parar')
+    expect(pt.composer.stopShort).toBe('Parar')
+    expect(pt.statusStack.stop).toBe('Parar')
+    expect(pt.assistant.thread.stop).toBe('Parar')
   })
 
   it('traduz os placeholders do composer', () => {
