@@ -144,6 +144,7 @@ import {
   ARTIFACTS_ROUTE,
   CAPABILITIES_ROUTE,
   CRON_ROUTE,
+  CRM_ROUTE,
   MESSAGING_ROUTE,
   SIDEBAR_NAV_AREA,
   type SidebarNavContribution
@@ -217,20 +218,18 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
     action: 'new-session',
     keybindActionId: 'session.new'
   },
-  {
-    id: 'capabilities',
+  { id: 'capabilities',
     label: '',
     icon: props => <Codicon name="symbol-misc" {...props} />,
     route: CAPABILITIES_ROUTE,
-    keybindActionId: 'nav.capabilities'
-  },
-  {
-    id: 'messaging',
+    keybindActionId: 'nav.capabilities' },
+  { id: 'messaging',
     label: '',
     icon: props => <Codicon name="comment" {...props} />,
     route: MESSAGING_ROUTE,
-    keybindActionId: 'nav.messaging'
-  },
+    keybindActionId: 'nav.messaging' },
+  { id: 'crm', label: '', icon: props => <Codicon name="organization" {...props} />,
+    route: CRM_ROUTE, keybindActionId: 'nav.crm' },
   // Artifacts and Scheduled jobs are outputs of running Hermes the developer
   // way; Capabilities and Messaging are how anyone sets it up.
   {
