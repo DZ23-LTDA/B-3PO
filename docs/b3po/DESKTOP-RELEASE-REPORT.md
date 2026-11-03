@@ -246,3 +246,48 @@ pt; escolha explícita (`es`) → es; sem idioma de máquina → mantém; sem na
 **Limite honesto:** a correção está no código-fonte e testada; o `.exe` em `release/win-unpacked` é um
 build anterior, então as capturas acima ainda mostram o placeholder em inglês. Refazer o pacote
 (`electron-builder`) é o próximo passo para a evidência visual em pt-BR.
+
+## Rodada 69 — pacote novo, servidor novo, e o idioma AINDA em inglês (com o que já eliminei)
+
+### Feito
+
+1. **Pacote reconstruído** a partir do commit atual: `npm run build` + `node scripts/run-electron-builder.mjs
+   --win msix`. Saída: `release/B3PO-0.0.0-win-x64.msix` (191 MB, **não assinada** —
+   `[batch-sign] AZURE_SIGN_* not set`) e `release/win-unpacked` novo (exe de 14:59).
+2. **O servidor que eu usava estava velho.** O log do app mostrou
+   `503 {"detail":"Restart required: This process is running code from e85de13b5c but the checkout on disk
+   is now 387bc8da2e…"}` em `/api/model/options`. Ou seja: todas as capturas anteriores foram feitas
+   contra um backend de 8 commits atrás. Subi o `serve` de novo a partir do checkout: agora
+   `/api/health` responde `commit 387bc8da` e `/api/model/options` devolve 200 com providers.
+3. Novo `serve` + pacote novo = a Home abre com `client vgit.387bc8d` no rodapé, o que **prova** que o
+   renderer embarcado é o desta rodada.
+
+### O que continua errado
+
+O composer segue com placeholder em inglês (“Start with a goal”). Então a correção da rodada 68
+(`resolveInitialLocalePreferringOs`) é **necessária mas não suficiente**: o código novo está rodando
+(versão no rodapé mudou) e a decisão de locale ainda cai em `en`.
+
+### O que já eliminei, com evidência
+
+| Hipótese | Teste | Resultado |
+|---|---|---|
+| Electron veria `en-US` | sonda `app.getLocale()` com o Electron do repo | **`pt-BR`**, `getPreferredSystemLanguages() = ["pt-BR"]` |
+| Falta de recursos de idioma no pacote | `release/win-unpacked/locales` | tem `pt-BR.pak`, `pt-PT.pak`, `en-US.pak` |
+| `pt.ts` sem tradução | grep no locale | tem (`newSessionPlaceholders`, “No que você está pensando?”) |
+| Build antigo | rodapé do app | `client vgit.387bc8d` — é o build novo |
+
+### Próximo passo (preciso, não vago)
+
+O `useState` do locale nasce de uma prop: `context.tsx:105` —
+`useState<Locale>(() => normalizeLocale(initialLocale))`. Se `initialLocale` chegar `'en'` e o efeito de
+config não rodar (por exemplo sem `configClient` em modo remoto), o estado nunca passa pela regra nova.
+O caminho é instrumentar uma linha em `context.tsx` registrando `initialLocale`, `saved` e o locale
+final no `desktop.log`, rodar uma vez e corrigir no ponto certo — em vez de continuar trocando o lugar
+da correção no escuro.
+
+### Registro de higiene
+
+O `run-electron-builder.mjs` aponta o cache para `path.join(source, '.cache/desktop-inputs')`, dentro do
+checkout; os `*.tar.gz` do builder derrubam o gate `profile-archives`. Removi 400 MB desse cache e o gate
+voltou a **14 checks, ok**. Também apaguei `release/win-unpacked.bak` (431 MB).
