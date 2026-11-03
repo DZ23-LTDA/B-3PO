@@ -64,6 +64,15 @@ def _source_of(cfg: dict, resolved: dict):
     return None
 
 
+# Fields that mean "this entry says WHERE to reach the provider", not just how to tune it.
+_ENDPOINT_FIELDS = ("base_url", "baseUrl", "url", "api")
+
+
+def _carries_endpoint(entry) -> bool:
+    """True when a ``providers.<key>`` entry names its own endpoint."""
+    return isinstance(entry, dict) and any(str(entry.get(field) or "").strip() for field in _ENDPOINT_FIELDS)
+
+
 def launch_model_seed(source_cfg: dict) -> dict:
     """The config a fresh profile needs to run the launch profile's model: its ``model`` block plus
     the endpoint definition it points at. ``model.provider: custom:lab`` alone is "Unknown provider"
@@ -85,11 +94,16 @@ def launch_model_seed(source_cfg: dict) -> dict:
     selected = _resolve(provider, view)
     if selected is None:
         exact = providers.get(provider)
+        # A built-in provider can still carry its OWN endpoint (`providers.ollama.base_url` for a
+        # local server, an OpenAI-compatible mirror, …). Without copying that entry the fresh
+        # profile resolves the provider with no URL and the first turn dies on a 404 — the bot is
+        # created and unusable. So an explicit endpoint travels even when the name is built-in.
+        endpoint = _carries_endpoint(exact)
         # Bare ``custom`` runs as provider ``custom`` and reads ``providers.custom`` tuning too.
         if (
             isinstance(exact, dict)
             and requested not in {"", "auto"}
-            and (requested == "custom" or _shadowed_by_builtin(requested))
+            and (endpoint or requested == "custom" or _shadowed_by_builtin(requested))
         ):
             seed["providers"] = {provider: exact}
         return seed

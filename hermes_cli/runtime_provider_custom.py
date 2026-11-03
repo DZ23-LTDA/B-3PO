@@ -31,6 +31,32 @@ def _normalize_custom_provider_name(value: str) -> str:
     return value.strip().lower().replace(" ", "-")
 
 
+def with_ollama_v1(url: str) -> str:
+    """Ollama's OpenAI wire lives under ``/v1``.
+
+    Users (and config seeds) paste a bare host — ``http://127.0.0.1:11434`` — and the runtime then
+    posts to ``/chat/completions``, which Ollama answers with **404 page not found**: the bot looks
+    created and unusable. A bare Ollama host gets the ``/v1`` the server actually serves; an explicit
+    path (``/v1``, ``/api``, a reverse-proxy prefix) is left exactly as written.
+    """
+    raw = str(url or "").strip()
+    if not raw:
+        return raw
+    from urllib.parse import urlparse
+
+    parsed = urlparse(raw if "://" in raw else f"//{raw}")
+    host = (parsed.hostname or "").lower()
+    try:
+        is_ollama = parsed.port == 11434
+    except ValueError:
+        is_ollama = False
+    if not is_ollama and "ollama" not in host.split("."):
+        return raw
+    if parsed.path in ("", "/"):
+        return raw.rstrip("/") + "/v1"
+    return raw
+
+
 def _normalize_base_url_for_match(value) -> str:
     return str(value or "").strip().rstrip("/").lower()
 
@@ -164,7 +190,7 @@ def _match_new_style_provider(
         # unrelated entry must not read its profile-scoped secret.
         key_env = _clean(entry.get("key_env") or entry.get("api_key_env"))
         api_key = get_secret_str(key_env, "").strip() if key_env and resolve_credentials else ""
-        result: dict[str, Any] = {"name": entry.get("name", ep_name), "base_url": base_url.strip(),
+        result: dict[str, Any] = {"name": entry.get("name", ep_name), "base_url": with_ollama_v1(base_url),
                                   "api_key": api_key or _clean(entry.get("api_key", "")), "model": entry.get("default_model", "")}
         # Command that PRINTS a short-lived credential; wrapped in a per-request token provider.
         key_cmd = _clean(entry.get("key_cmd", ""))
