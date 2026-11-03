@@ -210,3 +210,24 @@ export function bubblesSignature(bubbles: readonly ChatBubble[]): string {
 export function shouldReplaceBubbles(current: readonly ChatBubble[], next: readonly ChatBubble[]): boolean {
   return bubblesSignature(current) !== bubblesSignature(next)
 }
+
+/**
+ * Rotulo acessivel de uma conversa na lista: titulo + (nao lida) + quantidade de mensagens. Sem isso o
+ * leitor de tela anuncia so o titulo e perde o sinal de conversa nova.
+ */
+export function sessionRowLabel(session: SessionRow): string {
+  const parts = [session.title]
+
+  if (session.unread) {
+    parts.push('não lida')
+  }
+
+  if (session.messageCount > 0) {
+    // Plural de "mensagem" e "mensagens" (o -m cai), nao "mensagem" + "s".
+    const unit = session.messageCount === 1 ? 'mensagem' : 'mensagens'
+
+    parts.push(`${session.messageCount} ${unit}`)
+  }
+
+  return parts.join(', ')
+}

@@ -908,3 +908,37 @@ Desconectar e reabrir a sessão sozinho na tela. Corrigido com geração de sess
 
 O outro achado (erro de pareamento ecoando o link com token) **não procede**: `pairingFailureMessage()`
 devolve texto fixo por motivo. Registrado como rejeitado com evidência.
+
+## Rodada 71 — LISTA DE CONVERSAS por bot (antes só a mais recente, sem escolha)
+
+O app abria sempre a conversa mais recente do bot: para retomar outra, só pelo desktop — apesar de o
+servidor já expor `/api/sessions?profile=<bot>`.
+
+### O que foi feito
+
+| Peça | Onde |
+|---|---|
+| botão **“Conversas (N)”** + lista com título, prévia e marca de não lida | `src/screens/chat-chrome.tsx` + `src/screens/session-picker.tsx` |
+| toque na conversa carrega as mensagens daquela sessão (`openSession`) | `App.tsx` |
+| rótulo acessível com título, “não lida” e contagem | `chat-session.ts::sessionRowLabel` + 3 testes |
+
+### Defeitos que o aparelho revelou (todos meus, todos corrigidos)
+
+1. **O botão não aparecia**: o primeiro `replace` do meu script não aplicou e eu confiei no “aplicado” do
+   script em vez de conferir o arquivo — o app compilou com estado criado e sem uso. Passei a **verificar no
+   fonte antes de compilar**.
+2. **Toque não funcionava**: o botão estava no cabeçalho, que no Android fica **sob a barra de status**
+   (y≈32). Movi o controle para a área de conteúdo (y≈128).
+3. **`openSession` retornava sem carregar nada**: usei `nav.name`/`nav.bot`, mas a navegação é um
+   `NavState` e a rota vem de `currentRoute(nav)` com campo **`botName`**. Corrigido.
+4. **Plural errado**: “2 mensagems” — plural de “mensagem” é “mensagens” (o teste pegou antes de mim).
+5. **Gate reprovou `App` com CC 24 > 20**: extraí cabeçalho + lista para `chat-chrome.tsx` em vez de
+   escrever `# health: allow`.
+
+### Provado no aparelho (`dsh_pixel`), no APK final
+
+Bot `default` com **4 conversas**: toque em “Conversas (4)” → lista com “Testing after device allowlist”,
+“Processamento de envio de arquivo”, “Testar celular”, “Do celular” → toque em “Testar celular” →
+mensagens daquela conversa carregadas. Evidência: `docs/b3po/evidence/mobile-conversas-lista.png`.
+
+Mobile: **149 testes** + 8 pulados. Gate 14 ok; `tsc` limpo.

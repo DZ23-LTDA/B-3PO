@@ -42,10 +42,11 @@ import {
   shouldFollowUp,
   shouldReplaceBubbles
 } from './src/screens/chat-session'
-import type { ChatBubble, RawMessage } from './src/screens/chat-session'
+import type { ChatBubble, RawMessage, SessionRow } from './src/screens/chat-session'
 import { nextRetryDelay, RETRY_BUTTON_LABEL, retryingCopy } from './src/api/retry'
 import { isStaleSession } from './src/api/session-guard'
 import { PairLinkCard } from './src/screens/pair-link-card'
+import { ChatChrome } from './src/screens/chat-chrome'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
@@ -56,6 +57,9 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   // Sem o deep link a mao o usuario ficava sem saida depois de desconectar; aqui ele cola o link.
   const [pairLink, setPairLink] = useState('')
+  // Conversas do bot aberto: o aparelho so mostrava a mais recente e nao deixava escolher.
+  const [sessions, setSessions] = useState<SessionRow[]>([])
+  const [showSessions, setShowSessions] = useState(false)
   // Cada Desconectar invalida os pedidos que ja sairam (senao um connect() em voo ressuscita a sessao).
   const sessionGeneration = useRef(0)
   // O estado 'failed' guarda so origem+mensagem; para reconectar preciso das credenciais do pareamento.
@@ -176,12 +180,14 @@ export default function App() {
 
       try {
         const client = new RestClient({ origin, token })
-        const sessions = sessionRows(await client.sessions(bot.name))
+        const found = sessionRows(await client.sessions(bot.name))
+
+         setSessions(found)
 
         if (sessions.length === 0) {
           setChatNote(chatEmptyCopy('no-sessions').body)
         } else {
-          const messages = await client.messages(bot.name, sessions[0]!.id)
+          const messages = await client.messages(bot.name, found[0]!.id)
           const loaded = chatBubbles(messages as RawMessage[])
 
           setBubbles(loaded)
@@ -208,6 +214,37 @@ export default function App() {
       }
     },
     [connection]
+  )
+
+  /** Abre uma conversa especifica do bot aberto (escolhida na lista). */
+  const openSession = useCallback(
+    async (session: SessionRow) => {
+      setShowSessions(false)
+      setChatNote(null)
+
+      // A navegacao e um NavState: a rota atual vem de currentRoute, e o campo do bot e `botName`
+      // (usar `nav.name`/`nav.bot` aqui fazia a funcao retornar sem carregar nada).
+      const route = currentRoute(nav)
+
+      if (connection.status !== 'connected' || route.name !== 'chat') {
+        return
+      }
+
+      setChatLoading(true)
+
+      try {
+        const client = new RestClient({ origin: connection.origin, token: connection.token })
+        const loaded = chatBubbles((await client.messages(route.botName, session.id)) as RawMessage[])
+
+        setBubbles(loaded)
+        setChatNote(loaded.length === 0 ? chatEmptyCopy('no-messages').body : null)
+      } catch (failure) {
+        setChatNote(restFailureMessage(failure))
+      } finally {
+        setChatLoading(false)
+      }
+    },
+    [connection, nav]
   )
 
   /** Envia o texto digitado pelo transporte do gateway. */
@@ -335,21 +372,18 @@ export default function App() {
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-        {route.name === 'chat' ? (
-          <TouchableOpacity
-            accessibilityLabel={backLabel(nav)}
-            accessibilityRole="button"
-            onPress={() => setNav(back(nav))}
-            style={styles.back}
-          >
-            <Text style={styles.backText}>‹ {backLabel(nav)}</Text>
-          </TouchableOpacity>
-        ) : (
-          <Text style={styles.wordmark}>B-3PO</Text>
-        )}
-        {route.name === 'chat' ? <Text style={styles.headerTitle}>{headerTitle(route)}</Text> : null}
-      </View>
+        <ChatChrome
+          backLabel={backLabel(nav)}
+          onBack={() => setNav(back(nav))}
+          onCloseSessions={() => setShowSessions(false)}
+          onSelectSession={row => void openSession(row)}
+          onToggleSessions={() => setShowSessions(open => !open)}
+          sessions={sessions}
+          showMenu={route.name === 'chat'}
+          showSessions={showSessions}
+          title={route.name === 'chat' ? headerTitle(route) : ''}
+          wordmark="B-3PO"
+        />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -490,6 +524,7 @@ const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
   block: { gap: 14 },
+  conversationsRow: { paddingHorizontal: 20, paddingTop: 8 },
   disconnectButton: { alignItems: 'center', paddingVertical: 10 },
   disconnectText: { color: '#7f9cff', fontSize: 15 },
   body: { flex: 1 },
@@ -514,7 +549,7 @@ const styles = StyleSheet.create({
   cardTitle: { color: '#e8eefc', fontSize: 16, fontWeight: '600' },
   content: { padding: 20 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingTop: 12 },
-  headerTitle: { color: '#e8eefc', fontSize: 17, fontWeight: '600' },
+  headerTitle: { color: '#e8eefc', flexShrink: 1, fontSize: 17, fontWeight: '600' },
   row: {
     backgroundColor: '#12151c',
     borderColor: '#1f2430',
