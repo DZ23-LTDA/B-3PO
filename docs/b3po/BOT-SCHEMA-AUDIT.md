@@ -59,3 +59,24 @@ persistência real é `profile.yaml`, sincronizado como o resto das configuraç�
 
 O schema real é **compatível** com F4 (nada contradiz), mas incompleto: faltam três campos obrigatórios e
 a migração v1. Implementação viável sem tocar o core Hermes — fica no plugin/camada B-3PO.
+
+---
+
+## Atualização 21:31 — schema v1 implementado (camada de contrato)
+
+`apps/desktop/src/plugins/hermes-bots/bot-schema.ts` implementa F4 **sem tocar no `data.ts`** (59 KB) nem
+no runtime:
+
+- `BOT_SCHEMA_VERSION = 1`; `engine` só aceita `hermes`;
+- três blocos: `identity` / `runtime_config` / `links_and_state`;
+- `permission_policy` obrigatória, `RESTRICTIVE_POLICY` = `{allow:[], deny:[], default:'deny'}`;
+- `fromLegacyBotMeta()` converte `BotMeta` legado → v1 sem inventar valor (provider/model/refs = `null`);
+- `migrateBotRecord()` idempotente, normaliza `default` inválido para `deny`, rejeita engine ≠ hermes e
+  registro sem `id`;
+- `validateBotRecord()` devolve erros; `mascotIdFor()` expõe o mascote como identidade visual.
+
+**Testes:** `bot-schema.test.ts` — **12 testes, 12 passando**; `npm run typecheck` exit 0; eslint nos
+arquivos novos exit 0.
+
+**Ainda não conectado à UI.** O módulo é o contrato; a fiação no fluxo de criação/edição e a migração
+dos registros existentes são o próximo passo (Fase C, parte 2).

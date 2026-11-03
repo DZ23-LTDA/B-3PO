@@ -81,3 +81,16 @@ usar `--head owner:branch` (isso convida o gh a escolher o repositório "pai").
 Decisão autônoma: construir **casca de marca** nativa em vez de um cliente completo, porque o contrato de
 sessão (Fase E) não está congelado — criar cliente agora duplicaria contrato e violaria a regra de não
 fabricar funcionalidade. O emulador resolveu o "onde rodar"; o que falta é o contrato.
+
+## Rodada 5 — Fase C parte 1 (schema v1)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:30 | `bot-schema.ts` + testes | 12 testes verdes |
+| 21:31 | typecheck + eslint | exit 0 |
+| 21:31 | `python scripts/check` | **falhou**: `profile-archives` (cache do electron-builder em `.cache/`) |
+| 21:32 | cache removido (era artefato do `pack`, não do código) | gate voltou a **14 checks, ok** |
+
+**Incidente menor:** o `npm run pack` deixa `.cache/desktop-inputs` dentro do checkout, e o gate do
+repositório proíbe arquivos `.tar.gz` ali. Regra para as próximas rodadas: limpar `.cache` após
+empacotar ou apontar o cache do electron-builder para fora do checkout.

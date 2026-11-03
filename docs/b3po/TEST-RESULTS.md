@@ -38,3 +38,11 @@
 | T12b | Assinatura | `apksigner verify` | **verificado** (debug keystore) |
 | T12c | Instalação | `adb install -r …apk` | **Success** no AVD `dsh_pixel` |
 | T12d | Execução | `adb shell am start …` + `screencap` | app renderizou a marca; screenshot salvo |
+
+## Atualização 21:31 — schema v1
+
+| # | Teste | Comando | Resultado |
+|---|---|---|---|
+| T11a | Unit do schema | `npx vitest run src/plugins/hermes-bots/bot-schema.test.ts` | **12/12 passando** |
+| T11b | Typecheck com o módulo | `npm run typecheck` | **exit 0** |
+| T11c | Lint dos arquivos novos | `npx eslint …bot-schema*.ts` | **exit 0** |
