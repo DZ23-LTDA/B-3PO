@@ -498,3 +498,34 @@ aqui, datas de construção, e a seção de assinatura declarada (MSIX não assi
 iOS ausente por bloqueio externo, macOS/Linux não construídos).
 
 Também corrigi a formatação da tabela: um `replace` meu tinha comido os backticks de fechamento dos nomes.
+
+## Rodada 75 — seção de dispositivos provada por teste de DOM e pacote reconstruído
+
+### Prova comportamental (o que faltava na rodada 74)
+
+`src/app/settings/paired-devices-section.test.tsx` monta o componente real com `I18nProvider` e exercita:
+
+| Caso | O que verifica |
+|---|---|
+| lista | rótulo, perfil, “nunca” quando não há último uso, contagem de tickets |
+| vazio | o texto explica como adicionar em vez de mostrar lista em branco |
+| falha de leitura | mensagem + botão **Atualizar** que recarrega e passa a listar |
+| revogação | primeiro clique **não** chama o backend; a confirmação chama `revokePairedDevice('dev-1')` e a linha vira “revogado” |
+| já revogado | não oferece botão de revogar |
+
+5 testes verdes. É prova de comportamento no DOM, não snapshot.
+
+### Pacote
+
+`npm run build` + `run-electron-builder --win msix` no commit `b68bd72e`; cache do builder removido (senão o
+gate reprova em `profile-archives`); `ARTIFACT-MANIFEST.md` regenerado com hashes novos dos cinco artefatos.
+
+O binário aberto como cliente remoto renderiza a Home em pt-BR com as conversas reais — inclusive as criadas
+pelo celular (“Enviar após correções da re…”, “Testing after device allowlist”, “Testar celular”, “Do
+celular”). Evidência atualizada: `docs/b3po/evidence/desktop-home-pt-br.png`.
+
+### Ressalva registrada
+
+A captura é da Home, **não** da tela de Configurações → Conexões salvas: não há automação confiável para
+clicar dentro da janela Electron nesta sessão (o `SetForegroundWindow` é recusado aqui). A seção está provada
+por teste de componente; a captura de tela dela fica pendente e declarada como tal.
