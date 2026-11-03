@@ -62,3 +62,54 @@ pertence ao dispositivo que pede aprovação.
 
 **Achado aceito como está:** `ws://` para host local continua permitido (o app não executa código e o
 token é o controle de acesso), com a ressalva de que produção deve preferir `wss://`.
+
+## Rodada 42 — projeto nativo Android e **APK debug gerado**
+
+### O que foi feito
+
+- `android/` e `ios/` gerados a partir do template React Native 0.81 e integrados a
+  `mobile/b3po-app` (o app não foi recriado: `src/` e os 26 testes originais continuam);
+- pacote renomeado para **`com.dz23.b3po`** (Gradle `namespace`/`applicationId`, Kotlin e pastas);
+- rótulo visível do app: **B-3PO** (`strings.xml`, `app.json`);
+- `App.tsx` escrito: wordmark, estados vazios reais, pareamento por deep link `b3po://pair` e lista de
+  bots desenhada pelo view-model (nenhum dado inventado).
+
+### APK gerado e verificado
+
+```
+gradlew assembleDebug            -> BUILD SUCCESSFUL (2.2 min)
+arquivo   android/app/build/outputs/apk/debug/app-debug.apk
+tamanho   93,2 MB
+sha256    10DB8315F004768755CD6463470878D4A1289D94A6312EFF9C5E0BA56532ACA5
+pacote    com.dz23.b3po   versão 1.0
+minSdk    24   targetSdk 36
+assinatura  CN=Android Debug (certificado de DEBUG)
+```
+
+**Limite honesto:** é APK **debug**, assinado com a chave de debug do Android — não é artefato de
+distribuição. APK de release/AAB exigem keystore de release (não disponível aqui) e ficam
+`BLOCKED_BY_EXTERNAL_DEPENDENCY` até o proprietário fornecer/gerar a chave.
+
+### Por que a primeira tentativa falhou (registrado)
+
+O build quebrou em `:react-native-screens:generateCodegenSchemaFromJavaScript`:
+
+```
+The first argument of method showColumn must be of type React.ElementRef<>
+```
+
+É o codegen da Nova Arquitetura do RN 0.81 rejeitando o spec dessa versão do `react-native-screens`.
+Desligar `newArchEnabled` não dispensa a tarefa. Como navegação ainda não é renderizada no `App.tsx`,
+as dependências nativas não usadas (`@react-navigation/*`, `react-native-screens`,
+`react-native-safe-area-context`, `react-native-keychain`) saíram do `package.json` para o primeiro
+APK sair. **Reintroduzir exige versão compatível com o codegen do RN 0.81** — item aberto.
+
+### Pendente
+
+| Item | Estado |
+|---|---|
+| Navegação (bots → conversa) | dependência a reintroduzir com versão compatível |
+| Cofre seguro real (Keychain/Keystore) | mesma dependência a reintroduzir |
+| Conexão JSON-RPC/WebSocket real | cliente existe em `src/api`, falta ligar na tela |
+| APK release / AAB | BLOCKED_BY_EXTERNAL_DEPENDENCY (keystore de release) |
+| iOS / IPA | BLOCKED_BY_EXTERNAL_DEPENDENCY (macOS + Xcode + certificado) |

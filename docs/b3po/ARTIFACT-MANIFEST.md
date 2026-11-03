@@ -161,3 +161,20 @@ feito para não republicar números sem revalidar.
 
 Estes artefatos incluem: wordmark B-3PO, nome do agente B-3PO, sidebar/configurações em pt-BR,
 catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de telemetria.
+
+## Mobile — APK debug (Android)
+
+| Campo | Valor |
+|---|---|
+| Plataforma | Android (arm64-v8a, armeabi-v7a, x86_64) |
+| Formato | APK debug |
+| Versão | 1.0 (versionCode 1) |
+| Pacote | com.dz23.b3po |
+| minSdk / targetSdk | 24 / 36 |
+| Tamanho | 93,2 MB |
+| SHA-256 | 10DB8315F004768755CD6463470878D4A1289D94A6312EFF9C5E0BA56532ACA5 |
+| Assinatura | **Android Debug** (não é distribuição) |
+| Runner | Windows 11 + JDK 21 + Android SDK 36 (`gradlew assembleDebug`) |
+| Reproduzir | `cd mobile/b3po-app/android && gradlew.bat assembleDebug` |
+| Limitações | não assinado para loja; sem navegação nem cofre (ver MOBILE-REPORT); iOS bloqueado por macOS/Xcode |
+| Onde está | `mobile/b3po-app/android/app/build/outputs/apk/debug/app-debug.apk` (build local, fora do Git) |
