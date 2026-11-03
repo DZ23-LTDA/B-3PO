@@ -205,3 +205,8 @@ catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de t
 | Reproduzir | `cd mobile/b3po-app/android && gradlew.bat bundleRelease` |
 | Limitação | publicação exige keystore de release (BLOCKED_BY_EXTERNAL_DEPENDENCY) |
 | Onde está | `mobile/b3po-app/android/app/build/outputs/bundle/release/app-release.aab` (fora do Git) |
+## Rodada 57 — MSIX reconstruído
+
+| Plataforma | Formato | Commit | Tamanho | SHA-256 | Assinatura |
+|---|---|---|---|---|---|
+| Windows x64 | MSIX | `c33ed497` | 190,94 MB | `d8d88a307c3cd3d0def3a250ca36fc9b903284114ea90ebcbe240fb703d40249` | **não assinado** — instalação não verificada |
