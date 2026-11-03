@@ -3,84 +3,97 @@ import { WebSocketServer } from 'ws'
 import type { AddressInfo } from 'node:net'
 
 import {
-  GATEWAY_PROTOCOL,
-  TICKET_PROTOCOL_PREFIX,
   buildPromptSubmit,
-  buildRpc,
+  buildSessionResume,
+  canonicalSessionId,
+  gatewayHeaders,
   gatewayProtocols,
   gatewayWsUrl,
-  newSubmissionId,
+  promptAccepted,
   sendPromptOverGateway
 } from './gateway-rpc'
 
-describe('URL e subprotocolos do gateway', () => {
-  it('ticket vai no query e no subprotocolo', () => {
-    const credential = { kind: 'ticket' as const, ticket: 'abc123' }
+const credential = { kind: 'session-token' as const, token: 'tok-de-teste' }
 
-    expect(gatewayWsUrl('http://127.0.0.1:9119', credential)).toBe('ws://127.0.0.1:9119/api/ws?ticket=abc123')
-    expect(gatewayProtocols(credential)).toEqual([GATEWAY_PROTOCOL, `${TICKET_PROTOCOL_PREFIX}abc123`])
+describe('URL, headers e subprotocolos (contrato descoberto ao vivo)', () => {
+  it('credencial vai no query como ?token=', () => {
+    expect(gatewayWsUrl('http://127.0.0.1:9119', credential)).toBe('ws://127.0.0.1:9119/api/ws?token=tok-de-teste')
+    expect(gatewayWsUrl('http://127.0.0.1:9119/', credential)).toContain('/api/ws?token=')
   })
 
-  it('credencial interna vai como ?internal= e sem subprotocolo de ticket', () => {
-    const credential = { kind: 'internal' as const, value: 'segredo' }
-
-    expect(gatewayWsUrl('http://127.0.0.1:9119/', credential)).toBe('ws://127.0.0.1:9119/api/ws?internal=segredo')
-    expect(gatewayProtocols(credential)).toEqual([GATEWAY_PROTOCOL])
+  it('nada de subprotocolo: o servidor não devolve e o cliente abortaria', () => {
+    expect(gatewayProtocols(credential)).toEqual([])
   })
 
-  it('não inventa caminho: token de sessão não vira credencial de WS', () => {
-    const url = gatewayWsUrl('http://127.0.0.1:9119', { kind: 'ticket', ticket: 'x' })
+  it('Origin é obrigatório e espelha a origem HTTP', () => {
+    expect(gatewayHeaders('http://127.0.0.1:9119/')).toEqual({ Origin: 'http://127.0.0.1:9119' })
+  })
 
-    expect(url).not.toContain('token=')
+  it('não inventa caminho nem credencial alternativa', () => {
+    const url = gatewayWsUrl('http://127.0.0.1:9119', credential)
+
+    expect(url).not.toContain('ticket=')
+    expect(url).not.toContain('internal=')
   })
 })
 
-describe('frames JSON-RPC', () => {
-  it('prompt.submit exige session_id, texto e submission_id', () => {
-    expect(buildPromptSubmit(2, '', 'oi', 's1')).toEqual({ error: 'rpc_error' })
-    expect(buildPromptSubmit(2, 's1', '   ', 's1')).toEqual({ error: 'rpc_error' })
-    expect(buildPromptSubmit(2, 's1', 'oi', '')).toEqual({ error: 'rpc_error' })
-  })
-
-  it('prompt.submit só usa chaves que o servidor aceita', () => {
-    const frame = buildPromptSubmit(2, 's1', 'oi', 'sub-1')
+describe('frames', () => {
+  it('prompt.submit usa SÓ session_id e text (extras são recusados pelo servidor)', () => {
+    const frame = buildPromptSubmit(2, '20261103_140104_f5df78', 'olá')
 
     expect('error' in frame).toBe(false)
 
     if (!('error' in frame)) {
-      expect(Object.keys(frame.params).sort()).toEqual(['session_id', 'submission_id', 'text'])
+      expect(Object.keys(frame.params).sort()).toEqual(['session_id', 'text'])
       expect(frame.method).toBe('prompt.submit')
       expect(frame.jsonrpc).toBe('2.0')
     }
   })
 
-  it('identificador de submissão é único e legível', () => {
-    const a = newSubmissionId(1_700_000_000_000, 0.123456)
-    const b = newSubmissionId(1_700_000_000_001, 0.999999)
+  it('prompt.submit recusa localmente texto ou sessão vazios', () => {
+    expect(buildPromptSubmit(2, '', 'oi')).toEqual({ error: 'rpc_error' })
+    expect(buildPromptSubmit(2, 'sessao', '   ')).toEqual({ error: 'rpc_error' })
+  })
 
-    expect(a).not.toBe(b)
-    expect(a.startsWith('sub-')).toBe(true)
-    expect(a).toMatch(/^sub-[a-z0-9]+-[a-z0-9]+$/)
+  it('session.resume usa o id canônico', () => {
+    const frame = buildSessionResume(1, '20261103_140104_f5df78')
+
+    expect('error' in frame).toBe(false)
+
+    if (!('error' in frame)) {
+      expect(frame.method).toBe('session.resume')
+      expect(frame.params['session_id']).toBe('20261103_140104_f5df78')
+    }
+  })
+
+  it('id curto de session.create não serve: o canônico é stored_session_id', () => {
+    expect(canonicalSessionId({ session_id: 'd26bcd90', stored_session_id: '20261103_140104_f5df78' })).toBe(
+      '20261103_140104_f5df78'
+    )
+    expect(canonicalSessionId({ session_id: 'd26bcd90' })).toBe('d26bcd90')
+    expect(canonicalSessionId({})).toBe('')
+  })
+
+  it('resposta de aceite é a que traz status', () => {
+    expect(promptAccepted({ status: 'streaming', user_row_id: 1 })).toBe(true)
+    expect(promptAccepted({ code: 4000, message: 'invalid params' })).toBe(false)
+    expect(promptAccepted(null)).toBe(false)
   })
 })
 
-describe('ordem do envio: resume antes de submit', () => {
+describe('ordem do envio', () => {
   it('empurra session.resume e depois prompt.submit', () => {
     const sent: string[] = []
     const result = sendPromptOverGateway(
-      { send: frame => sent.push(frame), close: () => undefined },
-      { sessionId: 'local-abc', text: 'olá', submissionId: 'sub-1' }
+      { send: frame => sent.push(frame) },
+      { canonicalSessionId: '20261103_140104_f5df78', text: 'olá' }
     )
 
     expect(result.ok).toBe(true)
-    expect(sent).toHaveLength(2)
-
-    const first = JSON.parse(sent[0]!) as { method: string }
-    const second = JSON.parse(sent[1]!) as { method: string; params: Record<string, unknown> }
-
-    expect(first.method).toBe('session.resume')
-    expect(second.method).toBe('prompt.submit')
-    expect(second.params['text']).toBe('olá')
+    expect(sent.map(frame => (JSON.parse(frame) as { method: string }).method)).toEqual([
+      'session.resume',
+      'prompt.submit'
+    ])
   })
 
   it('socket que falha devolve erro, não sucesso', () => {
@@ -88,27 +101,22 @@ describe('ordem do envio: resume antes de submit', () => {
       {
         send: () => {
           throw new Error('socket morto')
-        },
-        close: () => undefined
+        }
       },
-      { sessionId: 'local-abc', text: 'olá', submissionId: 'sub-1' }
+      { canonicalSessionId: '2026', text: 'olá' }
     )
 
     expect(result).toEqual({ ok: false, error: 'socket_failed' })
   })
-
-  it('id de RPC é sequencial a partir de 1', () => {
-    expect(buildRpc(1, 'x', {}).id).toBe(1)
-    expect(buildRpc(2, 'x', {}).id).toBe(2)
-  })
 })
 
-describe('integração com um servidor WS que aplica o contrato', () => {
+describe('integração com servidor WS que aplica o contrato', () => {
   let server: WebSocketServer
   let origin: string
 
   beforeEach(async () => {
-    server = new WebSocketServer({ port: 0, handleProtocols: () => GATEWAY_PROTOCOL })
+    // O servidor real NÃO seleciona subprotocolo neste ramo; o fake imita isso.
+    server = new WebSocketServer({ port: 0 })
     await new Promise<void>(resolve => server.once('listening', () => resolve()))
     const { port } = server.address() as AddressInfo
     origin = `http://127.0.0.1:${port}`
@@ -118,48 +126,31 @@ describe('integração com um servidor WS que aplica o contrato', () => {
     await new Promise<void>(resolve => server.close(() => resolve()))
   })
 
-  it('recebe resume e submit na ordem e responde aos dois', async () => {
+  it('abre sem subprotocolo e recebe resume + submit na ordem', async () => {
     const received: Array<{ method: string; params: Record<string, unknown> }> = []
 
     server.on('connection', socket => {
       socket.on('message', raw => {
         const frame = JSON.parse(String(raw)) as { id: number; method: string; params: Record<string, unknown> }
         received.push({ method: frame.method, params: frame.params })
-
-        if (frame.method === 'session.resume') {
-          socket.send(JSON.stringify({ jsonrpc: '2.0', id: frame.id, result: { session_id: frame.params['session_id'] } }))
-        } else {
-          socket.send(JSON.stringify({ jsonrpc: '2.0', id: frame.id, result: { receipt: 'queued' } }))
-        }
+        socket.send(JSON.stringify({ jsonrpc: '2.0', id: frame.id, result: { status: 'streaming' } }))
       })
     })
 
-    const replies: Array<{ id: number }> = []
-    const ws = new WebSocket(gatewayWsUrl(origin, { kind: 'internal', value: 'teste' }), gatewayProtocols({
-      kind: 'internal',
-      value: 'teste'
-    }))
+    const ws = new WebSocket(gatewayWsUrl(origin, credential))
 
     await new Promise<void>((resolve, reject) => {
       ws.addEventListener('open', () => resolve())
       ws.addEventListener('error', () => reject(new Error('socket não abriu')))
     })
 
-    ws.addEventListener('message', event => {
-      replies.push(JSON.parse(String(event.data)) as { id: number })
-    })
-
-    sendPromptOverGateway(
-      { send: frame => ws.send(frame), close: () => ws.close() },
-      { sessionId: 'local-abc', text: 'olá', submissionId: 'sub-1' }
-    )
+    sendPromptOverGateway({ send: frame => ws.send(frame) }, { canonicalSessionId: '2026', text: 'olá' })
 
     await new Promise(resolve => setTimeout(resolve, 250))
 
     expect(received.map(frame => frame.method)).toEqual(['session.resume', 'prompt.submit'])
-    expect(received[0]?.params['session_id']).toBe('local-abc')
-    expect(received[1]?.params['submission_id']).toBe('sub-1')
-    expect(replies.map(reply => reply.id)).toEqual([1, 2])
+    expect(received[1]?.params['text']).toBe('olá')
+    expect(Object.keys(received[1]?.params ?? {}).sort()).toEqual(['session_id', 'text'])
 
     ws.close()
   })

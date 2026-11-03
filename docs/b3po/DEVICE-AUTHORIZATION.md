@@ -247,3 +247,42 @@ ponto em que o nativo é aceito. Não vou chutar: o 403 é a pista.
 
 **Status:** credencial de dispositivo funciona em HTTP, comprovada; envio por WebSocket continua
 bloqueado nessa camada. `NOT_READY`.
+
+## 10. RESOLVIDO: o contrato real do WebSocket (e o envio aceito)
+
+Quatro hipóteses caíram até sobrar a verdade. Cada erro foi um dado:
+
+| Tentativa | Erro observado | Conclusão |
+|---|---|---|
+| `?ticket=<ticket de dispositivo>` | close **1006** | o ramo sem gate só consome ticket na superfície `webapp`; em `serve` ele é ignorado |
+| subprotocolo `hermes-gateway-ticket.<t>` | close **1006** | mesma razão |
+| header `x-hermes-gateway-ticket` | upgrade **403** | o docstring é explícito: em socket de núcleo o grant nativo é recusado de propósito |
+| `?token=<session token>` sem `Origin` | close **1006** | falta `Origin` |
+| `?token=…` + `Origin` + subprotocolo pedido | **"Server sent no subprotocol"** | pedir `hermes-gateway-v1` quebra: o servidor não o devolve nesse ramo |
+| **`?token=…` + `Origin` + nenhum subprotocolo** | **WS ABERTO** | contrato correto |
+
+Depois de aberto:
+
+| Frame | Erro / resultado |
+|---|---|
+| `session.resume` com id curto de `session.create` | `4007 session not found` |
+| `session.resume` com `stored_session_id` | **ok** |
+| `prompt.submit` com `submission_id` | `4000 invalid params: Extra inputs are not permitted` |
+| `prompt.submit` com `input_id` | idem |
+| **`prompt.submit` com `{session_id, text}`** | **`{"status":"streaming","user_row_id":1}`** |
+
+O `mobile/b3po-app/src/api/gateway-rpc.ts` foi reescrito para esse contrato, com 12 testes: URL com
+`?token=`, `Origin` obrigatório, **zero subprotocolo**, `resume` com id canônico
+(`canonicalSessionId` prefere `stored_session_id`) e `prompt.submit` só com `session_id` + `text`.
+Teste de integração contra servidor `ws` real que, como o backend, não seleciona subprotocolo.
+
+### O que isso muda no diagnóstico anterior
+
+O bloqueio **não** era falta de autorização de dispositivo: a credencial que o WS aceita nesta
+superfície é o **token de sessão que o pareamento já carrega**. A chave de dispositivo (§3–§9) continua
+valendo como evolução — dá revogação por dispositivo e escopo por perfil — mas não é pré-requisito para
+o envio funcionar.
+
+**Pendente para fechar no aparelho:** `App.tsx` precisa abrir o socket com `gatewayWsUrl` +
+`gatewayHeaders`, criar/retomar a conversa e enviar pelo composer. O transporte está provado; falta
+ligar a tela.

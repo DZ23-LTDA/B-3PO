@@ -1,54 +1,37 @@
 /**
  * JSON-RPC do gateway pelo WebSocket — o caminho real de **enviar** uma mensagem.
  *
- * Descoberto lendo o código do servidor, não por tentativa e erro:
+ * O contrato abaixo não veio de documentação: veio de quatro tentativas contra o servidor rodando,
+ * com o erro de cada uma (registrado em `docs/b3po/DEVICE-AUTHORIZATION.md` §9.3).
  *
- * - `gateway/session_controls.py` registra os métodos `session.resume` e `prompt.submit`;
- * - `prompt.submit` exige `submission_id` não vazio e só aceita uma lista fechada de chaves;
- * - o socket precisa estar **subscrito** à sessão antes (daí o `session.resume`);
- * - o upgrade do WS aceita **ticket** (`hermes-gateway-ticket.<t>` ou `?ticket=`) ou a credencial
- *   interna do processo (`?internal=`). `?token=` **não** é aceito — foi o que causou o close 1006
- *   na sonda anterior.
+ * O que o servidor aceita:
  *
- * Esta classe não escolhe de onde vem a credencial: recebe uma `GatewayCredential` pronta. Sem
- * credencial válida ela não tenta abrir socket — devolve erro explícito em vez de falhar em silêncio.
+ * - credencial: `?token=<session token>` no query. Ticket de dispositivo **não** é aceito em
+ *   `/api/ws` nesta superfície (`serve`): o ramo sem gate só consome ticket quando a superfície é
+ *   `webapp`, e o header `x-hermes-gateway-ticket` é recusado de propósito em socket de núcleo.
+ * - `Origin` igual à origem HTTP do servidor. Sem ele o upgrade é recusado (403).
+ * - **nenhum subprotocolo**: pedir `hermes-gateway-v1` faz o cliente falhar com
+ *   "Server sent no subprotocol", porque o servidor não o devolve nesse ramo.
+ * - `session.resume` com o id **canônico** (`stored_session_id`, ex. `20261103_140104_f5df78`); o id
+ *   curto devolvido por `session.create` dá `4007 session not found`.
+ * - `prompt.submit` com **apenas** `session_id` e `text`. `submission_id` e `input_id` são recusados
+ *   como "Extra inputs are not permitted" — o schema de params é fechado.
+ *
+ * Resultado observado: `{"status":"streaming","user_row_id":1}`.
  */
 
-export const GATEWAY_PROTOCOL = 'hermes-gateway-v1'
-export const TICKET_PROTOCOL_PREFIX = 'hermes-gateway-ticket.'
 export const GATEWAY_WS_PATH = '/api/ws'
 
-/** Chaves que `prompt.submit` aceita; qualquer outra faz o servidor recusar com `invalid_params`. */
-export const PROMPT_SUBMIT_KEYS = [
-  'session_id',
-  'text',
-  'submission_id',
-  'input_id',
-  'queued',
-  'attachments',
-  'finite',
-  'unattended',
-  'surface',
-  'voice_context',
-  'interrupted',
-  'voice_turn',
-  'display_kind',
-  'title_preview',
-  'turn_author',
-  'api_text',
-  'model_override',
-  'clarify_batch'
-] as const
+/** Chaves que `prompt.submit` aceita nesta versão do backend. Mais que isto é recusado. */
+export const PROMPT_SUBMIT_KEYS = ['session_id', 'text'] as const
 
-export type GatewayCredential =
-  | { kind: 'ticket'; ticket: string }
-  | { kind: 'internal'; value: string }
+export interface GatewayCredential {
+  /** Token de sessão do pareamento. É a credencial que o ramo sem gate aceita em `/api/ws`. */
+  kind: 'session-token'
+  token: string
+}
 
-export type GatewayError =
-  | 'no_credential'
-  | 'socket_failed'
-  | 'rpc_error'
-  | 'timeout'
+export type GatewayError = 'no_credential' | 'socket_failed' | 'rpc_error'
 
 export interface RpcFrame {
   jsonrpc: '2.0'
@@ -57,24 +40,26 @@ export interface RpcFrame {
   params: Record<string, unknown>
 }
 
-/** URL com a credencial no lugar que o servidor aceita. */
+/** URL do socket: credencial no query, como o servidor espera. */
 export function gatewayWsUrl(origin: string, credential: GatewayCredential): string {
   const base = origin.replace(/^http/, 'ws').replace(/\/+$/, '')
-  const query =
-    credential.kind === 'ticket'
-      ? `ticket=${encodeURIComponent(credential.ticket)}`
-      : `internal=${encodeURIComponent(credential.value)}`
 
-  return `${base}${GATEWAY_WS_PATH}?${query}`
+  return `${base}${GATEWAY_WS_PATH}?token=${encodeURIComponent(credential.token)}`
 }
 
-/** Subprotocolos do upgrade; o ticket vai no subprotocolo quando existe. */
-export function gatewayProtocols(credential: GatewayCredential): string[] {
-  if (credential.kind === 'ticket') {
-    return [GATEWAY_PROTOCOL, `${TICKET_PROTOCOL_PREFIX}${credential.ticket}`]
-  }
+/**
+ * Subprotocolos a pedir — nenhum, de propósito.
+ *
+ * O servidor não devolve `hermes-gateway-v1` neste ramo; pedir faz o cliente abortar com
+ * "Server sent no subprotocol" (visto ao vivo). Vazio = handshake sem exigência.
+ */
+export function gatewayProtocols(_credential: GatewayCredential): string[] {
+  return []
+}
 
-  return [GATEWAY_PROTOCOL]
+/** Cabeçalho que o upgrade exige; sem `Origin` a resposta é 403. */
+export function gatewayHeaders(origin: string): Record<string, string> {
+  return { Origin: origin.replace(/\/+$/, '') }
 }
 
 export function buildRpc(id: number, method: string, params: Record<string, unknown>): RpcFrame {
@@ -82,56 +67,61 @@ export function buildRpc(id: number, method: string, params: Record<string, unkn
 }
 
 /** `prompt.submit` com validação local: falhar aqui é melhor que o servidor recusar depois. */
-export function buildPromptSubmit(
-  id: number,
-  sessionId: string,
-  text: string,
-  submissionId: string
-): RpcFrame | { error: GatewayError } {
-  if (!sessionId.trim() || !text.trim() || !submissionId.trim()) {
+export function buildPromptSubmit(id: number, sessionId: string, text: string): RpcFrame | { error: GatewayError } {
+  if (!sessionId.trim() || !text.trim()) {
     return { error: 'rpc_error' }
   }
 
-  return buildRpc(id, 'prompt.submit', {
-    session_id: sessionId,
-    text,
-    submission_id: submissionId
-  })
+  return buildRpc(id, 'prompt.submit', { session_id: sessionId, text })
 }
 
-/** Identificador de submissão estável e único por envio (sem depender de crypto do RN). */
-export function newSubmissionId(seed: number, random: number): string {
-  return `sub-${seed.toString(36)}-${Math.floor(random * 1e9).toString(36)}`
+/** `session.resume` precisa do id canônico, não do id curto de `session.create`. */
+export function buildSessionResume(id: number, canonicalSessionId: string): RpcFrame | { error: GatewayError } {
+  if (!canonicalSessionId.trim()) {
+    return { error: 'rpc_error' }
+  }
+
+  return buildRpc(id, 'session.resume', { session_id: canonicalSessionId })
+}
+
+/** Id curto de `session.create` não serve para resume; o canônico é `stored_session_id`. */
+export function canonicalSessionId(createResult: { session_id?: unknown; stored_session_id?: unknown }): string {
+  const stored = createResult.stored_session_id
+  const short = createResult.session_id
+
+  if (typeof stored === 'string' && stored.trim()) {
+    return stored.trim()
+  }
+
+  return typeof short === 'string' ? short.trim() : ''
 }
 
 export interface RpcTransport {
   send(frame: string): void
-  close(): void
 }
 
 export interface SendPromptOptions {
-  sessionId: string
+  /** Id canônico da conversa (ver `canonicalSessionId`). */
+  canonicalSessionId: string
   text: string
-  submissionId: string
-  /** Espera o `session.resume` antes de enviar (o servidor exige socket subscrito). */
-  resumeParams?: Record<string, unknown>
 }
 
 /**
- * Envia um prompt pelo gateway: `session.resume` → `prompt.submit`.
+ * Envia um prompt: `session.resume` e depois `prompt.submit`.
  *
- * Devolve erro tipado; nunca engole falha. O socket é injetado para o teste poder observar os frames.
+ * O socket é injetado para o teste poder observar exatamente os frames — o que garante a ordem e a
+ * ausência de chaves que o servidor recusa.
  */
 export function sendPromptOverGateway(
   transport: RpcTransport,
   options: SendPromptOptions
 ): { ok: true; frames: RpcFrame[] } | { ok: false; error: GatewayError } {
-  const resume = buildRpc(1, 'session.resume', {
-    session_id: options.sessionId,
-    ...(options.resumeParams ?? {})
-  })
+  const resume = buildSessionResume(1, options.canonicalSessionId)
+  const submit = buildPromptSubmit(2, options.canonicalSessionId, options.text)
 
-  const submit = buildPromptSubmit(2, options.sessionId, options.text, options.submissionId)
+  if ('error' in resume) {
+    return { ok: false, error: resume.error }
+  }
 
   if ('error' in submit) {
     return { ok: false, error: submit.error }
@@ -145,4 +135,15 @@ export function sendPromptOverGateway(
   }
 
   return { ok: true, frames: [resume, submit] }
+}
+
+/** Interpreta a resposta de `prompt.submit`; `streaming` é o aceite. */
+export function promptAccepted(result: unknown): boolean {
+  if (!result || typeof result !== 'object') {
+    return false
+  }
+
+  const status = (result as { status?: unknown }).status
+
+  return typeof status === 'string' && status.length > 0
 }

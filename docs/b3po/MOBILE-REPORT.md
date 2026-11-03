@@ -628,3 +628,15 @@ O caminho para permitir envio está especificado em `docs/b3po/DEVICE-AUTHORIZAT
 dispositivo emitida no pareamento, rota `POST /api/b3po/device-ticket`, ticket com
 `provider = "b3po-device"` aceito no WS só para métodos de sessão, revogação e rate limit, com nove
 critérios de aceite. O cliente (`gateway-rpc.ts`) já aceita `{kind:'ticket'}` — falta o emissor.
+
+## Rodada 61 — o WS abre e o prompt é aceito
+
+Contrato descoberto ao vivo: `?token=<session token>` + `Origin` + **nenhum subprotocolo**; depois
+`session.resume` com `stored_session_id` e `prompt.submit` com `{session_id, text}` (extras são
+recusados). Resultado do servidor: `{"status":"streaming","user_row_id":1}`.
+
+O que NÃO funcionou, e por quê: ticket de dispositivo (ignorado em `serve`), subprotocolo de ticket
+(1006), header nativo (403 por desenho), `?token=` sem `Origin` (1006), pedir `hermes-gateway-v1`
+("Server sent no subprotocol"). O detalhe completo está em `DEVICE-AUTHORIZATION.md` §10.
+
+`gateway-rpc.ts` reescrito para esse contrato, 12 testes.
