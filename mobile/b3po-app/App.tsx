@@ -44,6 +44,7 @@ import {
 } from './src/screens/chat-session'
 import type { ChatBubble, RawMessage } from './src/screens/chat-session'
 import { nextRetryDelay, RETRY_BUTTON_LABEL, retryingCopy } from './src/api/retry'
+import { PairLinkCard } from './src/screens/pair-link-card'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
@@ -52,6 +53,8 @@ export default function App() {
   const [connection, setConnection] = useState<ConnectionState>({ status: 'disconnected' })
   // Falhas seguidas de conexao: decide se ainda vale tentar sozinho ou se so o toque resolve.
   const [attempt, setAttempt] = useState(0)
+  // Sem o deep link a mao o usuario ficava sem saida depois de desconectar; aqui ele cola o link.
+  const [pairLink, setPairLink] = useState('')
   // O estado 'failed' guarda so origem+mensagem; para reconectar preciso das credenciais do pareamento.
   const lastCredentials = useRef<{ origin: string; deviceId: string; token: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -130,6 +133,8 @@ export default function App() {
     lastCredentials.current = null
     setAttempt(0)
     setBots([])
+    // O link antigo nao pode ficar no campo: na proxima conexao ele se mistura com o texto novo.
+    setPairLink('')
     setConnection({ status: 'signed_out' })
   }, [])
 
@@ -287,6 +292,7 @@ export default function App() {
       }
 
       setError(null)
+      setPairLink('')
       void connect(result.request.gatewayUrl, result.request.deviceId, result.request.token)
     },
     [connect]
@@ -378,6 +384,10 @@ export default function App() {
                 </>
               ) : null}
             </View>
+
+            {connection.status === 'disconnected' || connection.status === 'signed_out' ? (
+              <PairLinkCard onChangeText={setPairLink} onSubmit={() => pair(pairLink.trim())} value={pairLink} />
+            ) : null}
 
             {connection.status === 'connected' && botItems.length === 0 ? (
               <View style={styles.card}>

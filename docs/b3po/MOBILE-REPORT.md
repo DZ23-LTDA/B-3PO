@@ -861,3 +861,36 @@ sessão em memória e o usuário volta pelo link de pareamento. Limitação decl
 
 Teste novo em `status-card.test.ts`: o estado pós-desconexão não pode ser chamado de “Sem conexão”, porque
 foi escolha do usuário. Mobile: **143 testes** + 8 pulados.
+
+## Rodada 78 — RECONECTAR colando o link (o usuário não ficava sem saída)
+
+Depois do botão Desconectar (rodada 77), o app só voltava por **deep link**. Quem não tivesse o link à mão
+ficava preso na tela de desconectado.
+
+### O que foi feito
+
+- `src/screens/pair-link-card.tsx` (novo): campo **“Link de pareamento”** + botão **“Conectar”**, que só
+  habilita com texto. O `App.tsx` só injeta valor/onChange/onSubmit.
+- `src/screens/card-styles.ts` (novo): estilos do cartão, sem duplicar bloco.
+- `pair()` já existente é reusado — mesma validação (`parsePairingLink`) do deep link, para não haver dois
+  caminhos de pareamento com regras diferentes.
+
+### Dois defeitos que o teste no aparelho revelou
+
+1. **Campo não era limpo ao desconectar**: o link antigo continuava ali, e o texto novo se **misturava** com
+   ele (o dump mostrou `...&token=tb3po://pair...ok_b3po_live_...`). Agora `disconnect()` e o pareamento
+   bem-sucedido zeram o campo.
+2. **`App` estourou o ratchet de complexidade** (`CC 21 > target 20`, gate reprovado em `health`). Extraí o
+   cartão para componente próprio em vez de escrever `# health: allow` — o gate estava certo, a tela fazia
+   coisa demais.
+
+### Provado no aparelho (`dsh_pixel`), no APK final
+
+1. Pareado por deep link: **“Conectado ao computador”**, `Compilação: b7ba9c86`, `Gateway: rodando`, 3 bots.
+2. Toque em **Desconectar** → campo **vazio** + cartão “Conectar a um computador”.
+   Evidência: `mobile-parear-por-link.png`.
+3. Colei `b3po://pair?url=http%3A%2F%2F127.0.0.1%3A9119&token=…`, toquei em **Conectar** →
+   **“Conectado ao computador”** de novo, com os mesmos dados do servidor.
+   Evidência: `mobile-parear-por-link-conectado.png`.
+
+Mobile: **143 testes** + 8 pulados · `tsc` limpo · gate 14 checks ok.
