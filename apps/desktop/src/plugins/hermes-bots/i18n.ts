@@ -1796,7 +1796,15 @@ export const BOTS_LOCALES: PluginLocaleBundles = {
   de: { canonical: CANONICAL_GROUP_LOCALES.de },
   pt: {
     canonical: CANONICAL_GROUP_LOCALES.pt,
-    editor: { startFromTemplate: 'Começar de um modelo' }
+    editor: { startFromTemplate: 'Começar de um modelo' },
+    roster: { newBotOrGroup: 'Novo bot ou grupo' },
+    sections: {
+      newSection: 'Nova seção',
+      newTitle: 'Nova seção',
+      newSectionEllipsis: 'Nova seção…'
+    },
+    bot: { newTitle: 'Novo bot' },
+    group: { newTitle: 'Novo grupo' }
   },
   es: { canonical: CANONICAL_GROUP_LOCALES.es }
 }

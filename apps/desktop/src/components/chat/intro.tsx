@@ -4,6 +4,7 @@ import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
 import introCopyJsonl from './intro-copy.jsonl?raw'
+import introCopyPtJsonl from './intro-copy.pt.jsonl?raw'
 import { Wordmark } from './wordmark'
 
 type IntroCopy = {
@@ -106,6 +107,12 @@ function parseIntroCopy(raw: string): Record<string, IntroCopy[]> {
 }
 
 const INTRO_COPY_BY_PERSONALITY = parseIntroCopy(introCopyJsonl)
+// Portuguese copy for the personalities it covers; every other personality/dialect keeps English.
+const INTRO_COPY_PT = parseIntroCopy(introCopyPtJsonl)
+
+function copyTable(locale: string): Record<string, IntroCopy[]> {
+  return locale.startsWith('pt') ? { ...INTRO_COPY_BY_PERSONALITY, ...INTRO_COPY_PT } : INTRO_COPY_BY_PERSONALITY
+}
 
 function neutralCopy(): IntroCopy[] {
   return INTRO_COPY_BY_PERSONALITY.none || INTRO_COPY_BY_PERSONALITY.default || FALLBACK_COPY
@@ -148,21 +155,22 @@ function pickCopy(copies: IntroCopy[], seed = 0): IntroCopy {
 
 const WORDMARK = 'B-3PO'
 
-function resolveCopy(personality?: string, seed?: number): IntroCopy {
+function resolveCopy(personality: string | undefined, seed: number | undefined, locale: string): IntroCopy {
   const personalityKey = normalizeKey(personality)
+  const table = copyTable(locale)
 
   const copies = NEUTRAL_PERSONALITIES.has(personalityKey)
-    ? INTRO_COPY_BY_PERSONALITY[personalityKey] || neutralCopy()
-    : INTRO_COPY_BY_PERSONALITY[personalityKey] || fallbackCopyForPersonality(personalityKey)
+    ? table[personalityKey] || table.none || table.default || FALLBACK_COPY
+    : table[personalityKey] || INTRO_COPY_BY_PERSONALITY[personalityKey] || fallbackCopyForPersonality(personalityKey)
 
   return pickCopy(copies, seed)
 }
 
 export function Intro({ personality, seed }: IntroProps) {
   const [mountSeed] = useState(() => Math.floor(Math.random() * 100000))
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const rotationSeed = mountSeed + (seed ?? 0)
-  const copy = resolveCopy(personality, rotationSeed)
+  const copy = resolveCopy(personality, rotationSeed, locale)
   const key = normalizeKey(personality)
 
   const bodies =

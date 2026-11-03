@@ -212,6 +212,29 @@ export const ptOverrides: TranslationOverrides = {
     usageLevels: { free: 'Grátis', top_tier: 'Grande' },
     sectionRecommended: 'Recomendado'
   },
+  composer: {
+    message: 'Mensagem',
+    placeholderStarting: 'Iniciando o B-3PO...',
+    placeholderReconnecting: 'Reconectando ao B-3PO…',
+    placeholderFollowUp: 'Envie um complemento',
+    newSessionPlaceholders: [
+      'O que vamos construir?',
+      'Dê uma tarefa ao B-3PO',
+      'No que você está pensando?',
+      'Descreva o que precisa',
+      'O que vamos resolver?',
+      'Pergunte qualquer coisa',
+      'Comece com um objetivo'
+    ],
+    followUpPlaceholders: [
+      'Envie um complemento',
+      'Adicione mais contexto',
+      'Refine o pedido',
+      'E agora?',
+      'Continue',
+      'Vá mais fundo'
+    ]
+  },
   sidebar: {
     nav: {
       'new-session': 'Nova conversa',

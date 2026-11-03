@@ -1,0 +1,20 @@
+{"personality": "none", "headline": "Pronto quando você estiver", "body": "Peça para abrir um repositório, rodar testes, corrigir um bug ou escrever um PR. Eu mostro cada passo com você."}
+{"personality": "none", "headline": "Como posso ajudar hoje?", "body": "Aponte um arquivo, cole um erro ou descreva o que está construindo. Eu conduzo a partir daí."}
+{"personality": "none", "headline": "O que vamos mover hoje?", "body": "Envie o bug, a branch, o plano ou a ideia solta. Eu inspeciono o repositório e transformo no próximo passo concreto."}
+{"personality": "none", "headline": "No que você está pensando?", "body": "Traga o código, a dúvida ou a parte travada. Eu leio o contexto antes de mexer em qualquer coisa."}
+{"personality": "none", "headline": "Por onde começamos?", "body": "Traga o problema, a meta ou o arquivo. Eu inspeciono primeiro e mantenho o próximo passo concreto."}
+{"personality": "helpful", "headline": "Pronto quando você estiver", "body": "Peça para abrir um repositório, rodar testes, corrigir um bug ou escrever um PR. Eu mostro cada passo com você."}
+{"personality": "helpful", "headline": "Como posso ajudar hoje?", "body": "Aponte um arquivo, cole um erro ou descreva o que está construindo. Eu conduzo a partir daí."}
+{"personality": "helpful", "headline": "O que vamos mover hoje?", "body": "Envie o bug, a branch, o plano ou a ideia solta. Eu inspeciono o repositório e transformo no próximo passo concreto."}
+{"personality": "helpful", "headline": "No que você está pensando?", "body": "Traga o código, a dúvida ou a parte travada. Eu leio o contexto antes de mexer em qualquer coisa."}
+{"personality": "helpful", "headline": "Por onde começamos?", "body": "Traga o problema, a meta ou o arquivo. Eu inspeciono primeiro e mantenho o próximo passo concreto."}
+{"personality": "technical", "headline": "Pronto para trabalhar", "body": "Envie a tarefa, o caminho que falha ou o plano pela metade. Eu mostro o comando e o resultado real."}
+{"personality": "technical", "headline": "Qual é o próximo passo concreto?", "body": "Traga o arquivo, o erro e o objetivo. Eu leio o código antes de propor a mudança."}
+{"personality": "technical", "headline": "O que vamos construir?", "body": "Descreva o comportamento esperado e o atual. Eu localizo a causa e testo a correção."}
+{"personality": "technical", "headline": "Onde está o problema?", "body": "Cole o erro completo ou aponte o arquivo. Eu reproduzo antes de corrigir."}
+{"personality": "technical", "headline": "Comece pelo objetivo", "body": "Diga o resultado esperado. Eu decomponho em passos verificáveis."}
+{"personality": "concise", "headline": "Pronto.", "body": "Diga a tarefa."}
+{"personality": "concise", "headline": "Qual é a tarefa?", "body": "Seja direto: arquivo, erro, objetivo."}
+{"personality": "concise", "headline": "Objetivo?", "body": "Uma linha basta."}
+{"personality": "concise", "headline": "O que fazer?", "body": "Envie o pedido."}
+{"personality": "concise", "headline": "Vamos.", "body": "Diga o próximo passo."}

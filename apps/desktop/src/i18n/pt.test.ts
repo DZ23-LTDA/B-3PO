@@ -54,6 +54,7 @@ describe('pt-BR', () => {
   it('o override cobre exatamente as seções declaradas', () => {
     expect(Object.keys(ptOverrides).sort()).toEqual([
       'common',
+      'composer',
       'errors',
       'install',
       'language',
@@ -62,6 +63,12 @@ describe('pt-BR', () => {
       'sidebar',
       'ui'
     ])
+  })
+
+  it('traduz os placeholders do composer', () => {
+    expect(pt.composer.message).toBe('Mensagem')
+    expect(pt.composer.newSessionPlaceholders).toContain('Descreva o que precisa')
+    expect(pt.composer.placeholderStarting).toContain('B-3PO')
   })
 
   it('traduz as telas de idioma, erro, interface e seletor de modelo', () => {
