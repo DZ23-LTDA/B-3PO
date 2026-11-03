@@ -144,3 +144,13 @@ Windows comum sem sideload/assinatura. Registrado em `ADR-007`.
 | 22:00 | descoberto `auth.adopt_external_logins: true` | risco de privacidade → decisão do proprietário |
 | 22:09 | suíte de UI completa | **12760/12766**; 6 falhas ambientais/pré-existentes |
 | 22:20 | relatórios SECURITY/PRIVACY/ACCESSIBILITY/PERFORMANCE | criados com dados reais |
+
+## Rodada 10 — CI (Fase I)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 22:12 | workflow criado com actions pinadas por SHA | — |
+| 22:16 | 1º run | **failure** `EBADENGINE` (node 24 × engine-strict >=26) |
+| 22:19 | correção para `node-version: '26'` | push + PR **success** |
+
+CI agora cobre: gate de marca, testes de domínio (schema + orquestração) e typecheck — sem secrets.

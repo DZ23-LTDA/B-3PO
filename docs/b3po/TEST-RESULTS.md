@@ -99,3 +99,17 @@ Verificação: nenhum dos dois importa `bot-schema`/`orchestration` (`git grep` 
 Verificação: nenhum dos cinco importa `bot-schema`/`orchestration`; as referências a "Hermes" neles são
 `@hermes/plugin-sdk` (nome de pacote **não** alterado, nível 2) ou o atributo interno
 `hermesDesktopHost`. Não foram "consertados" para não mascarar falha do upstream.
+
+## Atualização 22:19 — CI verde no GitHub
+
+| Run | Evento | Commit | Resultado |
+|---|---|---|---|
+| `41558928386` | push em `b3po-brand` | `a33eda00` | **success** |
+| `41558937586` | pull_request (#1) | `a33eda00` | **success** |
+| `41558683918` | push (primeira tentativa) | `e7d63dab` | failure — `EBADENGINE`: runner com node 24, repo exige `>=26` |
+
+O workflow roda no runner do GitHub: gate de marca, 26 testes de domínio e typecheck do desktop — todos
+verdes. A falha inicial foi real e corrigida (`node-version: '26'`), não escondida.
+
+**Observação:** o PR #1 também dispara os workflows herdados do upstream (CI, Docker, Nix). Eles não são
+deste trabalho e não devem ser lidos como sinal de qualidade do B-3PO.
