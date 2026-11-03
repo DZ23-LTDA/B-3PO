@@ -115,3 +115,41 @@ separar as capacidades por provedor de ticket.
 
 Nada disso está implementado. O que existe hoje é o cliente (`gateway-rpc.ts`, 10 testes) esperando a
 credencial e a tela de conversa em modo leitura, ambos comprovados no aparelho.
+
+## 6. Implementado até aqui
+
+### 6.1. Cofre de dispositivos — `hermes_cli/b3po_devices.py` (16 testes)
+
+Núcleo de decisão, sem HTTP e sem ticket: é o que a rota vai chamar.
+
+| Função | Contrato |
+|---|---|
+| `create_device(label, profile_id, now)` | devolve `(record, key)`; a chave em claro sai **uma vez** e o registro guarda só `sha256` |
+| `verify_key(record, key)` | `hmac.compare_digest`; recusa `invalid_key` e `revoked` |
+| `authorize(...)` | chave + **escopo do perfil** + **janela de taxa**; devolve registro atualizado |
+| `revoke_device(record, now)` | marca revogação e zera a janela |
+| `public_view(record)` | o que a tela mostra: sem hash, sem chave |
+| `save_devices` / `load_devices` | escrita atômica (tmp + `os.replace`); leitura **fail-closed** |
+
+Testes que valem destaque:
+
+- **`key` não aparece no arquivo salvo** — o teste escreve o cofre e procura a chave em claro no JSON;
+- `public_view` não serializa nem a chave nem o hash;
+- dispositivo revogado recusa **mesmo com a chave correta**;
+- chave de um perfil recusada em outro (`scope_mismatch`);
+- taxa: 20 pedidos passam, o 21º é `rate_limited`, e fora da janela volta a passar;
+- arquivo corrompido devolve lista vazia (ninguém é liberado por engano);
+- registro corrompido é ignorado **sem perder os válidos**;
+- roundtrip preserva `last_seen_at`, contador e revogação, e a chave original continua valendo.
+
+### 6.2. Erros meus nesta rodada (dois, ambos pegos pelo gate)
+
+1. `read_text(encoding="utf-8")` — regra de footgun do Windows exige `utf-8-sig` (BOM). Corrigido.
+2. variável desempacotada não usada (`key_second`) — `RUF059` do ruff. Corrigido com `_key_second`.
+
+Nenhum dos dois era falha de lógica; os dois eram o gate fazendo o trabalho dele **antes** do commit.
+
+### 6.3. O que falta
+
+`POST /api/b3po/device-ticket`, a allowlist de métodos por provedor de ticket no WS e a tela de
+Dispositivos. O cliente mobile (`gateway-rpc.ts`) já aceita `{kind:'ticket'}`.
