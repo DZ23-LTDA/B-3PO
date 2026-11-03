@@ -23,7 +23,10 @@ Registrado em `docs/b3po/MOBILE-ARCHITECTURE-DECISION.md`.
 | Item | Estado |
 |---|---|
 | Contrato de execução (`src/protocol/execution.ts`) | **implementado e testado** (12 testes) |
-| Cliente de API (JSON-RPC/WebSocket) | a implementar |
+| Cliente de API (JSON-RPC/WebSocket) | **implementado e testado** (7 testes) |
+| Pareamento por link/QR (`src/pairing/pairing.ts`) | **implementado e testado** (10 testes) |
+| Reconexão sem replay duplicado (`src/sync/cursor.ts`) | **implementado e testado** (9 testes) |
+| Notificação ≠ autorização (`src/notifications/payload.ts`) | **implementado e testado** (8 testes) |
 | Login/logout + armazenamento seguro (Keychain/Keystore) | a implementar |
 | Telas (bots, chat, execução, aprovação) | a implementar |
 | `android/` e `ios/` nativos | a gerar (`npx react-native init`) |
