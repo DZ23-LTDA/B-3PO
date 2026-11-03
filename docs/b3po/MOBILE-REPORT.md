@@ -621,3 +621,10 @@ correto é o produto ter **autorização de dispositivo** (GOAL §16): chave por
 pareamento, aceita pelo WS. Isso é uma funcionalidade a especificar, não um hack a fazer agora.
 
 **Mobile: 121 testes + 8 pulados**, `tsc` limpo, gate **14 ok**.
+
+### Especificação do desbloqueio
+
+O caminho para permitir envio está especificado em `docs/b3po/DEVICE-AUTHORIZATION.md`: chave por
+dispositivo emitida no pareamento, rota `POST /api/b3po/device-ticket`, ticket com
+`provider = "b3po-device"` aceito no WS só para métodos de sessão, revogação e rate limit, com nove
+critérios de aceite. O cliente (`gateway-rpc.ts`) já aceita `{kind:'ticket'}` — falta o emissor.
