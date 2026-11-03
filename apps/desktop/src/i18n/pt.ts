@@ -496,6 +496,19 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    gateway: {
+      pairedDevicesTitle: 'Dispositivos pareados',
+      pairedDevicesIntro:
+        'Celulares que podem falar com os bots deste computador. Cada um tem a própria chave; revogar corta o acesso de vez.',
+      pairedDevicesEmpty: 'Nenhum celular pareado ainda. Abra o link de pareamento no aparelho para adicionar.',
+      pairedDevicesError: 'Não foi possível ler os dispositivos pareados.',
+      pairedDevicesRefresh: 'Atualizar',
+      pairedDevicesRevoke: 'Revogar',
+      pairedDevicesRevoked: 'revogado',
+      pairedDevicesCreated: 'adicionado',
+      pairedDevicesLastSeen: 'último uso',
+      pairedDevicesTickets: 'tickets'
+    },
     sections: {
       model: 'Modelo',
       chat: 'Conversa',

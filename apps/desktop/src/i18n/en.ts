@@ -1355,6 +1355,17 @@ export const en: Translations = {
       scopeNotRestored: (profile: string, error: string) => `Profile “${profile}” not restored: ${error}`
     },
     gateway: {
+        pairedDevicesTitle: 'Paired devices',
+        pairedDevicesIntro:
+          'Phones that can talk to the bots on this computer. Each one holds its own key; revoking cuts it off for good.',
+        pairedDevicesEmpty: 'No phone paired yet. Open the pairing link on the phone to add one.',
+        pairedDevicesError: 'Could not read the paired devices.',
+        pairedDevicesRefresh: 'Refresh',
+        pairedDevicesRevoke: 'Revoke',
+        pairedDevicesRevoked: 'revoked',
+        pairedDevicesCreated: 'added',
+        pairedDevicesLastSeen: 'last used',
+        pairedDevicesTickets: 'tickets',
       loading: 'Loading gateway settings...',
       ...enGatewayHost,
       title: 'Gateway Connection',

@@ -1141,6 +1141,16 @@ export interface Translations extends NoticeTranslations {
       scopeNotRestored: (profile: string, error: string) => string
     }
     gateway: GatewayHostTranslations & {
+        pairedDevicesTitle: string
+        pairedDevicesIntro: string
+        pairedDevicesEmpty: string
+        pairedDevicesError: string
+        pairedDevicesRefresh: string
+        pairedDevicesRevoke: string
+        pairedDevicesRevoked: string
+        pairedDevicesCreated: string
+        pairedDevicesLastSeen: string
+        pairedDevicesTickets: string
       loading: string
       title: string
       envOverride: string

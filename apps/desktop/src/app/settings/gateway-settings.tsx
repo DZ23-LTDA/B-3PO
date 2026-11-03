@@ -46,6 +46,7 @@ import { notify, notifyError, readableError } from '@/store/notifications'
 
 import { cloudTeamChanged, reconnectMovedCloudAgent } from './cloud-team-change'
 import { ConnectionsRegistrySection } from './connections-registry'
+import { PairedDevicesSection } from './paired-devices-section'
 import { CONTROL_TEXT } from './constants'
 import { KeychainEncryptionSetting, useKeychainEncryption } from './keychain-encryption-setting'
 import { ManagedUpdatesSection } from './managed-updates-section'
@@ -187,6 +188,7 @@ export function GatewaySettings({ embedded = false, subpage }: GatewaySettingsPr
     return (
       <SettingsContent>
         <ConnectionsRegistrySection />
+          <PairedDevicesSection />
       </SettingsContent>
     )
   }
