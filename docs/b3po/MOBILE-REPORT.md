@@ -827,3 +827,37 @@ Sem reiniciar o aplicativo em nenhum dos passos.
 - A cópia de esgotamento não promete contagem regressiva: manda tocar no botão.
 
 Mobile: **142 testes** + 8 pulados (eram 138; +4 do retry).
+
+## Rodada 77 — DESCONECTAR no aparelho (o usuário não ficava preso na sessão)
+
+O `SessionStore` já tinha `logout()` e `revokeAndLogout()` com teste, mas **a tela não expunha nada disso**:
+depois de parear, a única saída era matar o app.
+
+### O que foi feito
+
+| Peça | Onde |
+|---|---|
+| estado `signed_out` no contrato de conexão | `src/screens/status-card.ts` |
+| título/corpo próprios: **“Desconectado deste computador”** + instrução do link `b3po://pair` | idem |
+| botão **“Desconectar”** no cartão, só quando conectado | `App.tsx` (`disconnect`) |
+
+`disconnect()` esquece as credenciais em memória, zera o contador de tentativas, limpa a lista de bots e
+leva ao estado `signed_out` — que **não** é `failed`, então o retry automático não insiste numa escolha do
+usuário.
+
+### Por que não gravar no cofre agora
+
+Persistir a sessão exigiria `react-native-keychain`, bloqueado pelo codegen do RN 0.81 (já registrado).
+`session.ts` recusa guardar token em AsyncStorage de propósito — gravar segredo em texto claro para "ter
+logout persistente" seria trocar conveniência por um problema de segurança. Então: desconectar encerra a
+sessão em memória e o usuário volta pelo link de pareamento. Limitação declarada, não escondida.
+
+### Provado no aparelho (`dsh_pixel`)
+
+1. Conectado (`Compilação: b7ba9c86`, `Gateway: rodando`, 3 bots) → toque em **Desconectar**.
+2. Tela: **“Desconectado deste computador”** e “Abra o link de pareamento (b3po://pair?url=…&token=…) para
+   conectar de novo.” A lista de bots sumiu. Evidência: `docs/b3po/evidence/mobile-desconectado.png`.
+3. Esperei **12 s**: continua desconectado — nada de reconexão automática.
+
+Teste novo em `status-card.test.ts`: o estado pós-desconexão não pode ser chamado de “Sem conexão”, porque
+foi escolha do usuário. Mobile: **143 testes** + 8 pulados.

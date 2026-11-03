@@ -125,6 +125,14 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [attempt, connect, connection])
 
+  /** Desconectar: escolha do usuario, nao falha. Para o retry e esquece as credenciais em memoria. */
+  const disconnect = useCallback(() => {
+    lastCredentials.current = null
+    setAttempt(0)
+    setBots([])
+    setConnection({ status: 'signed_out' })
+  }, [])
+
   /** Abre o bot: busca a conversa mais recente e carrega as mensagens do servidor. */
   const openBot = useCallback(
     async (bot: BotProfile) => {
@@ -335,6 +343,18 @@ export default function App() {
               <Text style={styles.cardTitle}>{card.title}</Text>
               <Text style={styles.cardBody}>{card.body}</Text>
 
+              {connection.status === 'connected' ? (
+                <TouchableOpacity
+                  accessibilityLabel="Desconectar deste computador"
+                  accessibilityRole="button"
+                  activeOpacity={0.7}
+                  onPress={disconnect}
+                  style={styles.disconnectButton}
+                >
+                  <Text style={styles.disconnectText}>Desconectar</Text>
+                </TouchableOpacity>
+              ) : null}
+
               {connection.status === 'failed' ? (
                 <>
                   <Text style={styles.cardBody}>{retryingCopy(Math.max(0, attempt - 1))}</Text>
@@ -442,6 +462,8 @@ const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
   block: { gap: 14 },
+  disconnectButton: { alignItems: 'center', paddingVertical: 10 },
+  disconnectText: { color: '#7f9cff', fontSize: 15 },
   body: { flex: 1 },
   composer: { backgroundColor: '#0d1016', borderColor: '#1f2430', borderRadius: 14, borderWidth: 1, gap: 8, padding: 10 },
   composerInput: { color: '#e8eefc', fontSize: 14, maxHeight: 110, minHeight: 40, paddingHorizontal: 4, paddingVertical: 6 },

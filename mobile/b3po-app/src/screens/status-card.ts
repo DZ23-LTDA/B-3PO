@@ -9,6 +9,8 @@
 
 export type ConnectionState =
   | { status: 'disconnected' }
+  /** O usuario tocou em Desconectar: nao e falha de rede, e uma escolha. */
+  | { status: 'signed_out' }
   | { status: 'connecting'; origin: string }
   | {
       status: 'connected'
@@ -30,6 +32,10 @@ export interface StatusCard {
   body: string
 }
 
+export const SIGNED_OUT_TITLE = 'Desconectado deste computador'
+export const SIGNED_OUT_BODY =
+  'Abra o link de pareamento (b3po://pair?url=…&token=…) para conectar de novo.'
+
 export const OFFLINE_TITLE = 'Sem conexão com o computador'
 export const OFFLINE_BODY =
   'Verifique se o B-3PO está aberto na mesma rede. Suas ações continuam pendentes até reconectar.'
@@ -43,6 +49,9 @@ export function statusCard(state: ConnectionState, pairingError: string | null =
   switch (state.status) {
     case 'disconnected':
       return { title: OFFLINE_TITLE, body: OFFLINE_BODY }
+    case 'signed_out':
+      // Depois de desconectar, dizer "sem conexão" seria mentira: a conexão foi encerrada de proposito.
+      return { title: SIGNED_OUT_TITLE, body: SIGNED_OUT_BODY }
     case 'connecting':
       return { title: 'Conectando…', body: `Falando com o computador em ${state.origin}` }
     case 'failed':

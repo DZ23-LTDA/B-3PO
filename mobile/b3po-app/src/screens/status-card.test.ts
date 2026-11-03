@@ -70,3 +70,13 @@ describe('texto do cartão de status', () => {
     expect(card.body.length).toBeGreaterThan(10)
   })
 })
+
+describe('estado pos-desconexao', () => {
+  it('nao chama de falha de rede o que foi escolha do usuario', () => {
+    const card = statusCard({ status: 'signed_out' })
+
+    expect(card.title).toBe('Desconectado deste computador')
+    expect(card.body).toContain('b3po://pair')
+    expect(card.title).not.toContain('Sem conexão')
+  })
+})
