@@ -982,3 +982,18 @@ desmonta, a navegação é um `NavState` e a raiz segue montada.
 
 Provado no aparelho após as mudanças: abrir o bot mostra a conversa com histórico e o **envio** continua
 funcionando (“Enviando…” e a bolha do usuário). Mobile: **153 testes** + 8 pulados; gate 14 ok.
+
+### Prova no aparelho (depois do mesmo commit)
+
+Instalei o **APK release** novo no emulador e refiz o pareamento com o link real contra o `serve` local:
+o app abriu, conectou, listou as conversas do bot `default` (5) e reabriu a última com histórico real —
+incluindo a mensagem trocada pelo próprio celular. Evidência:
+`docs/b3po/evidence/mobile-build-aprovacao-conectado.png`.
+
+Isso importa porque a mudança tocou `App.tsx` e o socket: não bastava a suíte passar. O caminho completo
+(pareamento → REST → WS com `client.capabilities` novo → conversa) funciona no aparelho.
+
+**Detalhe técnico descoberto aqui:** `assembleDebug` **não** embute o bundle JS (debug carrega do Metro), por
+isso o APK de debug mantém a data antiga mesmo depois da mudança — quem prova comportamento de código novo
+em aparelho é o **release**. O manifesto registra os dois, e o de debug só serve para desenvolvimento com
+Metro ligado.
