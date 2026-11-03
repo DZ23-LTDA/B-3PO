@@ -678,3 +678,23 @@ E o aviso "Canonical groups require an explicit connection" era **mensagem de ex
 Virou copy traduzida ("Grupos exigem uma conexão e um perfil explícitos."), com genérico para o resto.
 
 Evidência: `docs/b3po/evidence/hero-final.png` (app empacotado, HEAD desta rodada).
+
+### Rodada 102 — medindo o inglês que sobra em Configurações
+
+Captura com o seletor em português (`docs/b3po/evidence/configuracoes-pt.png`):
+
+- **menu lateral: 100% em português** (Modelo, Modelos de fallback, Aparência, Segurança, Memória e contexto…);
+- **conteúdo do painel: em inglês** — "Applies to", "Provider", "Model", "Reasoning", "Restart backend", e a
+  ajuda do contexto ("Overrides the detected context window…").
+
+Medido: **33 literais de interface em inglês** no módulo `src/app/settings` — 22 são descrições de provedor
+(`constants.ts`, ex.: "Anthropic-compatible direct model API") e o resto rótulos de seção usados só como fallback.
+As strings do painel (ex.: "Main model context window (override)") **não estão no catálogo**: vêm do catalog de
+configuração do backend, em inglês, e o desktop as renderiza cruas.
+
+Plano para fechar isso (rodada seguinte):
+
+1. `settings.providers.<id>.description` no catálogo (pt primeiro, depois os outros locales);
+2. uma camada de cópia pt por **id de campo** (`settings.configFields.<id>.label/help`) aplicada onde os campos
+   de configuração renderizam — o backend continua sendo a fonte do valor, só a apresentação é traduzida;
+3. teste de cobertura: nenhuma chave visível sem pt (mesmo modelo do `overlay-completeness`).
