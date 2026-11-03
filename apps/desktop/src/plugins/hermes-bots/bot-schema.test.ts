@@ -7,7 +7,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   BOT_SCHEMA_VERSION,
-  type BotRecord,
+    botMetaPatchFromRecord,
+    type BotRecord,
+  botRecordFromMeta,
   fromLegacyBotMeta,
   mascotIdFor,
   migrateBotRecord,
@@ -145,5 +147,43 @@ describe('mascotIdFor', () => {
     })
 
     expect(mascotIdFor(withMascot)).toBe('nexus')
+  })
+})
+
+
+describe('botRecordFromMeta (fiacao do metadado persistido)', () => {
+  it('leva mascot_id e permission_policy do metadado para o registro v1', () => {
+    const record = botRecordFromMeta('reviewer', {
+      title: 'Code Reviewer',
+      mascot_id: 'cortex',
+      permission_policy: { allow: ['read_file'], deny: ['terminal'], default: 'ask' }
+    })
+
+    expect(record.identity.mascot_id).toBe('cortex')
+    expect(record.runtime_config.permission_policy).toEqual({
+      allow: ['read_file'],
+      deny: ['terminal'],
+      default: 'ask'
+    })
+  })
+
+  it('bot sem politica persistida nasce restritivo (nunca herda permissao)', () => {
+    const record = botRecordFromMeta('legacy', { title: 'Legacy' })
+    expect(record.runtime_config.permission_policy).toEqual(restrictivePolicy())
+    expect(record.identity.mascot_id).toBeNull()
+  })
+
+  it('round-trip: registro -> patch -> registro preserva identidade e politica', () => {
+    const original = botRecordFromMeta('ops', {
+      title: 'Ops',
+      mascot_id: 'nexus',
+      permission_policy: { allow: ['web_search'], deny: [], default: 'deny' }
+    })
+
+    const patch = botMetaPatchFromRecord(original)
+    const again = botRecordFromMeta('ops', { title: 'Ops', ...patch })
+
+    expect(again.identity.mascot_id).toBe('nexus')
+    expect(again.runtime_config.permission_policy).toEqual(original.runtime_config.permission_policy)
   })
 })

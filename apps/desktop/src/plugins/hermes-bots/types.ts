@@ -16,6 +16,8 @@ import type { ProfileSessionPreview } from '@hermes/plugin-sdk'
  * "d"). Structural rather than an import of core's `Translations`, which the
  * plugin fence puts out of reach — `t.sidebar.row` satisfies it.
  */
+import type { PermissionPolicy } from './bot-schema'
+
 export interface SidebarRowLabels {
   ageDay: string
   ageHour: string
@@ -89,6 +91,11 @@ export interface BotMeta {
   screenAutoOpen?: boolean
   shape?: string
   title?: string
+  /** Creation timestamp in ms. Deliberately not copied when duplicating a bot. */
+  /** B-3PO: identidade visual do bot (id de rand/avatars/manifest.json). Nunca define runtime. */
+  mascot_id?: null | string
+  /** B-3PO: politica de ferramentas aplicada no despacho (F4). Ausente = default restritivo. */
+  permission_policy?: PermissionPolicy
   /** Creation timestamp in ms. Deliberately not copied when duplicating a bot. */
   created?: number
 }
@@ -382,3 +389,4 @@ export type AttentionClass = 'agent_blocked' | 'missing_config' | 'provider_auth
 
 export type RosterKindFilter = 'all' | 'bots' | 'groups'
 export type RosterActivityFilter = 'active' | 'all' | 'older' | 'recent'
+

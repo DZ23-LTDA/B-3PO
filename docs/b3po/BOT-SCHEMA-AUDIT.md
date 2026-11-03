@@ -80,3 +80,28 @@ arquivos novos exit 0.
 
 **Ainda não conectado à UI.** O módulo é o contrato; a fiação no fluxo de criação/edição e a migração
 dos registros existentes são o próximo passo (Fase C, parte 2).
+
+---
+
+## Atualização 22:26 — fiacao na persistencia (F4 deixa de ser só contrato)
+
+`BotMeta` agora carrega os campos do contrato:
+
+```ts
+mascot_id?: null | string
+permission_policy?: PermissionPolicy
+```
+
+Como `saveBotMeta()` já persiste o metadado inteiro (spread + storage + `profiles.configure`), **não foi preciso
+mexer na função**: qualquer caminho que grave esses campos passa a persisti-los. Completado por:
+
+- `botRecordFromMeta(id, meta)` — compõe o registro v1 com default restritivo quando não há política
+  (bot antigo **nunca herda** permissão);
+- `botMetaPatchFromRecord(record)` — extrai só o que o metadado guarda;
+- `normalizePolicy` exportado (saneia `allow`/`deny` e invalida `default` para `deny`).
+
+**Testes:** 15 no schema (3 novos cobrindo a fiação e o round-trip registro → patch → registro).
+Typecheck e eslint verdes; `scripts/check` 14 ok.
+
+**Ainda falta:** a UI de escolher mascote e editar política (componentes). O caminho de dados já está aberto e
+persistente; falta a superfície.

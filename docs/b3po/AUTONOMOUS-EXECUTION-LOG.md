@@ -163,3 +163,11 @@ CI agora cobre: gate de marca, testes de domínio (schema + orquestração) e ty
 | 22:31 | `wsl -d Ubuntu -e node -v` | sem Node nativo; npm do Windows via interop |
 | 22:32 | decisão | registrar **BLOCKED_BY_EXTERNAL_DEPENDENCY** para Linux; não fabricar artefato |
 | 22:34 | CHANGELOG + corpo do PR atualizados | — |
+
+## Rodada 12 — fiação na persistência
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 22:24 | `mascot_id` e `permission_policy` no `BotMeta` | persistidos pelo caminho existente |
+| 22:25 | helpers `botRecordFromMeta` / `botMetaPatchFromRecord` | 3 testes novos |
+| 22:26 | lint + typecheck + `scripts/check` | verdes |

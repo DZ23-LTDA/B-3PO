@@ -140,7 +140,7 @@ function stringArrayOrNull(value: unknown): null | string[] {
   return items
 }
 
-function policyFrom(raw: unknown): PermissionPolicy {
+export function normalizePolicy(raw: unknown): PermissionPolicy {
   if (!raw || typeof raw !== 'object') {return restrictivePolicy()}
   const candidate = raw as Partial<PermissionPolicy>
   const allow = stringArrayOrNull(candidate.allow) ?? []
@@ -188,7 +188,7 @@ export function migrateBotRecord(raw: unknown): BotRecord {
       engine: 'hermes',
       provider: stringOrNull(runtimeIn.provider),
       model: stringOrNull(runtimeIn.model),
-      permission_policy: policyFrom(runtimeIn.permission_policy),
+      permission_policy: normalizePolicy(runtimeIn.permission_policy),
       workspace_ref: stringOrNull(runtimeIn.workspace_ref),
       tools: stringArrayOrNull(runtimeIn.tools),
       skills: stringArrayOrNull(runtimeIn.skills),
@@ -233,4 +233,36 @@ export function validateBotRecord(record: BotRecord): string[] {
 /** `mascot_id` é identidade visual; nunca define runtime. */
 export function mascotIdFor(record: BotRecord): null | string {
   return record.identity.mascot_id
+}
+
+
+/** Metadado persistido do bot (subconjunto relevante para o contrato v1). */
+export interface BotMetaLike extends LegacyBotMeta {
+  mascot_id?: null | string
+  permission_policy?: PermissionPolicy
+}
+
+/**
+ * Compõe o registro v1 a partir do metadado persistido.
+ * Campos ausentes caem no default restritivo — nunca herdam permissão de outro bot.
+ */
+export function botRecordFromMeta(id: string, meta: BotMetaLike = {}): BotRecord {
+  const record = fromLegacyBotMeta(id, meta)
+  record.identity.mascot_id = meta.mascot_id ?? null
+  record.runtime_config.permission_policy = meta.permission_policy
+    ? normalizePolicy(meta.permission_policy)
+    : restrictivePolicy()
+
+  return record
+}
+
+/** Extrai do registro apenas o que o metadado persistido guarda (identidade + política). */
+export function botMetaPatchFromRecord(record: BotRecord): {
+  mascot_id: null | string
+  permission_policy: PermissionPolicy
+} {
+  return {
+    mascot_id: record.identity.mascot_id,
+    permission_policy: record.runtime_config.permission_policy
+  }
 }
