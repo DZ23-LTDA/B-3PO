@@ -33,3 +33,17 @@
 
 Mocks só valem como teste unitário e devem estar marcados. Integração só conta com execução real
 (turno do agente, evento do runtime, arquivo persistido).
+
+## Atualização 22:25 — CI (Fase I, parte 1)
+
+Workflow `.github/workflows/b3po-brand.yml` (branches `b3po-brand` e PRs para ela / `main`):
+
+| Passo | O que roda |
+|---|---|
+| gate de marca | `python scripts/brand_check.py` (assets, contraste AA, cor proibida, nível 3) |
+| testes de domínio | `bot-schema.test.ts` + `orchestration.test.ts` (26 testes) |
+| typecheck | `npm run typecheck` no desktop |
+| SBOM | `npm sbom` — **informativo**, não bloqueia |
+
+Actions fixadas por SHA (política do repo): checkout `11d5960a`, setup-python `a26af69b`, setup-node `49933ea5`.
+Nenhum secret é usado; `permissions: contents: read`.
