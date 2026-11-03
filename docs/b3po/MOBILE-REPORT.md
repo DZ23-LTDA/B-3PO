@@ -173,3 +173,62 @@ APK, não por suposição.
 O APK release está assinado com a **chave de debug** que o template do RN traz, porque não existe
 keystore de release. É instalável e roda, mas **não é artefato de publicação**: AAB/loja exigem chave
 de release — `BLOCKED_BY_EXTERNAL_DEPENDENCY`.
+
+## Rodada 44 — pareamento por deep link provado no aparelho (e um bug real do React Native)
+
+### O que faltava
+
+`parsePairingLink` existia e tinha testes, mas o Android **nunca entregava** o link ao app: o
+`AndroidManifest.xml` não declarava o filtro. Código sem fio ligado não é funcionalidade.
+
+Filtro adicionado em `MainActivity`:
+
+```xml
+<intent-filter android:autoVerify="false">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="b3po" android:host="pair" />
+</intent-filter>
+```
+
+### O bug que o aparelho revelou
+
+Com o filtro no lugar, o link chegou — e foi **recusado** com "Este QR não é um convite do B-3PO".
+Causa: o React Native (Hermes) usa um polyfill de `URL` que **não** interpreta esquema customizado
+como o Node faz; `new URL("b3po://pair?…")` não devolve host `pair`. Meus 12 testes passavam porque
+rodam em Node, onde o `URL` nativo funciona — o teste estava certo e mesmo assim o produto quebrava.
+
+Correção: `splitPairLink` separa o link textualmente (regex + `decodeURIComponent`); `URL` continua
+usado só para http(s)/ws(s), que o polyfill trata bem. Quatro testes novos cobrem o formato exato que
+o Android entrega, caixa alta, percent-encoding inválido e host errado. **85 testes** no pacote.
+
+### Prova no emulador (dois caminhos, os dois valem)
+
+Link válido:
+
+```
+adb shell am start -a android.intent.action.VIEW \
+  -d "b3po://pair?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop&name=Escritorio"
+→ "B-3PO" / "Seus bots, no seu computador." / "Nenhum bot ainda"
+```
+
+Link inseguro (http para host remoto) — recusado pela regra de TLS:
+
+```
+-d "b3po://pair?url=http%3A%2F%2Fpc.dz23.dev&token=…"
+→ "Não foi possível parear"
+  "Conexão sem criptografia para um computador na rede. Use o endereço https/wss."
+```
+
+Screenshots: `docs/b3po/evidence/mobile-pair-ok.png` e `mobile-pair-insecure.png`.
+
+### Artefatos atualizados
+
+| Arquivo | Tamanho | SHA-256 |
+|---|---|---|
+| `app-release.apk` | 44,2 MB | `DEA8F4FC9263A127FF615EED92FC15826CF44AFB95D6C5560A3D2ED70811874A` |
+| `app-release.aab` | 19,0 MB | `5B84826FF9B13347C588534B8F48F62646B086F7E34F5803D451410E8E787F18` |
+
+O **AAB** agora existe (o GOAL pedia "quando possível"), gerado com a mesma chave de debug do
+template: serve para validar o empacotamento, **não** para publicar — loja exige chave de release.

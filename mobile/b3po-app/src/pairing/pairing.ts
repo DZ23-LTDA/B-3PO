@@ -12,13 +12,19 @@
  *   com um servidor remoto sem TLS significaria token em texto claro na rede;
  * - token obrigatório e com tamanho mínimo; um link sem token pareceria funcionar e falharia no
  *   primeiro RPC com uma mensagem confusa;
+ * - convite expirado é recusado quando o link informa `expires_at`;
  * - o dispositivo recebe um id estável: o payload pode trazê-lo, e o cliente gera um quando falta,
- *   para que revogação por dispositivo seja possível do lado do gateway (§16);
- * - convite expirado é recusado quando o link informa `expires_at`.
+ *   para que revogação por dispositivo seja possível do lado do gateway (§16).
  *
  * ATENÇÃO (revisão independente): `device` é IDENTIFICADOR, não credencial. Quem pareia depois deve
  * provar posse de uma chave privada guardada no Keychain/Keystore; o `device_id` sozinho nunca pode
  * autorizar nada no gateway. Exigir essa prova é trabalho de backend, registrado em MOBILE-REPORT.
+ *
+ * POR QUE NÃO USAR `URL` NO LINK: o React Native (Hermes) usa um polyfill de `URL` que não trata
+ * esquema customizado como esperado. Medido no emulador Android: `adb shell am start -d "b3po://pair?…"`
+ * chegava ao app e era recusado como "não é um convite do B-3PO" porque `new URL("b3po://pair?…")` não
+ * devolve host `pair`. A divisão do link é textual aqui; `URL` só é usado para http(s)/ws(s), que o
+ * polyfill trata corretamente.
  */
 
 export type PairingFailure =
@@ -83,47 +89,85 @@ export function newDeviceId(random: () => string = () => Math.random().toString(
   return `dev-${random()}${random()}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40)
 }
 
-/** Extrai e valida o endereço do gateway do convite. */
-function gatewayFromInvite(url: URL): { ok: true; url: string; host: string } | { ok: false; reason: PairingFailure } {
-  const rawGateway = (url.searchParams.get("url") ?? "").trim()
+/**
+ * Separa `b3po://pair?<query>` sem depender da implementação de `URL` (ver nota no topo).
+ * Devolve o host em minúsculas e os parâmetros já decodificados.
+ */
+export function splitPairLink(link: string): { host: string; params: Map<string, string> } | null {
+  const match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)\/?\??([^#]*)/.exec(link.trim())
 
-  if (!rawGateway) {
-    return { ok: false, reason: "missing-url" }
+  if (!match) {
+    return null
   }
 
-  const transport = normalizeTransport(rawGateway)
+  const [, scheme, host, query] = match
+
+  if ((scheme ?? '').toLowerCase() !== PAIR_SCHEME) {
+    return null
+  }
+
+  const params = new Map<string, string>()
+
+  for (const part of (query ?? '').split('&')) {
+    if (!part) {
+      continue
+    }
+
+    const eq = part.indexOf('=')
+    const rawKey = eq === -1 ? part : part.slice(0, eq)
+    const rawValue = eq === -1 ? '' : part.slice(eq + 1)
+
+    try {
+      params.set(decodeURIComponent(rawKey).trim().toLowerCase(), decodeURIComponent(rawValue).trim())
+    } catch {
+      // percent-encoding inválido: ignora o par em vez de derrubar o pareamento inteiro
+    }
+  }
+
+  return { host: (host ?? '').toLowerCase(), params }
+}
+
+/** Extrai e valida o endereço do gateway do convite. */
+function gatewayFromInvite(
+  rawGateway: string
+): { ok: true; url: string; host: string } | { ok: false; reason: PairingFailure } {
+  if (!rawGateway.trim()) {
+    return { ok: false, reason: 'missing-url' }
+  }
+
+  const transport = normalizeTransport(rawGateway.trim())
 
   if (!transport) {
-    return { ok: false, reason: "unsupported-scheme" }
+    return { ok: false, reason: 'unsupported-scheme' }
   }
 
-  const plaintext = transport.scheme === "ws" || transport.scheme === "http"
+  const plaintext = transport.scheme === 'ws' || transport.scheme === 'http'
 
   if (plaintext && !isLocalHost(transport.host)) {
-    return { ok: false, reason: "insecure-remote-url" }
+    return { ok: false, reason: 'insecure-remote-url' }
   }
 
   return { ok: true, url: transport.url, host: transport.host }
 }
 
 /** Chave de pareamento: obrigatória e com tamanho mínimo. */
-function tokenFromInvite(url: URL): { ok: true; token: string } | { ok: false; reason: PairingFailure } {
-  const token = (url.searchParams.get("token") ?? "").trim()
+function tokenFromInvite(rawToken: string): { ok: true; token: string } | { ok: false; reason: PairingFailure } {
+  const token = rawToken.trim()
 
   if (!token) {
-    return { ok: false, reason: "missing-token" }
+    return { ok: false, reason: 'missing-token' }
   }
 
   if (token.length < MIN_TOKEN_LENGTH) {
-    return { ok: false, reason: "token-too-short" }
+    return { ok: false, reason: 'token-too-short' }
   }
 
   return { ok: true, token }
 }
 
 /** Convite com prazo: um QR fotografado ontem não pode parear hoje. `expires_at` aceita s ou ms. */
-function inviteExpired(url: URL, now: number): boolean {
-  const raw = Number(url.searchParams.get("expires_at") ?? "")
+function inviteExpired(rawExpiresAt: string, now: number): boolean {
+  const raw = Number(rawExpiresAt)
 
   if (!Number.isFinite(raw) || raw <= 0) {
     return false
@@ -143,36 +187,31 @@ export function parsePairingLink(
   existingDeviceId?: string | null,
   now: number = Date.now()
 ): PairingResult {
-  let url: URL
+  const parsed = splitPairLink(link)
 
-  try {
-    url = new URL(link)
-  } catch {
-    return { ok: false, reason: "malformed-url" }
+  if (!parsed || parsed.host !== PAIR_HOST) {
+    return { ok: false, reason: 'not-a-pair-link' }
   }
 
-  if (url.protocol.replace(/:$/, "").toLowerCase() !== PAIR_SCHEME || url.host.toLowerCase() !== PAIR_HOST) {
-    return { ok: false, reason: "not-a-pair-link" }
-  }
-
-  const gateway = gatewayFromInvite(url)
+  const gateway = gatewayFromInvite(parsed.params.get('url') ?? '')
 
   if (!gateway.ok) {
     return gateway
   }
 
-  const token = tokenFromInvite(url)
+  const token = tokenFromInvite(parsed.params.get('token') ?? '')
 
   if (!token.ok) {
     return token
   }
 
-  if (inviteExpired(url, now)) {
-    return { ok: false, reason: "invite-expired" }
+  if (inviteExpired(parsed.params.get('expires_at') ?? '', now)) {
+    return { ok: false, reason: 'invite-expired' }
   }
 
-  const deviceId = (existingDeviceId ?? "").trim() || (url.searchParams.get("device") ?? "").trim() || newDeviceId()
-  const label = (url.searchParams.get("label") ?? url.searchParams.get("name") ?? "").trim()
+  const deviceId =
+    (existingDeviceId ?? '').trim() || (parsed.params.get('device') ?? '').trim() || newDeviceId()
+  const label = (parsed.params.get('label') ?? parsed.params.get('name') ?? '').trim()
 
   return {
     ok: true,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { newDeviceId, pairingFailureMessage, parsePairingLink } from './pairing'
+import { newDeviceId, pairingFailureMessage, parsePairingLink, splitPairLink } from './pairing'
 
 const TOKEN = 'tok_abcdefghijklmnop'
 const link = (params: Record<string, string>) =>
@@ -109,5 +109,36 @@ describe('prazo do convite (revisão independente)', () => {
 
     expect(parsePairingLink(link({ url: 'https://pc.dz23.dev', token: TOKEN, expires_at: String(future) })).ok).toBe(true)
     expect(parsePairingLink(link({ url: 'https://pc.dz23.dev', token: TOKEN })).ok).toBe(true)
+  })
+})
+
+describe('separação textual do link (bug do polyfill de URL no React Native)', () => {
+  // Medido no emulador: `new URL("b3po://pair?…")` não devolve host "pair" no Hermes, e o convite
+  // chegava ao app e era recusado. O parser é textual justamente por isso.
+  it('reconhece a forma que o Android entrega: b3po://pair?query', () => {
+    const parsed = splitPairLink('b3po://pair?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop')
+
+    expect(parsed?.host).toBe('pair')
+    expect(parsed?.params.get('url')).toBe('https://pc.dz23.dev')
+    expect(parsed?.params.get('token')).toBe('tok_abcdefghijklmnop')
+  })
+
+  it('aceita caixa alta no esquema e no host', () => {
+    const parsed = splitPairLink('B3PO://PAIR?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop')
+
+    expect(parsed?.host).toBe('pair')
+    expect(parsePairingLink('B3PO://PAIR?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop').ok).toBe(true)
+  })
+
+  it('não quebra com percent-encoding inválido — ignora o par', () => {
+    const parsed = splitPairLink('b3po://pair?url=%E0%A4%A&token=tok_abcdefghijklmnop')
+
+    expect(parsed?.host).toBe('pair')
+    expect(parsed?.params.get('token')).toBe('tok_abcdefghijklmnop')
+  })
+
+  it('recusa link de outro esquema ou sem host de pareamento', () => {
+    expect(splitPairLink('https://pc.dz23.dev/pair')).toBeNull()
+    expect(parsePairingLink('b3po://other?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop').ok).toBe(false)
   })
 })

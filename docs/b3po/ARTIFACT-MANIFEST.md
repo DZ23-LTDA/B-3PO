@@ -186,9 +186,22 @@ catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de t
 | Formato | APK release (JS embutido, 888 KB de bundle) |
 | Versão | 1.0 (versionCode 1) · pacote com.dz23.b3po · minSdk 24 · targetSdk 36 |
 | Tamanho | 44,2 MB |
-| SHA-256 | F6C343D45EC23E02D2D170098FEE53287154104A69F6CF393FC00ACA29F13268 |
+| SHA-256 | DEA8F4FC9263A127FF615EED92FC15826CF44AFB95D6C5560A3D2ED70811874A |
 | Assinatura | **Android Debug** (chave do template; NÃO é distribuição) |
 | Reproduzir | `cd mobile/b3po-app/android && gradlew.bat assembleRelease` |
 | Provado | instalado e aberto no emulador (`com.dz23.b3po/.MainActivity`); texto em pt-BR na tela |
 | Limitação | assinado com chave de debug; AAB/loja exigem keystore de release (BLOCKED) |
 | Onde está | `mobile/b3po-app/android/app/build/outputs/apk/release/app-release.apk` (fora do Git) |
+
+## Mobile — AAB (Android App Bundle)
+
+| Campo | Valor |
+|---|---|
+| Formato | AAB (bundle para Play) |
+| Versão | 1.0 · com.dz23.b3po |
+| Tamanho | 19,0 MB |
+| SHA-256 | 5B84826FF9B13347C588534B8F48F62646B086F7E34F5803D451410E8E787F18 |
+| Assinatura | chave de **debug** do template — serve para validar empacotamento, NÃO para publicar |
+| Reproduzir | `cd mobile/b3po-app/android && gradlew.bat bundleRelease` |
+| Limitação | publicação exige keystore de release (BLOCKED_BY_EXTERNAL_DEPENDENCY) |
+| Onde está | `mobile/b3po-app/android/app/build/outputs/bundle/release/app-release.aab` (fora do Git) |
