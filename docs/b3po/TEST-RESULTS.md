@@ -203,3 +203,24 @@ geração, socket do gateway, allowlist de dispositivo). Medido agora, não lemb
 
 Os artefatos foram reconstruídos no mesmo commit: MSIX, `B-3PO.exe`, APK release, APK debug e AAB, todos
 com hash novo em `ARTIFACT-MANIFEST.md` (antes o AAB e o APK debug eram de um build anterior).
+
+## Rodada 80 — números medidos de novo (e um erro meu corrigido)
+
+Ao atualizar o PR #1 eu escrevi "52 testes" para Configurações e "23" para o gateway de dispositivo. Fui
+medir em vez de confiar na memória:
+
+| Suíte | Comando | Medido |
+|---|---|---|
+| desktop `src/app/settings` | `npx vitest run src/app/settings` | **597 testes / 76 arquivos** |
+| gateway dispositivo | `pytest tests/tui_gateway/test_device_method_scope.py tests/hermes_cli/test_ws_device_ticket_admission.py` | **19 testes** (17 + 2) |
+| desktop `src/i18n` | `npx vitest run src/i18n` | **117 testes / 16 arquivos** |
+| mobile | `npx vitest run` em `mobile/b3po-app` | **165 + 8 pulados (173)** |
+| CRM | `npx vitest run` em `crm/` | **140 testes / 9 arquivos** |
+| gate | `python scripts/check` | **14 checks, ok** |
+
+Os dois primeiros números estavam **errados** e foram corrigidos no PR. Registro aqui porque a regra desta
+entrega é não deixar número inventado no relatório, mesmo quando o erro é meu e é pequeno.
+
+O PR #1 também passou a declarar um detalhe de arquitetura que evita surpresa futura: a aprovação do mobile
+usa **token de sessão**; se o app migrar para **ticket de dispositivo**, os métodos de aprovação precisam
+entrar na allowlist (`tui_gateway/device_scope.py`) — hoje seriam recusados com `4030`.
