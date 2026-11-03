@@ -29,7 +29,6 @@ export function MascotGrid({ onSelect, selectedId = null }: MascotGridProps) {
             }
             key={mascot.id}
             onClick={() => onSelect(mascot)}
-            title={mascot.name}
             type="button"
           >
             <img alt="" className="size-11" draggable={false} src={mascot.src} />

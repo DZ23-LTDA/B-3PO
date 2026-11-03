@@ -371,3 +371,18 @@ grande e o rebranding é incremental — não vou afirmar que "a interface está
 | 23:52 | app relançado com `HERMES_DESKTOP_HERMES_ROOT` + backend isolado | ainda pede instalção local (quer `<HERMES_HOME>\hermes-agent`) |
 | 23:55 | conferência das 21 entregas + 7 ADRs | **nenhuma faltando** (36 arquivos) |
 | 23:58 | `EXECUTIVE-REPORT.md` | relatório final com números verificados e veredito NOT_READY |
+
+## Atualização 00:04 — REGRESSÃO MINHA, achada pela suíte completa
+
+Rodar a suíte inteira (e não só os testes que eu toquei) pegou uma violação que eu introduzi na rodada 12:
+
+```
+mascot-grid.tsx:23 <button> has title= — use <Tip> ou aria-label
+  (src/components/ui/__tests__/no-native-title.test.ts)
+```
+
+O repo proíbe `title=` nativo em `<button>` (tooltip nativo não é acessível nem estilizável). Eu tinha posto
+`title={mascot.name}` no botão do mascote. **Corrigido**: o `aria-label` já carrega o nome; o `title` saiu.
+Verificado: `no-native-title` verde + 4 testes da grade verdes + eslint 0.
+
+**Lição registrada:** testar só os arquivos que a gente mexe não basta; a suíte completa é o gate real.

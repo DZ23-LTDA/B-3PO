@@ -79,3 +79,61 @@ AUMID de fallback em `main.ts` corrigido para `com.dz23.b3po`.
 **Consequência:** MSIX não assinado **não instala** em Windows comum sem sideload habilitado e
 certificado confiável. Ou seja: o artefato existe e é reproduzível, mas a prova de instalação limpa
 depende de certificado (dependência externa) — não vou chamar de instalável.
+
+---
+
+## Tabela consolidada (formato exigido pelo GOAL, 2026-11-02 23:59)
+
+Campos: nome, plataforma, versão, commit, **hash**, formato, assinatura, notarização, runner, limitações,
+instrução de instalação.
+
+### 1. Aplicativo desktop (Windows)
+
+| Campo | Valor |
+|---|---|
+| Nome | `B-3PO.exe` |
+| Plataforma | Windows 10/11 x64 |
+| Versão | `0.0.0` |
+| Commit | `707c3df2` (identidade) — UI de mascotes é posterior; ver limitação |
+| Hash (SHA-256) | `35269d021e7a067024abe98476662aada0513793680bd0c97dc41fe124fa7941` |
+| Formato | diretório desempacotado (`--dir`), **não** instalador |
+| Assinatura | **não assinada** |
+| Notarização | não se aplica |
+| Runner | Windows 11, Node 26.12.1, electron-builder |
+| Limitações | não é instalador; build anterior à fiação do mascote; sem assinatura; instalação limpa não testada |
+| Instalação | executar o `.exe` na pasta |
+
+### 2. Instalador (Windows MSIX)
+
+| Campo | Valor |
+|---|---|
+| Nome | `B3PO-0.0.0-win-x64.msix` |
+| Plataforma | Windows 10/11 x64 (MSIX) |
+| Versão | `0.0.0` |
+| Commit | `3c92a2ba` |
+| Hash (SHA-256) | `71f2b3ed45aa32353fc320a02d59ed825d7d27a0bd306e8c0252c049bb5486f0` |
+| Formato | MSIX (manifest custom em `assets/msix-manifest.xml`) |
+| Assinatura | **NotSigned** (confirmado por `Get-AuthenticodeSignature`) |
+| Notarização | não se aplica |
+| Runner | Windows 11, `npm run dist:win` |
+| Limitações | **não instala** em Windows comum sem sideload + certificado confiável; build anterior à UI de mascotes |
+| Instalação | não recomendada — usar o desempacotado |
+
+### 3. Casca Android
+
+| Campo | Valor |
+|---|---|
+| Nome | `b3po-android-shell-debug.apk` |
+| Plataforma | Android (minSdk 24, targetSdk 35) |
+| Versão | `0.0.0` |
+| Commit | `606d2d4` |
+| Hash (SHA-256) | `a96b4a332a153322b16488987b8295b531c71cb8ac8baa97da42338282f9648f` |
+| Formato | APK de debug |
+| Assinatura | keystore **de debug** |
+| Notarização | não se aplica |
+| Runner | Windows 11 + emulador `emulator-5554` |
+| Limitações | **não é o cliente do produto** (sem login, bots ou eventos) |
+| Instalação | `adb install -r` (validado) |
+
+**Nota:** as tabelas anteriores deste arquivo são históricas. Esta é a consolidada e a única que deve ser
+citada em relatório.
