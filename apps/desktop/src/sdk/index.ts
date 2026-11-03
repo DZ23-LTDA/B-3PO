@@ -21,6 +21,7 @@
 import { computed, type ReadableAtom } from 'nanostores'
 import type { ReactNode } from 'react'
 
+import { withTimeout } from '@/lib/with-timeout'
 import { capabilityScoped, getApiRequestConnection } from '@/api/client'
 import { mutateSessionFenced } from '@/api/sessions'
 import { PRIMARY_SESSION_VIEW } from '@/app/chat/session-view'
@@ -107,6 +108,7 @@ import type { PaginatedSessions, UsageStats } from '@/types/hermes'
 
 import type { SessionMutationSnapshot } from '../../../shared/src/session-http-mutations'
 
+import { resumeExistingTile } from './wake-tile'
 import { pluginDecisions, profiles, skills, toolsets } from './bridge'
 import { composerHost } from './composer'
 import { i18nHost } from './i18n'
@@ -1069,11 +1071,7 @@ export const host = {
             const tileDelegate = existingTile ? sessionTileDelegate() : null
 
             if (tileDelegate) {
-              try {
-                await tileDelegate.resumeTile(storedSessionId, { refreshTranscript: true })
-              } catch {
-                requestSessionResume(storedSessionId, ownerRoute || undefined)
-              }
+              await resumeExistingTile(tileDelegate, storedSessionId, ownerRoute, hydrationTimeoutMs)
             } else {
               requestSessionResume(storedSessionId, ownerRoute || undefined)
             }

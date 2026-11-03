@@ -17,7 +17,7 @@ import {
   storedStringArray,
   storedStringRecord
 } from '@/lib/storage'
-import { withTimeout } from '@/lib/with-timeout'
+import { BACKEND_BOOT_WAIT_TIMEOUT_MS, withTimeout } from '@/lib/with-timeout'
 import { registryConnectionKind } from '@/store/connection-registry-state'
 import {
   $gateway,
@@ -607,6 +607,21 @@ async function resolveConnectionForProfile(profile: string): Promise<HermesConne
 // their sockets — so their sessions keep streaming concurrently. A null/empty
 // target means "no explicit profile" → keep the current gateway (a plain new
 // chat stays put; single-profile users never leave the primary).
+/** `ensureGatewayForProfile` rides HermesGateway.connect(), which has no dial deadline of its
+ *  own: a backend that accepts the socket and never finishes the handshake left this await pending
+ *  for the life of the window. `ensureGatewayProfile` clears `$gatewaySwapTarget` in a `finally`, so
+ *  that pending dial kept the "Waking up <profile>…" overlay on screen and the composer blocked even
+ *  after the profile's turn had completed. Bound it by the cold-boot budget — long enough that a
+ *  healthy dial never trips it, short enough that a wedged one fails into the Retry surface instead
+ *  of hanging. The message keeps the `Timed out loading ` prefix the wake's catch keys on. */
+async function openProfileBackend(target: string): Promise<void> {
+  await withTimeout(
+    ensureGatewayForProfile(target),
+    BACKEND_BOOT_WAIT_TIMEOUT_MS,
+    `Timed out loading ${target}'s session history.`
+  )
+}
+
 export async function ensureGatewayProfile(
   profile: string | null | undefined,
   { forceLegacyRoute = false }: { forceLegacyRoute?: boolean } = {}
@@ -694,7 +709,7 @@ export async function ensureGatewayProfile(
     // syncConnectionToActiveProfile await left a window where $gateway
     // already targeted the new backend while $connection still described the
     // previous one, and remote-aware paths announced the wrong mode (#46651).
-    const [connection] = await Promise.all([resolveConnectionForProfile(target), ensureGatewayForProfile(target)])
+    const [connection] = await Promise.all([resolveConnectionForProfile(target), openProfileBackend(target)])
 
     // ONE publication frame. batch() defers Nanostores' notifications to the
     // end of the callback, so the profile pointer and the connection

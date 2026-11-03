@@ -59,3 +59,37 @@ aplicado **somente** no caminho do wake do sdk. Se a abertura do bot passar por
 - `evidence/f5-session-messages.txt` — transcript real do turno
 - `docs/b3po/F5-EVIDENCE-REPORT.md` §6–§8 — histórico do diagnóstico
 - `evidence/f5-real-turn.png` — tela no momento do bloqueio
+
+## Rodada 33 — duas hipóteses a mais eliminadas (com build novo e app real)
+
+| Hipótese | Correção aplicada | Reteste no app | Veredito |
+|---|---|---|---|
+| `ensureGatewayForProfile` sem deadline de dial | `openProfileBackend()` com `BACKEND_BOOT_WAIT_TIMEOUT_MS` (180 s) em `store/profile.ts` | overlay continua | **eliminada** |
+| `resumeTile` sem deadline | `resumeExistingTile()` em `sdk/wake-tile.ts`, orçamento de hidratação, 3 testes | overlay continua | **eliminada** |
+
+Descoberta relevante no caminho: o `desktop.log` mostra `active key=revisor-codigo ... profile=revisor-codigo`
+— a **ativação do perfil conclui**. Logo o overlay que fica não é o de `activateProfile`: é o do wake
+(`sdk/index.ts` → `$gatewaySwapTarget`), cujo `finally` só roda quando a promise do wake liquida.
+
+As duas correções ficaram no repositório porque são corretas por si (um dial e um resume de tile sem
+deadline podem pendurar para sempre), mas **nenhuma delas era a causa**.
+
+## O que falta (instrumentação, não palpite)
+
+O próximo passo não é outro patch especulativo: é **instrumentar o wake** e ler o resultado.
+
+1. Envolver cada await do wake com um marcador: `wakeStep('activation' | 'openSession' | 'tileResume'
+   | 'requestResume' | 'waitHydration')` gravando `console.warn('[bot-wake] step', { step, ms })`
+   quando o passo passar de 5 s.
+2. Reproduzir no app e ler o **console do renderer** (CDP `page.on('console')`): o último passo
+   registrado é o `await` culpado.
+3. Corrigir esse await específico (deadline + superfície de Retry) e retestar com o mesmo roteiro.
+
+Critério de aceite: overlay sai em ≤ 25 s e o composer aceita novo envio; sem erro quando o wake é
+saudável.
+
+## Estado do código nesta rodada
+
+- `apps/desktop/src/store/profile.ts` — `openProfileBackend()` (dial com deadline de cold boot)
+- `apps/desktop/src/sdk/wake-tile.ts` — `resumeExistingTile()` (tile resume com deadline) + `wake-tile.test.ts` (3 testes)
+- Gate `python scripts/check`: 14 ok; `tsc` limpo; `2307` testes de store/sdk verdes
