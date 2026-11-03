@@ -89,3 +89,14 @@ it('localizes the custom-personality fallback without translating its user-suppl
     expect(body).toContain('My Custom Voice')
   }
 })
+
+it('chat genérico mostra a marca (imagem), não o lettering gigante', () => {
+  vi.spyOn(Math, 'random').mockReturnValue(0)
+
+  const { container } = render(<Fixture />)
+  const img = container.querySelector('img')
+
+  expect(img?.getAttribute('src')).toMatch(/b3po-mark-(dark|light)\.png$/)
+  // O lettering gigante só aparece no chat de um bot, onde o nome é a identidade.
+  expect(container.querySelector('.wordmark')).toBeNull()
+})

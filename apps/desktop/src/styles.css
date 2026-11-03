@@ -4248,3 +4248,28 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
   background: none;
   color: var(--err-ink);
 }
+
+/* Herói da conversa vazia: o robô B-3PO flutua devagar. Movimento é idle (não é progresso de trabalho),
+   então fica desligado para quem pediu menos animação no sistema. */
+@keyframes b3po-hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-0.375rem);
+  }
+}
+
+.b3po-hero-float {
+  animation: b3po-hero-float 6s ease-in-out infinite;
+  object-fit: contain;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b3po-hero-float {
+    animation: none;
+  }
+}

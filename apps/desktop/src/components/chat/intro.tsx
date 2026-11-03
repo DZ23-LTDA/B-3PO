@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { BrandMark } from '@/components/brand-mark'
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
@@ -172,6 +173,9 @@ export function Intro({ personality, seed }: IntroProps) {
   const rotationSeed = mountSeed + (seed ?? 0)
   const copy = resolveCopy(personality, rotationSeed, locale)
   const key = normalizeKey(personality)
+  // Chat genérico (ou persona neutra) mostra a marca; o chat de um bot mostra o nome dele.
+  const isBrand = NEUTRAL_PERSONALITIES.has(key)
+  const wordmarkText = isBrand ? WORDMARK : titleize(personality || '')
 
   const bodies =
     t.intro.stock[key] ?? (NEUTRAL_PERSONALITIES.has(key) ? t.intro.stock.none : t.intro.custom(personality || ''))
@@ -183,8 +187,17 @@ export function Intro({ personality, seed }: IntroProps) {
       className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8"
       data-slot="aui_intro"
     >
-      <div className="w-full min-w-0">
-        <Wordmark className="mb-1" text={WORDMARK} />
+      <div className="flex w-full min-w-0 flex-col items-center">
+        {/*
+         * Marca = o robô B-3PO, não o lettering gigante. O wordmark ocupava a largura toda (`.fit-text`)
+         * e, em janela baixa, passava por cima do compositor — o "deslocado" que o dono viu. A imagem
+         * tem altura limitada por viewport e o texto acessível continua no `aria-label`.
+         */}
+        {isBrand ? (
+          <BrandMark aria-label={WORDMARK} className="b3po-hero-float mb-1 size-auto h-[min(15rem,34vh)] w-auto" role="img" />
+        ) : (
+          <Wordmark className="mb-1" text={wordmarkText} />
+        )}
 
         <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
       </div>

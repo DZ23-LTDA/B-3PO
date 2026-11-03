@@ -551,3 +551,24 @@ commit — a data de build é a prova real. Está escrito aqui para o leitor nã
 
 `assembleDebug` continua produzindo o **mesmo** APK (16:46) porque debug não embute JS: o hash não muda e isso
 é esperado, não é esquecimento.
+
+## Rodada 95 — herói da conversa vazia: o robô, não o lettering
+
+Pedido do dono: a tela inicial deve mostrar **o robô no meio**, não só "B-3PO" escrito — e nada deslocado.
+
+O herói vinha de `components/chat/intro.tsx` com `<Wordmark text="B-3PO" />`, que usa `.fit-text`: dimensiona a
+letra pela **largura** da coluna. Em janela baixa isso cresce sem limite e passa por cima do compositor — o logo
+aparecia sobre o "Say something…" na captura do dono. Era isso o "deslocado".
+
+Agora: chat genérico (persona neutra) mostra a **marca do robô** (`b3po-mark-{dark,light}.png`, tema-aware, via
+`BrandMark`) com altura limitada por viewport (`h-[min(15rem,34vh)]`), e o lettering só aparece no chat de um bot,
+onde o nome é a identidade. O `aria-label` continua "B-3PO" para leitor de tela.
+
+Movimento: flutuação idle de 6s em CSS (`.b3po-hero-float`), desligada em `prefers-reduced-motion: reduce`.
+
+### O que NÃO foi feito, e por quê
+
+O dono quer o robô se mexendo **como no GIF dele**. Não existe frame do B-3PO no repositório: `public/hermes-frames/`
+é o mascote do Hermes (cavaleiro pixel), e `public/b3po-mark-*.png` é um PNG estático. Fazer "animação" com
+transformação de imagem estática seria fingir. Falta o arquivo do GIF para extrair os quadros — fica registrado
+como dependência do dono, não como feature entregue.
