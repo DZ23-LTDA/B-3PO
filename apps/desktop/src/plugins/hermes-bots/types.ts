@@ -389,4 +389,3 @@ export type AttentionClass = 'agent_blocked' | 'missing_config' | 'provider_auth
 
 export type RosterKindFilter = 'all' | 'bots' | 'groups'
 export type RosterActivityFilter = 'active' | 'all' | 'older' | 'recent'
-
