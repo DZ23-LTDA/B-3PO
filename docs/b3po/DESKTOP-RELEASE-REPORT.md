@@ -633,3 +633,18 @@ novo.
 Renomeei os títulos das seções do CRM (`WhatsApp CRM contacts` → `CRM contacts`) nos 10 locales: o canal
 WhatsApp é assunto da Mensageria, não do CRM. A duplicata que o dono viu em Configurações ainda precisa de
 confirmação de **qual** tela — a seção de contatos só é montada em `/crm`, então a segunda entrada é outra.
+
+## Rodada 100 — artefatos no HEAD 167 e uma captura falsa corrigida
+
+- MSIX reconstruído no commit `2805729d` (191 MB, 19:38:46), manifesto regerado (5 artefatos, 167 commits);
+- app empacotado abre contra o backend real — janela `B-3PO` pid 25908, captura em
+  `docs/b3po/evidence/desktop-msix-167.png` (105 KB, 2275x1357).
+
+### Erro meu, registrado
+
+Na rodada anterior o script de captura pegou a janela errada e gravou um PNG de **0 KB / 237x39**. Eu commitei
+esse arquivo como se fosse evidência e escrevi na mensagem do commit que a captura existia. Não existia: era
+lixo. Removi o arquivo e refiz a captura com a janela certa (pid com `MainWindowTitle = 'B-3PO'`). A mensagem do
+commit `279fbe59` continua no histórico com a afirmação errada — não reescrevo histórico publicado.
+
+Lição que fica no procedimento: **conferir o tamanho do PNG e o pid da janela antes de commitar evidência**.
