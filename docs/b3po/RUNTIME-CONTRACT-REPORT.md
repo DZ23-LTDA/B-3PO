@@ -52,3 +52,23 @@ que não puder ser restringida por esses dois meios fica **desabilitada** e emit
 | Evento `cancelled` sem confirmação do runtime | estado travado em "cancelando" | timeout + `execution.failed` com motivo |
 | Aprovação só por gateway (Telegram etc.) | desktop sem canal de aprovação | mapear notify→UI antes do marco |
 | Provider local com janela < 64K | turno recusado (já ocorreu) | validar modelo na configuração (`ollama_num_ctx`/janela ≥ 64K) |
+
+---
+
+## Atualização 21:34 — adaptador v1 implementado (`orchestration.ts`)
+
+Implementado como módulo puro, testado, **sem tocar no runtime**:
+
+| Peça | Comportamento |
+|---|---|
+| `mapRuntimeFrame` | mapeia `turn.start/end/error` e `tool.start/complete` para os eventos do contrato |
+| Evento não mapeável | devolve `null` — **nunca** fabrica (`message.delta`, `tool.generating`, `approval.request`, tipos desconhecidos) |
+| `HERMES_CAPABILITIES` | declara só o que emite; `approval: 'gateway'`, `cancellation: 'interrupt'`, `tool_trace: true`; não lista `waiting_approval`/`cancelled` |
+| `decideTool` | `deny` vence `allow`; fora das listas vale o `default` (`deny` ou `ask`) |
+| `ExecutionLog` | idempotente por `execution_id:sequence:tipo` e por `event_id`; segue status `running/completed/failed/cancelled` |
+| `newExecutionId` / `newCorrelationId` | ids com prefixo e contador (sem colisão mesmo com relógio fixo) |
+
+**Testes:** `orchestration.test.ts` — 13 testes; somados aos 12 do schema, **25 testes verdes**.
+
+Falta (honesto): persistência dos metadados de execução, fiação no fluxo de UI e o caminho de aprovação
+pelo desktop — dependem de onde o gateway expõe aprovação ao cliente.

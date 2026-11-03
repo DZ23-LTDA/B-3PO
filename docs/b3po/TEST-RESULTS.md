@@ -46,3 +46,24 @@
 | T11a | Unit do schema | `npx vitest run src/plugins/hermes-bots/bot-schema.test.ts` | **12/12 passando** |
 | T11b | Typecheck com o módulo | `npm run typecheck` | **exit 0** |
 | T11c | Lint dos arquivos novos | `npx eslint …bot-schema*.ts` | **exit 0** |
+
+## Atualização 21:34 — adaptador de orquestração
+
+| # | Teste | Comando | Resultado |
+|---|---|---|---|
+| T11d | Unit do adaptador | `npx vitest run src/plugins/hermes-bots/orchestration.test.ts` | **13/13 passando** |
+| T11e | Suítes do domínio juntas | vitest com schema + orchestration | **25/25 passando** |
+| T11f | Lint | `npx eslint …orchestration*.ts` | exit 0 |
+
+## Atualização 21:38 — varredura do plugin (112 arquivos de teste)
+
+`npx vitest run src/plugins/hermes-bots/` → **932 testes passando, 2 falhando**, ambos **pré-existentes** e
+sem relação com este trabalho:
+
+| Teste | Falha | Avaliação |
+|---|---|---|
+| `cron-detail.test.tsx` > "labels a next run parked past the scheduler grace as overdue" | `expected null to be +0` | cron/relógio; nenhum arquivo novo é importado |
+| `cron-prompt.test.ts` > "passes substitutions, backticks and quotes through as text" | comportamento de shell no Windows | idem |
+
+Verificação: nenhum dos dois importa `bot-schema`/`orchestration` (`git grep` vazio). Não foram
+"consertados" para não mascarar problema do upstream — ficam registrados para a Fase H.

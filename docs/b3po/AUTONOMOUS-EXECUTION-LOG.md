@@ -94,3 +94,14 @@ fabricar funcionalidade. O emulador resolveu o "onde rodar"; o que falta é o co
 **Incidente menor:** o `npm run pack` deixa `.cache/desktop-inputs` dentro do checkout, e o gate do
 repositório proíbe arquivos `.tar.gz` ali. Regra para as próximas rodadas: limpar `.cache` após
 empacotar ou apontar o cache do electron-builder para fora do checkout.
+
+## Rodada 6 — Fase D parte 1 (adaptador de eventos)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:33 | `orchestration.ts` + testes | 13 testes |
+| 21:34 | 1ª execução | 1 falha no teste de ids (contador global) → teste corrigido |
+| 21:35 | typecheck | **erro TS2322** (array congelado sem tipo) → `as ExecutionEventType[]` |
+| 21:36 | typecheck | exit 0 |
+| 21:37 | suíte completa do plugin | 932 ok, **2 falhas pré-existentes (`cron-*`)** |
+| 21:37 | `python scripts/check` | 14 checks ok |
