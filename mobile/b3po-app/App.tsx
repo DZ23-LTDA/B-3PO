@@ -43,12 +43,17 @@ import {
   shouldReplaceBubbles
 } from './src/screens/chat-session'
 import type { ChatBubble, RawMessage } from './src/screens/chat-session'
+import { nextRetryDelay, RETRY_BUTTON_LABEL, retryingCopy } from './src/api/retry'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
 
 export default function App() {
   const [connection, setConnection] = useState<ConnectionState>({ status: 'disconnected' })
+  // Falhas seguidas de conexao: decide se ainda vale tentar sozinho ou se so o toque resolve.
+  const [attempt, setAttempt] = useState(0)
+  // O estado 'failed' guarda so origem+mensagem; para reconectar preciso das credenciais do pareamento.
+  const lastCredentials = useRef<{ origin: string; deviceId: string; token: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [nav, setNav] = useState<NavState>(initialNav)
   const [bots, setBots] = useState<BotProfile[]>([])
@@ -72,6 +77,7 @@ export default function App() {
   )
 
   const connect = useCallback(async (origin: string, deviceId: string, token: string) => {
+    lastCredentials.current = { origin, deviceId, token }
     setConnection({ status: 'connecting', origin })
 
     const client = new RestClient({ origin, token })
@@ -84,10 +90,12 @@ export default function App() {
       const profiles = await client.profiles().catch(() => [] as BotProfile[])
 
       setBots(profiles)
+      setAttempt(0)
       setConnection({ status: 'connected', origin, deviceId, token, health, gateway, checkedAt: Date.now() })
     } catch (failure) {
       const detail = failure instanceof Error ? failure.message : String(failure)
 
+      setAttempt(previous => previous + 1)
       setConnection({
         status: 'failed',
         origin,
@@ -95,6 +103,27 @@ export default function App() {
       })
     }
   }, [])
+
+  // Reconexao com espera crescente: 1s, 3s, 8s. Depois disso o cartao oferece o toque manual —
+  // insistir sozinho para sempre esconde do usuario que o servidor nao esta la.
+  useEffect(() => {
+    if (connection.status !== 'failed') {
+      return
+    }
+
+    const delay = nextRetryDelay(Math.max(0, attempt - 1))
+    const credentials = lastCredentials.current
+
+    if (delay === null || !credentials) {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      void connect(credentials.origin, credentials.deviceId, credentials.token)
+    }, delay)
+
+    return () => clearTimeout(timer)
+  }, [attempt, connect, connection])
 
   /** Abre o bot: busca a conversa mais recente e carrega as mensagens do servidor. */
   const openBot = useCallback(
@@ -305,6 +334,29 @@ export default function App() {
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{card.title}</Text>
               <Text style={styles.cardBody}>{card.body}</Text>
+
+              {connection.status === 'failed' ? (
+                <>
+                  <Text style={styles.cardBody}>{retryingCopy(Math.max(0, attempt - 1))}</Text>
+                  <TouchableOpacity
+                    accessibilityLabel={RETRY_BUTTON_LABEL}
+                    accessibilityRole="button"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setAttempt(0)
+
+                      const credentials = lastCredentials.current
+
+                      if (credentials) {
+                        void connect(credentials.origin, credentials.deviceId, credentials.token)
+                      }
+                    }}
+                    style={styles.sendButton}
+                  >
+                    <Text style={styles.sendButtonText}>{RETRY_BUTTON_LABEL}</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
             </View>
 
             {connection.status === 'connected' && botItems.length === 0 ? (

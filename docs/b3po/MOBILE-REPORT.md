@@ -798,3 +798,32 @@ resolveu, não mais tentativas.
 | campo limpa após envio | ✅ |
 | composer visível com teclado aberto | ✅ (era o bug) |
 | recarga da resposta em passos | implementada com 15 testes (rodada 64) |
+
+## Rodada 75 — RECONEXÃO no aparelho: espera crescente, contagem na tela e botão manual (comprovado)
+
+O app não reagia à queda do servidor: o cartão de erro ficava parado e só fechar/abrir resolvia. Agora:
+
+| Peça | Onde | Teste |
+|---|---|---|
+| espera entre tentativas (1 s, 3 s, 8 s, depois para) | `src/api/retry.ts::nextRetryDelay` | 4 testes em `retry.test.ts` |
+| texto do cartão com contagem e tentativas restantes | `retry.ts::retryingCopy` | idem |
+| botão manual com rótulo estável | `retry.ts::RETRY_BUTTON_LABEL` | idem |
+| agendamento + contador de falhas, credenciais guardadas para reconectar | `App.tsx` (`useEffect` + `lastCredentials`) | — |
+
+### Provado no aparelho (`dsh_pixel`)
+
+1. Derrubei o `serve` (`porta 9119 livre: True`) e abri o app pelo link de pareamento.
+   Tela: **"Sem conexão com o computador"**, o detalhe técnico honesto, **"Tentando de novo em 8s (mais 1
+   tentativa automatica)."** e o botão **"Tentar de novo"**. Evidência: `mobile-offline-retry.png`.
+2. Subi o `serve` de novo (`commit b7ba9c86`) e toquei em "Tentar de novo".
+   Tela: **"Conectado ao computador"**, `Servidor: http://127.0.0.1:9119`, `Compilação: b7ba9c86…`,
+   `Gateway: rodando`, e os três bots carregados. Evidência: `mobile-reconnected.png`.
+
+Sem reiniciar o aplicativo em nenhum dos passos.
+
+### Correções de texto no caminho
+
+- "Nao consegui falar…" → **"Não consegui falar…"** (acento faltando, achado na captura).
+- A cópia de esgotamento não promete contagem regressiva: manda tocar no botão.
+
+Mobile: **142 testes** + 8 pulados (eram 138; +4 do retry).
