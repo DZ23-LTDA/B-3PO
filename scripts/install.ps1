@@ -22,7 +22,8 @@
 #                         `hermes update --set-channel`
 [CmdletBinding(PositionalBinding=$false)]
 param(
-    [string]$Branch = "main",
+    # Produto (b3po-brand) por padrao; -Branch/HERMES_INSTALL_BRANCH escolhem outra.
+    [string]$Branch = $(if ($env:HERMES_INSTALL_BRANCH) { $env:HERMES_INSTALL_BRANCH } else { "b3po-brand" }),
     [string]$Commit = "",
     [string]$Channel = $(if ($env:HERMES_INSTALL_CHANNEL) { $env:HERMES_INSTALL_CHANNEL } else { "" }),
     [string]$HermesHome = $(if ($env:HERMES_HOME) { $env:HERMES_HOME } else { "$env:LOCALAPPDATA\hermes" }),
@@ -46,7 +47,13 @@ param(
     # path doesn't exist" report is which paths it actually resolved --
     # especially on profiles Windows exposes through an 8.3 alias.
     #   powershell -File install.ps1 -ShowResolvedPaths
-    [switch]$ShowResolvedPaths
+    [switch]$ShowResolvedPaths,
+    # Explicit, separate mode for developing against the upstream Hermes tree.
+    # Never implied by anything else: an operator has to ask for it by name.
+    [switch]$Upstream,
+    # Print the resolved source (product, repo, branch, commit) as JSON and
+    # exit without touching anything. The clean-install test asserts on it.
+    [switch]$PrintSource
 )
 
 $ErrorActionPreference = "Stop"
@@ -76,7 +83,30 @@ $script:BoundParams = $PSBoundParameters
 # Under iex, script scope is the caller's session and outlives a run; start
 # each run without the previous run's answer (see Set-LauncherUserPath).
 $script:BinDirOnCallerPath = $null
-$RepoUrl = if ($env:HERMES_REPO_URL) { $env:HERMES_REPO_URL } else { "https://github.com/NousResearch/hermes-agent.git" }
+# --- Product identity (B-3PO) ------------------------------------------------
+# The B-3PO installer installs B-3PO. The upstream Hermes repository is a
+# technical origin, reachable only through the explicit -Upstream switch (or
+# HERMES_INSTALL_UPSTREAM=1); it is never a silent default.
+$ProductName = "B-3PO"
+$ProductRepoUrl = "https://github.com/DZ23-LTDA/B-3PO.git"
+$ProductBranch = "b3po-brand"
+$UpstreamRepoUrl = "https://github.com/NousResearch/hermes-agent.git"
+$UpstreamBranch = "main"
+$UseUpstream = ($env:HERMES_INSTALL_UPSTREAM -eq "1") -or $Upstream.IsPresent
+
+# Upstream mode follows the upstream tree, so it defaults to the upstream branch
+# too -- unless the operator pinned a branch through the parameter or the env.
+if ($UseUpstream -and -not $PSBoundParameters.ContainsKey('Branch') -and -not $env:HERMES_INSTALL_BRANCH) {
+    $Branch = $UpstreamBranch
+}
+
+$RepoUrl = if ($env:HERMES_REPO_URL) {
+    $env:HERMES_REPO_URL
+} elseif ($UseUpstream) {
+    $UpstreamRepoUrl
+} else {
+    $ProductRepoUrl
+}
 
 # --- BEGIN GENERATED: bootstrap pins (scripts/gen-bootstrap-pins.py) ---
 # Derived from pm/lock.json. DO NOT EDIT BY HAND:
@@ -621,9 +651,9 @@ function Write-Err([string]$msg) { Write-Host "[X] $msg" -ForegroundColor Red }
 function Write-Banner {
     Write-Host ""
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
-    Write-Host "|             * Hermes Agent Installer                    |" -ForegroundColor Magenta
+    Write-Host "|             * B-3PO Installer                           |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
-    Write-Host "|  An open source AI agent by Nous Research.              |" -ForegroundColor Magenta
+    Write-Host "|  B-3PO bot platform - built on Hermes Agent (Nous).     |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
     Write-Host ""
 }
@@ -1503,7 +1533,7 @@ function Stage-Complete {
         $marker | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $InstallDir ".hermes-bootstrap-complete") -Encoding UTF8
     }
     if ($Channel) { Invoke-InstalledHermes @('update', '--set-channel', $Channel) }
-    if ($commit) { Write-Ok "Hermes Agent install complete (pinned $commit). Run: hermes" }
+    if ($commit) { Write-Ok "$ProductName install complete (pinned $commit). Run: hermes" }
 }
 
 function New-DesktopShortcuts {
@@ -1617,6 +1647,19 @@ if ($ShowResolvedPaths) {
 
 if ($Manifest) {
     @{ protocol_version = 1; stages = $Stages } | ConvertTo-Json -Depth 4 -Compress | Write-Output
+    exit 0
+}
+
+if ($PrintSource) {
+    # Side-effect-free: reports exactly what the install would clone, so a test
+    # (and an operator) can prove the product source without a network call.
+    @{
+        product = $ProductName
+        repo_url = $RepoUrl
+        branch = $(if ($Commit) { $Branch } else { $Branch })
+        commit = $Commit
+        upstream_mode = [bool]$UseUpstream
+    } | ConvertTo-Json -Compress | Write-Output
     exit 0
 }
 

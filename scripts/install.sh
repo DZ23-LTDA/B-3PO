@@ -20,9 +20,36 @@ set -u
 # hygiene can't break the locked sync the way it used to before pm owned it.
 export UV_NO_CONFIG=1
 
-REPO_URL="${HERMES_REPO_URL:-https://github.com/NousResearch/hermes-agent.git}"
-BRANCH="main"
+# --- Product identity (B-3PO) ------------------------------------------------
+# The B-3PO installer installs B-3PO. The upstream Hermes repository is a
+# technical origin reachable only through --upstream / HERMES_INSTALL_UPSTREAM=1;
+# it is never a silent default.
+PRODUCT_NAME="B-3PO"
+PRODUCT_REPO_URL="https://github.com/DZ23-LTDA/B-3PO.git"
+PRODUCT_BRANCH="b3po-brand"
+UPSTREAM_REPO_URL="https://github.com/NousResearch/hermes-agent.git"
+UPSTREAM_BRANCH="main"
+
+UPSTREAM_MODE=false
+if [ "${HERMES_INSTALL_UPSTREAM:-}" = "1" ]; then UPSTREAM_MODE=true; fi
+
+if [ -n "${HERMES_REPO_URL:-}" ]; then
+    REPO_URL="$HERMES_REPO_URL"
+elif [ "$UPSTREAM_MODE" = true ]; then
+    REPO_URL="$UPSTREAM_REPO_URL"
+else
+    REPO_URL="$PRODUCT_REPO_URL"
+fi
+
+if [ -n "${HERMES_INSTALL_BRANCH:-}" ]; then
+    BRANCH="$HERMES_INSTALL_BRANCH"
+elif [ "$UPSTREAM_MODE" = true ]; then
+    BRANCH="$UPSTREAM_BRANCH"
+else
+    BRANCH="$PRODUCT_BRANCH"
+fi
 INSTALL_COMMIT=""
+WANT_SOURCE=false
 # The update channel to install: stable (the latest published release, the default for the
 # official repository's main line) or main (every commit). An explicit choice is persisted.
 CHANNEL="${HERMES_INSTALL_CHANNEL:-}"
@@ -61,6 +88,12 @@ while [ $# -gt 0 ]; do
             esac
             shift 2 ;;
         --manifest|-Manifest) WANT_MANIFEST=true; shift ;;
+        --upstream|-Upstream)
+            UPSTREAM_MODE=true
+            REPO_URL="$UPSTREAM_REPO_URL"
+            if [ -z "${HERMES_INSTALL_BRANCH:-}" ]; then BRANCH="$UPSTREAM_BRANCH"; fi
+            shift ;;
+        --print-source|-PrintSource) WANT_SOURCE=true; shift ;;
         --json|-Json) JSON=true; shift ;;
         --non-interactive|-NonInteractive) NON_INTERACTIVE=true; shift ;;
         --skip-setup) NON_INTERACTIVE=true; shift ;;
@@ -191,9 +224,9 @@ stage_signal() {
 print_banner() {
     printf '\n%s%s' "$C_MAGENTA" "$C_BOLD"
     printf '%s\n' "┌─────────────────────────────────────────────────────────┐"
-    printf '%s\n' "│             ☤ Hermes Agent Installer                    │"
+    printf '%s\n' "│             B-3PO Installer                             │"
     printf '%s\n' "├─────────────────────────────────────────────────────────┤"
-    printf '%s\n' "│  An open source AI agent by Nous Research.              │"
+    printf '%s\n' "│  B-3PO bot platform - built on Hermes Agent (Nous).     │"
     printf '%s\n' "└─────────────────────────────────────────────────────────┘"
     printf '%s\n' "$C_NC"
 }
@@ -1182,7 +1215,7 @@ stage_complete() {
         "$INSTALL_DIR/.hermes/bin/hermes" update --set-channel "$CHANNEL" \
             || fail "could not save the $CHANNEL update channel" other
     fi
-    log_success "Hermes Agent install complete. Run: hermes"
+    log_success "$PRODUCT_NAME install complete. Run: hermes"
 }
 
 print_path_reload_hint() {
@@ -1243,6 +1276,13 @@ run_stage() (
 if [ "${BASH_SOURCE[0]:-$0}" = "$0" ]; then
     if [ "$WANT_MANIFEST" = true ]; then
         emit_manifest
+        exit 0
+    fi
+
+    if [ "$WANT_SOURCE" = true ]; then
+        # Side-effect-free: reports exactly what this install would clone.
+        printf '{"product":"%s","repo_url":"%s","branch":"%s","commit":"%s","upstream_mode":%s}\n' \
+            "$PRODUCT_NAME" "$REPO_URL" "$BRANCH" "$INSTALL_COMMIT" "$UPSTREAM_MODE"
         exit 0
     fi
 
