@@ -231,3 +231,20 @@ Resultado: **355 = valor de main** (permitido: só pode cair), sem waiver e sem 
 **Evidência:** `scripts/check` 14 ok · tsc 0 · eslint 0 · 47 testes (criação + schema + mascotes) verdes.
 
 **Ainda falta:** o mesmo em `edit-profile-dialog` (edição de bot existente).
+
+## Rodada 16 — mascote na edição de bot existente (F5 completo no domínio)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 23:04 | `EditProfileLook` ganha `mascotId` + diff em `editedLook` | patch só quando muda |
+| 23:05 | `edit-profile-dialog` passa `mascotId`/`onMascot` ao picker | aba B-3PO também na edição |
+| 23:06 | fixture do teste poluída pelo meu regex de fallback (25 linhas) | corrigida linha a linha |
+| 23:08 | `CC 21 > 20` em `EditProfileDialog` (dois `??`) | helper `openingMascotId` → CC 19 |
+| 23:10 | `scripts/check` + tsc + eslint + 37 testes | **verdes** |
+
+**Contrato coberto:** escolher, trocar e limpar mascote geram patch; **desmarcar** grava `mascot_id: null`
+(não remove a chave); o mascote não arrasta título/forma/imagem para o patch.
+
+Com isso o F5 tem o caminho completo no domínio: criar com mascote → persistir → editar → persistir.
+O que continua sem prova é o **roteiro visual ponta a ponta** (abrir o app, escolher, reiniciar, ver o
+mascote de volta).

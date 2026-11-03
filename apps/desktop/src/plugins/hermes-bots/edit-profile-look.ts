@@ -4,6 +4,8 @@ import type { BotMeta } from './types'
 export interface EditProfileLook {
   color: null | string
   image: null | string
+  /** Mascote oficial escolhido; `null` = nenhum. */
+  mascotId: null | string
   shape: BotMeta['shape']
   title: string
 }
@@ -27,6 +29,10 @@ export function editedLook(opened: EditProfileLook, current: EditProfileLook): B
   if (current.image !== opened.image) {
     patch.image = current.image
     patch.imageKind = current.image ? 'photo' : 'shape'
+  }
+
+  if (current.mascotId !== opened.mascotId) {
+    patch.mascot_id = current.mascotId
   }
 
   if (Object.keys(patch).length > 0) {

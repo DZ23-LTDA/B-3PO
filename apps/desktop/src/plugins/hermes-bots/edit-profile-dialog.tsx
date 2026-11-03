@@ -30,7 +30,7 @@ import { useBots } from './i18n'
 import { displayName } from './labels'
 import { AdvancedProfileConfig, applyAdvancedConfig, emptyAdvancedState } from './profile-config'
 import { botRosterMeta, requestForBot } from './routing'
-import type { AvatarAppearance, RosterRow } from './types'
+import type { AvatarAppearance, BotMeta, RosterRow } from './types'
 
 // ── edit profile dialog ──────────────────────────────────────────────────────
 
@@ -43,6 +43,11 @@ interface EditProfileDialogProps {
   bot: null | RosterRow
   onClose: () => void
   open: boolean
+}
+
+/** Mascote gravado no metadado; ausente vira `null` (nenhum). */
+function openingMascotId(meta: BotMeta | null | undefined): null | string {
+  return meta?.mascot_id ?? null
 }
 
 export function EditProfileDialog({ bot, open, onClose }: EditProfileDialogProps) {
@@ -66,6 +71,7 @@ export function EditProfileDialog({ bot, open, onClose }: EditProfileDialogProps
   const [shape, setShape] = useState(appearance.shape)
   const [color, setColor] = useState<null | string>(appearance.color)
   const [image, setImage] = useState<null | string>(appearance.image ?? null)
+  const [mascotId, setMascotId] = useState<null | string>(openingMascotId(meta))
   // A thin row from another connection carries its backend's title on the
   // row itself; there may be no local record for it.
   const openingTitle = meta?.title || bot?.title || ''
@@ -74,6 +80,7 @@ export function EditProfileDialog({ bot, open, onClose }: EditProfileDialogProps
     shape: appearance.shape,
     color: appearance.color,
     image: appearance.image ?? null,
+    mascotId: openingMascotId(meta),
     title: openingTitle
   }
 
@@ -116,7 +123,7 @@ export function EditProfileDialog({ bot, open, onClose }: EditProfileDialogProps
     setBusy(true)
     let advancedFailed = false
 
-    const look = editedLook(opened, { shape, color, image, title })
+    const look = editedLook(opened, { shape, color, image, title, mascotId })
     const persistence = look ? await saveBotMeta(bot, look) : null
 
     // Only an explicit remote failure is an error — 'unsupported' is the
@@ -214,8 +221,10 @@ export function EditProfileDialog({ bot, open, onClose }: EditProfileDialogProps
               description
             }}
             image={image}
+            mascotId={mascotId}
             onColor={setColor}
             onImage={setImage}
+            onMascot={mascot => setMascotId(mascot.id)}
             onShape={setShape}
             shape={shape}
           />
