@@ -397,3 +397,25 @@ Verificado: `no-native-title` verde + 4 testes da grade verdes + eslint 0.
 | 00:52 | mobile: contrato do protocolo | 12 testes |
 | 00:55 | mobile: cliente de API + sessão segura | 26 testes no total, tsc 0 |
 | 01:00 | relatórios finais atualizados | este bloco |
+
+## Rodada 26 — pt-BR e padronização da marca (2026-11-03)
+
+**pt-BR entregue** (`ee8a215e`): locale registrado no catálogo, no `BundledLocale`, no seletor e nos
+aliases (`pt`, `pt-BR`, `pt_br`); seções `common` (39 strings) e `install` (31, incluindo funções com
+placeholder) traduzidas como override sobre o inglês; rótulos canônicos de grupo do Bot Mode em pt.
+**91 testes de i18n verdes**, incluindo 7 novos (`pt.test.ts`) que provam registro, resolução de alias,
+tradução real, preservação de placeholders e fallback para o inglês nas seções ainda não traduzidas.
+
+**Marca padronizada** (`e1c44748`, 121 arquivos): a arte-fonte dos ícones passou a ser a marca B-3PO
+(SVG com o logo embutido), `nous-girl`/`nous-logo` renomeados para `b3po-mark`/`b3po-logo` em assets,
+`public`, website e web; o gerador aceita `<image>` como arte e mantém PNG/ICNS sob o limite de 500 KiB;
+os 99 alvos do pipeline foram regerados (desktop, bootstrap installer, website, web, appx, icns).
+
+**Correção visual pedida pelo proprietário:** o BrandMark mostrava um tile `#000105` sobre o card
+`#0E0F12` — mancha mais escura. A marca agora é **transparente** (fundo recortado por flood fill a partir
+das bordas, preservando os pretos internos do robô) e integra em qualquer superfície.
+Evidência: `evidence/desktop-b3po-brandmark.png`.
+
+**Não obtido ainda:** a UI em pt-BR no app real — o desktop resolve `display.language` pelo backend, e
+sem gateway a tela continua em inglês. O bootstrap local chegou a "0 de 9 etapas" e não progrediu (nenhum
+processo de instalação ativo), então o roteiro F5 segue **NÃO CONFIRMADO**.
