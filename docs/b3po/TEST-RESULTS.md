@@ -131,7 +131,7 @@ Nenhuma falha nova. As 6 restantes são ambientais e anteriores a esta entrega.
 | Suíte | Comando | Resultado |
 |---|---|---|
 | Gate do repositório | `python scripts/check` | **14 checks, ok** |
-| Mobile (`mobile/b3po-app`) | `npx vitest run` | **146 passando**, 8 pulados (154) — os 8 são os testes ao vivo que exigem servidor |
+| Mobile (`mobile/b3po-app`) | `npx vitest run` | **153 passando**, 8 pulados (161) — os 8 são os testes ao vivo que exigem servidor |
 | CRM (`crm/`) | `npx vitest run` | **140 passando** (9 arquivos) |
 | Desktop — idioma | `npx vitest run src/i18n` | **112 passando** (catálogo, cobertura, pt.test, overlay) |
 | Desktop — placeholder do composer | `npx vitest run src/app/chat/composer/hooks/use-composer-placeholder.test.tsx` | **1 passando** (regressão do locale congelado) |
@@ -140,7 +140,7 @@ Nenhuma falha nova. As 6 restantes são ambientais e anteriores a esta entrega.
 
 ### O que mudou desde a medição anterior
 
-- Mobile passou de 121 para **146** testes (composer, follow-up, `gateway-chat-socket` com 10, `chat-session`
+- Mobile passou de 121 para **153** testes (composer, follow-up, `gateway-chat-socket` com 10, `chat-session`
   com 15).
 - CRM está em **140**.
 - Desktop ganhou **4 testes** novos de idioma nesta série: três do provider (`context.test.tsx`) e um do
@@ -178,10 +178,28 @@ guarda de geração de sessão):
 | Suíte | Comando | Resultado |
 |---|---|---|
 | Gate do repo | `python scripts/check` | **14 checks, ok** |
-| Mobile | `npx vitest run` em `mobile/b3po-app` | **146 passando**, 8 pulados (154) |
+| Mobile | `npx vitest run` em `mobile/b3po-app` | **153 passando**, 8 pulados (161) |
 | Mobile — typecheck | `npx tsc --noEmit` | **exit 0** |
 | CRM | `npx vitest run` em `crm/` | **140 passando** (9 arquivos) |
 | Desktop — idioma | `npx vitest run src/i18n` | **112 passando** |
 | Desktop — áreas tocadas | `npx vitest run src/app/chat/composer src/app/shell/hooks` | **752 passando** |
 
 Contagem de commits na branch quando esta tabela foi escrita: **129** sobre `main`.
+
+## Remediação — 2026-11-03 19:50 UTC (rodada 73)
+
+Recontagem depois das rodadas 69–73 (lista de conversas, conversa inicial com histórico, guardas de
+geração, socket do gateway, allowlist de dispositivo). Medido agora, não lembrado:
+
+| Suíte | Resultado |
+|---|---|
+| Gate do repo (`python scripts/check`) | **14 checks, ok** |
+| Mobile (`npx vitest run`) | **153 passando**, 8 pulados (161) |
+| Mobile (`npx tsc --noEmit`) | exit 0 |
+| CRM (`npx vitest run`) | **140 passando** (9 arquivos) — medido 19:15 UTC |
+| Desktop `src/i18n` | **112 passando** (15 arquivos) — medido 19:15 UTC |
+| Gateway (device ticket + ws vizinhos) | **23 passando** |
+| Commits na branch | **135** sobre `main` |
+
+Os artefatos foram reconstruídos no mesmo commit: MSIX, `B-3PO.exe`, APK release, APK debug e AAB, todos
+com hash novo em `ARTIFACT-MANIFEST.md` (antes o AAB e o APK debug eram de um build anterior).
