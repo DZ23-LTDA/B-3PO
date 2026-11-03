@@ -942,3 +942,27 @@ Bot `default` com **4 conversas**: toque em “Conversas (4)” → lista com �
 mensagens daquela conversa carregadas. Evidência: `docs/b3po/evidence/mobile-conversas-lista.png`.
 
 Mobile: **149 testes** + 8 pulados. Gate 14 ok; `tsc` limpo.
+
+## Rodada 72 — abrir o bot mostrava conversa VAZIA (bug meu da rodada 71)
+
+Depois de renomear a variável local da lista de sessões para `found`, a checagem seguinte continuou lendo
+**`sessions`** — o estado do React, que na primeira abertura é sempre `[]`. Resultado: a tela caía em
+"sem conversas" mesmo com 4 conversas no servidor, e eu vi isso duas vezes no aparelho antes de achar a
+causa. O `tsc` não pega: `sessions` existe, só é o valor errado.
+
+### Correção (duas partes)
+
+1. **A checagem usa a lista recém-buscada**, via `pickInitialSession(found)` — nada de ler estado antigo.
+2. **A conversa inicial é a mais recente que tem mensagens.** A mais recente pode estar vazia (sessão criada
+   e abandonada), e abrir nela mostra "sem mensagens" mesmo existindo histórico. `pickInitialSession`
+   prefere a primeira com `messageCount > 0`; sem nenhuma, devolve a primeira e a tela explica o vazio.
+
+4 testes novos em `pick-initial-session.test.ts` (pula vazia, usa recente com conteúdo, fallback, lista vazia).
+
+### Provado no aparelho (`dsh_pixel`), APK final
+
+Tocar no bot `default` abre direto a conversa com histórico: “Você: teste depois da allowlist de
+dispositivo” + resposta do bot, com o atalho “Conversas (4)” acima. Evidência:
+`docs/b3po/evidence/mobile-conversa-inicial-com-historico.png`.
+
+Mobile: **153 testes** + 8 pulados. Gate 14 ok; `tsc` limpo.

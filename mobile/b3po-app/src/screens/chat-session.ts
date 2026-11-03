@@ -231,3 +231,19 @@ export function sessionRowLabel(session: SessionRow): string {
 
   return parts.join(', ')
 }
+
+/**
+ * Qual conversa abrir quando o bot e tocado.
+ *
+ * A lista vem ordenada por atividade, e a mais recente pode estar VAZIA (uma sessao criada e abandonada, ou
+ * a que acabou de nascer sem resposta). Abrir nela mostrava "sem mensagens" mesmo existindo conversa com
+ * historico — foi o que o aparelho mostrou. Preferimos a mais recente que tem mensagem; sem nenhuma, a
+ * primeira mesmo (a tela entao explica o estado vazio com honestidade).
+ */
+export function pickInitialSession(rows: readonly SessionRow[]): SessionRow | null {
+  if (rows.length === 0) {
+    return null
+  }
+
+  return rows.find(row => row.messageCount > 0) ?? rows[0] ?? null
+}

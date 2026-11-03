@@ -38,6 +38,7 @@ import {
   FOLLOW_UP_DELAYS_MS,
   chatBubbles,
   chatEmptyCopy,
+  pickInitialSession,
   sessionRows,
   shouldFollowUp,
   shouldReplaceBubbles
@@ -184,10 +185,12 @@ export default function App() {
 
          setSessions(found)
 
-        if (sessions.length === 0) {
+        const initial = pickInitialSession(found)
+
+        if (initial === null) {
           setChatNote(chatEmptyCopy('no-sessions').body)
         } else {
-          const messages = await client.messages(bot.name, found[0]!.id)
+          const messages = await client.messages(bot.name, initial.id)
           const loaded = chatBubbles(messages as RawMessage[])
 
           setBubbles(loaded)
