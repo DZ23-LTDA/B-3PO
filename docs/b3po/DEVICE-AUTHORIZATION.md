@@ -286,3 +286,41 @@ o envio funcionar.
 **Pendente para fechar no aparelho:** `App.tsx` precisa abrir o socket com `gatewayWsUrl` +
 `gatewayHeaders`, criar/retomar a conversa e enviar pelo composer. O transporte está provado; falta
 ligar a tela.
+
+## Estado: IMPLEMENTADO (rodada 68)
+
+A allowlist de métodos por provedor de ticket saiu do papel:
+
+| Peça | Onde | Teste |
+|---|---|---|
+| lista de verbos de sessão + recusa com motivo fixo | `tui_gateway/device_scope.py` (`DEVICE_SESSION_METHODS`, `method_refusal`) | `tests/tui_gateway/test_device_method_scope.py` |
+| fiação no funil único de despacho (vale para as faixas serial e concorrente) | `tui_gateway/ws.py::_dispatch_one` | 3 testes dirigindo o **`handle_ws` real** com `auth_identity={"provider":"b3po-device"}` |
+
+Código de erro: **4030** (`DEVICE_METHOD_FORBIDDEN`), fora da faixa 4000/4001 de parâmetros para o cliente
+distinguir "seu ticket não vale para isto" de "seu payload está errado".
+
+### Comprovado
+
+- `approval.respond` com ticket de dispositivo → erro 4030 **e o pedido não chega ao dispatcher**
+  (asserção sobre a lista de métodos vistos pelo `server.dispatch`).
+- `prompt.submit` com o mesmo ticket → passa.
+- Credencial de dono (`provider="local"`) → `approval.respond` continua passando: a regra não vaza.
+- Texto da recusa não ecoa parâmetro do cliente.
+
+17 testes no arquivo; gate `14 checks, ok`.
+
+### Não comprovado ao vivo (e por quê)
+
+Tentei a prova ponta a ponta no servidor real: criei dispositivo por `POST /api/b3po/devices`, troquei a
+chave por ticket em `/api/b3po/device-ticket` (funcionou) e abri `ws://…/api/ws?ticket=…`. O **upgrade**
+foi recusado com **HTTP 403 antes de o ticket ser consumido** — o gate `_close_unless_sidecar_allowed`
+roda primeiro nessa rota. Não insisti nem afrouxei gate para "fazer o teste passar": a recusa está provada
+pelos testes que dirigem o `handle_ws` real, e a prova ao vivo fica pendente de descobrir qual credencial
+aquele gate exige para uma conexão de dispositivo.
+
+### Efeito no app atual
+
+O mobile hoje autentica com **session token** (`/api/ws?token=…`), então a regra **não** o atinge — envio
+real no aparelho verificado depois da mudança. Quando o app passar a usar ticket de dispositivo, os verbos
+`session.create`, `session.list` e `session.compress` (que ele já chama) precisarão ser adicionados
+deliberadamente à lista, ou o fluxo quebra — está registrado aqui para não virar surpresa.

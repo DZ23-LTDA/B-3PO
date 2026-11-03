@@ -39,3 +39,15 @@ Seis achados; três corrigidos com teste no cliente mobile, três registrados co
 - não há pentest independente;
 - não há certificação de conformidade;
 - não há teste de carga nem de abuso em escala.
+
+## Rodada 68 — separação de capacidades do ticket de dispositivo (implementada)
+
+Achado que estava em aberto: o ticket de dispositivo valia como **qualquer** login do gateway. Um celular
+pareado podia, em tese, aprovar ação pendente, mutar sessão ou mexer em config — a promessa do pareamento
+("só conversa com o seu bot") não era aplicada no servidor.
+
+Agora `tui_gateway/device_scope.py` define os verbos permitidos (`session.resume`,
+`session.events.since`, `prompt.submit`, `prompt.cancel`, `session.interrupt`, `subagent.list`,
+`subagent.tail`) e `ws.py::_dispatch_one` recusa o resto com **4030** antes de despachar. Provado por 17
+testes, incluindo três que dirigem o `handle_ws` real e verificam que o método recusado **não chega** ao
+dispatcher, que `prompt.submit` passa e que credencial de dono não é afetada.
