@@ -419,3 +419,30 @@ Evidência: `evidence/desktop-b3po-brandmark.png`.
 **Não obtido ainda:** a UI em pt-BR no app real — o desktop resolve `display.language` pelo backend, e
 sem gateway a tela continua em inglês. O bootstrap local chegou a "0 de 9 etapas" e não progrediu (nenhum
 processo de instalação ativo), então o roteiro F5 segue **NÃO CONFIRMADO**.
+
+## Rodada 27 — bootstrap destravado e pt-BR provado no app real (2026-11-03)
+
+**PRIORIDADE 1 — bootstrap.** Causa raiz dupla, documentada em `BOOTSTRAP-DIAGNOSTIC.md`:
+(1) a etapa 1 aparecia como "cancelled by user" porque o app foi encerrado durante o download do git —
+não era deadlock; (2) defeito real: `python-deps` falhava com `WinError 3` porque o destino
+`installs/<id>/environments/<id>/workspace/...` tinha **261 caracteres** com `MAX_PATH=260` e
+`LongPathsEnabled=0`. Correção em `pm/workspace.py` (`long_root` nos três `copytree`) + regressão
+`tests/pm/test_workspace_long_paths.py`, commit **`6b25838e`**.
+
+Bootstrap real, etapa por etapa (`-Stage ... -NonInteractive -Json`): prerequisites **ok** (26 s),
+repository **ok** (43 s, nosso commit), venv **ok**, python-deps **ok** (62 s — era o bloqueio),
+config **ok**, products **ok** (72 s), complete **ok**; `setup`/`gateway` exigem input do usuário.
+**Gateway:** `state: ready`, `code_sha 6b25838e`, `http://127.0.0.1:58036`.
+
+**PRIORIDADE 2 — pt-BR.** `display.language: pt` aplicado: o desktop anexou ao gateway e a árvore de
+acessibilidade expõe string do catálogo pt (**"Aplicar"**) em Ajustes. Cobertura atual: `common` +
+`install`; sidebar, plugin de bots e a tela de setup de modelo caem no **fallback inglês** (por design).
+Evidência: `evidence/f5-pt-settings-dialog.png` (Ajustes reais mostrando `provider: ollama`,
+`model: qwen3.5:4b`) e `evidence/f5-pt-br-settings.png`.
+
+**Achado colateral (produto):** a etapa `repository` clona o upstream
+(`NousResearch/hermes-agent` v0.22.6) por padrão; o B-3PO só instala o próprio código se
+`HERMES_REPO_URL` for definido. Registrado como correção pendente.
+
+**Ainda não feito:** roteiro F5 completo (criar/editar bot, mascote, turno real, erro, cancelamento),
+`setup`/`gateway` pelo app, cliente mobile, 4 vulnerabilidades altas.

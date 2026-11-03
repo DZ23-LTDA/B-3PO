@@ -67,3 +67,15 @@ mascote de volta). É o próximo item de prova do F5.
 | Contrato do mobile | `mobile/b3po-app/src/protocol/execution.test.ts` (12) | frame desconhecido → null; log idempotente |
 | Cliente de API | `mobile/b3po-app/src/api/gateway.test.ts` (7) | correlação, dedupe, queda rejeita pendentes |
 | Sessão segura | `mobile/b3po-app/src/auth/session.test.ts` (7) | cofre validado; logout honesto sobre revogação |
+
+## Rodada 27 — evidências do bootstrap e do pt-BR
+
+| Evidência | Arquivo | O que prova |
+|---|---|---|
+| Diagnóstico do bootstrap | `BOOTSTRAP-DIAGNOSTIC.md` | etapas, causa raiz, correção e tempos |
+| Log do bootstrap interrompido | `logs/bootstrap-2026-11-03T05-09-41-686Z.log` (no HERMES_HOME) | `cancelled by user` na etapa 1 |
+| Log manual por etapa | `%TEMP%\b3po-f5-home\bootstrap-manual.log` | 7 etapas ok, exit code por etapa |
+| Gateway real | `hermes gateway ensure --json` | `state: ready`, `code_sha 6b25838e` |
+| Tela de Ajustes com config | `evidence/f5-pt-settings-dialog.png` | app anexado ao gateway, provider/model reais |
+| Árvore de acessibilidade em pt | captura UIA (nomes) | botão **"Aplicar"** do catálogo pt |
+| Regressão long path | `tests/pm/test_workspace_long_paths.py` | 2 testes verdes no Windows |
