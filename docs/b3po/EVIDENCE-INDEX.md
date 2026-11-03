@@ -39,3 +39,20 @@
 | App abre e renderiza a marca | `am start` + screenshot `evidence/android-brand-shell.png` |
 | Toolchain Android funciona | aapt2 36.0.0 + javac 21 + d8 + zipalign + apksigner, exit 0 |
 | Emulador disponível | `emulator -list-avds` → `dsh_pixel`; `sys.boot_completed=1` |
+
+---
+
+## Atualização 23:20 — evidências de domínio e UI (rodadas 10–16)
+
+| Evidência | Arquivo | O que prova |
+|---|---|---|
+| Schema v1 + política restritiva | `bot-schema.test.ts` (15) | contrato F4, migração, default restritivo |
+| Adaptador de eventos | `orchestration.test.ts` (13) | mapeamento real, `null` para desconhecido, idempotência |
+| Persistência do mascote | `data.bot-meta.test.ts` | `mascot_id`/`permission_policy` gravados pelo caminho real |
+| Catálogo empacotado | `mascots.test.ts` (6) | 20 mascotes, manifest idêntico, 512×512 em disco |
+| Grade de escolha | `mascot-grid.test.tsx` (4) | 20 botões acessíveis, seleção única, id desconhecido |
+| Edição do look | `edit-profile-look.test.ts` (5) | patch só do que mudou; limpar mascote grava `null` |
+| Vista e criação | `create-dialog.single-flight` + `create-agent-lazy-profile` | fluxo de criação não regrediu com a fiação |
+
+**Ainda sem evidência:** roteiro visual ponta a ponta no app empacotado (abrir → escolher → reiniciar →
+mascote de volta). É o próximo item de prova do F5.

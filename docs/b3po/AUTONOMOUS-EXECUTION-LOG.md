@@ -248,3 +248,14 @@ Resultado: **355 = valor de main** (permitido: só pode cair), sem waiver e sem 
 Com isso o F5 tem o caminho completo no domínio: criar com mascote → persistir → editar → persistir.
 O que continua sem prova é o **roteiro visual ponta a ponta** (abrir o app, escolher, reiniciar, ver o
 mascote de volta).
+
+## Rodada 17 — metadados de loja e índice de evidências
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 23:18 | `npm audit fix --dry-run` | **2 pacotes**, sem remover as 4 altas; o resto exige `--force` (major) |
+| 23:19 | decisão | **não** aplicar `--force` em fork com deps pinadas; registrar como dependência de decisão |
+| 23:20 | `STORE-METADATA.md` | rascunhos Microsoft/Google/Apple, com bloqueios explícitos |
+| 23:21 | `EVIDENCE-INDEX.md` | tabela de provas por arquivo de teste |
+
+Nenhuma submissão, conta, certificado ou pagamento foi feito — e nenhum artefato é chamado de assinado.
