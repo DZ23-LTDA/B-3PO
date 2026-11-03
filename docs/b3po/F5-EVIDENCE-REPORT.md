@@ -17,7 +17,7 @@
 | 8 | salvar | **VALIDADO** | perfil criado em `profiles/revisor-codigo` com `config.yaml` próprio |
 | 9 | fechar e reabrir o app | **VALIDADO** | app reiniciado com o mesmo `HERMES_HOME`/userData |
 | 10 | confirmar persistência | **VALIDADO** | o bot reaparece no roster após reinício (`evidence/f5-persisted.png`) |
-| 11 | iniciar turno Hermes real | **FALHOU** | bot novo fica em "Waking up revisor-codigo…" indefinidamente |
+| 11 | iniciar turno Hermes real | **VALIDADO** | turno real pelo app: `[user] Responda em uma frase: qual e o objetivo deste bot?` → `[assistant] Este bot é um assistente especialista dedicado à revisão de código…` (`evidence/f5-session-messages.txt`) |
 | 12 | capacidade autorizada | NÃO EXECUTADO | depende do passo 11 |
 | 13 | estado real observável | **PARCIAL** | sessão `Bot Chat` criada no perfil, `api_call_count=0`, `input_tokens=0` |
 | 14 | erro controlado | NÃO EXECUTADO | — |
@@ -91,3 +91,24 @@ erro. O runtime sabe servir o perfil (CLI provou); o que falta é o desktop conc
 para o perfil multiplexado.
 
 **Status do passo 11:** runtime **VALIDADO** por CLI; app **BLOQUEADO** por esse re-roteamento.
+
+## 7. Rodada 31 — passo 11 VALIDADO (e o defeito real é outro)
+
+O transcrito da sessão canônica do bot (`state.db` → `messages`, exportado em
+`evidence/f5-session-messages.txt`) mostra o turno completo **feito pelo app**:
+
+```
+[user]      Responda em uma frase: qual e o objetivo deste bot?
+[assistant] Este bot é um **assistente especialista dedicado à revisão de código** — analisa
+            segurança, qualidade, boas práticas e refatoração técnica para projetistas que
+            priorizam código limpo e sustentável.
+```
+
+É resposta gerada pelo modelo local (`qwen3.5:4b`), persistida na sessão canônica: **o caminho
+app → gateway → runtime → modelo → transcript funciona**.
+
+**O defeito que resta é de UI:** o overlay `Acordando <perfil>…` não sai depois que o turno termina,
+e o composer fica preso, cortando o envio seguinte (`[assistant] # Análise Rápida 🧐` interrompido).
+Ou seja: o passo 11 está validado; o que falha é o **estado visual pós-turno** do Bot Mode.
+
+Consequência para o roteiro: 12–17 podem ser executados; o bloqueio a corrigir é o overlay preso.
