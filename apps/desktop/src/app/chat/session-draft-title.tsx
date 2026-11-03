@@ -1,4 +1,4 @@
-import { newSessionTitle } from '@/lib/chat-runtime'
+import { useI18n } from '@/i18n'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { $draftTitles, draftTitleIn } from '@/store/composer'
 
@@ -19,7 +19,13 @@ export interface SessionDraftTitleProps {
  *
  * Falls back to the placeholder rather than going blank, so an emptied composer
  * reads the same as one never typed into.
+ *
+ * The fallback reads the label through `useI18n`, so it subscribes to the locale: the store selector
+ * alone only re-renders on composer edits, which left this tab captioned in the BOOT language when
+ * the saved locale finished loading a moment later.
  */
 export function SessionDraftTitle({ scope }: SessionDraftTitleProps) {
-  return useStoreSelector($draftTitles, titles => draftTitleIn(titles, scope)) || newSessionTitle()
+  const { t } = useI18n()
+
+  return useStoreSelector($draftTitles, titles => draftTitleIn(titles, scope)) || t.sidebar.nav['new-session']
 }

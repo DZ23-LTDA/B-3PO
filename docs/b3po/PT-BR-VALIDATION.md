@@ -97,3 +97,18 @@ idioma de boot (inglês) no registro.
 em vez de guardar a string traduzida no registro — o helper já existe e já é chamado em `session-tile`,
 `chat/index`, `contrib/controller`; falta o caminho da **aba principal** (registro da tab strip) usar a
 função no momento de pintar, não no de registrar.
+
+### Resolvido na rodada 37 — o rótulo da aba reage ao locale
+
+Causa confirmada e corrigida: `SessionDraftTitle` lia `newSessionTitle()` (que resolve o catálogo no
+momento da chamada) mas **só re-renderizava quando o composer mudava** — o locale salvo carrega
+assíncrono um instante depois do boot, então a legenda ficava no idioma de boot. Agora o componente lê
+`t.sidebar.nav['new-session']` via `useI18n()`, que **assina o locale**.
+
+Medido no app real com perfil de dados limpo:
+
+```
+abas: ["Conversas", "Bots", "Nova conversa", "Terminal"]    document.documentElement.lang = "pt"
+```
+
+Nenhuma das quatro abas principais exibe inglês.
