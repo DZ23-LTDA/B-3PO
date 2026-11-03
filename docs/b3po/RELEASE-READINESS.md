@@ -166,3 +166,27 @@ Branch `b3po-brand`, **139 commits** sobre `main`. Os vereditos acima estão **s
 - UI mínima de CRM no desktop (hoje o módulo é lógica testada sem tela);
 - homologar o ticket de dispositivo em servidor gated;
 - medir acessibilidade e performance com números.
+
+## Atualização — rodadas 83–92 (esta seção vale; o resto é histórico)
+
+Branch `b3po-brand`, **155 commits** sobre `main`. O que mudou desde a reavaliação da rodada 77:
+
+| Item | Antes | Agora |
+|---|---|---|
+| Aprovações no celular | ausente | recebe o pedido do computador, responde e **sobrevive à reconexão** (8+4 testes) |
+| CRM no desktop | só lógica em `crm/` | **contatos + funil + exportação CSV** em `/crm`, com item na sidebar |
+| Tela do CRM | dentro de Configurações | rota própria `/crm` + atalho `nav.crm` |
+| Documentos do GOAL §04 | ausentes | `docs/architecture/*` e `docs/legal/THIRD_PARTY_PROVENANCE.md` |
+| Testes de desktop | 112 (i18n) | **722** em `src/app/settings` + `src/i18n` (93 arquivos) |
+| Testes mobile | 153 | **169** (+8 pulados) |
+
+### O que continua faltando para READY_FOR_INTERNAL_PILOT
+
+- conversas e tarefas no CRM (conversas dependem do canal oficial do WhatsApp);
+- indicadores do dashboard CRM com dados de conversa (§14.6 parcial: só totais de funil);
+- aprovação comprovada contra um gateway real (hoje: frame real via socket falso + app no aparelho);
+- instalação limpa, atualização e desinstalação em Windows e Android;
+- captura de tela das rotas do desktop: o renderer exige `window.__DSH_BOOT__` (só o Electron injeta) e o
+  CDP só abre em modo dev — **não há screenshot de tela interna nesta máquina**;
+- homologação do ticket de dispositivo em servidor *gated*;
+- assinatura Windows e keystore Android (bloqueios externos já listados).

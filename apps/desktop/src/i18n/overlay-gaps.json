@@ -807,7 +807,7 @@
   "keybinds.actions.nav.capabilities": ["ja","zh-hant"],
   "keybinds.actions.nav.commandCenter": ["ja","zh-hant"],
   "keybinds.actions.nav.commandPalette": ["ja","zh-hant"],
-  "keybinds.actions.nav.crm": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "keybinds.actions.nav.crm": ["ja","zh-hant"],
   "keybinds.actions.nav.cron": ["ja","zh-hant"],
   "keybinds.actions.nav.messaging": ["ja","zh-hant"],
   "keybinds.actions.nav.profiles": ["ja","zh-hant"],
