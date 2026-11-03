@@ -40,6 +40,7 @@ import { getPluginCtx } from './shared'
 const en: BotsMessages = {
   canonical: CANONICAL_GROUP_LOCALES.en,
   editor: {
+    startFromTemplate: 'Start from a template',
     fullConfigHint: 'Full configuration needs a newer gateway (restart it after updating Hermes).',
     liveCapabilities: 'Capabilities (applies immediately — skills, tools, MCP)',
     editSoul: 'SOUL.md (persona + agent-messaging protocol)',
@@ -1793,7 +1794,10 @@ export const BOTS_LOCALES: PluginLocaleBundles = {
   ru: { canonical: CANONICAL_GROUP_LOCALES.ru },
   fr: { canonical: CANONICAL_GROUP_LOCALES.fr },
   de: { canonical: CANONICAL_GROUP_LOCALES.de },
-  pt: { canonical: CANONICAL_GROUP_LOCALES.pt },
+  pt: {
+    canonical: CANONICAL_GROUP_LOCALES.pt,
+    editor: { startFromTemplate: 'Começar de um modelo' }
+  },
   es: { canonical: CANONICAL_GROUP_LOCALES.es }
 }
 

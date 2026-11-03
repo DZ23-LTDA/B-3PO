@@ -8,6 +8,8 @@ export type BotsMessages = {
   canonical: { [K in keyof CanonicalGroupMessages]: string }
   /** Left rail: the bot + group-chat roster. */
   editor: {
+    /** Optional: locales without their own copy fall back to the English floor. */
+    startFromTemplate?: string
     fullConfigHint: string
     liveCapabilities: string
     editSoul: string
