@@ -252,3 +252,24 @@ máquina até alguém tratar a causa (D-Bus, `H:\`, fixture do esbuild).
 $env:HERMES_PYTHON = (Get-Command python).Source   # sem isso os testes pegam python3 do PATH (3.12, sem ruamel)
 cd apps/desktop; npx vitest run electron src
 ```
+
+### Atualização — o que continua vermelho nesta máquina (e por quê)
+
+Corrigi de verdade, com teste verde depois: `linux-crash-diagnostics` (separador de caminho), `log-rotation`
+(crescer o arquivo sem `ftruncate`), `singleton-lock` e `desktop-plugins-root` (fixture de symlink com EPERM).
+
+O que **não** dá para deixar verde aqui sem mexer em teste que não é meu, com a causa medida:
+
+| Teste | Causa medida |
+|---|---|
+| `tray-host.test.ts` (3) | `TypeError: process.getuid is not a function` — `dbus-native` real é carregado no bundle e é Linux-only; o mock do módulo não cobre o caminho de inicialização |
+| `packaged-working-directory.test.ts` (1) | o caso "releases the install CWD" faz `build()` com esbuild e o bundle transitivo importa `session` de `electron`, export ausente no stub |
+| `command-screenshot-monitor.test.ts` (1) | mesmo bundle: `updater/system-proxy-env.ts` puxa `session` |
+
+Tentei cobrir o `session` no stub: **não resolveu** (o import vem por outro caminho), então revertei — não deixo
+remendo que não conserta. Tratar isso é trabalho de quem mantém esses testes upstream no Windows, e não vou
+marcá-los como `skip` para "passar": seria esconder falha.
+
+Consequência prática: o `wrapup_check` automático exige suíte 100% verde e não alcança isso nesta máquina. O que
+está verificado da minha entrega: gate do repositório (14 checks), `tsc`, e as suítes que toquei (logo, CRM,
+i18n, chat, plugin de bots) — todas verdes.
