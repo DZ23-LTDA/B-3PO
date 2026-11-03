@@ -475,3 +475,26 @@ passar": a asserção continua de pé, o ambiente é que não tem `sh`.
 
 `src/lib/keybinds/browser-hints.test.tsx` estourou 25 s quando rodou junto da suíte inteira e passou sozinho
 em 7,85 s. É sensível a carga paralela aqui — registrado para não ser confundido com regressão.
+
+## Rodada 76 — pacote reconstruído no commit atual e manifesto refeito do zero
+
+### Pacote
+
+Rebuild com `npm run build` + `run-electron-builder --win msix` no commit `9f181585`:
+
+- `release/B3PO-0.0.0-win-x64.msix` — 190,9 MB, **não assinado** (Store-only build; `AZURE_SIGN_*` ausente).
+- `release/win-unpacked/B-3PO.exe` — 235,4 MB, exe de 15:54.
+
+Aberto como cliente remoto, renderizou de novo a Home em pt-BR: composer **“Descreva o que precisa”**,
+statusbar **“Servidor pronto”** e **“Inteligente”**, sidebar em português e as três conversas reais.
+Evidência: `docs/b3po/evidence/desktop-home-pt-br.png`.
+
+### Manifesto refeito, não remendado
+
+`ARTIFACT-MANIFEST.md` tinha um bloco **antigo no topo** afirmando `Nome: Hermes.exe (nome de produto ainda
+não rebrandado)` e um commit `21595add` — contradizendo o build atual. Manifesto com dado velho engana mais
+do que ajuda, então reescrevi o arquivo inteiro com: commit atual, cinco artefatos com **SHA-256 calculado**
+aqui, datas de construção, e a seção de assinatura declarada (MSIX não assinado, APK/AAB em chave de debug,
+iOS ausente por bloqueio externo, macOS/Linux não construídos).
+
+Também corrigi a formatação da tabela: um `replace` meu tinha comido os backticks de fechamento dos nomes.
