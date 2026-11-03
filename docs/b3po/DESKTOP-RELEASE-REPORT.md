@@ -572,3 +572,15 @@ O dono quer o robô se mexendo **como no GIF dele**. Não existe frame do B-3PO 
 é o mascote do Hermes (cavaleiro pixel), e `public/b3po-mark-*.png` é um PNG estático. Fazer "animação" com
 transformação de imagem estática seria fingir. Falta o arquivo do GIF para extrair os quadros — fica registrado
 como dependência do dono, não como feature entregue.
+
+### Piscada dos mascotes (rodada 96)
+
+Os 20 mascotes oficiais são **PNG estático** (`brand/avatars/*.png`): não existe pálpebra para animar, e o rosto
+vetorial que pisca de verdade (`t % 1.45 > 1.26` em `avatar.tsx`) só aparece em bot **sem** mascote escolhido.
+
+Solução entregue: ao renderizar a imagem, o componente injeta **uma vez** um `@keyframes` (squash vertical rápido no
+fim de um ciclo de 5,5 s) e aplica no `<img>` com atraso derivado do nome — 12 rostos no mesmo ciclo piscariam em
+uníssono. `prefers-reduced-motion: reduce` desliga.
+
+**É aproximação, não pálpebra**: piscada fiel exige frames por mascote (ou o GIF do dono, que ainda não está no
+repositório). Registrado aqui para não vender como mais do que é.

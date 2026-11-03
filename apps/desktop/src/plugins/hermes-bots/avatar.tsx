@@ -999,16 +999,57 @@ interface BotFaceProps {
  * Live math face. Photos still use <img>. Shape avatars stay SVG so
  * the clock can move them (a baked PNG cannot).
  */
+/**
+ * Mascotes são PNG estático: não têm pálpebra para animar. Um squash vertical rápido no fim de um ciclo
+ * longo lê como piscada em rosto de desenho e não move layout (só transform). É aproximação — piscada de
+ * verdade exige frames por mascote. Desligado para quem pediu menos animação.
+ */
+const MASCOT_BLINK_STYLE = 'hb-mascot-blink'
+
+function ensureMascotBlinkStyle() {
+  if (typeof document === 'undefined' || document.getElementById(MASCOT_BLINK_STYLE)) {
+    return
+  }
+
+  const style = document.createElement('style')
+  style.id = MASCOT_BLINK_STYLE
+  style.textContent = `
+@keyframes hb-mascot-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96.5% { transform: scaleY(0.93); }
+  98% { transform: scaleY(1); }
+}
+.hb-mascot-blink { animation: hb-mascot-blink 5.5s ease-in-out infinite; transform-origin: 50% 45%; }
+@media (prefers-reduced-motion: reduce) { .hb-mascot-blink { animation: none; } }
+`
+  document.head.appendChild(style)
+}
+
+/** Desloca a piscada por mascote: 12 rostos no mesmo ciclo piscariam em uníssono. */
+function mascotBlinkDelay(name: string): string {
+  let hash = 0
+
+  for (const char of name) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  }
+
+  return `${((hash % 44) / 10).toFixed(1)}s`
+}
+
 export function BotFace({ shape, color, image, size = 36, name = 'agent', mood = 'idle' }: BotFaceProps) {
   startFaceClock()
 
   if (image) {
+    ensureMascotBlinkStyle()
+
     return (
       <img
         alt=""
         aria-hidden
+        className="hb-mascot-blink"
         src={image}
         style={{
+          animationDelay: mascotBlinkDelay(name),
           width: size,
           height: size,
           borderRadius: '22%',
