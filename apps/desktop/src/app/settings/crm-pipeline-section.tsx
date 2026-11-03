@@ -10,8 +10,7 @@ import {
   pipelineErrorText,
   removeOpportunity,
   saveOpportunity,
-  stageLabel
-} from '@/api/crm-pipeline'
+  stageLabel, type PipelineStage } from '@/api/crm-pipeline'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -32,6 +31,11 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
   const [value, setValue] = useState('')
   const [contact, setContact] = useState('')
   const [saving, setSaving] = useState(false)
+  // Motivo de perda: o store exige quando o estágio é `perdido`.
+  const [doneStage, setDoneStage] = useState<PipelineStage>('novo')
+  const [lostReason, setLostReason] = useState('')
+  // Mover uma linha para `perdido` pede o motivo antes de salvar (regra do store, não da tela).
+  const [pendingLoss, setPendingLoss] = useState<null | { id: string; reason: string }>(null)
 
   const load = useCallback(async () => {
     try {
@@ -58,7 +62,13 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
     setFailure(null)
 
     try {
-      const answer = await saveOpportunity({ contact_phone: contact, stage: 'novo', title, value_cents: Number(value) || 0 })
+      const answer = await saveOpportunity({
+      contact_phone: contact,
+      lost_reason: doneStage === 'perdido' ? lostReason : '',
+      stage: doneStage,
+      title,
+      value_cents: Number(value) || 0
+    })
 
       if ('error' in answer) {
         setFailure(pipelineErrorText(answer.error))
@@ -73,8 +83,13 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
     }
   }, [contact, title, value])
 
-  const move = useCallback(async (row: CrmOpportunityRow, stage: CrmOpportunityRow['stage']) => {
-    const answer = await saveOpportunity({ ...row, stage })
+  const move = useCallback(
+    async (row: CrmOpportunityRow, stage: CrmOpportunityRow['stage'], reason = '') => {
+      const answer = await saveOpportunity({
+        ...row,
+        lost_reason: stage === 'perdido' ? reason : '',
+        stage
+      })
 
     if ('error' in answer) {
       setFailure(pipelineErrorText(answer.error))
@@ -156,6 +171,39 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
               </option>
             ))}
           </select>
+        <label className="flex flex-col gap-1">
+          <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+            {copy.stageInitial}
+          </span>
+          <select
+            aria-label={copy.stageInitial}
+            className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
+            onChange={event => {
+              setDoneStage(event.target.value as PipelineStage)
+              setLostReason('')
+            }}
+            value={doneStage}
+          >
+            {PIPELINE_STAGES.map(entry => (
+              <option key={entry} value={entry}>
+                {stageLabel(entry, copy.stages)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {doneStage === 'perdido' ? (
+          <label className="flex flex-col gap-1">
+            <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+              {copy.lostReason}
+            </span>
+            <input
+              aria-label={copy.lostReason}
+              className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
+              onChange={event => setLostReason(event.target.value)}
+              value={lostReason}
+            />
+          </label>
+        ) : null}
         </label>
         <Button disabled={saving} onClick={() => void save()} size="sm">
           {copy.add}
@@ -179,7 +227,16 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
                 <select
                   aria-label={copy.stage}
                   className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
-                  onChange={event => void move(row, event.target.value as CrmOpportunityRow['stage'])}
+                  onChange={event => {
+                const next = event.target.value as CrmOpportunityRow['stage']
+
+                if (next === 'perdido') {
+                  setPendingLoss({ id: row.id, reason: '' })
+                  return
+                }
+
+                void move(row, next)
+              }}
                   value={row.stage}
                 >
                   {PIPELINE_STAGES.map(stage => (
@@ -188,6 +245,28 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
                     </option>
                   ))}
                 </select>
+            {pendingLoss?.id === row.id ? (
+              <span className="flex items-center gap-1">
+                <input
+                  aria-label={copy.lostReason}
+                  className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
+                  onChange={event => setPendingLoss({ id: row.id, reason: event.target.value })}
+                  value={pendingLoss.reason}
+                />
+                <Button
+                  onClick={() => {
+                    void move(row, 'perdido', pendingLoss.reason)
+                    setPendingLoss(null)
+                  }}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {copy.add}
+                </Button>
+              </span>
+            ) : row.stage === 'perdido' && row.lost_reason ? (
+              <span className="text-xs text-(--ui-text-tertiary)">{row.lost_reason}</span>
+            ) : null}
                 <Button onClick={() => void remove(row.id)} size="sm" variant="ghost">
                   {copy.remove}
                 </Button>

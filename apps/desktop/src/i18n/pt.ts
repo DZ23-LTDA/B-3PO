@@ -497,6 +497,8 @@ export const ptOverrides: TranslationOverrides = {
   },
   settings: {
     crmPipeline: {
+      stageInitial: 'Estágio inicial',
+      lostReason: 'Por que foi perdida?',
       stages: {
         novo: 'Novo lead',
         contato: 'Contato iniciado',

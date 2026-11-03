@@ -300,3 +300,21 @@ Corrigido do jeito certo: os 7 rótulos viraram chaves `settings.crmPipeline.sta
 texto inventado.
 
 Testes: 119 verdes em `src/i18n` + painel do funil; gate 14 ok.
+
+## Rodada 94 — motivo de perda obrigatório (§14.3)
+
+Regra no **store**, não na tela: `normalizeOpportunity` devolve `lost_reason_required` quando o estágio é
+`perdido` e não há motivo. Ao voltar para o funil o motivo é limpo, então dado velho não vira ruído.
+
+Na interface: escolher "Perdido" numa linha **não salva** — abre um campo de motivo e um botão de confirmar.
+O motivo aparece na própria linha depois. O formulário de criação ganhou estágio inicial (rótulo próprio
+`stageInitial`, para não colidir com o seletor da linha) e o mesmo campo de motivo quando a etapa é perdida.
+
+### Dois defeitos meus, pegos na própria rodada
+
+1. Os testes novos usaram `{ contact, ... }`, mas o schema é `title` + `contact_phone` — 3 falhas, corrigidas.
+2. Pior: o `<select>` de estágio que eu tinha posto no formulário de criação era **decorativo** — o payload
+   continuava `stage: 'novo'` fixo. Um controle que não faz nada é exatamente o que o GOAL proíbe. Agora o
+   estágio escolhido vai no payload (`stage: doneStage`).
+
+Testes: 130 verdes (funil + i18n + store do funil); gate 14 ok.

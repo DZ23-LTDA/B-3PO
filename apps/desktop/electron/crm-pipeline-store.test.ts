@@ -105,4 +105,21 @@ describe('funil do CRM no disco', () => {
     expect(isStage('ganho')).toBe(true)
     expect(isStage('Ganho')).toBe(false)
   })
+  it('exige motivo quando a oportunidade vai para perdido', () => {
+    const result = normalizeOpportunity(opportunity({ stage: 'perdido' }), 1)
+
+    expect(result.error).toBe('lost_reason_required')
+  })
+
+  it('guarda o motivo de perda e o mostra na oportunidade', () => {
+    const result = normalizeOpportunity(opportunity({ lost_reason: '  preço  ', stage: 'perdido' }), 1)
+
+    expect(result.opportunity?.lost_reason).toBe('preço')
+  })
+
+  it('limpa o motivo quando a oportunidade volta para o funil', () => {
+    const result = normalizeOpportunity(opportunity({ lost_reason: 'preço', stage: 'negociacao' }), 1)
+
+    expect(result.opportunity?.lost_reason).toBe('')
+  })
 })

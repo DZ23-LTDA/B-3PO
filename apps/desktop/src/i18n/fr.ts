@@ -686,6 +686,8 @@ export const frOverrides = {
   },
   settings: {
     crmPipeline: {
+      stageInitial: 'Étape de départ',
+      lostReason: 'Pourquoi est-elle perdue ?',
       stages: {
         novo: 'Nouveau lead',
         contato: 'Contact entamé',

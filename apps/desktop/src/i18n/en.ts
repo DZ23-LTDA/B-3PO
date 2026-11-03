@@ -688,6 +688,8 @@ export const en: Translations = {
 
   settings: {
     crmPipeline: {
+      stageInitial: 'Starting stage',
+      lostReason: 'Why was it lost?',
       stages: {
         novo: 'New lead',
         contato: 'Contact started',

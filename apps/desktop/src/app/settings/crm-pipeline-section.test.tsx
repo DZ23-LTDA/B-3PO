@@ -39,6 +39,7 @@ const row = (over: Partial<CrmOpportunityRow> = {}): CrmOpportunityRow => ({
   created_at: 0,
   currency: 'BRL',
   id: 'opp-1',
+  lost_reason: '',
   stage: 'novo',
   title: 'Consultoria',
   updated_at: 1,
@@ -156,5 +157,30 @@ describe('funil de oportunidades (Configurações)', () => {
       expect(screen.getByText(/no local disk|não tem disco local/)).toBeTruthy()
     })
     expect(api.listOpportunities).not.toHaveBeenCalled()
+  })
+  it('escolher perdido pede o motivo antes de salvar e envia o motivo digitado', async () => {
+    api.listOpportunities.mockResolvedValue([row()])
+    api.saveOpportunity.mockResolvedValue({ opportunities: [row({ lost_reason: 'preço', stage: 'perdido' })] })
+
+    renderSection()
+
+    const select = await screen.findByLabelText(/Stage|Estágio/)
+
+    fireEvent.change(select, { target: { value: 'perdido' } })
+
+    // Nada foi salvo ainda: o motivo é obrigatório.
+    expect(api.saveOpportunity).not.toHaveBeenCalled()
+
+    const motivo = screen.getByLabelText(/Why was it lost|por que|motivo/i)
+
+    fireEvent.change(motivo, { target: { value: 'preço' } })
+    // O botão de confirmar é o mesmo `save` do formulário; a diferença é o estado pendente da linha.
+    fireEvent.click(screen.getAllByRole('button', { name: /Add|Adicionar|Salvar/i }).at(-1)!)
+
+    await waitFor(() => {
+      expect(api.saveOpportunity).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'opp-1', lost_reason: 'preço', stage: 'perdido' })
+      )
+    })
   })
 })

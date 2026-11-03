@@ -18,6 +18,8 @@ export const zhHantSettings = {
 
   settings: {
     crmPipeline: {
+      stageInitial: '起始階段',
+      lostReason: '為什麼丟單？',
       stages: {
         novo: '新線索',
         contato: '已聯繫',

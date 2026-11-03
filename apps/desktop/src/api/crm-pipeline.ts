@@ -12,6 +12,8 @@ export interface CrmOpportunityRow {
   created_at: number
   currency: string
   id: string
+  /** Preenchido só quando o estágio é `perdido`. */
+  lost_reason: string
   stage: PipelineStage
   title: string
   updated_at: number
@@ -102,6 +104,7 @@ export function opportunityTotals(rows: readonly CrmOpportunityRow[]): { openCen
 
 const MESSAGES: Record<string, string> = {
   contact_required: 'Escolha o contato da oportunidade.',
+  lost_reason_required: 'O motivo da perda é obrigatório.',
   stage_invalid: 'Estágio inválido.',
   title_required: 'Dê um nome à oportunidade.',
   unavailable: 'Este cliente não tem disco local para guardar o funil.'

@@ -247,6 +247,8 @@ export const jaOverrides = {
 
   settings: {
     crmPipeline: {
+      stageInitial: '開始ステージ',
+      lostReason: '失注の理由',
       stages: {
         novo: '新規リード',
         contato: '接触開始',

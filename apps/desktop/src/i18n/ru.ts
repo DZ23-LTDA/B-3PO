@@ -336,6 +336,8 @@ export const ruOverrides = {
   },
   settings: {
     crmPipeline: {
+      stageInitial: 'Начальный этап',
+      lostReason: 'Почему проиграна?',
       stages: {
         novo: 'Новый лид',
         contato: 'Контакт начат',

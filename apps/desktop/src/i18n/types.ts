@@ -601,6 +601,8 @@ export interface Translations extends NoticeTranslations {
 
   settings: {
     crmPipeline: {
+      stageInitial: string
+      lostReason: string
       stages: {
         novo: string
         contato: string

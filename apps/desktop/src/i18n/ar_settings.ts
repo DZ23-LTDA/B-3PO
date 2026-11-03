@@ -15,6 +15,8 @@ export const arSettings = {
   },
   settings: {
     crmPipeline: {
+      stageInitial: 'المرحلة الأولية',
+      lostReason: 'لماذا خُسرت؟',
       stages: {
         novo: 'عميل محتمل جديد',
         contato: 'بدأ التواصل',

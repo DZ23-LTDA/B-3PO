@@ -457,6 +457,8 @@ export const zhOverrides = {
 
   settings: {
     crmPipeline: {
+      stageInitial: '起始阶段',
+      lostReason: '为什么丢单？',
       stages: {
         novo: '新线索',
         contato: '已联系',

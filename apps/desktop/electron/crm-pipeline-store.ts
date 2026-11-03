@@ -17,6 +17,8 @@ export interface CrmOpportunity {
   /** Código da moeda; o valor é guardado em centavos para não perder precisão. */
   currency: string
   id: string
+  /** Só existe quando o estágio é `perdido`: o CRM exige saber por quê. */
+  lost_reason: string
   stage: PipelineStage
   title: string
   updated_at: number
@@ -83,12 +85,20 @@ export function normalizeOpportunity(input: unknown, now: number): { error: stri
     return { error: 'stage_invalid' }
   }
 
+  const lostReason = text(raw['lost_reason'])
+
+  if (stage === 'perdido' && !lostReason) {
+    return { error: 'lost_reason_required' }
+  }
+
   return {
     opportunity: {
       contact_phone: contact,
       created_at: typeof raw['created_at'] === 'number' ? raw['created_at'] : now,
       currency: (text(raw['currency']) || 'BRL').toUpperCase(),
       id: text(raw['id']) || `opp_${now}_${Math.random().toString(36).slice(2, 8)}`,
+      // Motivo de perda só faz sentido em `perdido`; ao voltar para o funil ele é limpo.
+      lost_reason: stage === 'perdido' ? lostReason : '',
       stage,
       title,
       updated_at: now,

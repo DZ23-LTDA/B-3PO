@@ -686,6 +686,8 @@ export const deOverrides = {
   },
   settings: {
     crmPipeline: {
+      stageInitial: 'Startphase',
+      lostReason: 'Warum verloren?',
       stages: {
         novo: 'Neuer Lead',
         contato: 'Kontakt begonnen',
