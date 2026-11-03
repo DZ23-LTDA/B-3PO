@@ -11,9 +11,13 @@
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { defineFieldCopy } from '@/app/settings/field-copy'
 import { ptBoot } from './pt_boot'
+import { ptClarify } from './pt_clarify'
+import { ptCronControl } from './pt_cron_control'
 import { ptModelSettings } from './pt_model_settings'
+import { ptThemePicker } from './pt_theme_picker'
 
 export const ptOverrides: TranslationOverrides = {
+  cron: { control: ptCronControl },
   ...ptBoot,
   common: {
     apply: 'Aplicar',
@@ -222,6 +226,8 @@ export const ptOverrides: TranslationOverrides = {
     dismiss: 'Dispensar'
   },
   assistant: {
+    clarify: ptClarify,
+    themePicker: ptThemePicker,
     thread: {
       stop: 'Parar'
     }

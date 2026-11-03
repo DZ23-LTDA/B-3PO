@@ -57,6 +57,7 @@ describe('pt-BR', () => {
       'boot',
       'common',
       'composer',
+      'cron',
       'errors',
       'install',
       'language',

@@ -749,3 +749,22 @@ Três tentativas de abrir Configurações na janela empacotada (Ctrl+, depois Ct
 de conversa: o teclado sintético (AppActivate + SendKeys) não é confiável aqui. Em vez de insistir, coloquei `pt`
 na **matriz de locales** de `model-settings.test.tsx` — o teste agora renderiza o painel em português e exige que
 as strings traduzidas apareçam e difiram do inglês (40 testes verdes). Prova por teste, não por imagem; declarado.
+
+### Rodada 105 — três famílias de locale a mais em português
+
+Continuando o backlog medido, entraram **`pt_theme_picker`** (seletor de tema), **`pt_cron_control`** (parar
+execução, execuções perdidas) e **`pt_clarify`** (pergunta com opções: escolher, pular, confirmar, progresso).
+
+Descoberta de processo que vale registrar: as famílias **não são todas de topo**. `clarify` e `themePicker` moram
+sob `assistant`; `control` mora sob `cron`. Tentei colocar as três em `settings` e o `tsc` barrou com "objeto só
+pode declarar propriedades conhecidas" — a checagem de tipos pagou o preço aqui. Agora uso um script que sobe a
+indentação do `en.ts` e me dá o caminho completo antes de inserir.
+
+Progresso do backlog: `boot`, `theme_picker`, `cron_control`, `clarify` feitos — **22 de 26 pendentes**
+(`desktop_commands`, `error_codes`, `error_layers`, `notices`, `notifications`, `connectors`/`connector_*`,
+`catalog`, `first_run`, `onboarding`, `model_menu`, `session_commands`, `projects`, `memory_layers`,
+`local_models`, `update_channel`, `gateway_host`, `shared_metrics`, `plugin_preview_access`, `plugin_update`,
+`preview_web`).
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes verdes, incluindo `pt-coverage`
+(chaves existentes no inglês, aridade de função e placeholders idênticos). Gate 14 ok.
