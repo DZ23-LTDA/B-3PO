@@ -250,3 +250,25 @@ mesmo formato — o arquivo terminou com 2.078 linhas, exatamente o teto, e o ga
 
 Fica registrado para quem mexer ali depois: aquele arquivo não aceita crescer; item novo tem que caber em duas
 linhas ou sair dele.
+
+## Rodada 90 — exportação de contatos em CSV (§14.2)
+
+`src/lib/crm-csv.ts` gera o arquivo: `;` como separador (Excel pt-BR), BOM UTF-8 (acento não quebra), campo
+entre aspas com aspas duplicadas quando tem `;`, aspas ou quebra de linha, e etiquetas num campo só.
+
+### O teste pegou um bug meu de segurança de dados
+
+Minha primeira regra prefixava com apóstrofo **todo** campo começando com `= + - @`, para impedir injeção de
+fórmula. Isso corrompia **todo telefone internacional** (`+5511…` virava `'+5511…`). O teste "uma linha por
+contato" falhou exatamente aí.
+
+Regra corrigida: `+` seguido de dígito é telefone e passa intacto; `=`, `@`, `-` e `+` não numérico continuam
+escapados. A proteção contra injeção permanece, sem estragar o dado.
+
+### Sobre a captura de tela que eu queria e não consegui
+
+Tentei renderizar a página `/crm` fora do Electron, servindo o renderer pelo Vite (`127.0.0.1:5174/crm`) e
+abrindo no Playwright. Resultado: **página em branco** — o renderer exige `window.__DSH_BOOT__`, que só o
+processo principal injeta. E o CDP do Electron só abre em modo dev (`HERMES_DESKTOP_DEV_SERVER`), nunca no
+pacote. Registro os dois caminhos tentados para ninguém repetir: captura de rota do desktop nesta máquina segue
+indisponível; a prova da página é por teste de DOM e build.
