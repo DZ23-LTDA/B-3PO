@@ -14,6 +14,8 @@ export type ConnectionState =
       status: 'connected'
       origin: string
       deviceId: string
+      /** Token de sessao do pareamento; sem ele os endpoints protegidos recusam. */
+      token: string
       health: { ok: boolean; commit: string | null; authRequired: boolean }
       // Nome 'gateway' e nao 'status': em rodada anterior o campo se chamava 'status' e SOBRESCREVIA o
       // discriminante da uniao, entao `state.status` era o objeto do gateway e o switch caia no default

@@ -191,6 +191,26 @@ export class RestClient {
     })
   }
 
+  /**
+   * Conversas de um bot. O backend local filtra por perfil: `/api/sessions?profile=<bot>`.
+   * Sem `profile`, o servidor devolve apenas o perfil padrão — por isso o parâmetro é obrigatório aqui.
+   */
+  async sessions(profile: string): Promise<Array<Record<string, unknown>>> {
+    const raw = await this.get<{ sessions?: unknown }>(`/api/sessions?profile=${encodeURIComponent(profile)}`)
+
+    return Array.isArray(raw.sessions) ? (raw.sessions as Array<Record<string, unknown>>) : []
+  }
+
+  /** Mensagens de uma conversa: `/api/sessions/{id}/messages?limit=N&profile=<bot>`. */
+  async messages(profile: string, sessionId: string, limit = 50): Promise<Array<Record<string, unknown>>> {
+    const query = `limit=${limit}&profile=${encodeURIComponent(profile)}`
+    const raw = await this.get<{ messages?: unknown }>(
+      `/api/sessions/${encodeURIComponent(sessionId)}/messages?${query}`
+    )
+
+    return Array.isArray(raw.messages) ? (raw.messages as Array<Record<string, unknown>>) : []
+  }
+
   /** `/api/status` — estado do gateway. */
   async status(): Promise<StatusInfo> {
     const raw = await this.get<Record<string, unknown>>('/api/status')

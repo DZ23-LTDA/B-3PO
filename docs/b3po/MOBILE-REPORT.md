@@ -482,3 +482,51 @@ Evidência: `docs/b3po/evidence/mobile-bots-reais.png` e `.txt`.
 Sem servidor no ar esses testes são pulados (nunca verdes por omissão).
 
 **101 testes + 8 pulados** no mobile, `tsc` limpo.
+
+## Rodada 56 — a conversa real abre no celular
+
+Contrato confirmado contra o servidor rodando:
+
+```
+GET /api/sessions?profile=<bot>
+    -> { sessions: [{ id, title, preview, message_count, unread, last_activity_at, … }] }
+GET /api/sessions/{id}/messages?limit=N&profile=<bot>
+    -> { messages: [{ id, role: 'user'|'assistant'|'tool'|…, content, timestamp }] }
+```
+
+Sem `?profile=`, o servidor devolve só o perfil padrão — por isso o mobile manda o perfil do bot.
+
+`RestClient.sessions()` e `RestClient.messages()` implementam isso; `src/screens/chat-session.ts` traduz
+para bolhas, com **10 testes**:
+
+| Regra | Por quê |
+|---|---|
+| `role: 'tool'` não vira fala do bot | saída de ferramenta é programa, não conversa |
+| `role` desconhecido aparece como "Sistema" | não descarta nem inventa; quem depura vê o que veio |
+| conteúdo vazio não gera bolha | sem bolha fantasma |
+| conteúdo multimodal junta partes de texto e **descarta vazias** | senão sobra espaço duplo na frase |
+| ordem por `timestamp` com desempate numérico por id | transcript não embaralha |
+
+### No aparelho
+
+Tocando no bot **Revisor de Código**, a tela abre a conversa mais recente com mensagens reais do
+servidor:
+
+```
+‹ Voltar para a lista de bots
+Revisor de Código
+Você
+Conte em 500 palavras a historia do teclado.
+Bot
+```
+
+Evidência: `docs/b3po/evidence/mobile-conversa-real.png` e `.txt`.
+
+### Erro meu nesta rodada
+
+Esqueci de guardar o **token** no estado da conexão: a lista de bots funcionava (o token ia na chamada
+de `/api/profiles`) mas a conversa dizia "Pareie o aparelho" porque `openBot` não tinha token para
+autenticar. Corrigi pondo `token` no estado `connected` — e o `tsc` acusou na hora os testes que
+montavam o estado sem ele.
+
+**111 testes + 8 pulados** no mobile, `tsc` limpo, gate **14 ok** verificado antes do commit.

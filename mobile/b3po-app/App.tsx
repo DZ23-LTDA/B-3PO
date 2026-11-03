@@ -29,6 +29,8 @@ import { back, backLabel, currentRoute, headerTitle, initialNav, openChat } from
 import type { NavState } from './src/app/router'
 import { RestClient, restFailureMessage } from './src/api/rest-client'
 import type { BotProfile } from './src/api/rest-client'
+import { chatBubbles, chatEmptyCopy, sessionRows } from './src/screens/chat-session'
+import type { ChatBubble, RawMessage } from './src/screens/chat-session'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
@@ -38,6 +40,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [nav, setNav] = useState<NavState>(initialNav)
   const [bots, setBots] = useState<BotProfile[]>([])
+  const [bubbles, setBubbles] = useState<ChatBubble[]>([])
+  const [chatNote, setChatNote] = useState<string | null>(null)
+  const [chatLoading, setChatLoading] = useState(false)
 
   const route = currentRoute(nav)
   const card = statusCard(connection, error)
@@ -64,7 +69,7 @@ export default function App() {
       const profiles = await client.profiles().catch(() => [] as BotProfile[])
 
       setBots(profiles)
-      setConnection({ status: 'connected', origin, deviceId, health, gateway, checkedAt: Date.now() })
+      setConnection({ status: 'connected', origin, deviceId, token, health, gateway, checkedAt: Date.now() })
     } catch (failure) {
       const detail = failure instanceof Error ? failure.message : String(failure)
 
@@ -75,6 +80,46 @@ export default function App() {
       })
     }
   }, [])
+
+  /** Abre o bot: busca a conversa mais recente e carrega as mensagens do servidor. */
+  const openBot = useCallback(
+    async (bot: BotProfile) => {
+      setNav(state => openChat(state, { name: bot.name, title: bot.title }))
+      setBubbles([])
+      setChatNote(null)
+
+      const token = connection.status === 'connected' ? connection.token : ''
+      const origin = connection.status === 'connected' ? connection.origin : ''
+
+      if (!origin || !token) {
+        setChatNote(chatEmptyCopy('not-connected').body)
+
+        return
+      }
+
+      setChatLoading(true)
+
+      try {
+        const client = new RestClient({ origin, token })
+        const sessions = sessionRows(await client.sessions(bot.name))
+
+        if (sessions.length === 0) {
+          setChatNote(chatEmptyCopy('no-sessions').body)
+        } else {
+          const messages = await client.messages(bot.name, sessions[0]!.id)
+          const loaded = chatBubbles(messages as RawMessage[])
+
+          setBubbles(loaded)
+          setChatNote(loaded.length === 0 ? chatEmptyCopy('no-messages').body : null)
+        }
+      } catch (failure) {
+        setChatNote(restFailureMessage(failure))
+      } finally {
+        setChatLoading(false)
+      }
+    },
+    [connection]
+  )
 
   const pair = useCallback(
     (value: string) => {
@@ -154,7 +199,7 @@ export default function App() {
                 accessibilityHint="Abre a conversa com este bot"
                 accessibilityRole="button"
                 key={item.name}
-                onPress={() => setNav(openChat(nav, { name: item.name, title: item.title }))}
+                onPress={() => void openBot(bots.find(bot => bot.name === item.name) ?? { name: item.name, title: item.title, description: '', model: null, provider: null, gatewayRunning: false, isDefault: false })}
                 style={styles.row}
               >
                 <Text style={styles.rowTitle}>{item.title}</Text>
@@ -166,14 +211,25 @@ export default function App() {
           </View>
         ) : (
           <View style={styles.block}>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Conversa</Text>
-              <Text style={styles.cardBody}>
-                {connection.status === 'connected'
-                  ? `Conectado a ${connection.origin}. As mensagens deste bot aparecem aqui quando a conversa for ligada ao servidor.`
-                  : card.body}
-              </Text>
-            </View>
+            {chatLoading ? <ActivityIndicator color="#7f9cff" /> : null}
+
+            {chatNote ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Conversa</Text>
+                <Text style={styles.cardBody}>{chatNote}</Text>
+              </View>
+            ) : null}
+
+            {bubbles.map(bubble => (
+              <View
+                accessibilityLabel={`${bubble.label}: ${bubble.body}`}
+                key={bubble.id}
+                style={[styles.bubble, bubble.align === 'right' ? styles.bubbleRight : styles.bubbleLeft]}
+              >
+                <Text style={styles.bubbleLabel}>{bubble.label}</Text>
+                <Text style={styles.bubbleBody}>{bubble.body}</Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -185,6 +241,11 @@ const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
   block: { gap: 14 },
+  bubble: { borderRadius: 12, maxWidth: '88%', padding: 12 },
+  bubbleBody: { color: '#e8eefc', fontSize: 14, lineHeight: 20 },
+  bubbleLabel: { color: '#7f9cff', fontSize: 11, marginBottom: 2 },
+  bubbleLeft: { alignSelf: 'flex-start', backgroundColor: '#12151c', borderColor: '#1f2430', borderWidth: 1 },
+  bubbleRight: { alignSelf: 'flex-end', backgroundColor: '#1b2b52' },
   card: {
     backgroundColor: '#12151c',
     borderColor: '#1f2430',

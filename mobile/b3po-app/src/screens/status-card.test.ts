@@ -27,6 +27,7 @@ describe('texto do cartão de status', () => {
       status: 'connected',
       origin: 'http://127.0.0.1:54686',
       deviceId: 'dev-1',
+      token: 'tok-teste',
       health,
       gateway: { gatewayRunning: true, gatewayState: 'running', configVersion: 52 },
       checkedAt: 1
@@ -45,6 +46,7 @@ describe('texto do cartão de status', () => {
       status: 'connected',
       origin: 'http://x',
       deviceId: 'dev-1',
+      token: 'tok-teste',
       health,
       gateway: null,
       checkedAt: 1
