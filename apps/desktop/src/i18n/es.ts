@@ -4268,7 +4268,7 @@ export const esOverrides = {
       skipped: 'Omitido',
       failed: 'Falló'
     },
-    oneTimeTitle: 'Hermes necesita una instalación única',
+    oneTimeTitle: 'B-3PO necesita una instalación única',
     unsupportedDesc: platform =>
       `La instalación automática del primer inicio aún no está disponible en ${platform}. Abre Terminal y ejecuta el comando de abajo; luego vuelve a abrir la app. Los siguientes inicios omitirán este paso.`,
     installCommand: 'Comando de instalación',
@@ -4276,21 +4276,21 @@ export const esOverrides = {
     viewDocs: 'Ver docs de instalación',
     installTo: 'Se instalará en',
     retryAfterRun: 'Ya lo ejecuté -- reintentar',
-    setupChoiceTitle: 'Configurar Hermes Desktop',
+    setupChoiceTitle: 'Configurar B-3PO Desktop',
     setupChoiceDesc:
       'Conecta esta app con un gateway de Hermes que ya esté en ejecución o instala Hermes localmente en este equipo.',
-    connectExistingTitle: 'Conectar con un Hermes existente',
+    connectExistingTitle: 'Conectar con un B-3PO existente',
     connectExistingShort: 'Conectar existente',
     connectExistingDesc:
       'Usa un backend remoto con un token de sesión o inicio de sesión en el navegador. No se iniciará ninguna instalación local.',
-    installLocalTitle: 'Instalar Hermes localmente',
-    installLocalDesc: 'Descarga Hermes, crea su entorno de Python y ejecuta el backend en este equipo.',
-    localStartUnavailable: 'No se pudo iniciar la instalación local. Reinicia Hermes Desktop e inténtalo de nuevo.',
-    remoteSetupTitle: 'Conectar con un Hermes existente',
+    installLocalTitle: 'Instalar B-3PO localmente',
+    installLocalDesc: 'Descarga B-3PO, crea su entorno de Python y ejecuta el backend en este equipo.',
+    localStartUnavailable: 'No se pudo iniciar la instalación local. Reinicia B-3PO Desktop e inténtalo de nuevo.',
+    remoteSetupTitle: 'Conectar con un B-3PO existente',
     remoteSetupDesc:
       'Introduce la URL de tu gateway. Hermes Desktop detectará si necesita un token o iniciar sesión en el navegador.',
     remoteUrlTitle: 'URL del gateway',
-    remoteUrlDesc: 'Usa la URL base del gateway de Hermes e incluye https:// si es remoto.',
+    remoteUrlDesc: 'Usa la URL base del gateway de B-3PO e incluye https:// si es remoto.',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
     probing: 'Detectando la autenticación del gateway…',
     probeError:

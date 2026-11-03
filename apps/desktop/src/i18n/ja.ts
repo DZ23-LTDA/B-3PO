@@ -2776,7 +2776,7 @@ export const jaOverrides = {
       skipped: 'スキップ',
       failed: '失敗'
     },
-    oneTimeTitle: 'Hermes には一度限りのインストールが必要です',
+    oneTimeTitle: 'B-3PO には一度限りのインストールが必要です',
     unsupportedDesc: platform =>
       `${platform} では自動の初回インストールはまだ利用できません。ターミナルを開いて以下のコマンドを実行し、このアプリを再起動してください。以降の起動ではこの手順はスキップされます。`,
     installCommand: 'インストールコマンド',
@@ -2784,25 +2784,25 @@ export const jaOverrides = {
     viewDocs: 'インストールドキュメントを見る',
     installTo: 'インストール先',
     retryAfterRun: '実行しました — 再試行',
-    setupChoiceTitle: 'Hermes Desktop をセットアップ',
+    setupChoiceTitle: 'B-3PO Desktop をセットアップ',
     setupChoiceDesc:
       'すでに実行している Hermes ゲートウェイに接続するか、このコンピューターに Hermes をローカルインストールします。',
-    connectExistingTitle: '既存の Hermes に接続',
+    connectExistingTitle: '既存の B-3PO に接続',
     connectExistingShort: '既存環境に接続',
     connectExistingDesc:
       'セッショントークンまたはブラウザーサインインでリモートバックエンドを使用します。ローカルインストールは開始されません。',
-    installLocalTitle: 'Hermes をローカルにインストール',
-    installLocalDesc: 'Hermes をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
+    installLocalTitle: 'B-3PO をローカルにインストール',
+    installLocalDesc: 'B-3PO をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
     localStartUnavailable:
       'ローカルインストールを開始できません。Hermes Desktop を再起動して、もう一度お試しください。',
-    remoteSetupTitle: '既存の Hermes に接続',
+    remoteSetupTitle: '既存の B-3PO に接続',
     remoteSetupDesc:
       'ゲートウェイ URL を入力してください。Hermes Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
     remoteUrlTitle: 'ゲートウェイ URL',
-    remoteUrlDesc: 'Hermes ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
+    remoteUrlDesc: 'B-3PO ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
     probing: 'ゲートウェイ認証方式を検出中...',
-    probeError: 'その Hermes ゲートウェイに到達できませんでした。',
+    probeError: 'その B-3PO ゲートウェイに到達できませんでした。',
     identityProvider: 'ID プロバイダー',
     authTitle: '認証',
     authNeedsOauth: provider => `このゲートウェイをテストする前に ${provider} でサインインしてください。`,

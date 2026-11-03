@@ -4278,7 +4278,7 @@ export const deOverrides = {
       skipped: 'Übersprungen',
       failed: 'Fehlgeschlagen'
     },
-    oneTimeTitle: 'Hermes braucht eine einmalige Installation',
+    oneTimeTitle: 'B-3PO braucht eine einmalige Installation',
     unsupportedDesc: platform =>
       `Die automatische Installation beim ersten Start ist auf ${platform} noch nicht verfügbar. Öffnen Sie ein Terminal, führen Sie den Befehl unten aus und starten Sie die App dann neu. Bei späteren Starts wird dieser Schritt übersprungen.`,
     installCommand: 'Installationsbefehl',
@@ -4286,26 +4286,26 @@ export const deOverrides = {
     viewDocs: 'Installations-Doku ansehen',
     installTo: 'Wird installiert nach',
     retryAfterRun: "Ich hab's ausgeführt – erneut versuchen",
-    setupChoiceTitle: 'Hermes Desktop einrichten',
+    setupChoiceTitle: 'B-3PO Desktop einrichten',
     setupChoiceDesc:
       'Verbinden Sie diese App mit einem Hermes Gateway, das Sie bereits betreiben, oder installieren Sie Hermes lokal auf diesem Computer.',
-    connectExistingTitle: 'Mit bestehendem Hermes verbinden',
+    connectExistingTitle: 'Mit bestehendem B-3PO verbinden',
     connectExistingShort: 'Bestehendes verbinden',
     connectExistingDesc:
       'Ein Remote-Backend mit Session-Token oder Browser-Anmeldung verwenden. Es wird keine lokale Installation gestartet.',
-    installLocalTitle: 'Hermes lokal installieren',
+    installLocalTitle: 'B-3PO lokal installieren',
     installLocalDesc:
       'Hermes herunterladen, seine Python-Umgebung erstellen und das Backend auf diesem Computer ausführen.',
     localStartUnavailable:
       'Die lokale Installation konnte nicht gestartet werden. Starten Sie Hermes Desktop neu und versuchen Sie es erneut.',
-    remoteSetupTitle: 'Mit bestehendem Hermes verbinden',
+    remoteSetupTitle: 'Mit bestehendem B-3PO verbinden',
     remoteSetupDesc:
       'Geben Sie die URL Ihres Gateways ein. Hermes Desktop erkennt, ob ein Token oder eine Browser-Anmeldung nötig ist.',
     remoteUrlTitle: 'Gateway-URL',
-    remoteUrlDesc: 'Verwenden Sie die Basis-URL des Hermes Gateways, bei Remote-Gateways einschließlich https://.',
+    remoteUrlDesc: 'Verwenden Sie die Basis-URL des B-3PO Gateways, bei Remote-Gateways einschließlich https://.',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
     probing: 'Gateway-Authentifizierung wird erkannt...',
-    probeError: 'Dieses Hermes Gateway konnte nicht erreicht werden.',
+    probeError: 'Dieses B-3PO Gateway konnte nicht erreicht werden.',
     probeErrorDetails: 'Details',
     identityProvider: 'Ihr Identity-Provider',
     authTitle: 'Authentifizierung',

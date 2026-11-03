@@ -343,3 +343,15 @@ porque o `userData` padrão carrega a sessão do desenvolvedor. Para o roteiro v
 **Conclusão:** o roteiro visual (criar bot → mascote → turno → reiniciar) exige três coisas que ainda não
 estão montadas juntas: gateway rodando, `userData` limpo e o app apontando para esse gateway. Fica como
 próxima tarefa, com o caminho já mapeado.
+
+## Atualização 23:43 — rebranding do onboarding em 7 idiomas
+
+O bloco de instalação/onboarding (mesmas chaves do `en.ts`) foi rebrandado em `de`, `es`, `fr`, `ja`, `ru`,
+`zh` e `zh-hant`: **68 linhas**, trocando o token de marca apenas nas chaves daquele bloco (não em
+exemplos de comando nem em nomes de runtime).
+
+Evidência: `tsc` 0 · **84 testes de i18n verdes** (`overlay-completeness`, `languages`, `registry` etc.) ·
+`scripts/check` 14 ok.
+
+**O que continua dizendo Hermes:** o resto da UI (chat, sidebar, settings), porque a cópia do produto é
+grande e o rebranding é incremental — não vou afirmar que "a interface está 100% B-3PO".
