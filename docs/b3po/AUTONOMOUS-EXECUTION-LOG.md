@@ -171,3 +171,16 @@ CI agora cobre: gate de marca, testes de domínio (schema + orquestração) e ty
 | 22:24 | `mascot_id` e `permission_policy` no `BotMeta` | persistidos pelo caminho existente |
 | 22:25 | helpers `botRecordFromMeta` / `botMetaPatchFromRecord` | 3 testes novos |
 | 22:26 | lint + typecheck + `scripts/check` | verdes |
+
+## Rodada 13 — mascotes empacotados no app
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 22:31 | 20 PNGs copiados para o bundle | 2,9 MB |
+| 22:31 | `mascots.ts` gerado (imports estáticos + `mascotById`) | — |
+| 22:32 | 1ª tentativa: `@/assets` | **reprovada** pela regra de isolamento de plugins (`no-restricted-imports`) |
+| 22:33 | assets movidos para dentro do plugin (`./assets/mascots/`) | lint 0, 6 testes |
+| 22:34 | typecheck + `scripts/check` | verdes |
+
+**Achado arquitetural:** plugins só podem importar `@hermes/plugin-sdk` e `react`. Assets da marca para o
+bot precisam morar dentro do plugin — o que é a decisão certa (o plugin é dono do que usa).
