@@ -210,3 +210,26 @@ catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de t
 | Plataforma | Formato | Commit | Tamanho | SHA-256 | Assinatura |
 |---|---|---|---|---|---|
 | Windows x64 | MSIX | `c33ed497` | 190,94 MB | `d8d88a307c3cd3d0def3a250ca36fc9b903284114ea90ebcbe240fb703d40249` | **não assinado** — instalação não verificada |
+
+## Artefatos do build atual
+
+commit `2679a847e0` · branch `b3po-brand` · gerado em 2026-11-03 18:40 UTC
+
+| Plataforma | Formato | Arquivo | Tamanho | SHA-256 | Construído |
+|---|---|---|---|---|---|
+| Windows x64 | MSIX (Store-only, NAO assinado) | `B3PO-0.0.0-win-x64.msix` | 190.9 MB | `563eb41fe2bdeb7e321d9a74d8eabfcf616af3a979ff1ff8517a1a99f64aecd9` | 2026-11-03 18:32 UTC |
+| Windows x64 | app executavel (win-unpacked) | `B-3PO.exe` | 235.4 MB | `69d2b610f00d3cffa80501e820b03b9714e81d8620a151a971f99196a337c986` | 2026-11-03 18:31 UTC |
+| Android | APK release (chave de debug) | `app-release.apk` | 44.2 MB | `0bea9daa399f06bb0b8277d30e74aeb875c9838edb178d1cd3b2b64ff1b15c99` | 2026-11-03 17:34 UTC |
+| Android | APK debug | `app-debug.apk` | 93.2 MB | `10db8315f004768755cd6463470878d4a1289d94a6312eff9c5e0ba56532aca5` | 2026-11-03 15:28 UTC |
+| Android | AAB release (chave de debug) | `app-release.aab` | 19.0 MB | `5b84826ff9b13347c588534b8f48f62646b086f7e34f5803d451410e8e787f18` | 2026-11-03 15:35 UTC |
+
+### Assinatura e limites (declarado, não presumido)
+
+- **MSIX Windows:** `[batch-sign] AZURE_SIGN_* not set` — pacote **não assinado**; `AppX/MSIX package is not
+  signed  reason=Windows Store only build`. Instalação por duplo clique não foi validada.
+- **APK/AAB Android:** assinados com a **chave de debug**; não há keystore de release no repositório
+  (proibido commitar). Publicação em loja não é possível neste estado.
+- **iOS:** nenhum artefato — BLOCKED_BY_EXTERNAL_DEPENDENCY (macOS + Xcode + certificado).
+- **macOS/Linux:** nenhum artefato construído nesta máquina.
+
+Os hashes acima foram calculados nesta máquina a partir dos arquivos listados; nenhum valor é estimado.

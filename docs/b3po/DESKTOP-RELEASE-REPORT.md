@@ -408,3 +408,43 @@ Depois da rodada 71 (placeholder re-escolhido + `shell.statusbar` traduzido), a 
 ### Evidência
 
 `docs/b3po/evidence/desktop-home-pt-br.png` — Home com o composer e a statusbar em pt-BR.
+
+## Rodada 73 — o chip "Impra" é DADO, e o manifesto de artefatos foi regenerado com hashes reais
+
+### "Impra" resolvido (como categoria)
+
+Rastreei o item da statusbar que desenha o chip: `use-statusbar-items.tsx`, id `workspace-cwd`:
+
+```tsx
+icon: <FolderOpen className="size-3" />,
+label: projectName || (currentCwd ? pathLeaf(currentCwd) : undefined),
+```
+
+Ou seja: o rótulo é **nome de projeto/pasta do workspace da sessão**, não uma string de catálogo. Por isso
+não aparecia em `en.ts`, `pt.ts` nem em plugin. Não é falha de tradução — e não vou "corrigir" um nome de
+pasta do usuário.
+
+As sessões do backend reportam `cwd = D:\IA-Workspace\Deepseek\projects\C-3PO BOT`, então o valor
+esperado nessa instalação é o nome da pasta. O texto exato do chip ficou registrado em
+`docs/b3po/evidence/desktop-statusbar-zoom.png` (recorte 3x).
+
+### Manifesto de artefatos regenerado
+
+`docs/b3po/ARTIFACT-MANIFEST.md` agora traz, para o commit `2679a847e0`, os hashes **calculados nesta
+máquina** (não estimados):
+
+| Artefato | Tamanho | SHA-256 |
+|---|---|---|
+| `B3PO-0.0.0-win-x64.msix` | 190,9 MB | `563eb41f…` |
+| `B-3PO.exe` (win-unpacked) | 235,4 MB | `69d2b610…` |
+| `app-release.apk` | 44,2 MB | `0bea9daa…` |
+| `app-debug.apk` | 93,2 MB | `10db8315…` |
+| `app-release.aab` | 19,0 MB | `5b84826f…` |
+
+Com a seção de assinatura declarada: MSIX **não assinado** (`AZURE_SIGN_* not set`, Store-only build),
+APK/AAB com **chave de debug**, iOS ausente por bloqueio externo, macOS/Linux não construídos aqui.
+
+### Regressão
+
+`npx vitest run src/app/chat/composer src/app/shell/hooks` → **752 testes passando** (áreas tocadas pelas
+mudanças de i18n/placeholder). Gate: 14 ok.
