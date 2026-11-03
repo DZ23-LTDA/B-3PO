@@ -144,3 +144,75 @@ mobile funcional, 4 vulnerabilidades altas de dependência e o roteiro visual do
 
 Esses bloqueios persistiram por mais de 10 rodadas sem alteração de ambiente — são dependências externas, não
 trabalho pendente de código.
+
+---
+
+# ESTADO FINAL DA EXECUÇÃO AUTÔNOMA (2026-11-03)
+
+Branch `b3po-brand`; `main` intocada (0 commits DZ23). PR `DZ23-LTDA/B-3PO#1` (draft, NÃO MESCLAR).
+
+## A. Concluído e comprovado
+
+| Item | Evidência |
+|---|---|
+| Identidade B-3PO (nome, ícone, paleta, 20 mascotes) | `brand/` + `brand_check` (14 checagens, contraste AA) |
+| App desktop rebrandado e executando | screenshots `evidence/desktop-b3po-*.png` |
+| Janela e onboarding com a marca (8 idiomas) | `MainWindowTitle = B-3PO` + `overlay-completeness` verde |
+| Schema do Bot v1 (F4) | `bot-schema.test.ts` (15) |
+| Adaptador de orquestração (O1/D3) | `orchestration.test.ts` (13) |
+| `mascot_id` persistido (criar e editar) | `data.bot-meta`, `edit-profile-look` (5), `mascot-grid` (4) |
+| Empréstimo de login externo opt-in | `config_defaults` false + 13 testes + 214 em `test_auth*` |
+| Contrato do mobile (cliente, sem runtime) | `mobile/b3po-app` — 26 testes, `clientExecutesTools: false` |
+| CI da branch | verde em todos os pushes (gate de marca + 47 testes de domínio + typecheck) |
+| Gate do repo | `scripts/check` **14 ok** |
+
+## B. Parcialmente concluído
+
+| Item | O que falta |
+|---|---|
+| Cliente mobile RN | protocolo + API + sessão prontos; faltam telas, `android/`, `ios/`, APK/AAB |
+| Artefatos Windows | gerados, mas do commit `3c92a2ba` (antes da UI de mascotes) |
+| Vulnerabilidades altas | 4 abertas; correção exige major (recusado sem análise) |
+| Rebranding da UI | onboarding feito; chat/sidebar/settings ainda dizem "Hermes" |
+| `pt-BR` | não existe (8 idiomas hoje) |
+
+## C. Bloqueado por ambiente
+
+| Item | Evidência | Comando para desbloquear |
+|---|---|---|
+| AppImage/.deb/.rpm | daemon Docker parado; WSL sem Node | `Start-Service com.docker.service` e rodar `electron-builder --linux` em container |
+| Build Android nativo | sem Gradle no PATH; SDK existe | `cd mobile/b3po-app && npx react-native init` + wrapper Gradle (baixa sozinho) |
+| E2E visual do repo | harness exige devshell nix/Linux | `scripts/run_tests.sh` num runner Linux |
+
+## D. Bloqueado por credencial
+
+| Item | Dependência |
+|---|---|
+| MSIX instalável, Store, SmartScreen | certificado de code signing (`CN=DZ23-LTDA`) |
+| APK/AAB de release | keystore de release + senha (não pode entrar no repo) |
+| `.app`/`.dmg`/IPA, notarização | macOS + Xcode + Apple Developer |
+
+## E. Bloqueado por decisão jurídica/comercial
+
+- Marca "B-3PO" vs C-3PO/Lucasfilm → `BRAND-RISK-REPORT.md`. Nada publicado, nenhuma conta criada.
+
+## F. Riscos críticos
+
+1. Marca (ver E).
+2. 4 vulnerabilidades altas de dependência.
+3. Artefatos Windows defasados em relação ao topo da branch.
+4. Interface ainda parcialmente com cópia "Hermes".
+
+## G. Arquivos-chave desta etapa
+
+`agent/credential_sources.py` · `hermes_cli/config_defaults.py` · `cli-config.yaml.example` ·
+`tests/agent/test_adopt_external_logins_default.py` · `tests/agent/test_anthropic_external_login_optout.py` ·
+`tests/hermes_cli/test_auth_codex_self_heal.py` · `mobile/b3po-app/**` · `docs/b3po/BRAND-RISK-REPORT.md` ·
+`docs/b3po/MOBILE-ARCHITECTURE-DECISION.md`
+
+## H. Veredito
+
+O núcleo está implementado e testado; o produto **não** está pronto para revisão como entrega
+multiplataforma. Nada aqui autoriza "100% pronto", "produção" ou "pronto para lançamento".
+
+NOT_READY: faltam instalação limpa assinada (Windows), cliente mobile funcional (telas + APK/AAB), artefatos Linux/macOS/iOS, roteiro visual F5 ponta a ponta, locale pt-BR e a correção das 4 vulnerabilidades altas.

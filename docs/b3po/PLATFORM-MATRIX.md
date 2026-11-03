@@ -48,3 +48,10 @@ Ambos exigem ação no host que não é build reproduzível — por isso o Linux
 Alternativa segura: rodar o workflow num runner `ubuntu-latest` (CI), que já tem toolchain Linux.
 
 **Nenhum artefato Linux é declarado aqui.**
+
+## Atualização final (2026-11-03)
+
+- **Auth:** empréstimo de login externo agora é opt-in (`false` por padrão), com 13 testes do gate e 214 em `test_auth*` verdes.
+- **Mobile:** decisão RN confirmada; protocolo + cliente de API + sessão segura implementados (26 testes).
+- **Marca:** `BRAND-RISK-REPORT.md` criado.
+- Status por plataforma: ver matriz no `RELEASE-READINESS.md` e a tabela A–H do `EXECUTIVE-REPORT.md`.

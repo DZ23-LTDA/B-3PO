@@ -92,3 +92,10 @@ limpa assinada, fiação do domínio na UI, cliente Android funcional e as fases
 
 **Veredito:** `NOT_READY` para revisão como produto multiplataforma; `READY_FOR_INTERNAL_PILOT` **não** se
 aplica porque a instalação limpa no Windows não é possível sem certificado e não há cliente mobile.
+
+## Atualização final (2026-11-03)
+
+- **Auth:** empréstimo de login externo agora é opt-in (`false` por padrão), com 13 testes do gate e 214 em `test_auth*` verdes.
+- **Mobile:** decisão RN confirmada; protocolo + cliente de API + sessão segura implementados (26 testes).
+- **Marca:** `BRAND-RISK-REPORT.md` criado.
+- Status por plataforma: ver matriz no `RELEASE-READINESS.md` e a tabela A–H do `EXECUTIVE-REPORT.md`.

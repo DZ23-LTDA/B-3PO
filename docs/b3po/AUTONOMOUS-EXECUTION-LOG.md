@@ -386,3 +386,14 @@ O repo proíbe `title=` nativo em `<button>` (tooltip nativo não é acessível 
 Verificado: `no-native-title` verde + 4 testes da grade verdes + eslint 0.
 
 **Lição registrada:** testar só os arquivos que a gente mexe não basta; a suíte completa é o gate real.
+
+## Rodadas finais (2026-11-03)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 00:41 | goal rearmado pelo proprietário | — |
+| 00:45 | `adopt_external_logins` → false (schema + leitor + exemplo) | 214 testes de auth verdes |
+| 00:48 | `BRAND-RISK-REPORT.md` | risco registrado, sem ação jurídica |
+| 00:52 | mobile: contrato do protocolo | 12 testes |
+| 00:55 | mobile: cliente de API + sessão segura | 26 testes no total, tsc 0 |
+| 01:00 | relatórios finais atualizados | este bloco |

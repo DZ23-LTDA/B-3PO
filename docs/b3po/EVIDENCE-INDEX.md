@@ -56,3 +56,14 @@
 
 **Ainda sem evidência:** roteiro visual ponta a ponta no app empacotado (abrir → escolher → reiniciar →
 mascote de volta). É o próximo item de prova do F5.
+
+## Evidências novas (2026-11-03)
+
+| Evidência | Arquivo de teste | O que prova |
+|---|---|---|
+| Empréstimo de login opt-in | `tests/agent/test_adopt_external_logins_default.py` (13) | só `true` literal liga; inválido/ilegível desliga |
+| Opt-out do Claude Code | `tests/agent/test_anthropic_external_login_optout.py` | padrão/false/inválido/true com efeito real no token |
+| Self-heal do Codex | `tests/hermes_cli/test_auth_codex_self_heal.py` | recuperação exige opt-in explícito |
+| Contrato do mobile | `mobile/b3po-app/src/protocol/execution.test.ts` (12) | frame desconhecido → null; log idempotente |
+| Cliente de API | `mobile/b3po-app/src/api/gateway.test.ts` (7) | correlação, dedupe, queda rejeita pendentes |
+| Sessão segura | `mobile/b3po-app/src/auth/session.test.ts` (7) | cofre validado; logout honesto sobre revogação |
