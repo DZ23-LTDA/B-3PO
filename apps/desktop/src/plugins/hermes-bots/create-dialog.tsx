@@ -41,7 +41,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { avatarColor, blobatarSvg, botAppearance, BotFace } from './avatar'
 import { defaultMascotFor } from './mascots'
-import { STARTER_BOTS, starterDraft } from './starter-bots'
+import { StarterBotPicker } from './starter-bot-picker'
 import { isBackfilledFacePng } from './avatar-image'
 import { AvatarPicker } from './avatar-picker'
 import { $selectedBot } from './bot-state'
@@ -389,6 +389,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
   // A remote-target create is gated by the TARGET machine's roster: a local
   // name clash is fine there, and the remote's own duplicate check rejects
   // real collisions at profiles.create time.
+  const starterFields = { name: setName, title: setTitle, description: setDescription, soul: setSoul, mascotId: setMascotId }
   const taken = slugTaken(roster, slug, createTarget, createdRef.current)
 
   const reset = () => {
@@ -798,26 +799,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
             onShape={setShape}
             shape={shape}
           />
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-(--ui-text-secondary)">{b.editor.startFromTemplate}</span>
-            {STARTER_BOTS.map(template => (
-              <Button
-                key={template.slug}
-                onClick={() => {
-                  const draft = starterDraft(template)
-                  setName(draft.name)
-                  setTitle(draft.title)
-                  setDescription(draft.description)
-                  setSoul(draft.soul)
-                  setMascotId(draft.mascotId)
-                }}
-                size="sm"
-                variant="ghost"
-              >
-                {template.title}
-              </Button>
-            ))}
-          </div>
+          <StarterBotPicker fields={starterFields} label={b.editor.startFromTemplate ?? 'Start from a template'} />
           {labeled(
             b.editor.name,
             <Input autoFocus onChange={event => setName(event.target.value)} placeholder="inbox-triage" value={name} />
