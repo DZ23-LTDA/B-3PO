@@ -39,6 +39,8 @@ import {
   probeImagen
 } from './avatar-image'
 import { useBots } from './i18n'
+import { MascotGrid } from './mascot-grid'
+import type { Mascot } from './mascots'
 import { PetTab } from './pet'
 
 interface AvatarPickerProps {
@@ -50,11 +52,24 @@ interface AvatarPickerProps {
   onColor: (color: null | string) => void
   onImage: (image: null | string) => void
   onShape: (shape: string) => void
+  /** Mascote oficial escolhido (B-3PO). Opcional: sem ele a aba nao aparece. */
+  mascotId?: null | string
+  onMascot?: (mascot: Mascot) => void
   shape: string
 }
 
 /** Shape grid + color swatches, shared by Edit Profile and New Bot. */
-export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, generateSeed }: AvatarPickerProps) {
+export function AvatarPicker({
+  shape,
+  color,
+  image,
+  onShape,
+  onColor,
+  onImage,
+  generateSeed,
+  mascotId = null,
+  onMascot
+}: AvatarPickerProps) {
   const b = useBots()
   const pickerName = generateSeed?.name || 'agent'
   const imagen = useValue($imagenAvailable)
@@ -128,7 +143,8 @@ export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, g
           { id: 'bot', label: b.avatar.tabBot },
           { id: 'generate', label: b.avatar.tabGenerate },
           { id: 'upload', label: b.avatar.upload },
-          { id: 'pet', label: b.avatar.tabPet }
+          { id: 'pet', label: b.avatar.tabPet },
+          ...(onMascot ? [{ id: 'mascot', label: 'B-3PO' }] : [])
         ]}
         value={tab}
       />
@@ -136,6 +152,9 @@ export function AvatarPicker({ shape, color, image, onShape, onColor, onImage, g
         <Button onClick={() => onImage(null)} size="sm" type="button" variant="ghost">
           {b.avatar.removeImage}
         </Button>
+      ) : null}
+      {tab === 'mascot' && onMascot ? (
+        <MascotGrid onSelect={onMascot} selectedId={mascotId} />
       ) : null}
       {tab === 'bot' ? (
         isBlobShape(shape) && blobatarSvg ? (

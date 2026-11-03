@@ -184,3 +184,25 @@ CI agora cobre: gate de marca, testes de domínio (schema + orquestração) e ty
 
 **Achado arquitetural:** plugins só podem importar `@hermes/plugin-sdk` e `react`. Assets da marca para o
 bot precisam morar dentro do plugin — o que é a decisão certa (o plugin é dono do que usa).
+
+## Rodada 14 — aba de mascotes (parcial) e bloqueio do ratchet
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 22:39 | `MascotGrid` (20 botões, `aria-pressed`, clique devolve o mascote) | 4 testes |
+| 22:40 | aba `B-3PO` no `AvatarPicker`, condicional a `onMascot` | lint/tsc verdes |
+| 22:42 | fiação no `create-dialog` (`mascot_id` nos dois payloads) | **reprovada pelo ratchet** |
+| 22:50 | tentativa de compensar extraindo `buildBotLook` e `persistRemoteLook` | medido **357 → 358** |
+| 22:53 | extração do efeito de conexões para hook | medido **358** |
+| 22:54 | `create-dialog.tsx` revertido | `scripts/check` 14 ok |
+
+**Fato medido:** `FUNC_LINES` de `CreateAgentDialog` está em **355 (valor de main, acima do alvo 300)** e o
+componente **só pode diminuir**. Minhas extrações (payload visual → `buildBotLook`; persistência remota →
+`persistRemoteLook`; efeito de conexões → `useConnectionsWhenOpen`) **não reduziram o número medido** — ele
+subiu 1. Ou seja, a unidade que o medidor conta não é a que eu removi.
+
+**Consequência:** a fiação do mascote no fluxo de criação fica **aberta** até um refactor dedicado desse
+componente (3.5k linhas). Não vou mascarar com waiver nem apagar linhas em branco para passar no número.
+
+**O que ficou pronto e utilizável:** `MascotGrid` (componente + 4 testes) e a aba condicional no
+`AvatarPicker`. Ela aparece quando um pai passar `onMascot` — o que ainda não acontece.
