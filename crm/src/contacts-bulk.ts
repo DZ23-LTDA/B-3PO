@@ -48,6 +48,56 @@ export interface ImportOptions {
   newId?: (index: number) => string
 }
 
+/** Campos que a planilha pode atualizar. Campo vazio NÃO sobrescreve o existente. */
+function patchFromRow(current: Contact, row: ContactRow): Partial<Omit<Contact, "id" | "phone" | "consent">> {
+  const patch: Partial<Omit<Contact, "id" | "phone" | "consent">> = {}
+
+  if (row.name?.trim()) patch.name = row.name.trim()
+  if (row.company?.trim()) patch.company = row.company.trim()
+  if (row.source?.trim()) patch.source = row.source.trim()
+  if (row.owner?.trim()) patch.owner = row.owner.trim()
+  if (row.tags && row.tags.length > 0) patch.tags = mergeTags(current.tags, row.tags)
+
+  const extraFields = {
+    ...(row.customFields ?? {}),
+    ...(row.email?.trim() ? { email: row.email.trim() } : {})
+  }
+
+  if (Object.keys(extraFields).length > 0) {
+    patch.customFields = { ...(current.customFields ?? {}), ...extraFields }
+  }
+
+  return patch
+}
+
+/** Cria o contato pelo contrato real de `createContact` e compõe id/campos extras depois. */
+function createFromRow(row: ContactRow, phone: string, id: string, now: number): Contact {
+  const candidate = createContact(
+    {
+      phone,
+      name: row.name?.trim() || undefined,
+      company: row.company?.trim() || undefined,
+      tags: row.tags && row.tags.length > 0 ? mergeTags([], row.tags) : undefined,
+      source: row.source?.trim() || "import",
+      owner: row.owner?.trim() || undefined
+    },
+    now
+  )
+
+  if (typeof candidate === "string") {
+    throw new Error("telefone passou pela normalização mas createContact recusou")
+  }
+
+  return {
+    ...candidate,
+    id,
+    customFields: {
+      ...(row.customFields ?? {}),
+      ...(row.email?.trim() ? { email: row.email.trim() } : {})
+    }
+  }
+}
+
 /**
  * Importa linhas sobre um conjunto existente. Devolve os contatos resultantes e o relatório do que foi
  * criado, atualizado e recusado — nada é descartado sem explicação.
@@ -68,16 +118,16 @@ export function importContacts(
   void now
 
   rows.forEach((row, index) => {
-    const phone = normalizePhone(row.phone ?? '')
+    const phone = normalizePhone(row.phone ?? "")
 
     if (!phone) {
-      skipped.push({ row, index, reason: 'invalid_phone' })
+      skipped.push({ row, index, reason: "invalid_phone" })
 
       return
     }
 
     if (seenPhones.has(phone)) {
-      skipped.push({ row, index, reason: 'duplicate_in_file' })
+      skipped.push({ row, index, reason: "duplicate_in_file" })
 
       return
     }
@@ -86,64 +136,25 @@ export function importContacts(
 
     const current = contacts.find(contact => contact.phone === phone)
 
-    if (current) {
-      if (!options.updateExisting) {
-        skipped.push({ row, index, reason: 'duplicate_in_file' })
+    if (!current) {
+      const createdContact = createFromRow(row, phone, newId(index), now)
 
-        return
-      }
-
-      // Campos vazios na planilha NÃO apagam o que já existe.
-      const patch: Partial<Contact> = {}
-
-      if (row.name?.trim()) patch.name = row.name.trim()
-      if (row.company?.trim()) patch.company = row.company.trim()
-      if (row.source?.trim()) patch.source = row.source.trim()
-      if (row.owner?.trim()) patch.owner = row.owner.trim()
-      if (row.tags && row.tags.length > 0) patch.tags = mergeTags(current.tags, row.tags)
-      if (row.customFields && Object.keys(row.customFields).length > 0) {
-        patch.customFields = { ...(current.customFields ?? {}), ...row.customFields }
-      }
-      if (typeof row.email === 'string' && row.email.trim()) {
-        patch.customFields = { ...(patch.customFields ?? current.customFields ?? {}), email: row.email.trim() }
-      }
-
-      const next = updateContact(current, patch, now)
-
-      contacts[contacts.indexOf(current)] = next
-      updated.push(next)
+      contacts.push(createdContact)
+      created.push(createdContact)
 
       return
     }
 
-    const input: ContactInput = {
-      phone,
-      name: row.name?.trim() || undefined,
-      company: row.company?.trim() || undefined,
-      tags: row.tags && row.tags.length > 0 ? mergeTags([], row.tags) : undefined,
-      source: row.source?.trim() || 'import',
-      owner: row.owner?.trim() || undefined
-    }
-
-    const candidate = createContact(input, now)
-
-    if (typeof candidate === 'string') {
-      skipped.push({ row, index, reason: 'invalid_phone' })
+    if (!options.updateExisting) {
+      skipped.push({ row, index, reason: "duplicate_in_file" })
 
       return
     }
 
-    const withId: Contact = {
-      ...candidate,
-      id: newId(index),
-      customFields: {
-        ...(row.customFields ?? {}),
-        ...(row.email?.trim() ? { email: row.email.trim() } : {})
-      }
-    }
+    const next = updateContact(current, patchFromRow(current, row), now)
 
-    contacts.push(withId)
-    created.push(withId)
+    contacts[contacts.indexOf(current)] = next
+    updated.push(next)
   })
 
   return { contacts, report: { created, updated, skipped } }
@@ -272,51 +283,60 @@ export interface Segment {
 }
 
 /** Filtra contatos por critérios declarados. Todos os critérios precisam bater (E lógico). */
+
+function matchesScalar(value: string | undefined, expected: string | undefined): boolean {
+  if (!expected) {
+    return true
+  }
+
+  return (value ?? "").trim().toLowerCase() === expected.trim().toLowerCase()
+}
+
+function matchesTags(tags: readonly string[], expected: readonly string[] | undefined): boolean {
+  if (!expected || expected.length === 0) {
+    return true
+  }
+
+  return expected.every(tag => tags.includes(tag))
+}
+
+function matchesConsent(contact: Contact, optedIn: boolean | undefined): boolean {
+  if (optedIn === true) {
+    return contact.consent.state === "opted_in"
+  }
+
+  if (optedIn === false) {
+    return contact.consent.state !== "opted_in"
+  }
+
+  return true
+}
+
+function matchesSearch(contact: Contact, needle: string): boolean {
+  if (!needle) {
+    return true
+  }
+
+  const haystack = [contact.name, contact.phone, contact.company, contact.customFields?.["email"]]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+
+  return haystack.includes(needle)
+}
+
+/** Filtra contatos por critérios declarados. Todos os critérios precisam bater (E lógico). */
 export function segmentContacts(contacts: readonly Contact[], segment: Segment): Contact[] {
-  const needle = (segment.search ?? '').trim().toLowerCase()
+  const needle = (segment.search ?? "").trim().toLowerCase()
 
   return contacts.filter(contact => {
-    if (segment.tags && segment.tags.length > 0) {
-      const hasAll = segment.tags.every(tag => contact.tags.includes(tag))
+    if (!matchesTags(contact.tags, segment.tags)) return false
+    if (!matchesScalar(contact.company, segment.company)) return false
+    if (!matchesScalar(contact.source, segment.source)) return false
+    if (!matchesScalar(contact.owner, segment.owner)) return false
+    if (!matchesConsent(contact, segment.optedIn)) return false
+    if (segment.blocked !== undefined && contact.blocked !== segment.blocked) return false
 
-      if (!hasAll) return false
-    }
-
-    if (segment.company && (contact.company ?? '').trim().toLowerCase() !== segment.company.trim().toLowerCase()) {
-      return false
-    }
-
-    if (segment.source && (contact.source ?? '').trim().toLowerCase() !== segment.source.trim().toLowerCase()) {
-      return false
-    }
-
-    if (segment.owner && (contact.owner ?? '').trim().toLowerCase() !== segment.owner.trim().toLowerCase()) {
-      return false
-    }
-
-    if (segment.optedIn === true && contact.consent.state !== 'opted_in') {
-      return false
-    }
-
-    if (segment.optedIn === false && contact.consent.state === 'opted_in') {
-      return false
-    }
-
-    if (segment.blocked !== undefined && contact.blocked !== segment.blocked) {
-      return false
-    }
-
-    if (needle) {
-      const haystack = [contact.name, contact.phone, contact.company, contact.customFields?.['email']]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-
-      if (!haystack.includes(needle)) {
-        return false
-      }
-    }
-
-    return true
+    return matchesSearch(contact, needle)
   })
 }

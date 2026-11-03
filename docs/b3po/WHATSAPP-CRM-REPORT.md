@@ -108,3 +108,17 @@ Ao ligar o módulo no `createContact` real descobri que ele **não aceita `id` n
 compor o `id`/campos extras depois, em vez de forçar uma assinatura que não existe.
 
 **122 testes** no CRM, `tsc --noEmit` limpo.
+
+### Correção obrigatória no mesmo dia (gate de saúde)
+
+O commit `c30d1f35` entrou com o gate **falhando** em `health`: `importContacts` com complexidade 28 e
+`segmentContacts` com 21, contra o teto de 20 para código novo.
+
+Dividi em funções de uma responsabilidade: `patchFromRow` (o que a planilha pode atualizar),
+`createFromRow` (criação pelo contrato real) e, no segmento, `matchesTags` / `matchesScalar` /
+`matchesConsent` / `matchesSearch`. Comportamento idêntico — os 19 testes continuam verdes — e o gate
+voltou a **14 checks ok**.
+
+**Terceira vez que commitei com o gate vermelho nesta execução.** O erro não é técnico, é de processo:
+o comando certo é `python scripts/check` **antes** do `git commit`, não depois. Registro aqui porque
+relatório que esconde o próprio descuido não serve para nada.
