@@ -319,3 +319,27 @@ Testes atualizados: `desktop-install-overlay.test.tsx` e `profile-rail-fleet.tes
 | Demais idiomas (de/es/fr/ja/ru/zh/zh-hant) | ainda dizem Hermes no mesmo bloco |
 | Caminho de instalação | `AppData\Local\hermes\hermes-agent` — **intencional** (compatibilidade nível 2) |
 | Resto da UI (chat, sidebar, settings) | ainda com cópia "Hermes" — rebranding de texto é incremental |
+
+## Atualização 23:36 — título da janela e tentativa do roteiro F5
+
+**Corrigido e verificado:** a janela do app chamava-se "Hermes".
+
+| Origem | Antes | Depois |
+|---|---|---|
+| `apps/desktop/index.html` | `<title>Hermes</title>` | `<title>B-3PO</title>` |
+| `apps/desktop/electron/main.ts` (4 janelas) | `title: 'Hermes'` | `title: 'B-3PO'` |
+
+Verificação real: app relançado e `MainWindowTitle` = **"B-3PO"**. `scripts/check` 14 ok, `tsc` 0.
+
+**Roteiro F5 tentado e barrado no gateway:** com `HERMES_HOME` isolado o app para na tela de setup
+(oferece instalar o runtime ou conectar); com o `HERMES_HOME` configurado ele ainda pede instalação porque
+o runtime não existe no caminho esperado (`<HOME>\hermes-agent`). Clicar em "Install B-3PO locally" inicia
+o bootstrap — não esperei a conclusão (download + venv).
+
+Além disso, o app restaurou um **preview persistido** (`linear.app/oauth/authorize`) cobrindo a casca,
+porque o `userData` padrão carrega a sessão do desenvolvedor. Para o roteiro visual é preciso
+`HERMES_DESKTOP_USER_DATA_DIR` limpo.
+
+**Conclusão:** o roteiro visual (criar bot → mascote → turno → reiniciar) exige três coisas que ainda não
+estão montadas juntas: gateway rodando, `userData` limpo e o app apontando para esse gateway. Fica como
+próxima tarefa, com o caminho já mapeado.
