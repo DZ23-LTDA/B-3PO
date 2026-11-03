@@ -530,3 +530,54 @@ autenticar. Corrigi pondo `token` no estado `connected` — e o `tsc` acusou na 
 montavam o estado sem ele.
 
 **111 testes + 8 pulados** no mobile, `tsc` limpo, gate **14 ok** verificado antes do commit.
+
+## Rodada 59 — envio de mensagem pelo celular: topologia de autenticação descoberta, envio NÃO liberado
+
+Três tentativas contra o servidor real, três respostas diferentes. Registro as três porque a diferença
+é o que explica o bloqueio.
+
+| Tentativa | O que fiz | Resposta |
+|---|---|---|
+| 1 | `POST /api/auth/ws-ticket` com `x-hermes-session-token` | **401 Unauthorized** |
+| 2 | `WS /api/ws?token=<token>` + subprotocolo `hermes-gateway-v1` | upgrade recusado, **close 1006** |
+| 3 | WS com ticket de `hermes-gateway-ticket.<ticket>` | não alcançado — depende da tentativa 1 |
+
+### Por que o endpoint de ticket recusa
+
+`hermes_cli/dashboard_auth/routes.py:573` — `api_auth_ws_ticket` chama `_require_session(request)`, que
+exige uma **sessão de login do dashboard** (cookie/sessão de usuário), não o `x-hermes-session-token`.
+O token que o pareamento usa é de outro nível: serve para REST (`/api/profiles`, `/api/sessions`,
+`/api/sessions/{id}/messages` — todos comprovados com 200), mas não emite ticket de WebSocket.
+
+### O caminho local que existe e por que não serve no celular
+
+`hermes_cli/gateway_client.py:285` minta `session-ticket` por um **socket de controle privado**
+(`{"protocol":1,"id":1,"verb":"session-ticket"}`). É um named pipe/unix socket da máquina: o
+`adb reverse` encaminha TCP, não pipe. Um celular não alcança esse caminho.
+Quando o servidor está sem gate, `web_server_chat.py:_server_internal_ws_url` monta
+`ws://host:port/api/ws?token=<_SESSION_TOKEN>` — foi a tentativa 2, e o upgrade caiu mesmo com o token
+válido em REST (`/api/health` responde `auth_required:false`).
+
+### O contrato de envio (achado, pronto para usar quando houver credencial)
+
+JSON-RPC sobre o WS do gateway (`gateway/session_controls.py`):
+
+```
+{"jsonrpc":"2.0","id":1,"method":"session.resume","params":{"session_id":"<id>"}}
+{"jsonrpc":"2.0","id":2,"method":"prompt.submit","params":{
+    "session_id":"<id>", "text":"...", "submission_id":"<uuid>"}}
+```
+
+`submission()` exige `submission_id` não vazio e recusa qualquer chave fora de
+`{session_id, text, submission_id, input_id, queued, attachments, finite, unattended, surface,
+voice_context, interrupted, voice_turn, display_kind, title_preview, turn_author, api_text,
+model_override, clarify_batch}`. Também exige que o socket esteja **subscrito** à sessão
+(`ref.session_id in self.subscriptions`) — daí o `session.resume` antes.
+
+### Status
+
+Envio pelo celular: **BLOCKED_BY_DESIGN** — falta fluxo de login do dashboard (ou ticket emitido para
+token de dispositivo). Não implementei composer com botão que não envia: botão sem ação é proibido pelo
+GOAL.
+
+O que o usuário tem hoje no celular, comprovado: lista de bots real e conversa real (leitura).

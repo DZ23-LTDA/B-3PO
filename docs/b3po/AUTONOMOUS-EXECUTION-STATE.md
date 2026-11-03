@@ -7,7 +7,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | 101 |
+| Commits DZ23 | 102 |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
 | Testes | desktop: bots 960 · i18n 104 · store/sdk 2307 · CRM 66 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
@@ -38,6 +38,12 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 
 Rodar `python scripts/check` **antes** do commit, nunca depois: três commits entraram com o gate
 vermelho nesta execução por inverter a ordem.
+
+## Bloqueio de desenho (não é bug)
+
+Envio de mensagem pelo celular precisa de ticket de WebSocket, e o endpoint de ticket exige sessão de
+login do dashboard (401 com o token de pareamento). O contrato do `prompt.submit` já está levantado em
+`MOBILE-REPORT.md` rodada 59; falta o fluxo de credencial.
 
 ## Como retomar
 
