@@ -43,9 +43,15 @@ jobs:
       - name: dependencias
         run: npm ci --no-audit --no-fund
 
-      - name: testes de dominio (schema + orquestracao)
+      - name: testes de dominio (schema, orquestracao, mascotes, look)
         working-directory: apps/desktop
-        run: npx vitest run src/plugins/hermes-bots/bot-schema.test.ts src/plugins/hermes-bots/orchestration.test.ts
+        run: >-
+          npx vitest run
+          src/plugins/hermes-bots/bot-schema.test.ts
+          src/plugins/hermes-bots/orchestration.test.ts
+          src/plugins/hermes-bots/mascots.test.ts
+          src/plugins/hermes-bots/mascot-grid.test.tsx
+          src/plugins/hermes-bots/edit-profile-look.test.ts
 
       - name: typecheck do desktop
         working-directory: apps/desktop

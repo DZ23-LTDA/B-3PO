@@ -62,3 +62,33 @@ gates, desktop compilando e empacotando, limites de plataforma medidos.
 
 **Veredito:** **NOT_READY** para revisão de proprietário como produto multiplataforma — falta instalação
 limpa assinada, fiação do domínio na UI, cliente Android funcional e as fases de idioma/CI.
+
+---
+
+## Matriz de critérios (Fase K) — estado em 23:50
+
+| Critério | Windows | Android | Linux | macOS | iOS |
+|---|---|---|---|---|---|
+| build | **sim** (exe, pack, MSIX) | **sim** (casca) | não | não | não |
+| instalação limpa | **não** (MSIX sem cert) | **sim** (emulador) | — | — | — |
+| atualização | não | — | — | — | — |
+| desinstalação | não testada | **sim** (adb uninstall) | — | — | — |
+| login | não testado no app | — | — | — | — |
+| criação de bot | **código + testes**, UI não percorrida | — | — | — | — |
+| persistência | **testada** (schema grave/leia) | — | — | — | — |
+| avatar/mascote | **grade + persistência testadas** | — | — | — | — |
+| turno Hermes | **validado por CLI** (13,4 s) | — | — | — | — |
+| capacidade autorizada | contrato + testes | — | — | — | — |
+| erro | contrato + testes | — | — | — | — |
+| cancelamento | contrato (capability) | — | — | — | — |
+| reconexão | não testada | — | — | — | — |
+| segurança | 0 críticas, 4 altas abertas | — | — | — | — |
+| acessibilidade | contraste AA; teclado/leitor **não medidos** | — | — | — | — |
+| performance | build medido; startup **não medido** | — | — | — | — |
+| logs | existem, sanitização não verificada ponta a ponta | — | — | — | — |
+| checksums | **sim** (SHA-256 no manifesto) | **sim** | — | — | — |
+| assinatura | **não** | debug | — | — | — |
+| status | **PARCIAL** | **PARCIAL (casca)** | **BLOQUEADO** | **BLOQUEADO** | **BLOQUEADO** |
+
+**Veredito:** `NOT_READY` para revisão como produto multiplataforma; `READY_FOR_INTERNAL_PILOT` **não** se
+aplica porque a instalação limpa no Windows não é possível sem certificado e não há cliente mobile.

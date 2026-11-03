@@ -355,3 +355,11 @@ Evidência: `tsc` 0 · **84 testes de i18n verdes** (`overlay-completeness`, `la
 
 **O que continua dizendo Hermes:** o resto da UI (chat, sidebar, settings), porque a cópia do produto é
 grande e o rebranding é incremental — não vou afirmar que "a interface está 100% B-3PO".
+
+## Rodada 21 — CI ampliado e documentação de instalação
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 23:45 | workflow passa a rodar mascotes, grade e look (5 arquivos) | — |
+| 23:48 | `INSTALL.md` criado | Windows real; Linux/macOS/iOS bloqueados; Android só casca |
+| 23:50 | matriz de critérios da Fase K no `RELEASE-READINESS` | veredito NOT_READY |
