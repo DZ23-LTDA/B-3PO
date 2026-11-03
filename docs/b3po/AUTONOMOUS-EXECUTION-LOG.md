@@ -66,3 +66,18 @@ PR correto: `DZ23-LTDA/B-3PO#1` (draft, revisão apenas, sem merge em `main`).
 
 **Lição para o próximo ciclo:** sempre passar `--repo <owner/name>`; nunca confiar no repo implícito; não
 usar `--head owner:branch` (isso convida o gh a escolher o repositório "pai").
+
+## Rodada 4 — Android (emulador disponibilizado pelo proprietário)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:27 | Inspeção do SDK | build-tools 36.0.0, platforms 35/37, AVD `dsh_pixel`, emulador ok |
+| 21:28 | Scaffold `mobile/android-brand-shell` (Java, sem Gradle) | criado |
+| 21:28 | 1ª build | falhou (d8 sem diretório de saída) → corrigido |
+| 21:29 | 2ª build | falhou (7z sem `-tzip`, depois `classes.dex` em `dex\`) → corrigido |
+| 21:30 | build + sign | **exit 0**, APK 301 KB, `apksigner verify` ok |
+| 21:30 | install + launch | **Success**; app renderizou a marca; screenshot salvo |
+
+Decisão autônoma: construir **casca de marca** nativa em vez de um cliente completo, porque o contrato de
+sessão (Fase E) não está congelado — criar cliente agora duplicaria contrato e violaria a regra de não
+fabricar funcionalidade. O emulador resolveu o "onde rodar"; o que falta é o contrato.

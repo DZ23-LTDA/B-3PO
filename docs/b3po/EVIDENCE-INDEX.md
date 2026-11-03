@@ -29,3 +29,13 @@
 - Vitest (`test:ui`, `test:desktop:platforms`) e Playwright E2E.
 - `npm audit`, SBOM, revisão de licenças de dependências.
 - macOS, Linux, Android, iOS.
+
+## Atualização 21:30 — Android
+
+| Afirmação | Evidência |
+|---|---|
+| APK gerado e assinado | `dist/b3po-android-shell-debug.apk` 301 KB, `apksigner verify` ok |
+| APK instalado no emulador | `adb install -r` → **Success** (`emulator-5554`, AVD `dsh_pixel`) |
+| App abre e renderiza a marca | `am start` + screenshot `evidence/android-brand-shell.png` |
+| Toolchain Android funciona | aapt2 36.0.0 + javac 21 + d8 + zipalign + apksigner, exit 0 |
+| Emulador disponível | `emulator -list-avds` → `dsh_pixel`; `sys.boot_completed=1` |

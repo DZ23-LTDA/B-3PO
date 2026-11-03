@@ -48,3 +48,23 @@ proíbe.
 
 `BLOCKED_BY_EXTERNAL_DEPENDENCY` para **iOS** (macOS/Xcode) e **sem projeto** para **Android**. Nenhum
 artefato mobile pode ser entregue nesta rodada sem violar a regra de não fabricar evidência.
+
+---
+
+## Atualização 21:30 — Android com emulador (proprietário disponibilizou)
+
+O bloqueio do Android **mudou de natureza**: existe SDK, AVD `dsh_pixel` e emulador funcional. O que
+continua faltando é o **cliente do produto** (contrato de sessão não congelado).
+
+Para não ficar parado, foi construída uma **casca de marca** nativa, sem Gradle, reproduzível:
+
+- projeto: `mobile/android-brand-shell/` (Java + recursos, manifest próprio);
+- build: `aapt2` → `javac` → `d8` → `zipalign` → `apksigner` (JDK 21 + build-tools 36.0.0);
+- artefato: `dist/b3po-android-shell-debug.apk` (301 KB), **assinado com keystore de debug**;
+- instalação e execução **comprovadas** no emulador `emulator-5554`;
+- screenshot: `docs/b3po/evidence/android-brand-shell.png`.
+
+O app mostra o wordmark oficial, fundo `#000105`, título e o aviso "casca de marca — cliente pendente do
+contrato de sessão". **Não** abre sessão, **não** executa ferramenta, **não** fala com runtime.
+
+Isso prova o pipeline Android ponta a ponta sem violar a regra de não fabricar funcionalidade.

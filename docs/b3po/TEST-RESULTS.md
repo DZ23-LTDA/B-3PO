@@ -29,3 +29,12 @@
 - `test:desktop:lifecycle` (instalação/atualização/desinstalação) — não executado.
 - `npm audit` / SBOM — pendente.
 - Android/iOS/Linux builds — impossíveis ou fora de escopo (ver `PLATFORM-MATRIX.md`).
+
+## Atualização 21:30 — Android (pipeline nativo sem Gradle)
+
+| # | Teste | Comando | Resultado |
+|---|---|---|---|
+| T12a | Build APK | `pwsh mobile/android-brand-shell/build.ps1` | **exit 0** — aapt2/javac/d8/zipalign/apksigner |
+| T12b | Assinatura | `apksigner verify` | **verificado** (debug keystore) |
+| T12c | Instalação | `adb install -r …apk` | **Success** no AVD `dsh_pixel` |
+| T12d | Execução | `adb shell am start …` + `screencap` | app renderizou a marca; screenshot salvo |

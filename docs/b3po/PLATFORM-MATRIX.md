@@ -23,3 +23,13 @@ Fatos medidos em 2026-11-02, Windows 11 Pro (10.0.26300).
 2. **Android**: projeto cliente (Kotlin ou React Native) + Gradle wrapper; SDK já existe.
 3. **Windows assinado**: certificado EV/OV Code Signing.
 4. **Linux**: rodar `docker run` com a imagem do electron-builder e o script `dist:linux`.
+
+## Atualização 21:30 — Android
+
+| Plataforma | Artefato | Status |
+|---|---|---|
+| Android | `b3po-android-shell-debug.apk` (301 KB, assinado com debug keystore) | **casca de marca instalada e executada** no AVD `dsh_pixel` |
+| Android (cliente real) | — | pendente do contrato de sessão (Fase E) |
+
+O APK não é o cliente do produto; é prova de pipeline + identidade. Nenhuma funcionalidade de bot foi
+implementada nem alegada.
