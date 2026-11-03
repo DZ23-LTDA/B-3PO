@@ -22,7 +22,7 @@
 | 13 | estado real observável | **PARCIAL** | sessão `Bot Chat` criada no perfil, `api_call_count=0`, `input_tokens=0` |
 | 14 | erro controlado | **PARCIAL** | erro real de provider observado (`HTTP 404: 404 page not found`), com mensagem ao usuário e turno encerrado |
 | 15 | `execution.failed` real | **PARCIAL** | a falha do turno aparece na sessão; o evento de orquestração do app não foi capturado |
-| 16 | cancelamento | NÃO EXECUTADO | — |
+| 16 | cancelamento | **VALIDADO** | `Stop` encerrou o turno; composer voltou utilizável; `[assistant] ::preview{file=…}` truncado prova a interrupção no meio |
 | 17 | ausência de segunda execução | NÃO EXECUTADO | — |
 
 ## 2. O que o passo 11 mostrou
@@ -160,3 +160,28 @@ O composer voltou habilitado e aceitou o segundo envio — **sem execução dupl
 
 **Regra adotada:** visibilidade se mede por `getComputedStyle` + `aria-hidden`, nunca por varredura
 de texto do documento.
+
+## 10. Rodada 39 — passo 16 (cancelamento) validado no app
+
+Roteiro: prompt longo ("1500 palavras sobre história da computação"), `Stop` clicado durante o
+streaming.
+
+```
+stopLabel: "Stop"        clicked: true
+idleAt: 15s              composer reabilitado: true
+```
+
+Transcrito em `state.db` (perfil `revisor-codigo`):
+
+```
+user       len=  73  Escreva um texto longo, de 1500 palavras, sobre a historia d...
+assistant  len=  41  ::preview{file="texto-historia-pag.html"}
+```
+
+A mensagem do assistente ficou **truncada no meio** (só o preview do artefato), a sessão continua
+aberta (`end_reason = None`) para retry, e `api_call_count = 1` — o cancelamento não disparou chamadas
+extras. É o comportamento correto de um cancelamento suave.
+
+**Observações honestas:**
+- até 15 s para o turno assentar (medido em polling de 1 s, com modelo local no meio de uma geração);
+- o controle aparece em inglês (`Stop`) na UI em português — nova lacuna de i18n, registrada.

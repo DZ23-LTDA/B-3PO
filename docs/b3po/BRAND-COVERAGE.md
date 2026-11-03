@@ -51,10 +51,18 @@ Mapa das superfícies visíveis. `Hermes` continua sendo o nome do **runtime** (
 A atribuição upstream **permanece** (rodapé + tagline): remover seria violação da MIT, e o corpo da
 documentação continua chamando o runtime de Hermes — o que ali é correto.
 
-**Limite desta rodada:** o site **não foi buildado**. `website/node_modules` não está instalado e um
-`npm install` completo do Docusaurus ficaria fora do orçamento da rodada; portanto a prova visual do
-navbar/rodapé fica para quando o site for compilado. O que está verificado aqui é o conteúdo do
-config e a existência dos dois arquivos de logo (`17208` e `17495` bytes, não placeholders).
+**Prova no build (rodada 39):** `npm ci` + `npm run build` no `website/` concluíram com
+`[SUCCESS] Generated static files`. No HTML gerado (`website/build/index.html`):
+
+```
+navbar__title  ->  B-3PO
+logo           ->  img/b3po-logo.png  +  img/b3po-logo-dark.png
+footer         ->  DZ23 ... built on Hermes Agent by Nous Research
+<title>Hermes Agent  ->  ausente
+```
+
+O aviso do próprio Docusaurus listou apenas *broken anchors* em páginas `zh-Hans` — documentação
+traduzida do upstream, não relacionada a esta mudança.
 
 **Nota de processo:** tentei primeiro um teste Python em `tests/brand/` que lia o `.ts` do config —
 `tests/AGENTS.md` proíbe teste que lê código-fonte (e teste Python sobre TS não roda no lane JS).
