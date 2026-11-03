@@ -18,10 +18,10 @@
 | 9 | fechar e reabrir o app | **VALIDADO** | app reiniciado com o mesmo `HERMES_HOME`/userData |
 | 10 | confirmar persistência | **VALIDADO** | o bot reaparece no roster após reinício (`evidence/f5-persisted.png`) |
 | 11 | iniciar turno Hermes real | **VALIDADO** | turno real pelo app: `[user] Responda em uma frase: qual e o objetivo deste bot?` → `[assistant] Este bot é um assistente especialista dedicado à revisão de código…` (`evidence/f5-session-messages.txt`) |
-| 12 | capacidade autorizada | NÃO EXECUTADO | depende do passo 11 |
+| 12 | capacidade autorizada | **BLOQUEADO (modelo)** | o modelo local compatível (≥64k contexto) narra o comando em vez de chamar a ferramenta; `qwen3:8b` é recusado pelo runtime (40.960 < 64.000) |
 | 13 | estado real observável | **PARCIAL** | sessão `Bot Chat` criada no perfil, `api_call_count=0`, `input_tokens=0` |
-| 14 | erro controlado | NÃO EXECUTADO | — |
-| 15 | `execution.failed` real | NÃO EXECUTADO | — |
+| 14 | erro controlado | **PARCIAL** | erro real de provider observado (`HTTP 404: 404 page not found`), com mensagem ao usuário e turno encerrado |
+| 15 | `execution.failed` real | **PARCIAL** | a falha do turno aparece na sessão; o evento de orquestração do app não foi capturado |
 | 16 | cancelamento | NÃO EXECUTADO | — |
 | 17 | ausência de segunda execução | NÃO EXECUTADO | — |
 
@@ -112,3 +112,19 @@ e o composer fica preso, cortando o envio seguinte (`[assistant] # Análise Ráp
 Ou seja: o passo 11 está validado; o que falha é o **estado visual pós-turno** do Bot Mode.
 
 Consequência para o roteiro: 12–17 podem ser executados; o bloqueio a corrigir é o overlay preso.
+
+## 8. Rodada 32 — passo 12 bloqueado por modelo local
+
+Tentativas de provar "capacidade autorizada" (ler um arquivo real via ferramenta):
+
+| Modelo | Contexto | Resultado |
+|---|---|---|
+| `qwen3.5:4b` | 262.144 | responde, mas **narra** o comando (`cat relatorio.txt`) sem emitir tool call — `tool_call_count=0` |
+| `qwen3:8b` | 40.960 | **recusado pelo runtime**: `Model qwen3:8b has a context window of 40,960 tokens, which is below the minimum 64,000 required` |
+
+Ou seja: o único modelo local compatível com o piso de contexto do Hermes não faz tool calling
+confiável, e o modelo maior disponível é recusado pelo próprio runtime. **Passo 12 fica
+`BLOCKED_BY_EXTERNAL_DEPENDENCY`** (escolha/credencial de modelo), não por defeito do B-3PO.
+
+Para destravar: um provider externo (API key) ou um modelo local ≥64k com tool calling (ex.: Qwen 3
+versão maior com contexto configurado, ou um modelo OpenAI-compatível servido com `num_ctx` alto).
