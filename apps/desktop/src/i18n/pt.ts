@@ -14,7 +14,10 @@ import { ptBoot } from './pt_boot'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
 import { ptErrorLayers } from './pt_error_layers'
+import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
+import { ptNotifications } from './pt_notifications'
+import { ptPluginUpdate } from './pt_plugin_update'
 import { ptMemoryLayers } from './pt_memory_layers'
 import { ptModelSettings } from './pt_model_settings'
 import { ptPluginPreviewAccess } from './pt_plugin_preview_access'
@@ -27,7 +30,7 @@ export const ptOverrides: TranslationOverrides = {
   sharedMetrics: ptSharedMetrics,
   cron: { control: ptCronControl },
   ...ptBoot,
-  skills: { plugins: { ...ptPluginPreviewAccess } },
+  skills: { plugins: { ...ptPluginPreviewAccess, ...ptPluginUpdate } },
   common: {
     apply: 'Aplicar',
     back: 'Voltar',
@@ -245,6 +248,7 @@ export const ptOverrides: TranslationOverrides = {
   // Barra de status: o bloco do en.ts é `shell.statusbar` e não estava coberto aqui, então a barra
   // inteira aparecia em inglês ("Backend ready", "Gateway", "ready"). Traduzido o que o usuário vê.
   shell: {
+    modelMenu: ptModelMenu,
     approvalMode: {
       title: 'Modo de aprovação',
       manual: 'Manual',
@@ -516,6 +520,7 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    notifications: ptNotifications,
     about: { channel: ptUpdateChannel },
     memoryLayers: ptMemoryLayers,
     model: ptModelSettings,

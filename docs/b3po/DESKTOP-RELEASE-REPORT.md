@@ -806,3 +806,20 @@ Progresso do backlog: **12 de 26** famílias em pt. Restam `desktop_commands` (f
 `gateway_host`, `plugin_update`, `preview_web`.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 108 — seletor de modelo, notificações e atualização de plugin em pt
+
+Três famílias: **`pt_model_menu`** (busca, favoritos, limites por provedor e por modelo, custo por Mtok,
+"rodar local · grátis, privado"), **`pt_notifications`** (sete tipos de notificação do sistema, permissão do
+navegador com os cinco estados, som de conclusão, silenciar sons) e **`pt_plugin_update`** (pastas liberadas,
+consentimento do novo pin, varredura de segurança com veredito de atenção e bloqueio).
+
+Desta vez nenhuma seção nova no topo: `notifications` ficou em `settings`, `plugin_update` somou ao bloco
+`skills.plugins` que já existia e `modelMenu` entrou em `shell` — então a lista do `pt.test.ts` não mudou.
+O script de caminho confirmou os três pais antes de inserir (`settings`, `skills.plugins`, `shell`).
+
+Progresso do backlog: **15 de 26** famílias em pt. Restam `error_codes`, `catalog`, `first_run`, `onboarding`,
+`projects`, `local_models`, `connectors`/`connector_*`, `gateway_host`, `preview_web`, `update_channel` (feito),
+`shared_metrics` (feito) — a lista viva está no bloco da rodada 105.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
