@@ -113,6 +113,39 @@ describe('aprovação pelo celular', () => {
     expect(onApproval).toHaveBeenLastCalledWith(null)
   })
 
+
+  it('reconectar durante uma aprovação pendente devolve o pedido do snapshot', async () => {
+    const onApproval = vi.fn()
+    const { fake, socket } = socketWithCallbacks({ onApproval })
+    const connecting = socket.connect()
+    fake().open()
+    await connecting
+
+    const resumed = socket.ensureSession('20261103_140104_f5df78')
+
+    // o servidor responde o resume com o que ficou aberto
+    const resumeFrame = fake()
+      .frames()
+      .find(frame => frame['method'] === 'session.resume')
+
+    expect(resumeFrame).toBeTruthy()
+
+    fake().deliver({
+      id: resumeFrame!['id'] as number,
+      jsonrpc: '2.0',
+      result: {
+        open_requests: [{ id: 77, method: 'approval', params: { request_id: 'p-1', command: 'git push' } }]
+      }
+    })
+
+    await resumed
+
+    expect(onApproval).toHaveBeenCalledWith(
+      expect.objectContaining({ command: 'git push', requestId: 'p-1', wireId: 77 })
+    )
+    expect(socket.getPendingApproval()?.requestId).toBe('p-1')
+  })
+
   it('sem pedido aberto, responder devolve false e não envia nada', async () => {
     const { fake, socket } = socketWithCallbacks()
     const connecting = socket.connect()

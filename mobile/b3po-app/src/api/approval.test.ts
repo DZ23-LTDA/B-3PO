@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   approvalResponseFrame,
   approvalSummary,
+  approvalsFromOpenRequests,
   choiceLabel,
+  firstPendingApproval,
   parseApprovalFrame
 } from './approval'
 
@@ -73,5 +75,33 @@ describe('pedido de aprovação', () => {
     expect(approvalSummary({ ...base, command: '  ', description: '' })).toBe(
       'O computador pediu uma autorização.'
     )
+  })
+})
+
+describe('snapshot de pedidos abertos na reconexão', () => {
+  it('recupera o pedido que o servidor deixou aberto', () => {
+    const open = [
+      { id: 12, method: 'approval', params: { command: 'npm publish', request_id: 'r-2' } },
+      { id: 13, method: 'clarify', params: {} }
+    ]
+
+    expect(approvalsFromOpenRequests(open)).toEqual([
+      { choices: ['once', 'deny'], command: 'npm publish', description: '', requestId: 'r-2', wireId: 12 }
+    ])
+  })
+
+  it('sem pedidos (ou lixo) devolve lista vazia', () => {
+    expect(approvalsFromOpenRequests(undefined)).toEqual([])
+    expect(approvalsFromOpenRequests(null)).toEqual([])
+    expect(approvalsFromOpenRequests([{ method: 'clarify' }, 'texto', 42])).toEqual([])
+  })
+
+  it('a tela recebe uma decisão por vez, na ordem do servidor', () => {
+    const open = [
+      { id: 1, method: 'approval', params: { request_id: 'a' } },
+      { id: 2, method: 'approval', params: { request_id: 'b' } }
+    ]
+
+    expect(firstPendingApproval(open)?.requestId).toBe('a')
   })
 })

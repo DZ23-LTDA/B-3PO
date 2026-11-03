@@ -77,3 +77,37 @@ export function approvalSummary(request: ApprovalRequest): string {
 
   return request.command.trim() || 'O computador pediu uma autorização.'
 }
+
+/**
+ * Pedidos que o servidor deixou abertos e devolveu no snapshot de `session.resume`.
+ *
+ * Sem isso, um celular que reconecta durante uma aprovação pendente não mostra nada e o turno fica parado
+ * até o tempo limite — o usuário nunca sabe que a decisão é dele.
+ */
+export function approvalsFromOpenRequests(open: unknown): ApprovalRequest[] {
+  if (!Array.isArray(open)) {
+    return []
+  }
+
+  return open
+    .map(entry => {
+      if (!entry || typeof entry !== 'object') {
+        return null
+      }
+
+      const record = entry as Record<string, unknown>
+      const wireId = record['id']
+
+      return parseApprovalFrame({
+        id: typeof wireId === 'number' ? wireId : Number.NaN,
+        method: record['method'],
+        params: record['params']
+      })
+    })
+    .filter((request): request is ApprovalRequest => request !== null)
+}
+
+/** O mais antigo primeiro, como o backend enfileira: uma decisão por vez. */
+export function firstPendingApproval(open: unknown): ApprovalRequest | null {
+  return approvalsFromOpenRequests(open)[0] ?? null
+}

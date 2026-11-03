@@ -29,7 +29,12 @@ export interface SocketLike {
   onclose: ((event: unknown) => void) | null
 }
 
-import { approvalResponseFrame, parseApprovalFrame, type ApprovalRequest } from './approval'
+import {
+  approvalResponseFrame,
+  firstPendingApproval,
+  parseApprovalFrame,
+  type ApprovalRequest
+} from './approval'
 
 export type SocketFactory = (url: string, options: { headers: Record<string, string> }) => SocketLike
 
@@ -248,8 +253,17 @@ export class GatewayChatSocket {
 
     if (existingSessionId) {
       try {
-        await this.request('session.resume', { session_id: existingSessionId })
+        const resumed = await this.request('session.resume', { session_id: existingSessionId })
         this.canonicalId = existingSessionId
+        // O snapshot traz o que ficou aberto: sem isso, reconectar durante uma aprovacao
+        // esconde a decisao do usuario e o turno espera ate o tempo limite.
+        const pending = firstPendingApproval(resumed['open_requests'])
+
+        if (pending) {
+          this.approval = pending
+          this.callbacks.onApproval?.(pending)
+        }
+
         // retomada não devolve id curto: o próprio id retomado serve para o submit
         this.promptId = existingSessionId
 

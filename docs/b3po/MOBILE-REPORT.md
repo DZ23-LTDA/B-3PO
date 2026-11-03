@@ -997,3 +997,17 @@ Isso importa porque a mudança tocou `App.tsx` e o socket: não bastava a suíte
 isso o APK de debug mantém a data antiga mesmo depois da mudança — quem prova comportamento de código novo
 em aparelho é o **release**. O manifesto registra os dois, e o de debug só serve para desenvolvimento com
 Metro ligado.
+
+### Rodada 81 — aprovação pendente sobrevive à reconexão
+
+Um cliente que reconecta durante uma aprovação pendente não a via: o pedido só existia no frame ao vivo. O
+gateway devolve os pedidos abertos em `session.resume` (`open_requests`), e o app ignorava esse campo — o turno
+ficava parado até o tempo limite e a decisão parecia perdida.
+
+Agora o `resume` lê o snapshot, extrai o pedido de `approval` (ignorando `clarify`/lixo) e mostra a faixa de
+decisão. Testes: 3 de parsing + 1 de socket que reconecta com o snapshot e confere o callback e o estado.
+
+Também registrei o que **não** dá para fazer aqui: `shell.exec` recusa comando perigoso com `4005` e não pede
+aprovação; para produzir uma aprovação real é preciso um turno do agente com tool call — bloqueio F5.
+
+Suíte mobile: **169 passando + 8 pulados (177)**.
