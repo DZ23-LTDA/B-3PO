@@ -4,6 +4,7 @@
 // `{ contacts }` ou `{ error }` — nunca lançam para a janela, porque um erro de validação é resposta, não
 // acidente.
 
+import { registerCrmCompanyLogoIpc } from './crm-company-logo'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import { CrmContactStore, crmStorePath, type CrmContact } from './crm-contacts-store'
@@ -36,6 +37,7 @@ export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: 
 
 /** Monta o store do usuário e registra os handlers: `main.ts` só precisa de uma chamada. */
 export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
+  registerCrmCompanyLogoIpc(ipcMain)
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
   registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))
 }

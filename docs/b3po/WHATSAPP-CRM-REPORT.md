@@ -337,3 +337,33 @@ Corrigido no rótulo e na descrição dos dois adapters:
 
 Se o dono quiser **uma só** entrada, a decisão é de produto (esconder a ponte ou a Cloud API) — não faço isso
 sem confirmar, porque esconder a ponte tiraria o canal que já foi usado nos testes com celular.
+
+## Rodada 100 — logo da empresa do contato (logo.dev)
+
+Onde o logo.dev resolve um problema real: a linha do contato no CRM mostra o **logo da empresa**, derivado do
+**domínio do e-mail** do contato (`maria@acme.com.br` → `acme.com.br`). Nada de campo novo: o e-mail já existia.
+
+Regras (testadas):
+
+- e-mail pessoal (gmail, hotmail, uol, bol, icloud…) **não** vira logo de empresa — mostrar o logo do Gmail
+  como "empresa do cliente" seria mentira visual;
+- TLD composto respeitado (`acme.com.br`, não `com.br`);
+- **desligado por padrão**: só liga com `B3PO_LOGO_DEV_TOKEN` no ambiente do processo principal. Sem token, a
+  linha não pede nada e o logo simplesmente não aparece.
+
+### Privacidade, declarada
+
+Cada requisição conta ao logo.dev **quais empresas você acompanha**. Por isso: token fora do Git, recurso
+opcional, e o pedido só acontece quando a linha é renderizada. Se o dono quiser, desligo por completo.
+
+### Por que NÃO troquei os ícones da Mensageria
+
+A lista de plataformas usa glifos do Simple Icons e, para Slack/DingTalk/Feishu/WeCom, **monograma de letra** —
+porque esses fabricantes pediram a remoção do Simple Icons. Usar logo.dev para "devolver" esses logos iria contra
+um pedido explícito das marcas. Ficou como está, de propósito.
+
+### Validação da API (uso real do MCP)
+
+`logo-dev` MCP: `account` (plano community, 500 créditos) e `brand(name="Stripe")` — retornou `logo.url`,
+`brandmark` em SVG, `colors` e `socials`, custando 5 créditos. O formato de `brand` é o que a tela consumiria se
+o dono passar o token.

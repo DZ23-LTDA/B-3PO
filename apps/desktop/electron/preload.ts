@@ -51,6 +51,9 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     }
   },
   getConnection: (profile, opts) => ipcRenderer.invoke('hermes:connection', profile, opts),
+  crmCompanyLogo: {
+    config: () => ipcRenderer.invoke('hermes:crm-company-logo:config')
+  },
   crmContacts: {
     list: () => ipcRenderer.invoke('hermes:crm-contacts:list'),
     remove: phone => ipcRenderer.invoke('hermes:crm-contacts:remove', phone),

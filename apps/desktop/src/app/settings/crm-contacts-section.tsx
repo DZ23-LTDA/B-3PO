@@ -8,6 +8,7 @@ import {
   removeCrmContact,
   saveCrmContact
 } from '@/api/crm-contacts'
+import { companyLogoConfig, companyLogoFor, type CompanyLogoConfig } from '@/api/crm-company-logo'
 import { CRM_ROUTE } from '@/app/routes'
 import { contactsToCsv, csvFileName } from '@/lib/crm-csv'
 import { Button } from '@/components/ui/button'
@@ -42,11 +43,17 @@ export function CrmContactsSection() {
   const copy = t.settings.crmContacts
 
   const [contacts, setContacts] = useState<null | CrmContactRow[]>(null)
+  // Logo da empresa: só com token configurado; sem ele, nada é pedido a terceiro.
+  const [logoConfig, setLogoConfig] = useState<CompanyLogoConfig>({ enabled: false, token: '' })
   const [failure, setFailure] = useState<null | string>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [company, setCompany] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    void companyLogoConfig().then(setLogoConfig)
+  }, [])
 
   const load = useCallback(async () => {
     setFailure(null)
@@ -172,10 +179,23 @@ export function CrmContactsSection() {
               className="flex items-center justify-between gap-4 rounded-md border border-border/60 px-3 py-2"
               key={contact.phone}
             >
-              <div className="flex min-w-0 flex-col">
+              <div className="flex min-w-0 items-center gap-2">
+                {companyLogoFor(contact.email, logoConfig) ? (
+                  <img
+                    alt=""
+                    aria-hidden
+                    className="size-6 shrink-0 rounded object-contain"
+                    height={24}
+                    loading="lazy"
+                    src={companyLogoFor(contact.email, logoConfig) ?? undefined}
+                    width={24}
+                  />
+                ) : null}
+                <span className="flex min-w-0 flex-col">
                 <span className="truncate text-sm text-foreground">{contact.name}</span>
                 <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
                   {[contact.phone, contact.company, contact.email].filter(Boolean).join(' · ')}
+                </span>
                 </span>
               </div>
               <Button onClick={() => void remove(contact.phone)} size="sm" variant="ghost">

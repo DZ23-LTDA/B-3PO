@@ -1,3 +1,8 @@
+vi.mock('@/api/crm-company-logo', () => ({
+  companyLogoConfig: async () => ({ enabled: true, token: 'pk_test' }),
+  companyLogoFor: (email: string) => (email.endsWith('@acme.com.br') ? 'https://img.logo.dev/acme.com.br' : null)
+}))
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -136,5 +141,18 @@ describe('contatos do CRM (Configurações)', () => {
       expect(screen.getByText(/no local disk|não tem disco local/)).toBeTruthy()
     })
     expect(api.listCrmContacts).not.toHaveBeenCalled()
+  })
+  it('mostra o logo da empresa quando o recurso está ligado e o e-mail identifica a empresa', async () => {
+    api.listCrmContacts.mockResolvedValue([contact({ company: 'Acme', email: 'maria@acme.com.br', name: 'Maria' })])
+
+    const { container } = renderSection()
+
+    // O nome do contato também aparece no <select> do funil: espera a imagem, não o texto.
+    await waitFor(() =>
+      expect(container.querySelector('img[src="https://img.logo.dev/acme.com.br"]')).not.toBeNull()
+    )
+
+    const img = container.querySelector('img[src="https://img.logo.dev/acme.com.br"]')
+    expect(img?.getAttribute('aria-hidden')).toBe('true')
   })
 })
