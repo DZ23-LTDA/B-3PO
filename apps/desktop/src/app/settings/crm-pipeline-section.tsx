@@ -144,6 +144,7 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
             {copy.contact}
           </span>
           <select
+            aria-label={copy.contact}
             className="h-8 w-48 rounded-md border border-border/60 bg-transparent px-2 text-sm"
             onChange={event => setContact(event.target.value)}
             value={contact}
