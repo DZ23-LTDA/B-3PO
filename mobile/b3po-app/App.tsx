@@ -1,9 +1,15 @@
 /**
  * Tela raiz do cliente B-3PO (Android/iOS).
  *
- * Fina de propósito: não decide nada. Depois do pareamento ela consulta o servidor de verdade
- * (`/api/health` e `/api/status` via `RestClient`) e **só mostra o que recebeu** — sem dado de exemplo.
- * Se o servidor estiver fora do ar, a tela diz isso em português, com a hora da última tentativa.
+ * Fina de propósito: não decide nada. A lógica de "o que mostrar" vive em `src/screens/status-card.ts`
+ * (testada) e a navegação em `src/app/router.ts` (testada). Aqui só há desenho.
+ *
+ * Depois do pareamento a tela consulta o servidor de verdade (`/api/health` e `/api/status` via
+ * `RestClient`) e mostra o que recebeu — sem dado de exemplo. Sem servidor, diz isso em português.
+ *
+ * Nota de layout: o texto do cartão é renderizado em `<Text>` direto dentro de `<View>`, sem
+ * componente intermediário. A versão anterior com um wrapper `Card` desenhava só o título no aparelho
+ * (defeito registrado no MOBILE-REPORT) e este caminho mais curto remove a variável.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,40 +28,37 @@ import { SafeAreaView } from 'react-native'
 import { back, backLabel, currentRoute, headerTitle, initialNav, openChat } from './src/app/router'
 import type { NavState } from './src/app/router'
 import { RestClient, restFailureMessage } from './src/api/rest-client'
-import type { HealthInfo, StatusInfo } from './src/api/rest-client'
-import { emptyStateCopy } from './src/screens/view-models'
+import { statusCard } from './src/screens/status-card'
+import type { ConnectionState } from './src/screens/status-card'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
 
-type Connection =
-  | { status: 'disconnected' }
-  | { status: 'connecting'; origin: string }
-  | { status: 'connected'; origin: string; deviceId: string; health: HealthInfo; status: StatusInfo | null; checkedAt: number }
-  | { status: 'failed'; origin: string; message: string }
-
 export default function App() {
-  const [connection, setConnection] = useState<Connection>({ status: 'disconnected' })
+  const [connection, setConnection] = useState<ConnectionState>({ status: 'disconnected' })
   const [error, setError] = useState<string | null>(null)
   const [nav, setNav] = useState<NavState>(initialNav)
 
   const route = currentRoute(nav)
+  const card = statusCard(connection, error)
+  const botItems = useMemo(() => [] as { name: string; title: string; description: string }[], [])
 
   const connect = useCallback(async (origin: string, deviceId: string) => {
-    console.log('[b3po] connect', origin, deviceId)
     setConnection({ status: 'connecting', origin })
 
     const client = new RestClient({ origin })
 
     try {
       const health = await client.health()
-      // /api/status é público também; se falhar, o health já provou que o servidor está de pé
-      const status = await client.status().catch(() => null)
+      const gateway = await client.status().catch(() => null)
 
-      console.log('[b3po] connected', JSON.stringify(health), JSON.stringify(status))
-      setConnection({ status: 'connected', origin, deviceId, health, status, checkedAt: Date.now() })
+      setConnection({ status: 'connected', origin, deviceId, health, gateway, checkedAt: Date.now() })
     } catch (failure) {
-      console.log('[b3po] failed', String(failure))
       const detail = failure instanceof Error ? failure.message : String(failure)
-      setConnection({ status: 'failed', origin, message: `${restFailureMessage(failure)}\n\nDetalhe técnico: ${detail}` })
+
+      setConnection({
+        status: 'failed',
+        origin,
+        message: `${restFailureMessage(failure)}\n\nDetalhe técnico: ${detail}`
+      })
     }
   }, [])
 
@@ -92,9 +95,6 @@ export default function App() {
     return () => subscription.remove()
   }, [pair])
 
-  const connected = connection.status === 'connected'
-  const botItems = useMemo(() => [] as { name: string; title: string; description: string }[], [])
-
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar barStyle="light-content" />
@@ -116,13 +116,23 @@ export default function App() {
 
       <ScrollView contentContainerStyle={styles.content}>
         {route.name === 'bots' ? (
-          <>
+          <View style={styles.block}>
             <Text style={styles.tagline}>Seus bots, no seu computador.</Text>
 
-            {statusCard(connection, error)}
+            {connection.status === 'connecting' ? <ActivityIndicator color="#7f9cff" /> : null}
 
-            {connected && botItems.length === 0 ? (
-              <Card title={emptyStateCopy('no-bots').title} body={emptyStateCopy('no-bots').body} />
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{card.title}</Text>
+              <Text style={styles.cardBody}>{card.body}</Text>
+            </View>
+
+            {connection.status === 'connected' && botItems.length === 0 ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Nenhum bot ainda</Text>
+                <Text style={styles.cardBody}>
+                  Os bots são criados no computador. Depois de criar um, ele aparece aqui para conversar.
+                </Text>
+              </View>
             ) : null}
 
             {botItems.map(item => (
@@ -133,97 +143,44 @@ export default function App() {
                 onPress={() => setNav(openChat(nav, { name: item.name, title: item.title }))}
                 style={styles.row}
               >
-                <View style={styles.rowMain}>
-                  <Text style={styles.rowTitle}>{item.title}</Text>
-                  <Text numberOfLines={2} style={styles.rowBody}>
-                    {item.description}
-                  </Text>
-                </View>
+                <Text style={styles.rowTitle}>{item.title}</Text>
+                <Text numberOfLines={2} style={styles.rowBody}>
+                  {item.description}
+                </Text>
               </TouchableOpacity>
             ))}
-          </>
+          </View>
         ) : (
-          <Card
-            title="Conversa"
-            body={
-              connected
-                ? `Conectado a ${connection.origin}. As mensagens deste bot aparecem aqui quando a conversa for ligada ao servidor.`
-                : emptyStateCopy('offline').body
-            }
-          />
+          <View style={styles.block}>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Conversa</Text>
+              <Text style={styles.cardBody}>
+                {connection.status === 'connected'
+                  ? `Conectado a ${connection.origin}. As mensagens deste bot aparecem aqui quando a conversa for ligada ao servidor.`
+                  : card.body}
+              </Text>
+            </View>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-
-/**
- * Um cartão por estado, com `default` explícito: qualquer estado inesperado mostra mensagem em vez de
- * deixar a tela em branco. Tela em branco não informa nada e parece app quebrado.
- */
-function statusCard(connection: Connection, pairingError: string | null) {
-  if (pairingError) {
-    return <Card title="Não foi possível parear" body={pairingError} />
-  }
-
-  switch (connection.status) {
-    case 'disconnected':
-      return <Card title={emptyStateCopy('offline').title} body={emptyStateCopy('offline').body} />
-    case 'connecting':
-      return (
-        <View style={styles.card}>
-          <ActivityIndicator />
-          <Text style={styles.cardTitle}>{emptyStateCopy('connecting').title}</Text>
-          <Text style={styles.cardBody}>{connection.origin}</Text>
-        </View>
-      )
-    case 'failed':
-      return <Card title="Sem conexão com o computador" body={connection.message} />
-    case 'connected':
-      return (
-        <Card
-          title="Conectado ao computador"
-          body={`Servidor: ${connection.origin}\nCompilação: ${connection.health.commit ?? 'não informada'}\nGateway: ${
-            connection.status ? 'consultado' : 'não consultado'
-          }\nToken exigido: ${connection.health.authRequired ? 'sim' : 'não'}${
-            connection.status ? `\nEstado do gateway: ${connection.status.gatewayRunning ? 'rodando' : 'parado'}` : ''
-          }`}
-        />
-      )
-    default:
-      return (
-        <Card
-          title="Estado inesperado"
-          body={`Feche e abra o aplicativo. Diagnóstico: ${JSON.stringify(connection)}`}
-        />
-      )
-  }
-}
-
-function Card({ body, title }: { body: string; title: string }) {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardBody}>{body}</Text>
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
+  block: { gap: 14 },
   card: {
     backgroundColor: '#12151c',
     borderColor: '#1f2430',
     borderRadius: 14,
     borderWidth: 1,
-    gap: 8,
     padding: 16
   },
-  cardBody: { color: '#8f9bb3', fontSize: 14, lineHeight: 20 },
+  cardBody: { color: '#8f9bb3', fontSize: 14, lineHeight: 20, marginTop: 6 },
   cardTitle: { color: '#e8eefc', fontSize: 16, fontWeight: '600' },
-  content: { gap: 14, padding: 20 },
+  content: { padding: 20 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingTop: 12 },
   headerTitle: { color: '#e8eefc', fontSize: 17, fontWeight: '600' },
   row: {
@@ -233,8 +190,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 14
   },
-  rowBody: { color: '#8f9bb3', fontSize: 13, lineHeight: 18 },
-  rowMain: { gap: 4 },
+  rowBody: { color: '#8f9bb3', fontSize: 13, lineHeight: 18, marginTop: 4 },
   rowTitle: { color: '#e8eefc', fontSize: 15, fontWeight: '600' },
   screen: { backgroundColor: '#0b0d12', flex: 1 },
   tagline: { color: '#8f9bb3', fontSize: 14 },

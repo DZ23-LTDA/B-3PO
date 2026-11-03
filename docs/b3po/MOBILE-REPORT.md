@@ -393,3 +393,44 @@ capturou na renderização. Investigar junto do defeito acima.
 
 `ErrorBoundary` (`src/app/error-boundary.tsx`): erro de render no release antes deixava a tela preta
 sem mensagem; agora mostra título, explicação e a mensagem técnica.
+
+## Rodada 49 — causa raiz do cartão sem corpo: colisão de nome no tipo
+
+O defeito aberto na rodada anterior **está corrigido**, e a causa não era layout.
+
+O tipo do estado tinha dois campos chamados `status`:
+
+```ts
+| { status: 'connected'; origin: string; …; status: StatusInfo | null; checkedAt: number }
+//  ^ discriminante da união        ^ informação do gateway — MESMO NOME
+```
+
+Em runtime o segundo sobrescrevia o primeiro: `connection.status` era o **objeto** do gateway, não a
+string `'connected'`. O `switch` nunca casava e caía no `default` — a tela mostrava "Estado
+inesperado", e o corpo do cartão vinha vazio porque o `JSON.stringify` do estado era o único texto e
+o layout o cortava. O TypeScript só reclamou (TS1117) quando a colisão apareceu num literal de teste,
+não na declaração do tipo.
+
+### Correção
+
+1. o campo do gateway passou a se chamar `gateway` (nome com significado próprio, sem colidir com o
+   discriminante);
+2. o texto do cartão saiu do JSX e virou módulo puro `src/screens/status-card.ts`, com **7 testes** —
+   é o teste que teria pego o bug desde o começo;
+3. o `Card` intermediário saiu: o texto é desenhado em `<Text>` direto no `<View>`.
+
+### Prova no aparelho (emulador → servidor real)
+
+```
+Conectado ao computador
+Servidor: http://127.0.0.1:54686
+Compilação: 98695c0cc7e58f85b5ff790482ff434ca722a1da
+Token exigido: não
+Gateway: rodando
+Estado: running
+Nenhum bot ainda
+```
+
+Evidências: `docs/b3po/evidence/mobile-conectado-servidor-real.png` e `.txt`.
+
+**101 testes + 5 pulados**, `tsc --noEmit` limpo.
