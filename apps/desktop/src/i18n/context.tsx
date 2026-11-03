@@ -11,7 +11,8 @@ import {
   isSupportedLocaleValue,
   localeConfigValue,
   normalizeLocale,
-  resolveInitialLocale
+  resolveInitialLocale,
+  resolveInitialLocalePreferringOs
 } from './languages'
 import { $appLocaleVersion, normalizeLocaleId, resolveTranslations } from './registry'
 import { $requestedLocale, setRuntimeI18nLocale } from './runtime'
@@ -186,8 +187,10 @@ export function I18nProvider({
           requestedRef.current = typeof saved === 'string' && saved.trim() ? normalizeLocaleId(saved) : null
           $requestedLocale.set(requestedRef.current)
 
-          // A saved choice needs no machine probe and always takes precedence.
-          if (isSupportedLocaleValue(saved)) {
+          // Um idioma EXPLÍCITO vence sem sondar a máquina. O default do backend (`en`) não conta
+          // como escolha: sem isso, toda máquina pt-BR abre a UI em inglês (ver
+          // resolveInitialLocalePreferringOs).
+          if (isSupportedLocaleValue(saved) && normalizeLocale(saved) !== DEFAULT_LOCALE) {
             setLocaleState(normalizeLocale(saved))
 
             return
@@ -199,7 +202,9 @@ export function I18nProvider({
           const machineProfile = await window.hermesDesktop?.getMachineProfile?.().catch(() => null)
 
           if (!cancelled && !userLocaleRef.current) {
-            setLocaleState(resolveInitialLocale(requestedRef.current, machineProfile?.locale))
+            setLocaleState(
+              resolveInitialLocalePreferringOs(requestedRef.current, machineProfile?.locale)
+            )
           }
         })
         .catch(error => {

@@ -275,6 +275,28 @@ export function resolveInitialLocale(saved: string | null | undefined, osLocale:
   return osPreferredLocale(osLocale) ?? DEFAULT_LOCALE
 }
 
+/**
+ * B-3PO: o default do backend para `display.language` é `en`, então "salvo" quase sempre significa
+ * "nunca escolhido". Com a UI em pt-BR como idioma de produto, o default não pode ganhar do idioma da
+ * máquina: só uma escolha EXPLÍCITA e diferente do default tem precedência sobre o OS.
+ *
+ * Consequência conhecida: quem escolher inglês de propósito numa máquina pt-BR volta ao pt no próximo
+ * boot enquanto a escolha for igual ao default. Escolher qualquer outro idioma fixa a escolha.
+ */
+export function resolveInitialLocalePreferringOs(
+  saved: string | null | undefined,
+  osLocale: string | null | undefined
+): Locale {
+  const savedIsSupported = isSupportedLocaleValue(saved)
+  const savedIsJustTheDefault = savedIsSupported && normalizeLocale(saved) === DEFAULT_LOCALE
+
+  if (savedIsSupported && !savedIsJustTheDefault) {
+    return normalizeLocale(saved)
+  }
+
+  return osPreferredLocale(osLocale) ?? (savedIsSupported ? normalizeLocale(saved) : DEFAULT_LOCALE)
+}
+
 /** The `display.language` value for a picker choice — the bundled option's
  *  config value, or the registered id itself. */
 export function localeConfigValue(locale: Locale): string {

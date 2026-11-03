@@ -193,3 +193,56 @@ Para validar os dois últimos passos, o caminho é: (a) pré-semear a conexão n
 de userData do app; ou (b) rodar em uma sessão interativa com foco de janela permitido; ou (c) usar
 `HERMES_DESKTOP_HERMES_ROOT` com um `hermes` já instalado e deixar o app subir o backend sozinho.
 Não vou declarar “instalação validada” sem ver a Home com dados.
+
+## Rodada 68 — A HOME REAL no app empacotado (e o idioma errado, com a causa)
+
+### Home carregada, comprovada
+
+Encontrei no `main` as variáveis que faltavam e o app empacotado virou **cliente remoto** do servidor
+que já estava rodando:
+
+```
+HERMES_DESKTOP_REMOTE_URL   = http://127.0.0.1:9119
+HERMES_DESKTOP_REMOTE_TOKEN = <token da sessão>
+HERMES_DESKTOP_USER_DATA_DIR= %TEMP%\b3po-desktop-ud   (perfil limpo)
+(sem ELECTRON_RUN_AS_NODE)
+```
+
+A janela abre na **Home do produto**, não no setup:
+
+- wordmark **B-3PO** grande no centro;
+- sidebar em pt-BR: CONVERSAS / BOTS, “Nova conversa”, “Capacidades”, “Mensageria”, “Artefatos”,
+  “Tarefas agendadas”, “Pesquisar conversas…”, FIXADAS;
+- **as conversas reais do servidor**: “Processamento de envio de…” (13m), “Testar celular” (23m),
+  “Do celular” (48m) — as mesmas sessões que o celular criou nesta e nas rodadas anteriores;
+- rodapé: **“Backend ready”**, modelo `Qwen3.5:4B`, `Smart`, `client vgit.e85de13.dirty`.
+
+Evidências: `desktop-home-remoto.png` e `desktop-home-aquecido.png` (2275×1357, capturadas com
+`PrintWindow`/`PW_RENDERFULLCONTENT`, porque `SetForegroundWindow` é recusado nesta sessão e o
+`CopyFromScreen` pegava outra janela por cima).
+
+### O defeito que a Home expôs: UI em inglês numa máquina pt-BR
+
+Com a sidebar em português, o composer aparecia com **“What's on your mind?”**.
+
+Causa rastreada, não suposta:
+
+1. `pt.ts` **tem** a tradução (`composer.newSessionPlaceholders`, inclusive “No que você está pensando?”)
+   e o consumidor é `app/chat/composer/hooks/use-composer-placeholder.ts`.
+2. O locale vem de `display.language` do backend (`i18n/context.tsx`, `getConfigDisplayLanguage`).
+3. `hermes_cli/config_defaults.py:889` define **`"language": "en"` como default**.
+4. `context.tsx` tratava qualquer valor suportado como “escolha do usuário” e retornava antes de
+   sondar a máquina — então o **default** ganhava de um Windows pt-BR.
+
+### Correção
+
+`languages.ts` ganhou `resolveInitialLocalePreferringOs`: o default `en` **não conta como escolha**, só
+um idioma explícito e diferente do default vence o sistema. `context.tsx` passou a usá-la (e a não
+retornar cedo no caso default). Testes em `languages.test.ts` cobrem os quatro casos: default + pt-BR →
+pt; escolha explícita (`es`) → es; sem idioma de máquina → mantém; sem nada salvo → segue a máquina.
+
+`npx vitest run src/i18n` → **108 testes passando**; `tsc --noEmit` limpo; gate 14 ok.
+
+**Limite honesto:** a correção está no código-fonte e testada; o `.exe` em `release/win-unpacked` é um
+build anterior, então as capturas acima ainda mostram o placeholder em inglês. Refazer o pacote
+(`electron-builder`) é o próximo passo para a evidência visual em pt-BR.
