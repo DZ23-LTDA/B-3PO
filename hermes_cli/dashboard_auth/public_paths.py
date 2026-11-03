@@ -24,4 +24,11 @@ PUBLIC_API_PATHS: frozenset[str] = frozenset({
     # Chronos managed-cron fire webhook (NAS -> agent). NOT cookie-gated: it
     # carries its own short-lived NAS-minted JWT (purpose=cron_fire), which the
     # handler verifies — the JWT, not this allowlist, is the security boundary.
-    "/api/cron/fire"})
+    "/api/cron/fire",
+    # B-3PO device ticket for a paired phone (GOAL §16). NOT session-gated: the
+    # paired device has no dashboard login. The device key IS the security
+    # boundary — verified against a stored SHA-256 in constant time, scoped to
+    # one profile, rate-limited per device and revocable; the handler mints a
+    # single-use 30s gateway ticket only after all of that passes
+    # (``hermes_cli.web_routers.b3po_devices``).
+    "/api/b3po/device-ticket"})

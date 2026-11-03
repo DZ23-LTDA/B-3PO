@@ -155,3 +155,12 @@ def test_ticket_attributes_it_to_the_device_not_a_user_login(device_file: Path):
     assert info["provider"] == "b3po-device"
     assert info["device_id"] == device["device_id"]
     assert info["user_id"].startswith("b3po-device:")
+
+def test_device_ticket_path_is_public_but_self_authenticating():
+    """Contrato entre a rota e o gate: a rota precisa ser pública (o celular não tem login),
+    e a segurança vem da chave do dispositivo verificada no próprio handler."""
+    from hermes_cli.dashboard_auth.public_paths import PUBLIC_API_PATHS
+
+    assert "/api/b3po/device-ticket" in PUBLIC_API_PATHS
+    # o pareamento NÃO é público: só o desktop autenticado cria dispositivo
+    assert "/api/b3po/devices" not in PUBLIC_API_PATHS

@@ -183,3 +183,67 @@ ticket, perfil fora do escopo dá 403, teto de taxa dá 429, e a listagem não s
    que não contém o meu código. `/openapi.json` não lista nenhum caminho `b3po`, confirmando. Testar ao
    vivo exige rodar o `serve` **do checkout**, não do binário instalado — próximo passo.
 3. Tela de Dispositivos e composer no celular continuam fora até (1) estar feito.
+
+## 9. Porta HTTP provada ao vivo — e o muro do WebSocket
+
+### 9.1. Como rodar o `serve` do checkout
+
+O `hermes.exe` instalado em `%TEMP%\b3po-f5-home\bin` **não** contém o código do checkout — foi por
+isso que a rodada 43 viu 405. Rodando o pacote do próprio checkout, as rotas aparecem. É preciso um
+arquivo lançador, porque `python -c` com espaços é quebrado pelo pwsh:
+
+```
+"import sys; sys.argv=['hermes','serve']; from hermes_cli.main import main; main()" > launcher.py
+python launcher.py        # cwd = raiz do checkout
+```
+
+`/openapi.json` então lista:
+
+```
+/api/b3po/device-ticket        [post]
+/api/b3po/devices              [get,post]
+/api/b3po/devices/{device_id}  [delete]
+```
+
+### 9.2. O gate global barrava a rota (causa raiz)
+
+Com a rota registrada, `POST /api/b3po/device-ticket` com a chave correta devolvia **401
+`Unauthorized`** — detalhe do middleware, não `invalid_key` do meu handler. Ou seja: o gate de auth
+rodava **antes** e exigia sessão de dashboard.
+
+Correção: `/api/b3po/device-ticket` entrou em `PUBLIC_API_PATHS`
+(`hermes_cli/dashboard_auth/public_paths.py`), seguindo o precedente de `/api/cron/fire` — rota pública
+**cuja credencial é verificada no próprio handler**. Aqui a credencial é a chave do dispositivo (hash
+em tempo constante, escopo de perfil, taxa, revogação). Um teste de contrato garante as duas pontas: a
+rota de ticket está na lista pública e a de pareamento **não** está.
+
+Depois da correção, ao vivo:
+
+| Pedido | Resultado |
+|---|---|
+| `POST /api/b3po/devices` com token de sessão | **200**, dispositivo `dev-3a35e2128eae98da`, chave emitida |
+| `POST /api/b3po/device-ticket` **só** com `x-b3po-device-key` | **200**, ticket de 30 s, perfil `revisor-codigo` |
+| mesmo pedido com chave errada | **401** (a isenção não abre a porta para qualquer um) |
+
+### 9.3. O muro: upgrade do WebSocket responde 403
+
+Quatro variantes contra o servidor real, todas recusadas:
+
+| Variante | Resultado |
+|---|---|
+| `?ticket=` no query + `hermes-gateway-v1` | close **1006**, sem motivo |
+| subprotocolo `hermes-gateway-ticket.<ticket>` | close **1006**, sem motivo |
+| idem, ticket recém-mintado (<1 s) | close **1006** |
+| header `x-hermes-gateway-ticket: <ticket>` (cliente `ws`, que permite header) | **upgrade 403** |
+
+O 403 é o dado novo e útil: o upgrade é recusado por uma camada anterior ao handler, e o log do
+servidor não registra nada (sem traceback). O caminho nativo (`native_http.authenticate_native_ws`)
+espera um ticket de propósito `native-http`, mintado pelo **socket de controle privado** — não um
+ticket de qualquer provedor.
+
+**Próximo passo concreto:** ler `authenticate_native_ws` e a regra que devolve 403 no upgrade, e decidir
+entre (a) mapear `b3po-device` como provedor aceito naquela função, ou (b) aceitar nosso ticket no mesmo
+ponto em que o nativo é aceito. Não vou chutar: o 403 é a pista.
+
+**Status:** credencial de dispositivo funciona em HTTP, comprovada; envio por WebSocket continua
+bloqueado nessa camada. `NOT_READY`.
