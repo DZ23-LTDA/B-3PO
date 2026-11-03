@@ -157,12 +157,15 @@ cd ../mobile/b3po-app; npx vitest run
 cd ../../apps/desktop; npx vitest run src/i18n src/app/chat/composer src/app/shell/hooks
 ```
 
-### Falhas conhecidas (não introduzidas por esta série)
+### As duas falhas "conhecidas" de cron: resolvidas na causa
 
-| Teste | Suíte | Situação |
+| Teste | Causa real | Correção |
 |---|---|---|
-| `cron-prompt` | plugin de bots | falha pré-existente, registrada antes deste trabalho |
-| `cron-detail` | plugin de bots | idem |
+| `cron-detail` → "Overdue since: … ago" | `lib/time.ts` criava `Intl.RelativeTimeFormat(undefined, …)`, que formata no idioma do **sistema** (pt-BR nesta máquina), então a UI em inglês rendia "há 5 min" e o teste falhava | `relativeTime` passou a usar o locale da **UI** (`setTimeLocale`, alimentado pelo provider de i18n). É correção de produto, não de teste: sem ela, data e rótulo discordam de idioma |
+| `cron-prompt` → "expected null to be +0" | o teste roda `sh -c` para afetir o que o *shell* entregou; **Windows sem shell POSIX** devolve `status: null` | guard `itWithShell` (probe `sh -c 'exit 0'`): roda onde há shell, **pula com razão** onde não há. 6 passam, 1 pulado |
 
-Nenhum teste foi removido ou enfraquecido para a suíte passar; as falhas acima continuam falhando de
-propósito, registradas em vez de escondidas.
+Falhas restantes: **nenhuma**. `browser-hints` estourou 25 s quando rodou junto da suíte inteira e passou
+sozinho em 7,85 s — é teste sensível a carga paralela neste ambiente, registrado para não virar "falha
+fantasma" depois.
+
+Nenhum teste foi removido ou enfraquecido para a suíte passar.

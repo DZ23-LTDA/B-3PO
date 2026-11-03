@@ -19,6 +19,16 @@ import { isLegacyDelegatedRoutine, normalizedProfileName, routineInputError, rou
 
 /** Run the delegation command under a `hermes` stub that prints its argv, so
  *  the assertion is what the SHELL passed — not what the string looks like. */
+/** O teste abaixo afere o que o SHELL entregou, então precisa de `sh`. Windows sem POSIX shell no PATH
+ *  não tem como exercitar isso: pular é honesto, fingir que passou não. */
+function hasPosixShell(): boolean {
+  const probe = spawnSync('sh', ['-c', 'exit 0'])
+
+  return probe.status === 0
+}
+
+const itWithShell = hasPosixShell() ? it : it.skip
+
 function argvOf(prompt: string): string[] {
   const command = prompt.slice(prompt.indexOf('hermes '), prompt.lastIndexOf('\n\nIf the command'))
   const result = spawnSync('sh', ['-c', `hermes() { printf '%s\\037' "$@"; }\n${command}`], { encoding: 'utf8' })
@@ -49,7 +59,7 @@ describe('direct vs delegated execution', () => {
 })
 
 describe('delegated arguments stay literal shell values', () => {
-  it('passes substitutions, backticks and quotes through as text', () => {
+  itWithShell('passes substitutions, backticks and quotes through as text', () => {
     const title = "Audit $(printf TITLE_EXPANDED) `printf TITLE_TICK` 'quoted'"
     const instruction = "Line one $(printf TASK_EXPANDED) `printf TASK_TICK`\nLine two 'quoted'"
 

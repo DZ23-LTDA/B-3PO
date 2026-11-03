@@ -4,6 +4,8 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
 
 import { getHermesConfigRecord, type HermesConfigRecord, retainConfigReadOrigin, saveHermesConfig } from '@/hermes'
 
+import { setTimeLocale } from '@/lib/time'
+
 import { TRANSLATIONS } from './catalog'
 import {
   DEFAULT_LOCALE,
@@ -148,6 +150,8 @@ export function I18nProvider({
   useEffect(() => {
     localeRef.current = locale
     setRuntimeI18nLocale(locale)
+    // Tempo/data seguem o idioma da UI, não o do sistema (ver lib/time.ts).
+    setTimeLocale(localeConfigValue(locale))
     applyDocumentLocale(locale, isRtlLocale(locale))
   }, [locale, registryVersion])
 

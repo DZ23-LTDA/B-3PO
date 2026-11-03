@@ -448,3 +448,30 @@ APK/AAB com **chave de debug**, iOS ausente por bloqueio externo, macOS/Linux n�
 
 `npx vitest run src/app/chat/composer src/app/shell/hooks` → **752 testes passando** (áreas tocadas pelas
 mudanças de i18n/placeholder). Gate: 14 ok.
+
+## Rodada 74 — datas seguem o idioma da UI, e as duas falhas de cron foram resolvidas na causa
+
+### Correção de produto: `Intl` não pode usar o locale do sistema
+
+`apps/desktop/src/lib/time.ts` criava os formatadores como `new Intl.RelativeTimeFormat(undefined, …)`.
+`undefined` = locale **do sistema** (pt-BR nesta máquina), não o da interface. Consequência real: com a UI
+em inglês, as datas saíam em português — "Overdue since: há 5 min" — e vice-versa.
+
+Agora `relativeTime` usa um `RelativeTimeFormat` em cache por locale, alimentado por `setTimeLocale()`, que
+o provider de i18n chama quando o idioma resolve (`context.tsx`, junto de `setRuntimeI18nLocale`). O default
+segue `DEFAULT_LOCALE` (`en`), então testes e primeira pintura ficam determinísticos.
+
+### As duas falhas "conhecidas" de cron
+
+| Teste | Causa | Correção |
+|---|---|---|
+| `cron-detail` | o formatador de tempo acima (locale do sistema) | corrigido na raiz — 13 testes da suíte de cron passam |
+| `cron-prompt` | o teste roda `sh -c`; **Windows sem shell POSIX** devolve `status: null` | guard `itWithShell` com probe `sh -c 'exit 0'`: roda onde há shell, **pula com razão** onde não há (6 passam, 1 pulado) |
+
+Não mexi no caminho de segurança (`isLegacyDelegatedRoutine` / pause de rotinas legadas) para "fazer o teste
+passar": a asserção continua de pé, o ambiente é que não tem `sh`.
+
+### Observação de ambiente
+
+`src/lib/keybinds/browser-hints.test.tsx` estourou 25 s quando rodou junto da suíte inteira e passou sozinho
+em 7,85 s. É sensível a carga paralela aqui — registrado para não ser confundido com regressão.
