@@ -1,0 +1,14 @@
+{
+  "name": "@dz23/crm-core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Núcleo do WhatsApp CRM oficial do B-3PO: consentimento, webhook, contatos e funil. Sem marca de terceiros.",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.12"
+  }
+}
