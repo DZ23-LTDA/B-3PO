@@ -727,3 +727,25 @@ Duas tentativas de abrir Configurações pela janela empacotada (`Ctrl+,` via Ap
 tela de conversa — a captura `configuracoes-modelo-pt.png` é do chat, não do painel. O painel está verificado por
 teste (93 arquivos, 724 testes, incluindo o `pt-coverage`), não por imagem desta vez. Tentar de novo na próxima
 rodada com outro caminho de navegação.
+
+### Rodada 104 — boot em português e a medida do que falta
+
+O inglês de Configurações não é "um arquivo": o catálogo é dividido em **famílias** de locale
+(`en_boot.ts`, `en_catalog.ts`, `en_clarify.ts`, …). Medi: **26 famílias** têm pelo menos 3 locales e **nenhuma
+tem português**. É esse o tamanho real do problema — e é por isso que traduzir "Configurações" por uma lista de
+strings nunca ia fechar.
+
+Nesta rodada entrou `pt_boot.ts`: tela de inicialização, mensagens de falha de boot (as seis causas comuns),
+login remoto, Nous Cloud fora do ar e a tela de retenção por atualização. Composed via `...ptBoot` no override.
+
+Backlog medido e registrado (ordem de impacto): `boot` (feito), `desktop_commands`, `error_codes`, `error_layers`,
+`notices`, `notifications`, `connectors`/`connector_*`, `cron_control`, `catalog`, `first_run`, `onboarding`,
+`model_menu`, `session_commands`, `projects`, `memory_layers`, `local_models`, `theme_picker`, `update_channel`,
+`gateway_host`, `clarify`, `shared_metrics`, `plugin_preview_access`, `plugin_update`, `preview_web`, `notifications`.
+
+### Sobre a captura que não saiu
+
+Três tentativas de abrir Configurações na janela empacotada (Ctrl+, depois Ctrl+K + "settings") devolveram a tela
+de conversa: o teclado sintético (AppActivate + SendKeys) não é confiável aqui. Em vez de insistir, coloquei `pt`
+na **matriz de locales** de `model-settings.test.tsx` — o teste agora renderiza o painel em português e exige que
+as strings traduzidas apareçam e difiram do inglês (40 testes verdes). Prova por teste, não por imagem; declarado.

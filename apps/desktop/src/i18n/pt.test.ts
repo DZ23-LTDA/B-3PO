@@ -54,6 +54,7 @@ describe('pt-BR', () => {
   it('o override cobre exatamente as seções declaradas', () => {
     expect(Object.keys(ptOverrides).sort()).toEqual([
       'assistant',
+      'boot',
       'common',
       'composer',
       'errors',

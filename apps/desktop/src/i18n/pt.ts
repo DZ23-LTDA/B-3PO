@@ -10,9 +10,11 @@
  */
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { defineFieldCopy } from '@/app/settings/field-copy'
+import { ptBoot } from './pt_boot'
 import { ptModelSettings } from './pt_model_settings'
 
 export const ptOverrides: TranslationOverrides = {
+  ...ptBoot,
   common: {
     apply: 'Aplicar',
     back: 'Voltar',
