@@ -220,4 +220,3 @@ function mascotDelayForTest(name: string): string {
 
   return `${((hash % 44) / 10).toFixed(1)}s`
 }
-
