@@ -59,3 +59,35 @@
 1. Reproduzir com `HERMES_LOG_LEVEL=debug` e capturar o turno do perfil novo.
 2. Instrumentar a criação do "turn machinery" por perfil (tempo de warmup + timeout).
 3. Se for warmup, exibir progresso real em vez de spinner infinito; se for deadlock, corrigir no gateway e cobrir com teste.
+
+## 6. Rodada 30 — causa do passo 11 isolada em duas camadas
+
+### 6.1 Provider (corrigido, `137c3342`)
+
+O perfil novo nascia com `providers` vazio: `launch_model_seed` só copiava a entrada de provider
+**custom**, não a de provider embutido com endpoint próprio (Ollama local). Sem endpoint o turno
+morria em `HTTP 404`. Correções:
+
+- `profile_model_seed` copia `providers.<key>` quando a entrada carrega endpoint (`base_url`/`baseUrl`/`url`/`api`);
+- `runtime_provider_custom.with_ollama_v1` normaliza host Ollama puro (`:11434`) para `/v1`, porque o
+  servidor responde **404** em `/chat/completions` — foi o que a sonda confirmou:
+  `/v1/chat/completions` → 200; `/chat/completions` → 404.
+- 5 testes de regressão em `tests/hermes_cli/test_profile_seed_builtin_endpoint.py`.
+
+**Turno por CLI validado** depois da correção, no perfil do bot: `hermes -z responda-ok` → `Ok` em 5 s.
+
+### 6.2 Rota do perfil no desktop (bloqueio atual)
+
+O mesmo turno **pelo app** continua parado em `Waking up revisor-codigo…`. O `desktop.log` mostra que
+a rota ativa nunca muda para o perfil do bot:
+
+```
+[...] [gateway-route win=main] active key=default via=primary conn=local profile=default   (última linha)
+```
+
+Ou seja: clicar na linha do bot exibe o overlay de troca, mas a troca de rota para
+`profile=revisor-codigo` não se completa — não há linha `active key=... profile=revisor-codigo`, nem
+erro. O runtime sabe servir o perfil (CLI provou); o que falta é o desktop concluir o re-roteamento
+para o perfil multiplexado.
+
+**Status do passo 11:** runtime **VALIDADO** por CLI; app **BLOQUEADO** por esse re-roteamento.
