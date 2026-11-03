@@ -12,7 +12,9 @@ ones (e.g. 429 quota, where the stored token is still valid).
 
 import base64
 import json
+import os
 import time
+from pathlib import Path
 
 import pytest
 
@@ -21,6 +23,18 @@ from hermes_cli import auth_codex
 from hermes_cli.auth import AuthError, _refresh_codex_auth_tokens, resolve_codex_runtime_credentials
 
 STALE = {"access_token": "stale-access", "refresh_token": "stale-refresh"}
+
+
+@pytest.fixture(autouse=True)
+def _adopt_external_logins_on():
+    """Estes testes exercitam o empréstimo do login da Codex CLI.
+
+    Desde que ``auth.adopt_external_logins`` passou a ser false por padrão, o caminho de recuperação
+    precisa de opt-in explícito — e é exatamente esse caminho que este arquivo cobre.
+    """
+    home = Path(os.environ["HERMES_HOME"])
+    home.mkdir(parents=True, exist_ok=True)
+    (home / "config.yaml").write_text("auth:\n  adopt_external_logins: true\n")
 
 
 def test_self_heals_on_stale_refresh_token(monkeypatch):
@@ -88,6 +102,9 @@ def test_self_heals_missing_singleton_access_token_from_codex_cli(tmp_path, monk
     monkeypatch.setenv("HERMES_HOME", str(hermes_home))
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
 
+    # Empréstimo do login da Codex CLI é opt-in desde que o padrão passou a ser false.
+    (hermes_home / "config.yaml").write_text("auth:\n  adopt_external_logins: true\n")
+
     resolved = resolve_codex_runtime_credentials()
 
     assert resolved["api_key"] == "fresh-access"
@@ -148,6 +165,8 @@ def _seed_homes(tmp_path, monkeypatch, hermes_tokens, cli_tokens):
     codex_home.mkdir()
     (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {"openai-codex": {
         "tokens": hermes_tokens, "auth_mode": "chatgpt"}}}))
+    # Emprestar o login da Codex CLI e opt-in desde que o padrao passou a ser false.
+    (hermes_home / "config.yaml").write_text("auth:\n  adopt_external_logins: true\n")
     (codex_home / "auth.json").write_text(json.dumps({"tokens": cli_tokens}))
     monkeypatch.setenv("HERMES_HOME", str(hermes_home))
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
