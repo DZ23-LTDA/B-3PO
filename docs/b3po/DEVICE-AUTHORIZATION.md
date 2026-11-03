@@ -153,3 +153,33 @@ Nenhum dos dois era falha de lógica; os dois eram o gate fazendo o trabalho del
 
 `POST /api/b3po/device-ticket`, a allowlist de métodos por provedor de ticket no WS e a tela de
 Dispositivos. O cliente mobile (`gateway-rpc.ts`) já aceita `{kind:'ticket'}`.
+
+## 7. Rota implementada — `hermes_cli/web_routers/b3po_devices.py` (10 testes)
+
+| Rota | O que faz |
+|---|---|
+| `POST /api/b3po/devices` | pareia: devolve a chave **uma vez** e o dispositivo sem segredo |
+| `POST /api/b3po/device-ticket` | valida `x-b3po-device-key`, escopo e taxa; minta ticket de uso único |
+| `GET /api/b3po/devices` | lista para a tela de Dispositivos (sem hash, sem chave) |
+| `DELETE /api/b3po/devices/{device_id}` | revoga |
+
+Mapa de erro → status: `invalid_key` 401, `revoked` 401, `scope_mismatch` 403, `rate_limited` 429,
+`invalid_input` 400.
+
+O teste mais importante é `test_ticket_attributes_it_to_the_device_not_a_user_login`: ele consome o
+ticket mintado e confere `provider == "b3po-device"`, `device_id` e `user_id` prefixado por
+`b3po-device:` — isto é, o ticket **não** é uma sessão de usuário logado. Os outros cobrem: chave
+ausente e chave errada devolvem o **mesmo** detalhe (não enumera dispositivos), revogado não pega
+ticket, perfil fora do escopo dá 403, teto de taxa dá 429, e a listagem não serializa hash.
+
+## 8. O que ainda NÃO está provado
+
+1. **Aceitação no WebSocket.** Não verifiquei ao vivo se `_consume_ws_ticket` aceita
+   `provider="b3po-device"` — só `bot-desktop` é recusado explicitamente, então a expectativa é que
+   aceite, mas expectativa não é prova. E a **allowlist de métodos** (só sessão, nunca `approval.respond`
+   ou `session.mutate`) ainda não existe: é o item de endurecimento obrigatório antes de liberar a UI.
+2. **Servidor real.** Tentei provar contra `hermes serve` na porta 9119 e o `POST /api/b3po/devices`
+   devolveu **405**: o processo em execução é o runtime **pré-instalado** em `%TEMP%\b3po-f5-home\bin`,
+   que não contém o meu código. `/openapi.json` não lista nenhum caminho `b3po`, confirmando. Testar ao
+   vivo exige rodar o `serve` **do checkout**, não do binário instalado — próximo passo.
+3. Tela de Dispositivos e composer no celular continuam fora até (1) estar feito.
