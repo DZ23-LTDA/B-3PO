@@ -12,14 +12,16 @@
  * (defeito registrado no MOBILE-REPORT) e este caminho mais curto remove a variável.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Linking,
   ScrollView,
+  Pressable,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native'
@@ -29,6 +31,7 @@ import { back, backLabel, currentRoute, headerTitle, initialNav, openChat } from
 import type { NavState } from './src/app/router'
 import { RestClient, restFailureMessage } from './src/api/rest-client'
 import type { BotProfile } from './src/api/rest-client'
+import { GatewayChatSocket } from './src/api/gateway-chat-socket'
 import { chatBubbles, chatEmptyCopy, sessionRows } from './src/screens/chat-session'
 import type { ChatBubble, RawMessage } from './src/screens/chat-session'
 import { statusCard } from './src/screens/status-card'
@@ -43,6 +46,9 @@ export default function App() {
   const [bubbles, setBubbles] = useState<ChatBubble[]>([])
   const [chatNote, setChatNote] = useState<string | null>(null)
   const [chatLoading, setChatLoading] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [sending, setSending] = useState(false)
+  const socketRef = useRef<GatewayChatSocket | null>(null)
 
   const route = currentRoute(nav)
   const card = statusCard(connection, error)
@@ -117,9 +123,91 @@ export default function App() {
       } finally {
         setChatLoading(false)
       }
+
+      // Socket de envio: mesmo contrato provado contra o servidor real
+      // (?token= + Origin + sem subprotocolo). Criado sob demanda, fechado ao sair.
+      if (!socketRef.current) {
+        socketRef.current = new GatewayChatSocket(origin, token, (url, options) => {
+          // React Native: new WebSocket(url, protocols, options). Passar as options no lugar de
+          // `protocols` (2º argumento) não abre o socket — o contrato exige o 2º vazio.
+          const Impl = WebSocket as unknown as {
+            new (u: string, p: string[], o?: { headers?: Record<string, string> }): WebSocket
+          }
+
+          return new Impl(url, [], options) as unknown as never
+        })
+      }
     },
     [connection]
   )
+
+  /** Envia o texto digitado pelo transporte do gateway. */
+  const sendDraft = useCallback(async () => {
+    const text = draft.trim()
+
+    if (!text || sending) {
+      return
+    }
+
+    if (connection.status !== 'connected') {
+      setChatNote('Sem conexão com o computador: pareie o aparelho para enviar.')
+
+      return
+    }
+
+    setSending(true)
+    setChatNote(null)
+
+    // Cria o socket aqui se ainda não existir: depender de `openBot` fazer isso deixava o botão
+    // sem ação quando a conversa abria antes de a conexão ficar pronta (falha silenciosa).
+    if (!socketRef.current) {
+      const originHere = connection.origin
+      const tokenHere = connection.token
+
+      socketRef.current = new GatewayChatSocket(originHere, tokenHere, (url, options) => {
+        const Impl = WebSocket as unknown as {
+          new (u: string, p: string[], o?: { headers?: Record<string, string> }): WebSocket
+        }
+
+        return new Impl(url, [], options) as unknown as never
+      })
+    }
+
+    const socket = socketRef.current
+
+    try {
+      await socket.connect()
+      const result = await socket.sendPrompt(text)
+
+      if (result.accepted) {
+        setDraft('')
+        // Recarrega a conversa do servidor: a bolha que aparece é a persistida, não uma otimista
+        const latest = chatBubbles(
+          (await new RestClient({
+            origin: connection.status === 'connected' ? connection.origin : '',
+            token: connection.status === 'connected' ? connection.token : ''
+          }).messages(
+            nav.kind === 'chat' ? nav.bot.name : '',
+            socket.getSessionId() ?? '',
+            50
+          )) as RawMessage[]
+        )
+
+        setBubbles(latest)
+      } else {
+        setChatNote('O computador não confirmou o envio.')
+      }
+    } catch (failure) {
+      const message =
+        failure && typeof failure === 'object' && 'message' in failure
+          ? String((failure as { message: unknown }).message)
+          : 'Falha ao enviar'
+
+      setChatNote(`Não foi possível enviar: ${message}`)
+    } finally {
+      setSending(false)
+    }
+  }, [draft, sending, connection, nav])
 
   const pair = useCallback(
     (value: string) => {
@@ -220,6 +308,30 @@ export default function App() {
               </View>
             ) : null}
 
+            <View style={styles.composer}>
+              <TextInput
+                accessibilityLabel="Mensagem para o bot"
+                multiline
+                onChangeText={setDraft}
+                onSubmitEditing={() => void sendDraft()}
+                returnKeyType="send"
+                placeholder="Escreva para o bot"
+                placeholderTextColor="#5b6478"
+                style={styles.composerInput}
+                value={draft}
+              />
+              <TouchableOpacity
+                accessibilityLabel="Enviar mensagem"
+                accessibilityRole="button"
+                activeOpacity={0.7}
+                disabled={sending || draft.trim().length === 0}
+                onPress={() => void sendDraft()}
+                style={[styles.sendButton, (sending || draft.trim().length === 0) && styles.sendButtonDisabled]}
+              >
+                <Text style={styles.sendButtonText}>{sending ? 'Enviando…' : 'Enviar'}</Text>
+              </TouchableOpacity>
+            </View>
+
             {bubbles.map(bubble => (
               <View
                 accessibilityLabel={`${bubble.label}: ${bubble.body}`}
@@ -241,6 +353,11 @@ const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
   block: { gap: 14 },
+  composer: { backgroundColor: '#0d1016', borderColor: '#1f2430', borderRadius: 14, borderWidth: 1, gap: 8, padding: 10 },
+  composerInput: { color: '#e8eefc', fontSize: 14, maxHeight: 110, minHeight: 40, paddingHorizontal: 4, paddingVertical: 6 },
+  sendButton: { alignItems: 'center', backgroundColor: '#2b5cff', borderRadius: 10, paddingVertical: 10 },
+  sendButtonDisabled: { backgroundColor: '#232a3a' },
+  sendButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
   bubble: { borderRadius: 12, maxWidth: '88%', padding: 12 },
   bubbleBody: { color: '#e8eefc', fontSize: 14, lineHeight: 20 },
   bubbleLabel: { color: '#7f9cff', fontSize: 11, marginBottom: 2 },

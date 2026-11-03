@@ -640,3 +640,44 @@ O que NÃO funcionou, e por quê: ticket de dispositivo (ignorado em `serve`), s
 ("Server sent no subprotocol"). O detalhe completo está em `DEVICE-AUTHORIZATION.md` §10.
 
 `gateway-rpc.ts` reescrito para esse contrato, 12 testes.
+
+## Rodada 62 — composer na tela; o toque ainda não dispara o envio
+
+### O que está pronto e testado
+
+`src/api/gateway-chat-socket.ts` — **9 testes**: abre com `?token=` + `Origin` + zero subprotocolo,
+`session.create` quando não há conversa, `session.resume` com id canônico, queda para criação quando a
+sessão sumiu (`4007`), `prompt.submit` só com `session_id` + `text`, texto vazio não vira pedido, erro
+do servidor vira rejeição tipada, e enviar sem conexão falha com mensagem clara.
+
+`App.tsx`: composer com `TextInput` + botão "Enviar" (desabilitado com campo vazio), envio por ENTER,
+socket criado sob demanda dentro de `sendDraft` (não depende mais do `openBot`), e recarga da conversa
+a partir do servidor depois do aceite (a bolha que aparece é a persistida, não uma otimista).
+
+### O que NÃO funciona, com a evidência
+
+No emulador, com o bot aberto e o campo preenchido ("Teste do celular"), tocar em "Enviar":
+
+- o campo **mantém** o texto (um envio bem-sucedido limparia o campo);
+- o rótulo do botão continua "Enviar" (viraria "Enviando…" durante o envio);
+- o servidor **não** registra nova mensagem: a sessão `20261103_140104_f5` segue com 2 mensagens;
+- `adb logcat` não mostra nenhum erro de JS.
+
+Ou seja: o handler do toque não está rodando. Testei `Pressable` e depois `TouchableOpacity` (que
+funciona nos itens da lista de bots) — mesmo resultado.
+
+### Hipótese principal para a próxima rodada
+
+O composer está **dentro do `ScrollView`** cujo conteúdo é muito mais alto que a tela (a resposta do bot
+tem ~1600 px). O toque no botão pode estar sendo resolvido contra o conteúdo rolado, não contra o que
+está visível. Caminho: mover o composer para **fora** do `ScrollView`, fixo no rodapé — que também é o
+comportamento certo de produto.
+
+Alternativa: instrumentar com um contador de toques visível na tela para confirmar se `onPress` roda.
+
+### O que já está provado sobre o envio (rodada 61)
+
+O transporte funciona: um cliente Node com `?token=` + `Origin` + zero subprotocolo abriu o WS,
+criou sessão, enviou `prompt.submit` com `{session_id, text}` e o gateway respondeu
+`{"status":"streaming"}`; a sessão `20261103_140104_f5` tem a mensagem e a resposta do modelo
+("B-3PO do celular funcionando. ✅"). O que falta é a **tela** disparar esse caminho.
