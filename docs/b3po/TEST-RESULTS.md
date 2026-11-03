@@ -113,3 +113,15 @@ verdes. A falha inicial foi real e corrigida (`node-version: '26'`), não escond
 
 **Observação:** o PR #1 também dispara os workflows herdados do upstream (CI, Docker, Nix). Eles não são
 deste trabalho e não devem ser lidos como sinal de qualidade do B-3PO.
+
+## Atualização 00:15 — verificação final da suíte
+
+Reexecução completa após a correção do `title=`:
+
+| Métrica | Resultado |
+|---|---|
+| Arquivos | 1.519 ok / 5 com falha (1.524) |
+| Testes | **6 falhando** — exatamente as pré-existentes (`cron-prompt`/`sh`, `cron-detail`, `keybinds` ×2, `browser-hints`, `terminal-ownership`) |
+| Regressão minha (`no-native-title`) | **eliminada** |
+
+Nenhuma falha nova. As 6 restantes são ambientais e anteriores a esta entrega.

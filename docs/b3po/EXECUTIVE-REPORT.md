@@ -21,7 +21,7 @@ roteiro visual ponta a ponta do desktop.
 | Item | Valor |
 |---|---|
 | Branch de trabalho | `b3po-brand` |
-| Commits DZ23 | **29** |
+| Commits DZ23 | **31** |
 | `main` | `f4cf411f` — **0 commits DZ23** (política F2-A mantida) |
 | Pull Request | `DZ23-LTDA/B-3PO#1` (draft, "NÃO MESCLAR") |
 | Worktree | limpo |
@@ -40,7 +40,7 @@ roteiro visual ponta a ponta do desktop.
 
 | Artefato | SHA-256 | Assinatura |
 |---|---|---|
-| `B-3PO.exe` | `35269d021e7a067024abe98476662aada0513793680bd0c97dc41fe124fa7941` | **não assinado** |
+| `B-3PO.exe` | `41170c009afad4c4271306ecaacaeb047a510221856695971361371f2561f12d` | **não assinado** |
 | `B3PO-0.0.0-win-x64.msix` | `71f2b3ed45aa32353fc320a02d59ed825d7d27a0bd306e8c0252c049bb5486f0` | **NotSigned** (verificado por Authenticode) |
 | `b3po-android-shell-debug.apk` | `a96b4a33…` | keystore **debug** |
 
@@ -52,7 +52,7 @@ Nenhum artefato é chamado de assinado, notarizado ou pronto para loja.
 |---|---|
 | `scripts/check` (gates do repo) | **14 checks ok** |
 | Testes de domínio (schema, orquestração, mascotes, grade, look) | **47 verdes** |
-| Suíte de UI do desktop | **12.760 passando / 6 falhando** (ambientais, documentadas) |
+| Suíte de UI do desktop | **1.519 arquivos ok / 5 com falha; 6 testes falhando** (ambientais, pré-existentes e documentadas) |
 | Testes de i18n | **84 verdes** |
 | Build + typecheck + lint | exit 0 |
 | Turno real do agente (CLI, provider local) | **13,4 s**, resposta `B-3PO online` |

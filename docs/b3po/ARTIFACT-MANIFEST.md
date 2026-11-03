@@ -61,7 +61,7 @@ Identidade do build mudou na fonte única `apps/desktop/product-identity.cjs`:
 Ícone trocado para o da marca (`assets/icon.ico`/`icon.png` gerados de `brand/icons/b3po-icon-512.png`).
 AUMID de fallback em `main.ts` corrigido para `com.dz23.b3po`.
 
-**Artefato reconferido:** `release/win-unpacked/B-3PO.exe` — ProductName `B-3PO`, CompanyName `DZ23-LTDA`, **não assinado**, SHA-256 `35269d021e7a067024abe98476662aada0513793680bd0c97dc41fe124fa7941`.
+**Artefato reconferido:** `release/win-unpacked/B-3PO.exe` — ProductName `B-3PO`, CompanyName `DZ23-LTDA`, **não assinado**, SHA-256 `41170c009afad4c4271306ecaacaeb047a510221856695971361371f2561f12d`.
 
 **Migração de dados:** o userData do Electron passa a derivar de `B-3PO`; instalações antigas em `%APPDATA%\Hermes` não são tocadas nem migradas automaticamente. Aceitável em pré-lançamento; se houver build interno em uso, migração com cópia + rollback entra na Fase C/2.
 
@@ -95,7 +95,7 @@ instrução de instalação.
 | Plataforma | Windows 10/11 x64 |
 | Versão | `0.0.0` |
 | Commit | `707c3df2` (identidade) — UI de mascotes é posterior; ver limitação |
-| Hash (SHA-256) | `35269d021e7a067024abe98476662aada0513793680bd0c97dc41fe124fa7941` |
+| Hash (SHA-256) | `41170c009afad4c4271306ecaacaeb047a510221856695971361371f2561f12d` |
 | Formato | diretório desempacotado (`--dir`), **não** instalador |
 | Assinatura | **não assinada** |
 | Notarização | não se aplica |
@@ -137,3 +137,17 @@ instrução de instalação.
 
 **Nota:** as tabelas anteriores deste arquivo são históricas. Esta é a consolidada e a única que deve ser
 citada em relatório.
+
+### Correção de bookkeeping (2026-11-03 00:10)
+
+O SHA-256 do `B-3PO.exe` registrado antes (`35269d02…`) era de um build **anterior** ao `dist:win`. O arquivo
+em disco (mtime 21:52:24, mesmo minuto do MSIX) tem:
+
+```
+41170c009afad4c4271306ecaacaeb047a510221856695971361371f2561f12d
+```
+
+**Consequência real:** os artefatos Windows em `release/` correspondem ao commit **`3c92a2ba`** (21:52) —
+portanto **não** incluem a UI de mascotes, o título B-3PO nem o rebranding de onboarding feitos depois. Para
+gerar artefato fiel ao topo da branch é preciso rodar `npm run pack` / `npm run dist:win` de novo; isso não foi
+feito para não republicar números sem revalidar.
