@@ -751,3 +751,50 @@ de `sendPrompt` virar `chatNote` visível (hoje o erro é engolido quando o RPC 
 (3) repetir o teste 3× seguidas para provar repetibilidade antes de chamar de pronto.
 
 Registro isso porque "funcionou uma vez" não é o mesmo que "funciona".
+
+## Rodada 65 — a causa era o teclado cobrindo o composer. Três envios seguidos, três respostas.
+
+A falha intermitente das rodadas 64 tinha uma causa de **produto**, não de teste:
+
+**o teclado virtual cobria o composer.** O campo e o botão ficavam em `y≈2142–2371`, atrás do teclado
+aberto. Tocar em "Enviar" atingia uma tecla do teclado, não o botão. Por isso: nenhuma mensagem nova, o
+texto permanecia no campo e nenhum erro aparecia.
+
+Prova objetiva: com o teclado aberto, o dump mostrava o `EditText` em `y=2142`; depois do
+`KeyboardAvoidingView`, o mesmo campo aparece em `y=1259` — acima do teclado.
+
+Correção: `KeyboardAvoidingView` (`behavior="padding"` no iOS, `"height"` no Android) envolvendo
+conteúdo + composer.
+
+### Repetibilidade provada (3 envios, 3 respostas)
+
+Sessão `20261103_143446_9bce31`:
+
+```
+[user]      Envio um
+[assistant] Olá! Percebi que sua mensagem ("Envio um...") está incompleta…
+[user]      Envio dois
+[assistant] Olá! Percebi que você enviou uma mensagem dizendo "Envio dois"…
+[user]      Envio tres
+[assistant] Olá! Estou aqui para ajudar com o seu projeto **C-3PO BOT**…
+```
+
+Evidência: `mobile-envio-repetibilidade.jpg` (conversa com a resposta do bot e o composer visível acima
+do teclado) e `mobile-repetibilidade-transcript.txt`.
+
+### O que eu errei antes de achar isso
+
+Passei duas rodadas culpando `Pressable`, `TouchableOpacity`, `multiline`, `onSubmitEditing` e o método
+de digitação. Todas as hipóteses eram plausíveis e todas estavam erradas; o dado que faltava estava na
+tela — a posição do campo (`y`) **antes e depois** do teclado abrir. Comparar coordenadas foi o que
+resolveu, não mais tentativas.
+
+### Estado do envio no celular
+
+| Item | Estado |
+|---|---|
+| enviar mensagem | ✅ 3 envios consecutivos |
+| bot responde | ✅ nas três |
+| campo limpa após envio | ✅ |
+| composer visível com teclado aberto | ✅ (era o bug) |
+| recarga da resposta em passos | implementada com 15 testes (rodada 64) |

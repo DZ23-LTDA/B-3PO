@@ -15,6 +15,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Linking,
   ScrollView,
   Pressable,
@@ -288,7 +290,12 @@ export default function App() {
         {route.name === 'chat' ? <Text style={styles.headerTitle}>{headerTitle(route)}</Text> : null}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        style={styles.body}
+      >
+        <ScrollView contentContainerStyle={styles.content}>
         {route.name === 'bots' ? (
           <View style={styles.block}>
             <Text style={styles.tagline}>Seus bots, no seu computador.</Text>
@@ -374,6 +381,7 @@ export default function App() {
           </TouchableOpacity>
         </View>
       ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -382,6 +390,7 @@ const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
   block: { gap: 14 },
+  body: { flex: 1 },
   composer: { backgroundColor: '#0d1016', borderColor: '#1f2430', borderRadius: 14, borderWidth: 1, gap: 8, padding: 10 },
   composerInput: { color: '#e8eefc', fontSize: 14, maxHeight: 110, minHeight: 40, paddingHorizontal: 4, paddingVertical: 6 },
   sendButton: { alignItems: 'center', backgroundColor: '#2b5cff', borderRadius: 10, paddingVertical: 10 },
