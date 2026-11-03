@@ -1,3 +1,25 @@
+# DEFEITO — overlay "Acordando <perfil>…" (RETRATADO)
+
+> **RETRATAÇÃO (rodada 34).** Este defeito **não existe**. A sonda de DOM mostra o overlay com
+> `opacity: 0`, `aria-hidden="true"` e o composer visível e utilizável:
+>
+> ```
+> className: "... z-50 flex items-center justify-center transition-opacity ... opacity-0"
+> opacity: "0"   ariaHidden: "true"   composer visivel: true
+> ```
+>
+> O texto `Acordando <perfil>…` permanece no DOM (o componente mantém o rótulo para não piscar no
+> fade-out), então `document.body.innerText` **inclui** esse texto. Minha verificação automática
+> usava `innerText` e por isso relatou "overlay presente" por três rodadas — um falso positivo do meu
+> teste, não um defeito do app.
+>
+> O que de fato acontecia, medido corretamente: o turno roda, o bot responde, o overlay desaparece
+> visualmente e o composer continua aceitando texto. O app estava funcionando.
+>
+> As seções abaixo ficam como registro do diagnóstico (hipóteses testadas e eliminadas). As duas
+> correções de deadline que sobreviveram são endurecimento legítimo de `await`s sem limite — não
+> consertos deste "defeito".
+
 # DEFECT — overlay "Acordando <perfil>…" não sai (Bot Mode)
 
 **Sintoma:** ao abrir o chat de um bot e enviar uma mensagem, o overlay `Acordando <perfil>…`
@@ -93,3 +115,16 @@ saudável.
 - `apps/desktop/src/store/profile.ts` — `openProfileBackend()` (dial com deadline de cold boot)
 - `apps/desktop/src/sdk/wake-tile.ts` — `resumeExistingTile()` (tile resume com deadline) + `wake-tile.test.ts` (3 testes)
 - Gate `python scripts/check`: 14 ok; `tsc` limpo; `2307` testes de store/sdk verdes
+
+## Lição de verificação
+
+Medir presença de UI por `innerText` do documento é falso positivo para qualquer elemento que use
+transição de opacidade. O teste correto é o que passou a ser usado:
+
+```js
+const cs = getComputedStyle(overlay)   // opacity, visibility
+overlay.getAttribute('aria-hidden')
+```
+
+Regra para os próximos roteiros de E2E nesta base: **visibilidade se mede por `getComputedStyle` +
+`aria-hidden`**, nunca por varredura de texto.
