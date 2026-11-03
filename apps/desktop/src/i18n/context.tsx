@@ -207,13 +207,23 @@ export function I18nProvider({
             )
           }
         })
-        .catch(error => {
+        .catch(async error => {
           if (cancelled || userLocaleRef.current) {
             return
           }
 
           setConfigLoadError(toError(error))
-          setLocaleState(DEFAULT_LOCALE)
+
+          // B-3PO: um config que não carrega não é motivo para abrir a UI em inglês numa máquina
+          // pt-BR. Sem escolha salva, o idioma da máquina é a resposta honesta; o inglês fica como
+          // último recurso (antes, este caminho fixava `en` em qualquer falha).
+          const fallbackProfile = await window.hermesDesktop?.getMachineProfile?.().catch(() => null)
+
+          if (!cancelled && !userLocaleRef.current) {
+            setLocaleState(
+              resolveInitialLocalePreferringOs(requestedRef.current, fallbackProfile?.locale)
+            )
+          }
 
           if (retryCount < MAX_LOCALE_RETRIES) {
             retryCount += 1

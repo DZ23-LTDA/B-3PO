@@ -291,3 +291,46 @@ da correção no escuro.
 O `run-electron-builder.mjs` aponta o cache para `path.join(source, '.cache/desktop-inputs')`, dentro do
 checkout; os `*.tar.gz` do builder derrubam o gate `profile-archives`. Removi 400 MB desse cache e o gate
 voltou a **14 checks, ok**. Também apaguei `release/win-unpacked.bak` (431 MB).
+
+## Rodada 70 — provas de que a lógica de idioma está certa, e a suspeita que sobrou
+
+### Testes que passaram a pinar o comportamento (context.test.tsx)
+
+| Teste | Entrada | Espera | Resultado |
+|---|---|---|---|
+| config salvo em pt | `getConfig → {display:{language:'pt'}}` | locale `pt` | ✅ |
+| config `en` + máquina `pt-BR` | `getConfig → 'en'`, `getMachineProfile → 'pt-BR'` | locale `pt` | ✅ |
+| config indisponível + máquina `pt-BR` | `getConfig` **rejeita** | locale `pt` | ✅ |
+
+O terceiro caso era um buraco real: o `catch` do load fixava `DEFAULT_LOCALE` (`en`) em **qualquer**
+falha de config. Agora ele consulta o perfil da máquina e usa `resolveInitialLocalePreferringOs`; o
+inglês ficou como último recurso. `context.test.tsx` está com **22 testes**; `context` + `languages`
+= 29 passando; `tsc` limpo; gate 14 ok.
+
+### E o app empacotado? Ainda inglês — mas agora sei onde NÃO é
+
+Pacote reconstruído e aberto de novo (`client vgit.387bc8d` no rodapé). Resultado na tela:
+
+- **em português**: sidebar (CONVERSAS, BOTS, Nova conversa, Capacidades, Mensageria, Artefatos,
+  Tarefas agendadas, Pesquisar conversas…, FIXADAS) e o parágrafo do herói;
+- **em inglês**: o placeholder do composer (“Ask anything”), o selo “Smart”, “Backend ready”, “IMPORT”.
+
+Isso **não é um locale**: é **mais de um escopo de i18n** na mesma janela. O provider do app
+(`main.tsx` → `ProfileI18nProvider` → `I18nProvider scopeKey=…`) resolveu pt; um segundo escopo — o que
+desenha composer e statusbar — ficou no default `en`. Minha correção atua no primeiro; o segundo não
+passa por ela.
+
+### Próximo passo (medido, não adivinhado)
+
+1. `grep -rn "I18nProvider" src/main.tsx src/app` e listar **cada** mount com seu `scopeKey`;
+2. achar o escopo que desenha `app/chat/composer` e `statusbar`;
+3. fazer esse escopo herdar o locale do escopo pai (ou passar `initialLocale` explícito) e provar com um
+   teste de render que o placeholder sai em pt.
+
+Ferramenta boa para isso: render test com `ProfileI18nProvider` + composer, comparando o placeholder.
+
+### Correção de registro
+
+Na rodada 69 eu disse que o problema era “o app não recebe o config”. A rodada 70 mostra que a lógica do
+provider está correta nos três casos; o que falta é o **segundo escopo**. Registro para não repetir o
+diagnóstico errado.

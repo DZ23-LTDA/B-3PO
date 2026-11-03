@@ -44,6 +44,63 @@ describe('I18nProvider', () => {
     expect(screen.getByTestId('label').textContent).toBe('Language')
   })
 
+  it('usa o display.language salvo (pt) em vez do default en', async () => {
+    const configClient = {
+      getConfig: async () => ({ display: { language: 'pt' } }),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+  })
+
+  it('sem escolha salva, segue o idioma da maquina (pt-BR) em vez de en', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      getConfig: async () => ({ display: { language: 'en' } }),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+    window.hermesDesktop = previous
+  })
+
+  it('config indisponivel nao abre a UI em ingles numa maquina pt-BR', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      getConfig: async () => {
+        throw new Error('config fora do ar')
+      },
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+    window.hermesDesktop = previous
+  })
+
   it('normalizes an initial locale alias and switches translations', async () => {
     render(
       <I18nProvider configClient={null} initialLocale="zh-CN">
