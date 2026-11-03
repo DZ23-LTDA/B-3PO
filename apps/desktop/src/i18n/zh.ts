@@ -484,7 +484,7 @@ export const zhOverrides = {
     crmContacts: {
       export: '导出 CSV',
       openCrm: '打开 CRM 页面',
-      title: 'WhatsApp CRM 联系人',
+      title: 'CRM 联系人',
       intro: '你的机器人对话的对象。联系人保存在本机，不会发送给第三方。',
       empty: '还没有联系人。在下面添加第一个。',
       unavailable: '此客户端没有可保存联系人的本地磁盘。',

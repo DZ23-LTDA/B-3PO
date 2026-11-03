@@ -90,12 +90,19 @@ export function BotChatEmpty({ sessionId }: { sessionId: string }) {
          * baixa, o nome do bot ocupava meia tela e encostava no compositor. O nome continua ali, em corpo de
          * texto, que é o que o leitor de tela lê.
          */}
-        <img
-          alt=""
-          aria-hidden
-          className="hb-mascot-blink mx-auto mb-3 block h-[min(9rem,26vh)] w-auto rounded-[22%] object-contain"
-          src={meta?.mascot_id ? rosterMascotSrc(meta.mascot_id, bot.name) : BRAND_ROBOT}
-        />
+        {/* O halo usa as cores do tema: a arte deixa de parecer um adesivo colado no fundo escuro. */}
+        <span className="relative mx-auto mb-4 flex items-center justify-center">
+          <span
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--ui-accent)_28%,transparent),transparent)] blur-xl"
+          />
+          <img
+            alt=""
+            aria-hidden
+            className="block h-[min(13rem,32vh)] w-auto rounded-[22%] object-contain"
+            src={meta?.mascot_id ? rosterMascotSrc(meta.mascot_id, bot.name) : BRAND_ROBOT}
+          />
+        </span>
 
         <p className="m-0 text-center text-lg font-medium leading-normal tracking-tight">{name}</p>
 

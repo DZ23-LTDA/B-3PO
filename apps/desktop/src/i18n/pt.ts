@@ -524,7 +524,7 @@ export const ptOverrides: TranslationOverrides = {
     crmContacts: {
       export: 'Exportar CSV',
       openCrm: 'Abrir a página do CRM',
-      title: 'Contatos do WhatsApp CRM',
+      title: 'Contatos do CRM',
       intro: 'Com quem seus bots falam. Os contatos ficam neste computador; nada é enviado a terceiros.',
       empty: 'Nenhum contato ainda. Cadastre o primeiro abaixo.',
       unavailable: 'Este cliente não tem disco local para guardar contatos.',

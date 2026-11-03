@@ -607,3 +607,29 @@ Evidência: `docs/b3po/evidence/hero-mascote-dev.png` — app empacotado contra 
 
 O robô continua **estático** (só a flutuação CSS). Movimento real pede frames — o GIF do dono não está no
 repositório. E a arte pode ficar maior: ajusto com nova captura.
+
+## Rodada 98 — sem movimento (decisão do dono) e um CSS quebrado meu
+
+O dono decidiu: **deixar o robô parado**. Removi a flutuação CSS do splash, apaguei a regra morta do
+`styles.css` e tirei a piscada do robô grande do chat de bot (piscada continua só nos avatares pequenos do
+roster, que é onde ela foi pedida).
+
+### Defeito que eu mesmo criei ao remover
+
+O corte da regra CSS deixou uma **chave de fechamento órfã** no fim de `styles.css`. O `tsc` não olha CSS, então
+passou; o `npm run build` falhou com `CssSyntaxError: Missing opening {` e o `electron-builder` **empacotou o
+bundle antigo**. Só percebi porque li o log do build: a captura tinha sido feita com o código velho. Corrigido
+(balanço 463/463 chaves) e reconstruído — a captura em `docs/b3po/evidence/hero-mascote-dev.png` é do bundle
+novo.
+
+### Duas telas, dois heróis, ambos com o robô
+
+- splash do rascunho (`components/chat/intro.tsx`): robô da marca + tagline, estático, altura por viewport;
+- chat de bot (`plugins/hermes-bots/chat-empty.tsx`): robô da marca (ou o mascote escolhido) sobre um halo que
+  usa `--ui-accent`, nome em corpo de texto.
+
+### WhatsApp duplicado em Configurações
+
+Renomeei os títulos das seções do CRM (`WhatsApp CRM contacts` → `CRM contacts`) nos 10 locales: o canal
+WhatsApp é assunto da Mensageria, não do CRM. A duplicata que o dono viu em Configurações ainda precisa de
+confirmação de **qual** tela — a seção de contatos só é montada em `/crm`, então a segunda entrada é outra.

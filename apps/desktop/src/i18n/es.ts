@@ -716,7 +716,7 @@ export const esOverrides = {
     crmContacts: {
       export: 'Exportar CSV',
       openCrm: 'Abrir la página del CRM',
-      title: 'Contactos del CRM de WhatsApp',
+      title: 'Contactos del CRM',
       intro: 'Con quién hablan tus bots. Los contactos se guardan en este equipo; nada se envía a terceros.',
       empty: 'Todavía no hay contactos. Añade el primero abajo.',
       unavailable: 'Este cliente no tiene disco local para guardar contactos.',

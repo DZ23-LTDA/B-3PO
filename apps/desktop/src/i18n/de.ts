@@ -713,7 +713,7 @@ export const deOverrides = {
     crmContacts: {
       export: 'CSV exportieren',
       openCrm: 'CRM-Seite öffnen',
-      title: 'WhatsApp-CRM-Kontakte',
+      title: 'CRM-Kontakte',
       intro: 'Mit wem deine Bots sprechen. Die Kontakte liegen auf diesem Computer; nichts geht an Dritte.',
       empty: 'Noch kein Kontakt. Füge unten den ersten hinzu.',
       unavailable: 'Dieser Client hat keine lokale Festplatte für Kontakte.',

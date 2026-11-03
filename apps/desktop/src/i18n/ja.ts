@@ -274,7 +274,7 @@ export const jaOverrides = {
     crmContacts: {
       export: 'CSV を書き出す',
       openCrm: 'CRM ページを開く',
-      title: 'WhatsApp CRM の連絡先',
+      title: 'CRM の連絡先',
       intro: 'ボットが話す相手です。連絡先はこのコンピューターに保存され、第三者には送信されません。',
       empty: '連絡先はまだありません。下から最初の 1 件を追加してください。',
       unavailable: 'このクライアントには連絡先を保存するローカルディスクがありません。',

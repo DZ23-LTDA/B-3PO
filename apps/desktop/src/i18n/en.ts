@@ -715,7 +715,7 @@ export const en: Translations = {
     crmContacts: {
       export: 'Export CSV',
       openCrm: 'Open the CRM page',
-      title: 'WhatsApp CRM contacts',
+      title: 'CRM contacts',
       intro: 'Who your bots talk to. Contacts live on this computer; nothing is sent to a third party.',
       empty: 'No contact yet. Add the first one below.',
       unavailable: 'This client has no local disk to keep contacts.',

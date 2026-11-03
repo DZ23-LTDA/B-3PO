@@ -194,7 +194,7 @@ export function Intro({ personality, seed }: IntroProps) {
          * tem altura limitada por viewport e o texto acessível continua no `aria-label`.
          */}
         {isBrand ? (
-          <BrandMark aria-label={WORDMARK} className="b3po-hero-float mb-1 size-auto h-[min(15rem,34vh)] w-auto" role="img" />
+          <BrandMark aria-label={WORDMARK} className="mb-1 size-auto h-[min(15rem,34vh)] w-auto" role="img" />
         ) : (
           <Wordmark className="mb-1" text={wordmarkText} />
         )}
