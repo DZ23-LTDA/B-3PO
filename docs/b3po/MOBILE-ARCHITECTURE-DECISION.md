@@ -31,3 +31,25 @@ observação e aprovação — nunca executando ferramentas nem mantendo sessão
 
 Nada de mobile é implementado nesta rodada. O documento existe para que a decisão não seja improvisada
 depois, e para registrar por que **não** se escolheu Flutter nem nativo duplo.
+
+---
+
+## Decisão final (2026-11-03, aprovada pelo proprietário): **React Native**
+
+A auditoria confirma RN como a opção mais compatível com o que já existe:
+
+| Evidência no repositório | Consequência |
+|---|---|
+| desktop é TypeScript + React (`apps/desktop`) | o cliente mobile reusa linguagem, tipos e o contrato de eventos |
+| o contrato de execução já existe em `orchestration.ts` | o mobile replica o **contrato**, não o runtime |
+| o gateway fala JSON-RPC por WebSocket | o mobile é mais um cliente do mesmo gateway |
+| `apps/shared` já concentra tipos compartilhados | futura extração do contrato para pacote comum |
+| Flutter exigiria Dart | dobraria linguagem e reimplementaria o contrato |
+| Kotlin + Swift nativos | dobraria o custo por plataforma |
+
+**Implementado nesta rodada:** `mobile/b3po-app/src/protocol/execution.ts` (contrato: mapeamento de
+frame → evento público, capabilities, `decideTool`, `ExecutionLog` idempotente com estado derivado) e
+**12 testes** rodando por `npx vitest run --root mobile/b3po-app`.
+
+**Não implementado ainda:** cliente de API, telas, login, pastas nativas, APK/AAB. O README do app
+lista item a item, sem maquiar.
