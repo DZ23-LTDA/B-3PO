@@ -53,6 +53,8 @@ jobs:
           src/plugins/hermes-bots/mascot-grid.test.tsx
           src/plugins/hermes-bots/edit-profile-look.test.ts
 
+      - name: auditoria de producao (nenhuma alta)
+        run: npm audit --omit=dev --audit-level=high
       - name: testes do CRM (consentimento, webhook, contatos)
         run: npx vitest run --root crm
       - name: typecheck do desktop
