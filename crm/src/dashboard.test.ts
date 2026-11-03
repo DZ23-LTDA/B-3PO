@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { addMessage, createConversation, resolveConversation } from './inbox'
 import type { Conversation } from './inbox'
+import { createTask, moveTask, pendingTaskCount } from './tasks'
+import type { Task } from './tasks'
 import {
   dashboardMetrics,
   formatDuration,
@@ -211,5 +213,28 @@ describe('formatação', () => {
     expect(formatPercent(0.755)).toBe('76%')
     expect(formatPercent(1)).toBe('100%')
     expect(formatPercent(null)).toBe('—')
+  })
+})
+
+describe('dashboard — composição com os outros módulos', () => {
+  it('tarefas e conversas reais alimentam os mesmos indicadores', () => {
+    const waiting = addMessage(conversation('c1'), { id: 'a', direction: 'in', text: 'oi', at: T0 - 2 * HOUR })
+    const openTask = createTask({ id: 't1', title: 'Ligar de volta', now: T0 - HOUR }) as Task
+    const doneTask = moveTask(createTask({ id: 't2', title: 'Enviar proposta', now: T0 - HOUR }) as Task, 'done', T0)
+      .task as Task
+
+    const metrics = dashboardMetrics({
+      conversations: [waiting],
+      deals: [],
+      stages,
+      contactsCreatedAt: [T0 - HOUR],
+      now: T0,
+      pendingTasks: pendingTaskCount([openTask, doneTask])
+    })
+
+    expect(metrics.pendingTasks.value).toBe(1)
+    expect(metrics.waitingConversations.value).toBe(1)
+    expect(metrics.newLeads.value).toBe(1)
+    expect(metrics.isEmpty).toBe(false)
   })
 })

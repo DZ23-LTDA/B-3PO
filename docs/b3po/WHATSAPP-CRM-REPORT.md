@@ -55,3 +55,32 @@ Dois testes falharam por expectativa **minha** errada, não por bug:
    acrescentei um caso de desempate.
 
 **86 testes** no CRM, `tsc --noEmit` limpo.
+
+## Rodada 52 — motor de automações (GOAL 14.5)
+
+`crm/src/automation.ts` com **16 testes**. O motor **não executa** nada: decide quais ações devem
+acontecer, com que chave de idempotência, e o que foi recusado. A execução real (enviar template,
+chamar bot, atualizar CRM) fica em outro módulo — por isso as regras de segurança são prováveis sem
+tocar em serviço externo.
+
+| Regra | Por quê |
+|---|---|
+| idempotência por `(evento, regra)` | webhook repete e cliente faz retry; ação duplicada manda mensagem duas vezes |
+| deduplicação por `(regra, contato)` numa janela | rajada do mesmo assunto não vira enxurrada |
+| limite de encadeamento (`depth` × `maxDepth`) | automação que dispara evento não entra em laço infinito |
+| teto de ações por evento | regra não pode explodir em 20 ações de uma vez |
+| pausada ≠ desligada | suspender sem apagar, e o motivo aparece na auditoria |
+| ação sensível sai marcada `needsApproval` | `send_template`, `call_bot`, `update_crm` nunca viram envio silencioso |
+| auditoria de tudo, inclusive recusa | responde "por que a automação não rodou" |
+| estado imutável | cada execução devolve estado novo; nada de mutação escondida |
+
+Também nesta rodada: teste de composição provando que `tasks` → `dashboard` fecha o `pendingTasks`
+que antes era `null` (tarefa aberta conta, concluída não).
+
+### Erro meu nesta rodada
+
+Deixei no teste de composição uma linha sem sentido (`metrics.isNew(...)`, método que não existe) e só
+percebi ao rodar. Removi. O hábito que pegou isso foi rodar a suíte inteira a cada mudança, não só o
+arquivo novo.
+
+**103 testes** no CRM, `tsc --noEmit` limpo.
