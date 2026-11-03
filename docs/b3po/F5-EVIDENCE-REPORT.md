@@ -128,3 +128,35 @@ confiável, e o modelo maior disponível é recusado pelo próprio runtime. **Pa
 
 Para destravar: um provider externo (API key) ou um modelo local ≥64k com tool calling (ex.: Qwen 3
 versão maior com contexto configurado, ou um modelo OpenAI-compatível servido com `num_ctx` alto).
+
+## 9. Rodada 34 — "overlay preso" RETRATADO; turno validado com medição correta
+
+O defeito que eu vinha perseguindo **não existe**. Sonda de DOM no app em execução:
+
+```
+className: "... z-50 flex items-center justify-center transition-opacity ... opacity-0"
+opacity: "0"    ariaHidden: "true"    composer visivel: true
+overlay oculto em: 3s
+```
+
+O componente mantém o rótulo `Acordando <perfil>…` no DOM durante o fade-out, então
+`document.body.innerText` **inclui** esse texto. Minha verificação lia `innerText` e por isso
+"encontrava" o overlay por três rodadas: falso positivo do teste, não falha do produto.
+
+Conversa real pelo app, medida corretamente (transcrito de `state.db`):
+
+```
+user:      Diga ok
+assistant: Ok
+user:      Responda apenas: teste-dois
+assistant: teste-dois
+```
+
+O composer voltou habilitado e aceitou o segundo envio — **sem execução duplicada**.
+
+**Passos do F5 agora:** 11 VALIDADO (turno real pelo app, duas mensagens, respostas reais);
+13 e 17 com evidência de estado e de não-duplicação; 12 segue bloqueado por modelo (tool calling);
+14/15 com erro de provider observado; 16 (cancelamento) ainda não exercitado.
+
+**Regra adotada:** visibilidade se mede por `getComputedStyle` + `aria-hidden`, nunca por varredura
+de texto do documento.
