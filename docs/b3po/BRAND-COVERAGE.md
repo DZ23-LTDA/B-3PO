@@ -24,7 +24,7 @@ Mapa das superfícies visíveis. `Hermes` continua sendo o nome do **runtime** (
 
 | Superfície | O que aparece | Ação |
 |---|---|---|
-| **Configurações → Aparência → Mascote** | catálogo **petdex** (Nukey, Socksy, Daemon Dumpling, Cache Capy…) com pets animados | substituir o catálogo de pets pelos **20 mascotes da marca**, ou esconder a página enquanto não houver versão animada |
+| ~~Configurações → Aparência → Mascote~~ | **resolvido em `45f23954`** | os 20 mascotes oficiais são empacotados como pets locais (`scripts/generate_brand_pets.py`); a galeria lista só a marca ("20 pets"), sem petdex e sem "Hermes" |
 | Título da aba de sessão nova | `NEW SESSION` | traduzir no catálogo |
 | Texto de apresentação do chat vazio | inglês | traduzir `intro-copy` |
 | PDFs/docs do site | "Hermes Agent" em páginas de marketing | rebrand de documentação (fora da UI do app) |
