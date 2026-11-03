@@ -17,6 +17,20 @@ export const zhHantSettings = {
   },
 
   settings: {
+    crmPipeline: {
+      title: '銷售漏斗',
+      intro: '此處記錄的機會的真實數字。',
+      empty: '還沒有機會。',
+      open: '進行中',
+      won: '贏單',
+      opportunity: '機會',
+      value: '金額（分）',
+      contact: '聯絡人',
+      add: '新增機會',
+      remove: '移除',
+      stage: '階段',
+      unavailable: '此用戶端沒有用於漏斗的本機磁碟。',
+    },
     crmContacts: {
       title: 'WhatsApp CRM 聯絡人',
       intro: '你的機器人對話的對象。聯絡人保存在本機，不會傳送給第三方。',

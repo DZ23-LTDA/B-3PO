@@ -455,6 +455,20 @@ export const zhOverrides = {
   },
 
   settings: {
+    crmPipeline: {
+      title: '销售漏斗',
+      intro: '此处记录的机会的真实数字。',
+      empty: '还没有机会。',
+      open: '进行中',
+      won: '赢单',
+      opportunity: '机会',
+      value: '金额（分）',
+      contact: '联系人',
+      add: '添加机会',
+      remove: '移除',
+      stage: '阶段',
+      unavailable: '此客户端没有用于漏斗的本地磁盘。',
+    },
     crmContacts: {
       title: 'WhatsApp CRM 联系人',
       intro: '你的机器人对话的对象。联系人保存在本机，不会发送给第三方。',

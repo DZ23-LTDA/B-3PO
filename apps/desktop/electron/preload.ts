@@ -56,6 +56,11 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: phone => ipcRenderer.invoke('hermes:crm-contacts:remove', phone),
     upsert: payload => ipcRenderer.invoke('hermes:crm-contacts:upsert', payload)
   },
+  crmPipeline: {
+    list: () => ipcRenderer.invoke('hermes:crm-pipeline:list'),
+    remove: id => ipcRenderer.invoke('hermes:crm-pipeline:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:crm-pipeline:upsert', payload)
+  },
   // Loopback origin that hosts YouTube's player for the file:// renderer.
   getEmbedHostOrigin: () => ipcRenderer.invoke('hermes:embed-host:origin'),
   // Registry-scoped backend resolution: { connectionId, profile } → descriptor.

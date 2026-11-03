@@ -14,6 +14,20 @@ export const arSettings = {
     noResults: 'لا توجد لغة مطابقة'
   },
   settings: {
+    crmPipeline: {
+      title: 'مسار المبيعات',
+      intro: 'أرقام حقيقية من الفرص المسجلة هنا.',
+      empty: 'لا توجد فرص بعد.',
+      open: 'قيد العمل',
+      won: 'مكسوبة',
+      opportunity: 'فرصة',
+      value: 'القيمة (سنت)',
+      contact: 'جهة الاتصال',
+      add: 'إضافة فرصة',
+      remove: 'إزالة',
+      stage: 'المرحلة',
+      unavailable: 'هذا العميل لا يملك قرصًا محليًا للمسار.',
+    },
     crmContacts: {
       title: 'جهات اتصال WhatsApp CRM',
       intro: 'من تتحدث معهم بوتاتك. تُحفظ جهات الاتصال على هذا الكمبيوتر ولا يُرسل شيء إلى طرف ثالث.',

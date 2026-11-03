@@ -684,6 +684,20 @@ export const frOverrides = {
     noResults: 'Aucune langue trouvée'
   },
   settings: {
+    crmPipeline: {
+      title: 'Pipeline commercial',
+      intro: 'Des chiffres réels issus des opportunités enregistrées ici.',
+      empty: 'Aucune opportunité pour l’instant.',
+      open: 'En cours',
+      won: 'Gagnées',
+      opportunity: 'Opportunité',
+      value: 'Valeur (centimes)',
+      contact: 'Contact',
+      add: 'Ajouter une opportunité',
+      remove: 'Retirer',
+      stage: 'Étape',
+      unavailable: 'Ce client n’a pas de disque local pour le pipeline.',
+    },
     crmContacts: {
       title: 'Contacts du CRM WhatsApp',
       intro: 'À qui parlent vos bots. Les contacts restent sur cet ordinateur ; rien n’est envoyé à un tiers.',

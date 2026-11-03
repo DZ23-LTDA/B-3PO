@@ -7,6 +7,8 @@
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import { CrmContactStore, crmStorePath, type CrmContact } from './crm-contacts-store'
+import { registerCrmPipelineIpc } from './crm-pipeline-ipc'
+import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 
 export type CrmContactsResult = { contacts: CrmContact[] } | { error: string }
 
@@ -35,4 +37,5 @@ export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: 
 /** Monta o store do usuário e registra os handlers: `main.ts` só precisa de uma chamada. */
 export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
+  registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))
 }

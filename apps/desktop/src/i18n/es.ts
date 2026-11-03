@@ -687,6 +687,20 @@ export const esOverrides = {
     noResults: 'No se encontraron idiomas'
   },
   settings: {
+    crmPipeline: {
+      title: 'Embudo de ventas',
+      intro: 'Números reales de las oportunidades registradas aquí.',
+      empty: 'Aún no hay oportunidades.',
+      open: 'Abiertas',
+      won: 'Ganadas',
+      opportunity: 'Oportunidad',
+      value: 'Valor (centavos)',
+      contact: 'Contacto',
+      add: 'Añadir oportunidad',
+      remove: 'Quitar',
+      stage: 'Etapa',
+      unavailable: 'Este cliente no tiene disco local para el embudo.',
+    },
     crmContacts: {
       title: 'Contactos del CRM de WhatsApp',
       intro: 'Con quién hablan tus bots. Los contactos se guardan en este equipo; nada se envía a terceros.',

@@ -246,6 +246,20 @@ export const jaOverrides = {
   },
 
   settings: {
+    crmPipeline: {
+      title: '商談パイプライン',
+      intro: 'ここに記録した商談の実数です。',
+      empty: '商談はまだありません。',
+      open: '進行中',
+      won: '受注',
+      opportunity: '商談',
+      value: '金額（セント）',
+      contact: '連絡先',
+      add: '商談を追加',
+      remove: '削除',
+      stage: 'ステージ',
+      unavailable: 'このクライアントにはパイプライン用のローカルディスクがありません。',
+    },
     crmContacts: {
       title: 'WhatsApp CRM の連絡先',
       intro: 'ボットが話す相手です。連絡先はこのコンピューターに保存され、第三者には送信されません。',

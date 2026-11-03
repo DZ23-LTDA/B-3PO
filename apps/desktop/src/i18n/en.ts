@@ -686,6 +686,20 @@ export const en: Translations = {
   },
 
   settings: {
+    crmPipeline: {
+      title: 'Sales pipeline',
+      intro: 'Real numbers from the opportunities you record here.',
+      empty: 'No opportunity yet.',
+      open: 'Open',
+      won: 'Won',
+      opportunity: 'Opportunity',
+      value: 'Value (cents)',
+      contact: 'Contact',
+      add: 'Add opportunity',
+      remove: 'Remove',
+      stage: 'Stage',
+      unavailable: 'This client has no local disk for the pipeline.',
+    },
     crmContacts: {
       title: 'WhatsApp CRM contacts',
       intro: 'Who your bots talk to. Contacts live on this computer; nothing is sent to a third party.',

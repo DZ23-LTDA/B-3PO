@@ -11,6 +11,19 @@ const api = vi.hoisted(() => ({
 
 vi.mock('@/api/crm-contacts', () => api)
 
+// O painel de contatos monta o funil; aqui ele e isolado com um funil vazio e disponivel.
+vi.mock('@/api/crm-pipeline', () => ({
+  PIPELINE_STAGES: ['novo', 'ganho'],
+  listOpportunities: vi.fn(async () => []),
+  money: vi.fn(() => 'R$ 0,00'),
+  opportunityTotals: vi.fn(() => ({ openCents: 0, wonCents: 0 })),
+  pipelineAvailable: vi.fn(() => true),
+  pipelineErrorText: vi.fn((code: string) => `erro:${code}`),
+  removeOpportunity: vi.fn(async () => []),
+  saveOpportunity: vi.fn(async () => ({ opportunities: [] })),
+  stageLabel: vi.fn((stage: string) => stage)
+}))
+
 import type { CrmContactRow } from '@/api/crm-contacts'
 
 import { I18nProvider } from '@/i18n'
@@ -49,8 +62,8 @@ describe('contatos do CRM (Configurações)', () => {
 
     renderSection()
 
-    expect(await screen.findByText('Maria')).toBeTruthy()
-    expect(screen.getByText(/\+5511999991111 · DZ23 · a@b\.co/)).toBeTruthy()
+    // O select do funil tambem lista o nome: a linha do contato e identificada pelo dado composto.
+    expect(await screen.findByText(/\+5511999991111 · DZ23 · a@b\.co/)).toBeTruthy()
   })
 
   it('sem contatos explica o vazio em vez de mostrar lista em branco', async () => {
@@ -65,7 +78,8 @@ describe('contatos do CRM (Configurações)', () => {
 
   it('cadastrar envia o que foi digitado e mostra a lista nova', async () => {
     api.listCrmContacts.mockResolvedValue([])
-    api.saveCrmContact.mockResolvedValue({ contacts: [contact({ name: 'João' })] })
+    // a fixture precisa carregar o telefone digitado: e ele que a linha mostra depois de salvar.
+    api.saveCrmContact.mockResolvedValue({ contacts: [contact({ name: 'João', phone: '+5511888882222' })] })
 
     renderSection()
 
@@ -81,7 +95,7 @@ describe('contatos do CRM (Configurações)', () => {
         expect.objectContaining({ name: 'João', phone: '+5511888882222' })
       )
     })
-    expect(await screen.findByText('João')).toBeTruthy()
+    expect(await screen.findByText(/\+5511888882222/)).toBeTruthy()
   })
 
   it('erro de validação do backend aparece como texto, sem perder a lista', async () => {

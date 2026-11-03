@@ -496,6 +496,20 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    crmPipeline: {
+      title: 'Funil de vendas',
+      intro: 'Números reais das oportunidades registradas aqui.',
+      empty: 'Nenhuma oportunidade ainda.',
+      open: 'Em aberto',
+      won: 'Ganho',
+      opportunity: 'Oportunidade',
+      value: 'Valor (centavos)',
+      contact: 'Contato',
+      add: 'Adicionar oportunidade',
+      remove: 'Remover',
+      stage: 'Estágio',
+      unavailable: 'Este cliente não tem disco local para o funil.',
+    },
     crmContacts: {
       title: 'Contatos do WhatsApp CRM',
       intro: 'Com quem seus bots falam. Os contatos ficam neste computador; nada é enviado a terceiros.',

@@ -684,6 +684,20 @@ export const deOverrides = {
     noResults: 'Keine Sprachen gefunden'
   },
   settings: {
+    crmPipeline: {
+      title: 'Verkaufstrichter',
+      intro: 'Echte Zahlen aus den hier erfassten Chancen.',
+      empty: 'Noch keine Chance.',
+      open: 'Offen',
+      won: 'Gewonnen',
+      opportunity: 'Chance',
+      value: 'Wert (Cent)',
+      contact: 'Kontakt',
+      add: 'Chance hinzufügen',
+      remove: 'Entfernen',
+      stage: 'Phase',
+      unavailable: 'Dieser Client hat keine lokale Festplatte für den Trichter.',
+    },
     crmContacts: {
       title: 'WhatsApp-CRM-Kontakte',
       intro: 'Mit wem deine Bots sprechen. Die Kontakte liegen auf diesem Computer; nichts geht an Dritte.',

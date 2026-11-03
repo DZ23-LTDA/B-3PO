@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
+import { CrmPipelineSection } from './crm-pipeline-section'
+
 /**
  * Contatos do WhatsApp CRM.
  *
@@ -154,6 +156,8 @@ export function CrmContactsSection() {
           ))}
         </ul>
       ) : null}
+
+      <CrmPipelineSection contacts={contacts ?? []} />
     </div>
   )
 }
