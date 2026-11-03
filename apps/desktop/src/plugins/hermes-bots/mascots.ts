@@ -79,3 +79,8 @@ export function defaultMascotFor(name: string): Mascot {
 
   return MASCOTS[hash % MASCOTS.length]
 }
+
+/** Arte do roster: o mascote escolhido, ou o padrão determinístico pelo nome do bot. */
+export function rosterMascotSrc(mascotId: string | null | undefined, name: string): string {
+  return (mascotById(mascotId ?? null) ?? defaultMascotFor(name)).src
+}

@@ -2324,10 +2324,8 @@ DEFAULT_CONFIG = {
             # Requires `enabled` (`send` alone logs an error). A package is sent only if its whole
             # period is inside a recorded consent window.
             "send": False,
-            # B-3PO ships no third-party telemetry endpoint: the product does not upload usage
-            # data anywhere. An operator who wants aggregate metrics points this at their own
-            # ingest URL; with it empty the offer surfaces stay decided-and-off.
-            # Non-HTTPS refused unless the host is localhost.
+            # B-3PO uploads nothing: no third-party ingest URL ships (an operator may set their
+            # own; empty keeps every consent surface decided-and-off). Non-HTTPS needs localhost.
             "endpoint": "",
         },
     },
