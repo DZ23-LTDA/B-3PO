@@ -206,3 +206,28 @@ componente (3.5k linhas). Não vou mascarar com waiver nem apagar linhas em bran
 
 **O que ficou pronto e utilizável:** `MascotGrid` (componente + 4 testes) e a aba condicional no
 `AvatarPicker`. Ela aparece quando um pai passar `onMascot` — o que ainda não acontece.
+
+## Rodada 15 — fiação do mascote no fluxo de criação (ratchet resolvido)
+
+**Causa raiz do bloqueio:** `FUNC_LINES` conta apenas as **linhas próprias** da função — closures internas
+são unidades separadas. Minhas extrações anteriores mexeram em código de closures, então o número não caía
+(e a linha de estado + as props eram próprias, então subia).
+
+**Compensação correta (3 linhas próprias removidas):**
+
+| Extração | O que saiu da função |
+|---|---|
+| `connectionLabel(connections, targetConnection)` | ternário de 3 linhas → 1 chamada |
+| `useConnectionTarget(targetConnection)` | `activeConnectionId` + comentário + `remoteTarget` → 1 chamada |
+
+Resultado: **355 = valor de main** (permitido: só pode cair), sem waiver e sem apagar linhas em branco.
+
+**Fiação concluída no fluxo de criação:**
+
+- `const [mascotId, setMascotId] = useState<null | string>(null)`
+- `<AvatarPicker mascotId={mascotId} onMascot={mascot => setMascotId(mascot.id)} />` → a aba **B-3PO** agora aparece
+- `mascot_id: mascotId ?? undefined` nos **dois** payloads (profile remoto e `saveBotMeta` local)
+
+**Evidência:** `scripts/check` 14 ok · tsc 0 · eslint 0 · 47 testes (criação + schema + mascotes) verdes.
+
+**Ainda falta:** o mesmo em `edit-profile-dialog` (edição de bot existente).

@@ -280,6 +280,19 @@ function useDraftProfile(
   return { discardDraft, draftGenRef, draftTargetRef }
 }
 
+/** Rotulo legivel da conexao escolhida (id cru quando a registry nao tem label). */
+function connectionLabel(connections: ConnectionRow[] | null, targetConnection: string): string {
+  return (connections || []).find(c => c.id === targetConnection)?.label || targetConnection
+}
+
+/** Conexao ativa desta janela + se o alvo escolhido e remoto. */
+function useConnectionTarget(targetConnection: string): { activeConnectionId: string; remoteTarget: boolean } {
+  const activeConnectionId = String(host.state?.connectionId?.get?.() || '').trim()
+  const remoteTarget = Boolean(targetConnection) && targetConnection !== (activeConnectionId || 'local')
+
+  return { activeConnectionId, remoteTarget }
+}
+
 export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: CreateAgentDialogProps) {
   const { t } = useI18n()
   const b = useBots()
@@ -301,6 +314,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
   const [shape, setShape] = useState(blobatarSvg ? 'blobatar' : 'circle')
   const [color, setColor] = useState<null | string>(null)
   const [image, setImage] = useState<null | string>(null)
+  const [mascotId, setMascotId] = useState<null | string>(null)
   const [advanced, setAdvanced] = useState(false)
   const [cloneFrom, setCloneFrom] = useState('default')
   const [model, setModel] = useState('')
@@ -335,14 +349,9 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
       )
       .catch(() => setConnections([]))
   }, [open, connections])
-  const activeConnectionId = String(host.state?.connectionId?.get?.() || '').trim()
-  // Remote target = an explicitly picked registry connection that is not the
-  // one this window is already on.
-  const remoteTarget = Boolean(targetConnection) && targetConnection !== (activeConnectionId || 'local')
+  const { activeConnectionId, remoteTarget } = useConnectionTarget(targetConnection)
 
-  const targetLabel = remoteTarget
-    ? (connections || []).find(c => c.id === targetConnection)?.label || targetConnection
-    : ''
+  const targetLabel = remoteTarget ? connectionLabel(connections, targetConnection) : ''
 
   /** Where the profile is created right now: the picked connection id for a
    *  remote target, '' for the active gateway. */
@@ -592,6 +601,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
+          mascot_id: mascotId ?? undefined,
           created: Date.now()
         }
 
@@ -620,6 +630,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
+          mascot_id: mascotId ?? undefined,
           created: Date.now()
         })
       }
@@ -778,8 +789,10 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
               description
             }}
             image={image}
+            mascotId={mascotId}
             onColor={setColor}
             onImage={setImage}
+            onMascot={mascot => setMascotId(mascot.id)}
             onShape={setShape}
             shape={shape}
           />
