@@ -134,3 +134,13 @@ bloqueado); `cliName` continua `hermes` (nível 2 não autorizado).
 
 Instalação limpa fica **bloqueada por certificado** — o artefato é reproduzível, mas não instalável em
 Windows comum sem sideload/assinatura. Registrado em `ADR-007`.
+
+## Rodada 9 — segurança, privacidade, testes e placar
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:58 | `npm audit` | 37 vulns: **0 críticas, 4 altas, 33 moderadas** |
+| 22:00 | leitura da config de telemetria | **desligada por padrão**, duplo opt-in |
+| 22:00 | descoberto `auth.adopt_external_logins: true` | risco de privacidade → decisão do proprietário |
+| 22:09 | suíte de UI completa | **12760/12766**; 6 falhas ambientais/pré-existentes |
+| 22:20 | relatórios SECURITY/PRIVACY/ACCESSIBILITY/PERFORMANCE | criados com dados reais |

@@ -75,3 +75,27 @@ Verificação: nenhum dos dois importa `bot-schema`/`orchestration` (`git grep` 
 | T7b | Instalador MSIX | `npm run dist:win` | **exit 0** — `B3PO-0.0.0-win-x64.msix` (185,53 MB) |
 | T7c | Assinatura do MSIX | `Get-AuthenticodeSignature` | **NotSigned** |
 | T7d | Instalação limpa do MSIX | — | **não executada** (exige certificado/sideload) |
+
+## Atualização 22:20 — suíte completa de UI
+
+`npx vitest run --project ui` em `apps/desktop`:
+
+| Métrica | Valor |
+|---|---|
+| Arquivos | **1521** (5 com falha) |
+| Testes | **12766** — **12760 passando, 6 falhando** |
+| Duração | 594 s |
+
+### Falhas (nenhuma causada por esta entrega)
+
+| Arquivo | Teste | Causa provável |
+|---|---|---|
+| `cron-prompt.test.ts` | substituições/aspas passam como texto | usa `spawnSync('sh')` — **`sh` não existe no Windows** |
+| `cron-detail.test.tsx` | "next run" vencido marcado como overdue | cron/relógio; pré-existente (mesma falha antes das mudanças) |
+| `use-keybinds-browser.test.tsx` | Alt defaults / ⌃⌘ no terminal | teclado/ambiente |
+| `browser-hints.test.tsx` | dica de binding no first-run | teclado/ambiente |
+| `terminal-ownership.test.ts` | retry na mesma gateway | terminal/gateway (timeout 24 s) |
+
+Verificação: nenhum dos cinco importa `bot-schema`/`orchestration`; as referências a "Hermes" neles são
+`@hermes/plugin-sdk` (nome de pacote **não** alterado, nível 2) ou o atributo interno
+`hermesDesktopHost`. Não foram "consertados" para não mascarar falha do upstream.

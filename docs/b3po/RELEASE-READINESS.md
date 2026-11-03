@@ -43,3 +43,22 @@ adaptador de eventos e as fases D/E. O que existe com evidência: núcleo execut
 gates, desktop compilando e empacotando, limites de plataforma medidos.
 
 **Status:** bloqueio externo real (Apple/Xcode, Android sem cliente) + trabalho interno pendente (D/E/F).
+
+---
+
+## Atualização 22:20 — placar consolidado
+
+| Plataforma | Build | Instalação | Turno Hermes | Assinatura | Status |
+|---|---|---|---|---|---|
+| Windows | **sim** (build, pack, MSIX) | não (MSIX sem cert) | **sim** (CLI/runner) | **não** | **PARCIAL** |
+| Android | **sim** (casca APK) | **sim** (emulador) | não (sem cliente) | debug | **PARCIAL (casca)** |
+| Linux | não tentado | — | — | — | NÃO TENTADO |
+| macOS | impossível aqui | — | — | — | BLOQUEADO (Xcode) |
+| iOS | impossível aqui | — | — | — | BLOQUEADO (Xcode) |
+
+**Segurança:** `npm audit` → 0 críticas, **4 altas**, 33 moderadas (ver `SECURITY-RELEASE-REPORT.md`).
+**Testes:** 12.760 unit de UI passando; 26 testes de domínio (schema + orquestração) passando.
+**Licença:** MIT preservado + `NOTICE`; marca fora do MIT.
+
+**Veredito:** **NOT_READY** para revisão de proprietário como produto multiplataforma — falta instalação
+limpa assinada, fiação do domínio na UI, cliente Android funcional e as fases de idioma/CI.
