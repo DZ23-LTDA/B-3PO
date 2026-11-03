@@ -15,6 +15,15 @@ export const arSettings = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'عميل محتمل جديد',
+        contato: 'بدأ التواصل',
+        qualificacao: 'التأهيل',
+        proposta: 'العرض',
+        negociacao: 'التفاوض',
+        ganho: 'مكسوبة',
+        perdido: 'خسارة',
+      },
       title: 'مسار المبيعات',
       intro: 'أرقام حقيقية من الفرص المسجلة هنا.',
       empty: 'لا توجد فرص بعد.',

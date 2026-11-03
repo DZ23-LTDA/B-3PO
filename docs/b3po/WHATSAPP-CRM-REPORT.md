@@ -289,3 +289,14 @@ overlay-completeness acusou 8 lacunas novas e eu tinha publicado o item de sideb
    de outra interface e se deu por satisfeita). O `tsc` mostrou; refiz mirando o bloco `crmContacts`.
 2. O mesmo tipo de erro no i18n: o guard `if "export:" in raw` encontrava a palavra em outro lugar e pulava o
    arquivo. Refiz por bloco, com verificação dentro do intervalo.
+
+## Rodada 93 — rótulos do funil respeitam o idioma
+
+`stageLabel` tinha um **mapa fixo em português** dentro de `src/api/crm-pipeline.ts`. Resultado: com a interface
+em inglês, o seletor de estágio mostrava "Novo lead / Qualificação / Ganho". Defeito meu, da rodada do funil.
+
+Corrigido do jeito certo: os 7 rótulos viraram chaves `settings.crmPipeline.stages.*` nos **10 locales**, e
+`stageLabel(stage, stages)` recebe o catálogo. O estágio cru fica como fallback se a chave faltar — nada de
+texto inventado.
+
+Testes: 119 verdes em `src/i18n` + painel do funil; gate 14 ok.

@@ -497,6 +497,15 @@ export const ptOverrides: TranslationOverrides = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'Novo lead',
+        contato: 'Contato iniciado',
+        qualificacao: 'Qualificação',
+        proposta: 'Proposta',
+        negociacao: 'Negociação',
+        ganho: 'Ganho',
+        perdido: 'Perdido',
+      },
       title: 'Funil de vendas',
       intro: 'Números reais das oportunidades registradas aqui.',
       empty: 'Nenhuma oportunidade ainda.',

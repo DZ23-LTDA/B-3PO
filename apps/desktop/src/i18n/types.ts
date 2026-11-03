@@ -601,6 +601,15 @@ export interface Translations extends NoticeTranslations {
 
   settings: {
     crmPipeline: {
+      stages: {
+        novo: string
+        contato: string
+        qualificacao: string
+        proposta: string
+        negociacao: string
+        ganho: string
+        perdido: string
+      }
       title: string
       intro: string
       empty: string

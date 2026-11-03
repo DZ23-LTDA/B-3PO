@@ -457,6 +457,15 @@ export const zhOverrides = {
 
   settings: {
     crmPipeline: {
+      stages: {
+        novo: '新线索',
+        contato: '已联系',
+        qualificacao: '资格确认',
+        proposta: '方案',
+        negociacao: '谈判',
+        ganho: '赢单',
+        perdido: '丢单',
+      },
       title: '销售漏斗',
       intro: '此处记录的机会的真实数字。',
       empty: '还没有机会。',

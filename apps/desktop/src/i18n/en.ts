@@ -688,6 +688,15 @@ export const en: Translations = {
 
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'New lead',
+        contato: 'Contact started',
+        qualificacao: 'Qualification',
+        proposta: 'Proposal',
+        negociacao: 'Negotiation',
+        ganho: 'Won',
+        perdido: 'Lost',
+      },
       title: 'Sales pipeline',
       intro: 'Real numbers from the opportunities you record here.',
       empty: 'No opportunity yet.',

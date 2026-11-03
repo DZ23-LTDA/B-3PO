@@ -686,6 +686,15 @@ export const frOverrides = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'Nouveau lead',
+        contato: 'Contact entamé',
+        qualificacao: 'Qualification',
+        proposta: 'Proposition',
+        negociacao: 'Négociation',
+        ganho: 'Gagnée',
+        perdido: 'Perdue',
+      },
       title: 'Pipeline commercial',
       intro: 'Des chiffres réels issus des opportunités enregistrées ici.',
       empty: 'Aucune opportunité pour l’instant.',

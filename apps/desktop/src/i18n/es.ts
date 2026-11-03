@@ -689,6 +689,15 @@ export const esOverrides = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'Nuevo lead',
+        contato: 'Contacto iniciado',
+        qualificacao: 'Cualificación',
+        proposta: 'Propuesta',
+        negociacao: 'Negociación',
+        ganho: 'Ganada',
+        perdido: 'Perdida',
+      },
       title: 'Embudo de ventas',
       intro: 'Números reales de las oportunidades registradas aquí.',
       empty: 'Aún no hay oportunidades.',

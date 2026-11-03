@@ -18,6 +18,15 @@ export const zhHantSettings = {
 
   settings: {
     crmPipeline: {
+      stages: {
+        novo: '新線索',
+        contato: '已聯繫',
+        qualificacao: '資格確認',
+        proposta: '方案',
+        negociacao: '談判',
+        ganho: '贏單',
+        perdido: '丟單',
+      },
       title: '銷售漏斗',
       intro: '此處記錄的機會的真實數字。',
       empty: '還沒有機會。',

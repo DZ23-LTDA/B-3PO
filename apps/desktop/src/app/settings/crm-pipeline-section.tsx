@@ -184,7 +184,7 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
                 >
                   {PIPELINE_STAGES.map(stage => (
                     <option key={stage} value={stage}>
-                      {stageLabel(stage)}
+                      {stageLabel(stage, copy.stages)}
                     </option>
                   ))}
                 </select>

@@ -686,6 +686,15 @@ export const deOverrides = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'Neuer Lead',
+        contato: 'Kontakt begonnen',
+        qualificacao: 'Qualifizierung',
+        proposta: 'Angebot',
+        negociacao: 'Verhandlung',
+        ganho: 'Gewonnen',
+        perdido: 'Verloren',
+      },
       title: 'Verkaufstrichter',
       intro: 'Echte Zahlen aus den hier erfassten Chancen.',
       empty: 'Noch keine Chance.',

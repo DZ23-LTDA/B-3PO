@@ -336,6 +336,15 @@ export const ruOverrides = {
   },
   settings: {
     crmPipeline: {
+      stages: {
+        novo: 'Новый лид',
+        contato: 'Контакт начат',
+        qualificacao: 'Квалификация',
+        proposta: 'Предложение',
+        negociacao: 'Переговоры',
+        ganho: 'Выиграно',
+        perdido: 'Проиграно',
+      },
       title: 'Воронка продаж',
       intro: 'Реальные цифры по сделкам, записанным здесь.',
       empty: 'Сделок пока нет.',

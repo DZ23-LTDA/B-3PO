@@ -247,6 +247,15 @@ export const jaOverrides = {
 
   settings: {
     crmPipeline: {
+      stages: {
+        novo: '新規リード',
+        contato: '接触開始',
+        qualificacao: '選定',
+        proposta: '提案',
+        negociacao: '交渉',
+        ganho: '受注',
+        perdido: '失注',
+      },
       title: '商談パイプライン',
       intro: 'ここに記録した商談の実数です。',
       empty: '商談はまだありません。',

@@ -75,18 +75,13 @@ export function money(cents: number, currency = 'BRL', locale = 'pt-BR'): string
   }
 }
 
-const STAGE_LABELS: Record<PipelineStage, string> = {
-  contato: 'Contato iniciado',
-  ganho: 'Ganho',
-  negociacao: 'Negociação',
-  novo: 'Novo lead',
-  perdido: 'Perdido',
-  proposta: 'Proposta',
-  qualificacao: 'Qualificação'
-}
-
-export function stageLabel(stage: PipelineStage): string {
-  return STAGE_LABELS[stage] ?? stage
+/**
+ * Rótulo do estágio VEM DO CATÁLOGO de i18n. Havia um mapa fixo em português aqui, então a tela mostrava
+ * português mesmo com a interface em inglês — defeito meu, corrigido: quem chama passa o texto traduzido e o
+ * estágio vira o fallback quando a chave não existe.
+ */
+export function stageLabel(stage: PipelineStage, stages: Partial<Record<PipelineStage, string>>): string {
+  return stages[stage] ?? stage
 }
 
 /** Totais reais: aberto (fora de ganho/perdido) e ganho, em centavos. */
