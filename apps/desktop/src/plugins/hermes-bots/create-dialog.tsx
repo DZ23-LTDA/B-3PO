@@ -40,6 +40,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 
 import { avatarColor, blobatarSvg, botAppearance, BotFace } from './avatar'
+import { defaultMascotFor } from './mascots'
 import { isBackfilledFacePng } from './avatar-image'
 import { AvatarPicker } from './avatar-picker'
 import { $selectedBot } from './bot-state'
@@ -601,7 +602,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
-          mascot_id: mascotId ?? undefined,
+          mascot_id: mascotId ?? defaultMascotFor(name).id,
           created: Date.now()
         }
 
@@ -630,7 +631,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
-          mascot_id: mascotId ?? undefined,
+          mascot_id: mascotId ?? defaultMascotFor(name).id,
           created: Date.now()
         })
       }
