@@ -129,7 +129,7 @@ describe('cobertura pt-BR', () => {
   })
 
   it('mantém as referências técnicas de runtime em inglês', () => {
-    expect(pt.install.settingUpTitle).toContain('Hermes Agent')
+    expect(pt.install.settingUpTitle).toContain('B-3PO')
     expect(pt.modelPicker.proNeedsSubscription).toContain('Nous')
   })
 })

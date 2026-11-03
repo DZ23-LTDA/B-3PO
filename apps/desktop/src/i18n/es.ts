@@ -959,7 +959,7 @@ export const esOverrides = {
       advanced: 'Avanzado'
     },
     searchPlaceholder: {
-      about: 'Acerca de Hermes Desktop',
+      about: 'Acerca de B-3PO Desktop',
       config: 'Buscar configuración...',
       gateway: 'Conexión del gateway...',
       keys: 'Buscar claves API...',
@@ -1642,14 +1642,14 @@ export const esOverrides = {
       updateAllRunning: 'Actualizando todas las instancias…',
       updateAllDone: 'Actualizaciones enviadas',
       updateAllFailed: 'Falló el envío de actualizaciones',
-      updateSkippedCloud: 'Administrado por Hermes Cloud',
+      updateSkippedCloud: 'Administrado por B-3PO Cloud',
       kindLocal: 'Local',
       kindRemote: 'Gateway remoto',
-      kindCloud: 'Hermes Cloud',
+      kindCloud: 'B-3PO Cloud',
       kindSsh: 'SSH',
       kindLocalDesc: 'El entorno de ejecución de Hermes administrado por esta app.',
       kindRemoteDesc: 'Un gateway de Hermes accesible por HTTP(S): LAN, Tailscale o internet.',
-      kindCloudDesc: 'Una instancia alojada detectada a través de tu cuenta de Hermes Cloud.',
+      kindCloudDesc: 'Una instancia alojada detectada a través de tu cuenta de B-3PO Cloud.',
       kindSshDesc: 'Una instalación de Hermes accesible por SSH.',
       labelTitle: 'Nombre',
       labelDesc:
@@ -1670,7 +1670,7 @@ export const esOverrides = {
       sameBackendHint: (label: string) => `Mismo backend que “${label}”`,
       localAddHint: 'Local no está disponible: la conexión local administrada ya existe (solo puede haber una).',
       cloudAddHint:
-        'Consejo: al iniciar sesión en Hermes Cloud arriba, tus agentes se detectan automáticamente; usa este formulario solo para registrar a mano la URL de una instancia conocida.',
+        'Consejo: al iniciar sesión en B-3PO Cloud arriba, tus agentes se detectan automáticamente; usa este formulario solo para registrar a mano la URL de una instancia conocida.',
       save: 'Guardar conexión',
       saving: 'Guardando…',
       cancel: 'Cancelar',
@@ -1712,13 +1712,13 @@ export const esOverrides = {
       remoteDesc: 'Conecta esta shell de escritorio a un backend remoto de Hermes.',
       remoteAuthHint:
         'Los gateways alojados usan OAuth o usuario y contraseña; los autohospedados pueden usar un token de sesión.',
-      cloudTitle: 'Hermes Cloud',
+      cloudTitle: 'B-3PO Cloud',
       cloudDesc:
-        'Inicia sesión una vez en Hermes Cloud y elige uno de los agentes de tu cuenta; no tienes que pegar ninguna URL.',
-      cloudSignInTitle: 'Hermes Cloud',
-      cloudSignIn: 'Iniciar sesión en Hermes Cloud',
-      cloudSignedIn: 'Sesión iniciada en Hermes Cloud',
-      cloudNeedsSignIn: 'Inicia sesión en Hermes Cloud para descubrir los agentes de tu cuenta.',
+        'Inicia sesión una vez en B-3PO Cloud y elige uno de los agentes de tu cuenta; no tienes que pegar ninguna URL.',
+      cloudSignInTitle: 'B-3PO Cloud',
+      cloudSignIn: 'Iniciar sesión en B-3PO Cloud',
+      cloudSignedIn: 'Sesión iniciada en B-3PO Cloud',
+      cloudNeedsSignIn: 'Inicia sesión en B-3PO Cloud para descubrir los agentes de tu cuenta.',
       cloudSignedInDesc: 'Has iniciado sesión. Elige un agente de abajo; la sesión se actualiza automáticamente.',
       cloudAgentsTitle: 'Tus agentes',
       cloudOrgPickerTitle: 'Elige una organización',
@@ -1739,11 +1739,11 @@ export const esOverrides = {
       cloudUseSaved: 'Usar gateway',
       cloudActive: 'Activo en esta ventana',
       cloudConnecting: 'Conectando…',
-      cloudDiscoverFailed: 'No se pudieron cargar tus agentes de Hermes Cloud',
+      cloudDiscoverFailed: 'No se pudieron cargar tus agentes de B-3PO Cloud',
       cloudConnectFailed: 'No se pudo conectar con ese agente',
-      cloudSignInFailed: 'Falló el inicio de sesión en Hermes Cloud',
-      cloudSignedOutTitle: 'Sesión cerrada en Hermes Cloud',
-      cloudSignedOutMessage: 'Se borró la sesión de Hermes Cloud.',
+      cloudSignInFailed: 'Falló el inicio de sesión en B-3PO Cloud',
+      cloudSignedOutTitle: 'Sesión cerrada en B-3PO Cloud',
+      cloudSignedOutMessage: 'Se borró la sesión de B-3PO Cloud.',
       cloudConnectedTitle: 'Conectado',
       cloudConnectedPill: 'Conectado',
       cloudConnectedTo: name => `Conectado a ${name}.`,
@@ -1794,7 +1794,7 @@ export const esOverrides = {
       enterUrlFirst: 'Introduce primero una URL remota.',
       restartingTitle: 'Reiniciando conexión del gateway',
       savedTitle: 'Ajustes del gateway guardados',
-      restartingMessage: 'Hermes Desktop se reconectará con los ajustes guardados.',
+      restartingMessage: 'B-3PO Desktop se reconectará con los ajustes guardados.',
       savedMessage: 'Guardado para el próximo reinicio.',
       connectedTo: (baseUrl, version) => `Conectado a ${baseUrl}${version ? ` · Hermes ${version}` : ''}`,
       reachableTitle: 'Gateway remoto accesible',
@@ -1840,7 +1840,7 @@ export const esOverrides = {
       sshErrNotInstalled:
         'Hermes no está instalado en el host remoto. Instálalo allí (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh) o indica la ruta de Hermes.',
       sshErrPlatform:
-        'Plataforma remota no compatible. El modo SSH de Hermes Desktop admite hosts remotos Linux, macOS y Windows.',
+        'Plataforma remota no compatible. El modo SSH de B-3PO Desktop admite hosts remotos Linux, macOS y Windows.',
       sshErrTimeout: 'La conexión SSH agotó el tiempo de espera. Es posible que el host no responda o esté en reposo.',
       sshErrUpdateRequired: 'Actualiza Hermes en el host remoto antes de conectarte con Desktop SSH.',
       sshErrInteractiveAuth:
@@ -2145,7 +2145,7 @@ export const esOverrides = {
         cliBillingDisabled: {
           title: 'El gasto remoto está desactivado',
           message:
-            'El gasto remoto está desactivado para esta cuenta; un administrador de facturación puede activarlo desde la página de Hermes Agent del portal.'
+            'El gasto remoto está desactivado para esta cuenta; un administrador de facturación puede activarlo desde la página de B-3PO del portal.'
         },
         roleRequired: {
           title: 'Se requiere rol de administrador',
@@ -2761,7 +2761,7 @@ export const esOverrides = {
       },
       settings: {
         title: 'Configuración',
-        detail: 'Configura Hermes Desktop'
+        detail: 'Configura B-3PO Desktop'
       },
       capabilities: {
         title: 'Capacidades',
@@ -3847,7 +3847,7 @@ export const esOverrides = {
       '/subscription': 'Ver tu plan de Nous y cambiarlo en el navegador',
       '/topup': 'Mostrar tu saldo de Nous y gestionar la facturación en el portal',
       '/platform': 'Pausar, reanudar o listar una plataforma del gateway que falla',
-      '/version': 'Mostrar la versión de Hermes Agent',
+      '/version': 'Mostrar la versión de B-3PO',
       '/debug': 'Subir un informe de depuración (información del sistema + registros) y obtener enlaces para compartir',
       '/model': 'Cambiar el modelo de esta sesión'
     },
@@ -4288,7 +4288,7 @@ export const esOverrides = {
     localStartUnavailable: 'No se pudo iniciar la instalación local. Reinicia B-3PO Desktop e inténtalo de nuevo.',
     remoteSetupTitle: 'Conectar con un B-3PO existente',
     remoteSetupDesc:
-      'Introduce la URL de tu gateway. Hermes Desktop detectará si necesita un token o iniciar sesión en el navegador.',
+      'Introduce la URL de tu gateway. B-3PO Desktop detectará si necesita un token o iniciar sesión en el navegador.',
     remoteUrlTitle: 'URL del gateway',
     remoteUrlDesc: 'Usa la URL base del gateway de B-3PO e incluye https:// si es remoto.',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
@@ -4315,7 +4315,7 @@ export const esOverrides = {
     applyRemote: 'Aplicar y reconectar',
     backToSetup: 'Atrás',
     failedTitle: 'Falló la instalación',
-    settingUpTitle: 'Configurando Hermes Agent',
+    settingUpTitle: 'Configurando B-3PO',
     finishingTitle: 'Terminando',
     failedDesc:
       'Uno de los pasos de configuración no terminó. Puede ocurrir si hay otra copia de Hermes en ejecución, se cortó la conexión a internet o un antivirus bloqueó el instalador. Cierra las demás ventanas de Hermes y elige Recargar y reintentar. Si vuelve a fallar, abre los registros y envíalos al soporte.',
@@ -4523,13 +4523,13 @@ export const esOverrides = {
       update: 'actualizar',
       updateInProgress: 'Actualización en curso',
       commitsBehind: (count, branch) => `${count} ${count === 1 ? 'commit' : 'commits'} detrás de ${branch}`,
-      desktopVersion: version => `Hermes Desktop v${version}`,
+      desktopVersion: version => `B-3PO Desktop v${version}`,
       backendVersion: version => `backend v${version}`,
       clientLabel: version => `cliente v${version}`,
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `Remoto: ${host}`,
       connectionCloud: host => `Nube: ${host}`,
-      connectionCloudTooltip: host => `Hermes Cloud · ${host}`,
+      connectionCloudTooltip: host => `B-3PO Cloud · ${host}`,
       connectionSshTooltip: host => `SSH · ${host}`,
       connectionRemoteTooltip: host => `Remoto · ${host}`,
       backendLabel: version => `backend v${version}`,
@@ -5433,8 +5433,8 @@ export const esOverrides = {
     sessionExportFailed: 'No se pudo exportar la sesión',
     imageSaved: 'Imagen guardada',
     downloadStarted: 'Descarga iniciada',
-    restartToUseSaveImage: 'Reinicia Hermes Desktop para usar Guardar imagen.',
-    restartToSaveImages: 'Reinicia Hermes Desktop para guardar imágenes',
+    restartToUseSaveImage: 'Reinicia B-3PO Desktop para usar Guardar imagen.',
+    restartToSaveImages: 'Reinicia B-3PO Desktop para guardar imágenes',
     imageDownloadFailed: 'Falló la descarga de imagen',
     openImage: 'Abrir imagen',
     downloadImage: 'Descargar imagen',

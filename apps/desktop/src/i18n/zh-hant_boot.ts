@@ -4,7 +4,7 @@ import { zhHantSessionCommands } from './zh-hant_session_commands'
 
 export const zhHantBoot = {
   boot: {
-    ready: 'Hermes Desktop 已就緒',
+    ready: 'B-3PO Desktop 已就緒',
     desktopBootFailedWithMessage: message => `桌面啟動失敗：${message}`,
     steps: {
       connectingGateway: '正在連線桌面閘道',
@@ -12,7 +12,7 @@ export const zhHantBoot = {
       loadingSessions: '正在載入最近工作階段',
       retryingRemoteBackend: '正在重新連線遠端 Hermes 後端…',
       startingDesktopConnection: '正在啟動桌面連線',
-      startingHermesDesktop: '正在啟動 Hermes Desktop…'
+      startingHermesDesktop: '正在啟動 B-3PO Desktop…'
     },
     errors: {
       backgroundExited: 'Hermes 背景程序已結束。',
@@ -71,7 +71,7 @@ export const zhHantBoot = {
   butterbar: {
     goTo: (index, total) => `顯示第 ${index} 則通知，共 ${total} 則`,
     legal: {
-      before: '使用 Hermes Agent 即表示受我們的',
+      before: '使用 B-3PO 即表示受我們的',
       terms: '服務條款',
       between: '和',
       privacy: '隱私權政策',
@@ -262,7 +262,7 @@ export const zhHantBoot = {
     applyRemote: '套用並重新連線',
     backToSetup: '返回',
     failedTitle: '安裝失敗',
-    settingUpTitle: '正在設定 Hermes Agent',
+    settingUpTitle: '正在設定 B-3PO',
     finishingTitle: '正在收尾',
     failedDesc:
       '某個安裝步驟失敗。在 Windows 上，如果另一個 Hermes CLI 或桌面執行個體正在執行，可能會出現這種情況。請停止正在執行的 Hermes 執行個體後重試。可查看下方的詳細資訊或 desktop 記錄中的完整記錄。',
@@ -284,7 +284,7 @@ export const zhHantBoot = {
   },
 
   onboarding: {
-    headerTitle: '開始設定 Hermes Agent',
+    headerTitle: '開始設定 B-3PO',
     headerDesc: '連線模型提供方即可開始聊天。大多數選項只需一次點擊。',
     preparingInstall: 'Hermes 正在完成安裝。首次執行通常不到一分鐘。',
     starting: '正在啟動 Hermes…',

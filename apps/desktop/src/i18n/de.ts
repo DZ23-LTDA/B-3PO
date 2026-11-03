@@ -443,7 +443,7 @@ export const deOverrides = {
         'Hermes konnte nicht in seinen Datenordner speichern. Öffnen Sie die Wartung, um das Problem zu prüfen und zu beheben.',
       gatewayAuthFailed: 'Gateway-Authentifizierung fehlgeschlagen – überprüfen Sie Ihren API_SERVER_KEY.',
       methodNotAllowed:
-        'Das Desktop-Backend hat diese Anfrage abgelehnt (405 Method Not Allowed). Starten Sie Hermes Desktop neu.',
+        'Das Desktop-Backend hat diese Anfrage abgelehnt (405 Method Not Allowed). Starten Sie B-3PO Desktop neu.',
       microphonePermission: 'Die Mikrofonberechtigung wurde verweigert.',
       openaiRejectedApiKey:
         'OpenAI hat Ihren API-Key abgelehnt. Aktualisieren Sie ihn unter Einstellungen → Schlüssel und versuchen Sie es erneut.',
@@ -956,7 +956,7 @@ export const deOverrides = {
       advanced: 'Erweitert'
     },
     searchPlaceholder: {
-      about: 'Über Hermes Desktop',
+      about: 'Über B-3PO Desktop',
       config: 'Einstellungen durchsuchen…',
       gateway: 'Gateway-Verbindung…',
       keys: 'API-Schlüssel durchsuchen…',
@@ -1643,10 +1643,10 @@ export const deOverrides = {
       updateAllRunning: 'Alle Instanzen werden aktualisiert…',
       updateAllDone: 'Updates versendet',
       updateAllFailed: 'Update-Verteilung fehlgeschlagen',
-      updateSkippedCloud: 'Wird von Hermes Cloud verwaltet',
+      updateSkippedCloud: 'Wird von B-3PO Cloud verwaltet',
       kindLocal: 'Lokal',
       kindRemote: 'Remote-Gateway',
-      kindCloud: 'Hermes Cloud',
+      kindCloud: 'B-3PO Cloud',
       kindSsh: 'SSH',
       kindLocalDesc: 'Die Hermes-Laufzeitumgebung, die von dieser App verwaltet wird.',
       kindRemoteDesc: 'Ein Hermes Gateway, das über HTTP(S) erreichbar ist – LAN, Tailscale oder das Internet.',
@@ -1671,7 +1671,7 @@ export const deOverrides = {
       sameBackendHint: (label: string) => `Gleiches Backend wie „${label}“`,
       localAddHint: 'Lokal ist nicht verfügbar: Die verwaltete lokale Verbindung existiert bereits (es gibt nur eine).',
       cloudAddHint:
-        'Tipp: Die Anmeldung unter Hermes Cloud oben erkennt Ihre Agents automatisch – verwenden Sie dieses Formular nur, um eine bekannte Instanz-URL manuell zu registrieren.',
+        'Tipp: Die Anmeldung unter B-3PO Cloud oben erkennt Ihre Agents automatisch – verwenden Sie dieses Formular nur, um eine bekannte Instanz-URL manuell zu registrieren.',
       save: 'Verbindung speichern',
       saving: 'Wird gespeichert…',
       cancel: 'Abbrechen',
@@ -1713,13 +1713,13 @@ export const deOverrides = {
       remoteDesc: 'Verbindet diese Desktop-Shell mit einem entfernten Hermes-Backend.',
       remoteAuthHint:
         'Gehostete Gateways verwenden OAuth oder Benutzername und Passwort; selbst gehostete können ein Session-Token verwenden.',
-      cloudTitle: 'Hermes Cloud',
+      cloudTitle: 'B-3PO Cloud',
       cloudDesc:
-        'Melden Sie sich einmal bei Hermes Cloud an und wählen Sie aus den Agents in Ihrem Konto – ohne eine URL einzufügen.',
-      cloudSignInTitle: 'Hermes Cloud',
-      cloudSignIn: 'Bei Hermes Cloud anmelden',
-      cloudSignedIn: 'Bei Hermes Cloud angemeldet',
-      cloudNeedsSignIn: 'Melden Sie sich bei Hermes Cloud an, um die Agents in Ihrem Konto zu finden.',
+        'Melden Sie sich einmal bei B-3PO Cloud an und wählen Sie aus den Agents in Ihrem Konto – ohne eine URL einzufügen.',
+      cloudSignInTitle: 'B-3PO Cloud',
+      cloudSignIn: 'Bei B-3PO Cloud anmelden',
+      cloudSignedIn: 'Bei B-3PO Cloud angemeldet',
+      cloudNeedsSignIn: 'Melden Sie sich bei B-3PO Cloud an, um die Agents in Ihrem Konto zu finden.',
       cloudSignedInDesc:
         'Sie sind angemeldet. Wählen Sie unten einen Agent; die Session wird automatisch aktualisiert.',
       cloudAgentsTitle: 'Ihre Agents',
@@ -1743,8 +1743,8 @@ export const deOverrides = {
       cloudConnecting: 'Verbindung wird hergestellt…',
       cloudDiscoverFailed: 'Ihre Hermes-Cloud-Agents konnten nicht geladen werden',
       cloudConnectFailed: 'Keine Verbindung zu diesem Agent möglich',
-      cloudSignInFailed: 'Anmeldung bei Hermes Cloud fehlgeschlagen',
-      cloudSignedOutTitle: 'Von Hermes Cloud abgemeldet',
+      cloudSignInFailed: 'Anmeldung bei B-3PO Cloud fehlgeschlagen',
+      cloudSignedOutTitle: 'Von B-3PO Cloud abgemeldet',
       cloudSignedOutMessage: 'Die Hermes-Cloud-Session wurde geleert.',
       cloudConnectedTitle: 'Verbunden',
       cloudConnectedPill: 'Verbunden',
@@ -1801,7 +1801,7 @@ export const deOverrides = {
       restartingTitle: 'Gateway-Verbindung wird neu gestartet',
       savedTitle: 'Gateway-Einstellungen gespeichert',
       restartingMessage:
-        'Hermes Desktop stellt mit den gespeicherten Einstellungen die Verbindung wieder her — die Shell bleibt offen.',
+        'B-3PO Desktop stellt mit den gespeicherten Einstellungen die Verbindung wieder her — die Shell bleibt offen.',
       savedMessage: 'Für den nächsten Neustart gespeichert.',
       connectedTo: (baseUrl, version) => `Verbunden mit ${baseUrl}${version ? ` · Hermes ${version}` : ''}`,
       reachableTitle: 'Remote-Gateway erreichbar',
@@ -2771,7 +2771,7 @@ export const deOverrides = {
       },
       settings: {
         title: 'Einstellungen',
-        detail: 'Hermes Desktop konfigurieren'
+        detail: 'B-3PO Desktop konfigurieren'
       },
       capabilities: {
         title: 'Fähigkeiten',
@@ -4297,10 +4297,10 @@ export const deOverrides = {
     installLocalDesc:
       'Hermes herunterladen, seine Python-Umgebung erstellen und das Backend auf diesem Computer ausführen.',
     localStartUnavailable:
-      'Die lokale Installation konnte nicht gestartet werden. Starten Sie Hermes Desktop neu und versuchen Sie es erneut.',
+      'Die lokale Installation konnte nicht gestartet werden. Starten Sie B-3PO Desktop neu und versuchen Sie es erneut.',
     remoteSetupTitle: 'Mit bestehendem B-3PO verbinden',
     remoteSetupDesc:
-      'Geben Sie die URL Ihres Gateways ein. Hermes Desktop erkennt, ob ein Token oder eine Browser-Anmeldung nötig ist.',
+      'Geben Sie die URL Ihres Gateways ein. B-3PO Desktop erkennt, ob ein Token oder eine Browser-Anmeldung nötig ist.',
     remoteUrlTitle: 'Gateway-URL',
     remoteUrlDesc: 'Verwenden Sie die Basis-URL des B-3PO Gateways, bei Remote-Gateways einschließlich https://.',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
@@ -4326,7 +4326,7 @@ export const deOverrides = {
     applyRemote: 'Übernehmen und neu verbinden',
     backToSetup: 'Zurück',
     failedTitle: 'Installation fehlgeschlagen',
-    settingUpTitle: 'Hermes Agent wird eingerichtet',
+    settingUpTitle: 'B-3PO wird eingerichtet',
     finishingTitle: 'Wird abgeschlossen',
     failedDesc:
       'Einer der Installationsschritte ist fehlgeschlagen. Unter Windows kann das passieren, wenn eine andere Hermes-CLI- oder Desktop-Instanz läuft. Beenden Sie alle laufenden Hermes-Instanzen und versuchen Sie es dann erneut. Das vollständige Protokoll finden Sie in den Details unten oder im Desktop-Log.',
@@ -4539,13 +4539,13 @@ export const deOverrides = {
       update: 'Update',
       updateInProgress: 'Update läuft',
       commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} hinter ${branch}`,
-      desktopVersion: version => `Hermes Desktop v${version}`,
+      desktopVersion: version => `B-3PO Desktop v${version}`,
       backendVersion: version => `Backend v${version}`,
       clientLabel: version => `Client v${version}`,
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `Remote: ${host}`,
       connectionCloud: host => `Cloud: ${host}`,
-      connectionCloudTooltip: host => `Hermes Cloud · ${host}`,
+      connectionCloudTooltip: host => `B-3PO Cloud · ${host}`,
       connectionSshTooltip: host => `SSH · ${host}`,
       connectionRemoteTooltip: host => `Remote · ${host}`,
       backendLabel: version => `Backend v${version}`,
@@ -5450,8 +5450,8 @@ export const deOverrides = {
     sessionExportFailed: 'Session konnte nicht exportiert werden',
     imageSaved: 'Bild gespeichert',
     downloadStarted: 'Download gestartet',
-    restartToUseSaveImage: 'Starten Sie Hermes Desktop neu, um „Bild speichern“ zu verwenden.',
-    restartToSaveImages: 'Starten Sie Hermes Desktop neu, um Bilder zu speichern',
+    restartToUseSaveImage: 'Starten Sie B-3PO Desktop neu, um „Bild speichern“ zu verwenden.',
+    restartToSaveImages: 'Starten Sie B-3PO Desktop neu, um Bilder zu speichern',
     imageDownloadFailed: 'Bild-Download fehlgeschlagen',
     openImage: 'Bild öffnen',
     downloadImage: 'Bild herunterladen',

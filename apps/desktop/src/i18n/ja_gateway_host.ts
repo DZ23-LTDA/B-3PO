@@ -6,7 +6,7 @@ export const jaGatewayHost: GatewayHostTranslations = {
   unavailableDesc: 'デスクトップ IPC ブリッジはゲートウェイ設定を公開していません。',
   webappHostTitle: 'Hermes ホスト',
   webappHostDesc:
-    'Webapp は常に配信元の Hermes ホストを使用します。ゲートウェイの切り替え、Hermes Cloud へのサインイン、保存済み接続の管理は Hermes Desktop アプリで行ってください。',
+    'Webapp は常に配信元の Hermes ホストを使用します。ゲートウェイの切り替え、B-3PO Cloud へのサインイン、保存済み接続の管理は B-3PO Desktop アプリで行ってください。',
   webAccess: {
     title: 'Web アクセス',
     intro: 'スマートフォンや別のコンピューターから、Nous アカウントでサインインしてこのコンピューターの Hermes を開きます。サインインした人はこのコンピューターでコマンドを実行できます。',

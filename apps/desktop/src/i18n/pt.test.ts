@@ -35,7 +35,7 @@ describe('pt-BR', () => {
 
   it('mantém o nome técnico do runtime em inglês onde é referência de produto', () => {
     // Traduzimos a frase, não o nome do runtime.
-    expect(pt.install.settingUpTitle).toContain('Hermes Agent')
+    expect(pt.install.settingUpTitle).toContain('B-3PO')
     expect(pt.install.failedDesc).toContain('Hermes')
   })
 

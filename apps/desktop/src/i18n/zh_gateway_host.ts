@@ -6,7 +6,7 @@ export const zhGatewayHost: GatewayHostTranslations = {
   unavailableDesc: '桌面 IPC 桥未暴露网关设置。',
   webappHostTitle: 'Hermes 主机',
   webappHostDesc:
-    'Webapp 始终使用提供它的 Hermes 主机。如需切换网关、登录 Hermes Cloud 或管理已保存的连接，请使用 Hermes Desktop 应用。',
+    'Webapp 始终使用提供它的 Hermes 主机。如需切换网关、登录 B-3PO Cloud 或管理已保存的连接，请使用 B-3PO Desktop 应用。',
   webAccess: {
     title: '网页访问',
     intro: '用手机或其他电脑，以你的 Nous 账户登录并打开这台电脑上的 Hermes。登录的人可以在这台电脑上运行命令。',

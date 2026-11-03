@@ -6,7 +6,7 @@ export const deGatewayHost: GatewayHostTranslations = {
   unavailableDesc: 'Die Desktop-IPC-Brücke stellt keine Gateway-Einstellungen bereit.',
   webappHostTitle: 'Hermes-Host',
   webappHostDesc:
-    'Die Webapp nutzt immer den Hermes-Host, der sie ausliefert. Um das Gateway zu wechseln, sich bei Hermes Cloud anzumelden oder gespeicherte Verbindungen zu verwalten, verwenden Sie die Hermes-Desktop-App.',
+    'Die Webapp nutzt immer den Hermes-Host, der sie ausliefert. Um das Gateway zu wechseln, sich bei B-3PO Cloud anzumelden oder gespeicherte Verbindungen zu verwalten, verwenden Sie die Hermes-Desktop-App.',
   webAccess: {
     title: 'Webzugriff',
     intro: 'Öffne Hermes auf diesem Computer vom Handy oder einem anderen Computer aus, angemeldet mit deinem Nous-Konto. Wer sich anmeldet, kann Befehle auf diesem Computer ausführen.',

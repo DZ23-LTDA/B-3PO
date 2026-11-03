@@ -5,7 +5,7 @@
  * que não está aqui cai no inglês, então nada quebra e a cobertura cresce por seção.
  *
  * Regra de tradução: textos apresentados ao usuário são traduzidos; **referências técnicas de
- * runtime continuam em inglês** — "Hermes Agent", "gateway", nomes de comando (`hermes`), nomes de
+ * runtime continuam em inglês** — "B-3PO", "gateway", nomes de comando (`hermes`), nomes de
  * provider e caminhos. Placeholders e funções mantêm a mesma assinatura do original.
  */
 import { defineLocale, type TranslationOverrides } from './define-locale'
@@ -116,7 +116,7 @@ export const ptOverrides: TranslationOverrides = {
     applyRemote: 'Aplicar e reconectar',
     backToSetup: 'Voltar',
     failedTitle: 'A instalação falhou',
-    settingUpTitle: 'Preparando o Hermes Agent',
+    settingUpTitle: 'Preparando o B-3PO',
     finishingTitle: 'Finalizando',
     failedDesc:
       'Uma das etapas de configuração não terminou. Isso acontece quando outra cópia do Hermes está aberta, a conexão caiu ou o antivírus bloqueou o instalador. Feche as outras janelas do Hermes e escolha Recarregar e tentar de novo. Se falhar de novo, abra os logs e envie ao suporte.',

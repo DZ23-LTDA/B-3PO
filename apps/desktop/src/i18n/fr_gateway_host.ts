@@ -6,7 +6,7 @@ export const frGatewayHost: GatewayHostTranslations = {
   unavailableDesc: "Le pont IPC du desktop n'expose pas les paramètres du gateway.",
   webappHostTitle: 'Hôte Hermes',
   webappHostDesc:
-    "La Webapp utilise toujours l'hôte Hermes qui la sert. Pour changer de gateway, vous connecter à Hermes Cloud ou gérer les connexions enregistrées, utilisez l'application Hermes Desktop.",
+    "La Webapp utilise toujours l'hôte Hermes qui la sert. Pour changer de gateway, vous connecter à B-3PO Cloud ou gérer les connexions enregistrées, utilisez l'application B-3PO Desktop.",
   webAccess: {
     title: 'Accès web',
     intro: "Ouvrez Hermes sur cet ordinateur depuis votre téléphone ou un autre ordinateur, avec votre compte Nous. Toute personne connectée peut exécuter des commandes sur cet ordinateur.",

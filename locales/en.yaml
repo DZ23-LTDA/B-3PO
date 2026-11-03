@@ -530,7 +530,7 @@ gateway:
     timed_out: "❌ Hermes update timed out after 30 minutes."
     finished_success: "✅ Hermes update finished successfully."
     last_lines: "{msg}\n\nLast lines:\n```\n{tail}\n```"
-    managed_action: "update Hermes Agent"
+    managed_action: "update B-3PO"
     not_applicable: "✗ `hermes update` does not apply to this install ({method}).\nUpdate with: {command}"
   usage:
     rate_limits: "⏱️ **Rate Limits:** {state}"
@@ -1527,7 +1527,7 @@ platform:
 
   email:
     image_line: "Image: {url}"
-    standalone_subject: "Hermes Agent"
+    standalone_subject: "B-3PO"
 
   dingtalk:
     emotion:
@@ -1535,7 +1535,7 @@ platform:
       done: "🥳Done"
 
   irc:
-    quit_message: "Hermes Agent shutting down"
+    quit_message: "B-3PO shutting down"
     standalone_quit: "delivered"
 
   relay:
@@ -1558,7 +1558,7 @@ slash:
   sethome:
     description: "Set this chat as the home channel"
   update:
-    description: "Update Hermes Agent to the latest version"
+    description: "Update B-3PO to the latest version"
   category:
     session: "Session"
     configuration: "Configuration"
@@ -1766,7 +1766,7 @@ slash:
   image:
     description: "Attach a local image file for your next prompt"
   version:
-    description: "Show Hermes Agent version"
+    description: "Show B-3PO version"
   debug:
     description: "Upload debug report (system info + logs) and get shareable links"
   quit:
@@ -1843,8 +1843,8 @@ cli:
     no_saved_card_add_funds_hint: "No saved card on file — “Add funds” walks you through adding one."
     actions_require_admin: "Billing actions require an org admin/owner."
     remote_spending_off_for_org: "Remote spending is off for this org."
-    killswitch_reason_overview: "A billing admin can turn it on from the portal's Hermes Agent page to add funds here."
-    killswitch_reason_buy: "A billing admin can turn it on from the portal's Hermes Agent page before adding funds."
+    killswitch_reason_overview: "A billing admin can turn it on from the portal's B-3PO page to add funds here."
+    killswitch_reason_buy: "A billing admin can turn it on from the portal's B-3PO page before adding funds."
     add_funds_now_hint: "Add funds now — a single charge, added to your balance today."
     refill_when_low_amounts: "Refill when low — charges {reload_to} automatically when your balance falls below {threshold}."
     refill_when_low_generic: "Refill when low — charges your card automatically when your balance falls below the amount you set."
@@ -1918,7 +1918,7 @@ cli:
     charge_failed_card_declined: "🔴 Your card was declined. Try another card on the portal."
     charge_failed_generic: "🔴 The charge didn't go through ({reason})."
     charge_error_no_payment_method: "💳 No card on file — top up and manage billing on the portal."
-    charge_error_remote_spending_disabled: "Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Agent page."
+    charge_error_remote_spending_disabled: "Remote spending is off for this account — a billing admin can turn it on from the portal's B-3PO page."
     charge_error_role_required: "Adding funds needs an org admin/owner. Ask an admin, or manage on the portal."
     charge_error_idempotency_conflict: "🔴 That charge key was already used for a different amount. Start a fresh top-up."
     revoked_by_admin: "An admin stopped this terminal's spending."
@@ -1936,7 +1936,7 @@ cli:
     charge_stepup_noninteractive: "Run `hermes portal` and allow Remote Spending, then retry."
     charge_stepup_declined: "No charge made. Run /topup when you want to allow Remote Spending."
     charge_stepup_not_granted: "Couldn't allow Remote Spending — an org admin or owner has to approve it. Your card was not charged."
-    allowed_but_org_off: "Remote Spending is allowed for this terminal, but it's still off for this org. A billing admin can turn it on from the portal's Hermes Agent page, then run /topup again."
+    allowed_but_org_off: "Remote Spending is allowed for this terminal, but it's still off for this org. A billing admin can turn it on from the portal's B-3PO page, then run /topup again."
     allowed_no_card: "Remote Spending allowed — but there's no card on file yet."
     topup_on_portal_to_continue: "Top up and manage billing on the portal to continue."
     allowed_run_topup: "Remote Spending allowed. Run /topup to continue."
@@ -2341,7 +2341,7 @@ cli:
   render:
     response_transformed: "[Response transformed after streaming]"
     banner_tagline: "{name} - AI Agent Framework"
-    banner_version: "Hermes Agent v{version} ({date})"
+    banner_version: "B-3PO v{version} ({date})"
 
   subagents:
     cannot_steer_process: "Background processes cannot be steered; stop them or read the log."
@@ -3220,12 +3220,12 @@ cli:
       usage: "/timestamps [on|off|status]"
       label: "Message timestamps"
     update:
-      managed_action: "update Hermes Agent"
+      managed_action: "update B-3PO"
       choice_update: "Update Now"
-      choice_update_desc: "exit the current session and update Hermes Agent"
+      choice_update_desc: "exit the current session and update B-3PO"
       choice_cancel: "Cancel"
       choice_cancel_desc: "keep the current session"
-      title: "☤  Update Hermes Agent"
+      title: "☤  Update B-3PO"
       detail: "This will exit the current session and run `hermes update`."
       cancelled: "🟡 /update cancelled."
       launching: "☤ Launching update..."
@@ -3245,7 +3245,7 @@ cli:
     fix_lm_studio: "LM Studio fix: Set context length in model settings → reload model"
     fix_local_server: "Fix: start your server with at least {tokens_k}K context (llama.cpp: -c {tokens}), or set model.ollama_num_ctx in config.yaml to the window it really serves"
     fix_config: "Fix: Set model.context_length in config.yaml, or increase your server's context setting"
-    hermes_models_not_agentic: "⚠  Nous Research Hermes 3 & 4 models are NOT agentic and are not designed for use with Hermes Agent."
+    hermes_models_not_agentic: "⚠  Nous Research Hermes 3 & 4 models are NOT agentic and are not designed for use with B-3PO."
     hermes_models_lack_tools: "They lack tool-calling capabilities required for agent workflows. Consider using an agentic model (Claude, GPT, Gemini, DeepSeek, etc.)."
     hermes_models_switch_hint: "Switch with: /model sonnet  or  /model gpt5"
     project_skills_loaded: "◆ {count} project skill(s) loaded from this repo"

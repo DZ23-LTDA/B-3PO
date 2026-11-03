@@ -529,7 +529,7 @@ gateway:
     timed_out: "❌ A Hermes frissítése 30 perc után időtúllépéssel leállt."
     finished_success: "✅ A Hermes frissítése sikeresen befejeződött."
     last_lines: "{msg}\n\nUtolsó sorok:\n```\n{tail}\n```"
-    managed_action: "a Hermes Agent frissítése"
+    managed_action: "a B-3PO frissítése"
     not_applicable: "✗ A `hermes update` nem alkalmazható erre a telepítésre ({method}).\nFrissítés így: {command}"
   usage:
     rate_limits: "⏱️ **Sebességkorlátok:** {state}"
@@ -1476,13 +1476,13 @@ platform:
       size_downgraded: "{label} mérete ({size_mb} MB) meghaladja a {cap} korlátot; fájlként küldtem el helyette."
   email:
     image_line: "Kép: {url}"
-    standalone_subject: "Hermes Agent"
+    standalone_subject: "B-3PO"
   dingtalk:
     emotion:
       thinking: "🤔Gondolkodom"
       done: "🥳Kész"
   irc:
-    quit_message: "Hermes Agent leáll"
+    quit_message: "B-3PO leáll"
     standalone_quit: "kézbesítve"
   relay:
     confirm_approve_once: "Jóváhagyás egyszer"
@@ -1504,7 +1504,7 @@ slash:
   sethome:
     description: "Ez a csevegés legyen az otthoni csatorna"
   update:
-    description: "Hermes Agent frissítése a legújabb verzióra"
+    description: "B-3PO frissítése a legújabb verzióra"
   category:
     session: "Munkamenet"
     configuration: "Konfiguráció"
@@ -1712,7 +1712,7 @@ slash:
   image:
     description: "Helyi képfájl csatolása a következő promptodhoz"
   version:
-    description: "A Hermes Agent verziójának megjelenítése"
+    description: "A B-3PO verziójának megjelenítése"
   debug:
     description: "Hibakeresési jelentés (rendszerinfó + naplók) feltöltése és megosztható linkek kérése"
   quit:
@@ -1785,8 +1785,8 @@ cli:
     no_saved_card_add_funds_hint: "Nincs mentett kártya — az „Egyszeri feltöltés” végigvezet a hozzáadásán."
     actions_require_admin: "A számlázási műveletekhez szervezeti admin/tulajdonos kell."
     remote_spending_off_for_org: "A távoli költés ki van kapcsolva ennél a szervezetnél."
-    killswitch_reason_overview: "Egy számlázási admin bekapcsolhatja a portál Hermes Agent oldalán, hogy itt is tölthess fel."
-    killswitch_reason_buy: "Egy számlázási admin bekapcsolhatja a portál Hermes Agent oldalán a feltöltés előtt."
+    killswitch_reason_overview: "Egy számlázási admin bekapcsolhatja a portál B-3PO oldalán, hogy itt is tölthess fel."
+    killswitch_reason_buy: "Egy számlázási admin bekapcsolhatja a portál B-3PO oldalán a feltöltés előtt."
     add_funds_now_hint: "Egyszeri feltöltés — egyetlen terhelés, ma kerül az egyenlegedre."
     refill_when_low_amounts: "Feltöltés alacsony egyenlegnél — automatikusan {reload_to} összeget terhel, amikor az egyenleged {threshold} alá esik."
     refill_when_low_generic: "Feltöltés alacsony egyenlegnél — automatikusan terheli a kártyádat, amikor az egyenleged a megadott összeg alá esik."
@@ -1857,7 +1857,7 @@ cli:
     charge_failed_card_declined: "🔴 A kártyádat elutasították. Próbálj másik kártyát a portálon."
     charge_failed_generic: "🔴 A terhelés nem ment át ({reason})."
     charge_error_no_payment_method: "💳 Nincs mentett kártya — tölts fel és kezeld a számlázást a portálon."
-    charge_error_remote_spending_disabled: "A távoli költés ki van kapcsolva ennél a fióknál — egy számlázási admin bekapcsolhatja a portál Hermes Agent oldalán."
+    charge_error_remote_spending_disabled: "A távoli költés ki van kapcsolva ennél a fióknál — egy számlázási admin bekapcsolhatja a portál B-3PO oldalán."
     charge_error_role_required: "A feltöltéshez szervezeti admin/tulajdonos kell. Kérj meg egy admint, vagy kezeld a portálon."
     charge_error_idempotency_conflict: "🔴 Ezt a terhelési kulcsot már használták más összeggel. Indíts új feltöltést."
     revoked_by_admin: "Egy admin leállította ennek a terminálnak a költését."
@@ -1874,7 +1874,7 @@ cli:
     charge_stepup_noninteractive: "Futtasd a `hermes portal` parancsot, engedélyezd a Távoli költést, majd próbáld újra."
     charge_stepup_declined: "Nem történt terhelés. Futtasd a /topup parancsot, amikor engedélyezni akarod a Távoli költést."
     charge_stepup_not_granted: "Nem sikerült engedélyezni a Távoli költést — szervezeti adminnak vagy tulajdonosnak kell jóváhagynia. A kártyádat nem terheltük meg."
-    allowed_but_org_off: "A Távoli költés engedélyezett ennél a terminálnál, de a szervezetnél még ki van kapcsolva. Egy számlázási admin bekapcsolhatja a portál Hermes Agent oldalán, utána futtasd újra a /topup parancsot."
+    allowed_but_org_off: "A Távoli költés engedélyezett ennél a terminálnál, de a szervezetnél még ki van kapcsolva. Egy számlázási admin bekapcsolhatja a portál B-3PO oldalán, utána futtasd újra a /topup parancsot."
     allowed_no_card: "Távoli költés engedélyezve — de még nincs mentett kártya."
     topup_on_portal_to_continue: "A folytatáshoz tölts fel és kezeld a számlázást a portálon."
     allowed_run_topup: "Távoli költés engedélyezve. Futtasd a /topup parancsot a folytatáshoz."
@@ -2180,7 +2180,7 @@ cli:
     images_attached_one: "📎 {count} kép csatolva"
     images_attached_other: "📎 {count} kép csatolva"
     command_interrupted: "Parancs megszakítva."
-    welcome: "Üdv a Hermes Agentben! Írd be az üzenetedet, vagy a /help paranccsal nézd meg a parancsokat."
+    welcome: "Üdv a B-3POben! Írd be az üzenetedet, vagy a /help paranccsal nézd meg a parancsokat."
     activated_skills_label: "Aktivált skillek:"
     redaction_disabled_title: "⚠  A titkok kitakarása KI VAN KAPCSOLVA"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value}). Az API-kulcsok és tokenek szó szerint megjelenhetnek a chatkimenetben, a munkamenet-JSON-okban és a naplókban. A visszakapcsoláshoz állítsd be a config.yaml fájlban: {setting}."
@@ -2260,7 +2260,7 @@ cli:
   render:
     response_transformed: "[A válasz a streamelés után átalakult]"
     banner_tagline: "{name} - AI-ügynök keretrendszer"
-    banner_version: "Hermes Agent v{version} ({date})"
+    banner_version: "B-3PO v{version} ({date})"
   subagents:
     cannot_steer_process: "Háttérfolyamatok nem irányíthatók; állítsd le őket, vagy olvasd el a naplót."
     count_live: "{count} élő"
@@ -3137,12 +3137,12 @@ cli:
       usage: "/timestamps [on|off|status]"
       label: "Üzenet-időbélyegek"
     update:
-      managed_action: "a Hermes Agent frissítése"
+      managed_action: "a B-3PO frissítése"
       choice_update: "Frissítés most"
-      choice_update_desc: "kilépés a jelenlegi munkamenetből és a Hermes Agent frissítése"
+      choice_update_desc: "kilépés a jelenlegi munkamenetből és a B-3PO frissítése"
       choice_cancel: "Mégse"
       choice_cancel_desc: "a jelenlegi munkamenet megtartása"
-      title: "☤  Hermes Agent frissítése"
+      title: "☤  B-3PO frissítése"
       detail: "Ez kilép a jelenlegi munkamenetből, és lefuttatja a `hermes update` parancsot."
       cancelled: "🟡 /update megszakítva."
       launching: "☤ Frissítés indítása..."
@@ -3162,7 +3162,7 @@ cli:
     fix_lm_studio: "LM Studio megoldás: állítsd be a kontextushosszt a modell beállításaiban → töltsd újra a modellt"
     fix_local_server: "Megoldás: indítsd a szervert legalább {tokens_k}K kontextussal (llama.cpp: -c {tokens}), vagy állítsd a model.ollama_num_ctx értékét a config.yaml fájlban a ténylegesen kiszolgált ablakra"
     fix_config: "Megoldás: állítsd be a model.context_length értékét a config.yaml fájlban, vagy növeld a szerver kontextusbeállítását"
-    hermes_models_not_agentic: "⚠  A Nous Research Hermes 3 és 4 modellek NEM ügynökmodellek, és nem a Hermes Agenthez készültek."
+    hermes_models_not_agentic: "⚠  A Nous Research Hermes 3 és 4 modellek NEM ügynökmodellek, és nem a B-3POhez készültek."
     hermes_models_lack_tools: "Hiányzik belőlük az ügynökmunkához szükséges eszközhívás. Használj inkább ügynökképes modellt (Claude, GPT, Gemini, DeepSeek stb.)."
     hermes_models_switch_hint: "Váltás: /model sonnet  vagy  /model gpt5"
     project_skills_loaded: "◆ {count} projektskill betöltve ebből a repóból"
