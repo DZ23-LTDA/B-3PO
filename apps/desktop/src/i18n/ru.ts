@@ -334,6 +334,17 @@ export const ruOverrides = {
     noResults: 'Языки не найдены'
   },
   settings: {
+    crmContacts: {
+      title: 'Контакты WhatsApp CRM',
+      intro: 'С кем общаются ваши боты. Контакты хранятся на этом компьютере; третьим лицам ничего не отправляется.',
+      empty: 'Контактов пока нет. Добавьте первый ниже.',
+      unavailable: 'У этого клиента нет локального диска для контактов.',
+      name: 'Имя',
+      phone: 'Телефон',
+      company: 'Компания',
+      add: 'Добавить контакт',
+      remove: 'Удалить',
+    },
     memoryLayers: ruMemoryLayers,
     // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {

@@ -243,6 +243,8 @@ import {
   uninstallArgsForMode,
   type UninstallSummaryDetails
 } from './desktop-uninstall'
+import { registerCrmContactsIpc } from './crm-contacts-ipc'
+import { CrmContactStore, crmStorePath } from './crm-contacts-store'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -17504,6 +17506,8 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 
   return { ok: true, mode, willRemoveAppBundle: Boolean(removeBundle), scriptPath }
 }
+
+registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(app.getPath('userData'))))
 
 registerDesktopUninstallIpc({
   ipcMain,

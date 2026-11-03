@@ -684,6 +684,17 @@ export const frOverrides = {
     noResults: 'Aucune langue trouvée'
   },
   settings: {
+    crmContacts: {
+      title: 'Contacts du CRM WhatsApp',
+      intro: 'À qui parlent vos bots. Les contacts restent sur cet ordinateur ; rien n’est envoyé à un tiers.',
+      empty: 'Aucun contact pour l’instant. Ajoutez le premier ci-dessous.',
+      unavailable: 'Ce client n’a pas de disque local pour les contacts.',
+      name: 'Nom',
+      phone: 'Téléphone',
+      company: 'Entreprise',
+      add: 'Ajouter un contact',
+      remove: 'Retirer',
+    },
     memoryLayers: frMemoryLayers,
     subpages: {
       appearanceTheme: 'Thème',

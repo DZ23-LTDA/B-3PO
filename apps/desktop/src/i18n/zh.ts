@@ -455,6 +455,17 @@ export const zhOverrides = {
   },
 
   settings: {
+    crmContacts: {
+      title: 'WhatsApp CRM 联系人',
+      intro: '你的机器人对话的对象。联系人保存在本机，不会发送给第三方。',
+      empty: '还没有联系人。在下面添加第一个。',
+      unavailable: '此客户端没有可保存联系人的本地磁盘。',
+      name: '姓名',
+      phone: '电话',
+      company: '公司',
+      add: '添加联系人',
+      remove: '移除',
+    },
     memoryLayers: zhMemoryLayers,
     subpages: {
       appearanceTheme: '主题',

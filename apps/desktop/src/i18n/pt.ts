@@ -496,6 +496,17 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    crmContacts: {
+      title: 'Contatos do WhatsApp CRM',
+      intro: 'Com quem seus bots falam. Os contatos ficam neste computador; nada é enviado a terceiros.',
+      empty: 'Nenhum contato ainda. Cadastre o primeiro abaixo.',
+      unavailable: 'Este cliente não tem disco local para guardar contatos.',
+      name: 'Nome',
+      phone: 'Telefone',
+      company: 'Empresa',
+      add: 'Adicionar contato',
+      remove: 'Remover',
+    },
     gateway: {
       pairedDevicesTitle: 'Dispositivos pareados',
       pairedDevicesIntro:

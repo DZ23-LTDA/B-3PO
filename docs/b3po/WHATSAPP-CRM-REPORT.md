@@ -146,3 +146,26 @@ desconhecida (correto), então o helper de teste lançava. Corrigi criando com e
 etapa no objeto — o caso testado (etapa sem probabilidade) continua coberto.
 
 **140 testes** no CRM, `tsc --noEmit` limpo, gate **14 ok** verificado **antes** do commit.
+
+## Rodada 84 — o CRM passa a ter TELA
+
+Até aqui o núcleo (`crm/`, 140 testes) não tinha superfície: nem HTTP, nem store, nem UI — o usuário não
+conseguia cadastrar um contato sequer. Esta rodada fecha a primeira metade:
+
+| Camada | Arquivo |
+|---|---|
+| store no disco do usuário (processo principal) | `electron/crm-contacts-store.ts` + 6 testes |
+| IPC tipado | `electron/crm-contacts-ipc.ts`, registrado em `main.ts`, exposto em `preload.ts` |
+| ponte do renderer | `src/api/crm-contacts.ts` (recusa com `unavailable` quando não há bridge) |
+| tela | `src/app/settings/crm-contacts-section.tsx` + 6 testes de DOM |
+
+A tela cobre os quatro estados que importam: carregando, vazio explicativo, erro de validação do backend
+como texto (sem perder a lista) e ausência de disco local (versão web) — nesse caso ela diz o motivo em vez
+de mostrar lista vazia enganosa.
+
+### Onde ela está montada (e por que isso é provisório)
+
+Por enquanto a seção aparece em **Configurações → Conexões salvas**, logo abaixo dos dispositivos pareados.
+É adjacente ("quem fala com os bots" / "com quem os bots falam"), mas **não é o lugar definitivo**: falta uma
+tela própria de CRM (funil, conversas, tarefas). Registro como provisório em vez de fingir que está no lugar
+certo.

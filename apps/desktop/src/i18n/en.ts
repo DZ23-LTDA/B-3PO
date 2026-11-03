@@ -686,6 +686,17 @@ export const en: Translations = {
   },
 
   settings: {
+    crmContacts: {
+      title: 'WhatsApp CRM contacts',
+      intro: 'Who your bots talk to. Contacts live on this computer; nothing is sent to a third party.',
+      empty: 'No contact yet. Add the first one below.',
+      unavailable: 'This client has no local disk to keep contacts.',
+      name: 'Name',
+      phone: 'Phone',
+      company: 'Company',
+      add: 'Add contact',
+      remove: 'Remove',
+    },
     subpages: {
       appearanceTheme: 'Theme',
       appearanceTypography: 'Typography',

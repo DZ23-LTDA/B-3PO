@@ -45,6 +45,7 @@ import { managedUpdatesSupported } from '@/store/managed-updates'
 import { notify, notifyError, readableError } from '@/store/notifications'
 
 import { cloudTeamChanged, reconnectMovedCloudAgent } from './cloud-team-change'
+import { CrmContactsSection } from './crm-contacts-section'
 import { ConnectionsRegistrySection } from './connections-registry'
 import { PairedDevicesSection } from './paired-devices-section'
 import { CONTROL_TEXT } from './constants'
@@ -189,6 +190,7 @@ export function GatewaySettings({ embedded = false, subpage }: GatewaySettingsPr
       <SettingsContent>
         <ConnectionsRegistrySection />
           <PairedDevicesSection />
+          <CrmContactsSection />
       </SettingsContent>
     )
   }

@@ -600,6 +600,17 @@ export interface Translations extends NoticeTranslations {
   }
 
   settings: {
+    crmContacts: {
+      title: string
+      intro: string
+      empty: string
+      unavailable: string
+      name: string
+      phone: string
+      company: string
+      add: string
+      remove: string
+    }
     subpages: Record<string, string>
     closeSettings: string
     exportConfig: string

@@ -684,6 +684,17 @@ export const deOverrides = {
     noResults: 'Keine Sprachen gefunden'
   },
   settings: {
+    crmContacts: {
+      title: 'WhatsApp-CRM-Kontakte',
+      intro: 'Mit wem deine Bots sprechen. Die Kontakte liegen auf diesem Computer; nichts geht an Dritte.',
+      empty: 'Noch kein Kontakt. Füge unten den ersten hinzu.',
+      unavailable: 'Dieser Client hat keine lokale Festplatte für Kontakte.',
+      name: 'Name',
+      phone: 'Telefon',
+      company: 'Firma',
+      add: 'Kontakt hinzufügen',
+      remove: 'Entfernen',
+    },
     memoryLayers: deMemoryLayers,
     subpages: {
       appearanceTheme: 'Design',

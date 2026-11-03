@@ -246,6 +246,17 @@ export const jaOverrides = {
   },
 
   settings: {
+    crmContacts: {
+      title: 'WhatsApp CRM の連絡先',
+      intro: 'ボットが話す相手です。連絡先はこのコンピューターに保存され、第三者には送信されません。',
+      empty: '連絡先はまだありません。下から最初の 1 件を追加してください。',
+      unavailable: 'このクライアントには連絡先を保存するローカルディスクがありません。',
+      name: '名前',
+      phone: '電話',
+      company: '会社',
+      add: '連絡先を追加',
+      remove: '削除',
+    },
     memoryLayers: jaMemoryLayers,
     // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {

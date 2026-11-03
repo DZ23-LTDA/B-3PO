@@ -14,6 +14,17 @@ export const arSettings = {
     noResults: 'لا توجد لغة مطابقة'
   },
   settings: {
+    crmContacts: {
+      title: 'جهات اتصال WhatsApp CRM',
+      intro: 'من تتحدث معهم بوتاتك. تُحفظ جهات الاتصال على هذا الكمبيوتر ولا يُرسل شيء إلى طرف ثالث.',
+      empty: 'لا توجد جهات اتصال بعد. أضف الأولى أدناه.',
+      unavailable: 'هذا العميل لا يملك قرصًا محليًا لحفظ جهات الاتصال.',
+      name: 'الاسم',
+      phone: 'الهاتف',
+      company: 'الشركة',
+      add: 'إضافة جهة اتصال',
+      remove: 'إزالة',
+    },
     memoryLayers: arMemoryLayers,
     // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {

@@ -687,6 +687,17 @@ export const esOverrides = {
     noResults: 'No se encontraron idiomas'
   },
   settings: {
+    crmContacts: {
+      title: 'Contactos del CRM de WhatsApp',
+      intro: 'Con quién hablan tus bots. Los contactos se guardan en este equipo; nada se envía a terceros.',
+      empty: 'Todavía no hay contactos. Añade el primero abajo.',
+      unavailable: 'Este cliente no tiene disco local para guardar contactos.',
+      name: 'Nombre',
+      phone: 'Teléfono',
+      company: 'Empresa',
+      add: 'Añadir contacto',
+      remove: 'Quitar',
+    },
     memoryLayers: esMemoryLayers,
     subpages: {
       appearanceTheme: 'Tema',
