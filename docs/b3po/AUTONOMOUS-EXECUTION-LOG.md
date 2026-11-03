@@ -49,3 +49,20 @@ Registro cronológico da execução autônoma autorizada pelo proprietário (Ade
 | B3 | Linux | container com electron-builder (Docker/WSL presentes; não executado) |
 | B4 | Windows assinado | certificado Code Signing (AZURE_SIGN_* ou PFX) |
 | B5 | F5 na UI | execução do fluxo com display (app aberto) — não provado |
+
+## Incidente — 21:26 (registrado, não omitido)
+
+**O que aconteceu:** ao abrir o Pull Request, o `gh` não tinha repositório padrão definido
+(`gh repo set-default --view` → "No default remote repository has been set"), e o comando com
+`--head DZ23-LTDA:b3po-brand` resolveu o **repositório base como o upstream** e criou o PR
+`NousResearch/hermes-agent#148220` — repositório público de terceiros.
+
+**Ação imediata:** PR **fechado** em segundos, com comentário explicando que foi aberto por engano e que
+nada daquele conteúdo se destina ao upstream. Nenhum merge ocorreu; nenhum commit foi enviado ao upstream;
+a branch `b3po-brand` existe apenas no fork DZ23-LTDA/B-3PO.
+
+**Correção aplicada:** `gh repo set-default DZ23-LTDA/B-3PO` e criação do PR com `--repo` explícito.
+PR correto: `DZ23-LTDA/B-3PO#1` (draft, revisão apenas, sem merge em `main`).
+
+**Lição para o próximo ciclo:** sempre passar `--repo <owner/name>`; nunca confiar no repo implícito; não
+usar `--head owner:branch` (isso convida o gh a escolher o repositório "pai").
