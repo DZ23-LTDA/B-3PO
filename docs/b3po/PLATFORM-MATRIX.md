@@ -33,3 +33,18 @@ Fatos medidos em 2026-11-02, Windows 11 Pro (10.0.26300).
 
 O APK não é o cliente do produto; é prova de pipeline + identidade. Nenhuma funcionalidade de bot foi
 implementada nem alegada.
+
+## Atualização 22:35 — Linux: tentativa e bloqueio exato
+
+Tentativa de gerar AppImage:
+
+| Caminho | Resultado |
+|---|---|
+| Docker (`docker run node:26-bookworm`) | **bloqueado** — daemon parado: `npipe:////./pipe/dockerDesktopLinuxEngine` não existe |
+| WSL `Ubuntu` | WSL instalado, mas **sem Node nativo**; o `npm` encontrado é o do Windows via interop (`/mnt/c/Program Files/nodejs`) — não serve para empacotar Linux |
+
+**Dependência externa:** iniciar o Docker Desktop (serviço) ou instalar Node 26 nativo dentro do WSL.
+Ambos exigem ação no host que não é build reproduzível — por isso o Linux fica **BLOCKED**, não "não tentado".
+Alternativa segura: rodar o workflow num runner `ubuntu-latest` (CI), que já tem toolchain Linux.
+
+**Nenhum artefato Linux é declarado aqui.**
