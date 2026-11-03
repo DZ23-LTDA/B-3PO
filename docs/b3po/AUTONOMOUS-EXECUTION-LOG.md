@@ -123,3 +123,14 @@ empacotar ou apontar o cache do electron-builder para fora do checkout.
 
 **Pendências desta frente:** `assets/icon.icns` e o bundle `icon.icon` ainda têm a arte antiga (macOS
 bloqueado); `cliName` continua `hermes` (nível 2 não autorizado).
+
+## Rodada 8 — Fase E parte 2 (instalador)
+
+| Hora | Ação | Resultado |
+|---|---|---|
+| 21:52 | `npm run dist:win` | exit 0 — MSIX gerado (185,53 MB) |
+| 21:53 | verificação de assinatura | `NotSigned` via Authenticode |
+| 21:53 | cache do builder | removido do checkout (regra do repo) |
+
+Instalação limpa fica **bloqueada por certificado** — o artefato é reproduzível, mas não instalável em
+Windows comum sem sideload/assinatura. Registrado em `ADR-007`.

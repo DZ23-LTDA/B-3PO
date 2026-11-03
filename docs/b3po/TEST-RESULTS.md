@@ -67,3 +67,11 @@ sem relação com este trabalho:
 
 Verificação: nenhum dos dois importa `bot-schema`/`orchestration` (`git grep` vazio). Não foram
 "consertados" para não mascarar problema do upstream — ficam registrados para a Fase H.
+
+## Atualização 21:53 — instalador Windows
+
+| # | Teste | Comando | Resultado |
+|---|---|---|---|
+| T7b | Instalador MSIX | `npm run dist:win` | **exit 0** — `B3PO-0.0.0-win-x64.msix` (185,53 MB) |
+| T7c | Assinatura do MSIX | `Get-AuthenticodeSignature` | **NotSigned** |
+| T7d | Instalação limpa do MSIX | — | **não executada** (exige certificado/sideload) |

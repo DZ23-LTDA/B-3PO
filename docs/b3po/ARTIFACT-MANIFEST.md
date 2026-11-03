@@ -64,3 +64,18 @@ AUMID de fallback em `main.ts` corrigido para `com.dz23.b3po`.
 **Artefato reconferido:** `release/win-unpacked/B-3PO.exe` — ProductName `B-3PO`, CompanyName `DZ23-LTDA`, **não assinado**, SHA-256 `35269d021e7a067024abe98476662aada0513793680bd0c97dc41fe124fa7941`.
 
 **Migração de dados:** o userData do Electron passa a derivar de `B-3PO`; instalações antigas em `%APPDATA%\Hermes` não são tocadas nem migradas automaticamente. Aceitável em pré-lançamento; se houver build interno em uso, migração com cópia + rollback entra na Fase C/2.
+
+## Atualização 21:53 — instalador Windows (MSIX)
+
+| Campo | Valor |
+|---|---|
+| Arquivo | `apps/desktop/release/B3PO-0.0.0-win-x64.msix` |
+| Tamanho | 185,53 MB |
+| SHA-256 | `71f2b3ed45aa32353fc320a02d59ed825d7d27a0bd306e8c0252c049bb5486f0` |
+| Assinatura | **NotSigned** (confirmado por `Get-AuthenticodeSignature`, não só pelo log) |
+| Manifest | `assets/msix-manifest.xml` (custom, do projeto) |
+| Runner | Windows 11 + `npm run dist:win` |
+
+**Consequência:** MSIX não assinado **não instala** em Windows comum sem sideload habilitado e
+certificado confiável. Ou seja: o artefato existe e é reproduzível, mas a prova de instalação limpa
+depende de certificado (dependência externa) — não vou chamar de instalável.
