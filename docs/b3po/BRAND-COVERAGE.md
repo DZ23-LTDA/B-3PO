@@ -1,0 +1,37 @@
+# BRAND-COVERAGE — onde a marca aparece e o que já é B-3PO
+
+**Data:** 2026-11-03 · **Branch:** `b3po-brand` · **Commit:** `65f880b9`
+
+Mapa das superfícies visíveis. `Hermes` continua sendo o nome do **runtime** (módulos, comandos
+`hermes`, variáveis `HERMES_*`, licença/NOTICE) — isso é atribuição legal, não marca de produto.
+
+## 1. Corrigido e verificado no app real
+
+| Superfície | Antes | Agora | Evidência |
+|---|---|---|---|
+| Wordmark da tela inicial | `HERMES AGENT` | **`B-3PO`** | `evidence/app-brand-verified.png` |
+| Nome do agente/bot padrão | `Hermes` | **`B-3PO`** | `labels.ts` + skin `agent_name`, verificado por CDP |
+| Sidebar (nav, busca, estados vazios) | inglês | **português** | `CONVERSAS`, `Nova conversa`, `Nenhuma conversa ainda` |
+| Configurações (nav e subpáginas) | inglês | **português** | `Modelo`, `Aparência`, `Mascote`, `Cobrança` |
+| Copy de boas-vindas (backend, 30+ locales) | "Welcome to Hermes Agent" | **"Welcome to B-3PO"** | `locales/*.yaml` |
+| Catálogos de UI (desktop, web, instalador) | "Hermes Agent" | **"B-3PO"** (523 substituições) | catraca `tests/brand/test_product_name_guard.py` |
+| Strip de telemetria | "Share with Nous" | **ausente** (sem endpoint de terceiro) | `consent_state` decidido-e-desligado |
+| Persona do agente | "You are Hermes Agent" | **"You are B-3PO, built on Hermes Agent by Nous Research"** | `agent/prompt_builder.py` |
+| Avatar do roster | sigilo gerado (roxo) | **mascote oficial quando escolhido**; bot novo nasce com um dos 20 | `rosterFaceFor`, `defaultMascotFor`, 5 testes |
+| Ícones, `.ico`, `.icns`, MSIX, favicons | arte Nous | **marca B-3PO** (99 alvos regerados) | `generate_icons.py` |
+
+## 2. Ainda com marca/arte de terceiro (pendente)
+
+| Superfície | O que aparece | Ação |
+|---|---|---|
+| **Configurações → Aparência → Mascote** | catálogo **petdex** (Nukey, Socksy, Daemon Dumpling, Cache Capy…) com pets animados | substituir o catálogo de pets pelos **20 mascotes da marca**, ou esconder a página enquanto não houver versão animada |
+| Título da aba de sessão nova | `NEW SESSION` | traduzir no catálogo |
+| Texto de apresentação do chat vazio | inglês | traduzir `intro-copy` |
+| PDFs/docs do site | "Hermes Agent" em páginas de marketing | rebrand de documentação (fora da UI do app) |
+
+## 3. Regra que passou a valer
+
+- Nome de produto vem de **`brand/brand.json`** (dado), não de string espalhada.
+- O rebrand é aplicado por `scripts/rebrand_product_name.py` (idempotente) e **travado** pelo teste
+  `tests/brand/test_product_name_guard.py`: reintroduzir "Hermes Agent" na interface falha o gate.
+- Identificadores, imports, caminhos, comandos `hermes` e `HERMES_*` **não** são tocados.
