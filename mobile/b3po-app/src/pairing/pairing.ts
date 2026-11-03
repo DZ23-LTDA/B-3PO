@@ -83,71 +83,102 @@ export function newDeviceId(random: () => string = () => Math.random().toString(
   return `dev-${random()}${random()}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40)
 }
 
-/**
- * Traduz um link de pareamento em pedido de conexão. `existingDeviceId` mantém o id já guardado
- * neste aparelho: reparear o mesmo celular não deve criar um dispositivo novo no gateway.
- */
-export function parsePairingLink(link: string, existingDeviceId?: string | null): PairingResult {
-  let url: URL
-
-  try {
-    url = new URL(link)
-  } catch {
-    return { ok: false, reason: 'malformed-url' }
-  }
-
-  if (url.protocol.replace(/:$/, '').toLowerCase() !== PAIR_SCHEME || url.host.toLowerCase() !== PAIR_HOST) {
-    return { ok: false, reason: 'not-a-pair-link' }
-  }
-
-  const rawGateway = (url.searchParams.get('url') ?? '').trim()
+/** Extrai e valida o endereço do gateway do convite. */
+function gatewayFromInvite(url: URL): { ok: true; url: string; host: string } | { ok: false; reason: PairingFailure } {
+  const rawGateway = (url.searchParams.get("url") ?? "").trim()
 
   if (!rawGateway) {
-    return { ok: false, reason: 'missing-url' }
+    return { ok: false, reason: "missing-url" }
   }
 
   const transport = normalizeTransport(rawGateway)
 
   if (!transport) {
-    return { ok: false, reason: 'unsupported-scheme' }
+    return { ok: false, reason: "unsupported-scheme" }
   }
 
-  const plaintext = transport.scheme === 'ws' || transport.scheme === 'http'
+  const plaintext = transport.scheme === "ws" || transport.scheme === "http"
 
   if (plaintext && !isLocalHost(transport.host)) {
-    return { ok: false, reason: 'insecure-remote-url' }
+    return { ok: false, reason: "insecure-remote-url" }
   }
 
-  const token = (url.searchParams.get('token') ?? '').trim()
+  return { ok: true, url: transport.url, host: transport.host }
+}
+
+/** Chave de pareamento: obrigatória e com tamanho mínimo. */
+function tokenFromInvite(url: URL): { ok: true; token: string } | { ok: false; reason: PairingFailure } {
+  const token = (url.searchParams.get("token") ?? "").trim()
 
   if (!token) {
-    return { ok: false, reason: 'missing-token' }
+    return { ok: false, reason: "missing-token" }
   }
 
   if (token.length < MIN_TOKEN_LENGTH) {
-    return { ok: false, reason: 'token-too-short' }
+    return { ok: false, reason: "token-too-short" }
   }
 
-  // Convite com prazo: um QR fotografado ontem não pode parear hoje (revisão independente).
-  const expiresAt = Number(url.searchParams.get('expires_at') ?? '')
-  const now = Date.now()
+  return { ok: true, token }
+}
 
-  if (Number.isFinite(expiresAt) && expiresAt > 0) {
-    const expiresAtMs = expiresAt > 1e12 ? expiresAt : expiresAt * 1000
+/** Convite com prazo: um QR fotografado ontem não pode parear hoje. `expires_at` aceita s ou ms. */
+function inviteExpired(url: URL, now: number): boolean {
+  const raw = Number(url.searchParams.get("expires_at") ?? "")
 
-    if (now > expiresAtMs) {
-      return { ok: false, reason: 'invite-expired' }
-    }
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return false
   }
 
-  const deviceId = (existingDeviceId ?? '').trim() || (url.searchParams.get('device') ?? '').trim() || newDeviceId()
-  const label = (url.searchParams.get('name') ?? '').trim()
+  const expiresAtMs = raw > 1e12 ? raw : raw * 1000
+
+  return now > expiresAtMs
+}
+
+/**
+ * Traduz um link de pareamento em pedido de conexão. `existingDeviceId` mantém o id já guardado
+ * neste aparelho: reparear o mesmo celular não deve criar um dispositivo novo no gateway.
+ */
+export function parsePairingLink(
+  link: string,
+  existingDeviceId?: string | null,
+  now: number = Date.now()
+): PairingResult {
+  let url: URL
+
+  try {
+    url = new URL(link)
+  } catch {
+    return { ok: false, reason: "malformed-url" }
+  }
+
+  if (url.protocol.replace(/:$/, "").toLowerCase() !== PAIR_SCHEME || url.host.toLowerCase() !== PAIR_HOST) {
+    return { ok: false, reason: "not-a-pair-link" }
+  }
+
+  const gateway = gatewayFromInvite(url)
+
+  if (!gateway.ok) {
+    return gateway
+  }
+
+  const token = tokenFromInvite(url)
+
+  if (!token.ok) {
+    return token
+  }
+
+  if (inviteExpired(url, now)) {
+    return { ok: false, reason: "invite-expired" }
+  }
+
+  const deviceId = (existingDeviceId ?? "").trim() || (url.searchParams.get("device") ?? "").trim() || newDeviceId()
+  const label = (url.searchParams.get("label") ?? url.searchParams.get("name") ?? "").trim()
 
   return {
     ok: true,
     request: {
-      gatewayUrl: transport.url,
-      token,
+      gatewayUrl: gateway.url,
+      token: token.token,
       deviceId,
       deviceLabel: label || null
     }
