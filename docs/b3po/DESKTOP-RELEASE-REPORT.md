@@ -785,3 +785,24 @@ Progresso do backlog: **7 de 26** famílias feitas (`boot`, `theme_picker`, `cro
 `notices`, `notifications` e `catalog` na frente.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 107 — avisos, comandos de barra, canal de atualização e métricas em pt
+
+Cinco famílias nesta rodada: **`pt_notices`** (renderização remota, barra de termos/privacidade, avisos do
+compositor, oferta de manter acordado, oferta de conectar apps), **`pt_session_commands`** (/undo, /retry,
+/steer, fila), **`pt_desktop_commands`** (/rollback, /agents, /config, /history, /save, /export, /import,
+/timestamps), **`pt_update_channel`** (estável x cada commit, aviso de rollback e de build retida) e
+**`pt_shared_metrics`** (consentimento de estatísticas — o texto que explica que só contagens vão embora).
+
+`notices` e `sharedMetrics` são spreads de topo; `updateChannel` mora em `settings.about.channel` e as duas
+famílias de comandos entram dentro de `promptNotices` — por isso o arquivo `pt_notices` importa
+`pt_session_commands` e `pt_desktop_commands`, como o inglês faz.
+
+A lista de seções do `pt.test.ts` passou de 15 para 21 entradas. Isso é o contrato funcionando: cada família nova
+tem que ser declarada, senão o teste reprova.
+
+Progresso do backlog: **12 de 26** famílias em pt. Restam `desktop_commands` (feito), `error_codes`, `notifications`,
+`catalog`, `first_run`, `onboarding`, `model_menu`, `projects`, `local_models`, `connectors`/`connector_*`,
+`gateway_host`, `plugin_update`, `preview_web`.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.

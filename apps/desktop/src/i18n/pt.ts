@@ -14,12 +14,17 @@ import { ptBoot } from './pt_boot'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
 import { ptErrorLayers } from './pt_error_layers'
+import { ptNotices } from './pt_notices'
 import { ptMemoryLayers } from './pt_memory_layers'
 import { ptModelSettings } from './pt_model_settings'
 import { ptPluginPreviewAccess } from './pt_plugin_preview_access'
+import { ptSharedMetrics } from './pt_shared_metrics'
 import { ptThemePicker } from './pt_theme_picker'
+import { ptUpdateChannel } from './pt_update_channel'
 
 export const ptOverrides: TranslationOverrides = {
+  ...ptNotices,
+  sharedMetrics: ptSharedMetrics,
   cron: { control: ptCronControl },
   ...ptBoot,
   skills: { plugins: { ...ptPluginPreviewAccess } },
@@ -511,6 +516,7 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    about: { channel: ptUpdateChannel },
     memoryLayers: ptMemoryLayers,
     model: ptModelSettings,
     /**
