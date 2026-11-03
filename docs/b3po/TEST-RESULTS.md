@@ -224,3 +224,31 @@ entrega é não deixar número inventado no relatório, mesmo quando o erro é m
 O PR #1 também passou a declarar um detalhe de arquitetura que evita surpresa futura: a aprovação do mobile
 usa **token de sessão**; se o app migrar para **ticket de dispositivo**, os métodos de aprovação precisam
 entrar na allowlist (`tui_gateway/device_scope.py`) — hoje seriam recusados com `4030`.
+
+## Rodada 101 — o que a suíte de electron/ revela nesta máquina (Windows)
+
+Rodando a suíte com o interpretador do projeto (`HERMES_PYTHON` = python 3.14 do pm) restam falhas **fora** do meu
+diff, todas com causa de plataforma:
+
+| Teste | Causa real | Situação |
+|---|---|---|
+| `linux-crash-diagnostics.test.ts` | esperava caminho POSIX fixo | **corrigido**: separador normalizado |
+| `log-rotation.test.ts` | `ftruncate` para crescer é POSIX | **corrigido**: cresce por `truncateSync` do caminho |
+| `singleton-lock.test.ts` | fixture exige `symlink` (EPERM sem Developer Mode) | **corrigido**: caso pulado com aviso |
+| `desktop-plugins-root.test.ts` | idem, link no fixture | **corrigido**: fixture condicional |
+| `tray-host.test.ts` | registro em barramento D-Bus | pré-existente, Windows |
+| `packaged-working-directory.test.ts` | `chdir` para um `H:\` que não existe nesta máquina | pré-existente, ambiente |
+| `command-screenshot-monitor.test.ts` | bundle esbuild de `updater/system-proxy-env.ts` pedindo `session` no `fixture:electron` | pré-existente |
+
+Os quatro primeiros eu consertei de verdade (não são "skip para passar": o caso POSIX e o de symlink agora
+funcionam onde o SO permite e declaram o pulo onde não permite). Os três últimos eu **não toquei** — nenhum
+arquivo deles aparece no meu diff — e não vou mascará-los com skip: ficam registrados como limitação desta
+máquina até alguém tratar a causa (D-Bus, `H:\`, fixture do esbuild).
+
+### Como rodar limpo aqui
+
+```powershell
+. ./activate.ps1
+$env:HERMES_PYTHON = (Get-Command python).Source   # sem isso os testes pegam python3 do PATH (3.12, sem ruamel)
+cd apps/desktop; npx vitest run electron src
+```

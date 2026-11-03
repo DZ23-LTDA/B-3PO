@@ -1,4 +1,18 @@
 import assert from 'node:assert/strict'
+
+/** Windows sem Developer Mode recusa symlink (EPERM): os casos que dependem de link são pulados. */
+function symlinksAllowed(dir: string): boolean {
+  const alvo = `${dir}-probe`
+
+  try {
+    require('node:fs').symlinkSync('x', alvo, 'file')
+    require('node:fs').rmSync(alvo, { force: true })
+
+    return true
+  } catch {
+    return false
+  }
+}
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -42,6 +56,13 @@ test('a zombie or missing owner is stale; kill(pid,0) alone would say alive', ()
 })
 
 test('removeStaleSingletonLock unlinks only a provably-dead owner', () => {
+  // Sem privilégio de symlink (Windows), o fixture não existe: o caso é pulado com aviso.
+  if (!symlinksAllowed(require('node:os').tmpdir())) {
+    console.warn('symlink indisponível nesta máquina: caso do SingletonLock pulado')
+
+    return
+  }
+
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-singleton-lock-'))
 
   try {

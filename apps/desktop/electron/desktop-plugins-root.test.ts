@@ -250,7 +250,19 @@ describe('reconcileUnifiedDesktopHalves', () => {
     const leaky = path.join(home, 'plugins', 'leaky')
     write(path.join(leaky, 'plugin.js'), 'x')
     write(path.join(home, 'secret'), 's')
-    fs.symlinkSync(path.join(home, 'secret'), path.join(leaky, 'secret'))
+
+    // Windows sem Developer Mode recusa criar symlink (EPERM). Sem o fixture não há como provar a recusa
+    // do link — o teste segue cobrindo a cópia, e a parte do link é declarada como pulada nesta máquina.
+    let leakyLink = true
+
+    try {
+      fs.symlinkSync(path.join(home, 'secret'), path.join(leaky, 'secret'))
+    } catch {
+      // Sem o link, `leaky` seria um pacote comum e entraria na cópia — o que mudaria o resultado esperado.
+      // Some com o fixture para o teste continuar medindo a mesma coisa.
+      leakyLink = false
+      fs.rmSync(leaky, { force: true, recursive: true })
+    }
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     try {
@@ -263,7 +275,11 @@ describe('reconcileUnifiedDesktopHalves', () => {
     expect(fs.readFileSync(path.join(appRoot, 'radar', 'panel.js'), 'utf8')).toBe('asset')
     expect(fs.existsSync(path.join(appRoot, 'radar', '.git'))).toBe(false)
     expect(fs.existsSync(path.join(appRoot, 'radar', '__pycache__'))).toBe(false)
-    expect(fs.existsSync(path.join(appRoot, 'leaky'))).toBe(false)
+    if (leakyLink) {
+      expect(fs.existsSync(path.join(appRoot, 'leaky'))).toBe(false)
+    } else {
+      console.warn('symlink indisponível nesta máquina: recusa do link não verificada')
+    }
     const marker = JSON.parse(fs.readFileSync(path.join(appRoot, 'radar', PACKAGE_MARKER), 'utf8'))
     expect(marker).toMatchObject({ package: 'radar', source: pkg, repo: 'https://github.com/o/radar' })
     expect(await reconcileUnifiedDesktopHalves(home, appRoot)).toEqual([])
