@@ -13,7 +13,12 @@
  * - token obrigatório e com tamanho mínimo; um link sem token pareceria funcionar e falharia no
  *   primeiro RPC com uma mensagem confusa;
  * - o dispositivo recebe um id estável: o payload pode trazê-lo, e o cliente gera um quando falta,
- *   para que revogação por dispositivo seja possível do lado do gateway (§16).
+ *   para que revogação por dispositivo seja possível do lado do gateway (§16);
+ * - convite expirado é recusado quando o link informa `expires_at`.
+ *
+ * ATENÇÃO (revisão independente): `device` é IDENTIFICADOR, não credencial. Quem pareia depois deve
+ * provar posse de uma chave privada guardada no Keychain/Keystore; o `device_id` sozinho nunca pode
+ * autorizar nada no gateway. Exigir essa prova é trabalho de backend, registrado em MOBILE-REPORT.
  */
 
 export type PairingFailure =
@@ -23,6 +28,7 @@ export type PairingFailure =
   | 'insecure-remote-url'
   | 'missing-token'
   | 'token-too-short'
+  | 'invite-expired'
   | 'malformed-url'
 
 export interface PairingRequest {
@@ -122,6 +128,18 @@ export function parsePairingLink(link: string, existingDeviceId?: string | null)
     return { ok: false, reason: 'token-too-short' }
   }
 
+  // Convite com prazo: um QR fotografado ontem não pode parear hoje (revisão independente).
+  const expiresAt = Number(url.searchParams.get('expires_at') ?? '')
+  const now = Date.now()
+
+  if (Number.isFinite(expiresAt) && expiresAt > 0) {
+    const expiresAtMs = expiresAt > 1e12 ? expiresAt : expiresAt * 1000
+
+    if (now > expiresAtMs) {
+      return { ok: false, reason: 'invite-expired' }
+    }
+  }
+
   const deviceId = (existingDeviceId ?? '').trim() || (url.searchParams.get('device') ?? '').trim() || newDeviceId()
   const label = (url.searchParams.get('name') ?? '').trim()
 
@@ -151,6 +169,8 @@ export function pairingFailureMessage(reason: PairingFailure): string {
       return 'O convite não traz a chave de pareamento.'
     case 'token-too-short':
       return 'A chave de pareamento do convite está incompleta. Gere o QR novamente.'
+    case 'invite-expired':
+      return 'Este convite expirou. Gere um novo QR no computador.'
     default:
       return 'Não foi possível ler o convite. Gere o QR novamente no computador.'
   }

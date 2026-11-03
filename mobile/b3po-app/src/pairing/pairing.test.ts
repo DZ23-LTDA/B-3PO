@@ -92,3 +92,22 @@ describe('pareamento por link/QR', () => {
     }
   })
 })
+
+describe('prazo do convite (revisão independente)', () => {
+  it('recusa convite vencido — QR fotografado ontem não pareia hoje', () => {
+    const past = Math.floor((Date.now() - 60_000) / 1000)
+    const result = parsePairingLink(link({ url: 'https://pc.dz23.dev', token: TOKEN, expires_at: String(past) }))
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.reason).toBe('invite-expired')
+    expect(pairingFailureMessage(result.reason)).toContain('expirou')
+  })
+
+  it('aceita convite dentro do prazo e sem prazo', () => {
+    const future = Math.floor((Date.now() + 300_000) / 1000)
+
+    expect(parsePairingLink(link({ url: 'https://pc.dz23.dev', token: TOKEN, expires_at: String(future) })).ok).toBe(true)
+    expect(parsePairingLink(link({ url: 'https://pc.dz23.dev', token: TOKEN })).ok).toBe(true)
+  })
+})

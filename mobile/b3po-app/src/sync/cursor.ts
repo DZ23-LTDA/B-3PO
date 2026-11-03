@@ -90,3 +90,36 @@ export function resumePayload(cursor: CursorState): { execution_id: string; afte
     .map(([execution_id, after_sequence]) => ({ execution_id, after_sequence }))
     .sort((a, b) => a.execution_id.localeCompare(b.execution_id))
 }
+
+/* ── watchdog de replay (achado da revisão independente) ──────────────────── */
+
+/**
+ * Recusar o lote com buraco protege contra progresso inventado, mas um gateway que nunca reenvia o
+ * evento faltante deixaria a tela travada esperando para sempre. Este veredito põe prazo: passado
+ * `timeoutMs` do primeiro buraco, o chamador deve forçar resync (descartar o cursor da execução e
+ * pedir o replay completo) em vez de continuar esperando em silêncio.
+ */
+export const REPLAY_TIMEOUT_MS = 30_000
+
+export interface GapVerdict {
+  action: 'wait' | 'force-resync'
+  stalledMs: number
+}
+
+export function gapVerdict(firstGapAt: number | null, now: number, timeoutMs: number = REPLAY_TIMEOUT_MS): GapVerdict {
+  if (firstGapAt === null) {
+    return { action: 'wait', stalledMs: 0 }
+  }
+
+  const stalledMs = Math.max(0, now - firstGapAt)
+
+  return { action: stalledMs >= timeoutMs ? 'force-resync' : 'wait', stalledMs }
+}
+
+/** Cursor sem a execução travada: o próximo lote dela recomeça do zero (replay completo). */
+export function forgetExecution(cursor: CursorState, executionId: string): CursorState {
+  const sequences = { ...cursor.sequences }
+  delete sequences[executionId]
+
+  return { sequences, seenEventIds: cursor.seenEventIds }
+}

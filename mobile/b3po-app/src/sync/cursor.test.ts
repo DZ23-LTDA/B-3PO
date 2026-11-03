@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import type { ExecutionEvent } from '../protocol/execution'
-import { applyEventBatch, cursorFor, emptyCursor, resumePayload } from './cursor'
+import {
+  applyEventBatch,
+  cursorFor,
+  emptyCursor,
+  forgetExecution,
+  gapVerdict,
+  REPLAY_TIMEOUT_MS,
+  resumePayload
+} from './cursor'
 
 let counter = 0
 
@@ -116,5 +124,30 @@ describe('cursor de reindexação', () => {
 
   it('um lote vazio é duplicata, não aplicação', () => {
     duplicated(applyEventBatch(emptyCursor(), []))
+  })
+})
+
+describe('watchdog de replay (revisão independente)', () => {
+  it('espera enquanto o buraco é recente', () => {
+    expect(gapVerdict(1_000, 5_000)).toEqual({ action: 'wait', stalledMs: 4_000 })
+  })
+
+  it('força resync quando o gateway não reenvia a tempo — a tela não trava para sempre', () => {
+    const verdict = gapVerdict(1_000, 1_000 + REPLAY_TIMEOUT_MS)
+
+    expect(verdict.action).toBe('force-resync')
+    expect(verdict.stalledMs).toBe(REPLAY_TIMEOUT_MS)
+  })
+
+  it('sem buraco registrado não há espera', () => {
+    expect(gapVerdict(null, 9_999)).toEqual({ action: 'wait', stalledMs: 0 })
+  })
+
+  it('esquecer a execução travada faz o próximo lote dela recomeçar do zero', () => {
+    const cursor = applied(applyEventBatch(emptyCursor(), [event('e1', 1), event('e2', 1)])).cursor
+    const fresh = forgetExecution(cursor, 'e1')
+
+    expect(cursorFor(fresh, 'e1')).toBe(0)
+    expect(cursorFor(fresh, 'e2')).toBe(1)
   })
 })
