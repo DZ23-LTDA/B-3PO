@@ -32,7 +32,14 @@ import type { NavState } from './src/app/router'
 import { RestClient, restFailureMessage } from './src/api/rest-client'
 import type { BotProfile } from './src/api/rest-client'
 import { GatewayChatSocket } from './src/api/gateway-chat-socket'
-import { chatBubbles, chatEmptyCopy, sessionRows } from './src/screens/chat-session'
+import {
+  FOLLOW_UP_DELAYS_MS,
+  chatBubbles,
+  chatEmptyCopy,
+  sessionRows,
+  shouldFollowUp,
+  shouldReplaceBubbles
+} from './src/screens/chat-session'
 import type { ChatBubble, RawMessage } from './src/screens/chat-session'
 import { statusCard } from './src/screens/status-card'
 import type { ConnectionState } from './src/screens/status-card'
@@ -181,19 +188,39 @@ export default function App() {
 
       if (result.accepted) {
         setDraft('')
-        // Recarrega a conversa do servidor: a bolha que aparece é a persistida, não uma otimista
-        const latest = chatBubbles(
-          (await new RestClient({
-            origin: connection.status === 'connected' ? connection.origin : '',
-            token: connection.status === 'connected' ? connection.token : ''
-          }).messages(
-            nav.kind === 'chat' ? nav.bot.name : '',
-            socket.getSessionId() ?? '',
-            50
-          )) as RawMessage[]
-        )
 
-        setBubbles(latest)
+        // O envio é aceito antes de o modelo terminar: recarrega do servidor em passos curtos até a
+        // resposta aparecer. A bolha que entra na tela é a persistida, nunca uma otimista.
+        const originNow = connection.status === 'connected' ? connection.origin : ''
+        const tokenNow = connection.status === 'connected' ? connection.token : ''
+        const botName = nav.kind === 'chat' ? nav.bot.name : ''
+        const client = new RestClient({ origin: originNow, token: tokenNow })
+
+        const load = async (): Promise<RawMessage[]> =>
+          (await client.messages(botName, socket.getSessionId() ?? '', 50)) as RawMessage[]
+
+        let previous = bubbles.length
+
+        for (let attempt = 0; attempt <= FOLLOW_UP_DELAYS_MS.length; attempt += 1) {
+          if (attempt > 0) {
+            await new Promise(resolve => setTimeout(resolve, FOLLOW_UP_DELAYS_MS[attempt - 1]))
+          }
+
+          try {
+            const loaded = chatBubbles(await load())
+
+            setBubbles(current => (shouldReplaceBubbles(current, loaded) ? loaded : current))
+
+            if (!shouldFollowUp({ previousCount: previous, currentCount: loaded.length, attempt, stopped: false })) {
+              previous = loaded.length
+              break
+            }
+
+            previous = loaded.length
+          } catch {
+            break
+          }
+        }
       } else {
         setChatNote('O computador não confirmou o envio.')
       }

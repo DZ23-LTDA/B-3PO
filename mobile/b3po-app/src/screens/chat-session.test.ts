@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { chatBubbles, chatEmptyCopy, sessionRows } from './chat-session'
+import {
+  FOLLOW_UP_DELAYS_MS,
+  bubblesSignature,
+  chatBubbles,
+  chatEmptyCopy,
+  sessionRows,
+  shouldFollowUp,
+  shouldReplaceBubbles
+} from './chat-session'
 
 describe('bolhas de conversa', () => {
   it('mapeia usuário e bot com alinhamento e rótulo', () => {
@@ -88,5 +96,36 @@ describe('estado vazio da conversa', () => {
       expect(copy.title.length).toBeGreaterThan(5)
       expect(copy.body.length).toBeGreaterThan(20)
     }
+  })
+})
+
+describe('recarga depois do envio', () => {
+  it('para quando chegou mensagem nova', () => {
+    expect(shouldFollowUp({ previousCount: 2, currentCount: 3, attempt: 0, stopped: false })).toBe(false)
+  })
+
+  it('continua enquanto nada chegou e há espera na fila', () => {
+    expect(shouldFollowUp({ previousCount: 2, currentCount: 2, attempt: 0, stopped: false })).toBe(true)
+    expect(shouldFollowUp({ previousCount: 2, currentCount: 2, attempt: FOLLOW_UP_DELAYS_MS.length - 1, stopped: false })).toBe(true)
+  })
+
+  it('para quando a fila de espera acabou', () => {
+    expect(shouldFollowUp({ previousCount: 2, currentCount: 2, attempt: FOLLOW_UP_DELAYS_MS.length, stopped: false })).toBe(false)
+  })
+
+  it('não recarrega se a tela foi fechada', () => {
+    expect(shouldFollowUp({ previousCount: 2, currentCount: 2, attempt: 0, stopped: true })).toBe(false)
+  })
+
+  it('assinatura muda quando chega mensagem e fica igual quando nada muda', () => {
+    const base = chatBubbles([{ id: 1, role: 'user', content: 'oi', timestamp: 1 }])
+    const grown = chatBubbles([
+      { id: 1, role: 'user', content: 'oi', timestamp: 1 },
+      { id: 2, role: 'assistant', content: 'olá!', timestamp: 2 }
+    ])
+
+    expect(bubblesSignature(base)).toBe(bubblesSignature(base))
+    expect(shouldReplaceBubbles(base, grown)).toBe(true)
+    expect(shouldReplaceBubbles(base, base)).toBe(false)
   })
 })

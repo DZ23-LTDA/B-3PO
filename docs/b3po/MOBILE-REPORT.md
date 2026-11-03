@@ -720,3 +720,34 @@ composer limpo depois do envio) e `mobile-envio-transcript.txt` (transcript lido
 | resposta do bot aparece | ✅ no servidor; a tela recarrega do servidor após o aceite |
 
 Testes: `gateway-chat-socket` com **10 testes** (incluindo o do id curto no submit).
+
+## Rodada 64 — recarga da resposta com regra testável (e um aviso honesto)
+
+O envio é aceito pelo gateway **antes** de o modelo terminar, então a primeira leitura do transcript
+pode vir sem a resposta. Implementei a recarga em passos, com a decisão em função pura:
+
+`src/screens/chat-session.ts`
+
+| Regra | Teste |
+|---|---|
+| para quando chegou mensagem nova | `shouldFollowUp(previous=2, current=3)` → `false` |
+| continua enquanto nada chegou e há espera na fila | `attempt < FOLLOW_UP_DELAYS_MS.length` → `true` |
+| para quando a fila acaba | último passo → `false` |
+| não recarrega com a tela fechada | `stopped: true` → `false` |
+| só troca as bolhas quando a assinatura muda | `shouldReplaceBubbles` |
+
+Esperas: `FOLLOW_UP_DELAYS_MS = [1200, 2500, 5000, 9000]`. `chat-session` chegou a **15 testes**.
+
+### O que NÃO foi comprovado nesta rodada
+
+Reabri o app, abri o bot e tentei enviar uma segunda mensagem ("Resuma em uma frase o que e um bot"):
+**nenhuma sessão nova apareceu** no servidor e a tela não mostrou nota de erro. Ou seja:
+
+- o envio **é** possível (rodada 63, com transcript e screenshot);
+- o caminho **não é** confiável ainda: uma execução funcionou, a seguinte não, sem mensagem de erro.
+
+Próximo passo, em ordem: (1) logar os frames do WS em `__DEV__` para ver onde para; (2) fazer toda falha
+de `sendPrompt` virar `chatNote` visível (hoje o erro é engolido quando o RPC estoura antes do catch);
+(3) repetir o teste 3× seguidas para provar repetibilidade antes de chamar de pronto.
+
+Registro isso porque "funcionou uma vez" não é o mesmo que "funciona".

@@ -172,3 +172,41 @@ export function chatEmptyCopy(reason: 'no-sessions' | 'no-messages' | 'not-conne
       return { title: 'Conversa sem mensagens', body: 'A sessão existe, mas ainda não tem mensagem.' }
   }
 }
+
+
+/** Esperas (ms) para recarregar a conversa enquanto o turno roda. Curto: não segura a tela. */
+export const FOLLOW_UP_DELAYS_MS = [1200, 2500, 5000, 9000] as const
+
+/**
+ * Vale recarregar de novo?
+ *
+ * O envio é aceito antes de o modelo terminar, então a primeira leitura pode vir sem a resposta.
+ * Paramos quando o número de mensagens aumenta, quando não há mais espera na fila, ou quando a tela
+ * já foi fechada (`stopped`).
+ */
+export function shouldFollowUp(options: {
+  previousCount: number
+  currentCount: number
+  attempt: number
+  stopped: boolean
+}): boolean {
+  if (options.stopped) {
+    return false
+  }
+
+  if (options.currentCount > options.previousCount) {
+    return false
+  }
+
+  return options.attempt < FOLLOW_UP_DELAYS_MS.length
+}
+
+/** Assinatura estável da conversa: muda quando chega mensagem nova ou o texto muda. */
+export function bubblesSignature(bubbles: readonly ChatBubble[]): string {
+  return bubbles.map(bubble => `${bubble.id}:${bubble.role}:${bubble.body.length}`).join('|')
+}
+
+/** O que a tela deve mostrar: recarrega se a assinatura mudou. */
+export function shouldReplaceBubbles(current: readonly ChatBubble[], next: readonly ChatBubble[]): boolean {
+  return bubblesSignature(current) !== bubblesSignature(next)
+}
