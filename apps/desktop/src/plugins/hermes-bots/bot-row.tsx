@@ -33,7 +33,7 @@ import {
 
 import { avatarColor, botAppearance, BotFace } from './avatar'
 import { isBackfilledFacePng } from './avatar-image'
-import { mascotById } from './mascots'
+import { rosterFaceFor } from './mascots'
 import {
   $botChatFocused,
   $focusedBotOwner,
@@ -148,7 +148,7 @@ export function BotRow({ bot, onDelete, onEdit, onGroup, onNewSection, showHandl
   const photo = Boolean(image && !isBackfilledFacePng(image))
   // O mascote escolhido no seletor É a identidade visual do bot: sem foto propria, ele substitui
   // o sigilo gerado. Antes, `mascot_id` era persistido mas nunca renderizado.
-  const mascotImage = mascotById(meta?.mascot_id ?? null)?.src ?? null
+  const mascotImage = rosterFaceFor(meta?.mascot_id)
   const turnBusy = useTurnBusy()
   // Preview identity must match click identity (#88200): when the backend
   // resolved the pinned canonical chat, preview THAT session — not the

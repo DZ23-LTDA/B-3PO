@@ -84,3 +84,10 @@ export function defaultMascotFor(name: string): Mascot {
 export function rosterMascotSrc(mascotId: string | null | undefined, name: string): string {
   return (mascotById(mascotId ?? null) ?? defaultMascotFor(name)).src
 }
+
+/** Imagem do roster quando o bot ESCOLHEU um mascote; `null` mantém a face animada. */
+export function rosterFaceFor(mascotId: string | null | undefined): null | string {
+  const selected = mascotById(mascotId ?? null)
+
+  return selected ? selected.src : null
+}
