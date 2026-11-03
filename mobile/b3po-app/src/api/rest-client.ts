@@ -1,0 +1,152 @@
+/**
+ * Cliente REST do B-3PO/Hermes para o mobile.
+ *
+ * O Desktop não fala JSON-RPC com o runtime: fala **REST** (`/api/*`) e usa WebSocket só em
+ * `/api/ws`. Descoberto lendo `apps/desktop/electron` (chamadas `/api/health`, `/api/status`,
+ * `/api/agents`, `/api/sessions/…`) e confirmado contra o servidor rodando:
+ *
+ *   GET /api/health -> 200 {"ok":true,…,"auth_required":false}
+ *   GET /api/status -> 200 {"gateway_running":true,…}
+ *   GET /api/agents -> 401 sem token
+ *
+ * Autenticação dos endpoints protegidos: header `X-Hermes-Session-Token` (ou `Authorization: Bearer`
+ * no modo token). O token NUNCA vai em query string — vira log de proxy e histórico.
+ */
+
+export interface RestOptions {
+  /** Origem do servidor, ex.: `http://127.0.0.1:54686`. */
+  origin: string
+  /** Token de sessão/ticket, quando o servidor exigir. */
+  token?: string
+  /** `fetch` injetável para teste. */
+  fetchImpl?: typeof fetch
+  /** Tempo máximo por pedido, em ms. */
+  timeoutMs?: number
+}
+
+export interface HealthInfo {
+  ok: boolean
+  commit: string | null
+  authRequired: boolean
+}
+
+export interface StatusInfo {
+  gatewayRunning: boolean
+  gatewayState: string | null
+  configVersion: number | null
+}
+
+export type RestFailure = 'unauthorized' | 'unreachable' | 'timeout' | 'bad-response'
+
+export class RestError extends Error {
+  readonly failure: RestFailure
+  readonly status: number | null
+
+  constructor(failure: RestFailure, message: string, status: number | null = null) {
+    super(message)
+    this.name = 'RestError'
+    this.failure = failure
+    this.status = status
+  }
+}
+
+export const SESSION_HEADER = 'X-Hermes-Session-Token'
+export const DEFAULT_TIMEOUT_MS = 8_000
+
+function joinUrl(origin: string, path: string): string {
+  return `${origin.trim().replace(/\/+$/, '')}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+export class RestClient {
+  private readonly origin: string
+  private readonly token: string | undefined
+  private readonly fetchImpl: typeof fetch
+  private readonly timeoutMs: number
+
+  constructor(options: RestOptions) {
+    this.origin = options.origin
+    this.token = (options.token ?? '').trim() || undefined
+    this.fetchImpl = options.fetchImpl ?? (globalThis.fetch as typeof fetch)
+    this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
+  }
+
+  /** GET tipado: devolve JSON ou lança `RestError` com o motivo legível. */
+  async get<T>(path: string): Promise<T> {
+    const headers: Record<string, string> = { accept: 'application/json' }
+
+    if (this.token) {
+      headers[SESSION_HEADER] = this.token
+      headers.authorization = `Bearer ${this.token}`
+    }
+
+    let response: Response
+
+    try {
+      response = await this.fetchImpl(joinUrl(this.origin, path), {
+        headers,
+        signal: AbortSignal.timeout(this.timeoutMs)
+      })
+    } catch (error) {
+      const isTimeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+
+      throw new RestError(
+        isTimeout ? 'timeout' : 'unreachable',
+        isTimeout ? 'o servidor não respondeu a tempo' : 'não foi possível falar com o servidor'
+      )
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new RestError('unauthorized', 'o servidor recusou o acesso: token ausente ou inválido', response.status)
+    }
+
+    if (!response.ok) {
+      throw new RestError('bad-response', `o servidor respondeu ${response.status}`, response.status)
+    }
+
+    try {
+      return (await response.json()) as T
+    } catch {
+      throw new RestError('bad-response', 'a resposta não era JSON', response.status)
+    }
+  }
+
+  /** `/api/health` — público; serve para descobrir se o servidor está de pé. */
+  async health(): Promise<HealthInfo> {
+    const raw = await this.get<Record<string, unknown>>('/api/health')
+
+    return {
+      ok: raw['ok'] === true,
+      commit: typeof raw['commit'] === 'string' ? raw['commit'] : null,
+      authRequired: raw['auth_required'] === true
+    }
+  }
+
+  /** `/api/status` — estado do gateway. */
+  async status(): Promise<StatusInfo> {
+    const raw = await this.get<Record<string, unknown>>('/api/status')
+
+    return {
+      gatewayRunning: raw['gateway_running'] === true,
+      gatewayState: typeof raw['gateway_state'] === 'string' ? raw['gateway_state'] : null,
+      configVersion: typeof raw['config_version'] === 'number' ? raw['config_version'] : null
+    }
+  }
+}
+
+/** Mensagem para a tela, sem jargão. */
+export function restFailureMessage(error: unknown): string {
+  if (error instanceof RestError) {
+    switch (error.failure) {
+      case 'unauthorized':
+        return 'O computador recusou o acesso. Pareie o aparelho novamente.'
+      case 'timeout':
+        return 'O computador demorou demais para responder. Verifique se o B-3PO está aberto.'
+      case 'unreachable':
+        return 'Não foi possível falar com o computador. Confira a rede e o endereço.'
+      default:
+        return 'O computador respondeu algo inesperado. Tente de novo em instantes.'
+    }
+  }
+
+  return 'Não foi possível falar com o computador.'
+}

@@ -3,24 +3,42 @@
  *
  * `GatewayClient` recebe o transporte por injeção (para o teste de contrato rodar sem socket); este
  * arquivo é a implementação de produção: usa o `WebSocket` global — que existe tanto no React Native
- * quanto no Node 22+ — e passa o token de pareamento **no handshake**, como subprotocolo, nunca na
- * query string (query string vai para log de proxy, histórico e crash report).
+ * quanto no Node 22+ — e passa o ticket **no handshake**, como subprotocolo, nunca na query string
+ * (query string vaza em log de proxy, histórico e relatório de crash).
  *
- * Protocolo de subprotocolo: `["b3po.v1", "token.<token>"]`. O servidor escolhe `b3po.v1` como
- * protocolo da sessão e lê o token do segundo item. O token no subprotocolo é aceito pelo
- * `Sec-WebSocket-Protocol` do RFC 6455 e não aparece em URL.
+ * O contrato NÃO é inventado: são os nomes que o servidor do B-3PO/Hermes aceita de fato, lidos em
+ * `hermes_cli/web_server_boundary.py`:
+ *
+ *   _GATEWAY_WS_PROTOCOL              = "hermes-gateway-v1"
+ *   _GATEWAY_WS_TICKET_PROTOCOL_PREFIX = "hermes-gateway-ticket."
+ *
+ * Antes desta rodada o cliente mandava `b3po.v1` / `token.…`, que o servidor não reconhece — o
+ * handshake seria recusado. Nome próprio de protocolo só quando o servidor também o aceita.
  */
 
 import type { Transport } from './gateway'
 
-export const GATEWAY_PROTOCOL = 'b3po.v1'
-export const TOKEN_PROTOCOL_PREFIX = 'token.'
+/** Protocolo de sessão aceito pelo servidor (`_GATEWAY_WS_PROTOCOL`). */
+export const GATEWAY_PROTOCOL = 'hermes-gateway-v1'
+/** Prefixo do subprotocolo que carrega o ticket (`_GATEWAY_WS_TICKET_PROTOCOL_PREFIX`). */
+export const TICKET_PROTOCOL_PREFIX = 'hermes-gateway-ticket.'
 
-/** Lista de subprotocolos para o handshake, com o token quando houver. */
-export function protocolList(token?: string): string[] {
-  const trimmed = (token ?? '').trim()
+/** Caminho do WebSocket usado pelo Desktop/dashboard. */
+export const GATEWAY_WS_PATH = '/api/ws'
 
-  return trimmed ? [GATEWAY_PROTOCOL, `${TOKEN_PROTOCOL_PREFIX}${trimmed}`] : [GATEWAY_PROTOCOL]
+/** Lista de subprotocolos para o handshake, com o ticket quando houver. */
+export function protocolList(ticket?: string): string[] {
+  const trimmed = (ticket ?? '').trim()
+
+  return trimmed ? [GATEWAY_PROTOCOL, `${TICKET_PROTOCOL_PREFIX}${trimmed}`] : [GATEWAY_PROTOCOL]
+}
+
+/** Junta origem + caminho do WS, sem duplicar barra. */
+export function gatewayWsUrl(origin: string, path: string = GATEWAY_WS_PATH): string {
+  const base = origin.trim().replace(/\/+$/, '')
+  const ws = base.replace(/^http(s?):\/\//i, (_all, secure: string) => (secure ? 'wss://' : 'ws://'))
+
+  return `${ws}${path.startsWith('/') ? path : `/${path}`}`
 }
 
 /** O que o transporte precisa do `WebSocket`; tipado aqui para não depender de lib.dom no RN. */
@@ -44,14 +62,14 @@ export interface OpenSocket {
  */
 export function createWebSocketTransport(
   url: string,
-  token: string | undefined,
+  ticket: string | undefined,
   openSocket: OpenSocket = (target, protocols) =>
     new (globalThis as unknown as { WebSocket: new (u: string, p: string[]) => MinimalSocket }).WebSocket(
       target,
       protocols
     )
 ): Transport {
-  const socket = openSocket(url, protocolList(token))
+  const socket = openSocket(url, protocolList(ticket))
   let onMessage: ((raw: string) => void) | null = null
   let onClose: (() => void) | null = null
   const queued: string[] = []

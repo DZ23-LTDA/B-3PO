@@ -295,3 +295,54 @@ Registrado como próximo passo concreto: enumerar as rotas/canal do `serve` back
 ele pelo `ws-transport.ts` já implementado. **Nada aqui foi declarado funcionando** — a conexão contra
 o servidor real segue sem prova, e o `gw.json` do perfil estava apontando para uma porta antiga já
 fechada (58036), o que também precisa de atenção em outro ciclo.
+
+## Rodada 47 — cliente mobile falando com o **servidor real** (contrato corrigido)
+
+### O que estava errado
+
+O transporte que escrevi na rodada anterior mandava `b3po.v1` + `token.<token>` no handshake. Nomes
+**inventados**: o servidor do B-3PO/Hermes aceita outros. Lidos em
+`hermes_cli/web_server_boundary.py`:
+
+```
+_GATEWAY_WS_PROTOCOL               = "hermes-gateway-v1"
+_GATEWAY_WS_TICKET_PROTOCOL_PREFIX = "hermes-gateway-ticket."
+```
+
+Com os nomes errados o handshake seria recusado e eu teria "provado" o cliente contra um servidor
+que aceitava qualquer coisa. Corrigido em `ws-transport.ts`, junto do caminho real `ws(s)://…/api/ws`
+(`gatewayWsUrl` converte a origem HTTP).
+
+### E o protocolo não é JSON-RPC
+
+O Desktop fala **REST** com o runtime (`/api/health`, `/api/status`, `/api/agents`,
+`/api/sessions/…`) e usa WebSocket só em `/api/ws`. Isso estava errado no meu modelo mental.
+
+`src/api/rest-client.ts` implementa o cliente REST com o header real `X-Hermes-Session-Token` (e
+`Authorization: Bearer` no modo token), timeout, e erro classificado (`unauthorized`, `unreachable`,
+`timeout`, `bad-response`) — cada um com mensagem de tela em português.
+
+### Prova contra o servidor vivo
+
+`src/api/rest-client.live.test.ts`, rodando contra o servidor de verdade
+(`B3PO_LIVE_ORIGIN=http://127.0.0.1:54686`), **5 testes verdes**:
+
+| Teste | Resultado real observado |
+|---|---|
+| `/api/health` | `{"ok":true,…,"auth_required":false}` |
+| `/api/status` | `{"gateway_running":true,…}` |
+| endpoint protegido sem token | 401 → `RestError('unauthorized')` |
+| token no header | aparece em `x-hermes-session-token`, **não** na URL |
+| servidor fora do ar | `RestError('unreachable')` em 1,5 s, sem travar |
+
+Sem servidor no ar os mesmos testes são **pulados** (nunca verdes por omissão).
+
+### Contagem
+
+**92 testes passando + 5 pulados** (os live, quando não há servidor), `tsc --noEmit` limpo.
+
+### Ainda pendente
+
+- as telas ainda não consomem o `RestClient` (falta ligar lista de bots e conversa ao cliente REST);
+- `/api/ws` exige *gateway ticket* de uso único gerado pelo servidor: falta descobrir como o Desktop
+  obtém o ticket para o celular pareado receber um.

@@ -17,7 +17,7 @@ import { WebSocketServer } from 'ws'
 import type { WebSocket } from 'ws'
 
 import { GatewayClient, GatewayError } from './gateway'
-import { createWebSocketTransport, GATEWAY_PROTOCOL, protocolList } from './ws-transport'
+import { createWebSocketTransport, GATEWAY_PROTOCOL, gatewayWsUrl, protocolList } from './ws-transport'
 
 interface RpcFrame {
   id?: string
@@ -102,7 +102,7 @@ describe('cliente sobre WebSocket real', () => {
     client.close()
   })
 
-  it('leva o token no handshake (subprotocolo), nunca na URL', async () => {
+  it('leva o ticket no handshake com os nomes que o servidor aceita', async () => {
     handshakes.length = 0
     const client = connectClient('tok_abcdefghijklmnop')
 
@@ -110,7 +110,7 @@ describe('cliente sobre WebSocket real', () => {
     client.close()
 
     expect(handshakes[0]?.protocols).toContain(GATEWAY_PROTOCOL)
-    expect(handshakes[0]?.protocols).toContain('token.tok_abcdefghijklmnop')
+    expect(handshakes[0]?.protocols).toContain('hermes-gateway-ticket.tok_abcdefghijklmnop')
     expect(protocolList('tok_abcdefghijklmnop').join(',')).not.toContain('ws://')
   })
 
@@ -155,5 +155,17 @@ describe('cliente sobre WebSocket real', () => {
 
     await expect(pending).rejects.toMatchObject({ code: 'connection_lost' })
     expect(client.pendingCount()).toBe(0)
+  })
+})
+
+describe('endereço do WebSocket', () => {
+  it('converte a origem HTTP no caminho /api/ws que o servidor usa', () => {
+    expect(gatewayWsUrl('http://127.0.0.1:54686')).toBe('ws://127.0.0.1:54686/api/ws')
+    expect(gatewayWsUrl('https://pc.dz23.dev/')).toBe('wss://pc.dz23.dev/api/ws')
+  })
+
+  it('usa os nomes de protocolo reais do servidor', () => {
+    expect(protocolList()).toEqual(['hermes-gateway-v1'])
+    expect(protocolList('abc')).toEqual(['hermes-gateway-v1', 'hermes-gateway-ticket.abc'])
   })
 })
