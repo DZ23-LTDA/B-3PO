@@ -116,6 +116,15 @@ def test_powershell_honors_explicit_overrides():
     assert source["branch"] == "release-x"
 
 
+def test_upstream_env_only_counts_when_it_asks_for_it():
+    """`HERMES_INSTALL_UPSTREAM=0` (ou vazio) não é opt-in: só o valor exato "1" liga o upstream."""
+    for value in ("0", "false", ""):
+        source = _powershell_source(env={"HERMES_INSTALL_UPSTREAM": value})
+
+        assert source["repo_url"] == PRODUCT_REPO, value
+        assert source["upstream_mode"] is False, value
+
+
 def test_shell_installer_defaults_to_the_product():
     source = _shell_source()
 
