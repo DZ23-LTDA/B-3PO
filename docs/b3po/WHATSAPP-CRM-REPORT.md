@@ -192,3 +192,25 @@ Rodando a pasta `electron/` inteira, `desktop-plugins-root.test.ts` falha com
 `EPERM: symlink ... secret`: o Windows exige Developer Mode/privilegio para criar symlink. O teste não toca em
 nada do CRM e a falha é de permissão do SO. Não é regressão minha — e também não é "verde": fica registrada como
 limitação do ambiente.
+
+## Rodada 85 — a fiação do CRM provada, e o pacote novo abre
+
+O `tsc` aceita uma fiação errada (canal com nome trocado, handler faltando). Duas camadas onde isso passaria
+em silêncio ganharam teste:
+
+| Teste | O que garante |
+|---|---|
+| `crm-contacts-ipc.test.ts` | os **três** canais são registrados e cada handler delega ao store; `remove` com payload inválido vira string vazia (não inventa argumento) |
+| `preload-crm-contacts.test.ts` | `window.hermesDesktop.crmContacts` existe com `list/upsert/remove` e cada um fala com o **canal certo** |
+
+Com isso a corrente inteira tem prova em algum nível: store (6), IPC (2), preload (2), ponte do renderer,
+painel (6) = **16 testes** só da feature.
+
+### O pacote novo abre (e isso importa)
+
+`mountCrmContacts` roda no boot do processo principal: um erro ali mata a janela antes de qualquer tela. Rebuild
+do MSIX no commit com a feature e abertura real como cliente remoto contra o `serve` — o app iniciou, conectou
+e mostrou as cinco conversas reais. Evidência: `docs/b3po/evidence/desktop-crm-ipc-boot.png`.
+
+Nuance já registrada antes: o manifesto carrega uma coluna de commit (HEAD na geração) e uma data por artefato;
+os testes adicionados depois não entram no bundle, então os artefatos correspondem ao código empacotado.
