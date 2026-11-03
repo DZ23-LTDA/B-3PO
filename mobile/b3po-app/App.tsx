@@ -90,6 +90,9 @@ export default function App() {
   const connect = useCallback(async (origin: string, deviceId: string, token: string) => {
     const startedAt = sessionGeneration.current
 
+    // Um pareamento novo pode apontar para OUTRO computador: o socket anterior nao serve.
+    socketRef.current?.close()
+    socketRef.current = null
     lastCredentials.current = { origin, deviceId, token }
     setConnection({ status: 'connecting', origin })
 
@@ -158,6 +161,10 @@ export default function App() {
     setError(null)
     // O link antigo nao pode ficar no campo: na proxima conexao ele se mistura com o texto novo.
     setPairLink('')
+    // O socket pertence ao gateway pareado: desconectar sem fecha-lo o deixava vivo (e reaproveitavel
+    // por engano num pareamento novo). Fecha antes de largar as credenciais.
+    socketRef.current?.close()
+    socketRef.current = null
     setConnection({ status: 'signed_out' })
   }, [])
 
@@ -167,6 +174,10 @@ export default function App() {
       setNav(state => openChat(state, { name: bot.name, title: bot.title }))
       setBubbles([])
       setChatNote(null)
+
+      // Revisao independente: sem esta guarda o resultado de um openBot pendente escrevia estado depois
+      // de o usuario desconectar (a tela voltava a mostrar conversa de uma sessao ja encerrada).
+      const botStartedAt = sessionGeneration.current
 
       const token = connection.status === 'connected' ? connection.token : ''
       const origin = connection.status === 'connected' ? connection.origin : ''
@@ -183,7 +194,11 @@ export default function App() {
         const client = new RestClient({ origin, token })
         const found = sessionRows(await client.sessions(bot.name))
 
-         setSessions(found)
+        if (isStaleSession(botStartedAt, sessionGeneration.current)) {
+          return
+        }
+
+        setSessions(found)
 
         const initial = pickInitialSession(found)
 
@@ -233,11 +248,18 @@ export default function App() {
         return
       }
 
+      // Mesma guarda do openBot: resposta que chega depois de desconectar nao escreve estado.
+      const sessionStartedAt = sessionGeneration.current
+
       setChatLoading(true)
 
       try {
         const client = new RestClient({ origin: connection.origin, token: connection.token })
         const loaded = chatBubbles((await client.messages(route.botName, session.id)) as RawMessage[])
+
+        if (isStaleSession(sessionStartedAt, sessionGeneration.current)) {
+          return
+        }
 
         setBubbles(loaded)
         setChatNote(loaded.length === 0 ? chatEmptyCopy('no-messages').body : null)

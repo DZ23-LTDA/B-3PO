@@ -966,3 +966,19 @@ dispositivo” + resposta do bot, com o atalho “Conversas (4)” acima. Evidê
 `docs/b3po/evidence/mobile-conversa-inicial-com-historico.png`.
 
 Mobile: **153 testes** + 8 pulados. Gate 14 ok; `tsc` limpo.
+
+## Rodada 73 — corridas de carregamento fechadas após revisão independente
+
+A revisão `9de395c9` apontou que `openBot`/`openSession` podiam escrever estado depois de o usuário
+desconectar, e que o WebSocket do gateway antigo sobrevivia ao `disconnect()`. Correções:
+
+- `openBot` e `openSession` capturam a geração da sessão no início e **descartam o resultado** se ela mudou
+  (mesma guarda já usada no `connect`);
+- `disconnect()` fecha e zera o socket; `connect()` também o descarta, porque um pareamento novo pode
+  apontar para outro computador.
+
+Um achado foi recusado com razão: “escrita de estado após desmontar” não se aplica — a tela de conversa não
+desmonta, a navegação é um `NavState` e a raiz segue montada.
+
+Provado no aparelho após as mudanças: abrir o bot mostra a conversa com histórico e o **envio** continua
+funcionando (“Enviando…” e a bolha do usuário). Mobile: **153 testes** + 8 pulados; gate 14 ok.

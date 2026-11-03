@@ -64,3 +64,31 @@ comparação, e sem ela o bug nasceria no dia em que a tela deixar desconectar d
 
 Pareamento por deep link → **"Conectado ao computador"** (guard não dá falso positivo) → **Desconectar** →
 **"Desconectado deste computador"** com campo vazio. Mobile: **146 testes** (+3) e 8 pulados.
+
+## Delegação 4 — revisão das telas de conversa (rodada 72)
+
+| Campo | Valor |
+|---|---|
+| Ferramenta | `mcp__dz23__delegate` (MCP DZ23 Subagents) |
+| Papel | `reviewer` · task_type `review` · detail `full` |
+| Alvo | `cerebras` / `gpt-oss-120b` (o alvo `groq/qwen3.8-27b` respondeu `billing_required` e o failover entrou) |
+| `request_id` | `9de395c9-dfd6-4548-a9d8-7de30639044d` |
+| Tokens | 1.181 entrada · 2.617 saída |
+| Módulos | `mobile/b3po-app/App.tsx` (`openBot`, `openSession`, `disconnect`, `socketRef`) |
+
+### Achados revisados por mim
+
+| # | Achado | Veredito | Ação |
+|---|---|---|---|
+| 1 | `openBot` pendente escreve estado depois de o usuário desconectar (Alto) | **procede** | guarda `isStaleSession(botStartedAt, …)` antes de `setSessions`/`setBubbles` |
+| 2 | socket reaproveitado entre gateways (Alto) | **procede em parte** | o socket é por *gateway*, então abrir outro bot no mesmo servidor está correto; o que faltava era fechá-lo ao desconectar e ao parear de novo — feito nos dois pontos |
+| 3 | escrita de estado após desmontar (Médio) | **não procede** | o app não desmonta a tela: navegação é estado (`NavState`), a raiz permanece montada |
+| 4 | mesma corrida em `openSession` (Médio) | **procede** | guarda `isStaleSession(sessionStartedAt, …)` |
+| 5 | socket não é fechado ao desconectar (Médio) | **procede** | `socketRef.current?.close()` + `= null` em `disconnect()` e em `connect()` |
+| 6 | `openBot` em sequência rápida | coberto por 1/4 | as guardas resolvem |
+
+### Verificado no aparelho depois das correções
+
+Parear → abrir o bot (conversa com histórico aparece) → digitar e **enviar**: “Você: envio apos correcoes
+da revisao” na tela e o botão em “Enviando…”. O socket continua sendo criado sob demanda, agora sempre
+amarrado ao pareamento atual.
