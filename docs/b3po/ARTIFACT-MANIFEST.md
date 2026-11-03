@@ -151,3 +151,13 @@ em disco (mtime 21:52:24, mesmo minuto do MSIX) tem:
 portanto **não** incluem a UI de mascotes, o título B-3PO nem o rebranding de onboarding feitos depois. Para
 gerar artefato fiel ao topo da branch é preciso rodar `npm run pack` / `npm run dist:win` de novo; isso não foi
 feito para não republicar números sem revalidar.
+
+## Rodada 28 — artefatos Windows no commit `2db0ab4e` (2026-11-03 09:11)
+
+| Artefato | Tamanho | SHA-256 | Assinatura |
+|---|---|---|---|
+| `apps/desktop/release/win-unpacked/B-3PO.exe` | 235 MB | `E0DDAC4D7C5ACCB7E3170D3AA4AD676E8D7611BF1F38FBDC10C60063CDE03F0A` | não assinado |
+| `apps/desktop/release/B3PO-0.0.0-win-x64.msix` | 191 MB | `9957874811ACE069CFC14803F3AF2703D53B6586BD47BFFA12A89684AB3B5CF7` | `NotSigned` (confirmado por `Get-AuthenticodeSignature`) |
+
+Estes artefatos incluem: wordmark B-3PO, nome do agente B-3PO, sidebar/configurações em pt-BR,
+catálogo de mascotes da marca (20) no lugar do petdex e ausência do strip de telemetria.
