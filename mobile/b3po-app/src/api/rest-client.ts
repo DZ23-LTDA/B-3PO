@@ -80,19 +80,36 @@ export class RestClient {
     }
 
     let response: Response
+    // `AbortSignal.timeout` não existe em todo runtime JavaScript (o Hermes/React Native pode não ter).
+    // Um AbortController com timer próprio faz o mesmo e funciona em qualquer lugar — e sempre limpa o
+    // timer, senão o app acumula timeout pendente a cada pedido.
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs)
+    let timedOut = false
+    const onAbort = () => {
+      timedOut = true
+    }
+
+    controller.signal.addEventListener?.('abort', onAbort)
 
     try {
-      response = await this.fetchImpl(joinUrl(this.origin, path), {
-        headers,
-        signal: AbortSignal.timeout(this.timeoutMs)
-      })
+      // O tipo de AbortSignal do React Native diverge do `global.AbortSignal` do lib.dom; o cast fica
+      // só nesta fronteira (o objeto é o mesmo em runtime).
+      const init = { headers, signal: controller.signal } as unknown as RequestInit
+
+      response = await this.fetchImpl(joinUrl(this.origin, path), init)
     } catch (error) {
-      const isTimeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+      const isTimeout =
+        timedOut || (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError'))
 
       throw new RestError(
         isTimeout ? 'timeout' : 'unreachable',
-        isTimeout ? 'o servidor não respondeu a tempo' : 'não foi possível falar com o servidor'
+        isTimeout
+          ? 'o servidor não respondeu a tempo'
+          : `não foi possível falar com o servidor (${error instanceof Error ? error.message : 'erro de rede'})`
       )
+    } finally {
+      clearTimeout(timer)
     }
 
     if (response.status === 401 || response.status === 403) {

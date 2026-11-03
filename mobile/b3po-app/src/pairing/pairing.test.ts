@@ -142,3 +142,19 @@ describe('separação textual do link (bug do polyfill de URL no React Native)',
     expect(parsePairingLink('b3po://other?url=https%3A%2F%2Fpc.dz23.dev&token=tok_abcdefghijklmnop').ok).toBe(false)
   })
 })
+
+describe('endereço do host visto pelo emulador Android', () => {
+  it('aceita 10.0.2.2 sem TLS — é a própria máquina, não a rede', () => {
+    const result = parsePairingLink(link({ url: 'http://10.0.2.2:54686', token: TOKEN }))
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.request.gatewayUrl).toBe('http://10.0.2.2:54686')
+  })
+
+  it('ainda recusa qualquer outro endereço da rede sem TLS', () => {
+    const result = parsePairingLink(link({ url: 'http://10.0.2.3:54686', token: TOKEN }))
+
+    expect(result.ok).toBe(false)
+  })
+})

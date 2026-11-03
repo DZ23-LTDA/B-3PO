@@ -1,12 +1,9 @@
 /**
  * Tela raiz do cliente B-3PO (Android/iOS).
  *
- * Fina de propósito: não decide nada. Ela lê o estado que o gateway informa, trata link de pareamento,
- * navega com `src/app/router.ts` e desenha o que `src/screens/view-models.ts` calcula. Sem gateway
- * conectado, mostra o estado vazio honesto — nunca uma lista de bots inventada.
- *
- * Acessibilidade: cada linha é um botão com `accessibilityRole` e rótulo que já inclui o estado
- * (`Analista, Trabalhando`), então o leitor de tela anuncia o que está acontecendo.
+ * Fina de propósito: não decide nada. Depois do pareamento ela consulta o servidor de verdade
+ * (`/api/health` e `/api/status` via `RestClient`) e **só mostra o que recebeu** — sem dado de exemplo.
+ * Se o servidor estiver fora do ar, a tela diz isso em português, com a hora da última tentativa.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -24,39 +21,60 @@ import { SafeAreaView } from 'react-native'
 
 import { back, backLabel, currentRoute, headerTitle, initialNav, openChat } from './src/app/router'
 import type { NavState } from './src/app/router'
-import { emptyStateCopy, botListItems } from './src/screens/view-models'
-import type { BotListItem } from './src/screens/view-models'
+import { RestClient, restFailureMessage } from './src/api/rest-client'
+import type { HealthInfo, StatusInfo } from './src/api/rest-client'
+import { emptyStateCopy } from './src/screens/view-models'
 import { pairingFailureMessage, parsePairingLink } from './src/pairing/pairing'
 
 type Connection =
   | { status: 'disconnected' }
-  | { status: 'connecting'; gateway: string }
-  | { status: 'connected'; gateway: string; deviceId: string }
+  | { status: 'connecting'; origin: string }
+  | { status: 'connected'; origin: string; deviceId: string; health: HealthInfo; status: StatusInfo | null; checkedAt: number }
+  | { status: 'failed'; origin: string; message: string }
 
 export default function App() {
   const [connection, setConnection] = useState<Connection>({ status: 'disconnected' })
   const [error, setError] = useState<string | null>(null)
   const [nav, setNav] = useState<NavState>(initialNav)
-  const [rows] = useState<Parameters<typeof botListItems>[0]>([])
 
-  const items = useMemo(() => botListItems(rows), [rows])
   const route = currentRoute(nav)
 
-  const pair = useCallback((link: string) => {
-    const result = parsePairingLink(link)
+  const connect = useCallback(async (origin: string, deviceId: string) => {
+    console.log('[b3po] connect', origin, deviceId)
+    setConnection({ status: 'connecting', origin })
 
-    if (!result.ok) {
-      setError(pairingFailureMessage(result.reason))
-      setConnection({ status: 'disconnected' })
+    const client = new RestClient({ origin })
 
-      return
+    try {
+      const health = await client.health()
+      // /api/status é público também; se falhar, o health já provou que o servidor está de pé
+      const status = await client.status().catch(() => null)
+
+      console.log('[b3po] connected', JSON.stringify(health), JSON.stringify(status))
+      setConnection({ status: 'connected', origin, deviceId, health, status, checkedAt: Date.now() })
+    } catch (failure) {
+      console.log('[b3po] failed', String(failure))
+      const detail = failure instanceof Error ? failure.message : String(failure)
+      setConnection({ status: 'failed', origin, message: `${restFailureMessage(failure)}\n\nDetalhe técnico: ${detail}` })
     }
-
-    setError(null)
-    setConnection({ status: 'connecting', gateway: result.request.gatewayUrl })
-    // A conexão JSON-RPC real é o próximo incremento; aqui registramos só a intenção validada.
-    setConnection({ status: 'connected', gateway: result.request.gatewayUrl, deviceId: result.request.deviceId })
   }, [])
+
+  const pair = useCallback(
+    (value: string) => {
+      const result = parsePairingLink(value)
+
+      if (!result.ok) {
+        setError(pairingFailureMessage(result.reason))
+        setConnection({ status: 'disconnected' })
+
+        return
+      }
+
+      setError(null)
+      void connect(result.request.gatewayUrl, result.request.deviceId)
+    },
+    [connect]
+  )
 
   useEffect(() => {
     const subscription = Linking.addEventListener('url', event => {
@@ -73,6 +91,9 @@ export default function App() {
 
     return () => subscription.remove()
   }, [pair])
+
+  const connected = connection.status === 'connected'
+  const botItems = useMemo(() => [] as { name: string; title: string; description: string }[], [])
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -95,91 +116,89 @@ export default function App() {
 
       <ScrollView contentContainerStyle={styles.content}>
         {route.name === 'bots' ? (
-          <BotList
-            connection={connection}
-            error={error}
-            items={items}
-            onOpen={item => setNav(openChat(nav, { name: item.name, title: item.title }))}
-          />
+          <>
+            <Text style={styles.tagline}>Seus bots, no seu computador.</Text>
+
+            {statusCard(connection, error)}
+
+            {connected && botItems.length === 0 ? (
+              <Card title={emptyStateCopy('no-bots').title} body={emptyStateCopy('no-bots').body} />
+            ) : null}
+
+            {botItems.map(item => (
+              <TouchableOpacity
+                accessibilityHint="Abre a conversa com este bot"
+                accessibilityRole="button"
+                key={item.name}
+                onPress={() => setNav(openChat(nav, { name: item.name, title: item.title }))}
+                style={styles.row}
+              >
+                <View style={styles.rowMain}>
+                  <Text style={styles.rowTitle}>{item.title}</Text>
+                  <Text numberOfLines={2} style={styles.rowBody}>
+                    {item.description}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </>
         ) : (
-          <ChatScreen botName={route.botName} connection={connection} />
+          <Card
+            title="Conversa"
+            body={
+              connected
+                ? `Conectado a ${connection.origin}. As mensagens deste bot aparecem aqui quando a conversa for ligada ao servidor.`
+                : emptyStateCopy('offline').body
+            }
+          />
         )}
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-function BotList({
-  connection,
-  error,
-  items,
-  onOpen
-}: {
-  connection: Connection
-  error: string | null
-  items: BotListItem[]
-  onOpen: (item: BotListItem) => void
-}) {
-  return (
-    <>
-      <Text style={styles.tagline}>Seus bots, no seu computador.</Text>
 
-      {error ? <Card title="Não foi possível parear" body={error} /> : null}
+/**
+ * Um cartão por estado, com `default` explícito: qualquer estado inesperado mostra mensagem em vez de
+ * deixar a tela em branco. Tela em branco não informa nada e parece app quebrado.
+ */
+function statusCard(connection: Connection, pairingError: string | null) {
+  if (pairingError) {
+    return <Card title="Não foi possível parear" body={pairingError} />
+  }
 
-      {connection.status === 'disconnected' ? (
-        <Card title={emptyStateCopy('offline').title} body={emptyStateCopy('offline').body} />
-      ) : null}
-
-      {connection.status === 'connecting' ? (
+  switch (connection.status) {
+    case 'disconnected':
+      return <Card title={emptyStateCopy('offline').title} body={emptyStateCopy('offline').body} />
+    case 'connecting':
+      return (
         <View style={styles.card}>
           <ActivityIndicator />
           <Text style={styles.cardTitle}>{emptyStateCopy('connecting').title}</Text>
-          <Text style={styles.cardBody}>{connection.gateway}</Text>
+          <Text style={styles.cardBody}>{connection.origin}</Text>
         </View>
-      ) : null}
-
-      {connection.status === 'connected' && items.length === 0 ? (
-        <Card title={emptyStateCopy('no-bots').title} body={emptyStateCopy('no-bots').body} />
-      ) : null}
-
-      {items.map(item => (
-        <TouchableOpacity
-          accessibilityHint="Abre a conversa com este bot"
-          accessibilityLabel={item.accessibilityLabel}
-          accessibilityRole="button"
-          key={item.name}
-          onPress={() => onOpen(item)}
-          style={styles.row}
-        >
-          <View style={styles.rowMain}>
-            <Text style={styles.rowTitle}>{item.title}</Text>
-            <Text numberOfLines={2} style={styles.rowBody}>
-              {item.description}
-            </Text>
-          </View>
-          <View style={[styles.badge, item.needsAttention && styles.badgeAttention]}>
-            <Text style={styles.badgeText}>{item.statusLabel}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </>
-  )
-}
-
-function ChatScreen({ botName, connection }: { botName: string; connection: Connection }) {
-  if (connection.status !== 'connected') {
-    return <Card title={emptyStateCopy('offline').title} body={emptyStateCopy('offline').body} />
+      )
+    case 'failed':
+      return <Card title="Sem conexão com o computador" body={connection.message} />
+    case 'connected':
+      return (
+        <Card
+          title="Conectado ao computador"
+          body={`Servidor: ${connection.origin}\nCompilação: ${connection.health.commit ?? 'não informada'}\nGateway: ${
+            connection.status ? 'consultado' : 'não consultado'
+          }\nToken exigido: ${connection.health.authRequired ? 'sim' : 'não'}${
+            connection.status ? `\nEstado do gateway: ${connection.status.gatewayRunning ? 'rodando' : 'parado'}` : ''
+          }`}
+        />
+      )
+    default:
+      return (
+        <Card
+          title="Estado inesperado"
+          body={`Feche e abra o aplicativo. Diagnóstico: ${JSON.stringify(connection)}`}
+        />
+      )
   }
-
-  return (
-    <>
-      <Card
-        title="Conversa"
-        body={`Conectado a ${connection.gateway}. As mensagens deste bot aparecem aqui quando o gateway responder.`}
-      />
-      <Text style={styles.meta}>Bot: {botName}</Text>
-    </>
-  )
 }
 
 function Card({ body, title }: { body: string; title: string }) {
@@ -194,9 +213,6 @@ function Card({ body, title }: { body: string; title: string }) {
 const styles = StyleSheet.create({
   back: { paddingVertical: 4 },
   backText: { color: '#7f9cff', fontSize: 15 },
-  badge: { backgroundColor: '#1f2430', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeAttention: { backgroundColor: '#2b3a55' },
-  badgeText: { color: '#c8d3e8', fontSize: 11 },
   card: {
     backgroundColor: '#12151c',
     borderColor: '#1f2430',
@@ -210,19 +226,15 @@ const styles = StyleSheet.create({
   content: { gap: 14, padding: 20 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingTop: 12 },
   headerTitle: { color: '#e8eefc', fontSize: 17, fontWeight: '600' },
-  meta: { color: '#5f6b83', fontSize: 12 },
   row: {
-    alignItems: 'center',
     backgroundColor: '#12151c',
     borderColor: '#1f2430',
     borderRadius: 14,
     borderWidth: 1,
-    flexDirection: 'row',
-    gap: 12,
     padding: 14
   },
   rowBody: { color: '#8f9bb3', fontSize: 13, lineHeight: 18 },
-  rowMain: { flex: 1, gap: 4 },
+  rowMain: { gap: 4 },
   rowTitle: { color: '#e8eefc', fontSize: 15, fontWeight: '600' },
   screen: { backgroundColor: '#0b0d12', flex: 1 },
   tagline: { color: '#8f9bb3', fontSize: 14 },

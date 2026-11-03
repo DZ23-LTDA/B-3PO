@@ -56,7 +56,9 @@ export const PAIR_SCHEME = 'b3po'
 export const PAIR_HOST = 'pair'
 export const MIN_TOKEN_LENGTH = 16
 
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+// `10.0.2.2` é o apelido do host visto de dentro do emulador Android: é a própria máquina, então
+// cai na mesma regra do loopback. Qualquer outro endereço sem TLS é recusado.
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1', '10.0.2.2'])
 
 function isLocalHost(host: string): boolean {
   return LOCAL_HOSTS.has(host.toLowerCase())

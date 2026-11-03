@@ -346,3 +346,50 @@ Sem servidor no ar os mesmos testes são **pulados** (nunca verdes por omissão)
 - as telas ainda não consomem o `RestClient` (falta ligar lista de bots e conversa ao cliente REST);
 - `/api/ws` exige *gateway ticket* de uso único gerado pelo servidor: falta descobrir como o Desktop
   obtém o ticket para o celular pareado receber um.
+
+## Rodada 48 — o app do celular falou com o servidor real (e um defeito de tela)
+
+### O que foi ligado
+
+`App.tsx` agora consulta o servidor depois do pareamento: `RestClient.health()` e `.status()`, com
+estado de carregamento, de erro (com detalhe técnico) e de sucesso. Nada de dado de exemplo.
+
+Também nesta rodada, dois bloqueios reais de plataforma:
+
+| Bloqueio | Causa | Correção |
+|---|---|---|
+| HTTP recusado no Android | `targetSdk 36` bloqueia cleartext por padrão | `network_security_config.xml` liberando cleartext **só** para `localhost`, `127.0.0.1` e `10.0.2.2` (host do emulador); todo o resto continua exigindo TLS |
+| `AbortSignal.timeout` | não existe em todo runtime JS (Hermes) | `AbortController` + `setTimeout` com `clearTimeout` no `finally`, e o motivo real na mensagem de erro |
+| Rede do emulador | NAT não alcançava o host | `adb reverse tcp:54686 tcp:54686` e pareamento em `http://127.0.0.1:54686` |
+
+### Prova de execução no aparelho (logcat)
+
+```
+[b3po] connect   'http://127.0.0.1:54686' 'dev-11nqhpwr6s9ktyfc2ysrrp'
+[b3po] connected '{"ok":true,"commit":"98695c0cc7e58f85b5ff790482ff434ca722a1da","authRequired":false}'
+                 '{"gatewayRunning":true,"gatewayState":"running",…}'
+```
+
+O celular (emulador) **alcançou o servidor B-3PO/Hermes real** e interpretou o JSON: saúde ok, commit
+real do código, `auth_required=false`, gateway rodando. Evidência em
+`docs/b3po/evidence/mobile-live-connection-logcat.txt`.
+
+### Defeito aberto (honesto)
+
+Na tela, o cartão de status aparece **sem o corpo do texto**: mostra o título ("Estado inesperado",
+por exemplo) e nada abaixo. O dado chegou (log acima), então o problema é de renderização do
+componente `Card` no release, não de rede. **Não está corrigido.**
+
+Sintoma exato medido com `uiautomator`: a `ScrollView` tem um único filho com 280 px e só o título do
+cartão; o `<Text>` do corpo não é desenhado. Próximo passo: eliminar o `Card` intermediário e desenhar
+o texto direto no container (suspeita: `gap` + `flex` do `View` dentro da `ScrollView` no release), e
+comparar com um build de debug com Metro para isolar release × runtime.
+
+Detalhe do caminho: o `default` do `switch` de estado existe justamente para nunca deixar a tela em
+branco — e foi ele que apareceu, provando que o estado chegou a um valor que o `case 'connected'` não
+capturou na renderização. Investigar junto do defeito acima.
+
+### Também adicionado
+
+`ErrorBoundary` (`src/app/error-boundary.tsx`): erro de render no release antes deixava a tela preta
+sem mensagem; agora mostra título, explicação e a mensagem técnica.
