@@ -61,6 +61,7 @@ describe('pt-BR', () => {
       'language',
       'modelPicker',
       'settings',
+      'shell',
       'sidebar',
       'statusStack',
       'ui'

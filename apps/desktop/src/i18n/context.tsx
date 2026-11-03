@@ -96,6 +96,31 @@ export interface I18nProviderProps {
   scopeKey?: string
 }
 
+/**
+ * Ler `display.language` não pode decidir o idioma da UI por omissão. Em modo remoto o bridge de config
+ * pode nunca resolver (não há backend local para responder), e a promessa pendente deixava o locale no
+ * estado inicial `en` para sempre. Um limite curto transforma "sem resposta" em "sem escolha salva", que
+ * é o que o fallback por idioma da máquina sabe tratar.
+ */
+const LOCALE_CONFIG_TIMEOUT_MS = 2500
+
+function withLocaleTimeout<T>(promise: Promise<T>, timeoutMs = LOCALE_CONFIG_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('config locale read timed out')), timeoutMs)
+
+    promise.then(
+      value => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      error => {
+        clearTimeout(timer)
+        reject(error)
+      }
+    )
+  })
+}
+
 export function I18nProvider({
   children,
   configClient = defaultConfigClient,
@@ -173,8 +198,7 @@ export function I18nProvider({
       setIsLoadingConfig(true)
       setConfigLoadError(null)
 
-      return configClient
-        .getConfig()
+      return withLocaleTimeout(configClient.getConfig())
         .then(async config => {
           if (cancelled || userLocaleRef.current) {
             return

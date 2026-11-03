@@ -334,3 +334,48 @@ Ferramenta boa para isso: render test com `ProfileI18nProvider` + composer, comp
 Na rodada 69 eu disse que o problema era “o app não recebe o config”. A rodada 70 mostra que a lógica do
 provider está correta nos três casos; o que falta é o **segundo escopo**. Registro para não repetir o
 diagnóstico errado.
+
+## Rodada 71 — o bug do idioma era o PLACEHOLDER congelado (sonda provou), e a statusbar foi traduzida
+
+### A sonda que resolveu
+
+Instrumentei o próprio placeholder para mostrar o locale resolvido:
+
+```
+[locale=pt] Give B-3PO a task
+```
+
+**O locale estava certo desde a rodada 68.** O texto é que era escolhido **uma vez, no mount**, quando o
+locale ainda era `en`; o efeito do hook só re-escolhia ao trocar de **conversa**, nunca ao trocar de
+**idioma**. UI em pt com placeholder congelado em inglês.
+
+Correção em `use-composer-placeholder.ts`: guardar o locale anterior e re-escolher o placeholder quando
+ele muda. Teste novo (`use-composer-placeholder.test.tsx`) aceita **apenas** os textos de
+`pt.composer.newSessionPlaceholders` — falha com o bug.
+
+### Statusbar traduzida
+
+O bloco `shell.statusbar` do `en.ts` não existia no `pt.ts`: a barra inteira saía em inglês. Adicionei
+`shell.statusbar` (e `shell.approvalMode`) em pt-BR. O teste `pt.test.ts` pina a lista exata de seções
+cobertas — atualizei para incluir `shell` (é guarda, não ruído).
+
+### Estado na tela (pacote reconstruído, `client vgit.387bc8d`)
+
+| Antes | Agora |
+|---|---|
+| "Ask anything" | **"O que vamos construir?"** |
+| "Backend ready" | **"Servidor pronto"** |
+| "Smart" | **"Inteligente"** |
+| "client vgit…" | **"cliente vgit…"** |
+| "Med" | ainda `Med` |
+| "Import" (canto) | ainda em inglês |
+
+Evidência: `docs/b3po/evidence/desktop-home-pt-br.png`.
+
+### O que falta (2 rótulos)
+
+`Med` (nível de raciocínio) e o rótulo de importação no canto direito. Mesma natureza do que acabei de
+corrigir: ou são chaves sem override em `pt.ts`, ou são valores capturados cedo por outro hook. O método
+que funcionou — sonda visível → chave → tradução — é o próximo passo.
+
+Testes: i18n **112 passando** (inclui os 23 de `context` e o novo do placeholder); gate 14 ok.

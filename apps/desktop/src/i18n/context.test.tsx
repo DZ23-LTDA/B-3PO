@@ -101,6 +101,27 @@ describe('I18nProvider', () => {
     window.hermesDesktop = previous
   })
 
+  it('config que nunca responde nao segura a UI em ingles', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      // promessa pendente para sempre: o bridge remoto sem backend local faz exatamente isso
+      getConfig: () => new Promise<never>(() => {}),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'), { timeout: 4000 })
+    window.hermesDesktop = previous
+  }, 8000)
+
   it('normalizes an initial locale alias and switches translations', async () => {
     render(
       <I18nProvider configClient={null} initialLocale="zh-CN">
