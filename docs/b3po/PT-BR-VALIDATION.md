@@ -71,3 +71,29 @@ defeito de integração. Não declaro pt-BR concluído.
 3. Se não trouxer, o defeito está no `config.get` do gateway (perfil default) e o fix é no backend.
 4. Teste de regressão: render do `I18nProvider` com config stub `display.language: pt` e asserção de
    string portuguesa (já existe no `context.test.tsx` para 9 locales; estender a pt).
+
+## 10. Rodada 36 — `/comandos` traduzidos e a causa do título "New session"
+
+### Resolvido: descrições do paleta de comandos
+
+`pt` não traduzia `composer.commandDescs` — as 71 descrições apareciam em inglês e o teste
+`slash-localization` falhava (confirmado no HEAD, sem mudanças minhas). Traduzidas as 71 entradas;
+o teste passa (2/2) e o `i18n` soma **103 testes** verdes.
+
+### Ainda aberto: o rótulo da aba principal continua em inglês
+
+A aba `New session` na faixa de tabs **não** vem de `newSessionTitle()` em tempo de render: o título é
+gravado no **registro da aba no boot**, e o locale do usuário carrega de forma assíncrona depois. Medido
+no app com perfil de dados limpo:
+
+```
+abas: ["Conversas", "Bots", "New session", "Terminal"]
+```
+
+"Conversas" e "Bots" são traduzidos porque vêm de `useI18n().t` no render; "New session" ficou com o
+idioma de boot (inglês) no registro.
+
+**Correção certa (próxima rodada):** resolver a legenda no render (`tileTitle()` → `newSessionTitle()`)
+em vez de guardar a string traduzida no registro — o helper já existe e já é chamado em `session-tile`,
+`chat/index`, `contrib/controller`; falta o caminho da **aba principal** (registro da tab strip) usar a
+função no momento de pintar, não no de registrar.
