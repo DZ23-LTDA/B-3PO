@@ -379,3 +379,32 @@ corrigir: ou são chaves sem override em `pt.ts`, ou são valores capturados ced
 que funcionou — sonda visível → chave → tradução — é o próximo passo.
 
 Testes: i18n **112 passando** (inclui os 23 de `context` e o novo do placeholder); gate 14 ok.
+
+## Rodada 72 — fechamento do idioma: pt-BR com duas exceções identificadas
+
+Depois da rodada 71 (placeholder re-escolhido + `shell.statusbar` traduzido), a Home ficou assim:
+
+| Elemento | Texto |
+|---|---|
+| sidebar | CONVERSAS, BOTS, Nova conversa, Capacidades, Mensageria, Artefatos, Tarefas agendadas, Pesquisar conversas…, FIXADAS |
+| herói | parágrafo em pt-BR vindo do bot |
+| composer | **"O que vamos construir?"** |
+| statusbar esquerda | **"Servidor pronto"** |
+| statusbar direita | **"Inteligente"**, **"cliente vgit…"** |
+
+### As duas exceções, com a origem de cada uma
+
+1. **"Med"** — não é chave faltando: é o rótulo compacto fixo de `apps/desktop/src/lib/reasoning-effort.ts`
+   (`SHORT_LABELS`: Off/Min/Low/**Med**/High/XHigh/Max/Ultra). O próprio arquivo documenta que menus e
+   configurações usam `shell.modelOptions` traduzido; o *pill* usa forma curta por espaço. Três letras
+   cabem; "Médio" não. Decisão: manter como chrome compacto e registrar a exceção em vez de fingir
+   100% traduzido. Se o dono preferir, o caminho é localizar `SHORT_LABELS` e passar o `t` ao pill
+   (toca `reasoning-pill.tsx` e o teste que pina 'Med').
+
+2. **"Impra"** — o chip à direita de "Servidor pronto". Não existe em catálogo nenhum (`en.ts`, `pt.ts`,
+   plugin): é **dado**, não tradução. Recortei a região da statusbar e ampliei para ler o texto exato
+   (evidência abaixo). Fica registrado como item aberto: identificar de qual campo do backend vem.
+
+### Evidência
+
+`docs/b3po/evidence/desktop-home-pt-br.png` — Home com o composer e a statusbar em pt-BR.
