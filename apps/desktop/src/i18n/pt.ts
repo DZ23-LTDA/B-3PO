@@ -511,6 +511,7 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
     crmContacts: {
+      openCrm: 'Abrir a página do CRM',
       title: 'Contatos do WhatsApp CRM',
       intro: 'Com quem seus bots falam. Os contatos ficam neste computador; nada é enviado a terceiros.',
       empty: 'Nenhum contato ainda. Cadastre o primeiro abaixo.',

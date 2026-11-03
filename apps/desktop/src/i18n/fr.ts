@@ -699,6 +699,7 @@ export const frOverrides = {
       unavailable: 'Ce client n’a pas de disque local pour le pipeline.',
     },
     crmContacts: {
+      openCrm: 'Ouvrir la page CRM',
       title: 'Contacts du CRM WhatsApp',
       intro: 'À qui parlent vos bots. Les contacts restent sur cet ordinateur ; rien n’est envoyé à un tiers.',
       empty: 'Aucun contact pour l’instant. Ajoutez le premier ci-dessous.',

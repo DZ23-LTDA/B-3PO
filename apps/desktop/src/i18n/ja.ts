@@ -261,6 +261,7 @@ export const jaOverrides = {
       unavailable: 'このクライアントにはパイプライン用のローカルディスクがありません。',
     },
     crmContacts: {
+      openCrm: 'CRM ページを開く',
       title: 'WhatsApp CRM の連絡先',
       intro: 'ボットが話す相手です。連絡先はこのコンピューターに保存され、第三者には送信されません。',
       empty: '連絡先はまだありません。下から最初の 1 件を追加してください。',

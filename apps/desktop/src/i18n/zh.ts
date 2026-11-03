@@ -470,6 +470,7 @@ export const zhOverrides = {
       unavailable: '此客户端没有用于漏斗的本地磁盘。',
     },
     crmContacts: {
+      openCrm: '打开 CRM 页面',
       title: 'WhatsApp CRM 联系人',
       intro: '你的机器人对话的对象。联系人保存在本机，不会发送给第三方。',
       empty: '还没有联系人。在下面添加第一个。',

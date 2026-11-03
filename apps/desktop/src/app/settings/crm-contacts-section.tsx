@@ -8,6 +8,7 @@ import {
   removeCrmContact,
   saveCrmContact
 } from '@/api/crm-contacts'
+import { CRM_ROUTE } from '@/app/routes'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -158,6 +159,11 @@ export function CrmContactsSection() {
       ) : null}
 
       <CrmPipelineSection contacts={contacts ?? []} />
+
+      {/* O CRM tem tela propria em /crm; aqui fica so o atalho para quem chega por Configuracoes. */}
+      <a className="mt-4 inline-block text-sm text-(--ui-text-secondary) underline" href={CRM_ROUTE}>
+        {copy.openCrm}
+      </a>
     </div>
   )
 }

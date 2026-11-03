@@ -699,6 +699,7 @@ export const deOverrides = {
       unavailable: 'Dieser Client hat keine lokale Festplatte für den Trichter.',
     },
     crmContacts: {
+      openCrm: 'CRM-Seite öffnen',
       title: 'WhatsApp-CRM-Kontakte',
       intro: 'Mit wem deine Bots sprechen. Die Kontakte liegen auf diesem Computer; nichts geht an Dritte.',
       empty: 'Noch kein Kontakt. Füge unten den ersten hinzu.',

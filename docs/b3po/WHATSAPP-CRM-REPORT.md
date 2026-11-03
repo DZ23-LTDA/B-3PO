@@ -214,3 +214,24 @@ e mostrou as cinco conversas reais. Evidência: `docs/b3po/evidence/desktop-crm-
 
 Nuance já registrada antes: o manifesto carrega uma coluna de commit (HEAD na geração) e uma data por artefato;
 os testes adicionados depois não entram no bundle, então os artefatos correspondem ao código empacotado.
+
+## Rodada 88 — o CRM ganhou TELA PRÓPRIA (`/crm`)
+
+Estava enterrado em Configurações ▸ Conexões salvas. Agora existe uma página do CRM:
+
+- `src/app/routes.ts`: `CRM_ROUTE = '/crm'`, `'crm'` no `AppView`/`AppRouteId` e entrada em `APP_ROUTES`;
+- `src/app/chat/route-tile.tsx`: `CrmView` carregada por `lazy` e título "CRM" na aba;
+- `src/app/crm/index.tsx`: página que **reusa** as seções de contatos e funil (não reimplementa nada);
+- atalho "Abrir a página do CRM" no fim da seção em Configurações, para quem já estava lá.
+
+### O que a página NÃO tem, e por quê
+
+Conversas e tarefas não estão lá. Conversas dependem do canal oficial do WhatsApp (bloqueio externo) e uma
+lista vazia que nunca recebe mensagem seria teatro, não produto. A página diz isso em uma linha em vez de
+mostrar um painel morto.
+
+### Ainda falta
+
+Item na sidebar: por enquanto a rota é alcançável pelo atalho em Configurações (e pela URL). Colocar o CRM na
+navegação lateral exige mexer no registro de nav + rótulo em 10 locales — fica para a próxima rodada, e está
+declarado em vez de escondido.

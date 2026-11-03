@@ -18,6 +18,7 @@ export const MESSAGING_ROUTE = '/messaging'
 export const WEBHOOKS_ROUTE = '/webhooks'
 export const ARTIFACTS_ROUTE = '/artifacts'
 export const CRON_ROUTE = '/cron'
+export const CRM_ROUTE = '/crm'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -29,6 +30,7 @@ export type AppView =
   | 'capabilities'
   | 'chat'
   | 'command-center'
+  | 'crm'
   | 'cron'
   // A contributed (plugin) full page at its own route — NOT chat. Without this
   // distinction contributed paths fell through appViewForPath's 'chat' default,
@@ -47,6 +49,7 @@ export type AppRouteId =
   | 'artifacts'
   | 'capabilities'
   | 'command-center'
+  | 'crm'
   | 'cron'
   | 'messaging'
   | 'new'
@@ -71,6 +74,7 @@ export const APP_ROUTES = [
   { id: 'webhooks', path: WEBHOOKS_ROUTE, view: 'webhooks' },
   { id: 'artifacts', path: ARTIFACTS_ROUTE, view: 'artifacts' },
   { id: 'cron', path: CRON_ROUTE, view: 'cron' },
+  { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'profiles', path: PROFILES_ROUTE, view: 'profiles' },
   { id: 'agents', path: AGENTS_ROUTE, view: 'agents' },
   { id: 'starmap', path: STARMAP_ROUTE, view: 'starmap' }
