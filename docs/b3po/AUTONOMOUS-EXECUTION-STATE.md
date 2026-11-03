@@ -7,7 +7,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | 97 |
+| Commits DZ23 | 98 |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
 | Testes | desktop: bots 960 · i18n 104 · store/sdk 2307 · CRM 66 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
@@ -19,7 +19,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Marca B-3PO (desktop, site, instaladores) | ✅ | `BRAND-COVERAGE.md`, `logo`, `B-3PO.exe` VersionInfo |
 | i18n pt-BR (superfície do produto) | ✅ | `PT-BR-VALIDATION.md`, 104 testes |
 | Bots: criar, mascote, conversar, cancelar | ✅ | `F5-EVIDENCE-REPORT.md`, screenshots |
-| WhatsApp CRM: consentimento, webhook, contatos, funil, inbox, métricas, tarefas/Kanban, automações, contatos em lote | ✅ núcleo | `WHATSAPP-CRM-REPORT.md`, 122 testes |
+| WhatsApp CRM: consentimento, webhook, contatos, funil, inbox, métricas, tarefas/Kanban, automações, contatos em lote, funil completo | ✅ núcleo | `WHATSAPP-CRM-REPORT.md`, 140 testes |
 | Envio real WhatsApp | 🔒 BLOCKED (conta Meta) | `WHATSAPP-CRM-SETUP.md` |
 | Android: projeto nativo, APK, AAB, pareamento, conexão REST real | ✅ | `MOBILE-REPORT.md` (rodadas 42–49) |
 | Android: lista de bots na tela | ⬜ aberto (401 de ticket) | `MOBILE-REPORT.md` rodada 50 |
@@ -34,6 +34,11 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 3. keystore de release para APK/AAB publicáveis;
 4. tool calling com modelo ≥64k;
 5. 3 vulnerabilidades dev bloqueadas por `min-release-age` até 2026-11-17.
+
+## Regra de processo (aprendida na prática)
+
+Rodar `python scripts/check` **antes** do commit, nunca depois: três commits entraram com o gate
+vermelho nesta execução por inverter a ordem.
 
 ## Como retomar
 

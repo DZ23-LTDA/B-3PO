@@ -122,3 +122,27 @@ voltou a **14 checks ok**.
 **Terceira vez que commitei com o gate vermelho nesta execução.** O erro não é técnico, é de processo:
 o comando certo é `python scripts/check` **antes** do `git commit`, não depois. Registro aqui porque
 relatório que esconde o próprio descuido não serve para nada.
+
+## Rodada 54 — funil comercial: perda com motivo, probabilidade e previsão (GOAL 14.3)
+
+`crm/src/pipeline.ts` com **18 testes**. O `Deal` base tinha etapa e valor; faltava o que transforma
+um quadro de cartões em instrumento de gestão.
+
+| Regra | Por quê |
+|---|---|
+| perder **exige motivo** (≥3 caracteres) | sem isso o relatório de perdas vira "não informado" e não ensina nada |
+| ganho limpa motivo de perda | estado contraditório (ganho + motivo de perda) não existe |
+| probabilidade validada em 0..100 | evita previsão absurda na tela |
+| probabilidade do negócio vence a da etapa; sem nenhuma, 0 (nunca NaN) | previsão nunca quebra por falta de dado |
+| previsão ponderada ignora ganho e perdido | negócio ganho já é receita, não previsão |
+| previsão atrasada calculada contra `now` | prazo vencido é sinal, não digitação |
+| relatório de perdas mostra "sem motivo registrado" explicitamente | esconder o buraco não corrige o processo |
+| ciclo médio só entre ganhos com tempo decorrido | média com zero inflado mente |
+
+### Erro meu nesta rodada
+
+Um teste tentava criar negócio **já** numa etapa desconhecida; o `createDeal` recusa etapa
+desconhecida (correto), então o helper de teste lançava. Corrigi criando com etapa válida e trocando a
+etapa no objeto — o caso testado (etapa sem probabilidade) continua coberto.
+
+**140 testes** no CRM, `tsc --noEmit` limpo, gate **14 ok** verificado **antes** do commit.
