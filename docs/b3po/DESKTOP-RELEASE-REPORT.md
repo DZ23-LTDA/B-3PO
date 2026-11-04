@@ -1419,3 +1419,21 @@ fazer cirurgia de aninhamento no fim da rodada — o arquivo está funcionando e
 ganhar 3 strings seria troca ruim. Fica registrado como a próxima tarefa de limpeza, com o diagnóstico pronto.
 
 Verificação: `src/i18n` + `src/app/settings` = 94 arquivos / 732 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 135 — investigação da dívida do catálogo (sem mudança de código, de propósito)
+
+Fui atacar as 3 linhas restantes de `quickEntry.*` e **descobri que o catálogo inglês e o tipo discordam**: o
+`en.ts` tem `quickEntry.providers` num bloco que meu rastreio resolve como topo, mas `types.ts` só declara
+`quickEntry` **dentro de `settings`** — e esse, por sua vez, só aceita as chaves do painel (`enabledTitle`, …).
+
+Tentei as duas rotas e as duas reprovam em `tsc`:
+- `quickEntry` no topo → `TS2353: 'quickEntry' does not exist in type …`
+- `providers` dentro de `settings.quickEntry` → `TS2353` com a lista fechada de chaves do painel
+
+**Revertí tudo**: o `git status` voltou vazio. O arquivo está exatamente como estava, verde (119 testes de i18n).
+
+Em vez de forçar, escrevi **`docs/b3po/PT-CATALOG-DEBT.md`**: estado medido, as 5 linhas com caminho e motivo, o
+que já descobri sobre o bloqueio, o que **não** fazer (renomear, duplicar em en, cirurgia no fim da rodada) e o
+roteiro de ataque em 5 passos. A próxima tentativa começa informada em vez de repetir a investigação.
+
+Rodada sem código novo é o certo aqui: o ganho eram 3 strings e o risco era o i18n inteiro.

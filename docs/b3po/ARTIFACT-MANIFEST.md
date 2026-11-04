@@ -3,7 +3,7 @@
 Manifesto dos artefatos **deste** build. Manifesto com dado velho engana mais do que ajuda: os
 hashes abaixo foram calculados nesta máquina a partir dos arquivos listados; nada é estimado.
 
-commit `32c507a3f7` · branch `b3po-brand` · 204 commits sobre `main` · gerado em 2026-11-04 03:13 UTC
+commit `4cb3f4e934` · branch `b3po-brand` · 205 commits sobre `main` · gerado em 2026-11-04 03:20 UTC
 
 | Plataforma | Formato | Arquivo | Tamanho | SHA-256 | Construído |
 |---|---|---|---|---|---|
