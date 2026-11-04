@@ -60,10 +60,12 @@ describe('contatos do CRM no disco', () => {
 
       const second = await store.upsert(contact({ name: 'Maria Silva', company: 'Nova' }))
 
-      expect('contacts' in second && second.contacts).toHaveLength(1)
-      expect(second.contacts[0]!.name).toBe('Maria Silva')
-      expect(second.contacts[0]!.company).toBe('Nova')
-      expect(second.contacts[0]!.created_at).toBe(original?.created_at)
+      const atualizado = 'contacts' in second ? second.contacts : []
+
+      expect(atualizado).toHaveLength(1)
+      expect(atualizado[0]!.name).toBe('Maria Silva')
+      expect(atualizado[0]!.company).toBe('Nova')
+      expect(atualizado[0]!.created_at).toBe(original?.created_at)
     })
   })
 

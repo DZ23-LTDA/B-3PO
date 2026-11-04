@@ -36,20 +36,20 @@ describe('readSendResponse', () => {
 
 describe('sendText', () => {
   it('chama a URL da versao certa com Bearer e corpo montado', async () => {
-    const fetchImpl = vi.fn(async () => ok({ messages: [{ id: 'wamid.1' }] }))
+    const fetchImpl = vi.fn(async (_url: string, _init: RequestInit) => ok({ messages: [{ id: 'wamid.1' }] }))
 
     const resultado = await sendText({ ...OPCOES, fetchImpl })
     const [url, init] = fetchImpl.mock.calls[0]
 
     expect(url).toBe('https://graph.facebook.com/v21.0/123456/messages')
     expect(init.method).toBe('POST')
-    expect(init.headers.Authorization).toBe('Bearer tok_fake')
-    expect(JSON.parse(init.body)).toMatchObject({ to: '5511999991111', type: 'text' })
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tok_fake')
+    expect(JSON.parse(init.body as string)).toMatchObject({ to: '5511999991111', type: 'text' })
     expect(resultado).toEqual({ messageId: 'wamid.1', ok: true })
   })
 
   it('nao chama a rede quando o payload e invalido', async () => {
-    const fetchImpl = vi.fn(async () => ok({}))
+    const fetchImpl = vi.fn(async (_url: string, _init: RequestInit) => ok({}))
     const resultado = await sendText({ ...OPCOES, body: '   ', fetchImpl })
 
     expect(fetchImpl).not.toHaveBeenCalled()
@@ -69,7 +69,7 @@ describe('sendText', () => {
   })
 
   it('aceita versao de API configuravel', async () => {
-    const fetchImpl = vi.fn(async () => ok({ messages: [{ id: 'wamid.2' }] }))
+    const fetchImpl = vi.fn(async (_url: string, _init: RequestInit) => ok({ messages: [{ id: 'wamid.2' }] }))
 
     await sendText({ ...OPCOES, apiVersion: 'v20.0', fetchImpl })
 

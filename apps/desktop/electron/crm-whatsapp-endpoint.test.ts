@@ -51,7 +51,8 @@ const pedido = (extra: Record<string, unknown> = {}) => {
     method: 'POST',
     sink: sinkFalso(),
     ...extra,
-  } as Parameters<typeof handleWhatsAppIngest>[0]
+    // O cast para o tipo do handler perderia dados, que e o que o teste inspeciona.
+  } as Parameters<typeof handleWhatsAppIngest>[0] & { sink: ReturnType<typeof sinkFalso> }
 }
 
 describe('handleWhatsAppIngest', () => {

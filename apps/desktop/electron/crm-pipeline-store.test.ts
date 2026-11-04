@@ -68,17 +68,19 @@ describe('funil do CRM no disco', () => {
 
       const second = await store.upsert(opportunity({ id: 'opp-1', stage: 'ganho', title: 'Consultoria fechada' }))
 
-      expect('opportunities' in second && second.opportunities).toHaveLength(1)
-      expect(second.opportunities[0]!.stage).toBe('ganho')
-      expect(second.opportunities[0]!.created_at).toBe(original?.created_at)
+      const atualizado = 'opportunities' in second ? second.opportunities : []
+
+      expect(atualizado).toHaveLength(1)
+      expect(atualizado[0]!.stage).toBe('ganho')
+      expect(atualizado[0]!.created_at).toBe(original?.created_at)
     })
   })
 
   it('totais separam aberto de ganho e ignoram perdido', () => {
     const rows: CrmOpportunity[] = [
-      { contact_phone: '1', created_at: 0, currency: 'BRL', id: 'a', stage: 'novo', title: 'a', updated_at: 0, value_cents: 1000 },
-      { contact_phone: '2', created_at: 0, currency: 'BRL', id: 'b', stage: 'ganho', title: 'b', updated_at: 0, value_cents: 500 },
-      { contact_phone: '3', created_at: 0, currency: 'BRL', id: 'c', stage: 'perdido', title: 'c', updated_at: 0, value_cents: 999 }
+      { contact_phone: '1', created_at: 0, currency: 'BRL', id: 'a', lost_reason: '', stage: 'novo', title: 'a', updated_at: 0, value_cents: 1000 },
+      { contact_phone: '2', created_at: 0, currency: 'BRL', id: 'b', lost_reason: '', stage: 'ganho', title: 'b', updated_at: 0, value_cents: 500 },
+      { contact_phone: '3', created_at: 0, currency: 'BRL', id: 'c', lost_reason: 'preco', stage: 'perdido', title: 'c', updated_at: 0, value_cents: 999 }
     ]
 
     expect(pipelineTotals(rows)).toEqual({ openCents: 1000, wonCents: 500 })
@@ -108,18 +110,18 @@ describe('funil do CRM no disco', () => {
   it('exige motivo quando a oportunidade vai para perdido', () => {
     const result = normalizeOpportunity(opportunity({ stage: 'perdido' }), 1)
 
-    expect(result.error).toBe('lost_reason_required')
+    expect('error' in result && result.error).toBe('lost_reason_required')
   })
 
   it('guarda o motivo de perda e o mostra na oportunidade', () => {
     const result = normalizeOpportunity(opportunity({ lost_reason: '  preço  ', stage: 'perdido' }), 1)
 
-    expect(result.opportunity?.lost_reason).toBe('preço')
+    expect('opportunity' in result ? result.opportunity?.lost_reason : null).toBe('preço')
   })
 
   it('limpa o motivo quando a oportunidade volta para o funil', () => {
     const result = normalizeOpportunity(opportunity({ lost_reason: 'preço', stage: 'negociacao' }), 1)
 
-    expect(result.opportunity?.lost_reason).toBe('')
+    expect('opportunity' in result ? result.opportunity?.lost_reason : null).toBe('')
   })
 })

@@ -54,6 +54,27 @@ testes do CRM acessando `.contacts` sem estreitar a união `{contacts} | {error}
   (`clipboard-ipc`, `plugin-files-ipc`, `spellcheck-dictionary-ipc`) **ficaram de fora**: usam outros
   métodos do `IpcMain` além de `handle`, e trocar o tipo deles quebrou mais do que consertou — revertidos.
 
+## Estado depois da rodada 28
+
+| Medida | Antes (r26) | r27 | r28 |
+|---|---|---|---|
+| erros totais no projeto electron | 27 | 19 | **0** |
+| erros em producao | 2 | 0 | **0** |
+| erros em teste | 25 | 19 | **0** |
+
+O typecheck do projeto electron voltou a ser um criterio citavel. Comando:
+
+```r
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.electron.json
+```r
+
+Uma excecao declarada: `electron/crm-tasks-store.test.ts` esta no `exclude`. Ele e um contrato
+CRUZADO - importa `src/api/crm-tasks.ts` para comparar as duas copias da regra de contagem - e o
+projeto electron exclui `src`. Fica fora do typecheck daqui ate existir um projeto que veja renderer e
+main juntos. Documentado no proprio tsconfig, nao escondido.
+
+---
+
 ## Estado depois da rodada 27
 
 | Medida | Antes | Depois |
