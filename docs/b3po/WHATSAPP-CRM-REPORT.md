@@ -1021,3 +1021,30 @@ testes do listener passavam a porta explicitamente.
 
 **A licao:** teste que passa a configuracao "na mao" nao prova que o app le a configuracao do ambiente. O elo entre
 ambiente e codigo precisa de teste proprio — e este eu nao tinha.
+
+
+## PROVA PONTA A PONTA NO BINARIO — passou (rodada 190)
+
+Com a correcao da porta, a mesma prova que falhou agora passa, no app empacotado:
+
+| checagem | resultado |
+|---|---|
+| POST assinado (HMAC) no listener do app | **200** `{stored: 1, duplicated: 0, ignored: 0}` |
+| reentrega do MESMO evento | **200** `{duplicated: 1, stored: 0}` |
+| POST sem token local | **401** |
+| store do app (via IPC real) | 1 conversa: `Cliente E2E` |
+| tela `/crm` | "Cliente E2E", `+5511987654321`, corpo da mensagem, badge 1, contadores "1 Aberta · 0 Aguardando · 1 nao lidas" |
+
+Evidencia: `docs/b3po/evidence/crm-e2e-webhook.png`.
+
+**O que isso prova:** o caminho HTTP assinado -> ingestao -> store -> tela funciona **no aplicativo compilado**, sem
+WhatsApp e sem credencial.
+
+**O que isso NAO prova:** que o adapter Python consegue postar aqui, porque o adapter precisa das `WHATSAPP_CLOUD_*` para
+estar de pe. O lado dele esta provado em teste unitario (10 testes pytest), nao em execucao real.
+
+### Nota de metodo (terceira vez)
+
+O primeiro screenshot desta rodada **de novo** nao mostrava a secao — ela estava abaixo da dobra e
+`captureBeyondViewport` nao rola o container. Antes de acusar o codigo, medi: `h2` incluia "Conversas" e o store tinha
+`["Cliente E2E"]`. **Verificar antes de culpar** — a licao da rodada 172, aplicada desta vez.
