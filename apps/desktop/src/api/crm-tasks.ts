@@ -120,6 +120,37 @@ export function dueLabel(dueAt: number | null, now: number, locale = 'pt-BR'): s
   return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(dueAt)
 }
 
+/**
+ * Contagem real do quadro: abertas, atrasadas (prazo no passado e ainda abertas) e concluídas.
+ *
+ * Existe do lado do renderer porque a tela precisa do número antes de qualquer escrita, e a mesma regra existe no
+ * store do processo principal (`electron/crm-tasks-store.ts`). Duas cópias de uma regra só continuam iguais se
+ * alguém cobrar: `electron/crm-tasks-store.test.ts` tem um teste que roda as duas sobre a mesma lista e compara.
+ */
+export function taskCounts(
+  tasks: readonly CrmTaskRow[],
+  now: number
+): { done: number; late: number; open: number } {
+  let open = 0
+  let late = 0
+  let done = 0
+
+  for (const task of tasks) {
+    if (task.status === 'concluida') {
+      done += 1
+      continue
+    }
+
+    open += 1
+
+    if (task.due_at !== null && task.due_at < now) {
+      late += 1
+    }
+  }
+
+  return { done, late, open }
+}
+
 const MESSAGES: Record<string, string> = {
   priority_invalid: 'Prioridade inválida.',
   status_invalid: 'Situação inválida.',

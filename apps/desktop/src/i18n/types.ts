@@ -599,6 +599,16 @@ export interface Translations extends NoticeTranslations {
     noResults: string
   }
 
+  /** Faixa de indicadores do CRM (todos derivados do que esta gravado). */
+  crmOverview: {
+    contacts: string
+    lateTasks: string
+    openOpportunities: string
+    openTasks: string
+    openValue: string
+    title: string
+    wonValue: string
+  }
   settings: {
     /** Copia da janela flutuante do atalho global (renderer sem provider de i18n). */
     quickEntryWindow: {

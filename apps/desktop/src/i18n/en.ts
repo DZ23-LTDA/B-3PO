@@ -686,6 +686,15 @@ export const en: Translations = {
     noResults: 'No languages found'
   },
 
+  crmOverview: {
+    contacts: 'Contacts',
+    lateTasks: 'Late tasks',
+    openOpportunities: 'Open deals',
+    openTasks: 'Open tasks',
+    openValue: 'Open value',
+    title: 'CRM at a glance',
+    wonValue: 'Won'
+  },
   settings: {
     crmTasks: {
       add: 'Add task',

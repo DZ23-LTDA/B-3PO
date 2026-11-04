@@ -63,6 +63,7 @@ describe('pt-BR', () => {
       'connectorOffer',
       'connectors',
       'connectorsPage',
+      'crmOverview',
       'cron',
       'errors',
       'firstRun',

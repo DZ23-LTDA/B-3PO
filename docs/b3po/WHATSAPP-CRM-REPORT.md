@@ -400,3 +400,33 @@ mesmo desenho de armazenamento dos outros dois (JSON sob `userData`, gravação 
 **Testes**: `electron/crm-tasks-store.test.ts` com **10 casos** — validação (título, prioridade, situação), prazo
 ausente/ISO/inválido, ordenação completa, contagem de atrasadas, gravação+releitura+remoção, arquivo corrompido e
 arquivo vazio.
+
+
+## Indicadores do CRM — entregue (rodada 142)
+
+Faixa de seis números no topo de `/crm`, todos derivados dos arquivos do usuário: contatos, oportunidades abertas,
+valor em aberto, ganho, tarefas abertas e tarefas atrasadas.
+
+- `src/app/crm/overview.ts` — `summarizeCrm()` puro: conta o que os stores devolveram, não recalcula regra.
+- `src/app/crm/crm-overview.tsx` — carrega os três stores em paralelo; **enquanto não respondem, a faixa não
+  desenha** (número pela metade é pior que número nenhum) e sem bridge ela some inteira em vez de mostrar zeros.
+- "Tarefas atrasadas" fica em `text-destructive` quando há atraso — conferido no app: `rgb(248, 81, 73)` contra
+  `srgb(0.90…)` das demais células.
+
+**Prova com dados reais** (semeados como o usuário criaria: 2 contatos, 1 oportunidade em negociação de R$ 15.000,
+1 ganha de R$ 4.500, 2 tarefas abertas com uma atrasada):
+
+```
+Contatos 2 · Oportunidades abertas 1 · Valor em aberto R$ 15.000,00 ·
+Ganho R$ 4.500,00 · Tarefas abertas 2 · Tarefas atrasadas 1
+```
+
+Evidência: `docs/b3po/evidence/crm-indicadores-pt.png`.
+
+**Erro meu nesta rodada:** usei `text-(--ui-danger)`, um token que **não existe** neste app — a cor não aplicava e
+nada quebrava, o pior tipo de defeito. Troquei por `text-destructive`, e a verificação passou a ser a cor computada,
+não o "parece certo" na captura.
+
+**Duas cópias da mesma regra:** `taskCounts` existe no store (processo principal) e no cliente do renderer. Duas
+cópias só continuam iguais se alguém cobrar, então `electron/crm-tasks-store.test.ts` roda as duas sobre a mesma
+lista e compara.

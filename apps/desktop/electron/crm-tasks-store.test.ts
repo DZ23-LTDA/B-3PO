@@ -156,4 +156,18 @@ describe('tarefas do CRM no disco', () => {
       await rm(dir, { force: true, recursive: true })
     }
   })
+  it('a contagem do renderer e a do store concordam na mesma lista', async () => {
+    // Duas copias da regra so continuam iguais se alguem cobrar: este teste roda as duas sobre o mesmo quadro.
+    const { taskCounts: noRenderer } = await import('../src/api/crm-tasks')
+    const agora = 1_700_000_000_000
+    const base = { contact_phone: '', created_at: agora, notes: '', priority: 'media' as const, updated_at: agora }
+    const lista: CrmTask[] = [
+      { ...base, id: 'a', status: 'aberta', title: 'atrasada', due_at: agora - 1 },
+      { ...base, id: 'b', status: 'aberta', title: 'no prazo', due_at: agora + 1 },
+      { ...base, id: 'c', status: 'aberta', title: 'sem prazo', due_at: null },
+      { ...base, id: 'd', status: 'concluida', title: 'feita', due_at: agora - 1 }
+    ]
+
+    expect(noRenderer(lista as never, agora)).toEqual(taskCounts(lista, agora))
+  })
 })

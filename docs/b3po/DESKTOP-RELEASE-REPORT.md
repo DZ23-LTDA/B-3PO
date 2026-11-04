@@ -1573,3 +1573,20 @@ contatos na mesma página, e era ruído para o usuário) e os nomes de placehold
 
 Verificação: `electron/crm` + `src/app/settings` + `src/i18n` = 94 arquivos / 732 testes; gate 14 ok; MSIX
 reconstruído.
+
+### Rodada 142 — indicadores do CRM, com números que saem do disco
+
+Seis números no topo de `/crm`: contatos, oportunidades abertas, valor em aberto, ganho, tarefas abertas e tarefas
+atrasadas. `summarizeCrm()` é puro e testado; a faixa **não desenha** enquanto os três stores não respondem (número
+pela metade é pior que nenhum) e some inteira sem bridge, em vez de mostrar zeros que seriam mentira.
+
+Prova com dados reais semeados no perfil (2 contatos, R$ 15.000 em negociação, R$ 4.500 ganho, 2 tarefas com 1
+atrasada): a faixa renderizou `Contatos 2 · Oportunidades abertas 1 · Valor em aberto R$ 15.000,00 · Ganho
+R$ 4.500,00 · Tarefas abertas 2 · Tarefas atrasadas 1`. Evidência: `docs/b3po/evidence/crm-indicadores-pt.png`.
+
+**Erro meu, do tipo que não faz barulho:** usei `text-(--ui-danger)` — um token que não existe neste app. A cor
+simplesmente não aplicava e nada quebrava. Troquei por `text-destructive` e passei a verificar a **cor computada**
+(`rgb(248, 81, 73)` na célula de atrasadas contra `srgb(0.90…)` nas outras), não o "parece certo" na captura.
+
+Também registrei a duplicação consciente de `taskCounts` (store do processo principal e cliente do renderer): duas
+cópias de uma regra só continuam iguais se alguém cobrar, então um teste roda as duas sobre a mesma lista e compara.

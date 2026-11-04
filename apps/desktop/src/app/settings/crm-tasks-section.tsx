@@ -255,7 +255,7 @@ export function CrmTasksSection() {
         </Button>
       </div>
 
-      {failure ? <p className="text-sm text-(--ui-danger)">{failure}</p> : null}
+      {failure ? <p className="text-sm text-destructive">{failure}</p> : null}
     </section>
   )
 }

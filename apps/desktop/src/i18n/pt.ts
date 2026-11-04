@@ -534,6 +534,15 @@ export const ptOverrides: TranslationOverrides = {
       noPR: 'Sem PR'
     }
   },
+  crmOverview: {
+    contacts: 'Contatos',
+    lateTasks: 'Tarefas atrasadas',
+    openOpportunities: 'Oportunidades abertas',
+    openTasks: 'Tarefas abertas',
+    openValue: 'Valor em aberto',
+    title: 'CRM em números',
+    wonValue: 'Ganho'
+  },
   settings: {
     providers: {
       connectAccount: 'Conectar uma conta',
