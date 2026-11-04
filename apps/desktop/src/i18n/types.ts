@@ -618,6 +618,16 @@ export interface Translations extends NoticeTranslations {
       targetSession: string
     }
     /** Tarefas do CRM: prazo, prioridade e o vínculo opcional com um contato. */
+    crmConversations: {
+      empty: string
+      loading: string
+      noMessages: string
+      pickOne: string
+      status: { aberta: string; aguardando: string; resolvida: string }
+      subtitle: string
+      title: string
+      unavailable: string
+    }
     crmTasks: {
       showDone: (count: number) => string
       hideDone: string

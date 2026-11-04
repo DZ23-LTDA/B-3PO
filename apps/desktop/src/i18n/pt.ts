@@ -906,6 +906,20 @@ export const ptOverrides: TranslationOverrides = {
       stage: 'Estágio',
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
+    crmConversations: {
+      empty: 'Nenhuma conversa ainda. Quando o WhatsApp oficial estiver conectado, as mensagens aparecem aqui.',
+      loading: 'Carregando conversas…',
+      noMessages: 'Sem mensagens ainda.',
+      pickOne: 'Escolha uma conversa para ler.',
+      status: {
+        aberta: 'Aberta',
+        aguardando: 'Aguardando',
+        resolvida: 'Resolvida',
+      },
+      subtitle: 'Mensagens recebidas e enviadas, ligadas ao contato do CRM.',
+      title: 'Conversas',
+      unavailable: 'As conversas precisam do aplicativo desktop para funcionar.',
+    },
     crmTasks: {
       showDone: (count: number) => `Mostrar ${count} concluíd` + (count === 1 ? 'a' : 'as'),
       hideDone: 'Ocultar concluídas',

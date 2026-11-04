@@ -696,6 +696,20 @@ export const en: Translations = {
     wonValue: 'Won'
   },
   settings: {
+    crmConversations: {
+      empty: 'No conversations yet. Once the official WhatsApp is connected, messages show up here.',
+      loading: 'Loading conversations…',
+      noMessages: 'No messages yet.',
+      pickOne: 'Pick a conversation to read.',
+      status: {
+        aberta: 'Open',
+        aguardando: 'Waiting',
+        resolvida: 'Resolved',
+      },
+      subtitle: 'Incoming and outgoing messages, linked to the CRM contact.',
+      title: 'Conversations',
+      unavailable: 'Conversations need the desktop app to work.',
+    },
     crmTasks: {
       showDone: (count: number) => `Show ${count} done`,
       hideDone: 'Hide done',

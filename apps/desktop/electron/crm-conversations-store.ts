@@ -204,8 +204,11 @@ export function conversationsStorePath(userDataDir: string): string {
 export class CrmConversationStore {
   private readonly file: string
 
-  constructor(userDataDir: string) {
-    this.file = conversationsStorePath(userDataDir)
+  // Recebe o CAMINHO DO ARQUIVO, igual a CrmTaskStore/CrmPipelineStore: quem chama resolve o nome uma vez
+  // (`conversationsStorePath`). Receber diretório aqui criava `<userData>/crm-conversations.json/crm-conversations.json`
+  // — verificado no app empacotado, não no teste.
+  constructor(file: string) {
+    this.file = file
   }
 
   async list(): Promise<CrmConversation[]> {

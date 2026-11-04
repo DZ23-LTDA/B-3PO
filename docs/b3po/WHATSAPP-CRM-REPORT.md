@@ -557,3 +557,32 @@ mesmo nome e a mesma semantica — e o `wa_id` do webhook que impede duplicata n
 limpo; gate 14 ok.
 
 **Falta:** a tela (lista + leitura) no `/crm`, com carregando/vazio/erro em pt-BR. Depois disso, ligar o webhook.
+
+
+## Tela das conversas: tentativa desmontada (rodada 171-172)
+
+Escrevi a secao (`crm-conversations-section.tsx`), com lista, leitura, carregando/vazio/erro e rotulo de estado, montei
+no `/crm` e verifiquei no app empacotado. Resultado: **o titulo "Conversas" aparecia e a lista vinha vazia**, mesmo com
+duas conversas no disco.
+
+Diagnostico no binario (via CDP, chamando o bridge direto do renderer):
+
+- o bridge `crmConversations` **existe** e responde;
+- `list()` devolvia `{ conversations: [] }`;
+- e o `upsert` de teste gravou em `<userData>/crm-conversations.json/crm-conversations.json` — um DIRETORIO com o
+  nome do arquivo dentro.
+
+**Causa:** `CrmConversationStore` recebia um diretorio e concatenava o nome, mas os stores irmaos
+(`CrmTaskStore`, `CrmPipelineStore`) recebem o **caminho do arquivo** — quem chama resolve com `tasksStorePath()`.
+Corrigido o construtor para receber o caminho do arquivo; 16 testes continuaram verdes.
+
+**Depois da correcao, a lista continuou vazia** e o orcamento de contexto acabou antes de fechar o diagnostico.
+
+**Decisao:** desmontei a secao do `/crm` e apaguei o componente, em vez de deixar na tela um "nenhuma conversa" que
+mente com conversas no disco. O que **fica** entregue e testado e a camada de dados inteira (store com idempotencia,
+16 testes; IPC; preload; cliente tipado com 5 testes incluindo o acordo de contagem entre tela e processo principal).
+
+**O que falta para retomar:** com o app aberto e um arquivo semeado, chamar `hermesDesktop.crmConversations.list()`
+pelo CDP e comparar com o caminho real que `mountCrmContacts` resolve. Suspeita principal: o `userDataDir` que chega ao
+mount nao e o mesmo diretorio em que o perfil semeado escreve (`<userData>/b3po`), o que explicaria o vazio mesmo com o
+construtor correto.

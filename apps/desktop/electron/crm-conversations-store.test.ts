@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   conversationCounts,
+  conversationsStorePath,
   CrmConversationStore,
   normalizeConversation,
   parseConversations,
@@ -151,14 +152,14 @@ describe('sortConversations e conversationCounts', () => {
 
 describe('CrmConversationStore', () => {
   it('grava, lê de volta e sobrevive a reinício (mesmo diretório, nova instância)', async () => {
-    const store = new CrmConversationStore(dir)
+    const store = new CrmConversationStore(conversationsStorePath(dir))
     const saved = await store.upsert({
       messages: [mensagem('olá', 'entrada', 1000, 'wamid.1')],
       title: 'Maria Souza',
     })
     expect('conversation' in saved).toBe(true)
 
-    const outra = new CrmConversationStore(dir)
+    const outra = new CrmConversationStore(conversationsStorePath(dir))
     const lista = await outra.list()
     expect(lista).toHaveLength(1)
     expect(lista[0].title).toBe('Maria Souza')
@@ -166,7 +167,7 @@ describe('CrmConversationStore', () => {
   })
 
   it('upsert por id atualiza sem duplicar e preserva created_at', async () => {
-    const store = new CrmConversationStore(dir)
+    const store = new CrmConversationStore(conversationsStorePath(dir))
     const primeiro = await store.upsert({ created_at: 111, id: 'c1', title: 'Maria' })
     if (!('conversation' in primeiro)) {
       throw new Error('esperava conversa')
@@ -180,7 +181,7 @@ describe('CrmConversationStore', () => {
   })
 
   it('remove apaga só a pedida e reclamar de id inexistente', async () => {
-    const store = new CrmConversationStore(dir)
+    const store = new CrmConversationStore(conversationsStorePath(dir))
     await store.upsert({ id: 'a', title: 'A' })
     await store.upsert({ id: 'b', title: 'B' })
     expect(await store.remove('a')).toEqual({ ok: true })
@@ -189,12 +190,12 @@ describe('CrmConversationStore', () => {
   })
 
   it('devolve { error } em vez de lançar quando a entrada é inválida', async () => {
-    const store = new CrmConversationStore(dir)
+    const store = new CrmConversationStore(conversationsStorePath(dir))
     expect(await store.upsert({})).toEqual({ error: 'A conversa precisa de um título (nome ou telefone).' })
   })
 
   it('lista vazia quando o arquivo não existe — instalação nova não é erro', async () => {
-    const store = new CrmConversationStore(join(dir, 'nunca-criado'))
+    const store = new CrmConversationStore(conversationsStorePath(join(dir, 'nunca-criado')))
     expect(await store.list()).toEqual([])
   })
 })
