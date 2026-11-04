@@ -7,9 +7,9 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | 139 |
+| Commits DZ23 | **229** (HEAD `119a6ab22d`) |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
-| Testes | desktop: bots 960 · i18n 104 · store/sdk 2307 · CRM 66 · mobile 101 (+5 live pulados) |
+| Testes | **regressao de fechamento: `src/i18n` + `src/app/crm` + `src/app/settings` = 96 arquivos / 750 testes, verdes**. Historicos: bots 960 · store/sdk 2307 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
 
 ## Frentes e estado
@@ -73,3 +73,31 @@ bloqueado, keystore, cofre seguro, ticket de dispositivo no WS, tool calling, Wh
 vulnerabilidades dev) e os comandos de revisão (`scripts/check`, vitest do CRM e do mobile).
 
 Nada de "pronto": o status declarado no PR é **NOT_READY**, com a lista do que falta.
+
+## Delta desta sessao (rodadas ~100-160)
+
+O que mudou depois do estado de 139 commits:
+
+**CRM entregue com prova no app empacotado:** pagina propria em `/crm` com rota e rotulo na sidebar; indicadores
+reais; funil em 7 colunas com contagem e total; filtro por texto e etapa com contagens honestas; tarefas com prazo,
+prioridade e vinculo opcional; aviso **"contato excluido"** em oportunidade e tarefa.
+
+**Dois bugs encontrados em codigo meu, nao no upstream:**
+
+1. o aviso de contato excluido comparava telefone por texto cru, entao contato gravado normalizado contra
+   oportunidade com mascara acusava "excluido" para contato que existia. Corrigido comparando digitos; provado
+   vermelho na base (3 de 14 testes) e verificado no binario com perfil semeado.
+2. plural "1 atrasada(s)"; corrigido e coberto por teste que tambem foi provado vermelho na base.
+
+**Outros quatro bugs reais corrigidos:** `/crm` caia numa sessao chamada "crm" (faltava `<Route>`), `traceWakeStep`
+quebrava com valor nao-`Promise`, `tray-host` sem guarda de plataforma (e D-Bus de Linux), `_keys.desktop.json`
+desatualizado. Mais um token CSS inventado (`text-(--ui-danger)`) que nao fazia nada.
+
+**Medicao corrigida, erro meu:** o baseline inicial de 56 falhas estava inflado porque a suite rodou com
+`HERMES_PYTHON` apontando para um Python sem `ruamel.yaml`. O numero real e **43**.
+
+**Documentacao:** `RESUMO-PARA-O-OWNER.md` (uma pagina), `guia/08-o-que-funciona-hoje.md` (validado x parcial x
+planejado), `PT-CATALOG-DEBT.md` e `BASELINE-DESKTOP-SUITE.md` atualizados.
+
+**O que continua aberto:** conversas do CRM (conta WhatsApp Business/Cloud API), iOS (macOS/Xcode), assinatura
+(certificado), keystore Android de release, e instalacao/atualizacao/desinstalacao nao testadas.
