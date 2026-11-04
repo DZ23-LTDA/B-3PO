@@ -16,7 +16,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 | Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | **IMPLEMENTED + TESTED + VALIDATED** | 14 |
 | Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | **IMPLEMENTED + TESTED + VALIDATED** | 18 |
 | Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | **IMPLEMENTED + TESTED + VALIDATED** | 10 |
-| Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | IMPLEMENTED + TESTED | 17 |
+| Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | **IMPLEMENTED + TESTED + VALIDATED** | 17 |
 | Contatos | `apps/desktop/electron/crm-contacts-store.ts` | `userData/b3po/crm-contacts.json` | IMPLEMENTED + TESTED | 6 |
 | Conversas | `apps/desktop/electron/crm-conversations-store.ts` | `userData/b3po/crm-conversations.json` | IMPLEMENTED + TESTED | 24 |
 | Oportunidades (funil) | `apps/desktop/electron/crm-pipeline-store.ts` | `userData/b3po/crm-pipeline.json` | IMPLEMENTED + TESTED | 10 |
@@ -110,6 +110,21 @@ liquidação. É coerente com venda à vista, mas não é uma decisão de produt
 `receivableForSale`. Prazo de pagamento por venda está pendente.
 
 Capturas: `finance-01-receita-aberta.png`, `finance-02-liquidado.png` em `docs/b3po-preview/`.
+
+### Agenda (rodada 17)
+
+| Passo | Resultado observado |
+|---|---|
+| `/agenda` renderiza | recurso, serviço, data, hora, duração |
+| marcar 09:00 cadeira-1 | aparece na lista: `Hoje (1)` |
+| marcar 09:30 cadeira-1 | recusado: **"Horário já ocupado: 09:00–10:00 (cadeira-1)"** |
+| marcar 09:30 cadeira-2 | aceito — dois compromissos, recursos diferentes |
+| estado final | `[["cadeira-1","marcado"],["cadeira-2","marcado"]]` |
+
+A recusa **nomeia** o compromisso que ocupa o horário. Recusar sem dizer qual deixaria o operador
+tentando horários no escuro — e o teste unitário prova a regra, não a mensagem.
+
+Capturas: `agenda-01-inicial.png`, `agenda-02-marcado.png`, `agenda-03-conflito.png`.
 
 ## Contratos compartilhados
 
