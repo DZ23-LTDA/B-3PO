@@ -613,13 +613,16 @@ export const ptOverrides: TranslationOverrides = {
       },
       approvals: {
         mode: 'Modo de aprovação',
-        timeout: 'Tempo limite da aprovação'
+        timeout: 'Tempo limite da aprovação',
+        mcpReloadConfirm: 'Confirmar recarregamento de MCP'
       },
       security: {
-        redactSecrets: 'Ocultar segredos'
+        redactSecrets: 'Ocultar segredos',
+        allowPrivateUrls: 'Permitir URLs privadas'
       },
       checkpoints: {
-        enabled: 'Pontos de restauração'
+        enabled: 'Pontos de restauração',
+        maxSnapshots: 'Limite de pontos de restauração'
       },
       toolOutput: {
         maxBytes: 'Limite de saída do terminal',

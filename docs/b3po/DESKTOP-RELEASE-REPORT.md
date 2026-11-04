@@ -1337,3 +1337,25 @@ O que sobra são chaves que o parser não resolve por serem multi-linha no ingl�
 Evidência: `docs/b3po/evidence/voz-pt.png` (Voz › Conversa por voz, com o aviso de custo por minuto).
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 132 — catálogo de campos: 106/106 rótulos e 49/49 descrições
+
+Fechei os últimos três rótulos que faltavam (`approvals.mcpReloadConfirm`, `security.allowPrivateUrls`,
+`checkpoints.maxSnapshots`) e conferi o resto com o verificador.
+
+**Número final, medido por script**: **106 de 106 rótulos** e **49 de 49 descrições** — e, importante,
+**zero valores idênticos ao inglês**, ou seja, nada foi "traduzido" copiando.
+
+O verificador também aponta **duas chaves falsas** que ele mesmo inventa ao ler valores multi-linha
+(`voice.chained`, `updates.nonInteractiveLocalChanges`). Conferi no arquivo: as traduções reais dessas duas existem
+(`voiceChatMode`, e o texto de `updates`). É limitação do meu parser, não do catálogo — registro para não inflar
+número nenhum.
+
+### O que sobrou em inglês no painel
+
+Só o que **não é do catálogo do frontend**:
+- descrições e valores de enum que vêm do **schema do backend** (`terminal.backend`, `memory.provider`,
+  `updates.nonInteractiveLocalChanges` → "Stash"), provado em duas rodadas que não são sobrescrevíveis daqui;
+- textos de tela fora do catálogo (Quick Entry, que precisa de locale pelo bridge).
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
