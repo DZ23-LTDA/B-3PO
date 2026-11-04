@@ -5,9 +5,10 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
+  CrmConversationStore,
+  NOTES_MAX,
   conversationCounts,
   conversationsStorePath,
-  CrmConversationStore,
   normalizeConversation,
   parseConversations,
   sortConversations,
@@ -197,5 +198,42 @@ describe('CrmConversationStore', () => {
   it('lista vazia quando o arquivo não existe — instalação nova não é erro', async () => {
     const store = new CrmConversationStore(conversationsStorePath(join(dir, 'nunca-criado')))
     expect(await store.list()).toEqual([])
+  })
+})
+
+describe('nota interna', () => {
+  const agora = 1_700_000_000_000
+  const base = { id: 'c1', title: 'Maria Souza', contact_phone: '+5511999991111' }
+
+  it('guarda a nota e corta no limite, sem estourar o arquivo', () => {
+    const resultado = normalizeConversation({ ...base, notes: 'x'.repeat(NOTES_MAX + 50) }, agora)
+
+    if ('error' in resultado) {
+      throw new Error(resultado.error)
+    }
+    expect(resultado.conversation.notes).toHaveLength(NOTES_MAX)
+  })
+
+  it('nota ausente ou de tipo errado vira texto vazio, nao corrompe a conversa', () => {
+    const semNota = normalizeConversation(base, agora)
+    const notaNumero = normalizeConversation({ ...base, notes: 42 }, agora)
+
+    if ('error' in semNota || 'error' in notaNumero) {
+      throw new Error('conversa deveria ser valida')
+    }
+    expect(semNota.conversation.notes).toBe('')
+    expect(notaNumero.conversation.notes).toBe('')
+  })
+
+  it('a nota sobrevive ao ciclo salvar/ler', () => {
+    const texto = 'Cliente pediu desconto; falar com o financeiro antes de responder.'
+    const resultado = normalizeConversation({ ...base, notes: texto }, agora)
+
+    if ('error' in resultado) {
+      throw new Error(resultado.error)
+    }
+
+    const arquivo = JSON.stringify({ schema_version: 1, conversations: [resultado.conversation] })
+    expect(parseConversations(arquivo).conversations[0].notes).toBe(texto)
   })
 })

@@ -619,6 +619,9 @@ export interface Translations extends NoticeTranslations {
     }
     /** Tarefas do CRM: prazo, prioridade e o vínculo opcional com um contato. */
     crmConversations: {
+      notePlaceholder: string
+      notes: string
+      saveNote: string
       filter: { aguardando: string; abertas: string; todas: string }
       noResults: string
       search: string

@@ -29,6 +29,7 @@ export function CrmConversationsSection() {
   const [failure, setFailure] = useState<null | string>(null)
   const [aberta, setAberta] = useState<null | string>(null)
   const [busca, setBusca] = useState('')
+  const [nota, setNota] = useState('')
   const [filtro, setFiltro] = useState<ConversationFilter>('todas')
 
   const carregar = useCallback(async () => {
@@ -72,6 +73,12 @@ export function CrmConversationsSection() {
   const contagens = useMemo(() => conversationCounts(rows ?? []), [rows])
   const visiveis = filterConversations(rows ?? [], filtro, busca)
   const selecionada = rows?.find(row => row.id === aberta) ?? null
+
+  // a nota acompanha a conversa selecionada
+  useEffect(() => {
+    setNota(selecionada?.notes ?? '')
+  }, [selecionada?.id, selecionada?.notes])
+
 
   return (
     <section className="mt-6 flex flex-col gap-3 border-t border-(--ui-border) pt-6">
@@ -208,6 +215,26 @@ export function CrmConversationsSection() {
                         {section.resolve}
                       </Button>
                     )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-(--ui-text-secondary)">{section.notes}</span>
+                    <textarea
+                      aria-label={section.notes}
+                      className="min-h-16 w-full rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1.5 text-sm text-foreground"
+                      onChange={event => setNota(event.target.value)}
+                      placeholder={section.notePlaceholder}
+                      value={nota}
+                    />
+                    <div>
+                      <Button
+                        disabled={nota === (selecionada.notes ?? '')}
+                        onClick={() => void alterar(selecionada, { notes: nota })}
+                        size="sm"
+                        type="button"
+                      >
+                        {section.saveNote}
+                      </Button>
+                    </div>
                   </div>
                   {selecionada.messages.length === 0 ? (
                     <p className="text-sm text-(--ui-text-tertiary)">{section.noMessages}</p>

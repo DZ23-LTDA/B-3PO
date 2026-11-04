@@ -11,7 +11,7 @@ const conversa = (status: 'aberta' | 'aguardando' | 'resolvida', unread = 0) => 
   id: `c_${status}_${unread}`,
   last_message_at: null,
   last_message_preview: '',
-  messages: [],
+  messages: [], notes: '',
   status,
   title: 'x',
   unread,

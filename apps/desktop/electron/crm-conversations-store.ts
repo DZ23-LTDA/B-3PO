@@ -29,6 +29,8 @@ export interface CrmMessage {
   sent_at: number
 }
 
+export const NOTES_MAX = 2000
+
 export interface CrmConversation {
   /** Telefone do contato (o índice do CRM), vazio quando não há contato vinculado. */
   contact_phone: string
@@ -38,6 +40,8 @@ export interface CrmConversation {
   last_message_at: number | null
   last_message_preview: string
   messages: CrmMessage[]
+  /** Nota interna da equipe. Nunca vai para o cliente, nunca e enviada ao WhatsApp. */
+  notes: string
   /** Rótulo livre: nome do contato ou o número, quando não há contato. */
   title: string
   status: ConversationStatus
@@ -133,6 +137,7 @@ export function normalizeConversation(
       last_message_at: last ? last.sent_at : null,
       last_message_preview: last ? previewOf(last.body) : '',
       messages,
+      notes: text(input['notes']).slice(0, NOTES_MAX),
       status,
       title,
       unread: typeof input['unread'] === 'number' && input['unread'] > 0 ? Math.floor(input['unread']) : 0,

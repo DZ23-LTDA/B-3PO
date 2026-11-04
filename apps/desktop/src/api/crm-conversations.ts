@@ -27,6 +27,8 @@ export interface CrmConversationRow {
   last_message_at: number | null
   last_message_preview: string
   messages: CrmMessageRow[]
+  /** Nota interna da equipe; nunca vai para o cliente. Opcional: dado gravado antes deste campo nao tem. */
+  notes?: string
   status: ConversationStatus
   title: string
   unread: number

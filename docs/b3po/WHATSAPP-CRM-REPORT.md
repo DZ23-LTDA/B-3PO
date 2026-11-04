@@ -1101,3 +1101,32 @@ Botoes de filtro mostram o estado ativo (Todos / Abertas / Aguardando / Resolvid
 de estado que ja existia — sem texto duplicado no catalogo.
 
 **Medido:** `src/i18n` + `src/app/crm` = 19 arquivos / 145 testes; gate 14 ok; build e MSIX refeitos.
+
+
+## Nota interna por conversa (rodada 197)
+
+O ultimo item simples do 14.1: nota da equipe, guardada junto da conversa.
+
+- campo `notes` no store, **cortado em 2000 caracteres** (`NOTES_MAX`), valor de tipo errado vira texto vazio;
+- leitura tolerante no cliente (`notes?`) — dado gravado antes do campo existir nao quebra a tela;
+- botao **desabilitado quando nada mudou**: nao ha o que salvar;
+- o texto diz na propria etiqueta que **nunca vai para o cliente**.
+
+**Prova no app empacotado** (`docs/b3po/evidence/crm-nota-interna.png`): campo presente, nota digitada,
+`Salvar nota` clicado, e o store devolveu
+`{"notes":"Cliente pediu 10% de desconto; falar com o financeiro antes de responder."}`.
+
+**3 testes novos** no store (limite de tamanho, tipo errado, sobrevive ao ciclo salvar/ler) -> 19 no arquivo.
+
+### O que deu errado antes de dar certo (e por que insisto em provar no binario)
+
+1. usei um helper `texto()` que nao existe — o do store e `text()`. O `tsc` pegou, mas eu tinha rodado os testes
+   ANTES de checar os tipos;
+2. os testes do store quebraram porque a conversa gravada ganhou `notes` — 12 falharam por fixture desatualizada;
+3. escrevi 3 testes contra a assinatura ERRADA: `normalizeConversation` exige `title` e devolve uniao
+   (`{conversation}` | `{error}`). Os testes falharam por erro meu, nao do codigo; reescrevi os testes, nao o codigo;
+4. **o bloco da nota nao foi inserido**: meu `str.replace` nao casou e o script imprimiu "ok" do mesmo jeito. So a
+   verificacao no binario mostrou `TEM CAMPO: false`. Corrigi com edicao por ancora exata; depois `TEM CAMPO: true`
+   e o store recebeu o texto.
+
+Licao que ja estava escrita e repeti: **script que imprime sucesso nao prova que alterou algo.** Medir o efeito, nao o log.

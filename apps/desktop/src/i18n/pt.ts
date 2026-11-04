@@ -907,6 +907,9 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
     crmConversations: {
+      notePlaceholder: 'Nota interna (nunca vai para o cliente)',
+      notes: 'Notas internas',
+      saveNote: 'Salvar nota',
       filter: { aguardando: 'Aguardando', abertas: 'Abertas', todas: 'Todas' },
       noResults: 'Nada encontrado nesta busca.',
       search: 'Buscar conversas…',

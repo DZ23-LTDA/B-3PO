@@ -697,6 +697,9 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      notePlaceholder: 'Internal note (never sent to the customer)',
+      notes: 'Internal notes',
+      saveNote: 'Save note',
       filter: { aguardando: 'Waiting', abertas: 'Open', todas: 'All' },
       noResults: 'Nothing matches this search.',
       search: 'Search conversations…',
