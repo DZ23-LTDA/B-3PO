@@ -1652,3 +1652,19 @@ Prova no app empacotado com perfil semeado (oportunidade apontando para telefone
 **Erro meu:** o primeiro `replace` não casou a linha do cartão e o script imprimiu "cartão marcado" mesmo assim —
 a verificação no app mostrou a marca ausente. Corrigi o alvo, confirmei por `grep` no fonte e só então pela
 captura. É o tipo de falso positivo que só a verificação externa pega.
+
+### Rodada 148 — tentativa revertida: marcar contato excluído nas tarefas
+
+Tentei estender a marca "contato excluído" (rodada 147, oportunidades) para as **tarefas**. A edição de copy caiu na
+seção errada do catálogo duas vezes seguidas (`crmTasks` × `crmPipeline`), o `tsc` acusou as duas, e eu **revertí**
+tudo em vez de insistir: `git status` voltou vazio, HEAD continua `12b16e3651`, e as áreas afetadas seguem verdes
+(**95 arquivos / 741 testes** em `src/app/crm` + `src/app/settings` + `src/i18n`).
+
+**O que ficou pendente, com o diagnóstico pronto:** `crm-tasks-section.tsx` linha ~185 monta o subtítulo da tarefa
+com `task.contact_phone` direto. O `isKnownContact()` já existe em `src/app/crm/filters.ts` e já é usado no cartão do
+funil; falta só a chave `contactRemoved` dentro de `settings.crmTasks` (ela existe em `settings.crmPipeline`) e a
+troca no array do subtítulo.
+
+**Por que parei:** duas tentativas de inserir a chave produziram catálogo inválido, e o custo de continuar às cegas
+(contexto curto) era maior que o benefício de uma linha de texto. Reverter e registrar é mais honesto que deixar meio
+caminho quebrado.
