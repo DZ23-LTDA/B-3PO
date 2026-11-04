@@ -944,3 +944,28 @@ inglês está escrito dentro do `en.ts`, então exige extração (as outras trad
 feitas de outra forma).
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 116 — página de Conectores em pt (backlog de locales fechado)
+
+**`pt_connectors`** traduz a página inteira — 11 mil bytes de inglês que moravam dentro do `en.ts`, não em um
+`en_connectors.ts`. Entraram busca e filtros, os segmentos (Todos / Disponíveis / Conectados / Desligados), o estado
+de cada app (card: gerenciado, catálogo, MCP personalizado, plugin; 13 estados; verbos; motivos), a página vazia,
+o formulário completo de MCP personalizado (comando, argumentos, variáveis de ambiente, cabeçalhos, tipos STDIO e
+HTTP com streaming, autenticação OAuth/Bearer), os diálogos (desconectar, remover, onde roda, regras da organização,
+conflito de edição) e a lista de ferramentas com facetas e vocabulário (leitura, escrita, destrutiva, repetível,
+externa).
+
+### O que o teste pegou
+
+Quatro funções tinham placeholder a mais que o inglês, todas pelo mesmo motivo — plural por condicional em
+português custa uma interpolação extra: `card.fact.toolsOff`, `card.fact.toolsOn`, `tools.conflictBody` e
+`tools.footerDirty`. Corrigi **espelhando a expressão do inglês** em vez de reescrevê-la em português.
+
+O `tsc` também pegou uma chave que eu inventei (`onLine`) e oito que faltaram (`retry`, `goneTitle`, `goneBody`,
+`remove`, `offTitle`, `offBody`, `needsAuthTitle`, `needsAuthBody`) — porque só tinha lido os primeiros 9 mil
+bytes do bloco. Comparei os conjuntos de chaves por script antes de confiar.
+
+**Backlog de locales: 26 de 26 famílias com português.** O que continua fora do idioma agora é copy escrita
+direto em componente (não catalogada), que é outro trabalho e está no relatório.
+
+Verificação: `src/i18n` 112 + `src/app/settings` 613 = 725 testes verdes; gate 14 ok; MSIX reconstruído.

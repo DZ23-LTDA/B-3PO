@@ -15,6 +15,7 @@ import { ptCatalog } from './pt_catalog'
 import { ptClarify } from './pt_clarify'
 import { ptConnectorAccounts } from './pt_connector_accounts'
 import { ptConnectorCard } from './pt_connector_card'
+import { ptConnectors } from './pt_connectors'
 import { ptCronControl } from './pt_cron_control'
 import { ptErrorCodes } from './pt_error_codes'
 import { ptErrorLayers } from './pt_error_layers'
@@ -37,7 +38,7 @@ import { ptUpdateChannel } from './pt_update_channel'
 
 export const ptOverrides: TranslationOverrides = {
   connectors: ptConnectorCard,
-  connectorsPage: { accounts: ptConnectorAccounts },
+  connectorsPage: ptConnectors,
   catalog: ptCatalog,
   onboarding: ptOnboarding,
   firstRun: ptFirstRun,
