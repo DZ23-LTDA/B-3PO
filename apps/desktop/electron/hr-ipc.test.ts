@@ -42,14 +42,18 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>) => Promise<T>):
 }
 
 describe('IPC de RH', () => {
-  it('registra os cinco canais', async () => {
+  // r191: eram cinco canais; `offboarding` e `treinamentos` entraram para o GOAL §19.
+  // O teste continua sendo a lista FECHADA de canais — protege contra canal acidental, nao um numero.
+  it('registra exatamente os canais de RH', async () => {
     await withIpc(async ipc => {
       expect(ipc.channels()).toEqual([
         'hermes:hr:departments',
         'hermes:hr:employees',
+        'hermes:hr:offboarding',
         'hermes:hr:policy',
         'hermes:hr:saveDepartment',
-        'hermes:hr:saveEmployee'
+        'hermes:hr:saveEmployee',
+        'hermes:hr:treinamentos'
       ])
     })
   })

@@ -13,6 +13,7 @@ import type { IpcMainInvokeEvent } from 'electron'
 import type { Department, Employee } from './hr-store'
 import { HR_OPERATIONS, canDecide, type HrOperation } from './hr-policy'
 import type { IpcRegistrar } from './ipc-types'
+import { avaliarOffboarding, treinamentosImpeditivos, type ChecklistOffboarding, type Treinamento } from './hr-lifecycle'
 
 export interface HrStoreLike {
   departments: (tenantId?: string) => Promise<Department[]>
@@ -53,6 +54,48 @@ export function registerHrIpc(ipcMain: IpcRegistrar, store: HrStoreLike): void {
       }
 
       return canDecide(op, typeof reason === 'string' ? reason : '')
+    }
+  )
+  // Offboarding: avalia o checklist de devolucao e diz o que falta, com os pendentes nomeados.
+  //
+  // NAO encerra o desligamento: quem decide isso e uma pessoa. O canal responde "pode encerrar?" e "o que
+  // falta" — as duas perguntas que o RH precisa responder antes de assinar.
+  ipcMain.handle(
+    'hermes:hr:offboarding',
+    async (_event: IpcMainInvokeEvent, payload: unknown) => {
+      const raw = (payload ?? {}) as Record<string, unknown>
+      const checklist: ChecklistOffboarding = {
+        concluidos: Array.isArray(raw['concluidos']) ? raw['concluidos'] : [],
+        exigidos: Array.isArray(raw['exigidos']) ? raw['exigidos'] : []
+      }
+
+      const resultado = avaliarOffboarding(checklist)
+
+      // Narrowing por `in`: o discriminante `pode_encerrar` nao bastou para o TS estreitar aqui.
+      if (!('pendentes' in resultado)) {
+        return { bloqueia_acesso: false, pendentes: [] as string[], pode_encerrar: true }
+      }
+
+      return {
+        bloqueia_acesso: resultado.pendentes.includes('acesso_sistemas'),
+        pendentes: resultado.pendentes,
+        pode_encerrar: false
+      }
+    }
+  )
+
+  // Treinamentos: quais obrigatorios estao pendentes ou vencidos numa data de referencia.
+  //
+  // `agora` vem no payload em vez de sair do relogio: dois relatorios do mesmo dia tem que concordar.
+  ipcMain.handle(
+    'hermes:hr:treinamentos',
+    async (_event: IpcMainInvokeEvent, payload: unknown) => {
+      const raw = (payload ?? {}) as Record<string, unknown>
+      const treinamentos = Array.isArray(raw['treinamentos']) ? (raw['treinamentos'] as Treinamento[]) : []
+      const agora = Number(raw['agora'])
+      const referencia = Number.isFinite(agora) && agora > 0 ? agora : Date.now()
+
+      return { impeditivos: treinamentosImpeditivos(treinamentos, referencia) }
     }
   )
 }
