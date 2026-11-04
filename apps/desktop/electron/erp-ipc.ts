@@ -30,6 +30,7 @@ import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
+
 import { registerAutomationIpc } from './automation-ipc'
 import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
@@ -152,6 +153,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     sales
   })
   registerAfterSalesIpc(ipcMain, { actorOf, afterSales, sales })
+
   const marketing = new MarketingStore(marketingStorePath(userDataDir))
 
   registerMarketingIpc(ipcMain, { marketing })

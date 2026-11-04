@@ -9,16 +9,19 @@ import { CrmOverview } from './crm-overview'
  * Reusa as seções que já vivem em Configurações — contatos e funil — em vez de reimplementar as duas. O que
  * muda é o lugar: uma página própria, que não obriga o usuário a caçar o CRM dentro de Configurações.
  *
- * O que ainda NÃO existe aqui: conversas (depende do canal oficial do WhatsApp) e tarefas. Aparecer sem
- * função seria pior do que não aparecer.
+ * Conversas ficam na própria página, lendo o store canônico. O texto antigo dizia que elas "entram
+ * quando o canal oficial do WhatsApp estiver conectado" — mas a seção já estava renderizada logo
+ * abaixo. O que faltava era o preload expor a ponte, não a tela existir.
+ *
+ * O que ainda NÃO existe aqui: tarefas.
  */
 export function CrmView() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
       <h1 className="text-lg font-semibold text-foreground">CRM</h1>
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-        Contatos e funil ficam neste computador. As conversas entram quando o canal oficial do WhatsApp estiver
-        conectado.
+        Contatos, funil e conversas ficam neste computador. Nada sobe para a nuvem sem você conectar um
+        canal.
       </p>
 
       {/* Ja estamos na pagina do CRM: nao mostrar o atalho para ela mesma. */}
