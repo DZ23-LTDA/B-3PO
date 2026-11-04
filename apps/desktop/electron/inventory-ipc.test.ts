@@ -39,12 +39,20 @@ async function withStore<T>(run: (store: InventoryStore) => Promise<T>): Promise
 }
 
 describe('IPC do estoque', () => {
-  it('registra os tres canais e nada alem deles', () => {
+  // r186: eram tres canais; inventario entrou para reconciliar a contagem fisica com o ledger (GOAL §14).
+  // O teste continua sendo a lista fechada de canais - o que ele protege e que um canal apareca por acidente,
+  // nao um numero especifico. Atualizado com a razao, nao afrouxado para 	oContain.
+  it('registra exatamente os canais do estoque', () => {
     const ipc = fakeIpc()
 
     registerInventoryIpc(ipc, { append: async () => ({ error: 'x' }), balances: async () => ({}), list: async () => [] })
 
-    expect(ipc.channels()).toEqual(['hermes:inventory:append', 'hermes:inventory:balances', 'hermes:inventory:list'])
+    expect(ipc.channels()).toEqual([
+      'hermes:inventory:append',
+      'hermes:inventory:balances',
+      'hermes:inventory:inventario',
+      'hermes:inventory:list'
+    ])
   })
 
   it('saldo comeca vazio e sobe depois da entrada', async () => {
