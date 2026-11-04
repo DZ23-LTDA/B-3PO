@@ -728,6 +728,31 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    agentes: {
+      aboveOwnLevel: string
+      add: string
+      bot: string
+      botAsOwner: string
+      botCannotGrant: string
+      deactivate: string
+      empty: string
+      hint: string
+      human: string
+      humanOnly: string
+      inactive: string
+      insufficientLevel: string
+      lastOwner: string
+      level: string
+      loadFailed: string
+      mcpNote: string
+      name: string
+      nameRequired: string
+      noScopeWarning: string
+      scopes: string
+      title: string
+      unavailable: string
+      youAre: string
+    },
     atendimento: {
       close: string
       closeRequiresResolved: string
