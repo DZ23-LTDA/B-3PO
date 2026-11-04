@@ -1292,3 +1292,17 @@ Campo `tags` no store, com validacao que existe por um motivo pratico:
 
 1. as constantes `TAG_MAX_CHARS`/`TAGS_MAX` nao entraram no import do teste — um teste passou a comparar com `undefined` e falhou; **o teste pegou**;
 2. a fixture do teste do cliente ficou sem `tags` e o `tsc` acusou. Reescrevi a fixture, nao o tipo.
+
+
+### Etiquetas na tela (rodada 218)
+
+Campo de etiquetas na conversa, salvo ao sair do campo (`onBlur`). Sem botao: a acao e obvia e um botao a mais so cria
+duvida sobre quando salvar.
+
+**Prova no app empacotado** (`docs/b3po/evidence/crm-etiquetas.png`): digitei `VIP, vip, orcamento` e o store devolveu
+`{"tags":["VIP","orcamento"]}` — **o duplicado `vip` foi descartado**, que e a regra que impede o filtro de mentir.
+Usuario que digita a mesma etiqueta em caixa diferente ve uma so.
+
+**Quinta vez que meu instrumento mentiu, e a mais instrutiva:** o primeiro teste devolveu `tags: []` e eu quase conclui
+que o app nao salvava. Era o **meu evento**: disparei `blur`, que nao borbulha; React escuta `focusout`. Troquei o evento
+e o app gravou na primeira tentativa. O codigo estava certo; a medicao errada.

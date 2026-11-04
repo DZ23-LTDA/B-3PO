@@ -1393,6 +1393,8 @@
   "settings.crmConversations.status.aguardando": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.status.resolvida": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.subtitle": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmConversations.tags": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmConversations.tagsPlaceholder": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.title": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.unavailable": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.waitingReply": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

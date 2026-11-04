@@ -697,6 +697,8 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      tags: 'Tags',
+      tagsPlaceholder: 'vip, orcamento, retorno',
       indicatorsTitle: 'At a glance',
       newConversations: 'New in 7 days',
       waitingReply: 'Waiting for reply',

@@ -233,7 +233,30 @@ export function CrmConversationsSection() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold text-(--ui-text-secondary)">{section.notes}</span>
+                    <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-(--ui-text-secondary)">{section.tags}</span>
+                  <input
+                    aria-label={section.tags}
+                    className="w-full rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1 text-sm text-foreground"
+                    defaultValue={(selecionada.tags ?? []).join(', ')}
+                    onBlur={event => {
+                      const atuais = (selecionada.tags ?? []).join(', ')
+                      if (event.target.value === atuais) {
+                        return
+                      }
+                      void alterar(selecionada, {
+                        tags: event.target.value
+                          .split(',')
+                          .map(pedaco => pedaco.trim())
+                          .filter(pedaco => pedaco !== ''),
+                      })
+                    }}
+                    placeholder={section.tagsPlaceholder}
+                    type="text"
+                  />
+                </div>
+
+                <span className="text-xs font-semibold text-(--ui-text-secondary)">{section.notes}</span>
                     <textarea
                       aria-label={section.notes}
                       className="min-h-16 w-full rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1.5 text-sm text-foreground"
