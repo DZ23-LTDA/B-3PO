@@ -8,7 +8,12 @@ import {
   saveConversation,
   type CrmConversationRow,
 } from '@/api/crm-conversations'
-import { filterConversations, type ConversationFilter } from '@/app/crm/conversation-filters'
+import {
+  filterConversations,
+  matchesTag,
+  usedTags,
+  type ConversationFilter,
+} from '@/app/crm/conversation-filters'
 import { needsReply, responseTime, responseTimeLabel } from '@/app/crm/response-time'
 import { CrmIndicators } from '@/app/crm/indicators'
 import { Button } from '@/components/ui/button'
@@ -33,6 +38,7 @@ export function CrmConversationsSection() {
   const [busca, setBusca] = useState('')
   const [nota, setNota] = useState('')
   const [filtro, setFiltro] = useState<ConversationFilter>('todas')
+  const [etiquetaFiltro, setEtiquetaFiltro] = useState('')
 
   const carregar = useCallback(async () => {
     if (!conversationsAvailable()) {
@@ -73,7 +79,10 @@ export function CrmConversationsSection() {
 
   const agora = Date.now()
   const contagens = useMemo(() => conversationCounts(rows ?? []), [rows])
-  const visiveis = filterConversations(rows ?? [], filtro, busca)
+  const etiquetas = usedTags(rows ?? [])
+  const visiveis = filterConversations(rows ?? [], filtro, busca).filter(conversa =>
+    matchesTag(conversa, etiquetaFiltro === '' ? null : etiquetaFiltro)
+  )
   const selecionada = rows?.find(row => row.id === aberta) ?? null
 
   // a nota acompanha a conversa selecionada
@@ -119,6 +128,22 @@ export function CrmConversationsSection() {
           {rows === null ? null : <CrmIndicators conversas={rows} section={section} />}
 
           <div className="flex flex-col gap-2">
+            {etiquetas.length === 0 ? null : (
+              <select
+                aria-label={section.tags}
+                className="rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1 text-sm text-foreground"
+                onChange={event => setEtiquetaFiltro(event.target.value)}
+                value={etiquetaFiltro}
+              >
+                <option value="">{section.filter.todas}</option>
+                {etiquetas.map(etiqueta => (
+                  <option key={etiqueta} value={etiqueta}>
+                    {etiqueta}
+                  </option>
+                ))}
+              </select>
+            )}
+
             <input
               aria-label={section.search}
               className="w-full rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1.5 text-sm text-foreground"

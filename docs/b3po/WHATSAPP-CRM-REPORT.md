@@ -1360,3 +1360,20 @@ Refiz com titulos que nao contem a palavra (`Maria Souza`, `Joao Lima`). Aí sim
 
 **A licao:** experimento com duas causas possiveis para o mesmo resultado nao prova nenhuma das duas. Nao basta o
 resultado ser o esperado — e preciso que a outra explicacao nao exista.
+
+
+## Filtro por etiqueta na tela (rodada 227)
+
+Seletor ao lado da busca. As opcoes vem de `usedTags`, entao so aparece etiqueta que existe — nao ha lista fixa para
+envelhecer. Sem etiqueta em uso, o seletor nem aparece (nao polui a tela vazia).
+
+**Prova** (`docs/b3po/evidence/crm-filtro-etiqueta.png`): perfil com `Maria Souza` (etiqueta `vip`) e `Joao Lima`
+(etiqueta `orcamento`). O seletor listou `["", "orcamento", "vip"]`; escolhendo `vip`, sobrou **so Maria Souza**.
+
+Titulos nao contem a palavra "vip" — nao ha confundidor com a busca por texto.
+
+**Erro do caminho:** ao injetar o JSX, o escape do shell transformou `(` em `(}` e o `tsc` reprovou com dois erros. Escrevi o
+controle em script gerado e conferi com `tsc` antes de compilar — o erro apareceu na hora certa, nao no build.
+
+**Estado da etiqueta, completo:** o campo edita e persiste (dedupe sem caixa), a busca encontra por texto e o seletor
+filtra. Falta apenas renomear/excluir uma etiqueta em uso.

@@ -125,3 +125,4 @@ Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relator
 - `crm-contato-excluido-pt.png` - comportamento ao excluir contato com tarefa ligada
 - `crm-tarefa-contato-excluido-pt.png` - tarefa apontando para contato excluido
 - `crm-fone-com-mascara-pt.png` - busca por telefone com mascara
+- `crm-filtro-etiqueta.png` - seletor de etiqueta filtrando a lista
