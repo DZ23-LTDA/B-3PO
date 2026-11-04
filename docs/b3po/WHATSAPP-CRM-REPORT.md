@@ -1173,3 +1173,23 @@ aceitacao do outro lado e pendencia declarada, nao feita.
 
 **Proximo:** gravar a mensagem enviada na conversa **usando o `wamid` real** devolvido (nunca um id inventado), e a UI
 de resposta — ambas ainda bloqueadas pela credencial.
+
+
+## Tempo de resposta (rodada 202) — indicador honesto do 14.6
+
+`crm-response-time.ts`: mede do ultimo **entrada** ate a **saida** seguinte, por conversa, e tira a media. **8 testes.**
+
+As decisoes que fazem o numero valer:
+
+| situacao | decisao | porque |
+|---|---|---|
+| conversa sem resposta | **`null`**, nao zero | contar como zero baixaria a media justamente nos piores casos — o cliente ignorado viraria "resposta instantanea" |
+| duas saidas seguidas | conta **uma** resposta | seguir a conversa nao e responder duas vezes |
+| saida sem entrada antes | ignorada | nao ha o que medir |
+| ordem de chegada embaralhada | ordena por `sent_at` | o store ja ordena, mas a funcao nao depende disso |
+| media entre conversas | so conversas **com** resposta | o mesmo argumento da primeira linha |
+
+Rotulo em pt-BR: `45 s`, `12 min`, `3 h 20 min`, `2 h` — nunca "0h" para algo que nao aconteceu.
+
+**O que ainda falta do 14.6:** novos leads, conversao e vendas dependem de oportunidades e tarefas ligadas a conversa, e
+a tela de indicadores ainda nao existe. A funcao esta pronta para alimenta-la.
