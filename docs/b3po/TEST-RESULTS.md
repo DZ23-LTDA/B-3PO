@@ -321,3 +321,15 @@ Arquivos desta serie, todos verdes: `crm-conversations-store` (19), `crm-meta-we
 
 **Como isto foi medido:** a lista de arquivos que falham foi aberta e comparada com a lista de arquivos editados. Nao aceitei
 "provavelmente e ambiente" como conclusao.
+
+
+## Regressao da area de CRM — medida em 223 rodadas
+
+Suite focada: 13 arquivos (store, mapeador Meta, assinatura, ingest, endpoint, listener, boot, outbound, envio, cliente tipado, e os modulos de UI do CRM).
+
+Resultado medido:
+
+- arquivos:  Test Files  13 passed (13)
+- contagem:       Tests  134 passed (134)
+
+Nenhuma falha. Todo o codigo do WhatsApp CRM e da inbox, mais os testes de i18n e das funcoes puras do CRM, em verde.
