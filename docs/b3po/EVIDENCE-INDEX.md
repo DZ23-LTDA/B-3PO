@@ -118,3 +118,4 @@ Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relator
 - `crm-selo-esperando.png` — selo "Aguardando resposta" numa conversa e ausente na respondida
 - `crm-painel.png` — painel Visao rapida com os tres indicadores conferidos contra o seed
 - `crm-etiquetas.png` - campo de etiquetas, com duplicata descartada no store
+- `crm-busca-etiqueta.png` - busca encontrando conversa por etiqueta (sem contaminacao do titulo)

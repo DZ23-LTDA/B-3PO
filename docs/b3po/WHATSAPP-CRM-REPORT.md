@@ -1340,3 +1340,23 @@ Digitar `vip` na busca agora encontra conversa marcada `VIP`. Cabia no campo que
    o mesmo padrao em outro contexto e falso positivo.
 
 Licao operacional: guarda de "ja apliquei" precisa ancorar no **trecho exato**, nao em substring do arquivo inteiro.
+
+
+### Busca por etiqueta provada no binario (rodada 221)
+
+**Prova** (`docs/b3po/evidence/crm-busca-etiqueta.png`), perfil com duas conversas: `Maria Souza` (etiqueta `vip`) e
+`Joao Lima` (etiqueta `orcamento`).
+
+| momento | lista |
+|---|---|
+| sem busca | Maria Souza + Joao Lima |
+| digitando `vip` | **so Maria Souza** |
+
+**A primeira tentativa nao valia, e eu quase aceitei.** Semeei titulos "Cliente VIP" e "Cliente Comum": buscar `vip`
+deixou um so resultado — mas o TITULO tambem continha "vip", entao a busca por titulo explicaria o mesmo efeito. O teste
+nao isolava nada.
+
+Refiz com titulos que nao contem a palavra (`Maria Souza`, `Joao Lima`). Aí sim: so a conversa **etiquetada** apareceu.
+
+**A licao:** experimento com duas causas possiveis para o mesmo resultado nao prova nenhuma das duas. Nao basta o
+resultado ser o esperado — e preciso que a outra explicacao nao exista.
