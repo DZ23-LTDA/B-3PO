@@ -117,3 +117,37 @@ python scripts/check                # 14 checks
 
 O que **não** envelhece: a lista de bloqueios externos (depende de terceiros, não de commits) e as decisões de
 arquitetura. São essas duas partes que valem a leitura em caso de dúvida.
+
+
+## Estado real ao fim da rodada 177 (fonte da verdade)
+
+- **branch:** `b3po-brand` · **HEAD:** `8e802c05b0` · **241 commits** · working tree limpo
+- **gate:** `python scripts/check` -> 14 checks, ok
+- **MSIX:** reconstruido, NAO assinado
+- **PR #1:** draft, aberto, NOT READY (nao fechar nem mesclar)
+
+### Entregue e verificado nesta sequencia
+
+- CRM com contatos, funil, tarefas e **conversas** (store com idempotencia por `external_id`, IPC, preload, cliente
+  tipado, tela no `/crm` com carregando/vazio/erro em pt-BR);
+- prova visual correta em `docs/b3po/evidence/crm-conversas-pt.png`;
+- duplicacao de "Tarefas do CRM" na pagina removida (medido: 1 ocorrencia de cada bloco).
+
+### PROXIMO PASSO CONCRETO (nao depende de credencial)
+
+Ligar o webhook do adapter oficial ao store de conversas:
+
+1. `plugins/platforms/whatsapp_cloud/adapter.py` — ler o handler que ja valida HMAC `X-Hub-Signature-256` e `WABA_ID`;
+2. mapear o payload da Meta para `CrmConversation`/`CrmMessage` (`wa_id` -> `external_id`, `timestamp` -> `sent_at`);
+3. gravar pelo `CrmConversationStore` (a idempotencia por `external_id` ja existe e tem teste);
+4. teste de integracao com payload de exemplo da Meta (sem credencial: HMAC e validacao podem ser exercitados com
+   `APP_SECRET` de teste local).
+
+### REGRAS DE TRABALHO QUE CUSTARAM RODADAS (nao repetir)
+
+1. **Evidencia visual tem que mostrar o objeto da afirmacao.** Verificar texto no DOM nao substitui olhar a imagem —
+   e `captureScreenshot` pega so o viewport: rolar a secao para dentro dele antes.
+2. **O perfil de teste vai na RAIZ de `HERMES_DESKTOP_USER_DATA_DIR`**, nao em `<dir>/b3po`: `mountCrmContacts` usa
+   `app.getPath('userData')` direto.
+3. **Registrar um defeito nao substitui consertar** quando o custo e de uma linha.
+4. **Teste de unidade pode passar chamando o construtor do jeito que voce imaginou** — so o binario mostra o jeito real.
