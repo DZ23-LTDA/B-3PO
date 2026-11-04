@@ -21,6 +21,8 @@ import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
 import { registerSalesIpc } from './sales-ipc'
+import { registerServicesIpc } from './services-ipc'
+import { ServicesStore, servicesStorePath } from './services-store'
 
 /**
  * Monta os IPC do ERP. Catálogo, estoque e vendas; financeiro e agenda ganham tela depois.
@@ -33,6 +35,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
+  registerServicesIpc(ipcMain, new ServicesStore(servicesStorePath(userDataDir)))
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
