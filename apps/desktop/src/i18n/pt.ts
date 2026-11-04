@@ -531,6 +531,46 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    providers: {
+      connectAccount: 'Conectar uma conta',
+      haveApiKey: 'Prefere usar uma chave de API?',
+      intro:
+        'Entre com uma assinatura — sem copiar chave de API. O B-3PO conduz o login no navegador por você, bem aqui.',
+      connected: 'Conectado',
+      collapse: 'Recolher',
+      connectAnother: 'Conectar outro provedor',
+      otherProviders: 'Outros provedores',
+      disconnect: 'Desconectar',
+      disconnectInTerminal: 'Desconectar (roda o comando de remoção no terminal)',
+      removeConfirm: provider => `Remover ${provider}?`,
+      removeExternalGeneric: provider => `${provider} é gerenciado pela CLI dele — remova por lá.`,
+      removeKeyManaged: provider => `${provider} é configurado por chave de API. Remova em Chaves de API.`,
+      removeTerminalConfirm: (provider, command) =>
+        `Desconectar ${provider}? Isso roda "${command}" no terminal para limpar a credencial.`,
+      removeTerminalRunning: provider => `Desconectando ${provider} no terminal…`,
+      removedTitle: 'Conta removida',
+      removedMessage: provider => `${provider} foi removido.`,
+      failedRemove: provider => `Não foi possível remover ${provider}`,
+      noProviderKeys: 'Nenhuma chave de API de provedor disponível.',
+      searchKeys: 'Buscar provedores…',
+      noKeysMatch: 'Nenhum provedor corresponde à busca.',
+      localEndpoint: {
+        title: 'Endpoint local / personalizado',
+        description: 'Aponte o B-3PO para qualquer endpoint compatível com OpenAI (Zyphra, vLLM, llama.cpp, Ollama etc).'
+      },
+      loading: 'Carregando provedores...'
+    },
+    billing: {
+      state: {
+        notice: {
+          loggedOut: {
+            title: 'Conecte sua conta Nous',
+            message: 'Entre com sua conta Nous para ver seu saldo, plano e uso aqui.',
+            action: 'Entrar'
+          }
+        }
+      }
+    },
     pluginPages: {
       blurb:
         'Opções que os plugins instalados adicionam. Cada plugin ganha a própria página, e alguns adicionam sub-páginas dentro dela.'

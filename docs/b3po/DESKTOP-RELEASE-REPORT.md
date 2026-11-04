@@ -1437,3 +1437,21 @@ que já descobri sobre o bloqueio, o que **não** fazer (renomear, duplicar em e
 roteiro de ataque em 5 passos. A próxima tentativa começa informada em vez de repetir a investigação.
 
 Rodada sem código novo é o certo aqui: o ganho eram 3 strings e o risco era o i18n inteiro.
+
+### Rodada 136 — inglês residual caiu para 2 linhas (e meu diagnóstico anterior estava errado)
+
+Na rodada passada eu registrei que as 3 strings pendentes viviam em `quickEntry.*` e que catálogo e tipo
+divergiam. **Errado.** Refiz o rastreio com **contagem de chaves** (autoritativa) em vez de recuo de indentação:
+elas estão em `settings.providers.intro`, `settings.billing.state.notice.loggedOut.*` e `settings.pluginPages.blurb`.
+
+Traduzi o bloco **`settings.providers` inteiro** (20 chaves: conectar conta, "prefere usar chave de API?",
+conectado, recolher, conectar outro provedor, desconectar, os textos de remoção por terminal/CLI/chave, busca de
+chaves, endpoint local/personalizado, carregando) e o aviso de conta Nous em Cobrança.
+
+**Inglês residual nas 13 telas: 5 → 2.** As 2 restantes são **schema do backend** (`Sobre` e uma descrição em
+`Avançado`), provadamente não sobrescrevíveis pelo frontend.
+
+Evidência: `docs/b3po/evidence/provedores-pt.png`, `docs/b3po/evidence/cobranca-pt.png`. Corrigi também o
+`PT-CATALOG-DEBT.md`, que agora diz a verdade em vez do diagnóstico errado.
+
+Verificação: `src/i18n` + `src/app/settings` = 94 arquivos / 732 testes; gate 14 ok; MSIX reconstruído.
