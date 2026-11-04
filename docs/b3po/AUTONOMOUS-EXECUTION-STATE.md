@@ -229,3 +229,47 @@ Ligar o webhook do adapter oficial ao store de conversas:
 **Nunca afirmar "funciona" com base em teste que passa.** Duas vezes o binario derrubou o que os testes aprovavam:
 o listener que subia em porta aleatoria e o bloco de UI que nunca foi inserido (o script imprimiu `ok` sem alterar
 nada). Medir o efeito, no arquivo e na tela — nao o log.
+
+
+## Retomada — fim da rodada 211 (leia primeiro)
+
+`b3po-brand` · HEAD `9673951485` · **271 commits** · arvore limpa · gate **14 ok** ·
+MSIX reconstruido, **nao assinado** · PR #1 **draft / NOT READY**.
+
+### Inbox do CRM — provado no binario, item por item
+
+| capacidade | prova |
+|---|---|
+| receber webhook assinado | e2e: 200 stored / 200 duplicated / 401 sem token |
+| idempotencia por `external_id` | 16 testes + reentrega e2e |
+| listar / abrir / ler | `crm-conversas-pt.png` |
+| marcar lida e resolver | `crm-acoes-pt.png` + store |
+| buscar (telefone por digitos) e filtrar | `crm-busca-pt.png` |
+| nota interna (2000 chars) | `crm-nota-interna.png` |
+| tempo de resposta | `crm-tempo-resposta.png` |
+| selo "aguardando resposta" | `crm-selo-esperando.png` (1 ocorrencia, so na conversa certa) |
+
+**7 capturas, todas no `EVIDENCE-INDEX.md`.**
+
+### O que NAO existe (nao apresentar como feito)
+
+- **responder** — payload e HTTP prontos e testados; falta a chamada real e gravar o `wamid`. Depende das
+  `WHATSAPP_CLOUD_*`.
+- anexos, etiquetas, atribuicao, templates, Kanban, demais indicadores do 14.6.
+- iOS, assinatura Windows, keystore Android, instalacao/atualizacao/desinstalacao.
+
+### Proximo passo, em ordem
+
+1. **com credencial:** `sendText` -> gravar a mensagem com o `wamid` devolvido -> textarea de resposta com estado de
+   envio/falha. As tres pecas estao prontas; falta o unico dado que nao posso inventar.
+2. **sem credencial:** indicadores restantes do 14.6 calculados dos stores; anexos; etiquetas; Kanban.
+
+### As regras que esta sessao pagou para aprender
+
+1. **medir o efeito, nao o log** — duas vezes o script imprimiu `ok` sem alterar nada;
+2. **o binario derruba o que o teste aprova** — listener em porta aleatoria, bloco de UI nunca inserido;
+3. **captura so existe quando o indice aponta para ela** — errei isso tres vezes;
+4. **numero honesto > numero bonito** — conversa sem resposta e `null`, nao zero;
+5. **gate vermelho nao commita**;
+6. **chave em catalogo grande se insere contando chaves**;
+7. **regressao conferida arquivo por arquivo**, nunca "provavelmente e ambiente".
