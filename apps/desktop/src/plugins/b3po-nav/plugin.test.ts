@@ -55,7 +55,6 @@ describe('menu dos módulos', () => {
 
     for (const esperado of [
       '/painel',
-      '/crm',
       '/products',
       '/stock',
       '/sales',
@@ -94,6 +93,17 @@ describe('menu dos módulos', () => {
       const seletor = '.codicon-' + item.data.codicon + ':before'
 
       expect(css.includes(seletor), 'icone invalido: ' + item.data.codicon).toBe(true)
+    }
+  })
+
+  it('nao repete um item que o menu do nucleo ja tem', () => {
+    // A captura da r97 mostrou "CRM" duas vezes: o menu do nucleo (junto de Capacidades, Mensageria,
+    // Artefatos e Tarefas agendadas) ja contribui com /crm, e o plugin contribuia de novo. Dois itens
+    // para o mesmo destino confundem, e o usuario foi quem viu - nao o teste.
+    const paths = contribuicoes().map(i => i.data.path)
+
+    for (const doNucleo of ['/crm']) {
+      expect(paths, doNucleo + ' ja vem do menu do nucleo').not.toContain(doNucleo)
     }
   })
 

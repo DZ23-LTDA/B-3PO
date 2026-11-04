@@ -36,7 +36,6 @@ interface ItemDeMenu {
  */
 const MODULOS: readonly ItemDeMenu[] = [
   { codicon: 'dashboard', label: 'Painel', path: '/painel' },
-  { codicon: 'comment-discussion', label: 'CRM', path: '/crm' },
   { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
   { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
   { codicon: 'package', label: 'Produtos', path: '/products' },
