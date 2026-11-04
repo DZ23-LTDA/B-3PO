@@ -15,6 +15,7 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
+import { createDispatcher, dispatchQuietly } from './automation-dispatch'
 import { PurchasesStore, purchasesStorePath } from './purchases-store'
 import { registerPurchasesIpc } from './purchases-ipc'
 import { SchedulingStore, schedulingStorePath } from './scheduling-store'
@@ -27,7 +28,7 @@ import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
 import { registerAutomationIpc } from './automation-ipc'
-import { AutomationStore, automationStorePath, runRules } from './automation-store'
+import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
 import { registerMarketingIpc } from './marketing-ipc'
 import { MarketingStore, marketingStorePath } from './marketing-store'
@@ -62,10 +63,18 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)))
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
 
-  registerServiceDeskIpc(ipcMain, desk)
+  registerServiceDeskIpc(ipcMain, desk, {
+    ticketOpened: async ticket => {
+      await dispatchQuietly(dispatch, { detail: ticket, tenant_id: ticket.tenant_id, type: 'ticket.aberto' })
+    }
+  })
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
-  registerInventoryIpc(ipcMain, inventory)
+  registerInventoryIpc(ipcMain, inventory, {
+    stockRanOut: async info => {
+      await dispatchQuietly(dispatch, { detail: info, tenant_id: info.tenant_id, type: 'estoque.zerado' })
+    }
+  })
   registerFinanceIpc(ipcMain, finance)
   const scheduling = new SchedulingStore(schedulingStorePath(userDataDir))
 
@@ -85,6 +94,20 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
     return primaryOwner(await actors.list())
   }
+
+  // O despachante de automacoes. `tools` e `automations` sao getters: ambos sao montados mais adiante
+  // neste arquivo, e o disparo so acontece depois de tudo pronto.
+  let ferramentas: AgentTool[] | null = null
+  let automacoes: AutomationStore | null = null
+
+  const dispatch = createDispatcher({
+    actors: () => actors.list(),
+    automations: {
+      list: async tenant => (automacoes ? automacoes.list(tenant) : [])
+    },
+    now: () => Date.now(),
+    tools: () => ferramentas ?? []
+  })
 
   // Administracao de atores. Estava implementada desde a rodada 26 e NUNCA montada: sem ela nao ha
   // como criar um bot pela interface, e sem bot o servidor MCP nunca tem credencial para emitir.
@@ -109,25 +132,16 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // executor de automacoes existe, passa nos testes e nunca roda em producao.
   const automations = new AutomationStore(automationStorePath(userDataDir))
 
+  automacoes = automations
+
   registerSalesIpc(ipcMain, {
     actorOf,
     afterSales,
     finance,
     inventory,
     onEvent: async event => {
-      await runRules(await automations.list(event.tenant_id), event.type, {
-        actorFor: async id => {
-          const atores = await actors.list()
-          const achado = atores.find(a => a.id === id && a.active)
-
-          return achado
-            ? { id: achado.id, kind: achado.kind, level: achado.level, role: achado.role, scopes: achado.scopes }
-            : null
-        },
-        now: Date.now(),
-        tenantId: event.tenant_id,
-        tools
-      })
+      // O mesmo despachante dos outros dominios: uma montagem, nao tres copias.
+      await dispatchQuietly(dispatch, { detail: event, tenant_id: event.tenant_id, type: event.type })
     },
     sales
   })
@@ -139,7 +153,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerAnalyticsIpc(ipcMain, { afterSales, desk, finance, inventory, marketing, sales })
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
-  const tools = buildDomainTools({
+  const tools: AgentTool[] = buildDomainTools({
     catalog: new CatalogStore(catalogStorePath(userDataDir)),
     desk: new ServiceDeskStore(serviceDeskStorePath(userDataDir)),
     finance,
@@ -148,6 +162,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   })
 
   // Automacoes: a tela precisa do catalogo REAL de ferramentas, entao o registro vem DEPOIS de 	ools.
+  ferramentas = tools
+
   registerAutomationIpc(ipcMain, { automations, tools })
 
   // Servidor MCP dos agentes. Disparado daqui (e nao do main.ts) porque este e o ponto que ja tem o

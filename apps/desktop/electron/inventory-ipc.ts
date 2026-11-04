@@ -20,7 +20,16 @@ function tenant(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-export function registerInventoryIpc(ipcMain: IpcRegistrar, store: InventoryStoreLike): void {
+/** Opcional: anunciado quando o saldo CRUZA para zero — a transicao e o evento, nao o estado. */
+export interface InventoryEventSink {
+  stockRanOut: (info: { product_sku: string; tenant_id: string }) => Promise<void>
+}
+
+export function registerInventoryIpc(
+  ipcMain: IpcRegistrar,
+  store: InventoryStoreLike,
+  onEvent?: InventoryEventSink
+): void {
   ipcMain.handle(
     'hermes:inventory:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ movements: InventoryMovement[] }> => ({
@@ -37,6 +46,22 @@ export function registerInventoryIpc(ipcMain: IpcRegistrar, store: InventoryStor
 
   ipcMain.handle(
     'hermes:inventory:append',
-    (_event: IpcMainInvokeEvent, payload: unknown): Promise<MovementResult> => store.append(payload)
+    async (_event: IpcMainInvokeEvent, payload: unknown): Promise<MovementResult> => {
+      const r = await store.append(payload)
+
+      if ('error' in r || !onEvent) return r
+
+      // Zerado e EVENTO so na transicao. Olhar alance === 0 a cada movimento dispararia de novo em
+      // toda saida seguinte de um item ja zerado; e a passagem para zero que interessa.
+      if (r.balance === 0 && r.movement.kind === 'saida') {
+        try {
+          await onEvent.stockRanOut({ product_sku: r.movement.product_sku, tenant_id: r.movement.tenant_id })
+        } catch {
+          // A automacao falhar nao desfaz a baixa de estoque.
+        }
+      }
+
+      return r
+    }
   )
 }

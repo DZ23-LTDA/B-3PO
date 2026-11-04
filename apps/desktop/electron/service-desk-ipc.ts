@@ -41,7 +41,16 @@ export function toView(ticket: Ticket, now: number): TicketView {
   }
 }
 
-export function registerServiceDeskIpc(ipcMain: IpcRegistrar, store: ServiceDeskLike): void {
+/** Opcional: o dominio anuncia o fato para as automacoes depois de concluir a acao. */
+export interface ServiceDeskEventSink {
+  ticketOpened: (ticket: { id: string; tenant_id: string; number: number; priority: string }) => Promise<void>
+}
+
+export function registerServiceDeskIpc(
+  ipcMain: IpcRegistrar,
+  store: ServiceDeskLike,
+  onEvent?: ServiceDeskEventSink
+): void {
   ipcMain.handle(
     'hermes:desk:tickets',
     async (): Promise<{ aberto_statuses: readonly TicketStatus[]; tickets: TicketView[] }> => {
@@ -53,7 +62,25 @@ export function registerServiceDeskIpc(ipcMain: IpcRegistrar, store: ServiceDesk
 
   ipcMain.handle('hermes:desk:indicators', async (): Promise<DeskIndicators> => indicators(await store.list(), Date.now()))
 
-  ipcMain.handle('hermes:desk:open', (_event: IpcMainInvokeEvent, payload: unknown) => store.open(payload))
+  ipcMain.handle('hermes:desk:open', async (_event: IpcMainInvokeEvent, payload: unknown) => {
+    const r = await store.open(payload)
+
+    // Depois de gravar, nunca antes: se o atendimento nao abriu, nao ha fato a anunciar.
+    if (!('error' in r) && onEvent) {
+      try {
+        await onEvent.ticketOpened({
+          id: r.ticket.id,
+          number: r.ticket.number,
+          priority: r.ticket.priority,
+          tenant_id: r.ticket.tenant_id
+        })
+      } catch {
+        // A automacao falhar nao desfaz o atendimento aberto.
+      }
+    }
+
+    return r
+  })
 
   ipcMain.handle(
     'hermes:desk:setStatus',
