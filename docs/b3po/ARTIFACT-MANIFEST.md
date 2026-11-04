@@ -3,12 +3,12 @@
 Manifesto dos artefatos **deste** build. Manifesto com dado velho engana mais do que ajuda: os
 hashes abaixo foram calculados nesta máquina a partir dos arquivos listados; nada é estimado.
 
-commit `9d6ec68485` · branch `b3po-brand` · 196 commits sobre `main` · gerado em 2026-11-04 02:08 UTC
+commit `fd25436238` · branch `b3po-brand` · 197 commits sobre `main` · gerado em 2026-11-04 02:19 UTC
 
 | Plataforma | Formato | Arquivo | Tamanho | SHA-256 | Construído |
 |---|---|---|---|---|---|
-| Windows x64 | MSIX (Store-only, NAO assinado) | `B3PO-0.0.0-win-x64.msix` | 191.4 MB | `b30be617d7891b8aeed8f53bbd406edc5a622a87f82c548785952a06eef2205c` | 2026-11-04 02:06 UTC |
-| Windows x64 | executavel (win-unpacked) | `B-3PO.exe` | 235.4 MB | `283450aa30c256411af8ebdc863e58166e4399ae7d72834f566b640d5c66b334` | 2026-11-04 02:06 UTC |
+| Windows x64 | MSIX (Store-only, NAO assinado) | `B3PO-0.0.0-win-x64.msix` | 191.4 MB | `c5e04be17ccb38702f12743e9d35355a7b60eda37ea7f4284890362b0cbcb57a` | 2026-11-04 02:17 UTC |
+| Windows x64 | executavel (win-unpacked) | `B-3PO.exe` | 235.4 MB | `a46453f524da3440b87583ea827e8764ce2b0a16cefa6ec3f43763ec3a7ab27f` | 2026-11-04 02:17 UTC |
 | Android | APK release (chave de debug) | `app-release.apk` | 44.2 MB | `3a337404ce6c2391b5339fe6aa6a85149ee7fc282f04422c01599abeadfe68eb` | 2026-11-03 20:27 UTC |
 | Android | APK debug | `app-debug.apk` | 93.5 MB | `8548a635904760483eeadfad5b0f43114aca90d3a447f782e2f9c38dc8c3ca98` | 2026-11-03 19:46 UTC |
 | Android | AAB release (chave de debug) | `app-release.aab` | 19.0 MB | `47fdfe557cf61a765287533d08abe38357a371a3cf227c22c5b67a97c8df8f61` | 2026-11-03 20:27 UTC |

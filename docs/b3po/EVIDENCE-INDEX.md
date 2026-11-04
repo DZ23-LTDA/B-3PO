@@ -85,3 +85,4 @@ mascote de volta). É o próximo item de prova do F5.
 | `evidence/aparencia-pt-final.png` | Aparência › Geral 100% em pt-BR, app empacotado, CDP |
 | `evidence/home-pt.png` | Home em pt-BR com mascote e hero (app empacotado) |
 | `evidence/home-datas-pt.png` | Home em pt-BR com o agrupamento de datas da sidebar traduzido |
+| `evidence/avancado-pt.png` | Avançado › Desktop e inicialização em pt-BR |

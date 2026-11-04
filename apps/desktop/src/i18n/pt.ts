@@ -549,7 +549,8 @@ export const ptOverrides: TranslationOverrides = {
       display: {
         personality: 'Personalidade',
         showReasoning: 'Blocos de raciocínio'
-      }
+      },
+      updates: { nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app' }
     }),
     fieldDescriptions: defineFieldCopy({
       model: 'Usado em conversas novas, a menos que você escolha outro modelo no compositor.',
@@ -559,6 +560,10 @@ export const ptOverrides: TranslationOverrides = {
       display: {
         personality: 'Estilo padrão do assistente em sessões novas.',
         showReasoning: 'Mostra as seções de raciocínio quando o backend as fornece.'
+      },
+      updates: {
+        nonInteractiveLocalChanges:
+          'Quando o B-3PO se atualiza pelo app (sem terminal), mantém as edições locais do código (stash) ou as descarta (discard). Atualizações pelo terminal sempre perguntam.'
       }
     }),
     crmPipeline: {
@@ -816,6 +821,61 @@ export const ptOverrides: TranslationOverrides = {
       notifications: 'Notificações',
       vault: 'Senhas e logins',
       plugins: 'Plugins'
+    },
+    config: {
+
+      minimizeToTrayTitle: 'Minimizar para a bandeja',
+      minimizeToTrayDesc:
+        'Minimiza ou fecha a janela principal para escondê-la na bandeja do sistema (menu bar no macOS) e manter o B-3PO rodando. Use Sair do B-3PO no menu da bandeja ou Cmd+Q para encerrar. Desligado por padrão; vale só para este dispositivo.',
+      minimizeToTrayUnavailable:
+        'A bandeja do sistema não está disponível. As janelas vão minimizar e fechar normalmente. Desligue e ligue para tentar de novo.',
+      none: 'Nenhum',
+      noneParen: '(nenhum)',
+      builtinOnly: 'Somente integrado',
+      notSet: 'Não definido',
+      commaSeparated: 'valores separados por vírgula',
+      searchPlaceholder: 'Buscar…',
+      noResults: 'Nenhum resultado',
+      systemDefault: 'Padrão do sistema',
+      loading: 'Carregando a configuração do B-3PO...',
+      emptyTitle: 'Nada para configurar',
+      emptyDesc: 'Esta seção não tem ajustes.',
+      failedLoad: 'Falha ao carregar as configurações',
+      autosaveFailed: 'Falha ao salvar automaticamente',
+      imported: 'Configuração importada',
+      invalidJson: 'JSON de configuração inválido',
+      toolsetsWipeConfirm:
+        'Remover todos os conjuntos de ferramentas ativos? Isso desliga memória, terminal, busca web, delegação e quase todas as outras ferramentas até você reativar.',
+      keepAwakeTitle: 'Manter o computador acordado',
+      keepAwakeDesc:
+        'Impede a máquina de dormir. "Enquanto trabalha" segura só enquanto há um turno em andamento, então execuções da noite sobrevivem sem deixar o notebook acordado a semana toda. A tela ainda pode escurecer.',
+      keepAwakeOff: 'Desligado',
+      keepAwakeWhileWorking: 'Enquanto trabalha',
+      keepAwakeAlways: 'Sempre',
+      disableF12Title: 'Desativar DevTools do F12',
+      disableF12Desc: 'Bloqueia o F12 de abrir as Ferramentas de Desenvolvedor. Ctrl+Shift+I (ou Cmd+Opt+I no Mac) continua funcionando.',
+      alwaysExternalLinksTitle: 'Abrir sempre os links no navegador externo',
+      alwaysExternalLinksDesc:
+        'Abre todo link clicado no navegador do sistema em vez do navegador interno. "Abrir no navegador interno" no menu de contexto continua funcionando.',
+      attachmentSizeTitle: 'Tamanho máximo de prévia / imagem',
+      attachmentSizeDesc:
+        'Tamanho máximo, em MB, de um arquivo local que o Desktop carrega para prévias e anexar imagem. O padrão é 16. Anexos remotos que não são imagem usam outro limite de 256 MB. Definir um valor muito alto carrega o arquivo inteiro na memória e pode travar ou derrubar o app.',
+      attachmentSizeUnit: 'MB',
+      attachmentSizeLabel: 'Tamanho máximo de prévia / imagem em megabytes',
+      voiceShortcutHintTitle: 'Atalho de gravação de voz',
+      voiceShortcutHintDesc:
+        'Defina o atalho de gravação em Configurações → Atalhos de teclado ("Iniciar / parar conversa por voz"). O valor voice.record_key só vale para a CLI e a TUI.',
+      showOptions: 'Mostrar opções'
+    },
+    quickEntry: {
+      enabledTitle: 'Entrada rápida',
+      enabledDesc:
+        'Chame um compositor pequeno de qualquer lugar com um atalho global e dispare um prompt sem abrir o B-3PO.',
+      shortcutTitle: 'Atalho da Entrada rápida',
+      shortcutDesc: 'Precisa de ao menos um modificador, ex.: CommandOrControl+Shift+Space.',
+      active: 'O atalho está ativo.',
+      takenBy: 'Outro app já usa este atalho — escolha outro.',
+      invalidShortcut: 'Atalho inválido. Inclua ao menos uma tecla modificadora.'
     },
     subpages: {
       appearanceTheme: 'Tema',

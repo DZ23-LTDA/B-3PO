@@ -1210,3 +1210,26 @@ reconstruído.
 O primeiro script de inserção montou a chave pai com o dois-pontos junto (`"sidebar:"`), então procurou
 `"  sidebar:: {"` e não achou nada. Silencioso do jeito pior: imprimiu "nao encontrado" e eu quase segui adiante.
 Corrigi lendo o nome sem o `:`.
+
+### Rodada 127 — Avançado › Desktop e inicialização em pt
+
+Traduzi `settings.config` (**38 chaves**, o bloco que aparece em Avançado › Desktop e inicialização): minimizar
+para a bandeja, manter o computador acordado (Desligado/Enquanto trabalha/Sempre) com a explicação de que
+"Enquanto trabalha" segura só durante o turno, desativar DevTools do F12, abrir links sempre no navegador externo,
+tamanho máximo de prévia/imagem (com o aviso de que valor alto pode travar o app), atalho de gravação de voz,
+e os estados vazios/erro ("Nada para configurar", "A configuração falhou ao carregar", "JSON de configuração
+inválido").
+
+Mais `settings.quickEntry` (**7 chaves**) — o painel da Entrada rápida, incluindo o motivo de o atalho precisar de
+modificador e o aviso de atalho já usado por outro app.
+
+E a linha `updates.nonInteractiveLocalChanges` em `fieldLabels`/`fieldDescriptions` — "Alterações locais em
+atualizações pelo app", com a explicação de stash/discard.
+
+Evidência: `docs/b3po/evidence/avancado-pt.png`.
+
+**O que ficou de fora, com motivo**: o seletor dessa última opção ainda mostra **"Stash"** — os valores do enum
+(`stash`/`discard`/`ask`) vêm do schema do backend, que o frontend apenas capitaliza. Traduzir isso é mexer no
+mapeamento de enum do frontend; fica registrado como pendência em vez de forçar.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
