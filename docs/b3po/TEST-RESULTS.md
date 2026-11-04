@@ -287,3 +287,13 @@ Detalhe por arquivo em [BASELINE-DESKTOP-SUITE.md](BASELINE-DESKTOP-SUITE.md). C
 
 Também rodam verdes, por área: `src/i18n` (16 arquivos/119 testes), `src/app/settings` (93/725),
 `src/app/quick-entry`, `src/plugins/hermes-bots` (132/1074).
+
+## Regressao de fechamento (rodada 160)
+
+Depois das rodadas 152-159 (plural, marca de contato excluido, correcao do falso positivo de formato de telefone,
+guia novo), rodei a regressao combinada das tres areas tocadas:
+
+`npx vitest run src/i18n src/app/crm src/app/settings` -> **96 arquivos / 750 testes, todos passando**.
+
+Numeros anteriores para comparar: `src/i18n` eram 119 testes e `src/app/settings` 725; os novos casos (4 do plural
+de tarefas, 5 de formato de telefone no CRM) entram nesse total sem afrouxar nenhuma assercao existente.
