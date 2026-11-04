@@ -17,6 +17,7 @@ import { CrmConversationStore, conversationsStorePath } from './crm-conversation
 import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 import { registerFiscalIpc } from './fiscal-ipc'
+import { registerSchedulingBlockIpc } from './scheduling-block-ipc'
 import { FiscalStore, fiscalStorePath } from './fiscal-store'
 import { resolverProvedor } from './fiscal-provider'
 import { registerLookupIpc } from './lookup-ipc'
@@ -84,6 +85,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // Documento fiscal: o emissor vem do ambiente, nunca do renderer.
   registerFiscalIpc(ipcMain, { store: new FiscalStore(fiscalStorePath(userDataDir)) })
+  registerSchedulingBlockIpc(ipcMain, userDataDir)
 
   registerPrivacyIpc(ipcMain, {
     store: {
