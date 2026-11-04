@@ -136,3 +136,37 @@ de esforço, é de plataforma.
 
 **O item 1** (WhatsApp). É o que transforma o CRM de "caderno de contatos bonito" em ferramenta de trabalho, e é o
 único bloqueio que muda o que o produto *é*. Certificado e keystore só mudam como ele é *entregue*.
+
+
+## As variaveis do DESKTOP (a parte que eu esqueceria de pedir)
+
+Configurar so as `WHATSAPP_CLOUD_*` faz o adapter receber a mensagem e **nada aparecer na tela** — porque o desktop so
+liga o receptor local quando recebe as tres abaixo. Esta foi a causa real de um e2e que falhou: o app escutava numa porta
+aleatoria e a ponte postava em outra.
+
+No **.env do runtime** (mesmo arquivo das `WHATSAPP_CLOUD_*`):
+
+| variavel | valor | para que serve |
+|---|---|---|
+| `B3PO_CRM_INGEST_PORT` | ex. `9187` | porta local que a ponte python vai procurar. Precisa ser a mesma dos dois lados |
+| `B3PO_CRM_INGEST_TOKEN` | um segredo local seu, longo e aleatorio | a ponte prova que e ela mesma. Loopback nao e autorizacao |
+| `WHATSAPP_CLOUD_APP_SECRET` | o secret do app Meta | o desktop revalida o HMAC por conta propria (defesa em profundidade) |
+
+No **ambiente do aplicativo desktop** (o que a tarefa/atalho define, nao o .env do python):
+
+| variavel | valor | efeito |
+|---|---|---|
+| `HERMES_DESKTOP_WHATSAPP_INGEST` | `1` | **sem isto o receptor nao sobe.** Qualquer outro valor mantem desligado |
+| `B3PO_CRM_INGEST_PORT` | o mesmo numero acima | sem porta valida o receptor nao sobe (falha explicita, nao aleatoria) |
+| `B3PO_CRM_INGEST_TOKEN` | o mesmo segredo acima | o desktop recusa POST sem ele (401) |
+| `WHATSAPP_CLOUD_APP_SECRET` | o mesmo secret acima | sem ele o desktop recusa por assinatura (401) |
+
+**Como sei que o receptor subiu:** se as quatro estiverem certas e a porta estiver livre, o app passa a aceitar POST em
+`http://127.0.0.1:<porta>/`. Se algo estiver errado, ele **nao sobe e nao avisa por padrao** — motivo pelo qual a
+primeira tentativa deve ser um teste assinado, nao uma mensagem real.
+
+**Ordem que evita depuracao as cegas:**
+
+1. subir o desktop com as quatro variaveis e confirmar que o receptor responde `401` sem token (prova que subiu);
+2. enviar um payload assinado e ver a conversa aparecer (prova o fio inteiro);
+3. so entao mandar uma mensagem do celular.
