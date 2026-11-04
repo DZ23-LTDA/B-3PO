@@ -1,0 +1,102 @@
+// O menu dos módulos existe e aponta para rotas que existem (rodada 96).
+//
+// POR QUE ESTE TESTE É DIFERENTE DOS DE ROTA
+//
+// `routes.test.ts` prova que uma rota resolve. Não prova que alguém chega nela. A navegação é populada
+// por contribuições `SIDEBAR_NAV_AREA`, não por `APP_ROUTES` — medido antes desta rodada, havia duas no
+// código inteiro (kanban e uma de teste), e nenhuma tela do produto tinha item de menu.
+//
+// Este teste liga as duas pontas: cada path do menu tem que existir em `APP_ROUTES`, e os módulos do
+// produto têm que estar no menu.
+
+import { describe, expect, it, vi } from 'vitest'
+
+import { APP_ROUTES } from '@/app/routes'
+import b3poNavPlugin from './plugin'
+
+interface Contribuicao {
+  area: string
+  data: { codicon: string; label: string; path: string }
+  id: string
+  order: number
+}
+
+function contribuicoes(): Contribuicao[] {
+  const vistas: Contribuicao[] = []
+
+  b3poNavPlugin.register({
+    registerMany: (itens: Contribuicao[]) => {
+      vistas.push(...itens)
+    }
+  } as never)
+
+  return vistas
+}
+
+describe('menu dos módulos', () => {
+  it('registra na area da navegacao lateral', () => {
+    const itens = contribuicoes()
+
+    expect(itens.length).toBeGreaterThan(10)
+    expect(itens.every(i => i.area === 'sidebar.nav')).toBe(true)
+  })
+
+  it('todo path do menu resolve numa rota registrada', () => {
+    // É a asserção que faltava: um menu apontando para path inexistente levaria a tela em branco.
+    const paths = new Set(APP_ROUTES.map(r => r.path))
+
+    for (const item of contribuicoes()) {
+      expect(paths.has(item.data.path), `menu aponta para ${item.data.path}, que não é rota`).toBe(true)
+    }
+  })
+
+  it('os modulos do produto estao no menu', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+
+    for (const esperado of [
+      '/painel',
+      '/crm',
+      '/products',
+      '/stock',
+      '/sales',
+      '/finance',
+      '/agenda',
+      '/compras',
+      '/empresa',
+      '/servicos',
+      '/rh',
+      '/atendimento',
+      '/posvenda',
+      '/marketing',
+      '/automacoes',
+      '/documentos',
+      '/privacidade'
+    ]) {
+      expect(paths, `${esperado} não aparece no menu`).toContain(esperado)
+    }
+  })
+
+  it('cada item tem rotulo e icone: um menu sem texto nao e menu', () => {
+    for (const item of contribuicoes()) {
+      expect(item.data.label.length, item.id).toBeGreaterThan(1)
+      expect(item.data.codicon.length, item.id).toBeGreaterThan(1)
+    }
+  })
+
+  it('nao ha path repetido', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+
+    expect(new Set(paths).size).toBe(paths.length)
+  })
+
+  it('o plugin vem ligado: um menu que o usuario precisa ativar nao e menu', () => {
+    expect(b3poNavPlugin.defaultEnabled).toBe(true)
+  })
+
+  it('registrar duas vezes nao lanca', () => {
+    expect(() => {
+      b3poNavPlugin.register({ registerMany: vi.fn() } as never)
+      b3poNavPlugin.register({ registerMany: vi.fn() } as never)
+    }).not.toThrow()
+  })
+})
