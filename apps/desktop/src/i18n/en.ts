@@ -791,6 +791,8 @@ export const en: Translations = {
       unavailable: 'The schedule needs the desktop app to work.'
     },
     compras: {
+      bestOffer: 'Best offer',
+      compare: 'Compare suppliers',
       addItem: 'Add item',
       addSupplier: 'Add supplier',
       alreadyReceived: 'A received order is final.',

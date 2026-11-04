@@ -701,7 +701,9 @@ export interface Translations extends NoticeTranslations {
       addItem: string
       addSupplier: string
       alreadyReceived: string
+      bestOffer: string
       cnpj: string
+      compare: string
       duplicateSupplier: string
       empty: string
       hint: string

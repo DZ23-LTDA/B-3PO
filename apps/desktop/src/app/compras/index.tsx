@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
+import { CotacaoPanel } from './cotacao-panel'
+
 /**
  * Tela de compras.
  *
@@ -279,6 +281,23 @@ export function ComprasView() {
           {failure ? (
             <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-danger)">{failure}</p>
           ) : null}
+
+          {/* Cotacao: compara fornecedores para o volume do pedido. Nao salva e nao cria pedido — compara e
+              mostra; transformar proposta em compromisso e a decisao seguinte, com aprovacao propria. */}
+          <CotacaoPanel
+            copy={{
+              add: copy.addItem,
+              compare: copy.compare,
+              empty: copy.empty,
+              price: copy.unitCost,
+              quantity: copy.quantity,
+              remove: copy.removeItem,
+              result: copy.bestOffer,
+              supplier: copy.supplier
+            }}
+            quantidade={quantityValue(quantidade)}
+            supplierNames={Object.fromEntries((suppliers ?? []).map(s => [s.id, s.name]))}
+          />
 
           {suppliers === null ? (
             <Loader />

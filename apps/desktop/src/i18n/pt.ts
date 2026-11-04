@@ -1001,6 +1001,8 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'A agenda precisa do aplicativo desktop para funcionar.'
     },
     compras: {
+      bestOffer: 'Melhor oferta',
+      compare: 'Comparar fornecedores',
       addItem: 'Adicionar item',
       addSupplier: 'Cadastrar fornecedor',
       alreadyReceived: 'Pedido recebido é definitivo.',
