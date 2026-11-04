@@ -1161,3 +1161,31 @@ inglês: as descrições longas de `settings.advanced.*` (sleep, F12, browser ex
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok (limpei `.cache` de novo —
 o `profile-archives` reprova com cache velho, e o script só remove depois do gate: ordem errada da minha parte).
+
+### Rodada 125 — Aparência inteira em português (o maior bloco que faltava)
+
+Traduzi `settings.appearance` — **79 chaves** cobrindo as seis sub-páginas de Aparência: modo de cor, escala da
+interface e do texto, exibição de chamadas de ferramenta (Produto/Técnico), esconder diffs e barras da linha do
+tempo, densidade da lista de conversas, faixa de abas, ações do app na barra de título, fonte do terminal e da
+conversa (com a amostra "Um pequeno jabuti xereta viu dez cegonhas felizes"), translucidez (vidro, tonalidade,
+frost, escopo), fundo da conversa, balão de mensagem, direção do texto, splash, preço dos modelos, reações, dicas,
+tours, compositor flutuante, navegador de arquivos, corações, incorporações inline, reabrir última conversa, tema e
+instalação de tema do VS Code.
+
+Também entrou `settings.search` ("Buscar" na barra do painel) — esse só apareceu na foto.
+
+**Descoberta técnica que destravou tudo**: o override do pt aceita **objeto parcial aninhado**. Eu tinha assumido
+que precisava entregar as 79 chaves de uma vez (ou nada); testei com duas chaves, o `tsc` passou, e aí deu para
+traduzir o bloco inteiro sem risco de meio-termo. O `pet.*` (mascotes) ficou de fora desta rodada, ainda em inglês.
+
+Verificação: **Aparência › Geral 100% em português** — `docs/b3po/evidence/aparencia-pt-final.png`, capturado do
+app empacotado por CDP. Também salvei `docs/b3po/evidence/home-pt.png` (Home em pt, com o mascote e o hero).
+
+**Achado novo na Home**: o agrupamento de datas da barra lateral ainda diz "EARLIER TODAY". Está no backlog.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Tropeço
+
+O `electron-builder` falhou com `EPERM ... unlink B-3PO.exe` porque eu tinha deixado o app aberto para as capturas.
+Fechei e refiz — sem estrago, mas o build chegou a sair 1 antes de passar.

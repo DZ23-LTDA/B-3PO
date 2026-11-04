@@ -82,3 +82,5 @@ mascote de volta). É o próximo item de prova do F5.
 | `evidence/configuracoes-pt-final.png` | Configurações › Modelo em pt-BR, app empacotado, capturado por CDP em 2026-11-03 |
 | `evidence/aparencia-pt-pendente.png` | Aparência › Geral: menu lateral em pt, opções ainda em inglês (limitação medida) |
 | `evidence/settings-sweep-pt.json` | Texto visível das 13 telas de Configurações, coletado por CDP |
+| `evidence/aparencia-pt-final.png` | Aparência › Geral 100% em pt-BR, app empacotado, CDP |
+| `evidence/home-pt.png` | Home em pt-BR com mascote e hero (app empacotado) |
