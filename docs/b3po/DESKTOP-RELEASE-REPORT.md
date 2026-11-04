@@ -969,3 +969,23 @@ bytes do bloco. Comparei os conjuntos de chaves por script antes de confiar.
 direto em componente (não catalogada), que é outro trabalho e está no relatório.
 
 Verificação: `src/i18n` 112 + `src/app/settings` 613 = 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 117 — o inglês que sobrava fora do catálogo (memória)
+
+Com as 26 famílias de locale traduzidas, o inglês restante é **copy escrita direto no componente**. Varri as telas de
+Configurações com um script (texto solto em JSX, `placeholder`, `title`, `aria-label`): 16 ocorrências em 14 arquivos,
+e 13 delas eram falso positivo (`Promise`, `NonNullable`, `YYYY` de formato de data).
+
+As três reais, todas em Configurações ▸ Memória:
+
+| Arquivo | Antes | Depois |
+|---|---|---|
+| `provider-config-modal.tsx` | `Cancel` solto | `t.common.cancel` |
+| `memory/connect.tsx` | `Waiting for browser consent…` + `Cancel` | `t.connectors.waiting` + `t.common.cancel` |
+| `provider-config-panel.tsx` | `Memory provider settings failed to load: …` + `Retry` | `t.settings.memoryLayers.statusUnavailable` + `t.common.retry` |
+
+Nenhum dos três componentes tinha o hook de i18n: era copy hardcoded de verdade, não catálogo faltando chave.
+Precisei adicionar `useI18n()` nos três — e errei a primeira inserção no modal, colocando o hook **dentro do tipo
+das props** (`TS1131` na hora). Movido para o corpo do componente.
+
+Verificação: `src/app/settings` + `src/i18n` = 93 arquivos verdes; gate 14 ok; MSIX reconstruído.
