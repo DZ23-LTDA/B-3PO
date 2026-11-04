@@ -15,6 +15,8 @@ import {
 import { listServices, type ServiceRow } from '@/api/services'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
+
+import { SchedulingBlocks } from './blocks'
 import { useI18n } from '@/i18n/context'
 
 /**
@@ -130,6 +132,8 @@ export function AgendaView() {
         <h1 className="text-lg font-semibold text-foreground">{copy.title}</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.hint}</p>
       </header>
+
+      <SchedulingBlocks />
 
       {!disponivel ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
