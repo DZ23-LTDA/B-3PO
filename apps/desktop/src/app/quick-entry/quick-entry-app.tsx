@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react'
 
+import { translateNow } from '@/i18n/runtime'
 import { isSubmitEnter } from '@/lib/ime'
 import {
   initialQuickComposerState,
@@ -189,10 +190,10 @@ export function QuickEntryApp() {
               userSelect: 'none'
             }}
           >
-            Send to
+            {translateNow('settings.quickEntryWindow.sendTo')}
           </label>
           <select
-            aria-label="Target session"
+            aria-label={translateNow('settings.quickEntryWindow.targetSession')}
             disabled={!state.connected}
             id="quick-entry-target"
             onChange={event => dispatch({ target: event.target.value, type: 'target' })}
@@ -214,10 +215,10 @@ export function QuickEntryApp() {
             value={state.target}
           >
             <option style={QUICK_TARGET_OPTION_STYLE} value={QUICK_TARGET_CURRENT}>
-              Current chat
+              {translateNow('settings.quickEntryWindow.currentChat')}
             </option>
             <option style={QUICK_TARGET_OPTION_STYLE} value={QUICK_TARGET_NEW}>
-              New session
+              {translateNow('settings.quickEntryWindow.newSession')}
             </option>
             {state.sessions.map(session => (
               <option key={session.id} style={QUICK_TARGET_OPTION_STYLE} value={session.id}>

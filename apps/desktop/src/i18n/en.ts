@@ -1282,7 +1282,14 @@ export const en: Translations = {
       captureFailed: 'Could not capture the frontmost window. Nothing was attached or sent.',
       contextChanged: 'The current draft changed during capture. The screenshot was not attached or sent.'
     },
-    quickEntry: {
+    /** A janela flutuante do atalho global (renderer separado, sem provider de i18n). */
+  quickEntryWindow: {
+    sendTo: 'Send to',
+    currentChat: 'Current chat',
+    newSession: 'New session',
+    targetSession: 'Target session'
+  },
+  quickEntry: {
       enabledTitle: 'Quick Entry',
       enabledDesc:
         'Summon a small composer from anywhere with a global shortcut and fire a prompt without opening Hermes.',

@@ -18,6 +18,7 @@ import {
 } from './languages'
 import { $appLocaleVersion, normalizeLocaleId, resolveTranslations } from './registry'
 import { $requestedLocale, setRuntimeI18nLocale } from './runtime'
+import { persistDesktopLocale } from './window-locale'
 import type { Locale, Translations } from './types'
 
 export interface I18nConfigClient {
@@ -150,6 +151,9 @@ export function I18nProvider({
   useEffect(() => {
     localeRef.current = locale
     setRuntimeI18nLocale(locale)
+    // Outras janelas do mesmo bundle (Quick Entry) não têm provider nem cliente de config:
+    // elas leem esta chave no boot para não nascerem em inglês. localStorage é compartilhado.
+    persistDesktopLocale(locale)
     // Tempo/data seguem o idioma da UI, não o do sistema (ver lib/time.ts).
     setTimeLocale(localeConfigValue(locale))
     applyDocumentLocale(locale, isRtlLocale(locale))

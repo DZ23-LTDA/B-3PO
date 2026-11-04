@@ -1116,7 +1116,14 @@ export const ptOverrides: TranslationOverrides = {
         'Defina o atalho de gravação em Configurações → Atalhos de teclado ("Iniciar / parar conversa por voz"). O valor voice.record_key só vale para a CLI e a TUI.',
       showOptions: 'Mostrar opções'
     },
-    quickEntry: {
+    /** A janela do atalho global (renderer sem provider): traduzida por translateNow. */
+  quickEntryWindow: {
+    sendTo: 'Enviar para',
+    currentChat: 'Conversa atual',
+    newSession: 'Nova conversa',
+    targetSession: 'Conversa de destino'
+  },
+  quickEntry: {
       enabledTitle: 'Entrada rápida',
       enabledDesc:
         'Chame um compositor pequeno de qualquer lugar com um atalho global e dispare um prompt sem abrir o B-3PO.',

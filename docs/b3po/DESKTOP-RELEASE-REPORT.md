@@ -1359,3 +1359,33 @@ Só o que **não é do catálogo do frontend**:
 - textos de tela fora do catálogo (Quick Entry, que precisa de locale pelo bridge).
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 133 — Quick Entry deixa de nascer em inglês (ponte de locale entre janelas)
+
+Era a última lacuna de i18n real que eu tinha mapeado: a **janela do atalho global** é um renderer separado, sem
+`I18nProvider` e sem cliente de config, então `display.language` — a fonte canônica — nunca chegava até ela.
+
+**Como resolvi, sem duplicar a leitura de config:**
+
+1. `src/i18n/window-locale.ts` (novo): `persistDesktopLocale` / `readDesktopLocale` / `adoptDesktopLocale` sobre uma
+   chave compartilhada (`b3po.desktop.activeLocale`). As duas janelas compartilham o mesmo `localStorage` — mesma
+   origem, mesma partição.
+2. `context.tsx` grava a locale resolvida no efeito que já a aplicava (uma linha, sem novo caminho de dados).
+3. `quick-entry-root.tsx` chama `adoptDesktopLocale()` **antes** de renderizar, então `translateNow` já responde no
+   idioma certo quando o React monta.
+4. `quick-entry-app.tsx` passou a usar `translateNow('settings.quickEntryWindow.*')` nos quatro textos
+   ("Send to", "Current tab", "New session", "Target session") com `en` + `pt` no catálogo.
+
+**Testes novos**: `window-locale.test.ts` com **7 casos** — publica, lê, ignora valor desconhecido, devolve `null`
+sem nada publicado, aplica no tradutor de módulo, mantém o padrão quando vazio, e não explode quando o
+`localStorage` nega acesso.
+
+`overlay-completeness` pediu o registro das 4 chaves novas em `overlay-gaps.json`; regenerei com
+`OVERLAY_GAPS_UPDATE=1` (+4 entradas, como esperado) e o reteste passou.
+
+**Limitação declarada**: `translateNow` não é reativo — se o usuário trocar o idioma com a janela do Quick Entry
+aberta, ela só reflete na próxima abertura. É aceitável para um compositor de atalho que vive segundos; registrar
+evita prometer o que não existe.
+
+Verificação: `src/i18n` + `src/app/quick-entry` + `src/app/settings` = 95 arquivos / 733 testes; gate 14 ok; MSIX
+reconstruído.

@@ -600,6 +600,13 @@ export interface Translations extends NoticeTranslations {
   }
 
   settings: {
+    /** Copia da janela flutuante do atalho global (renderer sem provider de i18n). */
+    quickEntryWindow: {
+      sendTo: string
+      currentChat: string
+      newSession: string
+      targetSession: string
+    }
     crmPipeline: {
       stageInitial: string
       lostReason: string
