@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { CrmConversationRow } from '@/api/crm-conversations'
 
-import { filterConversations, matchesSearch } from './conversation-filters'
+import { filterConversations, matchesSearch, matchesTag, usedTags } from './conversation-filters'
 
 const conversa = (extra: Partial<CrmConversationRow> = {}): CrmConversationRow => ({
   contact_phone: '+5511999991111',
@@ -63,5 +63,38 @@ describe('filterConversations', () => {
   it('combina filtro e busca', () => {
     expect(filterConversations(lista, 'aberta', 'joao')).toEqual([])
     expect(filterConversations(lista, 'aberta', 'maria').map(c => c.id)).toEqual(['a'])
+  })
+})
+
+describe('matchesTag', () => {
+  it('acha a etiqueta sem diferenciar maiuscula', () => {
+    expect(matchesTag(conversa({ tags: ['VIP'] }), 'vip')).toBe(true)
+    expect(matchesTag(conversa({ tags: ['vip'] }), 'VIP')).toBe(true)
+  })
+
+  it('etiqueta nula ou vazia casa com tudo', () => {
+    expect(matchesTag(conversa({ tags: [] }), null)).toBe(true)
+    expect(matchesTag(conversa({ tags: [] }), '  ')).toBe(true)
+  })
+
+  it('nao acha etiqueta que nao existe nem confunde com pedaco', () => {
+    expect(matchesTag(conversa({ tags: ['vip'] }), 'vi')).toBe(false)
+    expect(matchesTag(conversa({ tags: [] }), 'vip')).toBe(false)
+  })
+
+  it('conversa sem o campo nao quebra', () => {
+    expect(matchesTag(conversa(), 'vip')).toBe(false)
+  })
+})
+
+describe('usedTags', () => {
+  it('junta de todas as conversas sem repetir caixa e ordena', () => {
+    const lista = [conversa({ tags: ['VIP', 'orcamento'] }), conversa({ tags: ['vip', 'Retorno'] })]
+
+    expect(usedTags(lista)).toEqual(['orcamento', 'Retorno', 'VIP'].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('lista vazia da zero etiquetas', () => {
+    expect(usedTags([])).toEqual([])
   })
 })

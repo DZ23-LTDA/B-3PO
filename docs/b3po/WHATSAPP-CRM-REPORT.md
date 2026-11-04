@@ -1306,3 +1306,20 @@ Usuario que digita a mesma etiqueta em caixa diferente ve uma so.
 **Quinta vez que meu instrumento mentiu, e a mais instrutiva:** o primeiro teste devolveu `tags: []` e eu quase conclui
 que o app nao salvava. Era o **meu evento**: disparei `blur`, que nao borbulha; React escuta `focusout`. Troquei o evento
 e o app gravou na primeira tentativa. O codigo estava certo; a medicao errada.
+
+
+### Regra do filtro por etiqueta (rodada 219)
+
+`matchesTag(conversa, etiqueta)` e `usedTags(conversas)`, 6 testes.
+
+A decisao: `matchesTag` compara **sem diferenciar maiuscula**. O store impede duplicata dentro da mesma conversa, mas nao
+entre conversas — "VIP" numa e "vip" noutra sao a MESMA etiqueta para quem procura. Filtro que diferencia caixa mostra
+metade da lista e o usuario conclui que perdeu dado.
+
+Outras bordas: etiqueta nula/vazia casa com tudo (e o "sem filtro"), pedaco nao casa (`vi` nao acha `vip`), conversa sem
+o campo nao quebra.
+
+`usedTags` devolve o vocabulario em uso sem repetir caixa — e o que a lista de filtro precisa mostrar.
+
+**FALTA, e nao vou chamar de pronto:** nem `matchesTag` nem `usedTags` estao ligados a tela. A funcao existe e e testada;
+o filtro na tela nao existe.

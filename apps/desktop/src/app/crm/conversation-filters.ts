@@ -53,3 +53,37 @@ export function filterConversations(
       (filtro === 'todas' || conversation.status === filtro) && matchesSearch(conversation, termo)
   )
 }
+
+/**
+ * A conversa tem esta etiqueta?
+ *
+ * Compara sem diferenciar maiuscula porque o store ja impede duplicata dentro da mesma conversa, mas nao entre conversas:
+ * "VIP" numa e "vip" noutra sao a MESMA etiqueta para quem procura. Filtro que diferencia caixa esconde metade da lista.
+ *
+ * Etiqueta vazia/ausente casa com tudo — e como "sem filtro".
+ */
+export function matchesTag(conversation: CrmConversationRow, etiqueta: null | string): boolean {
+  const alvo = (etiqueta ?? '').trim().toLowerCase()
+
+  if (alvo === '') {
+    return true
+  }
+
+  return (conversation.tags ?? []).some(tag => tag.trim().toLowerCase() === alvo)
+}
+
+/** Todas as etiquetas em uso, sem repetir caixa, ordenadas — o que a lista de filtro precisa mostrar. */
+export function usedTags(conversations: readonly CrmConversationRow[]): string[] {
+  const vistas = new Map<string, string>()
+
+  for (const conversa of conversations) {
+    for (const tag of conversa.tags ?? []) {
+      const chave = tag.trim().toLowerCase()
+      if (chave !== '' && !vistas.has(chave)) {
+        vistas.set(chave, tag.trim())
+      }
+    }
+  }
+
+  return [...vistas.values()].sort((a, b) => a.localeCompare(b))
+}
