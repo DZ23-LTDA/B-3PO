@@ -151,3 +151,44 @@ Ligar o webhook do adapter oficial ao store de conversas:
    `app.getPath('userData')` direto.
 3. **Registrar um defeito nao substitui consertar** quando o custo e de uma linha.
 4. **Teste de unidade pode passar chamando o construtor do jeito que voce imaginou** — so o binario mostra o jeito real.
+
+
+## Estado real ao fim da rodada 195 (fonte da verdade)
+
+- **branch:** `b3po-brand` · **HEAD:** `68b275bba9` · **257 commits** · working tree limpo
+- **gate:** `python scripts/check` -> 14 checks, ok
+- **MSIX:** reconstruido, NAO assinado
+- **PR #1:** draft, aberto, NOT READY
+
+### O que a caixa de entrada do CRM faz HOJE (tudo provado no binario)
+
+| capacidade | prova |
+|---|---|
+| receber por webhook assinado (HMAC + token local) | e2e no app: 200 stored / 200 duplicated / 401 sem token |
+| persistir com idempotencia por `external_id` | 16 testes + reentrega e2e |
+| listar, abrir e ler mensagens | captura `crm-conversas-pt.png` |
+| marcar como lida e resolver | captura `crm-acoes-pt.png` + store `{status, unread}` |
+| buscar (inclusive telefone sem mascara) e filtrar por estado | captura `crm-busca-pt.png` |
+
+### O que a caixa de entrada NAO faz
+
+- **responder** — o adapter sabe enviar; o CRM ainda nao o chama. Depende das `WHATSAPP_CLOUD_*` para ser exercitado.
+- anexos, notas internas, templates, etiquetas, atribuicao, automacoes.
+
+### PROXIMO PASSO CONCRETO (nao depende de credencial)
+
+1. **notas internas** por conversa: campo `notes` no store (com teste de validacao e limite de tamanho) + UI de nota;
+2. **resposta (outbound)**: funcao pura que monta o payload de envio da Meta (`messaging_product`, `to`, `text.body`) com
+   teste; o envio real fica atras do adapter e das credenciais;
+3. so depois: anexos e templates.
+
+### REGRAS QUE CUSTARAM RODADAS (todas registradas com o caso concreto)
+
+1. evidencia visual tem que **mostrar** o objeto da afirmacao — `captureScreenshot` pega o viewport, e
+   `captureBeyondViewport` nao rola container: rolar antes;
+2. perfil de teste vai na **raiz** de `HERMES_DESKTOP_USER_DATA_DIR`;
+3. **registrar defeito nao substitui consertar** quando custa uma linha;
+4. teste que passa a configuracao na mao **nao prova** que o app le o ambiente (foi assim que o listener subiu em porta
+   aleatoria);
+5. **gate vermelho nao commit** — a guarda `if ($g -notmatch 'ok') { exit 1 }` existe por causa disso;
+6. chave nova em catalogo grande: localizar o bloco **contando chaves**, nunca por proximidade de texto.
