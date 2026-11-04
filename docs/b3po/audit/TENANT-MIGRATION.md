@@ -1,6 +1,6 @@
 # Migração de tenant — decisão pendente (rodada 21)
 
-**Status:** NÃO EXECUTADA. O cadastro de empresas existe; a troca do tenant dos dados existentes não.
+**Status:** IMPLEMENTADA E TESTADA, NÃO EXECUTADA EM DADOS REAIS. O executor existe em `apps/desktop/electron/tenant-migrate.ts` com backup, verificação e rollback; falta alguém decidir rodá-lo sobre um `userData` de verdade.
 
 ## Situação hoje
 
