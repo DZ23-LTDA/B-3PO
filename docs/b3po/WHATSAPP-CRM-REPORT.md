@@ -795,3 +795,36 @@ endpoint que so se testa com servidor de pe e endpoint que ninguem testa.
 | endpoint local | `crm-whatsapp-endpoint.ts` | 8 |
 
 **Falta apenas** subir o listener HTTP e chamar `handleWhatsAppIngest` (e o hook opt-in no adapter python).
+
+
+## Listener local: o laco esta fechado (rodada 184)
+
+`apps/desktop/electron/crm-whatsapp-listener.ts` — `startWhatsAppListener({ token, appSecret, sink }, porta)` devolve
+`{ port, close }`.
+
+**Escuta em 127.0.0.1, nunca 0.0.0.0.** Um listener em 0.0.0.0 ficaria visivel na rede local: mesmo com token, a
+superficie de ataque cresceria sem necessidade nenhuma.
+
+**Porta 0 = o sistema escolhe**, e devolvemos a porta real — o adapter recebe o numero efetivo em vez de um fixo que pode
+estar ocupado na maquina do cliente.
+
+**Corpo limitado a 1 MB.** Ler sem teto e convite a exaustao de memoria; payload com megabytes nao e mensagem de
+WhatsApp.
+
+**Testado com socket de verdade** (`fetch` contra o servidor em loopback), nao com mock: 6 testes — grava e devolve 200;
+sem token 401; GET 405; corpo grande 413 sem tocar no store; reentrega 200 com `duplicated`; e confere que a URL e
+127.0.0.1.
+
+### O fio completo, 51 testes
+
+| peca | arquivo | testes |
+|---|---|---|
+| guardar | `crm-conversations-store.ts` | 16 |
+| mapear payload | `crm-meta-webhook-map.ts` | 8 |
+| verificar HMAC | `crm-whatsapp-signature.ts` | 9 |
+| receber e gravar | `crm-whatsapp-ingest.ts` | 8 |
+| endpoint local | `crm-whatsapp-endpoint.ts` | 8 |
+| listener | `crm-whatsapp-listener.ts` | 6 |
+
+**Falta so o hook no adapter python** (postar em `http://127.0.0.1:<porta>/` com o header original) e a inicializacao do
+listener no processo principal do Electron com o token do app. Nada disso muda o que ja esta provado; e ligacao de fio.
