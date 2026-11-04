@@ -30,6 +30,7 @@ export const SERVICOS_ROUTE = '/servicos'
 export const RH_ROUTE = '/rh'
 export const ATENDIMENTO_ROUTE = '/atendimento'
 export const AGENTES_ROUTE = '/agentes'
+export const POSVENDA_ROUTE = '/posvenda'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -44,6 +45,7 @@ export type AppView =
   | 'command-center'
   | 'compras'
   | 'agentes'
+  | 'posvenda'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -74,6 +76,7 @@ export type AppRouteId =
   | 'command-center'
   | 'compras'
   | 'agentes'
+  | 'posvenda'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -110,6 +113,7 @@ export const APP_ROUTES = [
   { id: 'agenda', path: AGENDA_ROUTE, view: 'agenda' },
   { id: 'compras', path: COMPRAS_ROUTE, view: 'compras' },
   { id: 'agentes', path: AGENTES_ROUTE, view: 'agentes' },
+  { id: 'posvenda', path: POSVENDA_ROUTE, view: 'posvenda' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },

@@ -821,6 +821,20 @@ export const en: Translations = {
       unitCost: 'Unit cost',
       unavailable: 'Purchases need the desktop app to work.'
     },
+    posvenda: {
+      done: 'Done',
+      empty: 'No follow-up pending.',
+      hint: 'Follow-up is created when a sale is invoiced. The number that matters is the invoiced sales with none.',
+      loadFailed: 'Could not load follow-ups.',
+      noFollowUpOne: 'invoiced sale with no follow-up',
+      noFollowUp: 'invoiced sales with no follow-up',
+      noFollowUpHint: 'These sales were invoiced and nothing was scheduled after them — they will not come back on their own.',
+      overdue: 'overdue',
+      overdueTag: 'late',
+      pending: 'pending',
+      title: 'After-sales',
+      unavailable: 'After-sales needs the desktop app to work.'
+    },
     agentes: {
       aboveOwnLevel: 'You cannot grant a level above your own.',
       add: 'Create agent',

@@ -728,6 +728,20 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    posvenda: {
+      done: string
+      empty: string
+      hint: string
+      loadFailed: string
+      noFollowUpOne: string
+      noFollowUp: string
+      noFollowUpHint: string
+      overdue: string
+      overdueTag: string
+      pending: string
+      title: string
+      unavailable: string
+    },
     agentes: {
       aboveOwnLevel: string
       add: string

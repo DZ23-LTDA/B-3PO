@@ -1031,6 +1031,20 @@ export const ptOverrides: TranslationOverrides = {
       unitCost: 'Custo unitário',
       unavailable: 'As compras precisam do aplicativo desktop para funcionar.'
     },
+    posvenda: {
+      done: 'Concluir',
+      empty: 'Nenhum acompanhamento pendente.',
+      hint: 'O acompanhamento é criado quando a venda é faturada. O número que importa é o de vendas faturadas sem nenhum.',
+      loadFailed: 'Não foi possível carregar os acompanhamentos.',
+      noFollowUpOne: 'venda faturada sem acompanhamento',
+      noFollowUp: 'vendas faturadas sem acompanhamento',
+      noFollowUpHint: 'Estas vendas foram faturadas e nada foi agendado depois delas — elas não voltam sozinhas.',
+      overdue: 'atrasados',
+      overdueTag: 'atrasado',
+      pending: 'pendentes',
+      title: 'Pós-venda',
+      unavailable: 'O pós-venda precisa do aplicativo desktop para funcionar.'
+    },
     agentes: {
       aboveOwnLevel: 'Você não pode conceder um nível acima do seu.',
       add: 'Criar agente',
