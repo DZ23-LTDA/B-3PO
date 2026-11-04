@@ -1130,3 +1130,22 @@ O ultimo item simples do 14.1: nota da equipe, guardada junto da conversa.
    e o store recebeu o texto.
 
 Licao que ja estava escrita e repeti: **script que imprime sucesso nao prova que alterou algo.** Medir o efeito, nao o log.
+
+
+## Payload de envio (rodada 198) — a metade que nao precisa de credencial
+
+`crm-whatsapp-outbound.ts`: funcao **pura** que monta o corpo da WhatsApp Cloud API. O envio real depende de
+credencial e rede; a parte que erra de verdade pode ser provada sem conta nenhuma:
+
+| regra | porque |
+|---|---|
+| telefone so com digitos (tira `+`, espaco, parentese) | a Cloud API recusa mascara — `+55 11 99999-1111` tem que virar `5511999991111` |
+| menos de 8 ou mais de 15 digitos: recusa com motivo | numero truncado nao vira tentativa de envio; falha onde o erro e visivel |
+| texto so de espaco: recusa | cortar em silencio esconderia o problema de quem escreveu |
+| acima de 4096 caracteres: recusa e **informa o tamanho real** | o limite e da Meta; saber quantos caracteres passaram e o que permite corrigir |
+| apara espaco das pontas, preserva o meio | quebra de linha dentro da mensagem e intencional |
+
+**7 testes.** `tsc` limpo, gate 14 ok.
+
+**O que ainda NAO existe:** a chamada HTTP em si e a gravacao da mensagem enviada na conversa. Ambas dependem do
+adapter e das `WHATSAPP_CLOUD_*`; o payload ja esta pronto e testado para o dia em que a credencial chegar.
