@@ -50,6 +50,7 @@ const ComprasView = lazy(async () => ({ default: (await import('../compras')).Co
 const EmpresaView = lazy(async () => ({ default: (await import('../empresa')).EmpresaView }))
 const ServicosView = lazy(async () => ({ default: (await import('../servicos')).ServicosView }))
 const RhView = lazy(async () => ({ default: (await import('../rh')).RhView }))
+const AtendimentoView = lazy(async () => ({ default: (await import('../atendimento')).AtendimentoView }))
 
 export function LegacySessionRedirect() {
   const { sessionId } = useParams()
@@ -215,6 +216,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       <Route element={page(<EmpresaView />)} path="empresa" />
       <Route element={page(<ServicosView />)} path="servicos" />
       <Route element={page(<RhView />)} path="rh" />
+      <Route element={page(<AtendimentoView />)} path="atendimento" />
       <Route element={null} path="agents" />
       <Route element={null} path="command-center" />
       <Route element={null} path="cron" />

@@ -728,6 +728,34 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    atendimento: {
+      close: string
+      closeRequiresResolved: string
+      empty: string
+      hint: string
+      invalidRating: string
+      loadFailed: string
+      notFound: string
+      noRatings: string
+      open: string
+      openCount: string
+      overdue: string
+      overdueBadge: string
+      overdueCount: string
+      phone: string
+      priority: string
+      rate: string
+      rateRequiresResolved: string
+      remaining: string
+      resolve: string
+      reviewBadge: string
+      satisfaction: string
+      start: string
+      subject: string
+      subjectRequired: string
+      title: string
+      unavailable: string
+    },
     rh: {
       addDepartment: string
       addEmployee: string
