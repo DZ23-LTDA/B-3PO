@@ -69,6 +69,11 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: id => ipcRenderer.invoke('hermes:crm-tasks:remove', id),
     upsert: payload => ipcRenderer.invoke('hermes:crm-tasks:upsert', payload)
   },
+  documents: {
+    list: payload => ipcRenderer.invoke('hermes:documents:list', payload),
+    remove: id => ipcRenderer.invoke('hermes:documents:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:documents:upsert', payload)
+  },
   crmConversations: {
     list: () => ipcRenderer.invoke('hermes:crm-conversations:list'),
     remove: id => ipcRenderer.invoke('hermes:crm-conversations:remove', id),
