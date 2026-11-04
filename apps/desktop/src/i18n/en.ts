@@ -739,6 +739,7 @@ export const en: Translations = {
       won: 'Won',
       opportunity: 'Opportunity',
       value: 'Value (cents)',
+      columnEmpty: 'Nothing here yet',
       contact: 'Contact',
       add: 'Add opportunity',
       remove: 'Remove',

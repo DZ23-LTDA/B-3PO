@@ -14,7 +14,7 @@ import { CrmOverview } from './crm-overview'
  */
 export function CrmView() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
       <h1 className="text-lg font-semibold text-foreground">CRM</h1>
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         Contatos e funil ficam neste computador. As conversas entram quando o canal oficial do WhatsApp estiver

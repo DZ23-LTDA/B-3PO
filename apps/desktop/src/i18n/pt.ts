@@ -891,6 +891,7 @@ export const ptOverrides: TranslationOverrides = {
       won: 'Ganho',
       opportunity: 'Oportunidade',
       value: 'Valor (centavos)',
+      columnEmpty: 'Nada aqui ainda',
       contact: 'Contato',
       add: 'Adicionar oportunidade',
       remove: 'Remover',

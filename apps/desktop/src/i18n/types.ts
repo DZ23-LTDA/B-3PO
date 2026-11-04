@@ -661,6 +661,7 @@ export interface Translations extends NoticeTranslations {
       won: string
       opportunity: string
       value: string
+      columnEmpty: string
       contact: string
       add: string
       remove: string

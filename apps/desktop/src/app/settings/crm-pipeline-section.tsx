@@ -211,69 +211,95 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
       </div>
 
       {rows !== null && rows.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {rows.map(row => (
-            <li
-              className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border/60 px-3 py-2"
-              key={row.id}
-            >
-              <div className="flex min-w-0 flex-col">
-                <span className="truncate text-sm text-foreground">{row.title}</span>
-                <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-                  {`${row.contact_phone} · ${money(row.value_cents, row.currency)}`}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <select
-                  aria-label={copy.stage}
-                  className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
-                  onChange={event => {
-                const next = event.target.value as CrmOpportunityRow['stage']
+        // Funil visual: uma coluna por etapa, com contagem e total reais daquela etapa. O cartao continua igual
+        // (mover de etapa, motivo de perda obrigatorio, remover) — o que muda e o lugar: lado a lado, como um funil
+        // se le. Largura fixa com rolagem horizontal porque sete etapas em colunas elasticas espremem o texto ate
+        // truncar tudo; o funil rola, o cartao nao quebra.
+        <div className="flex flex-wrap gap-2 pb-2">
+          {PIPELINE_STAGES.map(stage => {
+            const daEtapa = rows.filter(row => row.stage === stage)
+            const totalEtapa = daEtapa.reduce((soma, row) => soma + row.value_cents, 0)
 
-                if (next === 'perdido') {
-                  setPendingLoss({ id: row.id, reason: '' })
-                  return
-                }
+            return (
+              <section className="w-60 shrink-0 rounded-md border border-border/60 p-2" key={stage}>
+                <header className="mb-2 flex flex-col gap-0.5 border-b border-border/60 pb-1">
+                  <span className="text-xs font-semibold text-foreground">{stageLabel(stage, copy.stages)}</span>
+                  <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                    {`${daEtapa.length} · ${money(totalEtapa)}`}
+                  </span>
+                </header>
+                {daEtapa.length === 0 ? (
+                  <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                    {copy.columnEmpty}
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {daEtapa.map(row => (
+                      <li
+                        className="flex flex-col gap-1.5 rounded-md border border-border/60 px-2 py-1.5"
+                        key={row.id}
+                      >
+                        <span className="text-sm leading-tight text-foreground">{row.title}</span>
+                        <span className="flex flex-col text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                          <span className="truncate">{row.contact_phone}</span>
+                          <span className="truncate">{money(row.value_cents, row.currency)}</span>
+                        </span>
+                        <select
+                          aria-label={copy.stage}
+                          className="h-7 w-full rounded-md border border-border/60 bg-transparent px-1 text-xs"
+                          onChange={event => {
+                            const next = event.target.value as CrmOpportunityRow['stage']
 
-                void move(row, next)
-              }}
-                  value={row.stage}
-                >
-                  {PIPELINE_STAGES.map(stage => (
-                    <option key={stage} value={stage}>
-                      {stageLabel(stage, copy.stages)}
-                    </option>
-                  ))}
-                </select>
-            {pendingLoss?.id === row.id ? (
-              <span className="flex items-center gap-1">
-                <input
-                  aria-label={copy.lostReason}
-                  className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
-                  onChange={event => setPendingLoss({ id: row.id, reason: event.target.value })}
-                  value={pendingLoss.reason}
-                />
-                <Button
-                  onClick={() => {
-                    void move(row, 'perdido', pendingLoss.reason)
-                    setPendingLoss(null)
-                  }}
-                  size="sm"
-                  variant="ghost"
-                >
-                  {copy.add}
-                </Button>
-              </span>
-            ) : row.stage === 'perdido' && row.lost_reason ? (
-              <span className="text-xs text-(--ui-text-tertiary)">{row.lost_reason}</span>
-            ) : null}
-                <Button onClick={() => void remove(row.id)} size="sm" variant="ghost">
-                  {copy.remove}
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                            if (next === 'perdido') {
+                              setPendingLoss({ id: row.id, reason: '' })
+
+                              return
+                            }
+
+                            void move(row, next)
+                          }}
+                          value={row.stage}
+                        >
+                          {PIPELINE_STAGES.map(opcao => (
+                            <option key={opcao} value={opcao}>
+                              {stageLabel(opcao, copy.stages)}
+                            </option>
+                          ))}
+                        </select>
+                        {pendingLoss?.id === row.id ? (
+                          <span className="flex flex-col gap-1">
+                            <input
+                              aria-label={copy.lostReason}
+                              className="h-7 w-full rounded-md border border-border/60 bg-transparent px-1 text-xs"
+                              onChange={event => setPendingLoss({ id: row.id, reason: event.target.value })}
+                              value={pendingLoss.reason}
+                            />
+                            <Button
+                              className="w-full"
+                              onClick={() => {
+                                void move(row, 'perdido', pendingLoss.reason)
+                                setPendingLoss(null)
+                              }}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              {copy.add}
+                            </Button>
+                          </span>
+                        ) : row.stage === 'perdido' && row.lost_reason ? (
+                          <span className="text-xs text-(--ui-text-tertiary)">{row.lost_reason}</span>
+                        ) : null}
+                        <Button className="w-full" onClick={() => void remove(row.id)} size="sm" variant="ghost">
+                          {copy.remove}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )
+          })}
+        </div>
       ) : null}
     </div>
   )

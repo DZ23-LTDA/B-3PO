@@ -1371,6 +1371,7 @@
   "settings.connections.updateAllRunning": ["ar","ja","zh-hant"],
   "settings.connections.updateSkippedCloud": ["ar","ja","zh-hant"],
   "settings.connections.urlTitle": ["ar","ja","zh-hant"],
+  "settings.crmPipeline.columnEmpty": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.add": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.contactLabel": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.due": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

@@ -1590,3 +1590,18 @@ simplesmente não aplicava e nada quebrava. Troquei por `text-destructive` e pas
 
 Também registrei a duplicação consciente de `taskCounts` (store do processo principal e cliente do renderer): duas
 cópias de uma regra só continuam iguais se alguém cobrar, então um teste roda as duas sobre a mesma lista e compara.
+
+### Rodada 143 — funil do CRM virou funil na tela
+
+O funil existia no dado e não na tela: era uma lista única com seletor de estágio em cada linha. Agora são sete
+colunas, cada uma com contagem e total reais da etapa, com o cartão mantendo mover/perder/remover.
+
+**Três iterações até ficar legível**, e as duas primeiras eram erro de produto:
+
+1. colunas elásticas espremiam sete etapas a ponto de truncar os nomes ("Neg o…") e sobrepor o seletor ao botão;
+2. largura fixa com rolagem horizontal tirou duas colunas da tela e quebrou o valor no meio do número;
+3. **final**: colunas de largura fixa que quebram em duas linhas — funil inteiro visível —, telefone e valor em
+   linhas separadas no cartão.
+
+Também subi a página do CRM de `max-w-3xl` para `max-w-6xl`: sete colunas não cabiam na largura antiga. Evidência:
+`docs/b3po/evidence/crm-funil-pt.png`, com dados reais semeados (Negociação R$ 15.000, Ganho R$ 4.500).

@@ -430,3 +430,24 @@ não o "parece certo" na captura.
 **Duas cópias da mesma regra:** `taskCounts` existe no store (processo principal) e no cliente do renderer. Duas
 cópias só continuam iguais se alguém cobrar, então `electron/crm-tasks-store.test.ts` roda as duas sobre a mesma
 lista e compara.
+
+
+## Funil visual — entregue (rodada 143)
+
+O funil era uma **lista única** com um seletor de estágio em cada linha: o funil existia no dado, não na tela.
+Agora são **sete colunas** (Novo lead → Perdido), cada uma com **contagem e total reais** daquela etapa, e o cartão
+continua com o que já funcionava: mover de etapa, motivo de perda obrigatório em `Perdido`, remover.
+
+Três iterações até ficar legível — e as duas primeiras estão registradas porque o erro foi de produto, não de código:
+
+1. **Colunas elásticas (`flex-1`)**: sete etapas espremidas truncavam tudo ("Neg o…", "Contato ini…") e o seletor
+   se sobrepunha ao botão de remover.
+2. **Largura fixa com rolagem horizontal**: o texto parou de truncar, mas duas colunas ficavam fora da tela e o
+   valor no cartão quebrava no meio (`R$ 15.00` / `0,00`).
+3. **Como está**: colunas de largura fixa que **quebram em duas linhas** (o funil inteiro visível de uma vez), e
+   telefone e valor em linhas separadas dentro do cartão.
+
+Página do CRM passou de `max-w-3xl` para `max-w-6xl`: sete colunas não cabem na largura antiga.
+
+Evidência: `docs/b3po/evidence/crm-funil-pt.png` — com 2 oportunidades reais semeadas no perfil, as colunas
+mostraram `Negociação 1 · R$ 15.000,00` e `Ganho 1 · R$ 4.500,00`, as outras cinco `Nada aqui ainda`.
