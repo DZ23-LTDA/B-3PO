@@ -16,6 +16,7 @@ import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { createDispatcher, dispatchQuietly } from './automation-dispatch'
+import { resolveRuleActor, withOwnerAlias } from './automation-actors'
 import { dueSoonConditions, overdueConditions } from './automation-conditions'
 import { SweepStore, sweepStatePath } from './automation-sweep'
 import { PurchasesStore, purchasesStorePath } from './purchases-store'
@@ -105,18 +106,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   let automacoes: AutomationStore | null = null
 
   const dispatch = createDispatcher({
-    actors: async () => {
-      const lista = await actors.list()
-
-      // Alias: a tela cria regra com ctor_id: 'owner' porque o id real (ctor_<timestamp>_<sufixo>)
-      // nao e legivel. Resolver aqui evita regra que parece configurada e falha com tor_ausente em
-      // toda execucao - foi exatamente o que a validacao no binario pegou.
-      if (!lista.some(a => a.id === 'owner')) {
-        return [...lista, { ...(await actorOf())!, active: true, id: 'owner' }].filter(a => a.id)
-      }
-
-      return lista
-    },
+    // O alias owner (rodada 68) vive em utomation-actors.ts, onde tem teste. Aqui so aplicamos.
+    actors: async () => withOwnerAlias(await actors.list(), await actorOf()),
     automations: {
       list: async tenant => (automacoes ? automacoes.list(tenant) : [])
     },

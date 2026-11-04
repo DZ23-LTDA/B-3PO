@@ -17,6 +17,7 @@
 // transicao e o evento), e `ticket.atrasado`/`conta.vencendo` ficam registrados como pendencias: sao
 // varredura, nao evento, e fingir que sao evento produziria disparo repetido.
 
+import { resolveRuleActor } from './automation-actors'
 import { runRules, type AutomationReport, type AutomationRule, type AutomationTrigger } from './automation-store'
 import type { AgentTool } from './agent-tools'
 import type { Actor } from './rbac'
@@ -45,14 +46,7 @@ export function createDispatcher(deps: DispatcherDeps): Dispatcher {
     const regras = await deps.automations.list(event.tenant_id)
 
     const report = await runRules(regras, event.type, {
-      actorFor: async id => {
-        const atores = await deps.actors()
-        const achado = atores.find(a => a.id === id && a.active)
-
-        return achado
-          ? { id: achado.id, kind: achado.kind, level: achado.level, role: achado.role, scopes: achado.scopes }
-          : null
-      },
+      actorFor: async id => resolveRuleActor(await deps.actors(), id),
       now: deps.now(),
       tenantId: event.tenant_id,
       tools: deps.tools()
