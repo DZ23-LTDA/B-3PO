@@ -11,6 +11,7 @@ import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 import type { InventoryMovement } from './inventory-store'
 import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
+import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
 
 export interface PurchasesStoreLike {
   orders: (tenantId?: string) => Promise<PurchaseOrder[]>
@@ -25,6 +26,8 @@ export interface InventoryLike {
 
 export interface PurchasesDeps {
   finance: { append: (input: unknown) => Promise<{ entry: FinanceEntry } | { error: string }> }
+  /** Limite de compra da empresa. Ausente ou com cents: null desliga o controle. */
+  limiteDeCompra?: () => Promise<LimiteDeCompra>
   inventory: InventoryLike
   store: PurchasesStoreLike
 }
@@ -66,6 +69,19 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
 
     if ('error' in normalizado) {
       return { error: normalizado.error }
+    }
+
+    // Limite de compra (GOAL §15). Sem limiteDeCompra configurado, nada muda: o controle e opt-in do dono.
+    // Recusar AQUI, antes de gravar, e o que impede um pedido acima do teto de virar estoque e conta a pagar
+    // para depois alguem descobrir que precisava de assinatura.
+    if (deps.limiteDeCompra) {
+      const limite = await deps.limiteDeCompra()
+      const total = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
+      const situacao = situacaoDaCompra(total, limite)
+
+      if (situacao.precisa) {
+        return { error: 'aprovacao_necessaria' }
+      }
     }
 
     const salvo = await deps.store.saveOrder({ ...(payload as object), status: 'recebido' })

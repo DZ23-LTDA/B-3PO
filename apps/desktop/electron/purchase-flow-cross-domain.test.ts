@@ -21,6 +21,7 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerPurchasesIpc } from './purchases-ipc'
 import { PurchasesStore, purchasesStorePath } from './purchases-store'
+import type { LimiteDeCompra } from './purchase-approval'
 
 type Ctx = {
   finance: FinanceStore
@@ -30,6 +31,7 @@ type Ctx = {
 
 let dir = ''
 let ctx: Ctx
+let limiteAtual: LimiteDeCompra | undefined
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), 'b3po-fluxo-compra-'))
@@ -40,13 +42,20 @@ beforeEach(async () => {
 
   const handlers = new Map<string, (event: unknown, ...args: unknown[]) => Promise<unknown>>()
 
+  limiteAtual = undefined
+
   registerPurchasesIpc(
     {
       handle: (canal: string, fn: (event: unknown, ...args: unknown[]) => Promise<unknown>) => {
         handlers.set(canal, fn)
       }
     } as never,
-    { finance, inventory, store } as never
+    {
+      finance,
+      inventory,
+      limiteDeCompra: async () => limiteAtual ?? { aprovadores: [], cents: null },
+      store
+    } as never
   )
 
   ctx = {
@@ -135,5 +144,42 @@ describe('compra recebida no fluxo entre dominios', () => {
     expect(segunda.error).toBe('pedido_recebido_imutavel')
     expect((await ctx.inventory.balances())['SKU-COMPRA']).toBe(primeiroEstoque)
     expect((await ctx.finance.totals()).openPayableCents).toBe(primeiroPagavel)
+  })
+})
+
+describe('limite de compra (GOAL §15)', () => {
+  it('com limite configurado, recusa ANTES de tocar estoque e financeiro', async () => {
+    // O ponto do requisito: a recusa precisa acontecer antes dos efeitos. Recusar depois seria deixar
+    // mercadoria no estoque e uma divida criada para alguem descobrir que faltava assinatura.
+    limiteAtual = { aprovadores: ['dono'], cents: 9_999 }
+
+    await ctx.invocar('hermes:purchases:saveSupplier', { id: 'forn-1', name: 'Fornecedor de Teste' })
+
+    const resposta = (await ctx.invocar('hermes:purchases:receive', pedido)) as { error?: string }
+
+    expect(resposta.error).toBe('aprovacao_necessaria')
+    expect((await ctx.inventory.balances())['SKU-COMPRA']).toBeUndefined()
+    expect((await ctx.finance.totals()).openPayableCents).toBe(0)
+  })
+
+  it('compra abaixo do limite continua passando', async () => {
+    limiteAtual = { aprovadores: ['dono'], cents: 1_000_000 }
+
+    await ctx.invocar('hermes:purchases:saveSupplier', { id: 'forn-1', name: 'Fornecedor de Teste' })
+
+    const resposta = (await ctx.invocar('hermes:purchases:receive', pedido)) as { error?: string }
+
+    expect(resposta.error).toBeUndefined()
+    expect((await ctx.inventory.balances())['SKU-COMPRA']).toBe(5_000)
+  })
+
+  it('sem limite configurado, nada muda', async () => {
+    limiteAtual = undefined
+
+    await ctx.invocar('hermes:purchases:saveSupplier', { id: 'forn-1', name: 'Fornecedor de Teste' })
+
+    const resposta = (await ctx.invocar('hermes:purchases:receive', pedido)) as { error?: string }
+
+    expect(resposta.error).toBeUndefined()
   })
 })
