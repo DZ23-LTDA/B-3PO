@@ -12,6 +12,7 @@ import type { InventoryMovement } from './inventory-store'
 import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
+import { escolherCotacao, type Cotacao } from './purchase-quotation'
 
 export interface PurchasesStoreLike {
   orders: (tenantId?: string) => Promise<PurchaseOrder[]>
@@ -118,4 +119,18 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
 
     return { order: salvo.order, orders: salvo.orders, stock, finance }
   })
+  // Cotacao: compara propostas para uma quantidade e devolve a escolha com a economia contra a segunda.
+  //
+  // NAO grava nada: uma cotacao e proposta, nao compromisso. Persistir aqui faria uma proposta vencida virar
+  // divida; quem compra decide se vira pedido.
+  ipcMain.handle(
+    'hermes:purchases:cotacao',
+    async (_event: IpcMainInvokeEvent, payload: unknown) => {
+      const raw = (payload ?? {}) as Record<string, unknown>
+      const cotacoes = Array.isArray(raw['cotacoes']) ? (raw['cotacoes'] as Cotacao[]) : []
+      const quantidade = Number(raw['quantidade'])
+
+      return escolherCotacao(cotacoes, quantidade)
+    }
+  )
 }
