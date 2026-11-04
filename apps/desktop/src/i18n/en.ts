@@ -4277,7 +4277,7 @@ export const en: Translations = {
       noReturn: 'Backend didn’t come back online. The update may not have completed — check the backend host.',
       owed: steps => `Backend updated, but still owed: ${steps}. Re-run \`hermes update\` to finish them.`
     },
-    appName: 'Hermes', // Update-status overlay + version-details (mechanism-aware update UI).
+    appName: 'B-3PO', // Update-status overlay + version-details (mechanism-aware update UI).
     version: (value: string) => `Version ${value}`,
     versionUnavailable: 'Version unavailable',
     checkNow: 'Check now',

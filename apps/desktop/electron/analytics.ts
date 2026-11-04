@@ -111,6 +111,11 @@ export interface Alert {
  * Um alerta so existe quando o dado sustenta a afirmacao — nao ha "tudo ok" inventado nem alerta
  * preventivo sobre numero que ninguem mediu.
  */
+/** Singular com 1; plural no resto (incluindo zero, que em portugues pede plural). */
+function plural(n: number, um: string, muitos: string): string {
+  return n === 1 ? um : muitos
+}
+
 export function alertsFor(snapshot: Snapshot): Alert[] {
   const alertas: Alert[] = []
 
@@ -125,7 +130,7 @@ export function alertsFor(snapshot: Snapshot): Alert[] {
 
   if (snapshot.desk.atrasados > 0) {
     alertas.push({
-      detail: `${snapshot.desk.atrasados} atendimento(s) passaram do prazo combinado.`,
+      detail: `${snapshot.desk.atrasados} ${snapshot.desk.atrasados === 1 ? 'atendimento passou' : 'atendimentos passaram'} do prazo combinado.`,
       domain: 'desk',
       severity: 'alta',
       title: 'Atendimento fora do prazo'
@@ -134,7 +139,7 @@ export function alertsFor(snapshot: Snapshot): Alert[] {
 
   if (snapshot.inventory.zerados > 0) {
     alertas.push({
-      detail: `${snapshot.inventory.zerados} produto(s) sem saldo para vender.`,
+      detail: `${snapshot.inventory.zerados} ${plural(snapshot.inventory.zerados, 'produto', 'produtos')} sem saldo para vender.`,
       domain: 'inventory',
       severity: 'alta',
       title: 'Estoque zerado em item cadastrado'
@@ -143,7 +148,7 @@ export function alertsFor(snapshot: Snapshot): Alert[] {
 
   if (snapshot.afterSales.semAcompanhamento > 0) {
     alertas.push({
-      detail: `${snapshot.afterSales.semAcompanhamento} venda(s) faturada(s) sem nenhum acompanhamento.`,
+      detail: `${snapshot.afterSales.semAcompanhamento} ${plural(snapshot.afterSales.semAcompanhamento, 'venda faturada', 'vendas faturadas')} sem nenhum acompanhamento.`,
       domain: 'sales',
       severity: 'media',
       title: 'Pós-venda não foi agendado'
@@ -152,7 +157,7 @@ export function alertsFor(snapshot: Snapshot): Alert[] {
 
   if (snapshot.marketing.agendadasVencidas > 0) {
     alertas.push({
-      detail: `${snapshot.marketing.agendadasVencidas} campanha(s) agendada(s) com início já passado.`,
+      detail: `${snapshot.marketing.agendadasVencidas} ${plural(snapshot.marketing.agendadasVencidas, 'campanha agendada', 'campanhas agendadas')} com início já passado.`,
       domain: 'marketing',
       severity: 'media',
       title: 'Campanha agendada não foi ativada'

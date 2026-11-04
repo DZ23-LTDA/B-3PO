@@ -4149,7 +4149,7 @@ export const esOverrides = {
     discontinuedBody:
       'Esta versión de Hermes ya no tiene soporte y podría dejar de funcionar; desinstálala. Tus datos permanecen en el disco.',
     channels: { stable: 'Estable', canary: 'Canary' },
-    appName: 'Hermes',
+    appName: 'B-3PO',
     availableBodyRelease: tag => `La versión ${tag} está lista para instalarse.`,
     releaseAvailable: tag => `La versión ${tag} está disponible.`,
     checkingShort: 'Comprobando…',

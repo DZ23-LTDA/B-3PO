@@ -770,6 +770,7 @@ export const ptOverrides: TranslationOverrides = {
         }
       },
       updates: {
+    appName: 'B-3PO',
         nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app'
       }
 
