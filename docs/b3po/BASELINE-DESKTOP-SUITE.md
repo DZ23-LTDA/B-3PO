@@ -74,3 +74,40 @@ paralela**, não assertion. Está medido, não suposto.
 O resto do arquivo (as falhas de `electron/` e `scripts/`) continua de pé e precisa de triagem própria: são
 empacotamento, tray, updater, assinatura de payload e instalador — dependem de Windows real, rede e artefato
 assinado.
+
+
+## Correção do baseline (rodada 140): 56 → 43 falhas, e parte era erro meu de medição
+
+A primeira medição rodou a suíte com `HERMES_PYTHON` apontando para o Python do checkout ativo, que **não tem
+`ruamel.yaml`**. Os testes de `electron/` que conversam com o lado Python morriam com
+`ModuleNotFoundError: No module named 'ruamel'` — inflando o número.
+
+Com `HERMES_PYTHON=D:\IA-Workspace\Deepseek\projects\b3po-testenv\Scripts\python.exe`:
+
+| | antes | depois |
+|---|---|---|
+| Testes com falha | 56 | **43** |
+| Arquivos com falha | 29 | **23** |
+| Testes que passam | 16.733 | **16.746** |
+
+Prova isolada: `electron/ui-preferences.test.ts` falhava 3/6 e agora faz **4 passam, 2 pulados**.
+
+### Corrigido nesta rodada
+
+- **`locales/_keys.desktop.json` estava desatualizado** — o teste cobrou (`npm run i18n:keys`). Foi o meu i18n
+  (chaves novas de `settings.providers`, `keybinds`, `sidebar.nav.crm`, `updates`) que ficou fora do arquivo
+  derivado. Regenerado; `scripts/i18n-keys.test.mjs` passa 2/2.
+- **`electron/tray-host.test.ts` (3 falhas)**: `TypeError: process.getuid is not a function` no Windows. O módulo é
+  `watchLinuxTrayHost` — D-Bus do Linux — e o arquivo não tinha guarda de plataforma. Marquei com
+  `test.skipIf(process.platform !== 'linux')`, seguindo o padrão de `app-relaunch.test.ts`. Agora 3 pulados com
+  motivo, não 3 vermelhos.
+
+### O que sobra (43) e por quê
+
+- **Symlink/ACL**: `plugin-files` (8), `desktop-plugin-install` (5), `ssh-connection` (4) — criar symlink no
+  Windows exige privilégio/developer mode; o ambiente não tem.
+- **Empacotamento/assinatura**: `after-pack-digests`, `payload-sign-cache`, `bundle-electron-main`,
+  `stage-native-deps`, `probe-prepared-native`, `run-electron-builder`, `channel-build-version`,
+  `desktop-installation`, `packaged-working-directory`, `system-proxy-env`, `desktop-plugin-remove` — dependem de
+  artefato assinado, instalador e rede.
+- **Timeout sob carga**: `use-keybinds-browser` (2) e `hermes-bots/legacy-sdk-compat` (1) — passam isolados.

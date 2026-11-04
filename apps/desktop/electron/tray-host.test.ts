@@ -22,7 +22,7 @@ function bus(hostRegistered: boolean) {
   return instance
 }
 
-test('a registered host is required, and losing its owner reports loss exactly once', async () => {
+test.skipIf(process.platform !== 'linux')('a registered host is required, and losing its owner reports loss exactly once', async () => {
   const instance = bus(true)
   const lost = vi.fn()
   const dispose = await watchLinuxTrayHost(lost)
@@ -40,7 +40,7 @@ test('a registered host is required, and losing its owner reports loss exactly o
   dispose()
 })
 
-test('dbus-native 0.15 returns the registered flag as a bare boolean', async () => {
+test.skipIf(process.platform !== 'linux')('dbus-native 0.15 returns the registered flag as a bare boolean', async () => {
   const instance = bus(true)
   instance.invoke.mockResolvedValue(true)
   const lost = vi.fn()
@@ -49,7 +49,7 @@ test('dbus-native 0.15 returns the registered flag as a bare boolean', async () 
   dispose()
 })
 
-test('a missing host and a failed query reject without leaving an open bus connection', async () => {
+test.skipIf(process.platform !== 'linux')('a missing host and a failed query reject without leaving an open bus connection', async () => {
   const lost = vi.fn()
   const absent = bus(false)
   await expect(watchLinuxTrayHost(lost)).rejects.toThrow('No system tray host')

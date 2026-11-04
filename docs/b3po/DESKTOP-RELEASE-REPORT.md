@@ -1527,3 +1527,23 @@ suposto.
 
 Somando as duas rodadas, saíram **9 testes vermelhos** e **2 bugs de produto** (`/crm` caindo em sessão, wrapper
 que quebrava com não-Promise). O que sobra de vermelho é `electron/`/`scripts/` e os 3 arquivos de timeout.
+
+### Rodada 140 — baseline recontado (56 → 43) e dois vermelhos que eram meus
+
+Descobri que a medição anterior estava **inflada por erro meu**: rodei a suíte com `HERMES_PYTHON` apontando para o
+Python do checkout ativo, que não tem `ruamel.yaml`. Os testes de `electron/` que falam com o lado Python morriam
+com `ModuleNotFoundError` e eu contei isso como falha de produto.
+
+Com o Python do testenv: **43 falhas em 23 arquivos** (era 56/29), **16.746 passam**.
+
+Correções desta rodada:
+
+1. **`locales/_keys.desktop.json` desatualizado** — o teste `scripts/i18n-keys.test.mjs` cobrou o arquivo derivado
+   das chaves do `en.ts`. Foi o meu próprio i18n (`settings.providers`, `keybinds`, `sidebar.nav.crm`, `updates`).
+   Regenerei com `npm run i18n:keys`; passa 2/2.
+2. **`electron/tray-host.test.ts` (3 falhas)**: `process.getuid is not a function` no Windows — o módulo é
+   `watchLinuxTrayHost` (D-Bus do Linux) e o arquivo não tinha guarda de plataforma. Marquei
+   `test.skipIf(process.platform !== 'linux')`, seguindo `app-relaunch.test.ts`. Viraram 3 pulados com motivo.
+
+Sobre os 43 restantes: symlink/ACL no Windows (17), empacotamento e assinatura (23) e timeout sob carga (3).
+Nenhum é de tradução, marca ou produto — e agora o número tem procedência medida.
