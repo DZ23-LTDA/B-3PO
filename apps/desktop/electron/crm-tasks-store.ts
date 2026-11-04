@@ -26,6 +26,8 @@ export interface CrmTask {
   notes: string
   priority: TaskPriority
   status: TaskStatus
+  /** Empresa dona da tarefa. Registros antigos são lidos como `local` — ver `parseTasks`. */
+  tenant_id: string
   title: string
   updated_at: number
 }
@@ -72,7 +74,9 @@ function dueAt(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-export function normalizeTask(input: unknown, now: number): { error: string } | { task: CrmTask } {
+export const DEFAULT_TENANT = 'local'
+
+export function normalizeTask(input: unknown, now: number, tenantId: string = DEFAULT_TENANT): { error: string } | { task: CrmTask } {
   const raw = (input ?? {}) as Record<string, unknown>
   const title = text(raw['title'])
 
@@ -100,6 +104,7 @@ export function normalizeTask(input: unknown, now: number): { error: string } | 
       notes: text(raw['notes']),
       priority,
       status,
+      tenant_id: tenantId || DEFAULT_TENANT,
       title,
       updated_at: now
     }
@@ -116,14 +121,17 @@ export function parseTasks(raw: string): TasksFile {
 
     return {
       schema_version: 1,
-      tasks: parsed.tasks.filter(
-        entry =>
-          !!entry &&
-          typeof entry.id === 'string' &&
-          typeof entry.title === 'string' &&
-          isPriority((entry as CrmTask).priority) &&
-          isStatus((entry as CrmTask).status)
-      )
+      // Tarefa gravada antes do tenant: lida como `local`, sem reescrever o arquivo.
+      tasks: parsed.tasks
+        .filter(
+          entry =>
+            !!entry &&
+            typeof entry.id === 'string' &&
+            typeof entry.title === 'string' &&
+            isPriority((entry as CrmTask).priority) &&
+            isStatus((entry as CrmTask).status)
+        )
+        .map(entry => ({ ...entry, tenant_id: (entry as CrmTask).tenant_id || DEFAULT_TENANT }))
     }
   } catch {
     return emptyTasks()
@@ -180,12 +188,12 @@ export function taskCounts(tasks: readonly CrmTask[], now: number): { done: numb
 export class CrmTaskStore {
   constructor(private readonly filePath: string) {}
 
-  async list(): Promise<CrmTask[]> {
-    return sortTasks((await this.read()).tasks)
+  async list(tenantId: string = DEFAULT_TENANT): Promise<CrmTask[]> {
+    return sortTasks((await this.read()).tasks.filter(t => t.tenant_id === tenantId))
   }
 
-  async upsert(input: unknown): Promise<{ error: string } | { tasks: CrmTask[] }> {
-    const normalized = normalizeTask(input, Date.now())
+  async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { tasks: CrmTask[] }> {
+    const normalized = normalizeTask(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
       return normalized
@@ -193,7 +201,8 @@ export class CrmTaskStore {
 
     const file = await this.read()
     const task = normalized.task
-    const index = file.tasks.findIndex(entry => entry.id === task.id)
+    // Uma tarefa so e editavel pela empresa dona: id de outra empresa nao entra no indice.
+    const index = file.tasks.findIndex(entry => entry.id === task.id && entry.tenant_id === task.tenant_id)
 
     if (index >= 0) {
       const anterior = file.tasks[index]!
@@ -206,15 +215,15 @@ export class CrmTaskStore {
 
     await this.write(file)
 
-    return { tasks: await this.list() }
+    return { tasks: await this.list(tenantId) }
   }
 
-  async remove(id: string): Promise<{ tasks: CrmTask[] }> {
+  async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ tasks: CrmTask[] }> {
     const file = await this.read()
-    file.tasks = file.tasks.filter(entry => entry.id !== id)
+    file.tasks = file.tasks.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))
     await this.write(file)
 
-    return { tasks: await this.list() }
+    return { tasks: await this.list(tenantId) }
   }
 
   private async read(): Promise<TasksFile> {
