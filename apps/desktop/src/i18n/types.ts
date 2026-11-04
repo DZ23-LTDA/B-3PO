@@ -728,6 +728,39 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    marketing: {
+      active: string
+      approve: string
+      approved: string
+      campaigns: string
+      contentPlaceholder: string
+      contentRequired: string
+      create: string
+      draft: string
+      editorial: string
+      errCampaignMissing: string
+      errChannel: string
+      errContent: string
+      errDateRequired: string
+      errEndBeforeStart: string
+      errName: string
+      errStart: string
+      errStatus: string
+      hint: string
+      leads: string
+      loadFailed: string
+      namePlaceholder: string
+      nameRequired: string
+      noCampaigns: string
+      noPosts: string
+      noPublishNote: string
+      overBudget: string
+      spend: string
+      staleScheduled: string
+      staleScheduledHint: string
+      title: string
+      unavailable: string
+    },
     posvenda: {
       done: string
       empty: string

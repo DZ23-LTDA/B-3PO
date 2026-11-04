@@ -26,6 +26,8 @@ import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
+import { registerMarketingIpc } from './marketing-ipc'
+import { MarketingStore, marketingStorePath } from './marketing-store'
 import { AfterSalesStore, afterSalesStorePath } from './after-sales-store'
 import { bootAgentMcp } from './mcp-boot'
 import { registerAdminIpc } from './admin-ipc'
@@ -100,6 +102,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // acompanhamento é criado — o domínio existe no disco e ninguém o alimenta.
   registerSalesIpc(ipcMain, { actorOf, afterSales, finance, inventory, sales })
   registerAfterSalesIpc(ipcMain, { actorOf, afterSales, sales })
+  registerMarketingIpc(ipcMain, { marketing: new MarketingStore(marketingStorePath(userDataDir)) })
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools = buildDomainTools({
