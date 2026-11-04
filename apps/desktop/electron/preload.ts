@@ -189,6 +189,17 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     list: () => ipcRenderer.invoke('hermes:scheduling:block:list'),
     remove: id => ipcRenderer.invoke('hermes:scheduling:block:remove', id)
   },
+  // Agentes. Forma PLANA - sem nivel `block`/`agent` aninhado. A r127 mostrou que um tipo declarando nivel
+  // inexistente compila (por `as unknown as`) e a tela mostra nada.
+  agents: {
+    approvals: (status?: string) => ipcRenderer.invoke('hermes:agent:approvals', status),
+    cancelExecution: (id: string) => ipcRenderer.invoke('hermes:agent:executions:cancel', id),
+    decide: (payload: { decidir: 'aprovar' | 'recusar'; id: string; quem: string }) =>
+      ipcRenderer.invoke('hermes:agent:approvals:decide', payload),
+    executions: (filtro?: { owner?: string; task_id?: string }) =>
+      ipcRenderer.invoke('hermes:agent:executions', filtro),
+    roster: () => ipcRenderer.invoke('hermes:agent:roster')
+  },
   finance: {
     append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
     list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),
