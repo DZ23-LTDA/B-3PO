@@ -7,7 +7,25 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
+export type BaseLegal = 'consentimento' | 'contrato' | 'legitimo_interesse' | 'obrigacao_legal'
+
+export type Consentimento = {
+  /** Quando o titular autorizou, em ms. */
+  at: number
+  /** Base legal invocada. */
+  base: BaseLegal
+  /** 	rue = autorizou; alse = recusou explicitamente. */
+  granted: boolean
+}
+
 export interface CrmContact {
+  /**
+   * Base legal do contato para receber comunicacao (LGPD). 
+ull = nunca registrado, que NAO e o mesmo
+   * que ecusado: ausencia de registro e ausencia de consentimento, mas precisa aparecer como tal em vez
+   * de virar um alse que ninguem sabe se foi recusa ou esquecimento.
+   */
+  consent: Consentimento | null
   created_at: number
   /** Só dígitos e `+`, como o telefone precisa chegar na API oficial. */
   phone: string
@@ -67,6 +85,43 @@ function tags(value: unknown): string[] {
 }
 
 /** Aceita o que veio do renderer e devolve um contato válido — ou o motivo da recusa. */
+const BASES_LEGAIS: readonly BaseLegal[] = ['consentimento', 'contrato', 'legitimo_interesse', 'obrigacao_legal']
+
+/**
+ * Le o consentimento gravado, ou `null` quando nunca foi registrado.
+ *
+ * Recusa tudo que nao for um registro completo e reconhecivel em vez de adivinhar. Um consentimento adivinhado
+ * e pior que ausente: ele aparece no relatorio de conformidade como se o titular tivesse autorizado.
+ */
+export function normalizarConsentimento(bruto: unknown): Consentimento | null {
+  if (!bruto || typeof bruto !== 'object') {
+    return null
+  }
+
+  const raw = bruto as Record<string, unknown>
+  const base = raw['base']
+  const at = Number(raw['at'])
+  const granted = raw['granted']
+
+  if (!BASES_LEGAIS.includes(base as BaseLegal)) {
+    return null
+  }
+
+  if (!Number.isFinite(at) || at <= 0) {
+    return null
+  }
+
+  if (typeof granted !== 'boolean') {
+    return null
+  }
+
+  return { at, base: base as BaseLegal, granted }
+}
+
+/** Pode receber comunicacao? Ausencia de registro nunca vira permissao. */
+export function podeReceberComunicacao(contato: CrmContact): boolean {
+  return contato.consent?.granted === true
+}
 export function normalizeContact(input: unknown, now: number, tenantId: string = DEFAULT_TENANT): { contact: CrmContact } | { error: string } {
   const raw = (input ?? {}) as Record<string, unknown>
   const name = text(raw['name'])
@@ -87,6 +142,7 @@ export function normalizeContact(input: unknown, now: number, tenantId: string =
   return {
     contact: {
       company: text(raw['company']),
+      consent: normalizarConsentimento(raw['consent']),
       created_at: typeof raw['created_at'] === 'number' ? raw['created_at'] : now,
       email: text(raw['email']),
       name,
