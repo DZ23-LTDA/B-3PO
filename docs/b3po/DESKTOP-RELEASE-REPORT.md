@@ -838,3 +838,19 @@ Progresso do backlog: **17 de 26** famílias em pt. Restam `error_codes` (a maio
 `onboarding`, `projects`, `local_models`, `connectors`/`connector_*`, `preview_web`.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 110 — o catálogo de erros em português (a maior família)
+
+**`pt_error_codes`**: os 39 códigos do cartão de erro, com título e corpo próprios — chave de API recusada,
+créditos, rate limit (do provedor e acima do provedor), sobrecarga, timeout, stream que caiu, contexto estourado,
+payload grande, modelo inexistente, política de privacidade do provedor, filtro de conteúdo, resposta truncada ou
+ilegível, sessão ocupada/em outro lugar/somente leitura, pasta da conversa apagada, chave da conversa trocada,
+modelo local desligado, disco cheio e os oito códigos do nível gratuito Nous.
+
+O `tsc` pegou duas chaves que eu tinha deixado de fora (`truncated` e `invalid_response`) — elas estavam na parte
+do arquivo inglês que não apareceu na primeira leitura. O tipo `Record<..., ErrorCardCopy>` exige todas.
+
+Progresso do backlog: **18 de 26** famílias em pt. Restam `catalog`, `onboarding`, `projects`, `local_models`,
+`connectors`/`connector_*`, `preview_web`.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.

@@ -13,6 +13,7 @@ import { defineFieldCopy } from '@/app/settings/field-copy'
 import { ptBoot } from './pt_boot'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
+import { ptErrorCodes } from './pt_error_codes'
 import { ptErrorLayers } from './pt_error_layers'
 import { ptFirstRun } from './pt_first_run'
 import { ptGatewayHost } from './pt_gateway_host'
@@ -245,6 +246,7 @@ export const ptOverrides: TranslationOverrides = {
     themePicker: ptThemePicker,
     thread: {
       ...ptErrorLayers,
+      errorCodes: ptErrorCodes,
       stop: 'Parar'
     }
   },
