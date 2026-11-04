@@ -1605,3 +1605,24 @@ colunas, cada uma com contagem e total reais da etapa, com o cartão mantendo mo
 
 Também subi a página do CRM de `max-w-3xl` para `max-w-6xl`: sete colunas não cabiam na largura antiga. Evidência:
 `docs/b3po/evidence/crm-funil-pt.png`, com dados reais semeados (Negociação R$ 15.000, Ganho R$ 4.500).
+
+### Rodada 144 — PR #1 atualizado com o estado real (estava 72 commits e várias correções atrás)
+
+O corpo do PR ainda descrevia 142 commits e HEAD `55deba5cd2`. A branch está em **214 commits / `57f59691c0` / 770
+arquivos**, e o texto não mencionava nada do que mudou desde então. Reescrevi com o que é verificável hoje:
+
+- **Idioma**: inglês residual nas 13 telas caiu para **2 linhas** (ambas do schema do backend), e o painel de
+  atalhos entrou em pt-BR com 107 nomes de ação.
+- **CRM no desktop**: página `/crm` com indicadores reais, contatos, funil em 7 colunas e tarefas — com as três
+  evidências novas.
+- **Suítes**: números medidos (16.746/43/216 no desktop completo; i18n 119; settings 725; bots 1.074; mobile 165;
+  CRM 140; gateway 19), e a explicação de que **nenhuma das 43 falhas é de marca, tradução ou produto**.
+- **Correções da triagem**: `/crm` caindo em sessão, `traceWakeStep` com não-`Promise`, `tray-host` sem guarda de
+  plataforma, `locales/_keys.desktop.json` desatualizado.
+- **Transparência**: registrei que o baseline inicial de 56 falhas estava inflado por `HERMES_PYTHON` apontando
+  para um Python sem `ruamel.yaml`.
+- **Limitações**: as 2 linhas de schema, Quick Entry não reativo, sessão do mobile não persistindo, aprovação sem
+  gateway real, CRM sem conversas, instalação/atualização/desinstalação não testadas, robô estático por decisão
+  do proprietário.
+
+Continua **draft** e **NOT_READY**, como o GOAL exige: não fechar, não mesclar, não publicar.
