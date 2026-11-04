@@ -11,17 +11,19 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { CatalogStore, catalogStorePath, type Product } from './catalog-store'
+import { FinanceStore, financeStorePath, receivableForSale } from './finance-store'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { SalesStore, salesStorePath, stockMovementsFor } from './sales-store'
 
 async function withErp<T>(
-  run: (erp: { catalog: CatalogStore; inventory: InventoryStore; sales: SalesStore }) => Promise<T>
+  run: (erp: { catalog: CatalogStore; finance: FinanceStore; inventory: InventoryStore; sales: SalesStore }) => Promise<T>
 ): Promise<T> {
   const dir = await mkdtemp(join(tmpdir(), 'b3po-erp-smoke-'))
 
   try {
     return await run({
       catalog: new CatalogStore(catalogStorePath(dir)),
+      finance: new FinanceStore(financeStorePath(dir)),
       inventory: new InventoryStore(inventoryStorePath(dir)),
       sales: new SalesStore(salesStorePath(dir))
     })
@@ -117,6 +119,52 @@ describe('ciclo comercial completo (produto -> estoque -> venda)', () => {
       })
 
       expect('sale' in venda && venda.sale.total_cents).toBe(2000 + 400)
+    })
+  })
+
+  it('CICLO COMPLETO: produto -> estoque -> venda -> receita, sem mock', async () => {
+    await withErp(async ({ catalog, finance, inventory, sales }) => {
+      await catalog.upsert({ name: 'Café 500g', price_cents: 2490, sku: 'CAF-500', unit: 'un' })
+      await inventory.append({ kind: 'entrada', product_sku: 'CAF-500', quantity: 10, ref: 'compra:1' })
+
+      const venda = await sales.create({
+        contact_phone: '+5511999991111',
+        items: [{ product_sku: 'CAF-500', quantity: 3, unit_price_cents: 2490 }],
+        status: 'faturado'
+      })
+
+      expect('sale' in venda).toBe(true)
+      if (!('sale' in venda)) return
+
+      // Estoque baixa pelo que a venda declarou
+      for (const movimento of stockMovementsFor(venda.sale)) {
+        expect('movement' in (await inventory.append(movimento))).toBe(true)
+      }
+
+      // Receita entra no financeiro
+      const receber = receivableForSale(venda.sale)
+
+      expect(receber).not.toBeNull()
+      if (!receber) return
+
+      expect('entry' in (await finance.append(receber))).toBe(true)
+
+      // O ciclo fecha com números coerentes entre os três domínios
+      expect(await inventory.balances()).toEqual({ 'CAF-500': 7000 })
+      expect(venda.sale.total_cents).toBe(7470)
+
+      const totais = await finance.totals()
+
+      expect(totais.openReceivableCents).toBe(7470)
+      expect(totais.paidReceivableCents).toBe(0)
+
+      // Faturar de novo não duplica nem estoque nem receita
+      for (const movimento of stockMovementsFor(venda.sale)) {
+        expect(await inventory.append(movimento)).toEqual({ error: 'ref_duplicado' })
+      }
+
+      expect(await finance.append(receber)).toEqual({ error: 'ref_duplicado' })
+      expect((await finance.totals()).openReceivableCents).toBe(7470)
     })
   })
 })
