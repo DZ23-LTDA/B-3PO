@@ -102,3 +102,19 @@ export function needsReply(messages: readonly CrmMessageRow[]): boolean {
 
   return ultima.direction === 'entrada'
 }
+
+/**
+ * Quantas conversas comecaram dentro da janela — o "novos leads" do 14.6.
+ *
+ * `created_at` e a data em que a PRIMEIRA mensagem entrou, nao a de cadastro. Contar por `updated_at` inflaria o numero
+ * toda vez que alguem respondesse uma conversa velha, e o painel diria "20 novos leads" quando ninguem novo chegou.
+ *
+ * Data no futuro e descartada: relogio errado nao pode virar lead.
+ */
+export function conversationsCreatedSince(
+  conversas: readonly { created_at: number }[],
+  desdeMs: number,
+  agoraMs: number
+): number {
+  return conversas.filter(c => c.created_at >= desdeMs && c.created_at <= agoraMs).length
+}

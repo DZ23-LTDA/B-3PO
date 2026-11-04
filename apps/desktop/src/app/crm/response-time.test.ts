@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { averageResponseTime, needsReply, responseTime, responseTimeLabel } from './response-time'
+import {
+  averageResponseTime,
+  conversationsCreatedSince,
+  needsReply,
+  responseTime,
+  responseTimeLabel,
+} from './response-time'
 
 const msg = (direction: 'entrada' | 'saida', sent_at: number) => ({
   body: 'x',
@@ -76,5 +82,28 @@ describe('needsReply', () => {
 
   it('ordena por horario em vez de confiar na ordem de chegada', () => {
     expect(needsReply([msg('entrada', 5000), msg('saida', 1000)])).toBe(true)
+  })
+})
+
+describe('conversationsCreatedSince', () => {
+  const AGORA = 1_700_000_000_000
+  const DIA = 86_400_000
+
+  it('conta so as que comecaram dentro da janela', () => {
+    const lista = [{ created_at: AGORA - DIA }, { created_at: AGORA - 10 * DIA }, { created_at: AGORA }]
+
+    expect(conversationsCreatedSince(lista, AGORA - 7 * DIA, AGORA)).toBe(2)
+  })
+
+  it('descarta data no futuro: relogio errado nao e lead', () => {
+    expect(conversationsCreatedSince([{ created_at: AGORA + DIA }], AGORA - 7 * DIA, AGORA)).toBe(0)
+  })
+
+  it('lista vazia conta zero, nao quebra', () => {
+    expect(conversationsCreatedSince([], AGORA - 7 * DIA, AGORA)).toBe(0)
+  })
+
+  it('borda: exatamente no inicio da janela entra', () => {
+    expect(conversationsCreatedSince([{ created_at: AGORA - 7 * DIA }], AGORA - 7 * DIA, AGORA)).toBe(1)
   })
 })

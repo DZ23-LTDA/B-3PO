@@ -1231,3 +1231,20 @@ Medido no DOM: `ocorrencias: 1` e a ordem das linhas mostra o selo depois de "Cl
 "Cliente Respondido". **Um selo, na conversa certa** — nao dois por engano nem zero.
 
 **Medido:** `src/i18n` + `src/app/crm` = 20 arquivos / 157 testes; gate 14 ok; build e MSIX refeitos.
+
+
+## Novas conversas na janela (rodada 214) — o "novos leads" do 14.6
+
+`conversationsCreatedSince(conversas, desde, agora)` conta as conversas que **comecaram** dentro do periodo.
+
+A decisao que define o numero: usa `created_at` (primeira mensagem), **nao** `updated_at`. Contar por `updated_at`
+inflaria o numero toda vez que alguem respondesse uma conversa velha — o painel diria "20 novos leads" num dia em que
+ninguem novo chegou, e o dono tomaria decisao de contratacao em cima disso.
+
+Outras bordas, com teste: data no futuro e descartada (relogio errado nao vira lead), lista vazia da zero, e o instante
+exato do inicio da janela entra.
+
+**4 testes.** Gate 14 ok, `tsc` limpo.
+
+**Falta:** a tela de indicadores. As funcoes (tempo de resposta, aguardando resposta, novas conversas) estao prontas e
+testadas; falta monta-las num painel. Nao vou chamar de pronto sem a captura dele.
