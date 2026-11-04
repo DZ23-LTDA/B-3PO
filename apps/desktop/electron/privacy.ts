@@ -219,3 +219,67 @@ export function anonimizarRegistros(telefoneBruto: unknown, exportacao: TitularE
     }))
   }
 }
+
+export interface PrivacyWriteDeps extends PrivacyDeps {
+  conversations: PrivacyDeps['conversations'] & { upsert: (input: unknown, tenantId?: string) => Promise<unknown> }
+  contacts: PrivacyDeps['contacts'] & { remove: (phone: string, tenantId?: string) => Promise<unknown>; upsert: (input: unknown, tenantId?: string) => Promise<unknown> }
+  opportunities: PrivacyDeps['opportunities'] & { upsert: (input: unknown, tenantId?: string) => Promise<unknown> }
+  tasks: PrivacyDeps['tasks'] & { upsert: (input: unknown, tenantId?: string) => Promise<unknown> }
+}
+
+/**
+ * Executa o pedido de anonimização.
+ *
+ * NÃO SE REMOVE NADA — EXCETO O CONTATO, E POR UM MOTIVO
+ *
+ * O `id` de conversa, oportunidade e tarefa é opaco (`conv_<ts>_<rand>`, `opp_…`, `task_…`): não carrega
+ * o telefone. Um `upsert` do registro anonimizado com o mesmo id **substitui o original no lugar**.
+ *
+ * Contato é diferente: a chave dele é o telefone. Anonimizar muda a chave, então o `upsert` criaria um
+ * registro novo e deixaria o antigo — aí sim é preciso remover o antigo.
+ *
+ * ESTA DIFERENÇA QUASE VIROU PERDA DE DADOS
+ *
+ * A primeira versão removia tudo "por simetria". Como o id não muda, o remove apagava o próprio
+ * anonimizado recém-gravado: o titular desaparecia do CRM sem substituto. O diagnóstico com um store só,
+ * imprimindo o arquivo entre os passos, mostrou a causa — e ela não aparecia no teste porque o fixture
+ * usava `o_<telefone>` como id, formato que a produção nunca gera.
+ */
+export async function aplicarAnonimizacao(
+  telefoneBruto: unknown,
+  deps: PrivacyWriteDeps,
+  tenantId?: string
+): Promise<{ error: string } | { marcador: string; substituidos: number }> {
+  const r = await exportarTitular(telefoneBruto, deps, tenantId)
+
+  if ('error' in r) return r
+
+  const total =
+    r.export.totais.contatos + r.export.totais.conversas + r.export.totais.oportunidades + r.export.totais.tarefas
+
+  if (total === 0) return { error: 'titular_sem_dados' }
+
+  const a = anonimizarRegistros(telefoneBruto, r.export)
+  const falhas: string[] = []
+  const conferir = (resultado: unknown, onde: string): void => {
+    if (resultado && typeof resultado === 'object' && 'error' in resultado) {
+      falhas.push(onde + ':' + String((resultado as { error: unknown }).error))
+    }
+  }
+
+  // 1) Escreve o anonimizado. Todo upsert é conferido: sem isso, uma recusa passaria como sucesso.
+  for (const c of a.conversas) conferir(await deps.conversations.upsert(c, tenantId), 'conversa')
+  for (const o of a.oportunidades) conferir(await deps.opportunities.upsert(o, tenantId), 'oportunidade')
+  for (const t of a.tarefas) conferir(await deps.tasks.upsert(t, tenantId), 'tarefa')
+
+  for (const c of a.contatos) {
+    conferir(await deps.contacts.upsert(c, tenantId), 'contato')
+  }
+
+  if (falhas.length > 0) return { error: 'anonimizacao_incompleta:' + falhas.join(',') }
+
+  // 2) Só o contato precisa de remoção: a chave dele mudou de telefone para o marcador.
+  for (const c of r.export.contatos) await deps.contacts.remove(c.phone, tenantId)
+
+  return { marcador: a.marcador, substituidos: total }
+}
