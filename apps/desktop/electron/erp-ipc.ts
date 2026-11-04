@@ -21,8 +21,12 @@ import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
 import { registerSalesIpc } from './sales-ipc'
+import { buildDomainTools } from './agent-tools-catalog'
+import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
+import { bootAgentMcp } from './mcp-boot'
+import { registerAdminIpc } from './admin-ipc'
 import { HrStore, hrStorePath } from './hr-store'
 import { registerHrIpc } from './hr-ipc'
 import { registerSchedulingCatalogIpc } from './scheduling-catalog-ipc'
@@ -35,7 +39,12 @@ import { ServicesStore, servicesStorePath } from './services-store'
  * Vendas recebe também estoque e financeiro porque faturar atravessa os três — a orquestração mora
  * aqui, no processo principal, e não no renderer.
  */
-export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
+export interface ErpMounted {
+  /** Ferramentas de dominio para o servidor MCP. Construidas dos MESMOS stores que os IPC usam. */
+  tools: AgentTool[]
+}
+
+export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMounted {
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
@@ -60,10 +69,36 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
   const actors = new ActorsStore(actorsStorePath(userDataDir))
   const actorOf = async () => primaryOwner(await actors.list())
 
-  registerSalesIpc(ipcMain, {
-    actorOf,
+  // Administracao de atores. Estava implementada desde a rodada 26 e NUNCA montada: sem ela nao ha
+  // como criar um bot pela interface, e sem bot o servidor MCP nunca tem credencial para emitir.
+  registerAdminIpc(ipcMain, {
+    actorOf: async () => {
+      await actors.ensureOwner()
+
+      const dono = await actorOf()
+
+      return dono ? { id: dono.id, kind: dono.kind, level: dono.level, role: dono.role, scopes: dono.scopes } : null
+    },
+    actors
+  })
+
+  const sales = new SalesStore(salesStorePath(userDataDir))
+
+  registerSalesIpc(ipcMain, { actorOf, finance, inventory, sales })
+
+  // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
+  const tools = buildDomainTools({
+    catalog: new CatalogStore(catalogStorePath(userDataDir)),
+    desk: new ServiceDeskStore(serviceDeskStorePath(userDataDir)),
     finance,
     inventory,
-    sales: new SalesStore(salesStorePath(userDataDir))
+    sales
   })
+
+  // Servidor MCP dos agentes. Disparado daqui (e nao do main.ts) porque este e o ponto que ja tem o
+  // userDataDir E as ferramentas: o main.ts esta sob ratchet de tamanho e so pode encolher.
+  // Sem await: subir socket nao pode atrasar a janela, e falhar aqui nao pode derrubar o app.
+  void bootAgentMcp(userDataDir, tools).then(r => console.error('[b3po-mcp]', JSON.stringify(r)))
+
+  return { tools }
 }
