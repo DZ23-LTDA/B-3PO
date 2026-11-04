@@ -687,6 +687,30 @@ export const en: Translations = {
   },
 
   settings: {
+    crmTasks: {
+      add: 'Add task',
+      contactLabel: 'Contact (optional)',
+      due: when => `due ${when}`,
+      dueLabel: 'Due date',
+      empty: 'No open tasks. Create the first one below.',
+      late: when => `late · ${when}`,
+      loading: 'Loading tasks…',
+      markDone: 'Mark as done',
+      markOpen: 'Reopen task',
+      noContact: 'No contact',
+      noDue: 'no due date',
+      priorities: { alta: 'High', baixa: 'Low', media: 'Medium' },
+      priorityLabel: 'Priority',
+      remove: 'Remove',
+      saving: 'Saving…',
+      subtitle: 'The follow-ups that do not fit in a conversation. Stored on this computer.',
+      summary: open => (open === 1 ? '1 open task' : `${open} open tasks`),
+      summaryLate: (open, late) => `${open} open · ${late} late`,
+      title: 'CRM tasks',
+      titleLabel: 'Task',
+      titlePlaceholder: 'Call Maria about the proposal',
+      unavailable: 'Tasks need the desktop app to be stored.'
+    },
     crmPipeline: {
       stageInitial: 'Starting stage',
       lostReason: 'Why was it lost?',

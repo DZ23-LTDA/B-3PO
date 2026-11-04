@@ -367,3 +367,36 @@ um pedido explícito das marcas. Ficou como está, de propósito.
 `logo-dev` MCP: `account` (plano community, 500 créditos) e `brand(name="Stripe")` — retornou `logo.url`,
 `brandmark` em SVG, `colors` e `socials`, custando 5 créditos. O formato de `brand` é o que a tela consumiria se
 o dono passar o token.
+
+
+## Tarefas do CRM — entregue (rodada 141)
+
+Antes: contatos e funil, e nada entre a conversa e o acompanhamento. Agora existe **tarefa** de verdade, no
+mesmo desenho de armazenamento dos outros dois (JSON sob `userData`, gravação atômica) — sem inventar servidor.
+
+| Peça | Arquivo |
+|---|---|
+| Store (dono do dado, processo principal) | `apps/desktop/electron/crm-tasks-store.ts` |
+| IPC | `apps/desktop/electron/crm-tasks-ipc.ts` (registrado em `mountCrmContacts`) |
+| Ponte do preload | `crmTasks` em `electron/preload.ts` |
+| Cliente tipado do renderer | `apps/desktop/src/api/crm-tasks.ts` |
+| Tela | `apps/desktop/src/app/settings/crm-tasks-section.tsx` (montada em `/crm` e em Configurações) |
+
+**Decisões que valem registrar:**
+
+- **Prazo é timestamp em ms, nunca data local.** Quem digitou "10/11" não pode ter a tarefa vencendo em outro dia
+  porque a máquina trocou de fuso. O `<input type="date">` converte na borda, no fuso de quem olha.
+- **"Atrasada" é derivado do relógio agora**, não gravado: uma tarefa que venceu ontem aparece atrasada hoje sem
+  ninguém tocar nela. `taskCounts(tasks, now)` é puro e testado.
+- **Ordem do quadro**: abertas antes das concluídas, prazo mais próximo primeiro, sem prazo ao fim.
+- **Vínculo com contato é opcional** — "ligar para a Maria" e "revisar a proposta" são tarefas do mesmo quadro.
+- **Sem bridge (versão web) a seção explica o motivo** em vez de mostrar lista vazia enganosa, e a copy é
+  diferente da de contatos de propósito: duas frases iguais na mesma página são ruído (foi um teste que pegou).
+
+**Prova de funcionamento real**: criei uma tarefa na UI do app empacotado, via CDP, e o arquivo
+`crm-tasks.json` apareceu no perfil com o conteúdo; a lista renderizou "Média · sem prazo". Evidência:
+`docs/b3po/evidence/crm-tarefas-pt.png`.
+
+**Testes**: `electron/crm-tasks-store.test.ts` com **10 casos** — validação (título, prioridade, situação), prazo
+ausente/ISO/inválido, ordenação completa, contagem de atrasadas, gravação+releitura+remoção, arquivo corrompido e
+arquivo vazio.

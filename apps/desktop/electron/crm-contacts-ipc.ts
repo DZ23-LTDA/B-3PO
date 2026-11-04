@@ -10,6 +10,8 @@ import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 import { CrmContactStore, crmStorePath, type CrmContact } from './crm-contacts-store'
 import { registerCrmPipelineIpc } from './crm-pipeline-ipc'
 import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
+import { registerCrmTasksIpc } from './crm-tasks-ipc'
+import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 
 export type CrmContactsResult = { contacts: CrmContact[] } | { error: string }
 
@@ -40,4 +42,5 @@ export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: 
   registerCrmCompanyLogoIpc(ipcMain)
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
   registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))
+  registerCrmTasksIpc(ipcMain, new CrmTaskStore(tasksStorePath(userDataDir)))
 }

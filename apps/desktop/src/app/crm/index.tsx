@@ -1,4 +1,5 @@
 import { CrmContactsSection } from '@/app/settings/crm-contacts-section'
+import { CrmTasksSection } from '@/app/settings/crm-tasks-section'
 
 /**
  * Tela do CRM.
@@ -20,6 +21,7 @@ export function CrmView() {
 
       {/* Ja estamos na pagina do CRM: nao mostrar o atalho para ela mesma. */}
       <CrmContactsSection showOpenLink={false} />
+      <CrmTasksSection />
     </div>
   )
 }

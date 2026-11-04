@@ -607,6 +607,31 @@ export interface Translations extends NoticeTranslations {
       newSession: string
       targetSession: string
     }
+    /** Tarefas do CRM: prazo, prioridade e o vínculo opcional com um contato. */
+    crmTasks: {
+      add: string
+      contactLabel: string
+      due: (when: string) => string
+      dueLabel: string
+      empty: string
+      late: (when: string) => string
+      loading: string
+      markDone: string
+      markOpen: string
+      noContact: string
+      noDue: string
+      priorities: { alta: string; baixa: string; media: string }
+      priorityLabel: string
+      remove: string
+      saving: string
+      subtitle: string
+      summary: (open: number) => string
+      summaryLate: (open: number, late: number) => string
+      title: string
+      titleLabel: string
+      titlePlaceholder: string
+      unavailable: string
+    }
     crmPipeline: {
       stageInitial: string
       lostReason: string

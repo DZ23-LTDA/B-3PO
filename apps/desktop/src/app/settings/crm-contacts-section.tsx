@@ -16,6 +16,7 @@ import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
 import { CrmPipelineSection } from './crm-pipeline-section'
+import { CrmTasksSection } from './crm-tasks-section'
 
 /**
  * Baixa um texto como arquivo. `URL.createObjectURL` + âncora é o caminho que funciona tanto no Electron
@@ -207,6 +208,7 @@ export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boo
       ) : null}
 
       <CrmPipelineSection contacts={contacts ?? []} />
+      <CrmTasksSection />
 
       {/* O CRM tem tela própria em /crm; este atalho existe para quem chega por
           Configurações. Dentro da própria página ele seria um link para onde a

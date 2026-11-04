@@ -1547,3 +1547,29 @@ Correções desta rodada:
 
 Sobre os 43 restantes: symlink/ACL no Windows (17), empacotamento e assinatura (23) e timeout sob carga (3).
 Nenhum é de tradução, marca ou produto — e agora o número tem procedência medida.
+
+### Rodada 141 — tarefas do CRM: da conversa ao acompanhamento
+
+O CRM tinha contatos e funil, e nada entre a conversa e o acompanhamento. Implementei **tarefas** com o mesmo
+desenho dos outros dois stores (JSON sob `userData`, `write` + `rename` atômicos, validação no processo principal,
+erro de validação como resposta e não como exceção):
+
+- `electron/crm-tasks-store.ts` + `crm-tasks-ipc.ts` (registrados no mesmo `mountCrmContacts`), ponte `crmTasks` no
+  preload, cliente tipado `src/api/crm-tasks.ts` e a tela `crm-tasks-section.tsx`, montada em `/crm` e em
+  Configurações.
+- Prazo em **timestamp**, não data local: trocar de fuso não muda o vencimento. "Atrasada" é calculado do relógio
+  de agora, nunca gravado — tarefa que venceu ontem fica atrasada hoje sem ninguém tocar nela.
+- Ordem do quadro: abertas antes das concluídas, prazo mais próximo primeiro, sem prazo no fim. Vínculo com contato
+  é opcional.
+
+**Prova real, não mock**: no app empacotado, via CDP, digitei um título e cliquei "Adicionar tarefa" — a tarefa
+apareceu na lista e o arquivo `crm-tasks.json` foi criado no perfil (342 bytes). Evidência:
+`docs/b3po/evidence/crm-tarefas-pt.png`.
+
+Dois erros meus que os testes pegaram antes de mim: a copy da seção repetia "não tem disco local" (colidia com a de
+contatos na mesma página, e era ruído para o usuário) e os nomes de placeholder do `pt` não batiam com o `en`
+(`abertas` vs `open`) — o teste de cobertura compara os nomes dentro do template porque um nome trocado renderiza
+`undefined`. Os dois corrigidos.
+
+Verificação: `electron/crm` + `src/app/settings` + `src/i18n` = 94 arquivos / 732 testes; gate 14 ok; MSIX
+reconstruído.
