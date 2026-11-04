@@ -1,4 +1,5 @@
 import { CrmContactsSection } from '@/app/settings/crm-contacts-section'
+import { CrmConversationsSection } from '@/app/settings/crm-conversations-section'
 import { CrmTasksSection } from '@/app/settings/crm-tasks-section'
 
 import { CrmOverview } from './crm-overview'
@@ -25,6 +26,7 @@ export function CrmView() {
       <CrmOverview />
 
       <CrmContactsSection showOpenLink={false} />
+        <CrmConversationsSection />
       <CrmTasksSection />
     </div>
   )

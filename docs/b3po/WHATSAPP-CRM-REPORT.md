@@ -586,3 +586,26 @@ mente com conversas no disco. O que **fica** entregue e testado e a camada de da
 pelo CDP e comparar com o caminho real que `mountCrmContacts` resolve. Suspeita principal: o `userDataDir` que chega ao
 mount nao e o mesmo diretorio em que o perfil semeado escreve (`<userData>/b3po`), o que explicaria o vazio mesmo com o
 construtor correto.
+
+
+## Tela das conversas: ENTREGUE e verificada (rodada 173)
+
+A rodada anterior tinha desmontado a tela porque a lista vinha vazia. A causa nao era a tela: **eu semeei o perfil no
+diretorio errado**. `main.ts` chama `mountCrmContacts(ipcMain, app.getPath('userData'))` — o `userData` DIRETO, sem
+subpasta — e eu escrevia em `<userData>/b3po`. Prova: com o mesmo arquivo na raiz do `userData`, `list()` devolveu
+`[{ Maria Souza }]`.
+
+Com isso, a tela foi restaurada (o componente nunca esteve no git; foi reescrito com os imports corretos e sem o
+ternario morto) e montada no `/crm`.
+
+**Prova no app empacotado**, perfil semeado na raiz do `userData` com duas conversas:
+
+- lista: **Maria Souza** e **Joao Lima**, com a previa da ultima mensagem ("Pode sim, qual o prazo...") e o convite
+  "Escolha uma conversa para ler";
+- ao clicar em Maria: as **tres mensagens** aparecem na ordem — "Vi o anuncio", "Posso te ajudar com a proposta?",
+  "Pode sim, qual o prazo de entrega?";
+- evidencia: `docs/b3po/evidence/crm-conversas-pt.png`.
+
+**A licao que custou uma rodada:** antes de culpar a tela, provar que o dado chega. O caminho estava no codigo desde o
+inicio (`mountCrmContacts(..., app.getPath('userData'))`); eu presumi a subpasta e gastei uma rodada desmontando
+codigo correto.
