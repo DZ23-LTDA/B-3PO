@@ -60,7 +60,7 @@ export function SchedulingBlocks() {
       if (r.error) {
         setFalha(blockErrorText(r.error))
       } else {
-        setRecurso('')
+        // O recurso NAO e limpo: e o contexto do painel de horarios livres, nao um campo do bloqueio.
         setMotivo('')
         setInicio('')
         setFim('')

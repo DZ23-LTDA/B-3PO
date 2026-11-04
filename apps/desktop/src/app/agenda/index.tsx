@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 
 import { SchedulingBlocks } from './blocks'
+import { SchedulingFreeSlots } from './livres'
 import { useI18n } from '@/i18n/context'
 
 /**
@@ -134,6 +135,7 @@ export function AgendaView() {
       </header>
 
       <SchedulingBlocks />
+      <SchedulingFreeSlots agendamentos={appointments ?? []} resourceId={recurso || (appointments ?? [])[0]?.resource_id || ""} />
 
       {!disponivel ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
