@@ -77,7 +77,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
       const dono = await actorOf()
 
-      return dono ? { id: dono.id, kind: dono.kind, level: dono.level, role: dono.role, scopes: dono.scopes } : null
+      // O nome do ator precisa vir junto: sem ele a tela mostra o nivel sem saber de quem.
+      return dono ? { id: dono.id, kind: dono.kind, level: dono.level, name: dono.name, role: dono.role, scopes: dono.scopes } : null
     },
     actors
   })

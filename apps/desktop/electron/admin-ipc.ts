@@ -59,7 +59,10 @@ export function registerAdminIpc(ipcMain: IpcRegistrar, deps: AdminDeps): void {
 
   ipcMain.handle(
     'hermes:admin:whoami',
-    async (): Promise<{ actor: Actor }> => ({ actor: await resolve(deps) })
+    // O ator carrega o nome quando vem do store; o fallback anonimo nao tem. O tipo declara os
+    // dois casos para a tela poder mostrar o nome sem conversao.
+    // casos para a tela poder mostrar o nome sem s.
+    async (): Promise<{ actor: Actor & { name?: string } }> => ({ actor: await resolve(deps) })
   )
 
   ipcMain.handle(
