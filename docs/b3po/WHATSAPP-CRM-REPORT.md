@@ -1073,3 +1073,31 @@ E o store confirmou persistencia: `{status: "resolvida", unread: 0}`.
 **Tropeço do caminho:** `markRead` ja existia em outro ponto do catalogo, entao minha checagem "ja tem a chave?" passou e a insercao foi para o bloco errado — o `tsc` acusou na hora. Corrigido localizando o bloco `crmConversations` **contando chaves**, a tecnica que eu mesmo ja tinha registrado e nao usei na primeira tentativa.
 
 **Medido:** i18n 17 arquivos / 123 testes; gate 14 ok; tsc limpo; build e MSIX refeitos.
+
+
+## Busca e filtro na caixa de entrada (rodada 195)
+
+Requisito 14.1 ("lista de conversas, busca, filtros"). Campo de busca + filtro por estado, com o cuidado que busca em
+conversa exige:
+
+- **telefone comparado por digitos** — procurar `219888` acha `+55 21 98888-7777`. Comparar texto cru falharia justamente
+  no caso mais comum;
+- **busca alcanca mensagens, nao so o titulo** — procurar "orcamento" acha a conversa onde o cliente falou isso;
+- **termo vazio casa com tudo**;
+- **estado de "nada encontrado"** em vez de lista silenciosamente vazia.
+
+A regra virou funcao pura (`src/app/crm/conversation-filters.ts`) com **8 testes**, porque filtro dentro de `map` de
+componente nao tem onde ser testado.
+
+**Prova no app empacotado** (`docs/b3po/evidence/crm-busca-pt.png`), perfil com 3 conversas:
+
+| acao | resultado |
+|---|---|
+| sem filtro | 3 conversas |
+| busca `219888` (sem mascara) | **so** Joao Lima (`+55 21 98888-7777`) |
+| filtro "Aguardando" | **so** Joao Lima |
+
+Botoes de filtro mostram o estado ativo (Todos / Abertas / Aguardando / Resolvida), e "Resolvida" reaproveita o rotulo
+de estado que ja existia — sem texto duplicado no catalogo.
+
+**Medido:** `src/i18n` + `src/app/crm` = 19 arquivos / 145 testes; gate 14 ok; build e MSIX refeitos.

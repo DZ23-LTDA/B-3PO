@@ -8,6 +8,7 @@ import {
   saveConversation,
   type CrmConversationRow,
 } from '@/api/crm-conversations'
+import { filterConversations, type ConversationFilter } from '@/app/crm/conversation-filters'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -27,6 +28,8 @@ export function CrmConversationsSection() {
   const [rows, setRows] = useState<null | CrmConversationRow[]>(null)
   const [failure, setFailure] = useState<null | string>(null)
   const [aberta, setAberta] = useState<null | string>(null)
+  const [busca, setBusca] = useState('')
+  const [filtro, setFiltro] = useState<ConversationFilter>('todas')
 
   const carregar = useCallback(async () => {
     if (!conversationsAvailable()) {
@@ -67,6 +70,7 @@ export function CrmConversationsSection() {
 
   const agora = Date.now()
   const contagens = useMemo(() => conversationCounts(rows ?? []), [rows])
+  const visiveis = filterConversations(rows ?? [], filtro, busca)
   const selecionada = rows?.find(row => row.id === aberta) ?? null
 
   return (
@@ -103,9 +107,42 @@ export function CrmConversationsSection() {
             </span>
           </div>
 
+          <div className="flex flex-col gap-2">
+            <input
+              aria-label={section.search}
+              className="w-full rounded border border-(--ui-border) bg-(--ui-surface) px-2 py-1.5 text-sm text-foreground"
+              onChange={event => setBusca(event.target.value)}
+              placeholder={section.search}
+              type="search"
+              value={busca}
+            />
+            <div className="flex flex-wrap gap-1">
+              {(['todas', 'aberta', 'aguardando', 'resolvida'] as const).map(opcao => (
+                <Button
+                  key={opcao}
+                  onClick={() => setFiltro(opcao)}
+                  size="sm"
+                  type="button"
+                  variant={filtro === opcao ? 'default' : 'outline'}
+                >
+                  {opcao === 'todas'
+                    ? section.filter.todas
+                    : opcao === 'aberta'
+                      ? section.filter.abertas
+                      : opcao === 'aguardando'
+                        ? section.filter.aguardando
+                        : section.status.resolvida}
+                </Button>
+              ))}
+            </div>
+            {visiveis.length === 0 ? (
+              <p className="text-sm text-(--ui-text-secondary)">{section.noResults}</p>
+            ) : null}
+          </div>
+
           <div className="flex flex-col gap-3 md:flex-row">
             <ul className="flex w-full flex-col gap-1 md:w-72 md:shrink-0">
-              {rows.map(row => {
+              {visiveis.map(row => {
                 const ativa = row.id === aberta
 
                 return (

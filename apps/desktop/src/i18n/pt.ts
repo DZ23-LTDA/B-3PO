@@ -907,6 +907,9 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
     crmConversations: {
+      filter: { aguardando: 'Aguardando', abertas: 'Abertas', todas: 'Todas' },
+      noResults: 'Nada encontrado nesta busca.',
+      search: 'Buscar conversas…',
       empty: 'Nenhuma conversa ainda. Quando o WhatsApp oficial estiver conectado, as mensagens aparecem aqui.',
       loading: 'Carregando conversas…',
       naoLidasLabel: 'nao lidas',

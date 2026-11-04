@@ -697,6 +697,9 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      filter: { aguardando: 'Waiting', abertas: 'Open', todas: 'All' },
+      noResults: 'Nothing matches this search.',
+      search: 'Search conversations…',
       markRead: 'Mark as read',
       resolve: 'Mark as resolved',
       empty: 'No conversations yet. Once the official WhatsApp is connected, messages show up here.',
