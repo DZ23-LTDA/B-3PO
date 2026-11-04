@@ -85,6 +85,9 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
     list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },
+  analytics: {
+    dashboard: () => ipcRenderer.invoke('hermes:analytics:dashboard')
+  },
   marketing: {
     campaigns: () => ipcRenderer.invoke('hermes:marketing:campaigns'),
     createCampaign: payload => ipcRenderer.invoke('hermes:marketing:createCampaign', payload),

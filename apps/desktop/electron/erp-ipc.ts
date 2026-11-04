@@ -26,6 +26,7 @@ import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
+import { registerAnalyticsIpc } from './analytics-ipc'
 import { registerMarketingIpc } from './marketing-ipc'
 import { MarketingStore, marketingStorePath } from './marketing-store'
 import { AfterSalesStore, afterSalesStorePath } from './after-sales-store'
@@ -57,7 +58,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   registerServicesIpc(ipcMain, services)
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)))
-  registerServiceDeskIpc(ipcMain, new ServiceDeskStore(serviceDeskStorePath(userDataDir)))
+  const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
+
+  registerServiceDeskIpc(ipcMain, desk)
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
@@ -102,7 +105,11 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // acompanhamento é criado — o domínio existe no disco e ninguém o alimenta.
   registerSalesIpc(ipcMain, { actorOf, afterSales, finance, inventory, sales })
   registerAfterSalesIpc(ipcMain, { actorOf, afterSales, sales })
-  registerMarketingIpc(ipcMain, { marketing: new MarketingStore(marketingStorePath(userDataDir)) })
+  const marketing = new MarketingStore(marketingStorePath(userDataDir))
+
+  registerMarketingIpc(ipcMain, { marketing })
+  // Analytics le pelo dono de cada dominio. Nao tem store proprio - de proposito.
+  registerAnalyticsIpc(ipcMain, { afterSales, desk, finance, inventory, marketing, sales })
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools = buildDomainTools({
