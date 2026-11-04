@@ -1149,3 +1149,27 @@ credencial e rede; a parte que erra de verdade pode ser provada sem conta nenhum
 
 **O que ainda NAO existe:** a chamada HTTP em si e a gravacao da mensagem enviada na conversa. Ambas dependem do
 adapter e das `WHATSAPP_CLOUD_*`; o payload ja esta pronto e testado para o dia em que a credencial chegar.
+
+
+## Envio composto (rodada 199) — forma provada, Meta nao
+
+`crm-whatsapp-outbound-send.ts`: o transporte entra por parametro (`fetchImpl`), entao a **forma** da chamada pode ser
+provada sem rede e sem credencial:
+
+| caso | comportamento |
+|---|---|
+| sucesso | devolve o `wamid` da Meta |
+| HTTP 200 **sem** `messages[0].id` | **nao** e sucesso — gravar no CRM uma mensagem que nao existe seria mentir para o usuario |
+| 4xx | erro **nao** recuperavel (numero invalido, token ruim: repetir nao resolve), com a mensagem da Meta |
+| 429 ou 5xx | marcado recuperavel |
+| falha de rede | vira `{error, retriable: true}`, nunca excecao solta |
+| payload invalido | **nao** chama a rede — nem chega a tentar |
+| versao da API | configuravel; padrao `v21.0` |
+
+**7 testes.** Gate 14 ok, `tsc` limpo.
+
+**O que continua NAO provado:** que a Meta aceita. Isso exige conta real. O teste prova o contrato do nosso lado; a
+aceitacao do outro lado e pendencia declarada, nao feita.
+
+**Proximo:** gravar a mensagem enviada na conversa **usando o `wamid` real** devolvido (nunca um id inventado), e a UI
+de resposta — ambas ainda bloqueadas pela credencial.
