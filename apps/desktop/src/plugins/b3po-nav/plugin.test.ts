@@ -83,6 +83,20 @@ describe('menu dos módulos', () => {
     }
   })
 
+  it('todo icone existe no conjunto de codicons', async () => {
+    // A captura da r97 mostrou Compras, Financeiro e Empresa SEM icone: cart, wallet e building nao
+    // existem. Um nome invalido nao quebra nada - o item so fica desalinhado -, entao so a tela mostrava.
+    // Este teste le a folha de icones de verdade, em vez de confiar na lista que eu escrevi de memoria.
+    const { readFile } = await import('node:fs/promises')
+    const css = await readFile('../../node_modules/@vscode/codicons/dist/codicon.css', 'utf8')
+
+    for (const item of contribuicoes()) {
+      const seletor = '.codicon-' + item.data.codicon + ':before'
+
+      expect(css.includes(seletor), 'icone invalido: ' + item.data.codicon).toBe(true)
+    }
+  })
+
   it('nao ha path repetido', () => {
     const paths = contribuicoes().map(i => i.data.path)
 

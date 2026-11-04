@@ -41,9 +41,9 @@ const MODULOS: readonly ItemDeMenu[] = [
   { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
   { codicon: 'package', label: 'Produtos', path: '/products' },
   { codicon: 'archive', label: 'Estoque', path: '/stock' },
-  { codicon: 'cart', label: 'Compras', path: '/compras' },
+  { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
   { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
-  { codicon: 'wallet', label: 'Financeiro', path: '/finance' },
+  { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
   { codicon: 'organization', label: 'RH', path: '/rh' },
   { codicon: 'megaphone', label: 'Marketing', path: '/marketing' },
@@ -52,7 +52,7 @@ const MODULOS: readonly ItemDeMenu[] = [
   { codicon: 'zap', label: 'Automações', path: '/automacoes' },
   { codicon: 'file', label: 'Documentos', path: '/documentos' },
   { codicon: 'law', label: 'Privacidade', path: '/privacidade' },
-  { codicon: 'building', label: 'Empresa', path: '/empresa' }
+  { codicon: 'library', label: 'Empresa', path: '/empresa' }
 ]
 
 const b3poNavPlugin: HermesPlugin = {
