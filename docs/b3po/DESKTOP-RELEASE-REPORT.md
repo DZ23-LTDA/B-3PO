@@ -1189,3 +1189,24 @@ Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 
 
 O `electron-builder` falhou com `EPERM ... unlink B-3PO.exe` porque eu tinha deixado o app aberto para as capturas.
 Fechei e refiz — sem estrago, mas o build chegou a sair 1 antes de passar.
+
+### Rodada 126 — mascotes em pt + o "EARLIER TODAY" da barra lateral
+
+Dois blocos que a varredura tinha marcado como pendentes:
+
+- **`sidebar.dateDivider` + `statusDivider` + `markAllRead`**: "MAIS CEDO HOJE" no lugar de "EARLIER TODAY".
+  Confirmado no app em execução lendo o DOM (não só no código): `docs/b3po/evidence/home-datas-pt.png`.
+  Já com `Ontem`, "Mais cedo esta semana", "Semana passada", "Mais cedo este mês", "Trabalhando"/"Concluído" e
+  "Marcar tudo como lido".
+- **`appearance.pet.*`** (24 chaves): adotar mascote, tamanho, passear quando ocioso, galeria com busca, 标签 de
+  instalado/gerado, renomear, apagar (com o aviso de que não dá para reinstalar), exportar, e as falhas de
+  adotar/desinstalar/renomear/exportar.
+
+Verificação: `src/i18n` + `src/app/settings` + `src/app/shell` = 112 arquivos / 908 testes; gate 14 ok; MSIX
+reconstruído.
+
+### Tropeço
+
+O primeiro script de inserção montou a chave pai com o dois-pontos junto (`"sidebar:"`), então procurou
+`"  sidebar:: {"` e não achou nada. Silencioso do jeito pior: imprimiu "nao encontrado" e eu quase segui adiante.
+Corrigi lendo o nome sem o `:`.

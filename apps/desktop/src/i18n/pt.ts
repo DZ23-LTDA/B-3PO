@@ -451,6 +451,18 @@ export const ptOverrides: TranslationOverrides = {
     ]
   },
   sidebar: {
+    dateDivider: {
+      today: 'Mais cedo hoje',
+      yesterday: 'Ontem',
+      thisWeek: 'Mais cedo esta semana',
+      lastWeek: 'Semana passada',
+      thisMonth: 'Mais cedo este mês'
+    },
+    statusDivider: {
+      working: 'Trabalhando',
+      done: 'Concluído'
+    },
+    markAllRead: 'Marcar tudo como lido',
     nav: {
       'new-session': 'Nova conversa',
       capabilities: 'Capacidades',
@@ -744,7 +756,45 @@ export const ptOverrides: TranslationOverrides = {
       installError: 'Não foi possível instalar esse tema.',
       installed: name => `Instalado “${name}”.`,
       removeTheme: 'Remover tema',
-      importedBadge: 'Importado'
+      importedBadge: 'Importado',
+
+      pet: {
+        title: 'Mascote',
+        intro:
+          'Adote um mascote oficial do B-3PO que flutua sobre o app e reage ao que o agente está fazendo — correndo enquanto ferramentas executam, comemorando no sucesso, emburrado nos erros.',
+        restartHint:
+          'Mascotes precisam de um reinício rápido — o app em execução começou antes deste recurso existir. Feche e reabra o B-3PO, depois volte aqui.',
+        scaleTitle: 'Tamanho',
+        scaleDesc: 'Redimensiona o mascote flutuante. Aplica em todo lugar na hora.',
+        roamTitle: 'Passear',
+        roamDesc: 'Deixa o mascote andar sozinho pela janela quando ocioso.',
+        chooseTitle: 'Escolha um mascote',
+        chooseDesc: 'Escolher instala (se preciso) e ativa.',
+        searchPlaceholder: 'Buscar mascotes…',
+        unreachable: 'Não foi possível carregar a galeria de mascotes. Reabra esta página.',
+        noMatch: query => `Nenhum mascote corresponde a "${query}".`,
+        installedTag: 'instalado',
+        generatedTag: 'Gerado',
+        countCapped: (cap, total) => `Mostrando ${cap} de ${total} — digite para refinar.`,
+        count: n => `${n} mascote${n === 1 ? '' : 's'}.`,
+        uninstall: name => `Desinstalar ${name}`,
+        delete: name => `Apagar ${name}`,
+        deleteTitle: name => `Apagar ${name}?`,
+        deleteBody: 'Isso apaga o mascote em definitivo — não dá para reinstalar.',
+        deleteConfirm: 'Apagar',
+        rename: name => `Renomear ${name}`,
+        renameTitle: 'Renomear mascote',
+        renamePlaceholder: 'Dê um nome ao mascote',
+        renameSave: 'Salvar',
+        exportPet: name => `Exportar ${name}`,
+        adoptFailed: slug => `Não foi possível adotar ${slug}`,
+        uninstallFailed: slug => `Não foi possível desinstalar ${slug}`,
+        renameFailed: slug => `Não foi possível renomear ${slug}`,
+        exportFailed: slug => `Não foi possível exportar ${slug}`,
+        noneAvailable: 'Nenhum mascote disponível para ativar agora.',
+        turnOnFailed: 'Não foi possível ativar o mascote.',
+        turnOffFailed: 'Não foi possível desativar o mascote.'
+      }
     },
     search: { placeholder: 'Buscar em todas as configurações…', pill: 'Buscar' },
     nav: {
