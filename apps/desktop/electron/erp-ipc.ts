@@ -18,6 +18,7 @@ import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 import { registerFiscalIpc } from './fiscal-ipc'
 import { registerSchedulingBlockIpc } from './scheduling-block-ipc'
+import { registerAgentIpc } from './agent-ipc'
 import { FiscalStore, fiscalStorePath } from './fiscal-store'
 import { resolverProvedor } from './fiscal-provider'
 import { registerLookupIpc } from './lookup-ipc'
@@ -86,6 +87,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Documento fiscal: o emissor vem do ambiente, nunca do renderer.
   registerFiscalIpc(ipcMain, { store: new FiscalStore(fiscalStorePath(userDataDir)) })
   registerSchedulingBlockIpc(ipcMain, userDataDir)
+
+  // Agentes: roster, execucoes e fila de aprovacao. Montado aqui, nao em main.ts, pelo mesmo motivo da r125:
+  // main.ts esta no teto de linhas e a montagem de dominio mora neste arquivo.
+  registerAgentIpc(ipcMain, userDataDir)
 
   registerPrivacyIpc(ipcMain, {
     store: {
