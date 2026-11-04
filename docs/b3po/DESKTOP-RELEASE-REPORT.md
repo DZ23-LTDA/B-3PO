@@ -1079,3 +1079,19 @@ Lição registrada: não usar `git checkout --` para "consertar" trabalho não c
 
 Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok;
 `code_health` 0 bloqueantes; MSIX reconstruído.
+
+### Rodada 122 — tela do bot em pt: catálogo do plugin COMPLETO
+
+**`i18n-screen-pt.ts`** fecha a última seção: a tela VNC do bot. 57 chaves — abrir a tela, os três estados de
+instalação (host Linux sem suporte, pacotes ausentes com o comando a rodar, instalar no host com sudo), o hero e o
+portal ("Ao vivo · bot no controle" / "você está no controle" / "outro espectador"), o aviso de imagem nova do
+sandbox (com a explicação de que /root e /workspace ficam na máquina), assumir e devolver o controle (inclusive a
+versão forçada para controlar preso por espectador que saiu) e os avisos de HTTPS.
+
+**Cobertura do catálogo do plugin de bots: 9 de 9 seções com português** — era 0 quando comecei a mexer nele.
+
+Mesmo padrão da rodada anterior, de propósito: módulo irmão + `screen: ptScreen` no `i18n.ts`, sem tocar no inglês
+e sem estourar o ratchet de linhas.
+
+Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
+reconstruído.
