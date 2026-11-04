@@ -1744,3 +1744,20 @@ Resultado no app: cartao "Proposta da Maria" com **R$ 9.000,00** e **sem** "cont
 no binario, nao so no teste. Evidencia: `docs/b3po/evidence/crm-fone-com-mascara-pt.png`.
 
 O artefato volta a corresponder ao HEAD; o manifesto foi refeito depois do commit.
+
+### Rodada 162 — tarefas concluidas somem da vista (mas nao do disco)
+
+Quem trabalha o dia inteiro acumula dezenas de tarefas concluidas, e a lista parava de mostrar o que ainda precisa de
+atencao. Agora as concluidas ficam **ocultas por padrao**, com um botao no resumo: `Mostrar 2 concluidas` / `Ocultar
+concluidas`. O botao so aparece quando existe alguma concluida, e `aria-pressed` acompanha o estado.
+
+**Dois erros meus nesta rodada, ambos pegos por verificacao externa:**
+
+1. a copy em pt duplicou `${count}` dentro do template e quebrou o teste de placeholders — a palavra do plural foi
+   para fora do template (mesma licao da rodada 152, aplicada tarde).
+2. o plural saiu como **"concluids"** porque eu concatenei `'concluid' + (1 ? '' : 's')`; o certo e `'concluid' +
+   (1 ? 'a' : 'as')`, concordando com "tarefas". Vi isso na captura, nao no teste.
+
+**Prova no app empacotado** (perfil com 1 aberta e 2 concluidas): antes do clique a concluida nao aparece e o botao
+diz "Mostrar 2 concluidas"; depois do clique as duas aparecem e o botao diz "Ocultar concluidas".
+Evidencia: `docs/b3po/evidence/crm-tarefas-concluidas-pt.png`.

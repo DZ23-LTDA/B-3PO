@@ -697,6 +697,8 @@ export const en: Translations = {
   },
   settings: {
     crmTasks: {
+      showDone: (count: number) => `Show ${count} done`,
+      hideDone: 'Hide done',
       contactRemoved: 'contact deleted',
       add: 'Add task',
       contactLabel: 'Contact (optional)',

@@ -907,6 +907,8 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
     crmTasks: {
+      showDone: (count: number) => `Mostrar ${count} concluíd` + (count === 1 ? 'a' : 'as'),
+      hideDone: 'Ocultar concluídas',
       contactRemoved: 'contato excluído',
       add: 'Adicionar tarefa',
       contactLabel: 'Contato (opcional)',

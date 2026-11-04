@@ -41,6 +41,9 @@ export function CrmTasksSection() {
   const [priority, setPriority] = useState<TaskPriority>('media')
   const [contact, setContact] = useState('')
   const [saving, setSaving] = useState(false)
+  // Tarefa concluida nao some do disco; some da VISTA por padrao. Quem trabalha o dia inteiro acumula
+  // dezenas delas, e a lista deixa de mostrar o que ainda precisa de atencao.
+  const [mostrarConcluidas, setMostrarConcluidas] = useState(false)
 
   const available = tasksAvailable()
 
@@ -130,6 +133,8 @@ export function CrmTasksSection() {
   const agora = Date.now()
   const abertas = tasks?.filter(task => task.status === 'aberta') ?? []
   const atrasadas = abertas.filter(task => task.due_at !== null && task.due_at < agora).length
+  const concluidas = (tasks ?? []).filter(task => task.status === 'concluida')
+  const visiveis = mostrarConcluidas ? (tasks ?? []) : abertas
 
   return (
     <section className="mt-6 flex flex-col gap-3 border-t border-(--ui-border) pt-6">
@@ -145,14 +150,26 @@ export function CrmTasksSection() {
       ) : abertas.length === 0 ? (
         <p className="text-sm text-(--ui-text-secondary)">{copy.empty}</p>
       ) : (
-        <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-          {atrasadas > 0 ? copy.summaryLate(abertas.length, atrasadas) : copy.summary(abertas.length)}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+            {atrasadas > 0 ? copy.summaryLate(abertas.length, atrasadas) : copy.summary(abertas.length)}
+          </p>
+          {concluidas.length > 0 ? (
+            <button
+              aria-pressed={mostrarConcluidas}
+              className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-secondary) underline underline-offset-2 hover:text-foreground"
+              onClick={() => setMostrarConcluidas(atual => !atual)}
+              type="button"
+            >
+              {mostrarConcluidas ? copy.hideDone : copy.showDone(concluidas.length)}
+            </button>
+          ) : null}
+        </div>
       )}
 
       {tasks !== null && tasks.length > 0 ? (
         <ul className="flex flex-col gap-1">
-          {tasks.map(task => {
+          {visiveis.map(task => {
             const concluida = task.status === 'concluida'
             const atrasada = !concluida && task.due_at !== null && task.due_at < agora
             const prazo = dueLabel(task.due_at, agora)

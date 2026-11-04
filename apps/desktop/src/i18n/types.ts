@@ -619,6 +619,8 @@ export interface Translations extends NoticeTranslations {
     }
     /** Tarefas do CRM: prazo, prioridade e o vínculo opcional com um contato. */
     crmTasks: {
+      showDone: (count: number) => string
+      hideDone: string
       contactRemoved: string
       add: string
       contactLabel: string
