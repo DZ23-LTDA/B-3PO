@@ -15,6 +15,16 @@ export interface CrmContact {
   email: string
   company: string
   tags: string[]
+  /**
+   * Empresa dona deste contato.
+   *
+   * O CRM nasceu sem tenant: `phone` era a chave única, e o mesmo telefone não podia ser cliente de
+   * duas empresas. Com multiempresa a chave passa a ser `(phone, tenant_id)`.
+   *
+   * Registros gravados antes disso não têm o campo; `parseStore` os lê como `local`, então nenhum dado
+   * existente fica órfão e nada precisa ser migrado destrutivamente.
+   */
+  tenant_id: string
   updated_at: number
 }
 
@@ -31,6 +41,8 @@ export interface CrmStoreFile {
 function emptyStore(): CrmStoreFile {
   return { contacts: [], schema_version: 1 }
 }
+
+export const DEFAULT_TENANT = 'local'
 
 export function crmStorePath(userDataDir: string): string {
   return join(userDataDir, 'b3po', 'crm-contacts.json')
@@ -55,7 +67,7 @@ function tags(value: unknown): string[] {
 }
 
 /** Aceita o que veio do renderer e devolve um contato válido — ou o motivo da recusa. */
-export function normalizeContact(input: unknown, now: number): { contact: CrmContact } | { error: string } {
+export function normalizeContact(input: unknown, now: number, tenantId: string = DEFAULT_TENANT): { contact: CrmContact } | { error: string } {
   const raw = (input ?? {}) as Record<string, unknown>
   const name = text(raw['name'])
   const phone = digitsOnly(raw['phone'])
@@ -80,6 +92,7 @@ export function normalizeContact(input: unknown, now: number): { contact: CrmCon
       name,
       phone,
       tags: tags(raw['tags']),
+      tenant_id: tenantId || DEFAULT_TENANT,
       updated_at: now
     }
   }
@@ -94,7 +107,14 @@ export function parseStore(raw: string): CrmStoreFile {
       return emptyStore()
     }
 
-    return { contacts: parsed.contacts.filter(entry => !!entry && typeof entry.phone === 'string'), schema_version: 1 }
+    // Registro antigo nao tem 	enant_id. Ler como local evita migracao destrutiva: o dado continua
+    // visivel e ganha o campo na proxima gravacao.
+    return {
+      contacts: parsed.contacts
+        .filter(entry => !!entry && typeof entry.phone === 'string')
+        .map(entry => ({ ...entry, tenant_id: entry.tenant_id || DEFAULT_TENANT })),
+      schema_version: 1
+    }
   } catch {
     return emptyStore()
   }
@@ -103,14 +123,14 @@ export function parseStore(raw: string): CrmStoreFile {
 export class CrmContactStore {
   constructor(private readonly filePath: string) {}
 
-  async list(): Promise<CrmContact[]> {
+  async list(tenantId: string = DEFAULT_TENANT): Promise<CrmContact[]> {
     const store = await this.read()
 
-    return [...store.contacts].sort((a, b) => b.updated_at - a.updated_at)
+    return store.contacts.filter(c => c.tenant_id === tenantId).sort((a, b) => b.updated_at - a.updated_at)
   }
 
-  async upsert(input: unknown): Promise<{ contacts: CrmContact[] } | { error: string }> {
-    const normalized = normalizeContact(input, Date.now())
+  async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] } | { error: string }> {
+    const normalized = normalizeContact(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
       return normalized
@@ -118,7 +138,8 @@ export class CrmContactStore {
 
     const store = await this.read()
     const contact = normalized.contact
-    const existing = store.contacts.findIndex(entry => entry.phone === contact.phone)
+    // Chave composta: o mesmo telefone pode ser cliente de duas empresas, e cada uma tem o seu.
+    const existing = store.contacts.findIndex(entry => entry.phone === contact.phone && entry.tenant_id === contact.tenant_id)
 
     if (existing >= 0) {
       // Mesmo telefone é o mesmo contato: atualiza em vez de duplicar (o índice do CRM é o telefone).
@@ -129,16 +150,16 @@ export class CrmContactStore {
 
     await this.write(store)
 
-    return { contacts: await this.list() }
+    return { contacts: await this.list(tenantId) }
   }
 
-  async remove(phone: string): Promise<{ contacts: CrmContact[] }> {
+  async remove(phone: string, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] }> {
     const store = await this.read()
     const wanted = digitsOnly(phone)
-    store.contacts = store.contacts.filter(entry => entry.phone !== wanted)
+    store.contacts = store.contacts.filter(entry => !(entry.phone === wanted && entry.tenant_id === tenantId))
     await this.write(store)
 
-    return { contacts: await this.list() }
+    return { contacts: await this.list(tenantId) }
   }
 
   private async read(): Promise<CrmStoreFile> {
