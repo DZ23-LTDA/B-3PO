@@ -1393,3 +1393,19 @@ filtra. Falta apenas renomear/excluir uma etiqueta em uso.
 
 **FALTA, e nao e pouco:** nao existe upload, nem armazenamento, nem envio. Estas sao as regras que o upload vai obedecer
 quando existir. Nao ha tela de anexo hoje.
+
+
+## Conversa <-> oportunidade pelo telefone (rodada 230)
+
+Auditei antes: `CrmOpportunity` **ja tem** `contact_phone`, e `CrmConversation` tambem. O elo nao precisa de campo novo nem
+de migracao — precisa do cruzamento.
+
+`samePhone`, `opportunitiesFor` e `openValueCents`. **7 testes.**
+
+| decisao | motivo |
+|---|---|
+| chave = telefone normalizado | um id de vinculo extra exigiria migracao e poderia divergir do telefone: duas verdades sobre "de quem e esta conversa" |
+| telefone vazio **nao casa nem consigo mesmo** | senao duas conversas sem numero viravam a mesma pessoa |
+| `openValueCents` exclui ganho e perdido | valor "em aberto" que soma negocios fechados infla o painel e engana a previsao |
+
+**FALTA:** a tela ainda nao mostra as oportunidades dentro da conversa. A funcao existe e e testada; o painel nao.
