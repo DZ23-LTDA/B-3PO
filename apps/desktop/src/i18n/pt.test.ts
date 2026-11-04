@@ -61,6 +61,7 @@ describe('pt-BR', () => {
       'connectorOffer',
       'cron',
       'errors',
+      'firstRun',
       'install',
       'keepAwakeOffer',
       'language',

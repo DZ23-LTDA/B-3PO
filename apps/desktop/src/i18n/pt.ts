@@ -14,6 +14,8 @@ import { ptBoot } from './pt_boot'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
 import { ptErrorLayers } from './pt_error_layers'
+import { ptFirstRun } from './pt_first_run'
+import { ptGatewayHost } from './pt_gateway_host'
 import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
 import { ptNotifications } from './pt_notifications'
@@ -26,6 +28,7 @@ import { ptThemePicker } from './pt_theme_picker'
 import { ptUpdateChannel } from './pt_update_channel'
 
 export const ptOverrides: TranslationOverrides = {
+  firstRun: ptFirstRun,
   ...ptNotices,
   sharedMetrics: ptSharedMetrics,
   cron: { control: ptCronControl },
@@ -587,6 +590,7 @@ export const ptOverrides: TranslationOverrides = {
       remove: 'Remover',
     },
     gateway: {
+      ...ptGatewayHost,
       pairedDevicesTitle: 'Dispositivos pareados',
       pairedDevicesIntro:
         'Celulares que podem falar com os bots deste computador. Cada um tem a própria chave; revogar corta o acesso de vez.',

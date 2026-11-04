@@ -823,3 +823,18 @@ Progresso do backlog: **15 de 26** famílias em pt. Restam `error_codes`, `catal
 `shared_metrics` (feito) — a lista viva está no bloco da rodada 105.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 109 — primeira execução e gateways em pt
+
+**`pt_first_run`** (as sete etapas do assistente: nome, cor, layout, apps, plugins, tour, primeira tarefa; convite
+para rodar modelo local; "comandos de barra ficam desligados durante a configuração"; rodar de novo) e
+**`pt_gateway_host`** (acesso pela web: iniciar/parar, rede local x URL própria, aviso de que a conexão não é
+criptografada, gateway preso por conversa rodando, tempo esgotado).
+
+`firstRun` é chave de topo; o gateway é spread dentro de `settings.gateway`. A lista de seções do `pt.test.ts`
+foi para 22 entradas com `firstRun`.
+
+Progresso do backlog: **17 de 26** famílias em pt. Restam `error_codes` (a maior, 82 strings), `catalog`,
+`onboarding`, `projects`, `local_models`, `connectors`/`connector_*`, `preview_web`.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
