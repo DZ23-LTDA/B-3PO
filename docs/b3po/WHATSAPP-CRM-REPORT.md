@@ -999,3 +999,25 @@ no app real.** A correcao provavel e mover a montagem do CRM para o boot do app 
 teste que garanta que a montagem acontece no startup — e refazer esta mesma prova.
 
 Registrado como **NOT_READY** com causa nomeada, nao como "quase pronto".
+
+
+## A causa do listener nao subir: porta aleatoria (rodada 189)
+
+A prova ponta a ponta deu `ECONNREFUSED` e eu primeiro suspeitei da montagem. A causa real era mais simples e mais
+constrangedora:
+
+**o desktop escutava em porta aleatoria (`port = 0`) e nunca leu `B3PO_CRM_INGEST_PORT`.** A ponte Python posta numa
+porta fixa; o desktop abria em outra qualquer. Os dois lados nunca se encontrariam — e nenhum teste pegava, porque os
+testes do listener passavam a porta explicitamente.
+
+**Correcoes:**
+
+1. `maybeStartWhatsAppIngest` agora **exige porta configurada**: sem `B3PO_CRM_INGEST_PORT` valido (0, negativo, >65535)
+   devolve `null` em vez de subir um listener inutil;
+2. `mountCrmContacts` passa `Number(process.env.B3PO_CRM_INGEST_PORT) || 0`;
+3. teste novo: porta ausente/invalida nao sobe; porta valida sobe **exatamente nela** (a mesma que a ponte usa).
+
+**Medido:** 6 testes no boot (antes 5); gate 14 ok.
+
+**A licao:** teste que passa a configuracao "na mao" nao prova que o app le a configuracao do ambiente. O elo entre
+ambiente e codigo precisa de teste proprio — e este eu nao tinha.

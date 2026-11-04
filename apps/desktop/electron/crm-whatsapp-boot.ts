@@ -16,6 +16,8 @@ import { startWhatsAppListener, type ListenerHandle } from './crm-whatsapp-liste
 export interface BootOptions {
   appSecret: null | string | undefined
   enabled: boolean
+  /** Porta que a ponte Python usa (`B3PO_CRM_INGEST_PORT`). 0 = sistema escolhe. */
+  port?: number
   sink: ConversationSink
   token: null | string | undefined
 }
@@ -25,11 +27,16 @@ export function ingestEnabled(env: Record<string, string | undefined>): boolean 
 }
 
 export async function maybeStartWhatsAppIngest(options: BootOptions): Promise<ListenerHandle | null> {
-  const { appSecret, enabled, sink, token } = options
+  const { appSecret, enabled, port = 0, sink, token } = options
 
   if (!enabled || !token || !appSecret) {
     return null
   }
 
-  return startWhatsAppListener({ appSecret, sink, token })
+  // Sem porta configurada a ponte nao tem para onde postar: subir em porta aleatoria seria um listener inutil.
+  if (!port || port <= 0 || port > 65535) {
+    return null
+  }
+
+  return startWhatsAppListener({ appSecret, sink, token }, port)
 }

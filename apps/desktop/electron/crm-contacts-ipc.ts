@@ -54,6 +54,7 @@ export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: 
   void maybeStartWhatsAppIngest({
     appSecret: process.env.WHATSAPP_CLOUD_APP_SECRET,
     enabled: ingestEnabled(process.env),
+    port: Number(process.env.B3PO_CRM_INGEST_PORT) || 0,
     sink: conversas,
     token: process.env.B3PO_CRM_INGEST_TOKEN,
   }).catch(() => {

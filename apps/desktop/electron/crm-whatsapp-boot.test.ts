@@ -40,10 +40,26 @@ describe('maybeStartWhatsAppIngest', () => {
     expect(await maybeStartWhatsAppIngest({ appSecret: undefined, enabled: true, sink: sink(), token: 't' })).toBeNull()
   })
 
-  it('com tudo presente sobe e devolve uma porta real', async () => {
-    aberto = await maybeStartWhatsAppIngest({ appSecret: 'segredo', enabled: true, sink: sink(), token: 'tok' })
+  it('sem porta configurada NAO sobe — porta aleatoria seria listener inutil', async () => {
+    expect(await maybeStartWhatsAppIngest({ appSecret: 'segredo', enabled: true, sink: sink(), token: 'tok' })).toBeNull()
+    expect(
+      await maybeStartWhatsAppIngest({ appSecret: 'segredo', enabled: true, port: 0, sink: sink(), token: 'tok' })
+    ).toBeNull()
+    expect(
+      await maybeStartWhatsAppIngest({ appSecret: 'segredo', enabled: true, port: 70000, sink: sink(), token: 'tok' })
+    ).toBeNull()
+  })
 
-    expect(aberto).not.toBeNull()
-    expect(aberto?.port).toBeGreaterThan(0)
+  it('sobe na porta configurada, que e a mesma que a ponte usa', async () => {
+    const porta = 9200 + Math.floor(Math.random() * 500)
+    aberto = await maybeStartWhatsAppIngest({
+      appSecret: 'segredo',
+      enabled: true,
+      port: porta,
+      sink: sink(),
+      token: 'tok',
+    })
+
+    expect(aberto?.port).toBe(porta)
   })
 })
