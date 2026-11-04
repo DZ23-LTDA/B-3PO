@@ -111,7 +111,15 @@ export function normalizeMovement(input: unknown, now: number): { error: string 
     return { error: 'kind_invalid' }
   }
 
-  const quantity = milli(raw['quantity_milli'] ?? raw['quantity'])
+  // `quantity_milli` já está em milésimos (é o campo que a venda emite); `quantity` é em unidades.
+  // Reconvertendo os dois, uma baixa de 3000 milésimos viraria 3.000.000.
+  const brutoMilli = raw['quantity_milli']
+  const quantity =
+    brutoMilli === undefined || brutoMilli === null
+      ? milli(raw['quantity'])
+      : Number.isFinite(Number(brutoMilli))
+        ? Math.round(Number(brutoMilli))
+        : 0
 
   if (quantity === 0) {
     return { error: 'quantity_required' }
