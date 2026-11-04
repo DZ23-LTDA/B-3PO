@@ -55,7 +55,7 @@ export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: 
     appSecret: process.env.WHATSAPP_CLOUD_APP_SECRET,
     enabled: ingestEnabled(process.env),
     sink: conversas,
-    token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
+    token: process.env.B3PO_CRM_INGEST_TOKEN,
   }).catch(() => {
     // abrir a porta e opcional: falhar aqui nao pode derrubar o app
   })

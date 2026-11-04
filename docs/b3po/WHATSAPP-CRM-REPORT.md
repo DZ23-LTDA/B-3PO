@@ -874,3 +874,62 @@ do valor de `main` — e o gate voltou a 14 ok.
 **A licao e sobre o processo, nao sobre o codigo:** eu li a saida do gate, vi `FAILED`, e o script de commit rodou em
 seguida sem parada. Gate que nao bloqueia o commit e so um relatorio. O correto e o commit depender do verde — e como o
 commit ja tinha sido feito, a correcao veio em commit separado, na mesma rodada.
+
+
+## Ponte do adapter para o CRM (rodada 186)
+
+`plugins/platforms/whatsapp_cloud/crm_bridge.py` — repassa o payload ja recebido pelo adapter para o listener local do
+desktop. **Nao guarda nada e nao interpreta nada: so repassa.**
+
+Tres propriedades que nao podem regredir:
+
+1. **opcional** — sem `B3PO_CRM_INGEST_PORT` (ou sem token), nao faz nada. Quem nao tem o desktop aberto nao paga nada;
+2. **nao bloqueia o canal** — timeout de 2s, e qualquer erro (conexao recusada, timeout, 401, 413) e **engolido**.
+   Mensagem de cliente nao pode deixar de ser respondida porque o CRM esta fechado;
+3. **nao inventa autenticacao** — repassa a assinatura original da Meta. O desktop revalida: se este processo for
+   comprometido e mandar corpo forjado, a assinatura nao fecha la.
+
+Sem retry de proposito: o retry da Meta ja existe; duplicar aqui criaria tempestade.
+
+**Medido:** 10 testes em `plugins/platforms/whatsapp_cloud/test_crm_bridge.py`, verdes com pytest — sem porta nao faz nada;
+porta invalida (`abc`, `0`, `70000`, `-1`) ignorada; sem token nao faz nada; `build_request` repassa a assinatura e **nao
+inventa** header quando ela falta; `forward` devolve status quando o desktop responde; **engole** `URLError` e
+`HTTPError`; header lido em qualquer caixa; JSON preserva acento.
+
+### O fio do WhatsApp, ponta a ponta
+
+| peca | arquivo | testes |
+|---|---|---|
+| guardar | `crm-conversations-store.ts` | 16 |
+| mapear payload | `crm-meta-webhook-map.ts` | 8 |
+| verificar HMAC | `crm-whatsapp-signature.ts` | 9 |
+| receber e gravar | `crm-whatsapp-ingest.ts` | 8 |
+| endpoint local | `crm-whatsapp-endpoint.ts` | 8 |
+| listener | `crm-whatsapp-listener.ts` | 6 |
+| boot com opt-in | `crm-whatsapp-boot.ts` | 5 |
+| **ponte no adapter** | `crm_bridge.py` | **10 (pytest)** |
+
+**66 testes.** Falta apenas chamar `forward_to_crm(...)` no ponto onde o adapter ja tem o corpo cru e a assinatura — uma
+linha — e ter as `WHATSAPP_CLOUD_*` para exercitar com mensagem real.
+
+
+## HX002: o gate me barrou de verdade (rodada 186)
+
+Segunda vez que o `health` reprovou — e desta vez o script **abortou antes do commit**, porque eu tinha acabado de
+colocar a guarda `if ($g -notmatch 'ok') { exit 1 }` depois do erro da rodada anterior. O gate passou a barrar.
+
+Achado:
+
+```
+plugins/platforms/whatsapp_cloud/crm_bridge.py:45  HX002  crm_token
+HX002: new HERMES_* environment variable — behavioural settings go in config.yaml,
+       secrets through the secret scope; .env is for credentials only
+```
+
+Eu tinha lido `HERMES_DESKTOP_REMOTE_TOKEN` no Python. A regra existe por um motivo: `HERMES_*` em Python e configuracao
+de runtime, e a ponte do CRM **nao e** runtime — e produto.
+
+**Correcao:** a ponte passou a usar `B3PO_CRM_INGEST_TOKEN` nos **dois lados** (Python e desktop). Alem de passar no gate,
+isso deixa a fronteira explicita: o token da ponte e do B-3PO; o token de sessao do desktop continua sendo do Hermes.
+
+**Medido:** 10 testes pytest verdes de novo; gate **14 ok**.
