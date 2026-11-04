@@ -72,9 +72,13 @@ export function AprovacoesPendentes() {
 
   return (
     <section className="rounded-lg border border-border p-4" data-aprovacoes={lista?.length ?? 0}>
-      <h2 className="text-sm font-medium">Aprovações pendentes</h2>
+      {/* "de negócio" nao e enfeite: o mobile tem uma tela de aprovacao que decide COMANDO e trava em
+          segundos. Duas telas chamadas "Aprovacoes" com prazos diferentes confundem, e a r150 documentou
+          a distincao. */}
+      <h2 className="text-sm font-medium">Aprovações de negócio</h2>
       <p className="mt-1 text-xs text-muted-foreground">
-        Ações que um agente quer executar e que exigem uma pessoa decidindo. Pedidos vencem em 24 horas.
+        Ações que um agente quer praticar na empresa e que exigem uma pessoa decidindo. Vencem em 24 horas.
+        Não são permissões de comando — essas aparecem durante a execução.
       </p>
 
       {erro && (
