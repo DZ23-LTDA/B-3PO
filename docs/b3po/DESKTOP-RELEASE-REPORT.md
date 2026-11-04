@@ -1761,3 +1761,18 @@ concluidas`. O botao so aparece quando existe alguma concluida, e `aria-pressed`
 **Prova no app empacotado** (perfil com 1 aberta e 2 concluidas): antes do clique a concluida nao aparece e o botao
 diz "Mostrar 2 concluidas"; depois do clique as duas aparecem e o botao diz "Ocultar concluidas".
 Evidencia: `docs/b3po/evidence/crm-tarefas-concluidas-pt.png`.
+
+### Rodada 163 — "1 abertas" nao existe: plural de "aberta" tambem flexiona
+
+O resumo das tarefas dizia `1 abertas · 1 atrasada`. Eu tinha corrigido so a segunda metade na rodada 152 e deixei
+"abertas" fixo — pior: escrevi um teste que **consagrava** o erro (`resumo(1, 0)` esperava "1 abertas"). Corrigido:
+`${open} ` + (open === 1 ? 'aberta' : 'abertas'), e a expectativa do teste foi ajustada para "1 aberta".
+
+**Erro meu no caminho, registrado:** o replace dropou a virgula no fim da chave e o catalogo deixou de compilar — 16
+arquivos de teste falharam ao carregar. Consertei a virgula e os 17 arquivos / 123 testes voltaram.
+
+**No app empacotado** (perfil com 1 tarefa aberta e 0 atrasadas): a string "1 abertas" **nao aparece**
+(`tem_1_abertas: false`). O caso de singular/plural do trecho de atrasadas segue coberto por teste de unidade.
+Evidencia: `docs/b3po/evidence/crm-uma-tarefa-aberta-pt.png`.
+
+**Licao:** o teste que eu escrevo tambem pode fixar o bug. Comparar com a lingua, nao com a saida do codigo.

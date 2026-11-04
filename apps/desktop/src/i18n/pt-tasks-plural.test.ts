@@ -16,7 +16,7 @@ describe('contagem de tarefas em português', () => {
   })
 
   it('usa plural no zero (nada de "0 atrasada")', () => {
-    expect(resumo(1, 0)).toBe('1 abertas · 0 atrasadas')
+    expect(resumo(1, 0)).toBe('1 aberta · 0 atrasadas')
   })
 
   it('nao deixa parênteses de gênero no texto', () => {
