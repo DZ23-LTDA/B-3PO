@@ -609,3 +609,25 @@ ternario morto) e montada no `/crm`.
 **A licao que custou uma rodada:** antes de culpar a tela, provar que o dado chega. O caminho estava no codigo desde o
 inicio (`mountCrmContacts(..., app.getPath('userData'))`); eu presumi a subpasta e gastei uma rodada desmontando
 codigo correto.
+
+
+## A captura de evidencia estava errada (rodada 174-175)
+
+A "prova" que eu apresentei da tela de conversas **nao mostrava a tela**: as verificacoes liam `document.body.innerText`
+(que inclui conteudo abaixo da dobra) e o `Page.captureScreenshot` captura so o viewport. Resultado: texto encontrado,
+imagem do lugar errado — evidencia que nao prova o que afirmei.
+
+Corrigido o metodo: `scrollIntoView` no titulo da secao antes de capturar, conferindo `getBoundingClientRect().top`
+dentro da viewport, mais `captureBeyondViewport`.
+
+**Olhar a imagem revelou tres defeitos que nenhum teste pegaria:**
+
+1. os contadores eram **`1 · 1 · 2`** — numeros nus sem rotulo. Virou "1 Aberta · 1 Aguardando · 2 nao lidas".
+2. o cabecalho da conversa repetia o nome que ja estava na lista. Virou o **telefone** (`+5511999991111`).
+3. o balao de saida usava `bg-accent`, que nesta marca e **cinza** — quase invisivel. Virou `bg-primary` (o azul).
+
+Regra que fica: **evidencia visual tem que mostrar o objeto da afirmacao**, e verificar texto no DOM nao substitui olhar a
+imagem.
+
+**Pendencia visivel e nao minha:** a pagina `/crm` mostra "Tarefas do CRM" **duas vezes** (bloco duplicado, anterior a
+este trabalho). Fica registrado em vez de ignorado.

@@ -699,6 +699,7 @@ export const en: Translations = {
     crmConversations: {
       empty: 'No conversations yet. Once the official WhatsApp is connected, messages show up here.',
       loading: 'Loading conversations…',
+      naoLidasLabel: 'unread',
       noMessages: 'No messages yet.',
       pickOne: 'Pick a conversation to read.',
       status: {

@@ -621,6 +621,7 @@ export interface Translations extends NoticeTranslations {
     crmConversations: {
       empty: string
       loading: string
+      naoLidasLabel: string
       noMessages: string
       pickOne: string
       status: { aberta: string; aguardando: string; resolvida: string }

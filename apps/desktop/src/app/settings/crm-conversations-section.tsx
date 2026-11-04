@@ -72,9 +72,18 @@ export function CrmConversationsSection() {
         <p className="text-sm text-(--ui-text-secondary)">{section.empty}</p>
       ) : (
         <>
-          <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-            {contagens.abertas} · {contagens.aguardando} · {contagens.naoLidas}
-          </p>
+          <div className="flex flex-wrap gap-x-3 text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+            <span>
+              <strong className="font-semibold text-foreground">{contagens.abertas}</strong> {section.status.aberta}
+            </span>
+            <span>
+              <strong className="font-semibold text-foreground">{contagens.aguardando}</strong> {section.status.aguardando}
+            </span>
+            <span>
+              <strong className="font-semibold text-foreground">{contagens.naoLidas}</strong>{' '}
+              {section.naoLidasLabel}
+            </span>
+          </div>
 
           <div className="flex flex-col gap-3 md:flex-row">
             <ul className="flex w-full flex-col gap-1 md:w-72 md:shrink-0">
@@ -97,7 +106,7 @@ export function CrmConversationsSection() {
                       <span className="flex items-center gap-2">
                         <span className="truncate text-sm text-foreground">{row.title}</span>
                         {row.unread > 0 ? (
-                          <span className="rounded-full bg-accent px-1.5 text-[10px] font-semibold text-accent-foreground">
+                          <span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                             {row.unread}
                           </span>
                         ) : null}
@@ -120,7 +129,9 @@ export function CrmConversationsSection() {
                 <p className="text-sm text-(--ui-text-tertiary)">{section.pickOne}</p>
               ) : (
                 <>
-                  <h3 className="text-sm font-semibold text-foreground">{selecionada.title}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {selecionada.contact_phone || selecionada.title}
+                  </h3>
                   {selecionada.messages.length === 0 ? (
                     <p className="text-sm text-(--ui-text-tertiary)">{section.noMessages}</p>
                   ) : (
@@ -130,7 +141,7 @@ export function CrmConversationsSection() {
                           className={
                             'max-w-[80%] rounded px-2 py-1 text-sm ' +
                             (message.direction === 'saida'
-                              ? 'self-end bg-accent text-accent-foreground'
+                              ? 'self-end bg-primary text-primary-foreground'
                               : 'self-start bg-(--ui-surface-raised) text-foreground')
                           }
                           key={message.external_id || 'local' + '-' + message.sent_at + '-' + index}
