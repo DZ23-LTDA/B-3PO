@@ -69,6 +69,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: id => ipcRenderer.invoke('hermes:crm-tasks:remove', id),
     upsert: payload => ipcRenderer.invoke('hermes:crm-tasks:upsert', payload)
   },
+  fiscal: {
+    cancelar: pedido => ipcRenderer.invoke('hermes:fiscal:cancelar', pedido),
+    emitir: pedido => ipcRenderer.invoke('hermes:fiscal:emitir', pedido),
+    list: () => ipcRenderer.invoke('hermes:fiscal:list'),
+    status: () => ipcRenderer.invoke('hermes:fiscal:status')
+  },
   lookup: {
     cep: cep => ipcRenderer.invoke('hermes:lookup:cep', cep),
     cnpj: cnpj => ipcRenderer.invoke('hermes:lookup:cnpj', cnpj)
