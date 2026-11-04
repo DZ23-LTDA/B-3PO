@@ -78,9 +78,9 @@ describe('funil do CRM no disco', () => {
 
   it('totais separam aberto de ganho e ignoram perdido', () => {
     const rows: CrmOpportunity[] = [
-      { contact_phone: '1', created_at: 0, currency: 'BRL', id: 'a', lost_reason: '', stage: 'novo', title: 'a', updated_at: 0, value_cents: 1000 },
-      { contact_phone: '2', created_at: 0, currency: 'BRL', id: 'b', lost_reason: '', stage: 'ganho', title: 'b', updated_at: 0, value_cents: 500 },
-      { contact_phone: '3', created_at: 0, currency: 'BRL', id: 'c', lost_reason: 'preco', stage: 'perdido', title: 'c', updated_at: 0, value_cents: 999 }
+      { contact_phone: '1', created_at: 0, currency: 'BRL', id: 'a', lost_reason: '', stage: 'novo', tenant_id: 'local', title: 'a', updated_at: 0, value_cents: 1000 },
+      { contact_phone: '2', created_at: 0, currency: 'BRL', id: 'b', lost_reason: '', stage: 'ganho', tenant_id: 'local', title: 'b', updated_at: 0, value_cents: 500 },
+      { contact_phone: '3', created_at: 0, currency: 'BRL', id: 'c', lost_reason: 'preco', stage: 'perdido', tenant_id: 'local', title: 'c', updated_at: 0, value_cents: 999 }
     ]
 
     expect(pipelineTotals(rows)).toEqual({ openCents: 1000, wonCents: 500 })

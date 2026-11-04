@@ -23,6 +23,8 @@ export interface CrmOpportunity {
   lost_reason: string
   stage: PipelineStage
   title: string
+  /** Empresa dona da oportunidade. Registros antigos são lidos como `local` — ver `parsePipeline`. */
+  tenant_id: string
   updated_at: number
   value_cents: number
 }
@@ -48,7 +50,13 @@ function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-export function normalizeOpportunity(input: unknown, now: number): { error: string } | { opportunity: CrmOpportunity } {
+export const DEFAULT_TENANT = 'local'
+
+export function normalizeOpportunity(
+  input: unknown,
+  now: number,
+  tenantId: string = DEFAULT_TENANT
+): { error: string } | { opportunity: CrmOpportunity } {
   const raw = (input ?? {}) as Record<string, unknown>
   const title = text(raw['title'])
   const contact = text(raw['contact_phone'])
@@ -81,6 +89,7 @@ export function normalizeOpportunity(input: unknown, now: number): { error: stri
       // Motivo de perda só faz sentido em `perdido`; ao voltar para o funil ele é limpo.
       lost_reason: stage === 'perdido' ? lostReason : '',
       stage,
+      tenant_id: tenantId || DEFAULT_TENANT,
       title,
       updated_at: now,
       value_cents: cents(raw['value_cents'])
@@ -97,9 +106,10 @@ export function parsePipeline(raw: string): PipelineFile {
     }
 
     return {
-      opportunities: parsed.opportunities.filter(
-        entry => !!entry && typeof entry.id === 'string' && isStage((entry as CrmOpportunity).stage)
-      ),
+      opportunities: parsed.opportunities
+        .filter(entry => !!entry && typeof entry.id === 'string' && isStage((entry as CrmOpportunity).stage))
+        // Oportunidade gravada antes do tenant: lida como `local`, sem reescrever o arquivo.
+        .map(entry => ({ ...entry, tenant_id: (entry as CrmOpportunity).tenant_id || DEFAULT_TENANT })),
       schema_version: 1
     }
   } catch {
@@ -126,19 +136,21 @@ export function pipelineTotals(opportunities: readonly CrmOpportunity[]): { open
 export class CrmPipelineStore {
   constructor(private readonly filePath: string) {}
 
-  async list(): Promise<CrmOpportunity[]> {
+  async list(tenantId: string = DEFAULT_TENANT): Promise<CrmOpportunity[]> {
     const file = await this.read()
     const ordem = new Map(PIPELINE_STAGES.map((stage, index) => [stage, index]))
 
-    return [...file.opportunities].sort((a, b) => {
-      const byStage = (ordem.get(a.stage) ?? 0) - (ordem.get(b.stage) ?? 0)
+    return file.opportunities
+      .filter(o => o.tenant_id === tenantId)
+      .sort((a, b) => {
+        const byStage = (ordem.get(a.stage) ?? 0) - (ordem.get(b.stage) ?? 0)
 
-      return byStage !== 0 ? byStage : b.updated_at - a.updated_at
-    })
+        return byStage !== 0 ? byStage : b.updated_at - a.updated_at
+      })
   }
 
-  async upsert(input: unknown): Promise<{ error: string } | { opportunities: CrmOpportunity[] }> {
-    const normalized = normalizeOpportunity(input, Date.now())
+  async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { opportunities: CrmOpportunity[] }> {
+    const normalized = normalizeOpportunity(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
       return normalized
@@ -146,7 +158,11 @@ export class CrmPipelineStore {
 
     const file = await this.read()
     const opportunity = normalized.opportunity
-    const index = file.opportunities.findIndex(entry => entry.id === opportunity.id)
+    // Id de outra empresa nao entra no indice: sem o tenant aqui, conhecer o id bastaria para
+    // sobrescrever a oportunidade alheia.
+    const index = file.opportunities.findIndex(
+      entry => entry.id === opportunity.id && entry.tenant_id === opportunity.tenant_id
+    )
 
     if (index >= 0) {
       const anterior = file.opportunities[index]!
@@ -159,15 +175,15 @@ export class CrmPipelineStore {
 
     await this.write(file)
 
-    return { opportunities: await this.list() }
+    return { opportunities: await this.list(tenantId) }
   }
 
-  async remove(id: string): Promise<{ opportunities: CrmOpportunity[] }> {
+  async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ opportunities: CrmOpportunity[] }> {
     const file = await this.read()
-    file.opportunities = file.opportunities.filter(entry => entry.id !== id)
+    file.opportunities = file.opportunities.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))
     await this.write(file)
 
-    return { opportunities: await this.list() }
+    return { opportunities: await this.list(tenantId) }
   }
 
   private async read(): Promise<PipelineFile> {
