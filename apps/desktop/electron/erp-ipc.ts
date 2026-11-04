@@ -16,6 +16,8 @@ import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { createDispatcher, dispatchQuietly } from './automation-dispatch'
+import { dueSoonConditions, overdueConditions } from './automation-conditions'
+import { SweepStore, sweepStatePath } from './automation-sweep'
 import { PurchasesStore, purchasesStorePath } from './purchases-store'
 import { registerPurchasesIpc } from './purchases-ipc'
 import { SchedulingStore, schedulingStorePath } from './scheduling-store'
@@ -50,6 +52,8 @@ import { ServicesStore, servicesStorePath } from './services-store'
 export interface ErpMounted {
   /** Ferramentas de dominio para o servidor MCP. Construidas dos MESMOS stores que os IPC usam. */
   tools: AgentTool[]
+  /** Dispara a varredura de condicoes agora. Exposto para o teste nao esperar o intervalo. */
+  varrer: () => Promise<void>
 }
 
 export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMounted {
@@ -166,10 +170,43 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   registerAutomationIpc(ipcMain, { automations, tools })
 
+  // Varredura das condicoes que NAO sao evento: atendimento atrasado e conta vencendo. Roda no mesmo
+  // intervalo do resto e e idempotente por (gatilho, entidade) - ver utomation-sweep.ts.
+  const sweep = new SweepStore(sweepStatePath(userDataDir))
+
+  async function varrer(): Promise<void> {
+    await sweep.run({
+      conditions: async () => {
+        const [tickets, entradas] = await Promise.all([desk.list(), finance.list()])
+
+        return [
+          ...overdueConditions(tickets, 'local'),
+          ...dueSoonConditions(entradas, 'local', Date.now())
+        ]
+      },
+      now: () => Date.now(),
+      run: async (trigger, condicao) => {
+        return dispatch({ detail: { entity_id: condicao.entity_id }, tenant_id: condicao.tenant_id, type: trigger })
+      }
+    })
+  }
+
+  // Intervalo longo de proposito: a varredura e idempotente, mas nao ha razao para acordar o disco a
+  // cada minuto. Cinco minutos e sensivel para SLA sem ser ruido.
+  const varredura = setInterval(() => {
+    void varrer().catch(() => {
+      // Falha na varredura nao pode derrubar o app: a proxima tentativa acontece no intervalo seguinte.
+    })
+  }, 5 * 60_000)
+
+  varredura.unref?.()
+
+  return { tools, varrer }
+
   // Servidor MCP dos agentes. Disparado daqui (e nao do main.ts) porque este e o ponto que ja tem o
   // userDataDir E as ferramentas: o main.ts esta sob ratchet de tamanho e so pode encolher.
   // Sem await: subir socket nao pode atrasar a janela, e falhar aqui nao pode derrubar o app.
   void bootAgentMcp(userDataDir, tools).then(r => console.error('[b3po-mcp]', JSON.stringify(r)))
 
-  return { tools }
+  return { tools, varrer }
 }
