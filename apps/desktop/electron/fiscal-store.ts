@@ -18,6 +18,7 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
+import { avaliarMotivo } from './fiscal-cancel'
 import type { FiscalDocumentKind, FiscalProvider, FiscalStatus, PedidoFiscal } from './fiscal-provider'
 
 const DEFAULT_TENANT = 'local'
@@ -164,6 +165,11 @@ export class FiscalStore {
 
   /** Cancela pelo `ref` da venda. Recusa quando não há documento autorizado para cancelar. */
   async cancelar(provider: FiscalProvider, ref: string, motivo: string, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { record: FiscalRecord }> {
+    // Valida ANTES de tocar no registro: um motivo curto nao pode marcar documento como cancelado.
+    const avaliado = avaliarMotivo(motivo)
+
+    if (avaliado.erro) return { error: avaliado.erro }
+
     const file = await this.readAll()
     const indice = file.documents.findIndex(d => d.ref === ref && d.tenant_id === tenantId)
 
@@ -173,7 +179,7 @@ export class FiscalStore {
 
     if (atual.status !== 'autorizado') return { error: 'documento_nao_autorizado' }
 
-    const resposta = await provider.cancelar(atual.chave, motivo)
+    const resposta = await provider.cancelar(atual.chave, avaliado.texto)
 
     if ('error' in resposta) return { error: resposta.error }
 

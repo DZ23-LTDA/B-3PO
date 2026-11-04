@@ -24,6 +24,7 @@ afterEach(async () => {
 })
 
 const PEDIDO: PedidoFiscal = { kind: 'nfe', payload: {}, ref: 'venda:v1', tenant_id: 'local' }
+const MOTIVO = 'cliente desistiu da compra'
 
 function store() {
   return new FiscalStore(fiscalStorePath(dir))
@@ -132,7 +133,8 @@ describe('cancelar', () => {
   })
 
   it('recusa cancelar ref inexistente', async () => {
-    expect(await store().cancelar(sandboxProvider(), 'venda:nada', 'x')).toEqual({ error: 'documento_nao_encontrado' })
+    // Motivo valido de proposito: o que se testa aqui e a ref inexistente, nao a justificativa.
+    expect(await store().cancelar(sandboxProvider(), 'venda:nada', MOTIVO)).toEqual({ error: 'documento_nao_encontrado' })
   })
 
   it('recusa cancelar documento rejeitado: nao ha o que cancelar sem autorizacao', async () => {
@@ -140,6 +142,6 @@ describe('cancelar', () => {
 
     await s.emitir(provedorQueFalha(), PEDIDO)
 
-    expect(await s.cancelar(sandboxProvider(), 'venda:v1', 'x')).toEqual({ error: 'documento_nao_autorizado' })
+    expect(await s.cancelar(sandboxProvider(), 'venda:v1', MOTIVO)).toEqual({ error: 'documento_nao_autorizado' })
   })
 })

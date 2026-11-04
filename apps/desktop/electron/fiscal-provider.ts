@@ -1,3 +1,5 @@
+import { avaliarMotivo } from './fiscal-cancel'
+
 // Emissão fiscal: contrato de provedor + sandbox (rodada 104).
 //
 // O QUE O GOAL EXIGE, E O QUE ELE PROÍBE
@@ -101,7 +103,12 @@ export function sandboxProvider(): FiscalProvider {
     },
     async cancelar(chave, motivo) {
       if (!chave.startsWith('SANDBOX-')) return { error: 'chave_de_outro_provedor' }
-      if (!motivo.trim()) return { error: 'motivo_obrigatorio' }
+
+      // A justificativa tem tamanho minimo na SEFAZ. Um `x` nao cancela nada - recusar aqui e a mesma
+      // regra que o emissor real aplicaria, e evita descobrir isso em producao.
+      const avaliado = avaliarMotivo(motivo)
+
+      if (avaliado.erro) return { error: avaliado.erro }
 
       return {
         resultado: {
