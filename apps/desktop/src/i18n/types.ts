@@ -684,6 +684,10 @@ export interface Translations extends NoticeTranslations {
       loadFailed: string
       resource: string
       resourceHint: string
+      catalogUnavailable: string
+      serviceNotFound: string
+      servicePlaceholder: string
+      serviceRequired: string
       resourceRequired: string
       service: string
       status: string

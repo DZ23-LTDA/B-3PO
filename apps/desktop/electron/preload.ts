@@ -112,6 +112,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   scheduling: {
     book: payload => ipcRenderer.invoke('hermes:scheduling:book', payload),
+    bookFromCatalog: payload => ipcRenderer.invoke('hermes:scheduling:bookFromCatalog', payload),
     cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:scheduling:cancel', id, tenantId, reason),
     confirm: (id, tenantId) => ipcRenderer.invoke('hermes:scheduling:confirm', id, tenantId),
     day: (tenantId, from, to, resourceId) => ipcRenderer.invoke('hermes:scheduling:day', tenantId, from, to, resourceId),

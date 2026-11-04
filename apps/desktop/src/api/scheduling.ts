@@ -131,3 +131,29 @@ export function dayBounds(ms: number): { end: number; start: number } {
 
   return { end: start + 86_400_000, start }
 }
+
+/**
+ * Agenda exigindo o catálogo de serviços.
+ *
+ * Usa o canal `bookFromCatalog`: o nome do serviço é resolvido contra o catálogo e o **fim do
+ * horário é derivado da duração real**, não digitado. O canal antigo (`book`) aceita um `ends_at`
+ * arbitrário e continua existindo para os agendamentos já gravados.
+ */
+export async function bookAppointmentFromCatalog(
+  payload: Record<string, unknown>
+): Promise<{ error: string; conflict?: AppointmentRow } | { appointments: AppointmentRow[] }> {
+  const api = bridge() as null | {
+    bookFromCatalog?: (p: Record<string, unknown>) => Promise<{ error: string; conflict?: AppointmentRow } | { appointments: AppointmentRow[] }>
+  }
+
+  if (!api) return { error: 'agenda_indisponivel' }
+
+  if (typeof api.bookFromCatalog !== 'function') {
+    // Runtime antigo: a tela precisa saber, e nao cair no canal que aceita texto livre sem avisar.
+    return { error: 'catalogo_indisponivel' }
+  }
+
+  const r = await api.bookFromCatalog(payload)
+
+  return 'error' in r ? { conflict: r.conflict, error: r.error } : { appointments: r.appointments }
+}

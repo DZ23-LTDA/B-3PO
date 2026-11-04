@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import {
-  bookAppointment,
+  bookAppointmentFromCatalog,
   cancelAppointment,
   confirmAppointment,
   dateLabel,
   dayBounds,
   instantFrom,
   listAppointments,
-  plusMinutes,
   schedulingAvailable,
   timeLabel,
   type AppointmentRow
 } from '@/api/scheduling'
+import { listServices, type ServiceRow } from '@/api/services'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -33,8 +33,8 @@ export function AgendaView() {
   const [recurso, setRecurso] = useState('')
   const [data, setData] = useState('')
   const [hora, setHora] = useState('09:00')
-  const [duracao, setDuracao] = useState('60')
   const [servico, setServico] = useState('')
+  const [catalogo, setCatalogo] = useState<ServiceRow[]>([])
   const [saving, setSaving] = useState(false)
 
   const disponivel = schedulingAvailable()
@@ -53,12 +53,22 @@ export function AgendaView() {
     if (disponivel) void carregar()
   }, [carregar, disponivel])
 
+  // O serviço vem do catálogo. Sem isso o campo volta a ser texto livre e a duração é chutada.
+  useEffect(() => {
+    if (disponivel) {
+      void listServices()
+        .then(setCatalogo)
+        .catch(() => setCatalogo([]))
+    }
+  }, [disponivel])
+
   const erroDe = (chave: string, conflito?: AppointmentRow): string => {
     if (chave === 'conflito_de_agenda' && conflito) {
       return `${copy.conflict} ${timeLabel(conflito.starts_at)}–${timeLabel(conflito.ends_at)} (${conflito.resource_id})`
     }
 
     const mapa: Record<string, string> = {
+      catalogo_indisponivel: copy.catalogUnavailable,
       comprovante: '',
       conflito_de_agenda: copy.conflict,
       periodo_invalido: copy.invalidPeriod,
@@ -81,11 +91,17 @@ export function AgendaView() {
       return
     }
 
+    if (!servico.trim()) {
+      setFailure(copy.serviceRequired)
+      return
+    }
+
     setSaving(true)
 
     try {
-      const r = await bookAppointment({
-        ends_at: plusMinutes(inicio, Number(duracao) || 60),
+      // `ends_at` NÃO é enviado: o processo principal deriva da duração do catálogo. Mandar o fim
+      // calculado aqui criaria duas fontes para a mesma duração.
+      const r = await bookAppointmentFromCatalog({
         resource_id: recurso.trim(),
         service: servico.trim(),
         starts_at: inicio
@@ -131,11 +147,18 @@ export function AgendaView() {
             </label>
             <label className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
               <span className="text-(--ui-text-tertiary)">{copy.service}</span>
-              <input
+              <select
                 className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
                 onChange={event => setServico(event.target.value)}
                 value={servico}
-              />
+              >
+                <option value="">{copy.servicePlaceholder}</option>
+                {catalogo.map(item => (
+                  <option key={item.id} value={item.name}>
+                    {item.name} · {item.duration_min} min
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
               <span className="text-(--ui-text-tertiary)">{copy.date}</span>
@@ -155,15 +178,8 @@ export function AgendaView() {
                 value={hora}
               />
             </label>
-            <label className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
-              <span className="text-(--ui-text-tertiary)">{copy.duration}</span>
-              <input
-                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
-                inputMode="numeric"
-                onChange={event => setDuracao(event.target.value)}
-                value={duracao}
-              />
-            </label>
+            {/* Removido o campo de duração: ela vem do catálogo. Campo que não faz nada é pior que
+                campo ausente — o operador digitaria 90 e receberia 30 sem entender. */}
             <div className="flex items-end">
               <Button disabled={saving} onClick={() => void marcar()}>
                 {copy.book}
