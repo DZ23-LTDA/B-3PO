@@ -85,7 +85,12 @@ export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps
   const hora = (ms: number) => new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <section className="flex flex-col gap-2 rounded-lg border border-(--ui-border) p-4">
+    <section
+      className="flex flex-col gap-2 rounded-lg border border-(--ui-border) p-4"
+      data-dia={dia}
+      data-recurso={resourceId}
+      data-slots={livres.length}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-[length:var(--conversation-caption-font-size)] font-medium text-foreground">
           Horários livres · {resourceId || 'sem recurso'}
