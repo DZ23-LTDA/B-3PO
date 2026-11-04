@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   CrmConversationStore,
   NOTES_MAX,
+  TAGS_MAX,
+  TAG_MAX_CHARS,
   conversationCounts,
   conversationsStorePath,
   normalizeConversation,
@@ -235,5 +237,42 @@ describe('nota interna', () => {
 
     const arquivo = JSON.stringify({ schema_version: 1, conversations: [resultado.conversation] })
     expect(parseConversations(arquivo).conversations[0].notes).toBe(texto)
+  })
+})
+
+describe('etiquetas', () => {
+  const agora = 1_700_000_000_000
+  const base = { id: 'c1', title: 'Maria', contact_phone: '+5511999991111' }
+
+  const tags = (valor: unknown) => {
+    const r = normalizeConversation({ ...base, tags: valor }, agora)
+
+    if ('error' in r) throw new Error(r.error)
+
+    return r.conversation.tags
+  }
+
+  it('apara espaco e descarta vazio', () => {
+    expect(tags(['  vip ', '', '   '])).toEqual(['vip'])
+  })
+
+  it('remove duplicata sem diferenciar maiuscula — senao o filtro mostra duas opcoes', () => {
+    expect(tags(['VIP', 'vip', 'Vip'])).toEqual(['VIP'])
+  })
+
+  it('descarta o que nao e texto em vez de quebrar a conversa', () => {
+    expect(tags(['ok', 42, null, { a: 1 }])).toEqual(['ok'])
+  })
+
+  it('corta etiqueta longa e limita a quantidade', () => {
+    const muitas = Array.from({ length: TAGS_MAX + 5 }, (_, i) => `t${i}`)
+
+    expect(tags([ 'x'.repeat(TAG_MAX_CHARS + 10) ])[0]).toHaveLength(TAG_MAX_CHARS)
+    expect(tags(muitas)).toHaveLength(TAGS_MAX)
+  })
+
+  it('ausente ou tipo errado vira lista vazia', () => {
+    expect(tags(undefined)).toEqual([])
+    expect(tags('vip')).toEqual([])
   })
 })

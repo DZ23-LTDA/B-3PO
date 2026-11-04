@@ -1270,3 +1270,25 @@ no componente em vez de importar; e o `types.ts` recebeu as chaves na primeira e
 
 **Quarta vez que a extracao por script mentiu:** o `evaluate` voltou `undefined` e foi o **screenshot** que mostrou os tres
 numeros. Verificacao de UI se faz olhando a tela.
+
+
+## Etiquetas por conversa (rodada 217)
+
+Campo `tags` no store, com validacao que existe por um motivo pratico:
+
+| regra | porque |
+|---|---|
+| apara espaco, descarta vazio | etiqueta em branco vira opcao fantasma no filtro |
+| remove duplicata **sem diferenciar maiuscula** | "VIP" e "vip" na mesma conversa viram **duas** opcoes na lista e o filtro passa a mentir |
+| descarta o que nao e texto | dado corrompido nao pode derrubar a conversa inteira |
+| corta em 40 caracteres, maximo 20 | limite explicito em vez de crescimento sem fim |
+| ausente ou tipo errado vira lista vazia | dado gravado antes do campo existir continua legivel |
+
+**5 testes novos** (24 no arquivo). Gate 14 ok, `tsc` limpo.
+
+**Falta:** UI de etiqueta (adicionar/remover) e o filtro por etiqueta. O campo existe e e validado; a tela nao.
+
+### Dois erros do caminho
+
+1. as constantes `TAG_MAX_CHARS`/`TAGS_MAX` nao entraram no import do teste — um teste passou a comparar com `undefined` e falhou; **o teste pegou**;
+2. a fixture do teste do cliente ficou sem `tags` e o `tsc` acusou. Reescrevi a fixture, nao o tipo.

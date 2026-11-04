@@ -30,6 +30,8 @@ export interface CrmMessage {
 }
 
 export const NOTES_MAX = 2000
+export const TAG_MAX_CHARS = 40
+export const TAGS_MAX = 20
 
 export interface CrmConversation {
   /** Telefone do contato (o índice do CRM), vazio quando não há contato vinculado. */
@@ -43,6 +45,8 @@ export interface CrmConversation {
   /** Nota interna da equipe. Nunca vai para o cliente, nunca e enviada ao WhatsApp. */
   notes: string
   /** Rótulo livre: nome do contato ou o número, quando não há contato. */
+  /** Etiquetas livres da equipe. Servem para filtrar e agrupar; nao vao para o cliente. */
+  tags: string[]
   title: string
   status: ConversationStatus
   unread: number
@@ -87,6 +91,40 @@ function normalizeMessage(raw: unknown): CrmMessage | null {
     external_id: text(input['external_id']),
     sent_at: stamp(input['sent_at'], Date.now()),
   }
+}
+
+/**
+ * Etiquetas: apara, descarta vazio e nao-texto, remove duplicata (sem diferenciar maiuscula) e corta nos limites.
+ * Duplicata e o erro que estraga filtro: "VIP" e "vip" na mesma conversa virariam duas opcoes na lista.
+ */
+function normalizeTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) {
+    return []
+  }
+
+  const vistas = new Set<string>()
+  const saida: string[] = []
+
+  for (const entrada of raw) {
+    if (typeof entrada !== 'string') {
+      continue
+    }
+    const limpa = entrada.trim().slice(0, TAG_MAX_CHARS)
+    if (limpa === '') {
+      continue
+    }
+    const chave = limpa.toLowerCase()
+    if (vistas.has(chave)) {
+      continue
+    }
+    vistas.add(chave)
+    saida.push(limpa)
+    if (saida.length >= TAGS_MAX) {
+      break
+    }
+  }
+
+  return saida
 }
 
 export function normalizeConversation(
@@ -139,6 +177,7 @@ export function normalizeConversation(
       messages,
       notes: text(input['notes']).slice(0, NOTES_MAX),
       status,
+      tags: normalizeTags(input['tags']),
       title,
       unread: typeof input['unread'] === 'number' && input['unread'] > 0 ? Math.floor(input['unread']) : 0,
       updated_at: stamp(input['updated_at'], now),

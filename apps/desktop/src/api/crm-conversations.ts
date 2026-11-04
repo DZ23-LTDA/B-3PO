@@ -30,6 +30,8 @@ export interface CrmConversationRow {
   /** Nota interna da equipe; nunca vai para o cliente. Opcional: dado gravado antes deste campo nao tem. */
   notes?: string
   status: ConversationStatus
+  /** Etiquetas da equipe; opcional para dado gravado antes do campo existir. */
+  tags?: string[]
   title: string
   unread: number
   updated_at: number
