@@ -273,3 +273,47 @@ MSIX reconstruido, **nao assinado** · PR #1 **draft / NOT READY**.
 5. **gate vermelho nao commita**;
 6. **chave em catalogo grande se insere contando chaves**;
 7. **regressao conferida arquivo por arquivo**, nunca "provavelmente e ambiente".
+
+
+## Retomada — estado em 281 commits (rodada 222)
+
+**Antes de qualquer coisa:** `git rev-parse --short HEAD`, `git status --porcelain` e `python scripts/check`.
+Se o gate nao disser `ok`, nao commitar.
+
+### O que existe, provado no binario (10 capturas indexadas)
+
+| capacidade | prova |
+|---|---|
+| inbox recebe, guarda com idempotencia | `crm-conversas-pt.png` |
+| cadeia webhook -> CRM ponta a ponta | `crm-e2e-webhook.png` |
+| marcar lida / resolver | `crm-acoes-pt.png` |
+| busca (titulo, telefone, mensagens) | `crm-busca-pt.png` |
+| nota interna | `crm-nota-interna.png` |
+| tempo de resposta por conversa | `crm-tempo-resposta.png` |
+| selo "aguardando resposta" | `crm-selo-esperando.png` |
+| painel Visao rapida (3 indicadores conferidos) | `crm-painel.png` |
+| campo de etiquetas (duplicata descartada) | `crm-etiquetas.png` |
+| busca por etiqueta (sem contaminacao do titulo) | `crm-busca-etiqueta.png` |
+
+### O que NAO existe — nao prometer
+
+- envio de mensagem pela tela (o codigo `sendText` existe, sem UI e sem credencial);
+- filtro dedicado por etiqueta (so a busca);
+- anexos, Kanban, ligar oportunidade a conversa;
+- iOS, assinatura Windows, keystore Android;
+- qualquer chamada real a API da Meta.
+
+### Proximo passo, em ordem
+
+1. **Com credencial:** ligar `sendText` na tela, persistir a saida com o `wamid` real, mostrar enviando/falhou/tentar de novo.
+2. **Sem credencial:** anexos ou Kanban; ou o controle de filtro por etiqueta (a funcao `matchesTag`/`usedTags` ja existe e tem teste).
+
+### Regras pagas com erro nesta sessao — nao repetir
+
+1. Captura so existe quando o indice aponta para ela.
+2. Verificacao de UI se faz olhando a tela; script de CDP serve para achar o caminho, nao para dar veredito.
+3. Antes de concluir que o app nao funciona, suspeitar do instrumento (7 vezes foi o instrumento).
+4. Guarda de "ja apliquei" ancora no trecho exato, nunca em substring do arquivo inteiro.
+5. Experimento com duas causas possiveis nao prova nenhuma — remover o confundidor e refazer.
+6. Nada de funcao que devolve sempre o mesmo valor disfarcada de regra.
+7. Nao declarar modulo pronto por ter campo e validacao: a tela e o teste no binario fazem parte.
