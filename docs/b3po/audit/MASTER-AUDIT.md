@@ -160,3 +160,46 @@ Tudo antes de (5) é single-tenant, o que é compatível com o estado atual e re
 - **Nenhuma linha de código de produto alterada** nesta rodada — era auditoria.
 
 **Status do produto: `NOT_READY`.** Critérios aplicáveis do V4 pendentes e agora inventariados com evidência.
+
+---
+
+## 10. Verificação pós-revisão independente (A27)
+
+A revisão independente via MCP DZ23 apontou que a varredura inicial cobria apenas o
+Electron/TypeScript, e que "ausente" poderia ser confundido com "sem tela". A crítica era
+procedente em método. Verifiquei as lacunas apontadas:
+
+| Lacuna apontada | Verificação | Resultado |
+|---|---|---|
+| Mobile pode ter estado local de ERP | 45 arquivos TS em `mobile/b3po-app`, busca por `product`, `estoque`, `inventory`, `finance`, `appointment` | **0 ocorrências** |
+| Banco pode ter tabelas de domínio | `CREATE TABLE` em `hermes_state_schema.py` | só `session_model_usage`, `gateway_routing`, `async_delegations` — **infraestrutura de runtime, nenhum domínio empresarial** |
+| WhatsApp Web e Cloud podem compartilhar store sem contrato | adaptadores e bridges | `whatsapp/adapter.py` e `whatsapp_cloud/adapter.py` são independentes; só o Cloud tem `crm_bridge.py` |
+
+**Conclusão revisada:** a afirmação "12 de 13 domínios ausentes" **se sustenta** após varrer
+mobile, banco e Python. O revisor supôs stack relacional (Postgres) que este projeto não usa —
+os dados de domínio são JSON atômicos em `userData` — mas o pedido de verificação estava certo
+e foi atendido.
+
+**Nuance acrescentada:** o canal WhatsApp **Web** hoje **não alimenta** o `CrmConversationStore`;
+apenas o caminho Cloud → `crm-whatsapp-ingest` → store está ligado. Isso não é duplicidade de
+armazenamento, mas é uma **lacuna de canal** que precisa ser decidida explicitamente.
+
+### O que aceito e o que rejeito da revisão
+
+**Aceito:**
+- A ordem de implementação deve tratar o contrato de tenant **cedo**, antes de espalhar domínios.
+- O teste de fumaça de integração proposto é a melhor contra-medida: *criar produto → vender →
+  verificar estoque decrementado → verificar reflexo financeiro*. Se falhar, não avançar para UI.
+
+**Rejeito, com motivo:**
+- "Implementar núcleo multitenant relacional antes de tudo": o produto é local-first com JSON
+  atômico; não há Postgres. Adicionar `tenant_id` a 4 stores JSON é barato e reversível. O que
+  deve vir cedo é o **contrato** (como o tenant é propagado), não uma camada de banco.
+- "Não criar telas na rodada 2": sem tela não há prova de uso, e o critério do V4 proíbe módulo
+  sem tela funcional. A ordem correta é **store + testes + tela mínima** no mesmo incremento.
+
+### Ajuste de plano decorrente
+
+1. `PRODUCT-TENANT-CONTRACT.md` — decidir onde o `tenant_id` entra nos stores atuais (rodada 2).
+2. Catálogo de produtos com `tenant_id` desde o primeiro campo.
+3. Teste de fumaça de integração antes de qualquer tela de venda.
