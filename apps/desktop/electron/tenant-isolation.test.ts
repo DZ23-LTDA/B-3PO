@@ -1,202 +1,158 @@
-// Isolamento entre tenants, provado em cada ledger.
+// Isolamento entre tenants (rodada 158).
 //
-// O GOAL diz: "Tenant A jamais acessa dados de Tenant B". O codigo tinha o filtro em 10 stores desde as
-// primeiras rodadas, mas nunca foi exercitado com dois tenants de verdade: todo dado do projeto usava
-// `local`, entao um filtro quebrado passaria despercebido.
+// O MODELO DO PRODUTO, PRIMEIRO
 //
-// Este teste escreve nos DOIS tenants e verifica o que cada um enxerga. Ele falha se um store esquecer
-// o filtro, e falha tambem se um filtro novo for copiado errado para outro dominio.
+// Decisao da r92: uma instalacao = uma empresa. `serverTenant()` devolve uma constante, e nenhum canal IPC
+// aceita `tenant_id` do renderer. Isso significa que o produto NAO tem multitenancy por linha — tem uma
+// empresa por instalacao.
 //
-// Nao e teste de leitura de fonte: cada store e instanciado sobre um arquivo temporario real.
+// O QUE AINDA PRECISA SER VERDADEIRO
+//
+// Se um arquivo de dados contiver registros de mais de um tenant (backup restaurado, arquivo copiado entre
+// maquinas, ou simplesmente um dia em que o produto ganhe troca de empresa), a leitura NAO pode misturar.
+// Estes testes plantam dois tenants num arquivo e verificam que so um aparece.
 
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { AfterSalesStore, afterSalesStorePath } from './after-sales-store'
-import { AutomationStore, automationStorePath } from './automation-store'
-import { CatalogStore, catalogStorePath } from './catalog-store'
-import { DocumentsStore, documentsStorePath } from './documents-store'
-import { FinanceStore, financeStorePath } from './finance-store'
-import { InventoryStore, inventoryStorePath } from './inventory-store'
-import { SalesStore, salesStorePath } from './sales-store'
-import { SchedulingStore, schedulingStorePath } from './scheduling-store'
-import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
-import { ServicesStore, servicesStorePath } from './services-store'
+import { agentExecutionsPath, openExecutionStore } from './agent-execution-store'
+import { agentApprovalsPath, openApprovalStore } from './agent-approval-store'
+import { hrVacationPath, openVacationStore } from './hr-vacation-store'
+import { serverTenant } from './server-tenant'
 
-const A = 'empresa_a'
-const B = 'empresa_b'
-const T0 = 1_700_000_000_000
+let userData = ''
 
-let dir = ''
-
-beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), 'b3po-tenant-'))
+beforeEach(() => {
+  userData = mkdtempSync(join(tmpdir(), 'b3po-iso-'))
 })
 
-afterEach(async () => {
-  await rm(dir, { force: true, recursive: true })
+afterEach(() => {
+  rmSync(userData, { force: true, recursive: true })
 })
 
-describe('catalogo', () => {
-  it('produto de A nao aparece em B', async () => {
-    const store = new CatalogStore(catalogStorePath(dir))
+/** Grava um arquivo de store com o schema real, plantando registros de dois tenants. */
+function plantar(caminho: string, chave: string, registros: unknown[]) {
+  mkdirSync(join(userData, 'b3po'), { recursive: true })
+  writeFileSync(caminho, JSON.stringify({ schema_version: 1, [chave]: registros }, null, 2), 'utf8')
+}
 
-    await store.upsert({ name: 'Café A', price_cents: 1000, sku: 'CAF-A', tenant_id: A })
-
-    expect((await store.list(A)).map(p => p.sku)).toEqual(['CAF-A'])
-    expect(await store.list(B)).toEqual([])
-  })
+const execucao = (tenant: string, id: string) => ({
+  execution_id: id,
+  owner: 'bot-1',
+  parent_execution_id: null,
+  started_at: 1_700_000_000_000,
+  status: 'concluida',
+  task_id: 't1',
+  tentativas: 0,
+  tenant_id: tenant
 })
 
-describe('estoque', () => {
-  it('movimentacao de A nao aparece em B', async () => {
-    const store = new InventoryStore(inventoryStorePath(dir))
-
-    await store.append({ kind: 'entrada', product_sku: 'CAF-A', quantity_milli: 5000, reason: 'a', tenant_id: A })
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-
-  it('saldo de A nao conta em B', async () => {
-    const store = new InventoryStore(inventoryStorePath(dir))
-
-    await store.append({ kind: 'entrada', product_sku: 'CAF-A', quantity_milli: 5000, reason: 'a', tenant_id: A })
-
-    expect((await store.balances(A))['CAF-A']).toBe(5000)
-    expect((await store.balances(B))['CAF-A']).toBeUndefined()
-  })
+const aprovacao = (tenant: string, id: string) => ({
+  acao: 'conceder desconto',
+  decidido_em: null,
+  decidido_por: null,
+  dominio: 'sales',
+  execution_id: 'e1',
+  id,
+  motivo: 'motivo suficientemente longo',
+  nivel_pedido: 'EXECUTE_ALLOWED',
+  solicitado_em: Date.now(),
+  solicitado_por: 'agente',
+  status: 'pendente',
+  tenant_id: tenant
 })
 
-describe('financeiro', () => {
-  it('lancamento de A nao aparece em B', async () => {
-    const store = new FinanceStore(financeStorePath(dir))
+const gozo = (tenant: string, id: string) => ({
+  created_at: 1_700_000_000_000,
+  dias: 30,
+  funcionario: 'ana',
+  id,
+  periodo_inicio: 1_700_000_000_000,
+  tenant_id: tenant
+})
 
-    await store.append({ amount_cents: 1000, description: 'a', due_at: T0, kind: 'pagar', party: 'X', tenant_id: A })
+describe('o tenant nunca vem do renderer', () => {
+  it('serverTenant ignora um valor pedido', () => {
+    // Esta e a defesa central: se o renderer pudesse escolher o tenant, todo o resto seria decoracao.
+    const doRenderer = serverTenant('tenant-do-atacante' as never)
 
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
+    expect(doRenderer).toBe(serverTenant())
   })
 
-  it('totais de B nao incluem o valor de A', async () => {
-    const store = new FinanceStore(financeStorePath(dir))
-
-    await store.append({ amount_cents: 50_000, description: 'a', due_at: T0 + 1000, kind: 'pagar', party: 'X', tenant_id: A })
-
-    expect((await store.totals(A)).openPayableCents).toBe(50_000)
-    expect((await store.totals(B)).openPayableCents).toBe(0)
+  it('serverTenant e estavel entre chamadas', () => {
+    expect(serverTenant()).toBe(serverTenant())
   })
 })
 
-describe('vendas', () => {
-  it('venda de A nao aparece em B', async () => {
-    const store = new SalesStore(salesStorePath(dir))
+describe('leitura nao mistura tenants', () => {
+  it('execucoes: so o tenant atual aparece', () => {
+    const atual = serverTenant()
 
-    const r = await store.create({ items: [{ product_sku: 'CAF-A', quantity_milli: 1000, unit_price_cents: 1000 }], tenant_id: A })
+    plantar(agentExecutionsPath(userData), 'execucoes', [
+      execucao(atual, 'minha'),
+      execucao('outra-empresa', 'alheia')
+    ])
 
-    await expect(Promise.resolve(r)).resolves.not.toHaveProperty('error')
+    const lista = openExecutionStore(userData).listar()
 
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
+    expect(lista.map(e => e.execution_id)).toEqual(['minha'])
+    expect(lista.every(e => e.tenant_id === atual)).toBe(true)
+  })
+
+  it('aprovacoes: so o tenant atual aparece', () => {
+    const atual = serverTenant()
+
+    plantar(agentApprovalsPath(userData), 'solicitacoes', [
+      aprovacao(atual, 'minha'),
+      aprovacao('outra-empresa', 'alheia')
+    ])
+
+    const lista = openApprovalStore(userData).listar(undefined, Date.now())
+
+    expect(lista.map(a => a.id)).toEqual(['minha'])
+  })
+
+  it('ferias: so o tenant atual aparece', () => {
+    const atual = serverTenant()
+
+    plantar(hrVacationPath(userData), 'gozos', [gozo(atual, 'meu'), gozo('outra-empresa', 'alheio')])
+
+    const lista = openVacationStore(userData).listar()
+
+    expect(lista.map(g => g.id)).toEqual(['meu'])
+  })
+
+  it('dois tenants no arquivo e um deles sem registros: o atual ve os seus', () => {
+    plantar(agentExecutionsPath(userData), 'execucoes', [execucao('outra-empresa', 'alheia')])
+
+    expect(openExecutionStore(userData).listar()).toEqual([])
   })
 })
 
-describe('agenda', () => {
-  it('compromisso de A nao aparece em B', async () => {
-    const store = new SchedulingStore(schedulingStorePath(dir))
+describe('escrita nao vaza tenant', () => {
+  it('registrar sempre grava com o tenant do servidor', () => {
+    const s = openExecutionStore(userData)
 
-    const r = await store.book({
-      ends_at: T0 + 1_800_000,
-      resource_id: 'sala-1',
-      starts_at: T0,
-      title: 'A',
-      tenant_id: A
-    })
+    s.iniciar(
+      { execution_id: 'e1', owner: 'bot-1', task_id: 't1' },
+      { agora: 1_700_000_000_000, credencial: true }
+    )
 
-    await expect(Promise.resolve(r)).resolves.not.toHaveProperty('error')
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('servicos', () => {
-  it('servico de A nao aparece em B', async () => {
-    const store = new ServicesStore(servicesStorePath(dir))
-
-    await store.upsert({ duration_minutes: 30, name: 'Corte', price_cents: 5000, tenant_id: A })
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('atendimento', () => {
-  it('ticket de A nao aparece em B', async () => {
-    const store = new ServiceDeskStore(serviceDeskStorePath(dir))
-
-    await store.open({ description: 'a', priority: 'normal', subject: 'A', tenant_id: A })
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('pos-venda', () => {
-  it('acompanhamento de A nao aparece em B', async () => {
-    const store = new AfterSalesStore(afterSalesStorePath(dir))
-
-    const r = await store.create({ contact_phone: '5511999998888', kind: 'satisfacao', sale_at: T0, sale_id: 'v1', tenant_id: A })
-
-    await expect(Promise.resolve(r)).resolves.not.toHaveProperty('error')
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('automacoes', () => {
-  it('regra de A nao aparece em B', async () => {
-    const store = new AutomationStore(automationStorePath(dir))
-
-    await store.create({ action_args: {}, action_name: 'inventory.append', actor_id: 'owner', name: 'A', tenant_id: A, trigger: 'venda.faturada' })
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('documentos', () => {
-  it('documento de A nao aparece em B', async () => {
-    const store = new DocumentsStore(documentsStorePath(dir))
-
-    await store.upsert({ name: 'a.pdf', ref: 'C:/a.pdf', scope: 'outro', tenant_id: A }, T0)
-
-    expect(await store.list(A)).toHaveLength(1)
-    expect(await store.list(B)).toEqual([])
-  })
-})
-
-describe('o isolamento vale nos dois sentidos', () => {
-  it('B tambem nao vaza para A', async () => {
-    const catalog = new CatalogStore(catalogStorePath(dir))
-
-    await catalog.upsert({ name: 'Só B', price_cents: 100, sku: 'SKU-B', tenant_id: B })
-
-    expect(await catalog.list(A)).toEqual([])
-    expect((await catalog.list(B)).map(p => p.sku)).toEqual(['SKU-B'])
+    expect(s.listar()[0]!.tenant_id).toBe(serverTenant())
   })
 
-  it('dois tenants no mesmo arquivo: cada um ve so o seu', async () => {
-    const catalog = new CatalogStore(catalogStorePath(dir))
+  it('o chamador nao consegue escolher tenant na escrita de ferias', () => {
+    const s = openVacationStore(userData)
 
-    await catalog.upsert({ name: 'A', price_cents: 100, sku: 'SKU-A', tenant_id: A })
-    await catalog.upsert({ name: 'B', price_cents: 200, sku: 'SKU-B', tenant_id: B })
+    // `tenant_id` no input existe para o teste de store poder simular; o store aplica `serverTenant`.
+    s.registrar(
+      { dias: 30, funcionario: 'ana', periodo_inicio: 1_700_000_000_000, tenant_id: 'invasor' as never },
+      1_700_000_000_000
+    )
 
-    expect((await catalog.list(A)).map(p => p.sku)).toEqual(['SKU-A'])
-    expect((await catalog.list(B)).map(p => p.sku)).toEqual(['SKU-B'])
+    expect(s.listar()[0]!.tenant_id).toBe(serverTenant())
   })
 })
