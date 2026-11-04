@@ -43,7 +43,7 @@ describe('menu dos módulos', () => {
 
   it('todo path do menu resolve numa rota registrada', () => {
     // É a asserção que faltava: um menu apontando para path inexistente levaria a tela em branco.
-    const paths = new Set(APP_ROUTES.map(r => r.path))
+    const paths = new Set<string>(APP_ROUTES.map(r => r.path))
 
     for (const item of contribuicoes()) {
       expect(paths.has(item.data.path), `menu aponta para ${item.data.path}, que não é rota`).toBe(true)
