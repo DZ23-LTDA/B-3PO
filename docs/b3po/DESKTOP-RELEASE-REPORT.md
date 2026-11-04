@@ -1734,3 +1734,13 @@ Corrigido comparando digitos dos dois lados; telefone vazio segue devolvendo `tr
 Provado vermelho na base: 3 dos 14 testes falham sem a correcao, 14 passam com ela.
 
 **E o segundo caso desta sessao em que o teste de caminho feliz nao bastava** — precisa-se do caso de formato.
+
+### Rodada 159 — correcao do falso positivo verificada no app empacotado
+
+A correcao da rodada 158 era so de logica; o MSIX em disco era anterior a ela. Reconstruido, e verificado com perfil
+semeado de proposito para o caso ruim: contato com `+5511999991111` e oportunidade com `+55 11 99999-1111`.
+
+Resultado no app: cartao "Proposta da Maria" com **R$ 9.000,00** e **sem** "contato excluido" — o falso positivo sumiu
+no binario, nao so no teste. Evidencia: `docs/b3po/evidence/crm-fone-com-mascara-pt.png`.
+
+O artefato volta a corresponder ao HEAD; o manifesto foi refeito depois do commit.

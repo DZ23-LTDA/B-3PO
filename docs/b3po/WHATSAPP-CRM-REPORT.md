@@ -507,3 +507,7 @@ devolvendo `true`: item sem telefone e item solto, nao orfao.
 
 Fica o registro do padrao: *uma feature nova pode nascer com o bug que ela mesma deveria evitar* — e o teste de
 formato, nao o teste de caminho feliz, e quem pega isso.
+
+**Provado no app empacotado (rodada 159).** Perfil semeado com o contato gravado normalizado (`+5511999991111`) e a
+oportunidade com mascara (`+55 11 99999-1111`): o cartao renderizou "Proposta da Maria" com **R$ 9.000,00** e **sem**
+a marca de contato excluido. Evidencia: `docs/b3po/evidence/crm-fone-com-mascara-pt.png`.
