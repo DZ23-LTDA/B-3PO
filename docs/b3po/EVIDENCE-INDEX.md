@@ -86,3 +86,4 @@ mascote de volta). É o próximo item de prova do F5.
 | `evidence/home-pt.png` | Home em pt-BR com mascote e hero (app empacotado) |
 | `evidence/home-datas-pt.png` | Home em pt-BR com o agrupamento de datas da sidebar traduzido |
 | `evidence/avancado-pt.png` | Avançado › Desktop e inicialização em pt-BR |
+| `evidence/terminal-pt.png` | Avançado › Backend do terminal em pt-BR |

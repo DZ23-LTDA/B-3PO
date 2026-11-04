@@ -1233,3 +1233,25 @@ Evidência: `docs/b3po/evidence/avancado-pt.png`.
 mapeamento de enum do frontend; fica registrado como pendência em vez de forçar.
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 128 — texto de campos: desktop, agente e terminal em pt
+
+**Medi antes de escrever**: o catálogo de campos tem **145 rótulos + 70 descrições**, e o pt cobria **5 + 5**.
+Ou seja, ~205 strings — a maior lacuna restante do painel, e a que explica por que algumas telas ainda misturavam
+idioma mesmo com a navegação traduzida.
+
+Nesta rodada entraram os grupos **`desktop`**, **`agent`** e **`terminal`** (rótulos e descrições): descoberta
+automática de repositórios e suas pastas, máximo de passos do agente, anexos de imagem, tentativas de API, camada
+de serviço, obrigar uso de ferramentas, diretório de trabalho, backend de execução, tempo limite de comando, shell
+persistente (com a explicação do SSH), repasse de variáveis e as quatro imagens de contêiner
+(Docker/Singularity/Modal/Daytona).
+
+Evidência: `docs/b3po/evidence/terminal-pt.png` (Avançado › Backend do terminal).
+
+**O que NÃO funcionou, e eu removi em vez de deixar sem efeito**: tentei sobrescrever no `fieldDescriptions` a
+descrição de `terminal.backend` e `terminal.timeout`. Não pegou — o app continua mostrando "Terminal execution
+backend" e o valor numérico sem ajuda. Essas duas vêm do **schema do backend**, não do `FIELD_DESCRIPTIONS` do
+frontend. Removi as duas chaves que eu tinha adicionado: código sem efeito é pior que ausência declarada.
+Mesma família do "Stash" da rodada anterior: o que vem do schema precisa de outra camada para traduzir.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.

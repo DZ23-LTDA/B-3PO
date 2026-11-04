@@ -550,7 +550,30 @@ export const ptOverrides: TranslationOverrides = {
         personality: 'Personalidade',
         showReasoning: 'Blocos de raciocínio'
       },
-      updates: { nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app' }
+      updates: { nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app' },
+      desktop: {
+        repoScanEnabled: 'Descoberta automática de repositórios',
+        repoScanRoots: 'Pastas de descoberta de repositórios',
+        repoScanExcludePaths: 'Pastas de repositório excluídas'
+      },
+      agent: {
+        maxTurns: 'Máximo de passos do agente',
+        imageInputMode: 'Anexos de imagem',
+        apiMaxRetries: 'Tentativas de API',
+        serviceTier: 'Camada de serviço',
+        toolUseEnforcement: 'Obrigar uso de ferramentas'
+      },
+      terminal: {
+        cwd: 'Diretório de trabalho',
+        backend: 'Backend de execução',
+        timeout: 'Tempo limite de comando',
+        persistentShell: 'Shell persistente',
+        envPassthrough: 'Repasse de variáveis de ambiente',
+        dockerImage: 'Imagem Docker',
+        singularityImage: 'Imagem Singularity',
+        modalImage: 'Imagem Modal',
+        daytonaImage: 'Imagem Daytona'
+      }
     }),
     fieldDescriptions: defineFieldCopy({
       model: 'Usado em conversas novas, a menos que você escolha outro modelo no compositor.',
@@ -564,6 +587,25 @@ export const ptOverrides: TranslationOverrides = {
       updates: {
         nonInteractiveLocalChanges:
           'Quando o B-3PO se atualiza pelo app (sem terminal), mantém as edições locais do código (stash) ou as descarta (discard). Atualizações pelo terminal sempre perguntam.'
+      },
+      desktop: {
+        repoScanEnabled: 'Varre pastas locais em busca de repositórios Git para mostrar em Projetos.',
+        repoScanRoots: 'Pastas a varrer. Vazio = varre o diretório pessoal.',
+        repoScanExcludePaths: 'Pastas e seus descendentes ignorados na descoberta de repositórios.'
+      },
+      agent: {
+        imageInputMode: 'Controla como os anexos de imagem são enviados ao modelo.',
+        maxTurns: 'Limite de turnos com ferramentas antes de o B-3PO parar uma execução.'
+      },
+      terminal: {
+        cwd: 'Pasta padrão de projetos para ferramentas e terminal.',
+        persistentShell:
+          'Backend SSH: mantém as variáveis exportadas entre comandos. Desligado, cada comando começa do ambiente de login; o diretório de trabalho sempre continua.',
+        envPassthrough: 'Variáveis de ambiente repassadas para a execução das ferramentas.',
+        dockerImage: 'Imagem do contêiner usada quando o backend é Docker.',
+        singularityImage: 'Imagem usada quando o backend é Singularity.',
+        modalImage: 'Imagem usada quando o backend é Modal.',
+        daytonaImage: 'Imagem usada quando o backend é Daytona.'
       }
     }),
     crmPipeline: {
