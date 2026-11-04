@@ -101,6 +101,12 @@ export async function handleRpc(request: RpcRequest, context: McpContext): Promi
     case 'ping':
       return ok(id, {})
 
+    // Notificações do cliente após o initialize. Um cliente MCP real envia `notifications/initialized`
+    // (sem `id`); responder -32601 faz alguns tratarem como falha de conexão e abandonarem o servidor.
+    case 'notifications/cancelled':
+    case 'notifications/initialized':
+      return ok(id, {})
+
     case 'tools/list':
       return ok(id, { tools: disponiveis.map(toolDescriptor) })
 
