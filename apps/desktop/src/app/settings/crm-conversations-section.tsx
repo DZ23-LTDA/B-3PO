@@ -9,7 +9,7 @@ import {
   type CrmConversationRow,
 } from '@/api/crm-conversations'
 import { filterConversations, type ConversationFilter } from '@/app/crm/conversation-filters'
-import { responseTime, responseTimeLabel } from '@/app/crm/response-time'
+import { needsReply, responseTime, responseTimeLabel } from '@/app/crm/response-time'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -181,6 +181,9 @@ export function CrmConversationsSection() {
                         {row.last_message_preview || section.noMessages}
                       </span>
                       <span className={'text-[10px] ' + statusTone(row.status)}>{section.status[row.status]}</span>
+                      {needsReply(row.messages) ? (
+                        <span className="text-[10px] font-semibold text-primary">{section.waitingReply}</span>
+                      ) : null}
                     </button>
                   </li>
                 )

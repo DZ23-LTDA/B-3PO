@@ -1393,6 +1393,7 @@
   "settings.crmConversations.subtitle": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.title": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.unavailable": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmConversations.waitingReply": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.columnEmpty": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.contactRemoved": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.filterAllStages": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

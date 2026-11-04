@@ -1210,3 +1210,24 @@ tela mostrando exatamente esse numero. Quando a conversa nao tem resposta, a lin
 
 **Terceira vez que o script de verificacao me deu resposta enganosa:** a regex com `\n` dentro do `evaluate` retornou
 `undefined`, e foi o **screenshot** que provou a linha na tela. Verificacao de UI se faz olhando a tela.
+
+
+## Selo "Aguardando resposta" na lista (rodada 210)
+
+O sinal que mais importa numa caixa de entrada, agora visivel: a conversa cuja **ultima mensagem e do cliente** ganha o
+selo `Aguardando resposta` na lista.
+
+Por que este e melhor que "nao lida": nao lida mede se eu vi; aguardando resposta mede se **o cliente esta esperando**.
+Conversa lida e sem resposta continua sendo cliente abandonado — e e o que o selo pega.
+
+**Prova no app empacotado** (`docs/b3po/evidence/crm-selo-esperando.png`), perfil com duas conversas:
+
+| conversa | ultima mensagem | selo |
+|---|---|---|
+| Cliente Esperando | do cliente | **1 ocorrencia** |
+| Cliente Respondido | minha | nenhuma |
+
+Medido no DOM: `ocorrencias: 1` e a ordem das linhas mostra o selo depois de "Cliente Esperando" e ausente depois de
+"Cliente Respondido". **Um selo, na conversa certa** — nao dois por engano nem zero.
+
+**Medido:** `src/i18n` + `src/app/crm` = 20 arquivos / 157 testes; gate 14 ok; build e MSIX refeitos.

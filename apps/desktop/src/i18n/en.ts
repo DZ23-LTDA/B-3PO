@@ -697,6 +697,7 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      waitingReply: 'Waiting for reply',
       responseTime: 'Response time',
       notePlaceholder: 'Internal note (never sent to the customer)',
       notes: 'Internal notes',
