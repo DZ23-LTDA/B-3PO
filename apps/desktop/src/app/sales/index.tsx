@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { emitirNota, fiscalAvailable, fiscalErrorText, listFiscal, type FiscalRow } from '@/api/fiscal'
+import { cancelarNota, emitirNota, fiscalAvailable, fiscalErrorText, listFiscal, type FiscalRow } from '@/api/fiscal'
 
 import { listProducts, priceLabel, type ProductRow } from '@/api/catalog'
 import { loadBalances, quantityLabel } from '@/api/inventory'
@@ -18,6 +18,8 @@ import {
 } from '@/api/sales'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
+
+import { FiscalStatusBanner } from './fiscal-status'
 import { useI18n } from '@/i18n/context'
 
 /**
@@ -71,12 +73,33 @@ export function SalesView() {
     return notas.find(n => n.ref === 'venda:' + saleId && n.status === 'autorizado' && n.url_danfe) ?? null
   }
 
+  /** Existe nota autorizada, com ou sem DANFE. Cancelar nao depende de ter url para imprimir. */
+  function notaAutorizada(saleId: string): boolean {
+    return notas.some(n => n.ref === 'venda:' + saleId && n.status === 'autorizado')
+  }
+
   /** Emitir nao fatura: so a venda faturada tem nota. O backend recusa o resto. */
   async function emitirNotaDaVenda(saleId: string): Promise<void> {
     setEmitindo(saleId)
     setFalhaFiscal('')
     try {
       const r = await emitirNota(saleId)
+
+      if ('error' in r) {
+        setFalhaFiscal(fiscalErrorText(r.error))
+      } else {
+        setNotas(await listFiscal())
+      }
+    } finally {
+      setEmitindo('')
+    }
+  }
+
+  async function cancelarNotaDaVenda(saleId: string): Promise<void> {
+    setEmitindo(saleId)
+    setFalhaFiscal('')
+    try {
+      const r = await cancelarNota(saleId, 'cancelada pelo operador')
 
       if ('error' in r) {
         setFalhaFiscal(fiscalErrorText(r.error))
@@ -169,6 +192,8 @@ export function SalesView() {
         <h1 className="text-lg font-semibold text-foreground">{copy.title}</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.hint}</p>
       </header>
+
+      <FiscalStatusBanner />
 
       {!disponivel ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
@@ -300,6 +325,15 @@ export function SalesView() {
                             {danfeDe(sale.id) ? (
                               <Button onClick={() => void abrirDanfe(sale.id)} variant="ghost">
                                 {copy.printInvoice}
+                              </Button>
+                            ) : null}
+                            {notaAutorizada(sale.id) ? (
+                              <Button
+                                disabled={emitindo === sale.id}
+                                onClick={() => void cancelarNotaDaVenda(sale.id)}
+                                variant="ghost"
+                              >
+                                {copy.cancelInvoice}
                               </Button>
                             ) : null}
                           </>

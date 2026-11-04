@@ -2124,6 +2124,7 @@
   "settings.sales.addItem": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.sales.alreadyIssued": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.sales.cancel": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.sales.cancelInvoice": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.sales.emitInvoice": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.sales.emitting": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.sales.empty": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

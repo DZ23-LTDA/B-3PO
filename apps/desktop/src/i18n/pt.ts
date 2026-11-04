@@ -1270,6 +1270,7 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'O financeiro precisa do aplicativo desktop para funcionar.'
     },
     sales: {
+      cancelInvoice: 'Cancelar nota',
       emitting: 'Emitindo…',
       emitInvoice: 'Emitir nota',
       printInvoice: 'Imprimir nota',

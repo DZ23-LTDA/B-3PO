@@ -967,6 +967,7 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     }
     sales: {
+      cancelInvoice: string
       emitting: string
       emitInvoice: string
       printInvoice: string
