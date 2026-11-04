@@ -41,6 +41,7 @@ const MessagingView = lazy(async () => ({ default: (await import('../messaging')
 const CapabilitiesView = lazy(async () => ({ default: (await import('../capabilities')).CapabilitiesView }))
 // O CRM carrega as secoes de Configuracoes: mantem o code-split como as demais paginas.
 const CrmView = lazy(async () => ({ default: (await import('../crm')).CrmView }))
+const ProductsView = lazy(async () => ({ default: (await import('../products')).ProductsView }))
 
 export function LegacySessionRedirect() {
   const { sessionId } = useParams()
@@ -196,6 +197,8 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       {/* CRM is a real page (contacts + pipeline), not a chat: without this route
           `/crm` falls through to `:sessionId` and opens a session named "crm". */}
       <Route element={page(<CrmView />)} path="crm" />
+      {/* Mesmo motivo do CRM: sem rota propria, `/products` abriria uma sessao chamada "products". */}
+      <Route element={page(<ProductsView />)} path="products" />
       <Route element={null} path="agents" />
       <Route element={null} path="command-center" />
       <Route element={null} path="cron" />

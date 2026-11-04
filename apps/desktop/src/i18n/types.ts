@@ -643,6 +643,34 @@ export interface Translations extends NoticeTranslations {
       title: string
       unavailable: string
     }
+    products: {
+      cancel: string
+      category: string
+      count: (n: number) => string
+      cost: string
+      duplicateSku: string
+      edit: string
+      empty: string
+      hint: string
+      invalidCost: string
+      invalidName: string
+      invalidPrice: string
+      invalidSku: string
+      loadFailed: string
+      name: string
+      noMatch: string
+      price: string
+      remove: string
+      save: string
+      saveEdit: string
+      search: string
+      sku: string
+      stock: string
+      title: string
+      unit: string
+      units: Record<string, string>
+      unavailable: string
+    }
     crmTasks: {
       showDone: (count: number) => string
       hideDone: string
