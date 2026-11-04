@@ -89,7 +89,17 @@ function normalizeItem(input: unknown): { error: string } | { item: SaleItem } {
   const raw = (input ?? {}) as Record<string, unknown>
   const sku = text(raw['product_sku'])
   const description = text(raw['description'])
-  const quantity = milli(raw['quantity_milli'] ?? raw['quantity'])
+  // `quantity_milli` já está em milésimos; `quantity` é em unidades. Reconvertendo os dois, uma linha
+  // de 3000 milésimos viraria 3.000.000 — e o faturamento recusaria por "saldo insuficiente" com o
+  // estoque cheio. É o mesmo defeito que apareceu no estoque na rodada 4; aqui ele passou desapercebido
+  // porque os testes de venda falavam em unidades.
+  const brutoMilli = raw['quantity_milli']
+  const quantity =
+    brutoMilli === undefined || brutoMilli === null
+      ? milli(raw['quantity'])
+      : Number.isFinite(Number(brutoMilli))
+        ? Math.round(Number(brutoMilli))
+        : 0
 
   if (!sku && !description) {
     return { error: 'item_sem_identidade' }

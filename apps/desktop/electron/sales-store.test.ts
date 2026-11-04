@@ -57,6 +57,25 @@ describe('vendas: total derivado dos itens', () => {
     expect(normalizeSale({ items: [item({ discount_cents: 5000 })] }, 1)).toEqual({ error: 'desconto_maior_que_item' })
   })
 
+  it('quantity_milli NAO e reconvertido: 3000 milesimos nao podem virar 3 milhoes', () => {
+    const criada = normalizeSale(
+      { items: [{ product_sku: 'CAF-500', quantity_milli: 3000, unit_price_cents: 2490 }] },
+      1
+    )
+
+    expect('sale' in criada).toBe(true)
+    if (!('sale' in criada)) return
+
+    expect(criada.sale.items[0]!.quantity_milli).toBe(3000)
+    expect(criada.sale.total_cents).toBe(7470)
+  })
+
+  it('quantity em unidades continua convertida para milesimos', () => {
+    const criada = normalizeSale({ items: [item({ quantity: 3, unit_price_cents: 1000 })] }, 1)
+
+    expect('sale' in criada && criada.sale.items[0]!.quantity_milli).toBe(3000)
+  })
+
   it('IGNORA o total enviado pelo chamador — a tela não define quanto o cliente paga', () => {
     const adulterada = normalizeSale({ items: [item()], total_cents: 1 }, 1)
     const normal = normalizeSale(venda(), 1)

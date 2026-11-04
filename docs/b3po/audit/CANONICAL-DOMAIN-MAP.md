@@ -14,7 +14,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 |---|---|---|---|---|
 | Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | **IMPLEMENTED + TESTED + VALIDATED** | 12 |
 | Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | **IMPLEMENTED + TESTED + VALIDATED** | 14 |
-| Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | IMPLEMENTED + TESTED | 16 |
+| Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | **IMPLEMENTED + TESTED + VALIDATED** | 18 |
 | Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | IMPLEMENTED + TESTED | 10 |
 | Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | IMPLEMENTED + TESTED | 17 |
 | Contatos | `apps/desktop/electron/crm-contacts-store.ts` | `userData/b3po/crm-contacts.json` | IMPLEMENTED + TESTED | 6 |
@@ -63,6 +63,30 @@ Ciclo operacional completo executado na UI do app real, `userData` isolado:
 O saldo de 7 é derivado das duas movimentações, não de um campo gravado. O erro chegou ao usuário como
 texto, não como exceção ou lista vazia. Capturas: `stock-01-inicial.png`, `stock-02-saldo-sete.png`,
 `stock-03-saldo-insuficiente.png` em `docs/b3po-preview/` (fora do repositório).
+
+### Vendas (rodada 13) — e um bug encontrado pela validação
+
+Ciclo comercial completo na UI do app real:
+
+| Passo | Resultado |
+|---|---|
+| entrada de 10 em `/stock` | saldo `10` |
+| montar venda `CAF-500 · 3 × R$ 24,90` em `/sales` | estimativa `R$ 74,70` |
+| **faturar** | venda `#1 · faturada · R$ 74,70` |
+| estoque depois de faturar | **`{"CAF-500":7000}`** — caiu de 10 para 7 |
+| venda depois de faturar | `[[1,"faturado",7470]]` |
+| tentar faturar 100 | recusado: *"Estoque insuficiente"* |
+| estoque/vendas depois da recusa | **inalterados** — 7000 e só a `#1` |
+
+**O bug que só apareceu aqui:** o primeiro faturamento recusou com `saldo_insuficiente` tendo 10 em
+estoque. Chamando o IPC direto, `quantity_milli: 1000` era gravado como `1000000`. O `sales-store`
+reconvertia milésimos como se fossem unidades — **o mesmo defeito que o teste de fumaça pegou no
+estoque na rodada 4, e que eu corrigi só lá.** Os testes de venda passavam porque falavam em
+`quantity` (unidades); o caminho em milésimos, que é o que a tela usa, não estava coberto.
+
+Corrigido nos dois campos com o mesmo critério, e agora há teste em `sales-store.test.ts` afirmando
+que `quantity_milli: 3000` não vira 3 milhões. **Lição: correção local de um defeito de unidade não é
+correção até ser procurada nos outros conversores.**
 
 ## Contratos compartilhados
 
