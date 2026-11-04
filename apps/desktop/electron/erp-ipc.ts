@@ -21,6 +21,8 @@ import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
 import { registerSalesIpc } from './sales-ipc'
+import { HrStore, hrStorePath } from './hr-store'
+import { registerHrIpc } from './hr-ipc'
 import { registerSchedulingCatalogIpc } from './scheduling-catalog-ipc'
 import { registerServicesIpc } from './services-ipc'
 import { ServicesStore, servicesStorePath } from './services-store'
@@ -39,6 +41,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
   registerServicesIpc(ipcMain, services)
+  registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)))
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)

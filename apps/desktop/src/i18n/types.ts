@@ -728,6 +728,30 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    rh: {
+      addDepartment: string
+      addEmployee: string
+      approvalNeeded: string
+      decisionAboutPerson: string
+      department: string
+      departmentName: string
+      departmentRequired: string
+      empty: string
+      forbiddenReason: string
+      hideSalary: string
+      hint: string
+      jobTitle: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      pickDepartment: string
+      salaryHidden: string
+      showSalary: string
+      status: string
+      title: string
+      unavailable: string
+      unknownOperation: string
+    }
     servicos: {
       add: string
       duration: string
