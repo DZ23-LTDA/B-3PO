@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     create: payload => ipcRenderer.invoke('hermes:automations:create', payload),
     list: () => ipcRenderer.invoke('hermes:automations:list'),
     setActive: payload => ipcRenderer.invoke('hermes:automations:setActive', payload),
+    sweep: () => ipcRenderer.invoke('hermes:automations:sweep'),
     tools: () => ipcRenderer.invoke('hermes:automations:tools'),
     triggers: () => ipcRenderer.invoke('hermes:automations:triggers')
   },

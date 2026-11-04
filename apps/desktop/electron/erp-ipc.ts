@@ -105,7 +105,18 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   let automacoes: AutomationStore | null = null
 
   const dispatch = createDispatcher({
-    actors: () => actors.list(),
+    actors: async () => {
+      const lista = await actors.list()
+
+      // Alias: a tela cria regra com ctor_id: 'owner' porque o id real (ctor_<timestamp>_<sufixo>)
+      // nao e legivel. Resolver aqui evita regra que parece configurada e falha com tor_ausente em
+      // toda execucao - foi exatamente o que a validacao no binario pegou.
+      if (!lista.some(a => a.id === 'owner')) {
+        return [...lista, { ...(await actorOf())!, active: true, id: 'owner' }].filter(a => a.id)
+      }
+
+      return lista
+    },
     automations: {
       list: async tenant => (automacoes ? automacoes.list(tenant) : [])
     },
@@ -168,7 +179,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Automacoes: a tela precisa do catalogo REAL de ferramentas, entao o registro vem DEPOIS de 	ools.
   ferramentas = tools
 
-  registerAutomationIpc(ipcMain, { automations, tools })
+  registerAutomationIpc(ipcMain, { automations, sweep: () => varrer(), tools })
 
   // Varredura das condicoes que NAO sao evento: atendimento atrasado e conta vencendo. Roda no mesmo
   // intervalo do resto e e idempotente por (gatilho, entidade) - ver utomation-sweep.ts.

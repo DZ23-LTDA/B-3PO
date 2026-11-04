@@ -10,6 +10,8 @@ import type { IpcRegistrar } from './ipc-types'
 
 export interface AutomationDeps {
   automations: AutomationStore
+  /** Varredura manual: o usuario pode pedir "verificar agora" em vez de esperar o intervalo. */
+  sweep?: () => Promise<unknown>
   /** O catalogo real: a mesma lista que o agente e o executor enxergam. */
   tools: readonly AgentTool[]
 }
@@ -38,6 +40,12 @@ export function registerAutomationIpc(ipcMain: IpcRegistrar, deps: AutomationDep
         .filter(t => t.action !== 'read')
         .map(t => ({ action: t.action, description: t.description, domain: t.domain, name: t.name }))
     }
+  })
+
+  ipcMain.handle('hermes:automations:sweep', async () => {
+    if (!deps.sweep) return { error: 'varredura_indisponivel' }
+
+    return { result: await deps.sweep() }
   })
 
   ipcMain.handle('hermes:automations:create', async (_event, payload: unknown) => {
