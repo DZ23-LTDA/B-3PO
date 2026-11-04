@@ -88,3 +88,4 @@ mascote de volta). É o próximo item de prova do F5.
 | `evidence/avancado-pt.png` | Avançado › Desktop e inicialização em pt-BR |
 | `evidence/terminal-pt.png` | Avançado › Backend do terminal em pt-BR |
 | `evidence/memoria-pt.png` | Memória e contexto › Memória persistente em pt-BR |
+| `evidence/voz-pt.png` | Voz › Conversa por voz em pt-BR, com o custo por minuto |

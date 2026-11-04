@@ -1309,3 +1309,31 @@ notícia: eu repeti o erro.
 minha intuição sobre o que deveria existir.
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 131 — a regra nova funcionou: zero chave inventada
+
+Apliquei a disciplina que prometi na rodada anterior: **parsear os dois lados e comparar conjuntos de chaves** antes
+de escrever. O script monta o dicionário pontuado (`tts.xai.voiceId`, `stt.elevenlabs.diarize`, …) do
+`FIELD_LABELS`/`FIELD_DESCRIPTIONS` do inglês e do `pt.ts`, e imprime **só o que falta**.
+
+Resultado: **54 rótulos + 16 descrições** traduzidos, e **nenhuma chave inventada** — primeira rodada em três sem
+esse erro.
+
+Entrou nesta rodada:
+
+- **`tts`** inteiro (23 chaves): provedor, Edge, OpenAI, ElevenLabs, xAI (voz, idioma, velocidade, tags automáticas,
+  latência, taxa de amostragem, bitrate), MiniMax, Mistral, Gemini, NeuTTS, KittenTTS, Piper, DeepInfra
+- **`stt`** inteiro (11): fala para texto, repetir transcrições, transcrição ao vivo, modelo local, idioma, e os
+  modelos por provedor com separação de falantes e marcação de eventos de áudio
+- **`toolOutput`**, **`codeExecution.mode`**, **`browser.allowPrivateUrls`/`autoLocalForPrivateUrls`/`useRealProfile`**,
+  **`checkpoints.maxSnapshots`**, **`security.allowPrivateUrls`**, **`approvals.mcpReloadConfirm`**,
+  **`auxiliary.compression.timeout`**, **`updates.nonInteractiveLocalChanges`** (rótulo)
+
+### Cobertura medida, agora com número que fecha
+
+**97 de 106 rótulos (91%)** e **48 de 49 descrições (97%)** do catálogo de campos — era **5 + 5** no início.
+O que sobra são chaves que o parser não resolve por serem multi-linha no inglês; ficam para a próxima.
+
+Evidência: `docs/b3po/evidence/voz-pt.png` (Voz › Conversa por voz, com o aviso de custo por minuto).
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.

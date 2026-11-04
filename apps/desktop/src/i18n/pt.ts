@@ -554,7 +554,6 @@ export const ptOverrides: TranslationOverrides = {
         personality: 'Personalidade',
         showReasoning: 'Blocos de raciocínio'
       },
-      updates: { nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app' },
       desktop: {
         repoScanEnabled: 'Descoberta automática de repositórios',
         repoScanRoots: 'Pastas de descoberta de repositórios',
@@ -621,7 +620,99 @@ export const ptOverrides: TranslationOverrides = {
       },
       checkpoints: {
         enabled: 'Pontos de restauração'
+      },
+      toolOutput: {
+        maxBytes: 'Limite de saída do terminal',
+        maxLines: 'Limite de páginas de arquivo',
+        maxLineLength: 'Limite de comprimento de linha'
+      },
+      codeExecution: {
+        mode: 'Modo de execução de código'
+      },
+      browser: {
+        allowPrivateUrls: 'URLs privadas no navegador',
+        autoLocalForPrivateUrls: 'Navegador local para URLs privadas',
+        useRealProfile: 'Usar meu perfil real do navegador'
+      },
+      stt: {
+        enabled: 'Fala para texto',
+        echoTranscripts: 'Repetir transcrições',
+        provider: 'Provedor de fala para texto',
+        streaming: 'Transcrição ao vivo',
+        local: {
+          model: 'Modelo local de transcrição',
+          language: 'Idioma da transcrição'
+        },
+        openai: {
+          model: 'Modelo STT da OpenAI',
+          streamingModel: 'Modelo de transcrição ao vivo da OpenAI'
+        },
+        groq: { model: 'Modelo STT da Groq' },
+        mistral: { model: 'Modelo STT da Mistral' },
+        xai: { model: 'Modelo STT da xAI' },
+        deepinfra: { model: 'Modelo STT da DeepInfra' },
+        elevenlabs: {
+          modelId: 'Modelo STT da ElevenLabs',
+          languageCode: 'Idioma na ElevenLabs',
+          tagAudioEvents: 'Marcar eventos de áudio',
+          diarize: 'Separação de falantes'
+        }
+      },
+      tts: {
+        provider: 'Provedor de texto para fala',
+        edge: { voice: 'Voz do Edge' },
+        openai: {
+          model: 'Modelo TTS da OpenAI',
+          voice: 'Voz da OpenAI'
+        },
+        elevenlabs: {
+          voiceId: 'Voz da ElevenLabs',
+          modelId: 'Modelo da ElevenLabs'
+        },
+        xai: {
+          voiceId: 'Voz da xAI (Grok)',
+          language: 'Idioma na xAI',
+          speed: 'Velocidade de reprodução na xAI',
+          autoSpeechTags: 'Tags de fala automáticas na xAI',
+          optimizeStreamingLatency: 'Otimização de latência de streaming na xAI',
+          sampleRate: 'Taxa de amostragem na xAI',
+          bitRate: 'Bitrate na xAI'
+        },
+        minimax: {
+          model: 'Modelo TTS da MiniMax',
+          voiceId: 'Voz da MiniMax'
+        },
+        mistral: {
+          model: 'Modelo TTS da Mistral',
+          voiceId: 'Voz da Mistral'
+        },
+        gemini: {
+          model: 'Modelo TTS do Gemini',
+          voice: 'Voz do Gemini'
+        },
+        neutts: {
+          model: 'Modelo NeuTTS',
+          device: 'Dispositivo do NeuTTS'
+        },
+        kittentts: {
+          model: 'Modelo KittenTTS',
+          voice: 'Voz do KittenTTS'
+        },
+        piper: { voice: 'Voz do Piper' },
+        deepinfra: {
+          model: 'Modelo TTS da DeepInfra',
+          voice: 'Voz da DeepInfra'
+        }
+      },
+      auxiliary: {
+        compression: {
+          timeout: 'Tempo limite do modelo de compactação (s)'
+        }
+      },
+      updates: {
+        nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app'
       }
+
     }),
     fieldDescriptions: defineFieldCopy({
       model: 'Usado em conversas novas, a menos que você escolha outro modelo no compositor.',
@@ -634,10 +725,7 @@ export const ptOverrides: TranslationOverrides = {
         personality: 'Estilo padrão do assistente em sessões novas.',
         showReasoning: 'Mostra as seções de raciocínio quando o backend as fornece.'
       },
-      updates: {
-        nonInteractiveLocalChanges:
-          'Quando o B-3PO se atualiza pelo app (sem terminal), mantém as edições locais do código (stash) ou as descarta (discard). Atualizações pelo terminal sempre perguntam.'
-      },
+
       desktop: {
         repoScanEnabled: 'Varre pastas locais em busca de repositórios Git para mostrar em Projetos.',
         repoScanRoots: 'Pastas a varrer. Vazio = varre o diretório pessoal.',
@@ -687,7 +775,42 @@ export const ptOverrides: TranslationOverrides = {
       },
       checkpoints: {
         enabled: 'Cria pontos de restauração antes de editar arquivos.'
+      },
+      codeExecution: {
+        mode: 'Quão estritamente a execução de código fica restrita ao projeto atual.'
+      },
+      browser: {
+        useRealProfile:
+          'A navegação local usa seus logins reais. O B-3PO copia o perfil do navegador padrão (cookies, logins, preferências) para um instantâneo gerenciado e o controla com o Chromium empacotado — seu perfil em uso nunca é aberto direto, e a cópia é atualizada a cada execução. Também deixa o agente abrir uma sessão local com o perfil real quando pedido, mesmo com um backend de navegador na nuvem configurado. Só navegadores Chromium (Chrome, Edge, Brave, Brave Origin, Chromium) são suportados; um padrão não-Chromium falha com mensagem clara. Desligado por padrão.'
+      },
+      auxiliary: {
+        compression: {
+          timeout: 'Segundos de espera pelo modelo auxiliar de compactação por chamada (padrão 120). Aumente para modelos locais lentos.'
+        }
+      },
+      tts: {
+        xai: {
+          voiceId: 'ID de voz da xAI (ex.: eve) ou um ID de voz personalizado.',
+          language: 'Código do idioma falado (ex.: en, pt-BR) ou "auto" para detecção automática.',
+          speed: 'Velocidade de reprodução. 0,7 = mais lento, 1,0 = normal, 1,5 = mais rápido.',
+          autoSpeechTags: 'Deixa um LLM inserir tags expressivas de áudio ([laughing], [sighs]) no roteiro antes da síntese.',
+          optimizeStreamingLatency: 'Troca entre latência e qualidade. 0 = melhor qualidade, 2 = menor latência.',
+          sampleRate: 'Taxa de amostragem do áudio em Hz. Mais alta = melhor qualidade e arquivos maiores.',
+          bitRate: 'Bitrate do MP3 em bps. Só vale quando o codec é mp3.'
+        },
+        neutts: {
+          device: 'Dispositivo de inferência local do NeuTTS.'
+        }
+      },
+      stt: {
+        enabled: 'Liga a transcrição de fala local ou via provedor.',
+        echoTranscripts: 'Posta no chat a transcrição 🎙️ crua das mensagens de voz.',
+        streaming: 'Mostra o texto enquanto você fala (OpenAI, xAI, ElevenLabs). Cai para a gravação se algo falhar.',
+        elevenlabs: {
+          languageCode: 'Código de idioma ISO-639-3 opcional. Em branco deixa a ElevenLabs detectar.'
+        }
       }
+
     }),
     crmPipeline: {
       stageInitial: 'Estágio inicial',
