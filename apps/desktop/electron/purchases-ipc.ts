@@ -9,6 +9,7 @@ import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
+import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 
 export interface PurchasesStoreLike {
@@ -23,13 +24,14 @@ export interface InventoryLike {
 }
 
 export interface PurchasesDeps {
+  finance: { append: (input: unknown) => Promise<{ entry: FinanceEntry } | { error: string }> }
   inventory: InventoryLike
   store: PurchasesStoreLike
 }
 
 export type ReceiveResult =
   | { error: string }
-  | { order: PurchaseOrder; orders: PurchaseOrder[]; stock: InventoryMovement[] }
+  | { finance: FinanceEntry | null; order: PurchaseOrder; orders: PurchaseOrder[]; stock: InventoryMovement[] }
 
 export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps): void {
   ipcMain.handle(
@@ -84,6 +86,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
       }
     }
 
-    return { order: salvo.order, orders: salvo.orders, stock }
+    // A conta a pagar e derivada do pedido recebido, com ref deterministica: um retry nao duplica.
+    const pagar = payableForPurchase(salvo.order)
+    let finance: FinanceEntry | null = null
+
+    if (pagar) {
+      const lancado = await deps.finance.append(pagar)
+
+      if ('entry' in lancado) {
+        finance = lancado.entry
+      } else if (lancado.error !== 'ref_duplicado') {
+        return { error: lancado.error }
+      }
+    }
+
+    return { order: salvo.order, orders: salvo.orders, stock, finance }
   })
 }

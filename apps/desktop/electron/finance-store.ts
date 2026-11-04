@@ -216,6 +216,39 @@ export function receivableForSale(sale: Sale, now: number = Date.now()): Omit<Fi
   }
 }
 
+/**
+ * A conta a pagar que um pedido **recebido** gera.
+ *
+ * Espelha `receivableForSale`: a venda faturada gera a receber, a compra recebida gera a pagar. O
+ * lançamento é derivado do pedido, nunca digitado — assim o financeiro não pode divergir da compra.
+ *
+ * Só `recebido` gera: rascunho e pedido são intenção, e cancelado não é obrigação. Mesma regra da venda,
+ * onde só `faturado` gera.
+ *
+ * `due_at` é o momento do recebimento porque o pedido não guarda prazo de pagamento. Quando o cadastro de
+ * fornecedor tiver condição de pagamento, este é o campo que passa a ler dele.
+ */
+export function payableForPurchase(
+  order: { id: string; number: number; status: string; supplier_id: string; tenant_id: string; total_cents: number },
+  now: number = Date.now()
+): Omit<FinanceEntry, 'created_at' | 'id' | 'updated_at'> | null {
+  if (order.status !== 'recebido' || order.total_cents <= 0) {
+    return null
+  }
+
+  return {
+    amount_cents: order.total_cents,
+    currency: 'BRL',
+    description: `Compra ${order.number}`,
+    due_at: now,
+    kind: 'pagar',
+    party: order.supplier_id,
+    ref: `compra:${order.id}`,
+    status: 'aberto',
+    tenant_id: order.tenant_id
+  }
+}
+
 export class FinanceStore {
   constructor(private readonly filePath: string) {}
 

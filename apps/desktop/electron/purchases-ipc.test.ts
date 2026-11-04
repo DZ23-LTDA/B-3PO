@@ -6,9 +6,33 @@ import { describe, expect, it } from 'vitest'
 
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { PurchasesStore, purchasesStorePath, type PurchaseOrder, type Supplier } from './purchases-store'
+import type { FinanceEntry } from './finance-store'
 import { registerPurchasesIpc, type ReceiveResult } from './purchases-ipc'
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown
+
+/** Financeiro falso: registra o que foi lancado, sem gravar arquivo. */
+interface FakeFinance {
+  append: (input: unknown) => Promise<{ entry: FinanceEntry } | { error: string }>
+  lancados: () => unknown[]
+}
+
+function fakeFinance(): FakeFinance {
+  const lancados: unknown[] = []
+
+  return {
+    append: async (input: unknown) => {
+      lancados.push(input)
+
+      const ref = (input as { ref?: string }).ref
+      const jaTem = lancados.some((l, i) => i < lancados.length - 1 && (l as { ref?: string }).ref === ref)
+
+      // Mesma semantica do store real: ref repetida e idempotencia, nao erro.
+      return jaTem ? { error: 'ref_duplicado' } : { entry: { ref } as unknown as FinanceEntry }
+    },
+    lancados: () => lancados
+  }
+}
 
 function fakeIpc() {
   const handlers = new Map<string, Handler>()
@@ -29,18 +53,19 @@ function fakeIpc() {
 }
 
 async function withDepot<T>(
-  run: (ctx: { inventory: InventoryStore; ipc: ReturnType<typeof fakeIpc>; store: PurchasesStore }) => Promise<T>
+  run: (ctx: { finance: FakeFinance; inventory: InventoryStore; ipc: ReturnType<typeof fakeIpc>; store: PurchasesStore }) => Promise<T>
 ): Promise<T> {
   const dir = await mkdtemp(join(tmpdir(), 'b3po-purchases-ipc-'))
 
   try {
     const inventory = new InventoryStore(inventoryStorePath(dir))
     const store = new PurchasesStore(purchasesStorePath(dir))
+    const finance = fakeFinance()
     const ipc = fakeIpc()
 
-    registerPurchasesIpc(ipc, { inventory, store })
+    registerPurchasesIpc(ipc, { finance, inventory, store })
 
-    return await run({ inventory, ipc, store })
+    return await run({ finance, inventory, ipc, store })
   } finally {
     await rm(dir, { force: true, recursive: true })
   }
