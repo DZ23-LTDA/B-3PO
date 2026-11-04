@@ -4,6 +4,7 @@
 // calculados lá — a tela nunca soma nem decide o que está vencido.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { FinanceEntry, FinanceTotals } from './finance-store'
@@ -15,22 +16,18 @@ export interface FinanceStoreLike {
   totals: (tenantId?: string) => Promise<FinanceTotals>
 }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLike): void {
   ipcMain.handle(
     'hermes:finance:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ entries: FinanceEntry[] }> => ({
-      entries: await store.list(tenant(tenantId))
+      entries: await store.list(serverTenant(tenantId))
     })
   )
 
   ipcMain.handle(
     'hermes:finance:totals',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ totals: FinanceTotals }> => ({
-      totals: await store.totals(tenant(tenantId))
+      totals: await store.totals(serverTenant(tenantId))
     })
   )
 
@@ -43,6 +40,6 @@ export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLik
   ipcMain.handle(
     'hermes:finance:settle',
     (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ entries: FinanceEntry[] } | { error: string }> =>
-      store.settle(typeof id === 'string' ? id : '', tenant(tenantId))
+      store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId))
   )
 }

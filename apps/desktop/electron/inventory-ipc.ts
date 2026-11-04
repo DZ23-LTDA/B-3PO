@@ -4,6 +4,7 @@
 // nunca é aceito do chamador — ele é derivado das movimentações no main.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
@@ -14,10 +15,6 @@ export interface InventoryStoreLike {
   append: (input: unknown) => Promise<MovementResult>
   balances: (tenantId?: string) => Promise<Record<string, number>>
   list: (tenantId?: string) => Promise<InventoryMovement[]>
-}
-
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
 /** Opcional: anunciado quando o saldo CRUZA para zero — a transicao e o evento, nao o estado. */
@@ -33,14 +30,14 @@ export function registerInventoryIpc(
   ipcMain.handle(
     'hermes:inventory:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ movements: InventoryMovement[] }> => ({
-      movements: await store.list(tenant(tenantId))
+      movements: await store.list(serverTenant(tenantId))
     })
   )
 
   ipcMain.handle(
     'hermes:inventory:balances',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ balances: Record<string, number> }> => ({
-      balances: await store.balances(tenant(tenantId))
+      balances: await store.balances(serverTenant(tenantId))
     })
   )
 
