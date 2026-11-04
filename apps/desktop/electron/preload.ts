@@ -184,6 +184,11 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     day: (tenantId, from, to, resourceId) => ipcRenderer.invoke('hermes:scheduling:day', tenantId, from, to, resourceId),
     list: tenantId => ipcRenderer.invoke('hermes:scheduling:list', tenantId)
   },
+  schedulingBlocks: {
+    create: payload => ipcRenderer.invoke('hermes:scheduling:block:create', payload),
+    list: () => ipcRenderer.invoke('hermes:scheduling:block:list'),
+    remove: id => ipcRenderer.invoke('hermes:scheduling:block:remove', id)
+  },
   finance: {
     append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
     list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),
