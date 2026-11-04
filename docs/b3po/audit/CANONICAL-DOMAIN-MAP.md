@@ -14,6 +14,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 |---|---|---|---|---|
 | Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | **IMPLEMENTED + TESTED + VALIDATED** | 12 |
 | Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | **IMPLEMENTED + TESTED + VALIDATED** | 14 |
+| Compras/fornecedores | `apps/desktop/electron/purchases-store.ts` | `userData/b3po/purchases.json` | **IMPLEMENTED + TESTED + VALIDATED** | 17 |
 | Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | **IMPLEMENTED + TESTED + VALIDATED** | 18 |
 | Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | **IMPLEMENTED + TESTED + VALIDATED** | 10 |
 | Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | **IMPLEMENTED + TESTED + VALIDATED** | 17 |
@@ -145,9 +146,9 @@ Capturas: `agenda-01-inicial.png`, `agenda-02-marcado.png`, `agenda-03-conflito.
 
 Provado em `apps/desktop/electron/erp-smoke.test.ts`, com os stores reais e zero mock.
 
-## Domínios ausentes (9)
+## Domínios ausentes (8)
 
-Compras/fornecedores · Atendimento/SLA · Pós-venda · RH · Marketing · Empresas/filiais ·
+Atendimento/SLA · Pós-venda · RH · Marketing · Empresas/filiais ·
 Usuários/permissões (RBAC) · Serviços (catálogo de serviços) · Analytics.
 
 ## Dívida registrada
