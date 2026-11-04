@@ -697,6 +697,7 @@ export const en: Translations = {
   },
   settings: {
     crmTasks: {
+      contactRemoved: 'contact deleted',
       add: 'Add task',
       contactLabel: 'Contact (optional)',
       due: when => `due ${when}`,

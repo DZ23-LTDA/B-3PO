@@ -14,6 +14,7 @@ import {
   type TaskPriority
 } from '@/api/crm-tasks'
 import { listCrmContacts, type CrmContactRow } from '@/api/crm-contacts'
+import { isKnownContact } from '@/app/crm/filters'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -179,7 +180,9 @@ export function CrmTasksSection() {
                     {[
                       copy.priorities[task.priority],
                       prazo ? (atrasada ? copy.late(prazo) : copy.due(prazo)) : copy.noDue,
-                      task.contact_phone
+                      task.contact_phone && !isKnownContact(contacts, task.contact_phone)
+                        ? copy.contactRemoved
+                        : task.contact_phone
                     ]
                       .filter(Boolean)
                       .join(' · ')}

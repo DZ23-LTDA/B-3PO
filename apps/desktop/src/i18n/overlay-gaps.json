@@ -1382,6 +1382,7 @@
   "settings.crmPipeline.filterStageAria": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.add": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.contactLabel": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmTasks.contactRemoved": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.due": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.dueLabel": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmTasks.empty": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

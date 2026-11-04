@@ -1668,3 +1668,18 @@ troca no array do subtítulo.
 **Por que parei:** duas tentativas de inserir a chave produziram catálogo inválido, e o custo de continuar às cegas
 (contexto curto) era maior que o benefício de uma linha de texto. Reverter e registrar é mais honesto que deixar meio
 caminho quebrado.
+
+### Rodada 149 — contato excluído nas tarefas: o pendente da rodada 148, fechado
+
+A rodada 148 reverteu esta mudança porque a copy caiu duas vezes na seção errada do catálogo. Aqui a inserção foi
+**determinística**: localizei o bloco `crmTasks: {` por regex e medi o fechamento por **contagem de chaves**, então a
+chave entrou no bloco certo nos três arquivos (`types.ts`, `en.ts`, `pt.ts`) — `tsc` limpo na primeira tentativa.
+
+A tarefa agora troca o telefone cru pelo aviso quando o contato não existe mais:
+`task.contact_phone && !isKnownContact(contacts, task.contact_phone) ? copy.contactRemoved : task.contact_phone`.
+
+**Prova no app empacotado** (perfil com contatos vazio e uma tarefa apontando para um telefone): a linha renderizou
+`Alta · vence 05/11/2026 · contato excluído`. Evidência:
+`docs/b3po/evidence/crm-tarefa-contato-excluido-pt.png`.
+
+Verificação: `src/app/crm` + `src/app/settings` + `src/i18n` = **95 arquivos / 741 testes**; gate 14 ok.
