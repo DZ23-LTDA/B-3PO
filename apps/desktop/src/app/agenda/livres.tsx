@@ -46,6 +46,7 @@ function janelaDoDia(base: number) {
 
 export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps) {
   const [blocos, setBlocos] = useState<BlockRow[]>([])
+  const [dia, setDia] = useState(() => new Date().toISOString().slice(0, 10))
   const [falha, setFalha] = useState('')
 
   useEffect(() => {
@@ -60,6 +61,9 @@ export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps
   const livres = useMemo(() => {
     if (!resourceId.trim()) return []
 
+    const base = new Date(`${dia}T12:00:00`).getTime()
+    const hoje = dia === new Date().toISOString().slice(0, 10)
+
     return horariosLivresPara({
       bloqueios: blocos.map(b => ({
         ends_at: b.ends_at,
@@ -68,12 +72,13 @@ export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps
         starts_at: b.starts_at
       })),
       duracao_minutos: DURACAO_PADRAO,
-      janela: janelaDoDia(Date.now()),
-      nao_antes_de: Date.now(),
+      janela: janelaDoDia(base),
+      // O corte por gora so vale para HOJE. Consultar amanha com ele devolveria lista vazia a noite.
+      ...(hoje ? { nao_antes_de: Date.now() } : {}),
       ocupados: agendamentos,
       resource_id: resourceId
     })
-  }, [agendamentos, blocos, resourceId])
+  }, [agendamentos, blocos, dia, resourceId])
 
   if (!resourceId.trim()) return null
 
@@ -81,9 +86,20 @@ export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps
 
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-(--ui-border) p-4">
-      <h2 className="text-[length:var(--conversation-caption-font-size)] font-medium text-foreground">
-        Horários livres hoje · {resourceId}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[length:var(--conversation-caption-font-size)] font-medium text-foreground">
+          Horários livres · {resourceId || 'sem recurso'}
+        </h2>
+        <label className="flex items-center gap-2 text-[length:var(--conversation-caption-font-size)]">
+          <span className="text-(--ui-text-tertiary)">Dia</span>
+          <input
+            className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+            onChange={evento => setDia(evento.target.value)}
+            type="date"
+            value={dia}
+          />
+        </label>
+      </div>
       {falha ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-danger)" role="alert">
           {falha}
@@ -91,7 +107,7 @@ export function SchedulingFreeSlots({ agendamentos, resourceId }: FreeSlotsProps
       ) : null}
       {livres.length === 0 ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-          Nenhum horário livre hoje entre {ABRE_HORA}h e {FECHA_HORA}h para este recurso.
+          Nenhum horário livre entre {ABRE_HORA}h e {FECHA_HORA}h para este recurso neste dia.
         </p>
       ) : (
         <ul className="flex flex-wrap gap-2 text-[length:var(--conversation-caption-font-size)]">
