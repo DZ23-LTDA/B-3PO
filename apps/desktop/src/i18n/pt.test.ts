@@ -68,6 +68,7 @@ describe('pt-BR', () => {
       'firstRun',
       'install',
       'keepAwakeOffer',
+      'keybinds',
       'language',
       'modelPicker',
       'onboarding',

@@ -38,7 +38,7 @@ function downloadText(fileName: string, text: string, mime: string): void {
  * O dado vive no disco do usuário (processo principal); esta tela lista e cadastra. Sem bridge (versão web) a
  * seção explica por que não há contatos em vez de mostrar lista vazia enganosa.
  */
-export function CrmContactsSection() {
+export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boolean } = {}) {
   const { t } = useI18n()
   const copy = t.settings.crmContacts
 
@@ -208,10 +208,14 @@ export function CrmContactsSection() {
 
       <CrmPipelineSection contacts={contacts ?? []} />
 
-      {/* O CRM tem tela propria em /crm; aqui fica so o atalho para quem chega por Configuracoes. */}
-      <a className="mt-4 inline-block text-sm text-(--ui-text-secondary) underline" href={CRM_ROUTE}>
-        {copy.openCrm}
-      </a>
+      {/* O CRM tem tela própria em /crm; este atalho existe para quem chega por
+          Configurações. Dentro da própria página ele seria um link para onde a
+          pessoa já está, então some quando a rota atual é a do CRM. */}
+      {showOpenLink ? (
+        <a className="mt-4 inline-block text-sm text-(--ui-text-secondary) underline" href={CRM_ROUTE}>
+          {copy.openCrm}
+        </a>
+      ) : null}
     </div>
   )
 }

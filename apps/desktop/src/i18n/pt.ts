@@ -21,6 +21,7 @@ import { ptErrorCodes } from './pt_error_codes'
 import { ptErrorLayers } from './pt_error_layers'
 import { ptFirstRun } from './pt_first_run'
 import { ptGatewayHost } from './pt_gateway_host'
+import { ptKeybinds } from './pt_keybinds'
 import { ptLocalModels } from './pt_local_models'
 import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
@@ -172,6 +173,8 @@ export const ptOverrides: TranslationOverrides = {
     cancelling: 'Cancelando...',
     cancelInstall: 'Cancelar instalação'
   },
+  /** Painel Atalhos de teclado (nomes das acoes + rotulos do painel). */
+  keybinds: ptKeybinds,
   language: {
     label: 'Idioma',
     description: 'Escolha o idioma da interface do aplicativo.',
@@ -467,6 +470,7 @@ export const ptOverrides: TranslationOverrides = {
       'new-session': 'Nova conversa',
       capabilities: 'Capacidades',
       messaging: 'Mensageria',
+      crm: 'CRM',
       artifacts: 'Artefatos',
       cron: 'Tarefas agendadas'
     },

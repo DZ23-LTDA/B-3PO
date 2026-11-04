@@ -1993,6 +1993,7 @@
   "sidebar.dateDivider.today": ["ar"],
   "sidebar.dateDivider.yesterday": ["ar"],
   "sidebar.messageCount": ["ar"],
+  "sidebar.nav.crm": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "sidebar.projects.autoDiscovered": ["ru"],
   "sidebar.projects.back": ["ja","zh-hant"],
   "sidebar.projects.baseBranchNone": ["ar"],

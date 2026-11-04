@@ -39,6 +39,8 @@ import type { SidebarActions, WiringActions } from './types'
 const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
 const MessagingView = lazy(async () => ({ default: (await import('../messaging')).MessagingView }))
 const CapabilitiesView = lazy(async () => ({ default: (await import('../capabilities')).CapabilitiesView }))
+// O CRM carrega as secoes de Configuracoes: mantem o code-split como as demais paginas.
+const CrmView = lazy(async () => ({ default: (await import('../crm')).CrmView }))
 
 export function LegacySessionRedirect() {
   const { sessionId } = useParams()
@@ -191,6 +193,9 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       <Route element={page(<CapabilitiesView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="capabilities" />
       <Route element={page(<MessagingView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="messaging" />
       <Route element={page(<ArtifactsView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="artifacts" />
+      {/* CRM is a real page (contacts + pipeline), not a chat: without this route
+          `/crm` falls through to `:sessionId` and opens a session named "crm". */}
+      <Route element={page(<CrmView />)} path="crm" />
       <Route element={null} path="agents" />
       <Route element={null} path="command-center" />
       <Route element={null} path="cron" />

@@ -3237,6 +3237,7 @@ export const en: Translations = {
       'new-session': 'New session',
       capabilities: 'Capabilities',
       messaging: 'Messaging',
+      crm: 'CRM',
       artifacts: 'Artifacts',
       cron: 'Scheduled jobs'
     },

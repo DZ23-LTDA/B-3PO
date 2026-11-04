@@ -1478,3 +1478,33 @@ alguns testes de keybinds/roteamento com mock incompleto. **Nenhuma falha é de 
 Isso não isenta o produto: 56 testes vermelhos precisam de triagem um a um. O que está garantido é que o número
 não foi causado pelo trabalho desta sessão, e isso agora está escrito com evidência, não suposição:
 `docs/b3po/BASELINE-DESKTOP-SUITE.md` (lista arquivo por arquivo) e a tabela em `TEST-RESULTS.md`.
+
+### Rodada 138 — dois bugs reais achados ao triar as falhas de UI (e os dois eram meus)
+
+Fui atrás das 56 falhas da suíte e encontrei **duas que o trabalho desta sessão causou**:
+
+**1. `/crm` abria um chat chamado "crm".** O branch adicionou `{ id: 'crm', path: '/crm', view: 'crm' }` em
+`APP_ROUTES`, mas a lista de `<Route>` (`app/contrib/surfaces.tsx`) é mantida à mão em outro arquivo e ficou sem a
+entrada. Sem `<Route>`, o caminho casa com `:sessionId` e o app abre uma sessão com o nome da página — exatamente o
+que o teste `surfaces.app-routes.test.tsx` denuncia: *"/crm has its own route and never opens as a session"*.
+Corrigi com `<Route element={page(<CrmView />)} path="crm" />`, com `CrmView` em `lazy()` como as outras páginas.
+
+**2. O item CRM da sidebar estava sem rótulo.** O rótulo vem de `s.nav[item.id]`; a chave `sidebar.nav.crm` não
+existia, então o `?? item.label` caía no `label: ''` da definição e a linha aparecia só com o ícone. Adicionei
+`crm: 'CRM'` no `en.ts` e no `pt.ts`.
+
+**3. De brinde, o painel "Atalhos de teclado" inteiro em português.** A falha do `keybinds/actions.test.ts`
+(`pt: expected false to be true`) era consequência de eu ter criado o locale `pt`: o teste passa a cobrir todos os
+idiomas e exige que a dica `voiceShortcutHintDesc` cite o nome da ação **no mesmo idioma**. A dica dizia "conversa
+por voz" e a ação só existia em inglês. Traduzi o bloco `keybinds` completo em `src/i18n/pt_keybinds.ts` — **107
+nomes de ação** (sessão, perfis, compositor, visualização, abas, terminal) + rótulos do painel.
+
+Também tirei o link "Abrir a página do CRM" de dentro da própria página do CRM (virava link para onde o usuário
+já está), via prop `showOpenLink` — sem tocar no router, que quebraria os 7 testes da seção.
+
+Evidência: `docs/b3po/evidence/crm-page-pt.png` (CRM em português, sidebar com "CRM" rotulado).
+Verificação: `src/app/settings` + `src/app/contrib` + `src/i18n` = **122 arquivos / 990 testes**; gate 14 ok; MSIX
+reconstruído.
+
+**Nota honesta sobre as outras falhas:** `browser-hints.test.tsx` passa sozinho (9s) e falha na suíte completa —
+é timeout sob carga paralela, não assertion. Registrado como tal, não como "verde".

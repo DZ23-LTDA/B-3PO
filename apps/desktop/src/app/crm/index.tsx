@@ -18,7 +18,8 @@ export function CrmView() {
         conectado.
       </p>
 
-      <CrmContactsSection />
+      {/* Ja estamos na pagina do CRM: nao mostrar o atalho para ela mesma. */}
+      <CrmContactsSection showOpenLink={false} />
     </div>
   )
 }
