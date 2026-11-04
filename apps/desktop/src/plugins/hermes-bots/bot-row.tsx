@@ -631,7 +631,7 @@ export function GroupRow({ active, group, members, needsYou, onOpen, onDisband, 
     <ContextMenu>
       <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onSelect={() => onOpen(group)}>Open Group Chat</ContextMenuItem>
+        <ContextMenuItem onSelect={() => onOpen(group)}>{b.bot.openGroupChat}</ContextMenuItem>
         <ContextMenuSeparator />
         {/* Same affordance as a bot row's pin; pinned rooms lead the roster
             band, and the flag lives on the room record. */}

@@ -138,6 +138,8 @@ export type BotsMessages = {
   }
   /** Creating, editing and removing a bot. */
   bot: {
+    openRecentSession: string
+    openGroupChat: string
     newTitle: string
     editTitle: string
     editMenu: string
@@ -223,6 +225,9 @@ export type BotsMessages = {
   }
   /** Group chats: the room, its composer, threads and activity feed. */
   group: {
+    startGatewayGroup: string
+    manageMembersAria: string
+    saveMembers: string
     newTitle: string
     manageDesc: string
     manageTitle: string

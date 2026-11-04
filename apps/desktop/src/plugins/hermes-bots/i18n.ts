@@ -175,6 +175,8 @@ const en: BotsMessages = {
     undo: 'Undo'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: 'New bot',
     editTitle: 'Edit profile',
     editMenu: 'Edit…',
@@ -248,6 +250,9 @@ const en: BotsMessages = {
     generating: 'Generating…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: 'New group chat',
     manageDesc: 'A bot can join multiple group chats. Memberships sync to every machine.',
     manageTitle: 'Manage groups',
@@ -618,6 +623,8 @@ const ja: BotsMessages = {
     undo: '元に戻す'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新しいボット',
     editTitle: 'プロファイルを編集',
     editMenu: '編集…',
@@ -691,6 +698,9 @@ const ja: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新しいグループチャット',
     manageDesc: 'ボットは複数のグループチャットに参加できます。メンバーシップはすべてのマシンに同期されます。',
     manageTitle: 'グループを管理',
@@ -1054,6 +1064,8 @@ const zh: BotsMessages = {
     undo: '撤销'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新建机器人',
     editTitle: '编辑配置档案',
     editMenu: '编辑…',
@@ -1127,6 +1139,9 @@ const zh: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新建群聊',
     manageDesc: '一个机器人可以加入多个群聊。成员关系会同步到每台设备。',
     manageTitle: '管理群组',
@@ -1483,6 +1498,8 @@ const zhHant: BotsMessages = {
     undo: '復原'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新增機器人',
     editTitle: '編輯設定檔',
     editMenu: '編輯…',
@@ -1556,6 +1573,9 @@ const zhHant: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新增群組聊天',
     manageDesc: '一個機器人可以加入多個群組聊天。成員關係會同步到每台裝置。',
     manageTitle: '管理群組',
@@ -1848,13 +1868,20 @@ export const BOTS_LOCALES: PluginLocaleBundles = {
       undo: 'Desfazer'
     },
     bot: {
+      openRecentSession: 'Abrir conversa recente',
+      openGroupChat: 'Abrir conversa em grupo',
       newTitle: 'Novo bot',
       editTitle: 'Editar perfil',
       editMenu: 'Editar…',
       chatEmpty: 'Diga algo para começar.'
     },
     avatar: { classicShapes: 'Formas clássicas' },
-    group: { newTitle: 'Nova conversa em grupo' }
+    group: {
+      newTitle: 'Nova conversa em grupo',
+      startGatewayGroup: 'Iniciar conversa em grupo',
+      manageMembersAria: 'Gerenciar membros do grupo',
+      saveMembers: 'Salvar membros'
+    }
   },
   es: { canonical: CANONICAL_GROUP_LOCALES.es }
 }

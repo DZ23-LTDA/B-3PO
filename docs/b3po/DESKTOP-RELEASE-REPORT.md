@@ -989,3 +989,26 @@ Precisei adicionar `useI18n()` nos três — e errei a primeira inserção no mo
 das props** (`TS1131` na hora). Movido para o corpo do componente.
 
 Verificação: `src/app/settings` + `src/i18n` = 93 arquivos verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 118 — cinco textos do plugin de bots saíram do hardcode
+
+Varri o resto do app (fora de Configurações): 53 ocorrências em 31 arquivos, muitas delas nomes de marca
+(Nous Portal, OpenRouter) que ficam como estão. Corrigi as do **plugin de bots**, que é a nossa área:
+
+| Onde | Antes | Agora |
+|---|---|---|
+| `bot-row.tsx` | `Open recent session`, `Open Group Chat` | `b.bot.openRecentSession`, `b.bot.openGroupChat` |
+| `group-chat-view.tsx` | `Start gateway group`, `aria-label="Manage group members"` | `b.group.startGatewayGroup`, `b.group.manageMembersAria` |
+| `group-chat-view-members.tsx` | `Save members`, `Cancel` | `b.group.saveMembers`, `t.common.cancel` |
+
+Entraram em `en` + `pt` no `i18n.ts` do plugin e no tipo `BotsMessages`.
+
+### O gate reprovou e estava certo
+
+Meu primeiro tiro usou `{b.bot.openRecentSession ?? ''}`. O `??` conta como **branch**: `GroupRow` foi de CC 22
+para 23 e `LegacyGroupChatWorkspace` de CC 36 para 37 — as duas violações **bloqueantes** do `code_health`
+("só pode descer"). Removi os fallbacks e tornei as chaves obrigatórias no tipo, preenchendo `ja`/`zh`/`zh-hant`
+com o texto em inglês (fallback declarado, igual ao que existia antes). Gate voltou a 14 ok, 0 bloqueantes.
+
+Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
+reconstruído.

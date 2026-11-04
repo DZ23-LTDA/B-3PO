@@ -35,6 +35,8 @@ import {
   groupSessionMemberKey
 } from './group-membership'
 import { harvestStrandedGroupReply } from './group-turns'
+import { useI18n } from '@/i18n'
+import { useBots } from './i18n'
 import { displayName } from './labels'
 import { botRosterMeta } from './routing'
 import type { BotMeta, RosterRow } from './types'
@@ -135,6 +137,8 @@ interface GroupMemberPickerProps {
  *  checklist, pre-checked with the room's current seats. Nothing is written
  *  until Save; Cancel leaves membership untouched. */
 export function GroupMemberPicker({ group, members, open, onClose }: GroupMemberPickerProps) {
+  const b = useBots()
+  const { t } = useI18n()
   const allMeta: Record<string, BotMeta> = useValue($botMeta)
   const liveRoster: RosterRow[] = useValue($lastRoster)
 
@@ -229,10 +233,10 @@ export function GroupMemberPicker({ group, members, open, onClose }: GroupMember
         </div>
         <DialogFooter>
           <Button onClick={onClose} variant="secondary">
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button disabled={selected.size < 2 || selected.size > GROUP_CHAT_MAX_MEMBERS} onClick={() => void save()}>
-            Save members
+            {b.group.saveMembers}
           </Button>
         </DialogFooter>
       </DialogContent>
