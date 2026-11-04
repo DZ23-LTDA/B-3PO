@@ -35,6 +35,7 @@ export const MARKETING_ROUTE = '/marketing'
 export const PAINEL_ROUTE = '/painel'
 export const AUTOMACOES_ROUTE = '/automacoes'
 export const DOCUMENTOS_ROUTE = '/documentos'
+export const PRIVACIDADE_ROUTE = '/privacidade'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -54,6 +55,7 @@ export type AppView =
   | 'painel'
   | 'automacoes'
   | 'documentos'
+  | 'privacidade'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -89,6 +91,7 @@ export type AppRouteId =
   | 'painel'
   | 'automacoes'
   | 'documentos'
+  | 'privacidade'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -130,6 +133,7 @@ export const APP_ROUTES = [
   { id: 'painel', path: PAINEL_ROUTE, view: 'painel' },
   { id: 'automacoes', path: AUTOMACOES_ROUTE, view: 'automacoes' },
   { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
+  { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },

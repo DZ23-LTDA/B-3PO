@@ -12,6 +12,11 @@ import { CompaniesStore, companiesStorePath } from './companies-store'
 import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
 import { registerDocumentsIpc } from './documents-ipc'
+import { CrmContactStore, crmStorePath } from './crm-contacts-store'
+import { CrmConversationStore, conversationsStorePath } from './crm-conversations-store'
+import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
+import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
+import { registerPrivacyIpc } from './privacy-ipc'
 import { DocumentsStore, documentsStorePath } from './documents-store'
 import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
@@ -68,6 +73,16 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // Registro de documentos. NAO guarda o binario - ver documents-store.ts para o porque.
   registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)))
+
+  // Pedido do titular (LGPD). Reusa os MESMOS stores do CRM: nenhum armazenamento paralelo.
+  registerPrivacyIpc(ipcMain, {
+    store: {
+      contacts: new CrmContactStore(crmStorePath(userDataDir)),
+      conversations: new CrmConversationStore(conversationsStorePath(userDataDir)),
+      opportunities: new CrmPipelineStore(pipelineStorePath(userDataDir)),
+      tasks: new CrmTaskStore(tasksStorePath(userDataDir))
+    }
+  })
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
   registerServicesIpc(ipcMain, services)
