@@ -190,3 +190,35 @@ Branch `b3po-brand`, **155 commits** sobre `main`. O que mudou desde a reavalia�
   CDP só abre em modo dev — **não há screenshot de tela interna nesta máquina**;
 - homologação do ticket de dispositivo em servidor *gated*;
 - assinatura Windows e keystore Android (bloqueios externos já listados).
+
+---
+
+## Atualização (rodadas 138–145): o que mudou no CRM e na qualidade
+
+**Entregue e comprovado**
+
+- página `/crm` com rota própria, rótulo na sidebar e **indicadores reais**;
+- **funil em sete colunas** com contagem e total por etapa, e **filtro** por texto/estágio com contagens do
+  conjunto filtrado;
+- **tarefas** do CRM (prazo, prioridade, vínculo opcional com contato) persistidas em `crm-tasks.json`;
+- painel **Atalhos de teclado** inteiro em pt-BR (107 nomes de ação);
+- inglês residual nas 13 telas de Configurações: **2 linhas**, ambas do schema do backend.
+
+**Qualidade, medida**
+
+- desktop completo: **16.746 passam · 43 falham · 216 pulados**; nenhuma falha é de marca, tradução ou produto
+  (triage em `BASELINE-DESKTOP-SUITE.md`);
+- gate do repositório: **14 checks, ok** a cada rodada;
+- quatro defeitos reais corrigidos no caminho: `/crm` caindo em sessão, `traceWakeStep` quebrando com
+  não-`Promise`, `tray-host` sem guarda de plataforma, `locales/_keys.desktop.json` desatualizado.
+
+**Continua NOT_READY porque**
+
+1. CRM **sem conversas** — depende do canal oficial do WhatsApp (bloqueio externo);
+2. iOS sem artefato (macOS/Xcode/certificado);
+3. MSIX **não assinado** e APK/AAB em chave de **debug**;
+4. instalação limpa, atualização e desinstalação **não testadas**;
+5. 2 linhas de texto em inglês vindas do schema do backend;
+6. 43 falhas de ambiente na suíte desktop (symlink no Windows, empacotamento/assinatura, timeout sob carga).
+
+Nenhum desses itens foi escondido em relatório: todos aparecem aqui, no PR #1 e no log por rodada.

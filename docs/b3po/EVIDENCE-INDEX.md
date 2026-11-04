@@ -89,3 +89,16 @@ mascote de volta). É o próximo item de prova do F5.
 | `evidence/terminal-pt.png` | Avançado › Backend do terminal em pt-BR |
 | `evidence/memoria-pt.png` | Memória e contexto › Memória persistente em pt-BR |
 | `evidence/voz-pt.png` | Voz › Conversa por voz em pt-BR, com o custo por minuto |
+
+## CRM no desktop (rodadas 138–145)
+
+| Arquivo | O que prova |
+|---|---|
+| `evidence/crm-page-pt.png` | `/crm` abre a **página** de CRM em pt (rotas antes caíam numa sessão chamada "crm") |
+| `evidence/crm-tarefas-pt.png` | tarefa criada pela UI e listada; `crm-tasks.json` gravado no perfil |
+| `evidence/crm-indicadores-pt.png` | seis indicadores reais no topo (contatos, oportunidades, valor aberto, ganho, tarefas abertas/atrasadas) |
+| `evidence/crm-funil-pt.png` | funil em **sete colunas** com contagem e total por etapa |
+| `evidence/crm-filtro-pt.png` | filtro por texto recortando o quadro (`1 de 2`), com "Implantação" fora e "Consultoria" dentro |
+
+Todos capturados do **app empacotado** via CDP, com dados semeados no perfil (2 contatos, 1 oportunidade em
+negociação de R$ 15.000, 1 ganha de R$ 4.500, 2 tarefas com 1 atrasada) — não são mockups.
