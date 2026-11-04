@@ -111,5 +111,6 @@ negociação de R$ 15.000, 1 ganha de R$ 4.500, 2 tarefas com 1 atrasada) — n�
 | `crm-acoes-pt.png` | prova visual no app empacotado |
 | `crm-busca-pt.png` | prova visual no app empacotado |
 | `crm-nota-interna.png` | prova visual no app empacotado |
+| `crm-tempo-resposta.png` | tempo de resposta de 12 min calculado e exibido |
 
 Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relatorio aponta para a captura correspondente.
