@@ -22,9 +22,14 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 | Oportunidades (funil) | `apps/desktop/electron/crm-pipeline-store.ts` | `userData/b3po/crm-pipeline.json` | IMPLEMENTED + TESTED | 10 |
 | Tarefas | `apps/desktop/electron/crm-tasks-store.ts` | `userData/b3po/crm-tasks.json` | IMPLEMENTED + TESTED | 11 |
 
-**Nenhum destes tem tela ainda, exceto o CRM (contatos, funil, tarefas) e o catálogo de produtos.**
-O Business Core está implementado e testado no processo principal; a UI de estoque, vendas, financeiro
-e agenda vem na fase de integração. Chamar de "pronto" antes disso seria o que o GOAL proíbe.
+**Nenhum destes tem tela ainda, exceto o CRM (contatos, funil, tarefas), o catálogo de produtos e o
+estoque.** Vendas, financeiro e agenda têm store e testes no processo principal, mas ainda não têm UI.
+Chamar de "pronto" antes disso seria o que o GOAL proíbe.
+
+**Lição das rodadas 8 e 9, aplicada em definitivo:** uma tela nova exige **três** registros, não um —
+`<Route>` em `surfaces.tsx`, entrada em `APP_ROUTES` (`src/app/routes.ts`) e a constante de rota. Faltar
+o segundo faz o roteador cair no catch-all e voltar para a conversa nova **sem erro visível**. O
+estoque já nasceu com os três.
 
 ## Evidência de validação (rodada 9)
 

@@ -74,11 +74,16 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: id => ipcRenderer.invoke('hermes:crm-conversations:remove', id),
     upsert: payload => ipcRenderer.invoke('hermes:crm-conversations:upsert', payload)
   },
-  // Business Core. Hoje só o catálogo; os outros domínios entram quando ganharem tela.
+  // Business Core. Catálogo e estoque; os outros domínios entram quando ganharem tela.
   catalog: {
     list: tenantId => ipcRenderer.invoke('hermes:catalog:list', tenantId),
     remove: (id, tenantId) => ipcRenderer.invoke('hermes:catalog:remove', id, tenantId),
     upsert: payload => ipcRenderer.invoke('hermes:catalog:upsert', payload)
+  },
+  inventory: {
+    append: payload => ipcRenderer.invoke('hermes:inventory:append', payload),
+    balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
+    list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },
   // Loopback origin that hosts YouTube's player for the file:// renderer.
   getEmbedHostOrigin: () => ipcRenderer.invoke('hermes:embed-host:origin'),

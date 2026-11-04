@@ -7,11 +7,14 @@ import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
 import { registerCatalogIpc } from './catalog-ipc'
+import { InventoryStore, inventoryStorePath } from './inventory-store'
+import { registerInventoryIpc } from './inventory-ipc'
 
 /**
- * Monta os IPC do ERP. Hoje só o catálogo; estoque, vendas, financeiro e agenda entram aqui conforme
- * cada um ganha tela — registrá-los antes disso exporia canal sem consumidor.
+ * Monta os IPC do ERP. Catálogo e estoque; vendas, financeiro e agenda entram aqui conforme cada um
+ * ganha tela — registrá-los antes disso exporia canal sem consumidor.
  */
 export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
+  registerInventoryIpc(ipcMain, new InventoryStore(inventoryStorePath(userDataDir)))
 }
