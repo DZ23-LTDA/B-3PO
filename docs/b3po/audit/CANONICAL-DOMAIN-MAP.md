@@ -15,7 +15,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 | Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | **IMPLEMENTED + TESTED + VALIDATED** | 12 |
 | Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | **IMPLEMENTED + TESTED + VALIDATED** | 14 |
 | Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | **IMPLEMENTED + TESTED + VALIDATED** | 18 |
-| Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | IMPLEMENTED + TESTED | 10 |
+| Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | **IMPLEMENTED + TESTED + VALIDATED** | 10 |
 | Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | IMPLEMENTED + TESTED | 17 |
 | Contatos | `apps/desktop/electron/crm-contacts-store.ts` | `userData/b3po/crm-contacts.json` | IMPLEMENTED + TESTED | 6 |
 | Conversas | `apps/desktop/electron/crm-conversations-store.ts` | `userData/b3po/crm-conversations.json` | IMPLEMENTED + TESTED | 24 |
@@ -87,6 +87,29 @@ estoque na rodada 4, e que eu corrigi só lá.** Os testes de venda passavam por
 Corrigido nos dois campos com o mesmo critério, e agora há teste em `sales-store.test.ts` afirmando
 que `quantity_milli: 3000` não vira 3 milhões. **Lição: correção local de um defeito de unidade não é
 correção até ser procurada nos outros conversores.**
+
+### Ciclo completo na interface (rodada 15)
+
+Uma única sessão no app real, `userData` isolado, percorrendo os cinco domínios:
+
+| Passo | Interface | Estado no processo principal |
+|---|---|---|
+| cadastro do produto | `/products` | `catalog.json` com `CAF-500` |
+| entrada de 10 | `/stock` | `{"CAF-500":10000}` |
+| venda de 3 faturada | `/sales` → `#1 · faturada · R$ 74,70` | `[[1,"faturado",7470]]` |
+| baixa automática | `/stock` | `{"CAF-500":7000}` |
+| receita gerada | `/finance` → **A receber em aberto R$ 74,70** | `openReceivableCents: 7470` |
+| liquidação | `/finance` → **Recebido R$ 74,70** | `paidReceivableCents: 7470`, aberto 0 |
+
+Estado final conferido nos três arquivos: estoque `7000`, venda `#1 faturada 7470`, financeiro
+`[["receber",7470,"pago"]]`. Os quatro domínios concordam.
+
+**Observação honesta sobre o vencimento:** a conta a receber nasce com `due_at = agora`, então aparece
+como vencida no mesmo instante em que é criada — o indicador "Vencido" mostrou R$ 74,70 antes da
+liquidação. É coerente com venda à vista, mas não é uma decisão de produto tomada: é o valor default do
+`receivableForSale`. Prazo de pagamento por venda está pendente.
+
+Capturas: `finance-01-receita-aberta.png`, `finance-02-liquidado.png` em `docs/b3po-preview/`.
 
 ## Contratos compartilhados
 
