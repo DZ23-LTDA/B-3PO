@@ -88,8 +88,8 @@ describe('comparar por SKU', () => {
 
   it('calcula o custo medio unitario por fornecedor, do mais barato ao mais caro', () => {
     const comparacao = compararPorSku('SKU-1', fornecedores, [
-      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, unit_cost_cents: 2000 }] }),
-      pedido({ id: 'o2', supplier_id: 's2', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, unit_cost_cents: 1500 }] })
+      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, total_cents: 2000, unit_cost_cents: 2000 }] }),
+      pedido({ id: 'o2', supplier_id: 's2', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, total_cents: 1500, unit_cost_cents: 1500 }] })
     ])
 
     expect(comparacao.map(c => c.supplier_name)).toEqual(['Beta', 'Alfa'])
@@ -98,7 +98,7 @@ describe('comparar por SKU', () => {
 
   it('so pedido RECEBIDO conta: preco de orcamento nao e preco praticado', () => {
     const comparacao = compararPorSku('SKU-1', fornecedores, [
-      pedido({ id: 'o1', supplier_id: 's1', status: 'orcamento', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, unit_cost_cents: 100 }] })
+      pedido({ id: 'o1', supplier_id: 's1', status: 'rascunho', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, total_cents: 100, unit_cost_cents: 100 }] })
     ])
 
     expect(comparacao).toEqual([])
@@ -106,7 +106,7 @@ describe('comparar por SKU', () => {
 
   it('ignora outro SKU', () => {
     const comparacao = compararPorSku('SKU-1', fornecedores, [
-      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-9', quantity_milli: 1000, unit_cost_cents: 100 }] })
+      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-9', quantity_milli: 1000, total_cents: 100, unit_cost_cents: 100 }] })
     ])
 
     expect(comparacao).toEqual([])
@@ -119,8 +119,8 @@ describe('comparar por SKU', () => {
 
   it('melhor preco devolve o mais barato quando ha dado', () => {
     const melhor = melhorPrecoPara('SKU-1', fornecedores, [
-      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, unit_cost_cents: 2000 }] }),
-      pedido({ id: 'o2', supplier_id: 's2', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, unit_cost_cents: 1200 }] })
+      pedido({ id: 'o1', supplier_id: 's1', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, total_cents: 2000, unit_cost_cents: 2000 }] }),
+      pedido({ id: 'o2', supplier_id: 's2', items: [{ product_sku: 'SKU-1', quantity_milli: 1000, total_cents: 1200, unit_cost_cents: 1200 }] })
     ])
 
     expect(melhor?.supplier_name).toBe('Beta')

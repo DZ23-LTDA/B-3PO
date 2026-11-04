@@ -16,6 +16,7 @@ import { CrmContactStore, crmStorePath } from './crm-contacts-store'
 import { CrmConversationStore, conversationsStorePath } from './crm-conversations-store'
 import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
+import { registerLookupIpc } from './lookup-ipc'
 import { registerPrivacyIpc } from './privacy-ipc'
 import { DocumentsStore, documentsStorePath } from './documents-store'
 import { FinanceStore, financeStorePath } from './finance-store'
@@ -75,6 +76,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)))
 
   // Pedido do titular (LGPD). Reusa os MESMOS stores do CRM: nenhum armazenamento paralelo.
+  // Consulta publica de CNPJ/CEP: leitura pura, sem gravacao.
+  registerLookupIpc(ipcMain)
+
   registerPrivacyIpc(ipcMain, {
     store: {
       contacts: new CrmContactStore(crmStorePath(userDataDir)),

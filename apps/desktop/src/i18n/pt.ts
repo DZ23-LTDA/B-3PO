@@ -1223,6 +1223,8 @@ export const ptOverrides: TranslationOverrides = {
     empresa: {
       addBranch: 'Adicionar filial',
       addCompany: 'Cadastrar empresa',
+      searchCnpj: 'Buscar dados',
+      searching: 'Buscando…',
       address: 'Endereço',
       branchLabel: 'Filial',
       branchName: 'Nome da filial',

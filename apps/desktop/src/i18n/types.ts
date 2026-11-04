@@ -920,6 +920,8 @@ export interface Translations extends NoticeTranslations {
     empresa: {
       addBranch: string
       addCompany: string
+      searchCnpj: string
+      searching: string
       address: string
       branchLabel: string
       branchName: string

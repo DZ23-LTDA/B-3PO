@@ -1618,6 +1618,8 @@
   "settings.empresa.nameRequired": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.empresa.noBranches": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.empresa.pickCompany": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.empresa.searchCnpj": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.empresa.searching": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.empresa.title": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.empresa.tradeName": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.empresa.unavailable": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

@@ -1013,6 +1013,8 @@ export const en: Translations = {
     empresa: {
       addBranch: 'Add branch',
       addCompany: 'Add company',
+      searchCnpj: 'Look up',
+      searching: 'Searching…',
       address: 'Address',
       branchLabel: 'Branch',
       branchName: 'Branch name',

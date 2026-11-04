@@ -69,6 +69,10 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: id => ipcRenderer.invoke('hermes:crm-tasks:remove', id),
     upsert: payload => ipcRenderer.invoke('hermes:crm-tasks:upsert', payload)
   },
+  lookup: {
+    cep: cep => ipcRenderer.invoke('hermes:lookup:cep', cep),
+    cnpj: cnpj => ipcRenderer.invoke('hermes:lookup:cnpj', cnpj)
+  },
   privacy: {
     anonymize: pedido => ipcRenderer.invoke('hermes:privacy:anonymize', pedido),
     export: telefone => ipcRenderer.invoke('hermes:privacy:export', telefone),

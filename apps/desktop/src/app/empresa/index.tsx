@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { consultarCnpj, lookupAvailable, lookupErrorText } from '@/api/lookup'
+
 import {
   companiesAvailable,
   listBranches,
@@ -34,6 +36,7 @@ export function EmpresaView() {
   const [filial, setFilial] = useState('')
   const [endereco, setEndereco] = useState('')
   const [saving, setSaving] = useState(false)
+  const [buscando, setBuscando] = useState(false)
 
   const disponivel = companiesAvailable()
 
@@ -71,6 +74,32 @@ export function EmpresaView() {
 
     return mapa[chave] ?? chave
   }
+
+  /**
+   * Preenche razao social e nome fantasia a partir do CNPJ.
+   *
+   * So preenche o que veio preenchido: se a Receita nao tiver fantasia, o campo do operador nao e apagado.
+   * E nao salva - ele confere e clica em adicionar. Uma resposta errada da API nunca vira registro.
+   */
+  const buscarPeloCnpj = useCallback(async () => {
+    setBuscando(true)
+    setFailure(null)
+
+    try {
+      const r = await consultarCnpj(cnpj)
+
+      if ('error' in r) {
+        setFailure(lookupErrorText(r.error))
+
+        return
+      }
+
+      if (r.empresa.razao_social) setNome(r.empresa.razao_social)
+      if (r.empresa.nome_fantasia) setFantasia(r.empresa.nome_fantasia)
+    } finally {
+      setBuscando(false)
+    }
+  }, [cnpj])
 
   async function cadastrarEmpresa() {
     if (!nome.trim()) {
@@ -152,6 +181,18 @@ export function EmpresaView() {
             {campo(copy.name, nome, setNome)}
             {campo(copy.tradeName, fantasia, setFantasia)}
             {campo(copy.cnpj, cnpj, setCnpj)}
+            {lookupAvailable() ? (
+              <div className="flex items-end gap-2">
+                <Button
+                  disabled={saving || buscando || !cnpj}
+                  onClick={() => void buscarPeloCnpj()}
+                  type="button"
+                  variant="outline"
+                >
+                  {buscando ? copy.searching : copy.searchCnpj}
+                </Button>
+              </div>
+            ) : null}
             <div className="flex items-end">
               <Button disabled={saving} onClick={() => void cadastrarEmpresa()}>
                 {copy.addCompany}
