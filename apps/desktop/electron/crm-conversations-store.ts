@@ -197,11 +197,15 @@ export function conversationCounts(conversations: readonly CrmConversation[]): {
   return { abertas, aguardando, naoLidas, resolvidas }
 }
 
+export function conversationsStorePath(userDataDir: string): string {
+  return join(userDataDir, 'crm-conversations.json')
+}
+
 export class CrmConversationStore {
   private readonly file: string
 
   constructor(userDataDir: string) {
-    this.file = join(userDataDir, 'crm-conversations.json')
+    this.file = conversationsStorePath(userDataDir)
   }
 
   async list(): Promise<CrmConversation[]> {

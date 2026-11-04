@@ -536,3 +536,24 @@ Criado `apps/desktop/electron/crm-conversations-store.ts`, no mesmo desenho de c
 
 **Proximo passo (nao depende de credencial):** IPC + preload + cliente tipado, e a lista/leitura no `/crm`. Depois
 disso, ligar o webhook do adapter oficial (`plugins/platforms/whatsapp_cloud/adapter.py`) ao store.
+
+
+## Conversas ligadas de ponta a ponta do dado (rodada 170)
+
+Fechado o caminho completo do dado, sem depender de credencial:
+
+`crm-conversations-store.ts` (disco) -> `crm-conversations-ipc.ts` (`hermes:crm-conversations:{list,upsert,remove}`)
+-> `preload.ts` (`crmConversations` bridge) -> `src/api/crm-conversations.ts` (cliente tipado) -> montado em
+`mountCrmContacts`, ao lado de contatos/funil/tarefas.
+
+**Duplicacao consciente, guardada por teste:** a contagem por estado existe nos dois lados (tela e processo
+principal), porque a tela nao deve ir ao IPC so para somar. `src/api/crm-conversations.test.ts` compara as duas
+implementacoes no mesmo conjunto — se uma mudar sozinha, o teste acusa. Duplicar sem essa garantia seria so divida.
+
+**Idempotencia carimbada no caminho:** o `external_id` sai do store, atravessa o IPC e chega ao cliente tipado com o
+mesmo nome e a mesma semantica — e o `wa_id` do webhook que impede duplicata na reentrega.
+
+**Medido:** 21 testes nos dois arquivos (`electron/crm-conversations-store.test.ts` 16 + `src/api` 5); `tsc --noEmit`
+limpo; gate 14 ok.
+
+**Falta:** a tela (lista + leitura) no `/crm`, com carregando/vazio/erro em pt-BR. Depois disso, ligar o webhook.
