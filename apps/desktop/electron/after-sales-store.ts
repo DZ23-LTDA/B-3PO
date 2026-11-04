@@ -165,6 +165,16 @@ export class AfterSalesStore {
     return followUpsFor((await this.read()).follow_ups, tenantId)
   }
 
+  /**
+   * Todos, inclusive os ja resolvidos.
+   *
+   * `list()` filtra por pendente de proposito — e a lista de trabalho. Mas o indicador de buraco
+   * precisa saber se a venda TEVE acompanhamento: um follow-up ja feito conta como atendido.
+   */
+  async listAll(tenantId: string = DEFAULT_TENANT): Promise<FollowUp[]> {
+    return (await this.read()).follow_ups.filter(f => f.tenant_id === tenantId)
+  }
+
   async create(input: unknown): Promise<{ followUp: FollowUp; followUps: FollowUp[] } | { error: string }> {
     const normalized = normalizeFollowUp(input, Date.now())
 

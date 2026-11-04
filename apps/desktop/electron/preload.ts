@@ -85,6 +85,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
     list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },
+  aftersales: {
+    create: payload => ipcRenderer.invoke('hermes:aftersales:create', payload),
+    indicators: () => ipcRenderer.invoke('hermes:aftersales:indicators'),
+    list: () => ipcRenderer.invoke('hermes:aftersales:list'),
+    setStatus: payload => ipcRenderer.invoke('hermes:aftersales:setStatus', payload)
+  },
   admin: {
     actors: () => ipcRenderer.invoke('hermes:admin:actors'),
     deactivate: id => ipcRenderer.invoke('hermes:admin:deactivate', id),

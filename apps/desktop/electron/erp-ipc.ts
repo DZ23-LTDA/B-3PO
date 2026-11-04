@@ -25,6 +25,8 @@ import { buildDomainTools } from './agent-tools-catalog'
 import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
+import { registerAfterSalesIpc } from './after-sales-ipc'
+import { AfterSalesStore, afterSalesStorePath } from './after-sales-store'
 import { bootAgentMcp } from './mcp-boot'
 import { registerAdminIpc } from './admin-ipc'
 import { HrStore, hrStorePath } from './hr-store'
@@ -67,7 +69,15 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerPurchasesIpc(ipcMain, { inventory, store: new PurchasesStore(purchasesStorePath(userDataDir)) })
   // O ator e resolvido AQUI, no processo principal: o renderer nao diz quem e.
   const actors = new ActorsStore(actorsStorePath(userDataDir))
-  const actorOf = async () => primaryOwner(await actors.list())
+
+  // `ensureOwner` antes de resolver: num perfil novo nao existe dono, e sem dono TODA acao de escrita
+  // volta `sem_permissao` — o produto fica inutilizavel na primeira abertura. O primeiro dono e local e
+  // criado sozinho; isso nao e escalada, e o estado inicial que a interface pressupoe.
+  const actorOf = async () => {
+    await actors.ensureOwner()
+
+    return primaryOwner(await actors.list())
+  }
 
   // Administracao de atores. Estava implementada desde a rodada 26 e NUNCA montada: sem ela nao ha
   // como criar um bot pela interface, e sem bot o servidor MCP nunca tem credencial para emitir.
@@ -84,8 +94,12 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   })
 
   const sales = new SalesStore(salesStorePath(userDataDir))
+  const afterSales = new AfterSalesStore(afterSalesStorePath(userDataDir))
 
-  registerSalesIpc(ipcMain, { actorOf, finance, inventory, sales })
+  // O pós-venda entra no faturamento: sem isto `deps.afterSales` fica undefined em produção e nenhum
+  // acompanhamento é criado — o domínio existe no disco e ninguém o alimenta.
+  registerSalesIpc(ipcMain, { actorOf, afterSales, finance, inventory, sales })
+  registerAfterSalesIpc(ipcMain, { actorOf, afterSales, sales })
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools = buildDomainTools({
