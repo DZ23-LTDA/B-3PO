@@ -39,7 +39,7 @@ demais, que casava qualquer linha terminando em `payload`. Medido com o padrão 
 | `sales-ipc.ts` | 2 |
 | `documents-ipc.ts` | **corrigido na r86** |
 
-**6 arquivos, 15 chamadas** ainda abertas. Os quatro canais do CRM **não** têm o defeito: o `list()` deles
+**6 arquivos, 15 chamadas** que foram corrigidas nas rodadas 88 e 89. Os quatro canais do CRM **não** têm o defeito: o `list()` deles
 não recebe tenant. A lista anterior os incluía por erro de medição.
 
 O mesmo defeito aparecia com dois nomes — `tenant(payload)` em `documents-ipc` e `tenant(tenantId)` nos
@@ -94,3 +94,66 @@ não de código.
 - Uploads: o domínio de documentos **não recebe binário** (decisão da r73), então não há superfície.
 
 Marcar o critério `segurança` como cumprido sem tratar o achado 1 seria falso. Ele está **parcial**.
+
+---
+
+## Achado 1 — FECHADO (rodadas 86 a 89)
+
+### O que foi feito
+
+`serverTenant()` em `server-tenant.ts` devolve o tenant da **instalação** e descarta o que veio do
+renderer. Os sete canais passaram a usá-la:
+
+| Rodada | Arquivo | Chamadas |
+|---|---|---|
+| 86 | `documents-ipc.ts` | 2 |
+| 88 | `finance-ipc.ts` | 3 |
+| 88 | `inventory-ipc.ts` | 2 |
+| 89 | `sales-ipc.ts` | 2 |
+| 89 | `purchases-ipc.ts` | 2 |
+| 89 | `catalog-ipc.ts` | 2 |
+| 89 | `scheduling-ipc.ts` | 4 |
+
+Medido depois: **0 chamadas** com tenant vindo do renderer em `*-ipc.ts`.
+
+### A prova
+
+`server-tenant.test.ts` e `server-tenant-2.test.ts` instanciam o store real, gravam dados em
+`empresa_b` e chamam o canal pedindo `empresa_b`:
+
+- documentos: `segredo-b.pdf` não aparece;
+- financeiro: lançamentos de B ausentes, `openPayableCents` de B = 0;
+- estoque: saldo de B ausente, movimentações de B vazias.
+
+**58 testes de IPC, 0 falhas.**
+
+### Três testes que codificavam o bug
+
+O defeito tinha testes que o afirmavam como comportamento correto — e um teste que protege o defeito é
+pior que nenhum:
+
+| Arquivo | Afirmava | Agora afirma |
+|---|---|---|
+| `documents-ipc.test.ts` | *"list repassa o tenant pedido"* | o canal usa o tenant do servidor |
+| `catalog-ipc.test.ts` | *"filtra a listagem pelo tenant informado"* | o canal ignora o pedido |
+| `server-tenant-2.test.ts` (meu) | formato `{ totals }` errado | corrigido |
+
+### Duas correções de medição antes de qualquer código
+
+| Rodada | O que eu afirmei | Realidade |
+|---|---|---|
+| 85 | "20 canais com IDOR" | grep largo demais |
+| 87 | "os 4 do CRM têm IDOR" | não têm — `list()` deles não recebe tenant |
+
+O achado era real; **o meu inventário dele não era**. Corrigir a medição antes de corrigir 20 arquivos
+economizou trabalho em 13 que não precisavam de nada.
+
+## O que continua aberto em segurança
+
+| Item | Estado |
+|---|---|
+| LGPD | sem consentimento, exportação ou eliminação de dados pessoais |
+| `fs-ipc` / `terminal-ipc` | path traversal não revisado neste ciclo |
+| Assinatura de código | sem certificado — `BLOCKED_BY_EXTERNAL_DEPENDENCY` |
+
+`segurança` permanece **PARCIAL**: o IDOR saiu, os itens acima não entraram.
