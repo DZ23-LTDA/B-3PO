@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 
 import { FiscalStatusBanner } from './fiscal-status'
+import { CancelInvoiceInput } from './cancel-invoice'
 import { useI18n } from '@/i18n/context'
 
 /**
@@ -47,6 +48,7 @@ export function SalesView() {
   const fiscalDisponivel = fiscalAvailable()
   const [notas, setNotas] = useState<FiscalRow[]>([])
   const [emitindo, setEmitindo] = useState('')
+  const [cancelando, setCancelando] = useState('')
   const [falhaFiscal, setFalhaFiscal] = useState('')
 
   const carregar = useCallback(async () => {
@@ -95,11 +97,11 @@ export function SalesView() {
     }
   }
 
-  async function cancelarNotaDaVenda(saleId: string): Promise<void> {
+  async function cancelarNotaDaVenda(saleId: string, motivo: string): Promise<void> {
     setEmitindo(saleId)
     setFalhaFiscal('')
     try {
-      const r = await cancelarNota(saleId, 'cancelada pelo operador')
+      const r = await cancelarNota(saleId, motivo)
 
       if ('error' in r) {
         setFalhaFiscal(fiscalErrorText(r.error))
@@ -327,12 +329,14 @@ export function SalesView() {
                                 {copy.printInvoice}
                               </Button>
                             ) : null}
-                            {notaAutorizada(sale.id) ? (
-                              <Button
-                                disabled={emitindo === sale.id}
-                                onClick={() => void cancelarNotaDaVenda(sale.id)}
-                                variant="ghost"
-                              >
+                            {notaAutorizada(sale.id) && cancelando === sale.id ? (
+                              <CancelInvoiceInput
+                                busy={emitindo === sale.id}
+                                onCancel={() => setCancelando('')}
+                                onConfirm={motivo => void cancelarNotaDaVenda(sale.id, motivo)}
+                              />
+                            ) : notaAutorizada(sale.id) ? (
+                              <Button onClick={() => setCancelando(sale.id)} variant="ghost">
                                 {copy.cancelInvoice}
                               </Button>
                             ) : null}

@@ -7,6 +7,14 @@
  * servidor; quando é `true`, o rótulo é "homologação" e não há promessa de validade fiscal.
  */
 
+/**
+ * Mínimo de caracteres da justificativa de cancelamento (regra da NF-e).
+ *
+ * Duplicado aqui de propósito: o renderer não importa de lectron/. O valor é o MESMO do backend, e se
+ * divergir o servidor recusa — a tela só antecipa o aviso, não decide.
+ */
+export const MOTIVO_MINIMO = 15
+
 export const FISCAL_KINDS = ['nfe', 'nfce', 'nfse'] as const
 export type FiscalKind = (typeof FISCAL_KINDS)[number]
 
