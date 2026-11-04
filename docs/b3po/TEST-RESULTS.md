@@ -273,3 +273,17 @@ marcá-los como `skip` para "passar": seria esconder falha.
 Consequência prática: o `wrapup_check` automático exige suíte 100% verde e não alcança isso nesta máquina. O que
 está verificado da minha entrega: gate do repositório (14 checks), `tsc`, e as suítes que toquei (logo, CRM,
 i18n, chat, plugin de bots) — todas verdes.
+
+## Suíte desktop completa — 1962 arquivos
+
+| | |
+|---|---|
+| Testes | **16733 passam**, **56 falham**, 216 pulados (de 17005) |
+| Arquivos | **1915 passam**, **29 falham**, 18 pulados (de 1962) |
+
+Os arquivos que falham **não foram tocados por este branch** (`git diff main..HEAD` vazio nesses caminhos).
+Detalhe por arquivo em [BASELINE-DESKTOP-SUITE.md](BASELINE-DESKTOP-SUITE.md). Concentram-se em `electron/` e
+`scripts/` (empacotamento, tray, updater, assinatura) e em alguns testes de keybinds/roteamento com falha de mock.
+
+Também rodam verdes, por área: `src/i18n` (16 arquivos/119 testes), `src/app/settings` (93/725),
+`src/app/quick-entry`, `src/plugins/hermes-bots` (132/1074).

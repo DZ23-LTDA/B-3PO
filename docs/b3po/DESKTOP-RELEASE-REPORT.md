@@ -1455,3 +1455,26 @@ Evidência: `docs/b3po/evidence/provedores-pt.png`, `docs/b3po/evidence/cobranca
 `PT-CATALOG-DEBT.md`, que agora diz a verdade em vez do diagnóstico errado.
 
 Verificação: `src/i18n` + `src/app/settings` = 94 arquivos / 732 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 137 — suíte desktop completa: 16.733 passam, 56 falham (todas pré-existentes)
+
+Rodei a suíte **inteira** do desktop, não só as pastas que eu vinha mexendo. Resultado honesto:
+
+| | |
+|---|---|
+| Testes | **16.733 passam**, **56 falham**, 216 pulados (de 17.005) |
+| Arquivos | **1.915 passam**, **29 falham**, 18 pulados (de 1.962) |
+
+**Nenhum dos arquivos que falham foi tocado por este branch** — `git diff --stat main..HEAD` nesses caminhos
+volta vazio. Conferi a amostra `src/sdk/profile-routing.test.ts`: falha com
+`TypeError: Cannot read properties of undefined (reading 'finally')`, erro de mock/ambiente, e o arquivo é byte a
+byte o de `main`.
+
+Pior que o número de antes (eu vinha reportando "5 testes upstream falham por Windows") porque agora medi a suíte
+toda em vez de só as pastas do meu trabalho. A concentração está em `electron/` e `scripts/` (empacotamento, tray,
+updater, assinatura de payload, instalador) — áreas que dependem de Windows real/rede/artefato assinado — e em
+alguns testes de keybinds/roteamento com mock incompleto. **Nenhuma falha é de texto traduzido.**
+
+Isso não isenta o produto: 56 testes vermelhos precisam de triagem um a um. O que está garantido é que o número
+não foi causado pelo trabalho desta sessão, e isso agora está escrito com evidência, não suposição:
+`docs/b3po/BASELINE-DESKTOP-SUITE.md` (lista arquivo por arquivo) e a tabela em `TEST-RESULTS.md`.
