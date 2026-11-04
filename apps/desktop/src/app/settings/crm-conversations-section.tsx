@@ -9,6 +9,7 @@ import {
   type CrmConversationRow,
 } from '@/api/crm-conversations'
 import { filterConversations, type ConversationFilter } from '@/app/crm/conversation-filters'
+import { responseTime, responseTimeLabel } from '@/app/crm/response-time'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -205,6 +206,15 @@ export function CrmConversationsSection() {
                         {section.markRead}
                       </Button>
                     ) : null}
+                    {(() => {
+                      const medida = responseTime(selecionada.messages)
+
+                      return medida === null ? null : (
+                        <span className="text-xs text-(--ui-text-secondary)">
+                          {section.responseTime}: {responseTimeLabel(medida.mediaMs)}
+                        </span>
+                      )
+                    })()}
                     {selecionada.status === 'resolvida' ? null : (
                       <Button
                         onClick={() => void alterar(selecionada, { status: 'resolvida' })}

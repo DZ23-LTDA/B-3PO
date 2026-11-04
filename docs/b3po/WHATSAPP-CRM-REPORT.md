@@ -1193,3 +1193,20 @@ Rotulo em pt-BR: `45 s`, `12 min`, `3 h 20 min`, `2 h` — nunca "0h" para algo 
 
 **O que ainda falta do 14.6:** novos leads, conversao e vendas dependem de oportunidades e tarefas ligadas a conversa, e
 a tela de indicadores ainda nao existe. A funcao esta pronta para alimenta-la.
+
+
+### Tempo de resposta visivel (rodada 203)
+
+O indicador saiu da funcao e chegou na tela: no cabecalho da conversa aparece **"Tempo de resposta: 12 min"**.
+
+Prova: `docs/b3po/evidence/crm-tempo-resposta.png` — perfil semeado com entrada e saida separadas por 12 minutos, e a
+tela mostrando exatamente esse numero. Quando a conversa nao tem resposta, a linha **nao aparece** — nada de "0 s".
+
+**Dois erros do caminho:**
+
+1. importei a funcao de `@/electron/...`, que o renderer nao alcanca (o Electron e outra fronteira). A funcao pura passou a
+   morar em `src/app/crm/response-time.ts`, com os tipos do renderer;
+2. meu `replace` de renomeacao gerou `CrmMessageRowRow` — `tsc` pegou na hora.
+
+**Terceira vez que o script de verificacao me deu resposta enganosa:** a regex com `\n` dentro do `evaluate` retornou
+`undefined`, e foi o **screenshot** que provou a linha na tela. Verificacao de UI se faz olhando a tela.

@@ -5,7 +5,7 @@
  * zero, nao um chute. Media que conta conversa sem resposta como "zero" baixaria o numero justamente nos piores casos.
  */
 
-import type { CrmMessage } from './crm-conversations-store'
+import type { CrmMessageRow } from '@/api/crm-conversations'
 
 export interface ResponseTime {
   /** Quantas respostas entraram na conta (mensagens de saida que tiveram uma entrada antes). */
@@ -18,7 +18,7 @@ export interface ResponseTime {
  * Para cada mensagem de SAIDA, mede o tempo desde a ultima ENTRADA anterior. Ignora saidas consecutivas (seguir a
  * conversa com duas mensagens seguidas nao e "segunda resposta") e ignora saida sem entrada antes (nao ha o que medir).
  */
-export function responseTime(messages: readonly CrmMessage[]): null | ResponseTime {
+export function responseTime(messages: readonly CrmMessageRow[]): null | ResponseTime {
   const ordenadas = [...messages].sort((a, b) => a.sent_at - b.sent_at)
   const duracoes: number[] = []
   let ultimaEntrada: null | number = null
@@ -53,7 +53,7 @@ export function responseTime(messages: readonly CrmMessage[]): null | ResponseTi
 }
 
 /** Media entre conversas que TIVERAM resposta. Conversa sem resposta nao entra — e por isso que o numero e honesto. */
-export function averageResponseTime(conversas: readonly { messages: CrmMessage[] }[]): null | ResponseTime {
+export function averageResponseTime(conversas: readonly { messages: CrmMessageRow[] }[]): null | ResponseTime {
   const medidas = conversas.map(c => responseTime(c.messages)).filter((m): m is ResponseTime => m !== null)
 
   if (medidas.length === 0) {

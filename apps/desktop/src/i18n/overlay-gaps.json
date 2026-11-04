@@ -1384,6 +1384,7 @@
   "settings.crmConversations.notes": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.pickOne": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.resolve": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmConversations.responseTime": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.saveNote": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.search": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmConversations.status.aberta": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

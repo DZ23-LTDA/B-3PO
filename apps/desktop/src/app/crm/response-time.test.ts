@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { averageResponseTime, responseTime, responseTimeLabel } from './crm-response-time'
+import { averageResponseTime, responseTime, responseTimeLabel } from './response-time'
 
 const msg = (direction: 'entrada' | 'saida', sent_at: number) => ({
   body: 'x',
