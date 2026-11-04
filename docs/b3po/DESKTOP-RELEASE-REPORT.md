@@ -1626,3 +1626,16 @@ arquivos**, e o texto não mencionava nada do que mudou desde então. Reescrevi 
   do proprietário.
 
 Continua **draft** e **NOT_READY**, como o GOAL exige: não fechar, não mesclar, não publicar.
+
+### Rodada 145 — filtro no funil (busca livre + estágio), com contagens honestas
+
+`filterOpportunities()` puro e testado (8 casos): busca em título, telefone e motivo da perda; recorte por estágio.
+As contagens das colunas e o rótulo `1 de 2` usam o conjunto filtrado — coluna dizendo "3" com um cartão seria
+mentira.
+
+Prova no app: digitei "Consultoria" via CDP, o quadro foi para `1 de 2`, "Implantação" saiu e "Consultoria" ficou
+(`docs/b3po/evidence/crm-filtro-pt.png`).
+
+Dois defeitos pegos antes de mim: o `aria-label` do filtro repetia o do cartão (`Stage`), o que quebrou o teste da
+seção por ambiguidade e confundiria leitor de tela — virou "Filtrar por etapa"; e o rótulo dizia "limpar" ao lado
+do botão "Limpar filtro".

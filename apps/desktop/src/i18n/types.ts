@@ -655,6 +655,13 @@ export interface Translations extends NoticeTranslations {
         perdido: string
       }
       title: string
+      filterAllStages: string
+      filterClear: string
+      filterPlaceholder: string
+      filterReset: string
+      filterResult: (shown: number, total: number) => string
+      filterStageAria: string
+      filterStage: string
       intro: string
       empty: string
       open: string

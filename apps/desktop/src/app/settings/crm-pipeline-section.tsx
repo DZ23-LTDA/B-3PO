@@ -1,3 +1,4 @@
+import { EMPTY_OPPORTUNITY_FILTER, filterOpportunities, hasActiveFilter, type OpportunityFilter } from '@/app/crm/filters'
 import { useCallback, useEffect, useState } from 'react'
 
 import {
@@ -106,6 +107,11 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
     }
   }, [copy.unavailable])
 
+  const [filtro, setFiltro] = useState<OpportunityFilter>(EMPTY_OPPORTUNITY_FILTER)
+  // As colunas contam o que passou pelo filtro: dizer "3" e mostrar um cartao seria mentira.
+  const visiveis = filterOpportunities(rows ?? [], filtro)
+  const filtrando = hasActiveFilter(filtro)
+
   const totals = opportunityTotals(rows ?? [])
 
   return (
@@ -116,6 +122,41 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
       <p className="mb-2 text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         {copy.intro}
       </p>
+
+      {rows !== null && rows.length > 0 ? (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <input
+            aria-label={copy.filterPlaceholder}
+            className="h-8 w-56 rounded-md border border-border/60 bg-transparent px-2 text-sm"
+            onChange={event => setFiltro({ ...filtro, query: event.target.value })}
+            placeholder={copy.filterPlaceholder}
+            value={filtro.query}
+          />
+          <select
+            aria-label={copy.filterStageAria}
+            className="h-8 rounded-md border border-border/60 bg-transparent px-2 text-sm"
+            onChange={event => setFiltro({ ...filtro, stage: event.target.value as OpportunityFilter['stage'] })}
+            value={filtro.stage}
+          >
+            <option value="todos">{copy.filterAllStages}</option>
+            {PIPELINE_STAGES.map(stage => (
+              <option key={stage} value={stage}>
+                {stageLabel(stage, copy.stages)}
+              </option>
+            ))}
+          </select>
+          {filtrando ? (
+            <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+              {copy.filterResult(visiveis.length, rows.length)}
+            </span>
+          ) : null}
+          {filtrando ? (
+            <Button onClick={() => setFiltro(EMPTY_OPPORTUNITY_FILTER)} size="sm" variant="ghost">
+              {copy.filterReset}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       {rows !== null && rows.length > 0 ? (
         <p className="mb-4 text-sm text-(--ui-text-secondary)">
@@ -217,7 +258,7 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
         // truncar tudo; o funil rola, o cartao nao quebra.
         <div className="flex flex-wrap gap-2 pb-2">
           {PIPELINE_STAGES.map(stage => {
-            const daEtapa = rows.filter(row => row.stage === stage)
+            const daEtapa = visiveis.filter(row => row.stage === stage)
             const totalEtapa = daEtapa.reduce((soma, row) => soma + row.value_cents, 0)
 
             return (

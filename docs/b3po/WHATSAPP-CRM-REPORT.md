@@ -451,3 +451,24 @@ Página do CRM passou de `max-w-3xl` para `max-w-6xl`: sete colunas não cabem n
 
 Evidência: `docs/b3po/evidence/crm-funil-pt.png` — com 2 oportunidades reais semeadas no perfil, as colunas
 mostraram `Negociação 1 · R$ 15.000,00` e `Ganho 1 · R$ 4.500,00`, as outras cinco `Nada aqui ainda`.
+
+
+## Filtro do funil — entregue (rodada 145)
+
+O GOAL pede "Kanban real, **filtros** e relatórios" (§14.3). O funil tinha as colunas e não tinha filtro.
+
+`src/app/crm/filters.ts` (puro, 8 testes) — `filterOpportunities(rows, {query, stage})`:
+
+- busca livre em **título, telefone e motivo da perda** (o telefone entra de propósito: é como o contato aparece no
+  cartão, e procurar por número precisa achar);
+- recorte por estágio, ou `Todas as etapas`;
+- **as contagens das colunas e o rótulo `1 de 2` usam o conjunto filtrado** — uma coluna que diz "3" e mostra um
+  cartão seria mentira.
+
+**Prova no app empacotado**, via CDP: digitei "Consultoria" no campo e o quadro passou a mostrar `1 de 2`;
+"Implantação" (que estava visível antes) saiu, "Consultoria" ficou. Evidência: `docs/b3po/evidence/crm-filtro-pt.png`.
+
+**Erro pego por teste:** o `aria-label` do seletor de filtro era o mesmo do seletor de estágio do cartão
+(`Stage`), o que fez o teste da seção achar **dois** elementos e falhar. Também confundiria leitor de tela.
+Virou `filterStageAria` — "Filtrar por etapa". E o rótulo repetia "limpar" ao lado do botão "Limpar filtro";
+a palavra saiu.
