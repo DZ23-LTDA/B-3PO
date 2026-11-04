@@ -31,9 +31,15 @@ export type PrivacyResult =
   | { alcance: PrivacyTotals; telefone: string }
   | { marcador: string; substituidos: number }
 
+// A ponte mora em hermesDesktop, não em hermes.
+//
+// Eu escrevi window.hermes.privacy e o TypeScript aceitou (era um cast), o teste do backend passou (o IPC
+// está montado) e a tela renderizou - dizendo "esta versão não expõe o pedido". O defeito só apareceu
+// abrindo o app: a ponte existe, o nome estava errado, e um cast esconde isso.
 function bridge() {
-  return (window as unknown as { hermes?: { privacy?: Record<string, (arg: unknown) => Promise<unknown>> } }).hermes
-    ?.privacy
+  return (
+    globalThis as { hermesDesktop?: { privacy?: Record<string, (arg: unknown) => Promise<unknown>> } }
+  ).hermesDesktop?.privacy
 }
 
 export function privacyAvailable(): boolean {
