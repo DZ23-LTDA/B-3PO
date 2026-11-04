@@ -239,6 +239,7 @@ import {
   type UninstallSummaryDetails
 } from './desktop-uninstall'
 import { mountCrmContacts } from './crm-contacts-ipc'
+import { mountErpIpc } from './erp-ipc'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -17502,6 +17503,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 }
 
 mountCrmContacts(ipcMain, app.getPath('userData'))
+  mountErpIpc(ipcMain, app.getPath('userData'))
 
 registerDesktopUninstallIpc({
   ipcMain,
