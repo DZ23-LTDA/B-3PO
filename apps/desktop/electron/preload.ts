@@ -91,6 +91,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     faturar: payload => ipcRenderer.invoke('hermes:sales:faturar', payload),
     list: tenantId => ipcRenderer.invoke('hermes:sales:list', tenantId)
   },
+  finance: {
+    append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
+    list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),
+    settle: (id, tenantId) => ipcRenderer.invoke('hermes:finance:settle', id, tenantId),
+    totals: tenantId => ipcRenderer.invoke('hermes:finance:totals', tenantId)
+  },
   // Loopback origin that hosts YouTube's player for the file:// renderer.
   getEmbedHostOrigin: () => ipcRenderer.invoke('hermes:embed-host:origin'),
   // Registry-scoped backend resolution: { connectionId, profile } → descriptor.

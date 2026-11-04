@@ -22,6 +22,7 @@ export const CRM_ROUTE = '/crm'
 export const PRODUCTS_ROUTE = '/products'
 export const STOCK_ROUTE = '/stock'
 export const SALES_ROUTE = '/sales'
+export const FINANCE_ROUTE = '/finance'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -35,6 +36,7 @@ export type AppView =
   | 'command-center'
   | 'crm'
   | 'cron'
+  | 'finance'
   // A contributed (plugin) full page at its own route — NOT chat. Without this
   // distinction contributed paths fell through appViewForPath's 'chat' default,
   // so the sidebar kept a session highlighted and the titlebar kept the
@@ -57,6 +59,7 @@ export type AppRouteId =
   | 'command-center'
   | 'crm'
   | 'cron'
+  | 'finance'
   | 'messaging'
   | 'new'
   | 'profiles'
@@ -84,6 +87,7 @@ export const APP_ROUTES = [
   { id: 'artifacts', path: ARTIFACTS_ROUTE, view: 'artifacts' },
   { id: 'cron', path: CRON_ROUTE, view: 'cron' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
+  { id: 'finance', path: FINANCE_ROUTE, view: 'finance' },
   { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
   { id: 'sales', path: SALES_ROUTE, view: 'sales' },
   { id: 'stock', path: STOCK_ROUTE, view: 'stock' },

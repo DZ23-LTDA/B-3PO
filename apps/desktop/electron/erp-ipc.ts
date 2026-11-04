@@ -8,6 +8,7 @@ import type { IpcMain } from 'electron'
 import { CatalogStore, catalogStorePath } from './catalog-store'
 import { registerCatalogIpc } from './catalog-ipc'
 import { FinanceStore, financeStorePath } from './finance-store'
+import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
@@ -25,5 +26,6 @@ export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: strin
 
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
+  registerFinanceIpc(ipcMain, finance)
   registerSalesIpc(ipcMain, { finance, inventory, sales: new SalesStore(salesStorePath(userDataDir)) })
 }

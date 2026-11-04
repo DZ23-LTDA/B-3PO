@@ -95,7 +95,7 @@ describe('IPC do estoque', () => {
     })
   })
 
-  it('mountErpIpc liga catalogo, estoque e vendas sobre o mesmo userData', async () => {
+  it('mountErpIpc liga os dominios do ERP sobre o mesmo userData', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'b3po-erp-mount-'))
 
     try {
@@ -103,11 +103,15 @@ describe('IPC do estoque', () => {
 
       mountErpIpc(ipc, dir)
 
-      expect(ipc.channels()).toContain('hermes:catalog:list')
-      expect(ipc.channels()).toContain('hermes:inventory:append')
-      expect(ipc.channels()).toContain('hermes:sales:faturar')
-      // 3 do catálogo + 3 do estoque + 4 de vendas.
-      expect(ipc.channels()).toHaveLength(10)
+      const canais = ipc.channels()
+
+      expect(canais).toContain('hermes:catalog:list')
+      expect(canais).toContain('hermes:inventory:append')
+      expect(canais).toContain('hermes:sales:faturar')
+      expect(canais).toContain('hermes:finance:totals')
+      // Todo canal registrado pertence a um domínio conhecido — pega typo e canal órfão sem fixar
+      // um total que quebra a cada domínio novo.
+      expect(canais.every(canal => /^hermes:(catalog|inventory|sales|finance):/.test(canal))).toBe(true)
     } finally {
       await rm(dir, { force: true, recursive: true })
     }
