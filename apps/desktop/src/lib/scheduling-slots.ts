@@ -62,7 +62,14 @@ export function horariosLivresPara(consulta: ConsultaSlots): Slot[] {
   const granularidade = Math.max(1, consulta.granularidade_minutos ?? 30)
   const duracaoMs = duracao * MINUTO
   const passoMs = granularidade * MINUTO
-  const piso = Math.max(consulta.janela.abre, consulta.nao_antes_de ?? consulta.janela.abre)
+  // Alinha o piso a granularidade. Sem isso, um nao_antes_de de 17:35 gera 17:35, 18:05, 18:35 -
+  // horarios quebrados que nao existem em nenhuma agenda e que o operador nao consegue comparar
+  // com o relogio.
+  // A grade vem do EXPEDIENTE, nao do epoch: alinhar por `Math.ceil(epoch/passo)` moveria o primeiro
+  // horario de uma janela que comeca as 09:00, porque 09:00 nao e multiplo de 30min desde 1970.
+  const abertura = consulta.janela.abre
+  const bruto = Math.max(abertura, consulta.nao_antes_de ?? abertura)
+  const piso = abertura + Math.ceil((bruto - abertura) / passoMs) * passoMs
 
   const impedimentos = [
     ...consulta.ocupados

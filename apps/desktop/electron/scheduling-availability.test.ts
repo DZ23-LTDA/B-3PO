@@ -132,8 +132,8 @@ describe('horariosLivres', () => {
   it('nao_antes_de corta o passado', () => {
     const livres = horariosLivres({ ...base, nao_antes_de: ABRE + HORA + 15 * MIN, ocupados: [] })
 
-    // Piso 10:15, granularidade 60 -> 10:15 e 11:15; 11:15 terminaria 12:15.
-    expect(livres.map(l => (l.starts_at - ABRE) / MIN)).toEqual([75])
+    // Piso bruto 10:15 na grade de 60min a partir das 09:00 -> 11:00 (nao 10:15, que nao e slot).
+    expect(livres.map(l => (l.starts_at - ABRE) / MIN)).toEqual([120])
   })
 
   it('granularidade padrao e 30 minutos', () => {
