@@ -54,7 +54,11 @@ describe('resolveVersionStatus', () => {
     expect(client({ version: 'unknown', sha: 'abc1234' }).unknown).toBe(false)
     expect(client({ version: 'unknown' }).unknown).toBe(true)
     expect(backend({ version: 'unknown', sha: 'abc1234' }).unknown).toBe(true)
-    expect(client({ version: 'git.abc1234' }).label).toBe('vgit.abc1234')
+
+    // Uma build sem release nenhuma diz `dev`. Antes este teste afirmava `vgit.abc1234`: o hash com
+    // prefixo `v`, que e informacao de desenvolvimento vazando para a barra de status. O teste estava
+    // codificando o defeito em vez de protege-lo contra regressao.
+    expect(client({ version: 'git.abc1234' }).label).toBe('client dev')
   })
 
   it('drops the diff while an apply is in flight', () => {

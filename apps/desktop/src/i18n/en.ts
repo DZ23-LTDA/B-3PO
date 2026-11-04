@@ -4599,7 +4599,7 @@ export const en: Translations = {
       releaseAvailable: (tag: string) => `Version ${tag} is available.`,
       desktopVersion: version => `B-3PO Desktop v${version}`,
       backendVersion: version => `Backend v${version}`,
-      clientLabel: version => `client v${version}`,
+      clientLabel: version => (version === 'dev' ? 'client dev' : `client v${version}`),
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `Remote: ${host}`,
       connectionCloud: host => `Cloud: ${host}`,

@@ -297,7 +297,7 @@ export const ptOverrides: TranslationOverrides = {
       desktopVersion: version => `B-3PO Desktop v${version}`,
       backendVersion: version => `Servidor v${version}`,
       backendLabel: version => `servidor v${version}`,
-      clientLabel: version => `cliente v${version}`,
+      clientLabel: version => (version === 'dev' ? 'cliente dev' : `cliente v${version}`),
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `Remoto: ${host}`,
       connectionCloud: host => `Nuvem: ${host}`,
