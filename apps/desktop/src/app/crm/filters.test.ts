@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { CrmOpportunityRow } from '@/api/crm-pipeline'
 
-import { EMPTY_OPPORTUNITY_FILTER, filterOpportunities, hasActiveFilter } from './filters'
+import { EMPTY_OPPORTUNITY_FILTER, filterOpportunities, hasActiveFilter, isKnownContact } from './filters'
 
 const op = (over: Partial<CrmOpportunityRow> = {}): CrmOpportunityRow => ({
   contact_phone: '+5511999991111',
@@ -57,5 +57,14 @@ describe('filtro do funil', () => {
     expect(hasActiveFilter({ query: '   ', stage: 'todos' })).toBe(false)
     expect(hasActiveFilter({ query: 'x', stage: 'todos' })).toBe(true)
     expect(hasActiveFilter({ query: '', stage: 'perdido' })).toBe(true)
+  })
+
+  it('reconhece contato que existe, contato removido e tarefa sem contato', () => {
+    const contatos = [{ phone: '+5511999991111' }]
+
+    expect(isKnownContact(contatos, '+5511999991111')).toBe(true)
+    expect(isKnownContact(contatos, '+5511900000000')).toBe(false)
+    // Sem telefone não é órfão: é tarefa/oportunidade solta, que é permitido.
+    expect(isKnownContact(contatos, '')).toBe(true)
   })
 })

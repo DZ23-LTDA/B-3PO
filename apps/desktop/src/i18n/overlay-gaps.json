@@ -1372,6 +1372,7 @@
   "settings.connections.updateSkippedCloud": ["ar","ja","zh-hant"],
   "settings.connections.urlTitle": ["ar","ja","zh-hant"],
   "settings.crmPipeline.columnEmpty": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.crmPipeline.contactRemoved": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.filterAllStages": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.filterClear": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.crmPipeline.filterPlaceholder": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

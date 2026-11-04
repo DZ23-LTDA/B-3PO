@@ -40,3 +40,18 @@ export function filterOpportunities(
 export function hasActiveFilter(filter: OpportunityFilter): boolean {
   return filter.query.trim() !== '' || filter.stage !== 'todos'
 }
+
+/**
+ * O contato desta linha ainda existe?
+ *
+ * Apagar um contato não apaga a oportunidade nem a tarefa — e não deve: o histórico de negócio continua valendo.
+ * Mas a tela precisa dizer que o telefone ali é um contato que não existe mais, em vez de mostrar um número
+ * solto como se estivesse tudo bem.
+ */
+export function isKnownContact(contacts: readonly { phone: string }[], phone: string): boolean {
+  if (!phone.trim()) {
+    return true
+  }
+
+  return contacts.some(contact => contact.phone === phone)
+}

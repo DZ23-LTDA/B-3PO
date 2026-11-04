@@ -873,6 +873,7 @@ export const ptOverrides: TranslationOverrides = {
 
     }),
     crmPipeline: {
+      contactRemoved: 'contato excluído',
       stageInitial: 'Estágio inicial',
       lostReason: 'Por que foi perdida?',
       stages: {

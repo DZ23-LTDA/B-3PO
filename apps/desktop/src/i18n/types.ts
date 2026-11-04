@@ -643,6 +643,7 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     }
     crmPipeline: {
+      contactRemoved: string
       stageInitial: string
       lostReason: string
       stages: {

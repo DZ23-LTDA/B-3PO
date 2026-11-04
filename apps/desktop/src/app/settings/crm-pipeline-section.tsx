@@ -1,4 +1,4 @@
-import { EMPTY_OPPORTUNITY_FILTER, filterOpportunities, hasActiveFilter, type OpportunityFilter } from '@/app/crm/filters'
+import { EMPTY_OPPORTUNITY_FILTER, filterOpportunities, hasActiveFilter, type OpportunityFilter, isKnownContact } from '@/app/crm/filters'
 import { useCallback, useEffect, useState } from 'react'
 
 import {
@@ -283,7 +283,11 @@ export function CrmPipelineSection({ contacts }: { contacts: readonly { name: st
                         <span className="text-sm leading-tight text-foreground">{row.title}</span>
                         <span className="flex flex-col text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
                           <span className="truncate">{row.contact_phone}</span>
-                          <span className="truncate">{money(row.value_cents, row.currency)}</span>
+                          <span className={isKnownContact(contacts, row.contact_phone) ? 'truncate' : 'truncate text-destructive'}>
+                            {isKnownContact(contacts, row.contact_phone)
+                              ? money(row.value_cents, row.currency)
+                              : copy.contactRemoved}
+                          </span>
                         </span>
                         <select
                           aria-label={copy.stage}

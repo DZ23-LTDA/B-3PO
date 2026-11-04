@@ -472,3 +472,21 @@ O GOAL pede "Kanban real, **filtros** e relatórios" (§14.3). O funil tinha as 
 (`Stage`), o que fez o teste da seção achar **dois** elementos e falhar. Também confundiria leitor de tela.
 Virou `filterStageAria` — "Filtrar por etapa". E o rótulo repetia "limpar" ao lado do botão "Limpar filtro";
 a palavra saiu.
+
+
+## Contato excluído na oportunidade — entregue (rodada 147)
+
+Apagar um contato **não** apaga a oportunidade nem a tarefa, e não deve: o histórico de negócio continua valendo.
+Mas a tela mostrava um telefone solto como se o contato existisse.
+
+`isKnownContact(contacts, phone)` (puro, com teste) resolve isso: quando o telefone do cartão não está na lista de
+contatos, o lugar do valor passa a dizer **"contato excluído"**, em vermelho de perigo. Sem telefone continua sendo
+tarefa/oportunidade solta — que é permitido, e não é órfã.
+
+**Prova no app empacotado** (perfil semeado com a oportunidade apontando para um telefone que não existe em
+`crm-contacts.json`): o cartão renderizou `Proposta da Maria · +5511999991111 · contato excluído`.
+Evidência: `docs/b3po/evidence/crm-contato-excluido-pt.png`.
+
+**Erro meu, registrado:** na primeira tentativa o `replace` não casou a linha do cartão e eu imprimi "cartão
+marcado" mesmo assim; o teste visual mostrou a marca ausente. Só aceitei o item como pronto depois que o
+`grep` no fonte mostrou `isKnownContact` e a captura mostrou o texto.

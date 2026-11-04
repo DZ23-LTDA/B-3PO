@@ -1639,3 +1639,16 @@ Prova no app: digitei "Consultoria" via CDP, o quadro foi para `1 de 2`, "Implan
 Dois defeitos pegos antes de mim: o `aria-label` do filtro repetia o do cartão (`Stage`), o que quebrou o teste da
 seção por ambiguidade e confundiria leitor de tela — virou "Filtrar por etapa"; e o rótulo dizia "limpar" ao lado
 do botão "Limpar filtro".
+
+### Rodada 147 — oportunidade de contato excluído deixa de parecer normal
+
+Apagar contato não apaga a oportunidade (o histórico vale), mas o cartão mostrava um telefone solto sem aviso.
+`isKnownContact()` puro e testado: telefone fora da lista de contatos → o lugar do valor diz "contato excluído" em
+cor de perigo; sem telefone continua sendo item solto, que é permitido.
+
+Prova no app empacotado com perfil semeado (oportunidade apontando para telefone inexistente): cartão renderizou
+"contato excluído". Evidência: `docs/b3po/evidence/crm-contato-excluido-pt.png`.
+
+**Erro meu:** o primeiro `replace` não casou a linha do cartão e o script imprimiu "cartão marcado" mesmo assim —
+a verificação no app mostrou a marca ausente. Corrigi o alvo, confirmei por `grep` no fonte e só então pela
+captura. É o tipo de falso positivo que só a verificação externa pega.

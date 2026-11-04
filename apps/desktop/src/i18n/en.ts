@@ -721,6 +721,7 @@ export const en: Translations = {
       unavailable: 'Tasks need the desktop app to be stored.'
     },
     crmPipeline: {
+      contactRemoved: 'contact deleted',
       stageInitial: 'Starting stage',
       lostReason: 'Why was it lost?',
       stages: {
