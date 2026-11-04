@@ -3,6 +3,7 @@
 // Um domínio entra aqui quando tem store e testes — não antes. Cada um é ligado no seu próprio store,
 // sobre os mesmos arquivos sob `userData`, e o renderer só alcança o que está registrado.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
@@ -27,7 +28,7 @@ import { registerSalesIpc } from './sales-ipc'
  * Vendas recebe também estoque e financeiro porque faturar atravessa os três — a orquestração mora
  * aqui, no processo principal, e não no renderer.
  */
-export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
+export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
 

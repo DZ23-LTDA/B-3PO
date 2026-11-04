@@ -28,7 +28,9 @@ export interface SalesStoreLike {
 }
 
 export interface InventoryLike {
-  append: (input: unknown) => Promise<{ balance: number } | { error: string }>
+  // O store real devolve `movement` junto do saldo. O tipo estava declarando só `balance`, e o
+  // `'movement' in baixa` nunca estreitava — o compilador via sempre o braço sem movimento.
+  append: (input: unknown) => Promise<{ balance: number; movement: InventoryMovement } | { error: string }>
   balances: (tenantId?: string) => Promise<Record<string, number>>
 }
 

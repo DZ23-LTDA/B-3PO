@@ -1,6 +1,7 @@
 // Funil do CRM exposto ao renderer por IPC. Mesmo desenho dos contatos: o processo principal valida e grava,
 // e um erro de validação volta como resposta `{ error }` em vez de exceção.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { CrmOpportunity } from './crm-pipeline-store'
@@ -13,7 +14,7 @@ export interface CrmPipelineStoreLike {
   upsert: (input: unknown) => Promise<CrmPipelineResult>
 }
 
-export function registerCrmPipelineIpc(ipcMain: Pick<IpcMain, 'handle'>, store: CrmPipelineStoreLike): void {
+export function registerCrmPipelineIpc(ipcMain: IpcRegistrar, store: CrmPipelineStoreLike): void {
   ipcMain.handle('hermes:crm-pipeline:list', async (): Promise<{ opportunities: CrmOpportunity[] }> => ({
     opportunities: await store.list()
   }))

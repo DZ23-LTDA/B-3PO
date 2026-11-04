@@ -1,6 +1,7 @@
 // Conversas do CRM expostas ao renderer por IPC. Mesmo desenho de contatos, funil e tarefas: o processo
 // principal valida e grava, e um erro de validação volta como `{ error }` em vez de exceção.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { CrmConversation } from './crm-conversations-store'
@@ -14,7 +15,7 @@ export interface CrmConversationStoreLike {
 }
 
 export function registerCrmConversationsIpc(
-  ipcMain: Pick<IpcMain, 'handle'>,
+  ipcMain: IpcRegistrar,
   store: CrmConversationStoreLike
 ): void {
   ipcMain.handle(

@@ -104,7 +104,11 @@ export function parseMetaWebhook(payload: unknown, now: number = Date.now()): Me
           last_message_at: sentAt,
           last_message_preview: corpo.slice(0, 120),
           messages: [mensagem],
+          // Conversa nova do canal: sem nota interna e sem etiqueta ainda. O tipo exige os dois
+          // desde que o CRM ganhou etiquetas, e este arquivo nao foi atualizado na epoca.
+          notes: '',
           status: 'aberta',
+          tags: [],
           title: nomeDoContato(value, de, telefone),
           unread: 1,
           updated_at: now,

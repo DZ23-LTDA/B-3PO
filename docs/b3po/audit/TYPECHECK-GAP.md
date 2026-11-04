@@ -49,15 +49,34 @@ testes do CRM acessando `.contacts` sem estreitar a união `{contacts} | {error}
 - `erp-ipc.ts`: passou a resolver o ator (`primaryOwner`) e a entregá-lo a `registerSalesIpc`.
 - `sales-ipc.ts`: `InventoryLike.append` declarava `{ balance }` mas o store devolve
   `{ balance, movement }`. O tipo era o bug; o cast que eu tinha tentado escondia.
-- os oito `register*Ipc` passaram a depender de `IpcRegistrar` (a interface mínima que realmente usam)
-  em vez de `Pick<IpcMain, 'handle'>`, o que remove o atrito com o fake de teste.
+- os `register*Ipc` passaram a depender de `IpcRegistrar` (a interface mínima que realmente usam)
+  em vez de `Pick<IpcMain, 'handle'>`, o que remove o atrito com o fake de teste. Três arquivos
+  (`clipboard-ipc`, `plugin-files-ipc`, `spellcheck-dictionary-ipc`) **ficaram de fora**: usam outros
+  métodos do `IpcMain` além de `handle`, e trocar o tipo deles quebrou mais do que consertou — revertidos.
 
-## O que fica pendente, sem disfarce
+## Estado depois da rodada 27
 
-1. Os 2 erros de produção do WhatsApp/CRM — precisam ser investigados com o código na mão, não
-   corrigidos por dedução.
-2. Os 25 erros de teste — mecânicos, mas espalhados por arquivos que não são desta rodada.
-3. **O typecheck do electron precisa entrar no processo**, senão o próximo "limpo" mente de novo.
+| Medida | Antes | Depois |
+|---|---|---|
+| erros totais no projeto electron | 27 | **19** |
+| erros em arquivos de **produção** | 2 | **0** |
+| erros em arquivos de teste | 25 | 19 |
 
-Enquanto 1 e 2 existirem, `typecheck` **não** é um critério que eu possa citar como prova de saúde do
-processo principal.
+Os dois erros de produção foram corrigidos com causa-raiz identificada, não por cast:
+
+1. **`crm-meta-webhook-map.ts`** — o tipo `CrmConversation` ganhou `tags` quando o CRM foi estendido,
+   e este arquivo continuou montando a conversa sem `notes` e `tags`. Conversa nova do canal não tem
+   nota nem etiqueta: os defaults corretos são `''` e `[]`, adicionados.
+2. **`crm-whatsapp-ingest.ts`** — o tipo `SignatureResult` é uma união discriminada correta, mas o
+   narrowing por `!ok` não estava sendo aplicado neste projeto. Trocado por `ok === false`, explícito.
+
+## O que continua pendente
+
+19 erros em 5 arquivos de **teste** do CRM, todos do mesmo tipo: acessar `.contacts` / `.opportunities`
+numa união `{ dados } | { error }` sem estreitar antes.
+
+São mecânicos — mas são de arquivos que não são desta rodada, e consertar 19 asserções em lote sem
+executar cada um seria trocar um erro silencioso por outro. O próximo passo é arquivo por arquivo.
+
+**Enquanto esses 19 existirem, o typecheck do electron não pode ser usado como critério de aprovação.**
+A produção está limpa; a suíte de teste do CRM não está.

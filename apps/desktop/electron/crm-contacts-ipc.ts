@@ -5,6 +5,7 @@
 // acidente.
 
 import { registerCrmCompanyLogoIpc } from './crm-company-logo'
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import { CrmContactStore, crmStorePath, type CrmContact } from './crm-contacts-store'
@@ -24,7 +25,7 @@ export interface CrmContactsStore {
   upsert: (input: unknown) => Promise<CrmContactsResult>
 }
 
-export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: CrmContactsStore): void {
+export function registerCrmContactsIpc(ipcMain: IpcRegistrar, store: CrmContactsStore): void {
   ipcMain.handle('hermes:crm-contacts:list', async (): Promise<{ contacts: CrmContact[] }> => ({
     contacts: await store.list()
   }))
@@ -41,7 +42,7 @@ export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: 
 }
 
 /** Monta o store do usuário e registra os handlers: `main.ts` só precisa de uma chamada. */
-export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): CrmConversationStore {
+export function mountCrmContacts(ipcMain: IpcRegistrar, userDataDir: string): CrmConversationStore {
   registerCrmCompanyLogoIpc(ipcMain)
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
   registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))

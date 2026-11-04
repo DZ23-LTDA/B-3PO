@@ -1,6 +1,7 @@
 // Tarefas do CRM expostas ao renderer por IPC. Mesmo desenho dos contatos e do funil: o processo principal
 // valida e grava, e um erro de validação volta como resposta `{ error }` em vez de exceção.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { CrmTask } from './crm-tasks-store'
@@ -13,7 +14,7 @@ export interface CrmTaskStoreLike {
   upsert: (input: unknown) => Promise<CrmTasksResult>
 }
 
-export function registerCrmTasksIpc(ipcMain: Pick<IpcMain, 'handle'>, store: CrmTaskStoreLike): void {
+export function registerCrmTasksIpc(ipcMain: IpcRegistrar, store: CrmTaskStoreLike): void {
   ipcMain.handle('hermes:crm-tasks:list', async (): Promise<{ tasks: CrmTask[] }> => ({ tasks: await store.list() }))
 
   ipcMain.handle(

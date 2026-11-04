@@ -35,7 +35,9 @@ export async function ingestMetaWebhook(input: IngestInput): Promise<IngestResul
   const { appSecret, now = Date.now(), rawBody, signature, sink } = input
 
   const assinatura = verifyMetaSignature(rawBody, signature, appSecret)
-  if (!assinatura.ok) {
+  // Comparacao explicita em vez de !ok: com o tsconfig do electron o narrowing por negacao nao
+  // estava sendo aplicado, e o compilador via a uniao inteira.
+  if (assinatura.ok === false) {
     return { error: assinatura.reason }
   }
 
