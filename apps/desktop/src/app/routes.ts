@@ -25,6 +25,7 @@ export const SALES_ROUTE = '/sales'
 export const FINANCE_ROUTE = '/finance'
 export const AGENDA_ROUTE = '/agenda'
 export const COMPRAS_ROUTE = '/compras'
+export const EMPRESA_ROUTE = '/empresa'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -40,6 +41,7 @@ export type AppView =
   | 'compras'
   | 'crm'
   | 'cron'
+  | 'empresa'
   | 'finance'
   // A contributed (plugin) full page at its own route — NOT chat. Without this
   // distinction contributed paths fell through appViewForPath's 'chat' default,
@@ -65,6 +67,7 @@ export type AppRouteId =
   | 'compras'
   | 'crm'
   | 'cron'
+  | 'empresa'
   | 'finance'
   | 'messaging'
   | 'new'
@@ -95,6 +98,7 @@ export const APP_ROUTES = [
   { id: 'agenda', path: AGENDA_ROUTE, view: 'agenda' },
   { id: 'compras', path: COMPRAS_ROUTE, view: 'compras' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
+  { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },
   { id: 'finance', path: FINANCE_ROUTE, view: 'finance' },
   { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
   { id: 'sales', path: SALES_ROUTE, view: 'sales' },

@@ -724,6 +724,28 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    empresa: {
+      addBranch: string
+      addCompany: string
+      address: string
+      branchLabel: string
+      branchName: string
+      cnpj: string
+      company: string
+      companyRequired: string
+      duplicateCnpj: string
+      empty: string
+      hint: string
+      loadFailed: string
+      migrationNote: string
+      name: string
+      nameRequired: string
+      noBranches: string
+      pickCompany: string
+      title: string
+      tradeName: string
+      unavailable: string
+    }
     finance: {
       add: string
       alreadyPaid: string

@@ -817,6 +817,28 @@ export const en: Translations = {
       unitCost: 'Unit cost',
       unavailable: 'Purchases need the desktop app to work.'
     },
+    empresa: {
+      addBranch: 'Add branch',
+      addCompany: 'Add company',
+      address: 'Address',
+      branchLabel: 'Branch',
+      branchName: 'Branch name',
+      cnpj: 'CNPJ',
+      company: 'Company',
+      companyRequired: 'Select a company.',
+      duplicateCnpj: 'A company with this CNPJ already exists.',
+      empty: 'No company registered yet.',
+      hint: 'The company is the tenant. Each one keeps its own data.',
+      loadFailed: 'Could not load companies.',
+      migrationNote: 'Registering a company does not move existing data into it yet — that migration is a separate, backed-up step.',
+      name: 'Name',
+      nameRequired: 'Enter the name.',
+      noBranches: 'No branch yet.',
+      pickCompany: 'Select a company',
+      title: 'Company',
+      tradeName: 'Trade name',
+      unavailable: 'Companies need the desktop app to work.'
+    },
     finance: {
       add: 'Add entry',
       alreadyPaid: 'This entry is already settled.',

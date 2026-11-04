@@ -1027,6 +1027,28 @@ export const ptOverrides: TranslationOverrides = {
       unitCost: 'Custo unitário',
       unavailable: 'As compras precisam do aplicativo desktop para funcionar.'
     },
+    empresa: {
+      addBranch: 'Adicionar filial',
+      addCompany: 'Cadastrar empresa',
+      address: 'Endereço',
+      branchLabel: 'Filial',
+      branchName: 'Nome da filial',
+      cnpj: 'CNPJ',
+      company: 'Empresa',
+      companyRequired: 'Selecione uma empresa.',
+      duplicateCnpj: 'Já existe uma empresa com este CNPJ.',
+      empty: 'Nenhuma empresa cadastrada ainda.',
+      hint: 'A empresa é o tenant. Cada uma mantém os próprios dados.',
+      loadFailed: 'Não foi possível carregar as empresas.',
+      migrationNote: 'Cadastrar empresa ainda não move os dados existentes para ela — essa migração é um passo separado, com backup.',
+      name: 'Nome',
+      nameRequired: 'Informe o nome.',
+      noBranches: 'Nenhuma filial ainda.',
+      pickCompany: 'Selecione uma empresa',
+      title: 'Empresa',
+      tradeName: 'Nome fantasia',
+      unavailable: 'As empresas precisam do aplicativo desktop para funcionar.'
+    },
     finance: {
       add: 'Lançar',
       alreadyPaid: 'Este lançamento já está liquidado.',
