@@ -317,3 +317,21 @@ Se o gate nao disser `ok`, nao commitar.
 5. Experimento com duas causas possiveis nao prova nenhuma — remover o confundidor e refazer.
 6. Nada de funcao que devolve sempre o mesmo valor disfarcada de regra.
 7. Nao declarar modulo pronto por ter campo e validacao: a tela e o teste no binario fazem parte.
+
+
+## Decisao do proprietario (rodada 226) — credencial adiada
+
+Perguntado explicitamente se as nove variaveis do WhatsApp Cloud API estavam configuradas, o proprietario respondeu:
+**"Ainda nao — siga no que nao depende disso."**
+
+Consequencias, para nao haver duvida na retomada:
+
+- o envio de mensagens **nao** sera ligado na tela nesta fase. O codigo `sendText` continua existindo e testado, sem UI.
+- a ordem de trabalho passa a ser, por prioridade de valor sem credencial:
+  1. filtro por etiqueta na tela (as funcoes `matchesTag` e `usedTags` ja existem e tem teste);
+  2. anexos (validacao de tipo e tamanho, sem upload real);
+  3. Kanban de oportunidades;
+  4. ligar oportunidade a conversa.
+- nao perguntar de novo sobre credencial antes de esgotar os itens acima.
+- **continua proibido** declarar "WhatsApp conectado": a cadeia esta provada com payload assinado sintetico, e a API da Meta
+  nunca foi chamada.
