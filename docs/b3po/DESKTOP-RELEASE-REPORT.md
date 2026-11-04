@@ -1389,3 +1389,33 @@ evita prometer o que não existe.
 
 Verificação: `src/i18n` + `src/app/quick-entry` + `src/app/settings` = 95 arquivos / 733 testes; gate 14 ok; MSIX
 reconstruído.
+
+### Rodada 134 — medição honesta do inglês residual: 5 linhas em 13 telas
+
+Rodei a varredura por CDP nas **13 telas de Configurações** com o app empacotado e contei as linhas que ainda
+parecem inglês (heurística: palavras funcionais em inglês, sem acento, descontando nomes de marca/provedor).
+
+Antes desta rodada: **8 linhas**. Traduzi 3 (duas de `updates` — "não foi possível falar com o servidor de
+atualizações", "o backend já está na versão mais recente" — e o `pluginPages.blurb`). **Agora: 5.**
+
+As 5 restantes, com o motivo de cada uma:
+
+| Tela | Texto | Motivo |
+|---|---|---|
+| Provedores | "Sign in with a subscription…" | `quickEntry.providers.intro` — bloco `quickEntry` de topo **não existe no pt** (ver dívida abaixo) |
+| Cobrança (2) | "Connect your Nous account" + corpo | mesma causa: `quickEntry.billing.state.notice.loggedOut.*` |
+| Sobre | "No Python interpreter is available…" | vem do **schema do backend** |
+| Avançado | "When Hermes updates itself…" (descrição) | também do schema — o catálogo tem a tradução, o app mostra a do schema |
+
+### Dívida estrutural que eu encontrei e NÃO consertei às pressas
+
+O `pt.ts` tem deriva de aninhamento: o bloco `settings.quickEntry` (chaves do painel "Entrada rápida") está no
+**nível de topo** com recuo inconsistente, e `subpages` aparece **depois** dele (linha ~1140), embora os rótulos de
+sub-página funcionem nas capturas. Tentar criar um `quickEntry` de topo para os 3 textos da janela esbarra em
+`TS1117` (chave duplicada) e num `settings` que não contém `subpages`.
+
+Isso é dívida real, não cosmética: qualquer tradução futura de `quickEntry.*` vai bater nela. **Parei** em vez de
+fazer cirurgia de aninhamento no fim da rodada — o arquivo está funcionando e verde, e quebrar i18n inteiro para
+ganhar 3 strings seria troca ruim. Fica registrado como a próxima tarefa de limpeza, com o diagnóstico pronto.
+
+Verificação: `src/i18n` + `src/app/settings` = 94 arquivos / 732 testes; gate 14 ok; MSIX reconstruído.

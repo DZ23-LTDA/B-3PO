@@ -80,7 +80,8 @@ describe('pt-BR', () => {
       'sidebar',
       'skills',
       'statusStack',
-      'ui'
+      'ui',
+      'updates'
     ])
   })
 

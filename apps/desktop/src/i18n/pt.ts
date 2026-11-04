@@ -531,6 +531,10 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    pluginPages: {
+      blurb:
+        'Opções que os plugins instalados adicionam. Cada plugin ganha a própria página, e alguns adicionam sub-páginas dentro dela.'
+    },
     profileScope: { appliesTo: 'Aplica-se a' },
     localModels: ptLocalModels,
     notifications: ptNotifications,
@@ -1183,6 +1187,12 @@ export const ptOverrides: TranslationOverrides = {
       advancedDesktop: 'Desktop e inicialização',
     }
   },
+  /** Só o que o painel de atualizações mostra hoje; o resto do bloco cai no inglês. */
+  updates: {
+    cantReach: 'Não foi possível falar com o servidor de atualizações.',
+    latestBodyBackend: 'O backend já está na versão mais recente.'
+  },
+
 }
 
 export const pt = defineLocale(ptOverrides)
