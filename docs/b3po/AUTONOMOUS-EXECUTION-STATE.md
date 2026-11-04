@@ -192,3 +192,40 @@ Ligar o webhook do adapter oficial ao store de conversas:
    aleatoria);
 5. **gate vermelho nao commit** — a guarda `if ($g -notmatch 'ok') { exit 1 }` existe por causa disso;
 6. chave nova em catalogo grande: localizar o bloco **contando chaves**, nunca por proximidade de texto.
+
+
+## PONTO DE RETOMADA — fim da rodada 199 (leia isto primeiro)
+
+- **branch** `b3po-brand` · **HEAD** `c89404caf9` · **261 commits** · arvore limpa
+- **gate** `python scripts/check` -> **14 checks, ok**
+- **MSIX** reconstruido a cada rodada, **nao assinado**
+- **PR #1** draft, aberto, NOT READY
+
+### Cadeia do WhatsApp — estado por elo, sem inflar
+
+| elo | estado | prova |
+|---|---|---|
+| Meta -> adapter (HMAC) | existente no upstream | testes do adapter |
+| adapter -> ponte python | implementado | 10 testes pytest |
+| ponte -> listener local | **provado no binario** | e2e: 200 stored / 401 sem token |
+| listener -> store | **provado no binario** | idempotencia por `external_id` |
+| store -> tela | **provado no binario** | capturas de ler, lida, resolvida, busca, nota |
+| payload de envio | implementado | 7 testes |
+| envio HTTP (forma) | implementado | 7 testes com transporte injetado |
+| **Meta aceita o envio** | **NAO PROVADO** | falta credencial real |
+| gravar enviada com `wamid` | nao implementado | depende do item acima |
+| UI de resposta | nao implementada | depende do item acima |
+
+### O proximo passo tem nome e limite
+
+1. **bloqueado por credencial:** `sendText` -> gravar a mensagem com o `wamid` devolvido -> textarea de resposta na
+   conversa, com estado de envio/falha/retentativa. As tres pecas estao prontas; falta o unico dado que eu nao posso
+   inventar.
+2. **nao bloqueado, se quiser continuar sem credencial:** indicadores do CRM (14.6) calculados dos stores reais;
+   anexos; etiquetas/atribuicao; e a lista de tarefas com Kanban de verdade.
+
+### Regra que vale mais que qualquer feature desta sessao
+
+**Nunca afirmar "funciona" com base em teste que passa.** Duas vezes o binario derrubou o que os testes aprovavam:
+o listener que subia em porta aleatoria e o bloco de UI que nunca foi inserido (o script imprimiu `ok` sem alterar
+nada). Medir o efeito, no arquivo e na tela — nao o log.
