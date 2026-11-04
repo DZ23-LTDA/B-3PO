@@ -68,3 +68,27 @@ describe('filtro do funil', () => {
     expect(isKnownContact(contatos, '')).toBe(true)
   })
 })
+
+describe('isKnownContact com formatos diferentes', () => {
+  const contatos = [{ phone: '+5511999991111' }]
+
+  it('reconhece o contato quando a oportunidade guardou o telefone com mascara', () => {
+    expect(isKnownContact(contatos, '+55 11 99999-1111')).toBe(true)
+  })
+
+  it('reconhece o contato quando a oportunidade guardou so os digitos', () => {
+    expect(isKnownContact(contatos, '5511999991111')).toBe(true)
+  })
+
+  it('reconhece quando o contato e que esta com mascara', () => {
+    expect(isKnownContact([{ phone: '(11) 99999-1111' }], '11999991111')).toBe(true)
+  })
+
+  it('continua acusando contato que nao existe', () => {
+    expect(isKnownContact(contatos, '+5511988887777')).toBe(false)
+  })
+
+  it('telefone vazio nao e contato excluido — e item solto', () => {
+    expect(isKnownContact(contatos, '   ')).toBe(true)
+  })
+})

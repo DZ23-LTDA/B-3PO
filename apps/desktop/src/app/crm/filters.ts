@@ -48,10 +48,18 @@ export function hasActiveFilter(filter: OpportunityFilter): boolean {
  * Mas a tela precisa dizer que o telefone ali é um contato que não existe mais, em vez de mostrar um número
  * solto como se estivesse tudo bem.
  */
+function phoneDigits(value: string): string {
+  return value.replace(/\D/g, '')
+}
+
 export function isKnownContact(contacts: readonly { phone: string }[], phone: string): boolean {
-  if (!phone.trim()) {
+  // Os contatos sao gravados so com digitos (o store chama digitsOnly), mas a oportunidade e a tarefa guardam o
+  // telefone como foi digitado. Comparar texto cru acusava "contato excluido" para um contato que existe sempre
+  // que alguem escrevia com mascara ("+55 11 99999-1111" x "+5511999991111"). Comparar digitos resolve os dois lados.
+  const alvo = phoneDigits(phone)
+  if (!alvo) {
     return true
   }
 
-  return contacts.some(contact => contact.phone === phone)
+  return contacts.some(contact => phoneDigits(contact.phone) === alvo)
 }

@@ -1723,3 +1723,14 @@ nao quebrou.
 
 Nota que o caso do zero e deliberado: `resumo(1, 0)` espera "0 atrasadas", nao "0 atrasada" — e o tipo de detalhe
 que so aparece quando se escreve a expectativa por extenso.
+
+### Rodada 158 — falso positivo do "contato excluido" (bug da rodada 147)
+
+A marca que eu entreguei na rodada 147 comparava telefone por texto cru. Contatos sao gravados so com digitos; a
+oportunidade e a tarefa guardam o telefone como foi digitado. Logo, "+55 11 99999-1111" contra "+5511999991111"
+acusava **contato excluido num contato que existe**.
+
+Corrigido comparando digitos dos dois lados; telefone vazio segue devolvendo `true` (item solto, nao orfao).
+Provado vermelho na base: 3 dos 14 testes falham sem a correcao, 14 passam com ela.
+
+**E o segundo caso desta sessao em que o teste de caminho feliz nao bastava** — precisa-se do caso de formato.

@@ -490,3 +490,20 @@ Evidência: `docs/b3po/evidence/crm-contato-excluido-pt.png`.
 **Erro meu, registrado:** na primeira tentativa o `replace` não casou a linha do cartão e eu imprimi "cartão
 marcado" mesmo assim; o teste visual mostrou a marca ausente. Só aceitei o item como pronto depois que o
 `grep` no fonte mostrou `isKnownContact` e a captura mostrou o texto.
+
+
+## Bug encontrado na propria marca de "contato excluido" (rodada 158)
+
+A marca da rodada 147 comparava telefone por **texto cru**. Mas o store de contatos grava so digitos (`digitsOnly`), enquanto
+a oportunidade e a tarefa guardam `contact_phone` **como foi digitado**. Resultado: quem escrevia "+55 11 99999-1111"
+via **"contato excluido" num contato que existia** — falso positivo, o pior tipo de aviso, porque ensina o usuario a
+ignorar o aviso.
+
+`isKnownContact` agora compara **digitos dos dois lados** (`phoneDigits`). Telefone vazio (ou sem nenhum digito) continua
+devolvendo `true`: item sem telefone e item solto, nao orfao.
+
+**Provado vermelho na base:** com a comparacao antiga, 3 dos 14 testes falham exatamente nos casos de formato
+(mascara na oportunidade, so digitos, mascara no contato); com a correcao, 14 passam.
+
+Fica o registro do padrao: *uma feature nova pode nascer com o bug que ela mesma deveria evitar* — e o teste de
+formato, nao o teste de caminho feliz, e quem pega isso.
