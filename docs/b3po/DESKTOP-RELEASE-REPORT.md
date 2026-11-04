@@ -904,3 +904,23 @@ com aviso de confiança, os destaques e o bloco de modo desenvolvedor.
 Progresso do backlog: **22 de 26** famílias em pt. Restam `local_models` e os três de conectores.
 
 Verificação: 93 arquivos / 725 testes verdes (`src/i18n` 112 + `src/app/settings` 613); gate 14 ok; MSIX reconstruído.
+
+### Rodada 114 — modelos locais em pt
+
+**`pt_local_models`** (a maior família restante, 103 chaves): runtime llama.cpp (instalar, atualizar, build e
+backend), hardware detectado (GPU, RAM, memória unificada), biblioteca de modelos com recomendação e o motivo dela,
+download com pausa/retomada/velocidade/ETA, quickstart de um clique, "tudo na GPU" x "parte na RAM" com as dicas,
+carregar/descarregar da memória, ligar/desligar servidor, busca no Hugging Face e arquivo GGUF avulso.
+
+### O que o `tsc` pegou (duas vezes)
+
+1. `resumeFailed` — a chave real é `downloadResumeFailed`; eu tinha lido o nome cortado na borda do buffer.
+2. Faltavam `activateFailed`, `activateDoneToast`, `downloadFailed`, `downloadPauseFailed`.
+
+Nenhuma das duas passaria sem o tipo, e as duas seriam tela em inglês em produção. É o mesmo padrão da rodada 110:
+**ler arquivo grande em pedaços corta nome de chave**.
+
+Progresso do backlog: **23 de 26** famílias em pt. Restam só os três de conectores — que exigem extrair do `en.ts`
+em vez do padrão `en_<família>`.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.

@@ -18,6 +18,7 @@ import { ptErrorCodes } from './pt_error_codes'
 import { ptErrorLayers } from './pt_error_layers'
 import { ptFirstRun } from './pt_first_run'
 import { ptGatewayHost } from './pt_gateway_host'
+import { ptLocalModels } from './pt_local_models'
 import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
 import { ptOnboarding } from './pt_onboarding'
@@ -504,6 +505,7 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    localModels: ptLocalModels,
     notifications: ptNotifications,
     about: { channel: ptUpdateChannel },
     memoryLayers: ptMemoryLayers,
