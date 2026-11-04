@@ -114,3 +114,5 @@ negociação de R$ 15.000, 1 ganha de R$ 4.500, 2 tarefas com 1 atrasada) — n�
 | `crm-tempo-resposta.png` | tempo de resposta de 12 min calculado e exibido |
 
 Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relatorio aponta para a captura correspondente.
+
+- `crm-selo-esperando.png` — selo "Aguardando resposta" numa conversa e ausente na respondida
