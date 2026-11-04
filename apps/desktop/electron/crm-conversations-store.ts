@@ -49,6 +49,13 @@ export interface CrmConversation {
   tags: string[]
   title: string
   status: ConversationStatus
+  /**
+   * Empresa dona da conversa.
+   *
+   * O CRM nasceu sem tenant; `id` era a única identidade. Registros gravados antes disso são lidos como
+   * `local` por `parseConversations`, então nada precisa ser migrado destrutivamente.
+   */
+  tenant_id: string
   unread: number
   updated_at: number
 }
@@ -127,9 +134,12 @@ function normalizeTags(raw: unknown): string[] {
   return saida
 }
 
+export const DEFAULT_TENANT = 'local'
+
 export function normalizeConversation(
   raw: unknown,
-  now: number
+  now: number,
+  tenantId: string = DEFAULT_TENANT
 ): { conversation: CrmConversation } | { error: string } {
   if (!raw || typeof raw !== 'object') {
     return { error: 'Conversa inválida.' }
@@ -178,6 +188,7 @@ export function normalizeConversation(
       notes: text(input['notes']).slice(0, NOTES_MAX),
       status,
       tags: normalizeTags(input['tags']),
+      tenant_id: tenantId || DEFAULT_TENANT,
       title,
       unread: typeof input['unread'] === 'number' && input['unread'] > 0 ? Math.floor(input['unread']) : 0,
       updated_at: stamp(input['updated_at'], now),
@@ -201,7 +212,10 @@ export function parseConversations(raw: string): ConversationsFile {
   }
   const conversations: CrmConversation[] = []
   for (const entry of list) {
-    const parsed = normalizeConversation(entry, Date.now())
+    // O tenant gravado manda; sem ele (arquivo anterior ao multiempresa) a conversa é do tenant local.
+    // Ler não reescreve o arquivo: a conversa antiga só ganha o campo quando alguém a editar.
+    const doArquivo = (entry as Record<string, unknown> | null)?.['tenant_id']
+    const parsed = normalizeConversation(entry, Date.now(), typeof doArquivo === 'string' ? doArquivo : DEFAULT_TENANT)
     if ('conversation' in parsed) {
       conversations.push(parsed.conversation)
     }
@@ -255,22 +269,28 @@ export class CrmConversationStore {
     this.file = file
   }
 
-  async list(): Promise<CrmConversation[]> {
+  async list(tenantId: string = DEFAULT_TENANT): Promise<CrmConversation[]> {
     try {
       const raw = await readFile(this.file, 'utf8')
-      return sortConversations(parseConversations(raw).conversations)
+      const todas = parseConversations(raw).conversations
+
+      return sortConversations(todas.filter(c => c.tenant_id === tenantId))
     } catch {
       return []
     }
   }
 
-  async upsert(input: unknown): Promise<{ conversation: CrmConversation } | { error: string }> {
-    const normalized = normalizeConversation(input, Date.now())
+  async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ conversation: CrmConversation } | { error: string }> {
+    const normalized = normalizeConversation(input, Date.now(), tenantId)
     if ('error' in normalized) {
       return normalized
     }
-    const conversations = await this.list()
-    const index = conversations.findIndex(entry => entry.id === normalized.conversation.id)
+    // Le TODAS: o `write` grava o arquivo inteiro, e gravar so a lista do tenant apagaria as conversas
+    // das outras empresas. O indice exige id E tenant: conhecer o id nao basta para editar a alheia.
+    const conversations = await this.readAll()
+    const index = conversations.findIndex(
+      entry => entry.id === normalized.conversation.id && entry.tenant_id === normalized.conversation.tenant_id
+    )
     if (index === -1) {
       conversations.push(normalized.conversation)
     } else {
@@ -285,14 +305,24 @@ export class CrmConversationStore {
     return { conversation: normalized.conversation }
   }
 
-  async remove(id: string): Promise<{ ok: true } | { error: string }> {
-    const conversations = await this.list()
-    const remaining = conversations.filter(entry => entry.id !== id)
+  async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ ok: true } | { error: string }> {
+    // Le TODAS: `write` grava o arquivo inteiro. Filtrar por tenant aqui apagaria as outras empresas.
+    const conversations = await this.readAll()
+    const remaining = conversations.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))
     if (remaining.length === conversations.length) {
       return { error: 'Conversa não encontrada.' }
     }
     await this.write(remaining)
     return { ok: true }
+  }
+
+  /** Todas as conversas do arquivo, sem filtro de tenant. Usado por quem grava o arquivo inteiro. */
+  private async readAll(): Promise<CrmConversation[]> {
+    try {
+      return parseConversations(await readFile(this.file, 'utf8')).conversations
+    } catch {
+      return []
+    }
   }
 
   private async write(conversations: CrmConversation[]): Promise<void> {

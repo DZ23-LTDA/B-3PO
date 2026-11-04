@@ -109,6 +109,9 @@ export function parseMetaWebhook(payload: unknown, now: number = Date.now()): Me
           notes: '',
           status: 'aberta',
           tags: [],
+          // Mensagem que chega pelo webhook entra no tenant local: o payload da Meta nao carrega a
+          // empresa de destino, e adivinhar seria pior que assumir o dono da instalacao.
+          tenant_id: 'local',
           title: nomeDoContato(value, de, telefone),
           unread: 1,
           updated_at: now,
