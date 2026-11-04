@@ -907,6 +907,8 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'Este cliente não tem disco local para o funil.',
     },
     crmConversations: {
+      indicatorsTitle: 'Visao rapida',
+      newConversations: 'Novas em 7 dias',
       waitingReply: 'Aguardando resposta',
       responseTime: 'Tempo de resposta',
       notePlaceholder: 'Nota interna (nunca vai para o cliente)',

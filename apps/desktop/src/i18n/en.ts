@@ -697,6 +697,8 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      indicatorsTitle: 'At a glance',
+      newConversations: 'New in 7 days',
       waitingReply: 'Waiting for reply',
       responseTime: 'Response time',
       notePlaceholder: 'Internal note (never sent to the customer)',

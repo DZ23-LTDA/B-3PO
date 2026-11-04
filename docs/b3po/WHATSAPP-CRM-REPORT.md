@@ -1248,3 +1248,25 @@ exato do inicio da janela entra.
 
 **Falta:** a tela de indicadores. As funcoes (tempo de resposta, aguardando resposta, novas conversas) estao prontas e
 testadas; falta monta-las num painel. Nao vou chamar de pronto sem a captura dele.
+
+
+## Painel "Visao rapida" no CRM (rodada 215)
+
+As tres funcoes prontas agora aparecem juntas no topo da secao Conversas: **Aguardando resposta**, **Novas em 7 dias** e
+**Tempo de resposta**.
+
+**Prova** (`docs/b3po/evidence/crm-painel.png`), perfil semeado com tres conversas e os numeros conferidos um a um:
+
+| indicador | tela | esperado pelo seed |
+|---|---|---|
+| Aguardando resposta | **2** | "Esperando" (ultima do cliente) + "Antiga" (ultima do cliente) |
+| Novas em 7 dias | **2** | criadas ha 2 e 3 dias; a de 30 dias fica fora |
+| Tempo de resposta | **12 min** | entrada 20 min atras, saida 8 min atras |
+
+Nao e "o painel aparece": os tres numeros batem com o que foi semeado, inclusive os casos que **devem** ficar de fora.
+
+**Erros do caminho:** `Messages` nao existe em `i18n/types` (o tipo do catalogo tem outro nome) — resolvi com tipo local
+no componente em vez de importar; e o `types.ts` recebeu as chaves na primeira execucao (o log truncado escondeu a linha).
+
+**Quarta vez que a extracao por script mentiu:** o `evaluate` voltou `undefined` e foi o **screenshot** que mostrou os tres
+numeros. Verificacao de UI se faz olhando a tela.

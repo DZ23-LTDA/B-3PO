@@ -10,6 +10,7 @@ import {
 } from '@/api/crm-conversations'
 import { filterConversations, type ConversationFilter } from '@/app/crm/conversation-filters'
 import { needsReply, responseTime, responseTimeLabel } from '@/app/crm/response-time'
+import { CrmIndicators } from '@/app/crm/indicators'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
@@ -114,6 +115,8 @@ export function CrmConversationsSection() {
               {section.naoLidasLabel}
             </span>
           </div>
+
+          {rows === null ? null : <CrmIndicators conversas={rows} section={section} />}
 
           <div className="flex flex-col gap-2">
             <input
