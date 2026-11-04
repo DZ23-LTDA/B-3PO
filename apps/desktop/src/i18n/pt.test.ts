@@ -56,6 +56,7 @@ describe('pt-BR', () => {
       'assistant',
       'boot',
       'butterbar',
+      'catalog',
       'common',
       'composer',
       'connectorOffer',

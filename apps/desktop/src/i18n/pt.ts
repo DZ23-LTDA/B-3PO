@@ -11,6 +11,7 @@
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { defineFieldCopy } from '@/app/settings/field-copy'
 import { ptBoot } from './pt_boot'
+import { ptCatalog } from './pt_catalog'
 import { ptClarify } from './pt_clarify'
 import { ptCronControl } from './pt_cron_control'
 import { ptErrorCodes } from './pt_error_codes'
@@ -32,6 +33,7 @@ import { ptThemePicker } from './pt_theme_picker'
 import { ptUpdateChannel } from './pt_update_channel'
 
 export const ptOverrides: TranslationOverrides = {
+  catalog: ptCatalog,
   onboarding: ptOnboarding,
   firstRun: ptFirstRun,
   ...ptNotices,

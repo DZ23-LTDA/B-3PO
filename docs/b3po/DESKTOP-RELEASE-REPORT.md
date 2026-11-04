@@ -893,3 +893,14 @@ o script de caminho devolve o mesmo rótulo para os dois.
 Progresso do backlog: **21 de 26** famílias em pt. Restam `catalog`, `local_models` e os três de conectores.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 113 — catálogo de Capacidades em pt
+
+**`pt_catalog`**: a página que mais aparecia em inglês nas minhas capturas. Entraram busca de skills e plugins,
+filtros e fontes, ordenação, contagem de resultados, os níveis (Oficial / Verificado / Comunidade), ficha do item
+(autor, fonte, categoria, versão, plataformas, ferramentas, hooks, licença, commit revisado), o fluxo de instalação
+com aviso de confiança, os destaques e o bloco de modo desenvolvedor.
+
+Progresso do backlog: **22 de 26** famílias em pt. Restam `local_models` e os três de conectores.
+
+Verificação: 93 arquivos / 725 testes verdes (`src/i18n` 112 + `src/app/settings` 613); gate 14 ok; MSIX reconstruído.
