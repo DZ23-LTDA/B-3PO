@@ -668,3 +668,21 @@ Decisoes no codigo:
 formatos para o mesmo dado. Corrigido passando o telefone normalizado ao fallback.
 
 **Falta:** o handler (validar HMAC e chamar este mapeador) e a gravacao pelo `CrmConversationStore`.
+
+
+## Assinatura do webhook (rodada 180)
+
+`apps/desktop/electron/crm-whatsapp-signature.ts` — `verifyMetaSignature(corpoCru, header, appSecret)`.
+
+**Fail-closed:** sem `APP_SECRET` configurado, **nada passa**. Um webhook aberto por falta de configuracao e o pior
+modo de falha possivel: aceitaria mensagem de qualquer um na URL.
+
+**`timingSafeEqual`, nao `===`:** comparar hash com comparacao normal vaza, pelo tempo de resposta, quantos caracteres do
+HMAC estavam certos — o que basta para forjar a assinatura byte a byte. E o tamanho e checado antes, porque
+`timingSafeEqual` **lanca** com tamanhos diferentes (o teste cobre isso: nao pode estourar).
+
+Outras decisoes: recusa antes de comparar quando o hex nao tem 64 caracteres; aceita hex em maiuscula (implementacoes
+variam); corpo vazio tambem e assinavel.
+
+**Medido:** 9 testes em `electron/crm-whatsapp-signature.test.ts`, verdes (aceita correta, recusa corpo adulterado, recusa
+outro segredo, fail-closed, header ausente, formato errado, maiuscula, corpo vazio, tamanho diferente).
