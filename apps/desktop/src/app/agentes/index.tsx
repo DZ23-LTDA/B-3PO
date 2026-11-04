@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
+import { AprovacoesPendentes } from './aprovacoes'
 
 /**
  * Agentes.
@@ -131,6 +132,10 @@ export function AgentesView() {
         <h1 className="text-lg font-semibold text-foreground">{copy.title}</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.hint}</p>
       </header>
+
+      {/* Fila de aprovacao. Fica ACIMA do cadastro porque e o que chega sem o usuario procurar: um pedido
+          esperando perde a validade em 24h e nao avisa. */}
+      <AprovacoesPendentes />
 
       {!disponivel ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
