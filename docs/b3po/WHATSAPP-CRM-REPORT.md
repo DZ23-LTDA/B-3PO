@@ -964,3 +964,38 @@ Meta -> adapter oficial (valida HMAC) -> forward_to_crm -> 127.0.0.1:porta
 ```
 
 **66 testes** cobrindo cada elo. O que falta agora **nao e codigo**: e configurar as variaveis e ver a mensagem chegar.
+
+
+## A prova ponta a ponta FALHOU — e o motivo e um defeito de montagem (rodada 188)
+
+Tentei a prova mais forte disponivel sem credencial: subir o **app empacotado** com
+`HERMES_DESKTOP_WHATSAPP_INGEST=1`, `B3PO_CRM_INGEST_PORT` e `B3PO_CRM_INGEST_TOKEN`, postar um webhook **assinado com
+HMAC** e conferir a conversa na tela.
+
+Resultado:
+
+```
+TypeError: fetch failed — connect ECONNREFUSED 127.0.0.1:9187
+```
+
+**O listener nao subiu no binario.** Investiguei a causa:
+
+```
+chamadas de mountCrmContacts(ipcMain...): [17504]
+enclosing L17389: async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult>
+```
+
+A **unica** chamada de `mountCrmContacts` no `main.ts` esta dentro de `runDesktopUninstall` — o fluxo de desinstalacao. Ou
+seja: a montagem do CRM (IPC **e** agora o listener) depende de uma funcao que roda no desinstalador.
+
+**Por que ninguem notou:** a UI do CRM funciona porque as telas que testei antes usavam o **build de desenvolvimento**
+(atualizado), enquanto o binario empacotado segue outro caminho de boot. E o proprio CRM ja funcionava no empacotado —
+entao essa chamada deve ser alcancada por algum caminho que eu nao consegui confirmar nesta rodada. **Nao afirmo que o CRM
+esta quebrado no binario**; afirmo que **o listener nao abriu**, e que o unico ponto de montagem conhecido esta no lugar
+errado.
+
+**Consequencia honesta:** as 66 provas sao de modulo e de integracao em teste. **Nao existe prova de que o listener sobe
+no app real.** A correcao provavel e mover a montagem do CRM para o boot do app (fora de `runDesktopUninstall`), com um
+teste que garanta que a montagem acontece no startup — e refazer esta mesma prova.
+
+Registrado como **NOT_READY** com causa nomeada, nao como "quase pronto".
