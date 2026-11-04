@@ -1027,6 +1027,23 @@ export const ptOverrides: TranslationOverrides = {
       unitCost: 'Custo unitário',
       unavailable: 'As compras precisam do aplicativo desktop para funcionar.'
     },
+    servicos: {
+      add: 'Cadastrar serviço',
+      duration: 'Duração (minutos)',
+      durationRequired: 'Informe uma duração maior que zero.',
+      duplicate: 'Já existe um serviço com este nome.',
+      empty: 'Nenhum serviço cadastrado ainda.',
+      free: 'cortesia',
+      hint: 'Duração e preço daqui são os que a agenda usa.',
+      loadFailed: 'Não foi possível carregar os serviços.',
+      name: 'Nome',
+      nameRequired: 'Informe o nome.',
+      notFound: 'Serviço não encontrado.',
+      price: 'Preço',
+      remove: 'Remover',
+      title: 'Serviços',
+      unavailable: 'Os serviços precisam do aplicativo desktop para funcionar.'
+    },
     empresa: {
       addBranch: 'Adicionar filial',
       addCompany: 'Cadastrar empresa',

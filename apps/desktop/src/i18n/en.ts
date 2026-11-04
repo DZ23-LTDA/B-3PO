@@ -817,6 +817,23 @@ export const en: Translations = {
       unitCost: 'Unit cost',
       unavailable: 'Purchases need the desktop app to work.'
     },
+    servicos: {
+      add: 'Add service',
+      duration: 'Duration (minutes)',
+      durationRequired: 'Enter a duration greater than zero.',
+      duplicate: 'A service with this name already exists.',
+      empty: 'No service registered yet.',
+      free: 'free',
+      hint: 'Duration and price here are what the schedule uses.',
+      loadFailed: 'Could not load services.',
+      name: 'Name',
+      nameRequired: 'Enter the name.',
+      notFound: 'Service not found.',
+      price: 'Price',
+      remove: 'Remove',
+      title: 'Services',
+      unavailable: 'Services need the desktop app to work.'
+    },
     empresa: {
       addBranch: 'Add branch',
       addCompany: 'Add company',

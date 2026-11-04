@@ -724,6 +724,23 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    servicos: {
+      add: string
+      duration: string
+      durationRequired: string
+      duplicate: string
+      empty: string
+      free: string
+      hint: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      notFound: string
+      price: string
+      remove: string
+      title: string
+      unavailable: string
+    }
     empresa: {
       addBranch: string
       addCompany: string

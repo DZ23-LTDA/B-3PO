@@ -26,6 +26,7 @@ export const FINANCE_ROUTE = '/finance'
 export const AGENDA_ROUTE = '/agenda'
 export const COMPRAS_ROUTE = '/compras'
 export const EMPRESA_ROUTE = '/empresa'
+export const SERVICOS_ROUTE = '/servicos'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -52,6 +53,7 @@ export type AppView =
   | 'profiles'
   | 'products'
   | 'sales'
+  | 'servicos'
   | 'settings'
   | 'starmap'
   | 'stock'
@@ -74,6 +76,7 @@ export type AppRouteId =
   | 'profiles'
   | 'products'
   | 'sales'
+  | 'servicos'
   | 'settings'
   | 'starmap'
   | 'stock'
@@ -102,6 +105,7 @@ export const APP_ROUTES = [
   { id: 'finance', path: FINANCE_ROUTE, view: 'finance' },
   { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
   { id: 'sales', path: SALES_ROUTE, view: 'sales' },
+  { id: 'servicos', path: SERVICOS_ROUTE, view: 'servicos' },
   { id: 'stock', path: STOCK_ROUTE, view: 'stock' },
   { id: 'profiles', path: PROFILES_ROUTE, view: 'profiles' },
   { id: 'agents', path: AGENTS_ROUTE, view: 'agents' },
