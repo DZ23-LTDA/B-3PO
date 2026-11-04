@@ -11,6 +11,8 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
+import { PurchasesStore, purchasesStorePath } from './purchases-store'
+import { registerPurchasesIpc } from './purchases-ipc'
 import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
@@ -30,5 +32,7 @@ export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: strin
   registerInventoryIpc(ipcMain, inventory)
   registerFinanceIpc(ipcMain, finance)
   registerSchedulingIpc(ipcMain, new SchedulingStore(schedulingStorePath(userDataDir)))
+  // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
+  registerPurchasesIpc(ipcMain, { inventory, store: new PurchasesStore(purchasesStorePath(userDataDir)) })
   registerSalesIpc(ipcMain, { finance, inventory, sales: new SalesStore(salesStorePath(userDataDir)) })
 }

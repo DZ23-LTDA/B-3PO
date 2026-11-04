@@ -110,9 +110,12 @@ describe('IPC do estoque', () => {
       expect(canais).toContain('hermes:sales:faturar')
       expect(canais).toContain('hermes:finance:totals')
       expect(canais).toContain('hermes:scheduling:book')
+      expect(canais).toContain('hermes:purchases:receive')
       // Todo canal registrado pertence a um domínio conhecido — pega typo e canal órfão sem fixar
       // um total que quebra a cada domínio novo. A lista de domínios é explícita de propósito.
-      expect(canais.every(canal => /^hermes:(catalog|finance|inventory|sales|scheduling):/.test(canal))).toBe(true)
+      expect(canais.every(canal => /^hermes:(catalog|finance|inventory|purchases|sales|scheduling):/.test(canal))).toBe(
+        true
+      )
     } finally {
       await rm(dir, { force: true, recursive: true })
     }
