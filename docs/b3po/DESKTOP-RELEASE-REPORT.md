@@ -1776,3 +1776,25 @@ arquivos de teste falharam ao carregar. Consertei a virgula e os 17 arquivos / 1
 Evidencia: `docs/b3po/evidence/crm-uma-tarefa-aberta-pt.png`.
 
 **Licao:** o teste que eu escrevo tambem pode fixar o bug. Comparar com a lingua, nao com a saida do codigo.
+
+### Rodada 168 — descobri que o adapter oficial do WhatsApp JA EXISTE (e minha instrucao estava errada)
+
+Antes de continuar mandando o proprietario criar variaveis, fui conferir se os nomes batiam com o codigo. Nao batiam:
+o repo ja traz `plugins/platforms/whatsapp_cloud/adapter.py`, o adapter **oficial** da Meta Cloud API, com webhook
+aiohttp, validacao HMAC `X-Hub-Signature-256` e checagem de `WABA_ID`. As variaveis reais sao `WHATSAPP_CLOUD_*`
+(`PHONE_NUMBER_ID`, `ACCESS_TOKEN`, `APP_ID`, `APP_SECRET`, `WABA_ID`, `VERIFY_TOKEN`, `WEBHOOK_HOST`, `WEBHOOK_PORT`
+com default 8090, `WEBHOOK_PATH` `/whatsapp/webhook`, `API_VERSION` v20.0). Eu havia escrito `B3PO_WHATSAPP_*` e dito
+que o canal precisava ser construido — **as duas coisas erradas**.
+
+Corrigido em `DESBLOQUEIO-O-QUE-PRECISO.md`, que agora separa com precisao:
+
+- **ja existe:** o adapter oficial (codigo, nao plano);
+- **falta de voce:** as credenciais;
+- **falta de mim:** store + IPC + cliente de **conversas** e a lista/leitura no `/crm` — e esses dois nao dependem de
+  credencial, sao o proximo passo que eu ataco.
+
+**O que continua proibido:** o bridge nao-oficial (Baileys/WhatsApp Web) que tambem vive no repo segue sendo o que o
+GOAL manda **nao** usar como arquitetura de producao.
+
+**Licao:** instrucao para outra pessoa e codigo tambem — precisa ser verificada, nao lembrada. Se eu tivesse mandado
+o proprietario criar `B3PO_WHATSAPP_*`, ele perderia tempo e concluiria que o produto nao tem o que ja tem.

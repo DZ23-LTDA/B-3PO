@@ -10,60 +10,65 @@ Enquanto elas não existirem, eu continuo entregando correções pontuais — ma
 
 ## 1. WhatsApp oficial — desbloqueia as CONVERSAS do CRM
 
-**O que está travado:** o CRM tem contatos, funil, tarefas e indicadores funcionando com dados locais. O que **não**
-existe é a caixa de entrada de conversas, porque não há de onde puxar mensagem.
+> **Correção importante (rodada 168).** Eu havia escrito aqui que o canal precisava ser construído e que as
+> variáveis se chamavam `B3PO_WHATSAPP_*`. **Estava errado.** O repositório já traz o adapter oficial da Cloud API
+> em `plugins/platforms/whatsapp_cloud/adapter.py`, com webhook, HMAC e formatação. O que falta é credencial e a
+> lista de conversas do lado do CRM.
 
-**O que não vou fazer:** automação não oficial do WhatsApp Web (QR de sessão pessoal), scraping ou engenharia reversa.
-Isso viola os termos do WhatsApp e cai no primeiro banimento — e o GOAL proíbe explicitamente como arquitetura de
-produção.
+**O que já existe (código real, não plano):**
+
+- `plugins/platforms/whatsapp_cloud/adapter.py` — Meta WhatsApp Business Platform (Graph API + webhook aiohttp);
+- webhook em `:8090`, caminho `/whatsapp/webhook`, versão de API `v20.0` (todos configuráveis);
+- validação de assinatura `X-Hub-Signature-256` quando `APP_SECRET` está setado;
+- checagem de `WABA_ID` no inbound, quando configurado.
+
+**O que falta:** as credenciais (você) e a **lista de conversas no CRM** (eu — hoje o CRM tem contatos, funil e
+tarefas; não tem tela de conversa, e o store correspondente também não existe).
+
+### Variáveis — nomes reais do código
+
+```dotenv
+WHATSAPP_CLOUD_PHONE_NUMBER_ID=...
+WHATSAPP_CLOUD_ACCESS_TOKEN=...
+WHATSAPP_CLOUD_APP_ID=...            # opcional
+WHATSAPP_CLOUD_APP_SECRET=...        # opcional, mas liga a validação HMAC
+WHATSAPP_CLOUD_WABA_ID=...           # opcional; quando setado, o webhook exige que bata
+WHATSAPP_CLOUD_VERIFY_TOKEN=...      # você inventa; usado no GET de verificação
+WHATSAPP_CLOUD_WEBHOOK_HOST=...      # opcional
+WHATSAPP_CLOUD_WEBHOOK_PORT=8090     # padrão
+WHATSAPP_CLOUD_WEBHOOK_PATH=/whatsapp/webhook
+WHATSAPP_CLOUD_API_VERSION=v20.0
+```
+
+O arquivo é `%USERPROFILE%\.hermes\.env` (segredos só ali, nunca no Git). Me diga apenas "está no .env".
 
 ### O que você precisa obter (Meta, gratuito no começo)
 
 1. **Conta no Meta Business** e um **app** em `developers.facebook.com` do tipo *Business*.
-2. **WhatsApp Business Account (WABA)** com um **número de telefone** verificado. Um número fixo ou um chip novo
-   dedicado — não o seu pessoal, porque o número fica vinculado à API.
-3. Do painel, quatro valores:
+2. **WhatsApp Business Account (WABA)** com um **número verificado** — chip dedicado, não o seu pessoal, porque o
+   número fica preso à API.
+3. Do painel: `phone_number_id`, `waba_id`, e um **token permanente de system user** com
+   `whatsapp_business_messaging` e `whatsapp_business_management` (o token do painel dura 24h e serve só para teste).
+4. Para uso real, um **domínio seu com HTTPS** apontando para o webhook. Para o primeiro teste eu subo um túnel local.
 
-| Valor | Onde achar |
-|---|---|
-| `phone_number_id` | WhatsApp → API Setup → "From" |
-| `waba_id` | WhatsApp → API Setup (ID da conta) |
-| **token permanente** | Business Settings → System Users → gerar token com `whatsapp_business_messaging` e `whatsapp_business_management` |
-| `verify_token` | **você inventa** — uma string qualquer, usada uma vez para registrar o webhook |
+**O que continua proibido:** sessão de WhatsApp Web / Baileys como arquitetura de produção. Existe um bridge
+não-oficial no repo (upstream), e ele continua sendo o que o GOAL manda **não** usar como base do produto.
 
-> O token temporário do painel dura 24h e serve só para teste. Para o produto funcionar de verdade, gere o token de
-> **system user**.
+### Como vou provar
 
-4. Um **endereço público para o webhook**. Para testar, eu consigo subir um túnel local e registrar — mas para uso
-   real precisa de um domínio seu com HTTPS.
+1. `GET` no webhook com o `VERIFY_TOKEN` → a Meta valida o endpoint.
+2. Mensagem **do seu celular** para o número da API aparece na lista de conversas.
+3. Resposta pela interface chega no celular.
+4. Conversa vinculada ao contato e à oportunidade no funil.
 
-### Como me entregar
+### Ordem de execução do meu lado
 
-Não cole o token em chat, issue ou commit. Coloque em:
+1. store + IPC + cliente tipado de **conversas** (mesmo padrão de contatos/pipeline/tarefas);
+2. lista e leitura de conversa no `/crm`;
+3. ligar o webhook do adapter ao store, com deduplicação por `message_id`;
+4. só então automações.
 
-```
-%USERPROFILE%\.hermes\.env          ← secrets ficam só aqui, nunca no Git
-```
-
-```dotenv
-B3PO_WHATSAPP_PHONE_NUMBER_ID=...
-B3PO_WHATSAPP_WABA_ID=...
-B3PO_WHATSAPP_TOKEN=...
-B3PO_WHATSAPP_VERIFY_TOKEN=...
-```
-
-E me diga apenas: "está no .env". Eu leio o arquivo, nunca imprimo o valor.
-
-### Como vou provar que funciona
-
-1. `GET` no webhook com o `verify_token` — a Meta valida o endpoint.
-2. Enviar uma mensagem **do seu celular para o número da API** e mostrar ela aparecendo na inbox.
-3. Responder pela inbox e confirmar que chega no celular.
-4. Mostrar a conversa vinculada ao contato e a oportunidade no funil.
-
-Só depois disso a inbox e as automações saem de ⬜ para ✅ em `guia/08-o-que-funciona-hoje.md`.
-
----
+Os itens 1 e 2 **não dependem de você** — são os próximos que eu ataco.
 
 ## 2. Certificado Windows — desbloqueia a distribuição
 
