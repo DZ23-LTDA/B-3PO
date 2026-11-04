@@ -13,7 +13,9 @@ import { CrmOverview } from './crm-overview'
  * quando o canal oficial do WhatsApp estiver conectado" — mas a seção já estava renderizada logo
  * abaixo. O que faltava era o preload expor a ponte, não a tela existir.
  *
- * O que ainda NÃO existe aqui: tarefas.
+ * Tarefas não têm seção própria: `CrmContactsSection` já renderiza `CrmTasksSection` no fim
+ * (crm-contacts-section.tsx). Durante duas rodadas este comentário afirmou que tarefas "não existem
+ * aqui" — era falso, e afirmar ausência sem verificar custou três correções seguidas.
  */
 export function CrmView() {
   return (
