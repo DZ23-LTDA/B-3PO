@@ -19,7 +19,8 @@ rodei. O `npx tsc` também não o resolvia (pegava um pacote `tsc` da npm em vez
 o comando correto é:
 
 ```
-node node_modules/typescript/bin/tsc --noEmit -p tsconfig.electron.json
+python scripts/check-b3po-types
+
 ```
 
 ## Por que isso importa
@@ -62,11 +63,18 @@ testes do CRM acessando `.contacts` sem estreitar a união `{contacts} | {error}
 | erros em producao | 2 | 0 | **0** |
 | erros em teste | 25 | 19 | **0** |
 
-O typecheck do projeto electron voltou a ser um criterio citavel. Comando:
+O typecheck do projeto electron voltou a ser um criterio citavel. Comando oficial do fork:
 
 ```r
-node node_modules/typescript/bin/tsc --noEmit -p tsconfig.electron.json
+python scripts/check-b3po-types
+
 ```r
+
+O script checa os DOIS projetos (processo principal e renderer), usa o tsc do repo em vez de
+
+px` (que tenta instalar o pacote npm `tsc`, que nao e o compilador), e imprime um erro por linha.
+Provado nos dois sentidos: com um erro de tipo injetado em `rbac.ts` ele reporta FALHOU e sai com
+codigo 1; removido o erro, volta a ok. Verificacao que nao falha quando deve nao serve.
 
 Uma excecao declarada: `electron/crm-tasks-store.test.ts` esta no `exclude`. Ele e um contrato
 CRUZADO - importa `src/api/crm-tasks.ts` para comparar as duas copias da regra de contagem - e o
