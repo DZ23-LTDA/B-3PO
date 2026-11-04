@@ -1291,3 +1291,21 @@ frontend, que ainda posso traduzir, e (b) descrições e valores de enum vindos 
 (i18n no backend ou um mapa no painel) — não é trabalho de tradução.
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 130 — rótulos planos de topo (fuso, ferramentas, leitura de arquivo)
+
+Entraram as chaves planas do `FIELD_LABELS` que ainda faltavam — as que aparecem no topo de painéis, não dentro de
+um grupo: **conjuntos de ferramentas ativos**, **fuso horário**, **limite de leitura de arquivo** e **lista de
+comandos permitidos**. E as descrições de `timezone` e `fileReadMaxChars`.
+
+### Duas vezes seguida o mesmo erro — e agora virou regra
+
+Nas duas últimas rodadas criei chaves de descrição que **não existem no inglês** (`fieldDescriptions.delegation.*`,
+depois `toolsets` e `commandAllowlist`). O teste `pt-coverage` pegou as duas. Boa notícia: o teste funciona. Má
+notícia: eu repeti o erro.
+
+**Regra que passo a seguir**: antes de escrever qualquer bloco de descrição, extraio a lista exata de chaves do
+`FIELD_DESCRIPTIONS` e testo a interseção — em vez de "traduzir o que faz sentido". O catálogo é a fonte, não a
+minha intuição sobre o que deveria existir.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.

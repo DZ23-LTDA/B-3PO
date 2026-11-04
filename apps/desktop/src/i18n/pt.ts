@@ -544,6 +544,10 @@ export const ptOverrides: TranslationOverrides = {
      */
     fieldLabels: defineFieldCopy({
       model: 'Modelo padrão',
+      toolsets: 'Conjuntos de ferramentas ativos',
+      timezone: 'Fuso horário',
+      fileReadMaxChars: 'Limite de leitura de arquivo',
+      commandAllowlist: 'Lista de comandos permitidos',
       modelContextLength: 'Janela de contexto do modelo principal (substituir)',
       fallbackProviders: 'Modelos de fallback',
       display: {
@@ -621,6 +625,8 @@ export const ptOverrides: TranslationOverrides = {
     }),
     fieldDescriptions: defineFieldCopy({
       model: 'Usado em conversas novas, a menos que você escolha outro modelo no compositor.',
+      timezone: 'Identificador de fuso IANA. Em branco usa o fuso do sistema.',
+      fileReadMaxChars: 'Máximo de caracteres que o B-3PO pode ler de um arquivo por pedido.',
       modelContextLength:
         'Substitui a janela de contexto detectada do modelo PRINCIPAL do chat (em tokens). Deixe 0 para usar o valor detectado do modelo escolhido. Não afeta modelos auxiliares/MoA.',
       fallbackProviders: 'Entradas provedor:modelo de reserva, tentadas quando o modelo padrão falha.',
