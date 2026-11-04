@@ -66,3 +66,17 @@ E abra o MSIX, vá em **Configurações → CRM** ou clique em **CRM** na sideba
 
 **NOT_READY** — pelos itens 1 a 4 acima, que dependem de você (conta WhatsApp, certificados) ou de ambiente
 (macOS). O que não dependia de terceiro está entregue e comprovado.
+
+## O que eu preciso de você (checklist)
+
+Os quatro bloqueios, com o que pedir e como me entregar, estão em
+[DESBLOQUEIO-O-QUE-PRECISO.md](DESBLOQUEIO-O-QUE-PRECISO.md). Resumo:
+
+| Item | Desbloqueia | Você precisa |
+|---|---|---|
+| WhatsApp oficial | **conversas do CRM** | conta Meta Business + WABA + número verificado + token de system user |
+| Certificado Windows | distribuir o MSIX | certificado OV/EV ou Azure Trusted Signing |
+| Keystore Android | APK de release | keystore gerado por você + senha |
+| macOS/Xcode | cliente iOS | Mac (ou CI macOS) + conta Apple |
+
+Se só puder fazer uma: **WhatsApp**. É o que muda o que o produto é; as outras mudam como ele é entregue.
