@@ -7,7 +7,7 @@ Estado corrente do trabalho autônomo. Atualizado a cada rodada; é o que permit
 | Campo | Valor |
 |---|---|
 | Branch de produto | `b3po-brand` (a `main` segue espelho limpo do upstream) |
-| Commits DZ23 | **229** (HEAD `119a6ab22d`) |
+| Commits DZ23 | **232** (HEAD `acc399c120`) |
 | Gate do repositório | `python scripts/check` → 14 checks, ok |
 | Testes | **regressao de fechamento: `src/i18n` + `src/app/crm` + `src/app/settings` = 96 arquivos / 750 testes, verdes**. Historicos: bots 960 · store/sdk 2307 · mobile 101 (+5 live pulados) |
 | Status do produto | **NOT_READY** (há critérios abertos, listados abaixo) |
@@ -101,3 +101,19 @@ planejado), `PT-CATALOG-DEBT.md` e `BASELINE-DESKTOP-SUITE.md` atualizados.
 
 **O que continua aberto:** conversas do CRM (conta WhatsApp Business/Cloud API), iOS (macOS/Xcode), assinatura
 (certificado), keystore Android de release, e instalacao/atualizacao/desinstalacao nao testadas.
+
+## Fonte da verdade (por que números aqui envelhecem)
+
+Este arquivo é escrito à mão entre rodadas, então qualquer contagem pode ficar para trás assim que um commit entra —
+e um estado desatualizado atrapalha justamente a retomada que ele promete. Antes de confiar em qualquer número acima,
+confirme em um comando:
+
+```powershell
+git rev-parse --short HEAD          # commit real
+git rev-list --count main..HEAD     # commits DZ23 reais
+git status --short                  # deve estar vazio
+python scripts/check                # 14 checks
+```
+
+O que **não** envelhece: a lista de bloqueios externos (depende de terceiros, não de commits) e as decisões de
+arquitetura. São essas duas partes que valem a leitura em caso de dúvida.
