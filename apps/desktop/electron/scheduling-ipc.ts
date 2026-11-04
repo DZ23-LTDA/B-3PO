@@ -5,6 +5,7 @@
 // horário.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { Appointment, SchedulingStore } from './scheduling-store'
@@ -22,10 +23,6 @@ export interface SchedulingStoreLike {
   list: (tenantId?: string) => Promise<Appointment[]>
 }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 function numero(value: unknown): number {
   const n = Number(value)
 
@@ -36,7 +33,7 @@ export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingSt
   ipcMain.handle(
     'hermes:scheduling:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ appointments: Appointment[] }> => ({
-      appointments: await store.list(tenant(tenantId))
+      appointments: await store.list(serverTenant(tenantId))
     })
   )
 
@@ -50,7 +47,7 @@ export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingSt
       resourceId: unknown
     ): Promise<{ appointments: Appointment[] }> => ({
       appointments: await store.day(
-        tenant(tenantId) ?? 'local',
+        serverTenant(tenantId) ?? 'local',
         numero(from),
         numero(to),
         typeof resourceId === 'string' && resourceId.trim() ? resourceId.trim() : undefined
@@ -66,13 +63,13 @@ export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingSt
   ipcMain.handle(
     'hermes:scheduling:cancel',
     (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown, reason: unknown): Promise<{ appointments: Appointment[] } | { error: string }> =>
-      store.cancel(typeof id === 'string' ? id : '', tenant(tenantId), typeof reason === 'string' ? reason : '')
+      store.cancel(typeof id === 'string' ? id : '', serverTenant(tenantId), typeof reason === 'string' ? reason : '')
   )
 
   ipcMain.handle(
     'hermes:scheduling:confirm',
     (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ appointments: Appointment[] } | { error: string }> =>
-      store.confirm(typeof id === 'string' ? id : '', tenant(tenantId))
+      store.confirm(typeof id === 'string' ? id : '', serverTenant(tenantId))
   )
 }
 

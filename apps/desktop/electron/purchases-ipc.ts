@@ -5,6 +5,7 @@
 // duplicar mercadoria.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
@@ -30,15 +31,11 @@ export type ReceiveResult =
   | { error: string }
   | { order: PurchaseOrder; orders: PurchaseOrder[]; stock: InventoryMovement[] }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps): void {
   ipcMain.handle(
     'hermes:purchases:suppliers',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ suppliers: Supplier[] }> => ({
-      suppliers: await deps.store.suppliers(tenant(tenantId))
+      suppliers: await deps.store.suppliers(serverTenant(tenantId))
     })
   )
 
@@ -51,7 +48,7 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
   ipcMain.handle(
     'hermes:purchases:orders',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ orders: PurchaseOrder[] }> => ({
-      orders: await deps.store.orders(tenant(tenantId))
+      orders: await deps.store.orders(serverTenant(tenantId))
     })
   )
 

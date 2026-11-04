@@ -4,6 +4,7 @@
 // `{ error }`. O renderer nunca recebe exceção nem decide o que é válido.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { Product } from './catalog-store'
@@ -16,15 +17,11 @@ export interface CatalogStoreLike {
   upsert: (input: unknown) => Promise<CatalogResult>
 }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 export function registerCatalogIpc(ipcMain: IpcRegistrar, store: CatalogStoreLike): void {
   ipcMain.handle(
     'hermes:catalog:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ products: Product[] }> => ({
-      products: await store.list(tenant(tenantId))
+      products: await store.list(serverTenant(tenantId))
     })
   )
 
@@ -36,6 +33,6 @@ export function registerCatalogIpc(ipcMain: IpcRegistrar, store: CatalogStoreLik
   ipcMain.handle(
     'hermes:catalog:remove',
     (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ products: Product[] }> =>
-      store.remove(typeof id === 'string' ? id : '', tenant(tenantId))
+      store.remove(typeof id === 'string' ? id : '', serverTenant(tenantId))
   )
 }

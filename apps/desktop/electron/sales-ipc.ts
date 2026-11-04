@@ -13,6 +13,7 @@
 // (a) recusa antes de sujar o estado no caso previsível, e (b) idempotência que torna a repetição segura.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import { receivableForSale, type FinanceEntry } from './finance-store'
@@ -59,10 +60,6 @@ export type FaturarResult =
   | { error: string; message?: string }
   | { finance: FinanceEntry | null; sale: Sale; sales: Sale[]; stock: InventoryMovement[] }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 /**
  * Simula a baixa de estoque contra o saldo atual e devolve o SKU que falta, ou null.
  *
@@ -89,7 +86,7 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
   ipcMain.handle(
     'hermes:sales:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ sales: Sale[] }> => ({
-      sales: await deps.sales.list(tenant(tenantId))
+      sales: await deps.sales.list(serverTenant(tenantId))
     })
   )
 
@@ -107,7 +104,7 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
     > =>
       deps.sales.cancel(
         typeof id === 'string' ? id : '',
-        tenant(tenantId),
+        serverTenant(tenantId),
         typeof reason === 'string' ? reason : ''
       )
   )

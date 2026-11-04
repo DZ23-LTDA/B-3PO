@@ -92,7 +92,7 @@ describe('IPC do catalogo', () => {
     })
   })
 
-  it('filtra a listagem pelo tenant informado e ignora tenant nao-string', async () => {
+  it('NAO usa o tenant informado pelo renderer: sempre o da instalacao', async () => {
     await withStore(async store => {
       await store.upsert({ name: 'A', sku: 'A-1', tenant_id: 'empresa-a' })
       await store.upsert({ name: 'B', sku: 'B-1', tenant_id: 'empresa-b' })
@@ -104,8 +104,10 @@ describe('IPC do catalogo', () => {
       const deA = (await ipc.invoke('hermes:catalog:list', 'empresa-a')) as { products: Product[] }
       const invalido = (await ipc.invoke('hermes:catalog:list', 42)) as { products: Product[] }
 
-      expect(deA.products.map(p => p.name)).toEqual(['A'])
-      // tenant não-string cai no default (`local`), que está vazio aqui.
+      // Este teste afirmava `['A']` — o IDOR da r85 escrito como comportamento desejado. O canal não
+      // usa o tenant pedido: quem responde é o da instalação, e os produtos de teste são de outras
+      // empresas de propósito.
+      expect(deA.products).toEqual([])
       expect(invalido.products).toEqual([])
     })
   })
