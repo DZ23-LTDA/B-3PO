@@ -335,3 +335,25 @@ Consequencias, para nao haver duvida na retomada:
 - nao perguntar de novo sobre credencial antes de esgotar os itens acima.
 - **continua proibido** declarar "WhatsApp conectado": a cadeia esta provada com payload assinado sintetico, e a API da Meta
   nunca foi chamada.
+
+
+### Correcao da fila (rodada 229) — Kanban e pipeline JA EXISTEM
+
+Ao ir construir "Kanban de oportunidades", auditei antes de escrever e encontrei pronto:
+
+- `apps/desktop/electron/crm-pipeline-store.ts` + `.test.ts` (store validado)
+- `apps/desktop/electron/crm-pipeline-ipc.ts` (IPC)
+- `apps/desktop/src/api/crm-pipeline.ts` (cliente tipado)
+- `apps/desktop/src/app/settings/crm-pipeline-section.tsx` + `.test.tsx` (tela com teste)
+- `apps/desktop/src/plugins/kanban/` + `src/contrib/kanban-card-badges.tsx` (Kanban com badges)
+
+**Portanto, saem da fila:** "Kanban de oportunidades" e "funil visual" — ja existem. Construir de novo seria duplicar
+fonte de verdade, que o GOAL proibe explicitamente.
+
+**Fila corrigida, sem credencial:**
+1. ~~filtro por etiqueta~~ FEITO e provado;
+2. ~~regras de anexo~~ FEITO (upload continua dependente de armazenamento);
+3. **ligar oportunidade a conversa** — o elo que ainda nao existe;
+4. renomear/excluir etiqueta em uso (gestao de vocabulario).
+
+Licao: auditar antes de construir economiza a rodada inteira e evita duas verdades sobre o mesmo dado.
