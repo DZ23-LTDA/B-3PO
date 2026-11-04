@@ -762,3 +762,36 @@ sem ele — loopback nao e autorizacao.
 
 **O que ainda depende do proprietario:** as `WHATSAPP_CLOUD_*` para o adapter subir de verdade. Sem elas, 1 e 3 podem ser
 feitos e provados com payload sintetico; so o ciclo real (celular -> inbox) exige credencial.
+
+
+## Endpoint local do CRM (rodada 183)
+
+`apps/desktop/electron/crm-whatsapp-endpoint.ts` — `handleWhatsAppIngest(request)` devolve `{ status, body }`.
+
+**Duas provas independentes antes de gravar:**
+
+1. **token local** (`x-b3po-token` ou `Authorization: Bearer`) — mesmo sendo loopback, qualquer processo da maquina
+   alcancaria a porta. Loopback nao e autorizacao. Sem token configurado, nao atende **ninguem** (fail-closed);
+2. **assinatura da Meta revalidada** — o repasse carrega o header original. Se o adapter for comprometido e mandar corpo
+   forjado, esta camada ainda recusa (tem teste: token certo + assinatura errada = 401).
+
+**Codigos escolhidos por causa do adapter, nao por estetica:** assinatura/segredo = **401**, payload ruim = **400**,
+reentrega = **200 com `duplicated`**. Se tudo fosse 500, o adapter repetiria em loop uma mensagem que nunca vai passar; e
+se a reentrega fosse erro, o retry da Meta viraria tempestade.
+
+**Funcao pura em relacao a HTTP** (recebe texto, devolve status+corpo): o contrato inteiro e testavel sem abrir socket —
+endpoint que so se testa com servidor de pe e endpoint que ninguem testa.
+
+**Medido:** 8 testes em `electron/crm-whatsapp-endpoint.test.ts`, verdes; `tsc --noEmit` limpo.
+
+### Estado do fio (45 testes no total)
+
+| peca | arquivo | testes |
+|---|---|---|
+| guardar | `crm-conversations-store.ts` | 16 |
+| mapear payload | `crm-meta-webhook-map.ts` | 8 |
+| verificar HMAC | `crm-whatsapp-signature.ts` | 9 |
+| receber e gravar | `crm-whatsapp-ingest.ts` | 8 |
+| endpoint local | `crm-whatsapp-endpoint.ts` | 8 |
+
+**Falta apenas** subir o listener HTTP e chamar `handleWhatsAppIngest` (e o hook opt-in no adapter python).
