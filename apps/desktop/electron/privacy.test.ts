@@ -211,7 +211,7 @@ describe('anonimizacao (decisao do proprietario, r92)', () => {
   it('o marcador e derivado e nao reversivel pelo formato', () => {
     const a = anonimizarRegistros(TELEFONE, { contatos: [], conversas: [], gerado_em: 1, oportunidades: [], tarefas: [], telefone: TELEFONE, totais: { contatos: 0, conversas: 0, mensagens: 0, oportunidades: 0, tarefas: 0 } })
 
-    expect(a.marcador).toMatch(/^anon_[0-9a-f]{12}$/)
+    expect(a.marcador).toMatch(/^900\d{9}$/)
     expect(a.marcador).not.toContain(TELEFONE)
   })
 

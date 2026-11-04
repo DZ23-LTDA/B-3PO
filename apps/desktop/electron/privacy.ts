@@ -162,7 +162,21 @@ export function anonimizarRegistros(telefoneBruto: unknown, exportacao: TitularE
   marcador: string
 } {
   const telefone = normalizarTelefone(telefoneBruto)
-  const marcador = `anon_${createHash('sha256').update(telefone).digest('hex').slice(0, 12)}`
+
+  // Só dígitos, de propósito.
+  //
+  // O CRM normaliza telefone para dígitos e recusa o que não tenha ao menos 8 (`phone_too_short` /
+  // `contact_required`). Um marcador alfanumérico como `anon_3f2a1b` viraria 3 dígitos e o pedido do
+  // titular falharia na gravação — depois de já ter apagado o original.
+  //
+  // O prefixo `900` mantém formato de telefone e não colide com número real, que no Brasil começa em 1–8.
+  const digitos = createHash('sha256')
+    .update(telefone)
+    .digest('hex')
+    .replace(/\D/g, '')
+    .padEnd(9, '0')
+    .slice(0, 9)
+  const marcador = '900' + digitos
 
   // Os id dos registros carregam o telefone (c_5511…, o_5511…) porque foram gerados a partir
   // dele. Anonimizar só os campos de contato deixaria o telefone no identificador — e um JSON
