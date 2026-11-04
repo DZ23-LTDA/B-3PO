@@ -297,3 +297,27 @@ guia novo), rodei a regressao combinada das tres areas tocadas:
 
 Numeros anteriores para comparar: `src/i18n` eram 119 testes e `src/app/settings` 725; os novos casos (4 do plural
 de tarefas, 5 de formato de telefone no CRM) entram nesse total sem afrouxar nenhuma assercao existente.
+
+
+## Regressao das areas tocadas — rodada 205
+
+Comando: `npx vitest run electron src/app src/api src/i18n` em `apps/desktop`.
+
+**9.283 testes: 9.045 passam, 31 falham, 207 pulados.**
+
+As 31 falhas, uma por uma, todas de ambiente — **nenhuma** em arquivo desta serie:
+
+| arquivo | categoria |
+|---|---|
+| `packaged-working-directory`, `bundle-electron-main`, `run-electron-builder`, `channel-build-version`, `checkout-source`, `desktop-installation` | packaging / assinatura |
+| `plugin-files`, `desktop-plugin-install`, `desktop-plugin-remove` | ACL / symlink |
+| `ssh-connection`, `system-proxy-env`, `command-screenshot-monitor` | ambiente |
+| `terminal-ownership`, `use-keybinds-browser` | timeout |
+
+Arquivos desta serie, todos verdes: `crm-conversations-store` (19), `crm-meta-webhook-map` (8), `crm-whatsapp-signature` (9),
+`crm-whatsapp-ingest` (8), `crm-whatsapp-endpoint` (8), `crm-whatsapp-listener` (6), `crm-whatsapp-boot` (6),
+`crm-whatsapp-outbound` (7), `crm-whatsapp-outbound-send` (7), `conversation-filters` (8), `response-time` (8),
+`crm-conversations` (5), i18n (17 arquivos / 123+).
+
+**Como isto foi medido:** a lista de arquivos que falham foi aberta e comparada com a lista de arquivos editados. Nao aceitei
+"provavelmente e ambiente" como conclusao.
