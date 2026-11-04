@@ -1710,3 +1710,16 @@ local. Linkado no indice do guia (`README.md`, linha 35).
 
 **Conteudo nao foi inventado:** cada linha ✅ corresponde a algo ja capturado no app empacotado ou coberto por teste
 nesta branch; cada ⬜ sai da lista de bloqueios de `RELEASE-READINESS.md`.
+
+### Rodada 157 — o plural ganha prova: teste que falha sem a correcao
+
+Na rodada 152 eu corrigi "1 atrasada(s)" e admiti que o teste de cobertura so compara NOMES de placeholder — ele
+nunca provou que a palavra flexiona. Fechado agora com `src/i18n/pt-tasks-plural.test.ts` (4 casos: singular,
+plural, zero e ausencia de "(s)").
+
+**Provado vermelho na base, como manda o guia do repo:** reinjetei a copy antiga (`atrasada(s)`) e os 4 testes
+falharam; restaurei a correcao e voltaram a passar. Sem esse passo, um teste verde nao prova nada alem de que ele
+nao quebrou.
+
+Nota que o caso do zero e deliberado: `resumo(1, 0)` espera "0 atrasadas", nao "0 atrasada" — e o tipo de detalhe
+que so aparece quando se escreve a expectativa por extenso.
