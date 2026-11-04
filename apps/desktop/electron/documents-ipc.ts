@@ -4,6 +4,7 @@
 // pode fazer e registrar, listar, corrigir metadados e remover o registro.
 
 import type { IpcRegistrar } from './ipc-types'
+import { serverTenant } from './server-tenant'
 import type { DocumentRecord } from './documents-store'
 
 export interface DocumentsStoreLike {
@@ -13,16 +14,13 @@ export interface DocumentsStoreLike {
   upsert: (input: unknown) => Promise<{ document: DocumentRecord } | { error: string }>
 }
 
-function tenant(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
 export function registerDocumentsIpc(ipcMain: IpcRegistrar, store: DocumentsStoreLike): void {
   ipcMain.handle(
     'hermes:documents:list',
     async (_event: unknown, payload: unknown) => ({
-      documents: await store.list(tenant(payload)),
-      totals: await store.totals(tenant(payload))
+      // O tenant vem do SERVIDOR, não do payload: aceitar o do renderer seria IDOR por construção.
+      documents: await store.list(serverTenant(payload)),
+      totals: await store.totals(serverTenant(payload))
     })
   )
 

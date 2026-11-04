@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { registerDocumentsIpc } from './documents-ipc'
 import type { DocumentRecord } from './documents-store'
+import { INSTALLATION_TENANT } from './server-tenant'
 
 const doc: DocumentRecord = {
   created_at: 1,
@@ -63,20 +64,24 @@ describe('canais de documentos', () => {
     expect(r.totals.total).toBe(1)
   })
 
-  it('list repassa o tenant pedido', async () => {
+  // Estes dois testes ANTES afirmavam o contrario: que o canal repassava o tenant pedido pelo renderer.
+  // Era o IDOR da rodada 85 escrito como se fosse o comportamento desejado. Um teste que codifica o bug
+  // e pior que nenhum teste - ele protege o defeito.
+  it('list NAO repassa o tenant do renderer: usa o do servidor', async () => {
     const { canais, store } = fake()
 
     await canais.get('hermes:documents:list')!(null, 'outro')
 
-    expect(store.list).toHaveBeenCalledWith('outro')
+    expect(store.list).toHaveBeenCalledWith(INSTALLATION_TENANT)
+    expect(store.list).not.toHaveBeenCalledWith('outro')
   })
 
-  it('list sem payload usa o tenant padrao', async () => {
+  it('list sem payload tambem usa o tenant do servidor', async () => {
     const { canais, store } = fake()
 
     await canais.get('hermes:documents:list')!(null, undefined)
 
-    expect(store.list).toHaveBeenCalledWith(undefined)
+    expect(store.list).toHaveBeenCalledWith(INSTALLATION_TENANT)
   })
 
   it('remove aceita id como string e recusa forma inesperada sem quebrar', async () => {
