@@ -11,6 +11,8 @@ import { ActorsStore, actorsStorePath, primaryOwner } from './actors-store'
 import { CompaniesStore, companiesStorePath } from './companies-store'
 import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
+import { registerDocumentsIpc } from './documents-ipc'
+import { DocumentsStore, documentsStorePath } from './documents-store'
 import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
@@ -63,6 +65,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
+
+  // Registro de documentos. NAO guarda o binario - ver documents-store.ts para o porque.
+  registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)))
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
   registerServicesIpc(ipcMain, services)
