@@ -1095,3 +1095,34 @@ e sem estourar o ratchet de linhas.
 
 Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
 reconstruído.
+
+### Rodada 123 — captura REAL de Configurações em pt (e três textos que ela denunciou)
+
+**A captura que faltava saiu.** O teclado sintético nunca navegou até o painel; a solução foi **CDP**: subi o app
+empacotado com `--remote-debugging-port=9222`, conectei no WebSocket do renderer, naveguei por `location.hash =
+'#/settings'` e capturei com `Page.captureScreenshot`. Nada de SendKeys, nada de adivinhação — e é repetível:
+`docs/b3po/evidence/configuracoes-pt-final.png` (190,8 KB, 2253×1347).
+
+A captura provou o que o proprietário reclamou e provou também o que ainda estava errado **na própria tela**:
+
+| Antes | Depois |
+|---|---|
+| trilha `Settings › Modelo › Modelo principal` | `Configurações › Modelo › Modelo principal` |
+| `Applies to` | `Aplica-se a` |
+| `Medium` (esforço de raciocínio) | `Médio` |
+
+Chaves: `commandCenter.settings` (era a trilha — **não** era `settings.nav.keysSettings`, que eu tinha traduzido
+primeiro e não mudou nada), `settings.profileScope.appliesTo` e a família nova `shell.modelOptions`
+(`pt_model_options.ts`, 19 chaves: esforço mínimo→ultra, velocidade rápida/ultra-rápida, daybreak).
+
+Sobra em inglês nessa tela só o `custom`, que é **id de provider** (dado, não copy).
+
+### Dois erros meus nesta rodada
+
+1. Traduzi `settings.nav.keysSettings` achando que era a trilha. Não era. Descobri perguntando ao app em execução
+   (CDP: procurar o elemento com o texto e ler o `className`/pai) em vez de continuar caçando no código.
+2. Na lista de seções esperadas do `pt.test.ts` coloquei `commandCenter` **depois** de `common`. A ordem
+   alfabética põe `commandCenter` antes (`comman` < `common`). O teste reprovou e estava certo.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok (precisei limpar `.cache`
+antes — o `profile-archives` reprova com cache velho); MSIX reconstruído.

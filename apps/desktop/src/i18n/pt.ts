@@ -35,6 +35,7 @@ import { ptPluginPreviewAccess } from './pt_plugin_preview_access'
 import { ptSharedMetrics } from './pt_shared_metrics'
 import { ptThemePicker } from './pt_theme_picker'
 import { ptUpdateChannel } from './pt_update_channel'
+import { ptModelOptions } from './pt_model_options'
 
 export const ptOverrides: TranslationOverrides = {
   connectors: ptConnectorCard,
@@ -48,6 +49,7 @@ export const ptOverrides: TranslationOverrides = {
   ...ptBoot,
   skills: { plugins: { ...ptPluginPreviewAccess, ...ptPluginUpdate } },
   preview: { web: ptPreviewWeb },
+  commandCenter: { settings: 'Configurações' },
   common: {
     apply: 'Aplicar',
     back: 'Voltar',
@@ -269,6 +271,7 @@ export const ptOverrides: TranslationOverrides = {
   // Barra de status: o bloco do en.ts é `shell.statusbar` e não estava coberto aqui, então a barra
   // inteira aparecia em inglês ("Backend ready", "Gateway", "ready"). Traduzido o que o usuário vê.
   shell: {
+    modelOptions: ptModelOptions,
     minimizeWindow: 'Minimizar janela',
     closeWindow: 'Fechar janela',
     windowControls: 'Controles da janela',
@@ -516,6 +519,7 @@ export const ptOverrides: TranslationOverrides = {
     }
   },
   settings: {
+    profileScope: { appliesTo: 'Aplica-se a' },
     localModels: ptLocalModels,
     notifications: ptNotifications,
     about: { channel: ptUpdateChannel },
@@ -615,6 +619,7 @@ export const ptOverrides: TranslationOverrides = {
     exportFailed: 'Falha ao exportar',
     resetFailed: 'Falha ao restaurar',
     nav: {
+      keysSettings: 'Configurações',
       providers: 'Provedores',
       providerAccounts: 'Contas',
       providerApiKeys: 'Chaves de API',
@@ -624,7 +629,6 @@ export const ptOverrides: TranslationOverrides = {
       apiKeys: 'Ferramentas e chaves',
       keybinds: 'Atalhos de teclado',
       keysTools: 'Ferramentas',
-      keysSettings: 'Configurações',
       mcp: 'MCP',
       archivedChats: 'Conversas arquivadas',
       sessions: 'Conversas',
