@@ -1683,3 +1683,17 @@ A tarefa agora troca o telefone cru pelo aviso quando o contato não existe mais
 `docs/b3po/evidence/crm-tarefa-contato-excluido-pt.png`.
 
 Verificação: `src/app/crm` + `src/app/settings` + `src/i18n` = **95 arquivos / 741 testes**; gate 14 ok.
+
+### Rodada 152 — plural em português na contagem de tarefas ("1 atrasada", não "1 atrasada(s)")
+
+A linha-resumo das tarefas dizia `2 abertas · 1 atrasada(s)`. Corrigido para plural real em pt:
+`${open} abertas · ${late} ` + (`late === 1 ? 'atrasada' : 'atrasadas'`). Em inglês não havia o que corrigir — "late"
+não flexiona.
+
+**O teste de cobertura pegou minha primeira tentativa:** eu havia posto o ternário **dentro** do template
+(`${late === 1 ? 'atrasada' : 'atrasadas'}`), o que faz `${late}` aparecer duas vezes e quebra a regra de "mesmos
+placeholders do inglês" — exatamente o teste que existe para impedir tradução que renderiza `undefined`. A palavra do
+plural passou para **fora** do template e a suíte voltou a verde (732 testes em `src/i18n` + `src/app/settings`).
+
+**Nota de escopo:** mudança de copy verificada por typecheck e suíte; não rebuildei o MSIX nesta rodada, então
+**não** afirmo captura de tela dela.

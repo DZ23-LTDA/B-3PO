@@ -925,7 +925,9 @@ export const ptOverrides: TranslationOverrides = {
       saving: 'Salvando…',
       subtitle: 'Os acompanhamentos que não cabem em uma conversa. Ficam neste computador.',
       summary: open => (open === 1 ? '1 tarefa aberta' : `${open} tarefas abertas`),
-      summaryLate: (open, late) => `${open} abertas · ${late} atrasada(s)`,
+      // A palavra do plural fica FORA do template de proposito: o teste de cobertura compara os nomes
+      // interpolados com os do ingles, e repetir `${late}` dentro do ternario mudava essa lista.
+      summaryLate: (open, late) => `${open} abertas · ${late} ` + (late === 1 ? 'atrasada' : 'atrasadas'),
       title: 'Tarefas do CRM',
       titleLabel: 'Tarefa',
       titlePlaceholder: 'Ligar para a Maria sobre a proposta',
