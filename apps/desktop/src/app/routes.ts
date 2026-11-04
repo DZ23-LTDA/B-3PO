@@ -32,6 +32,7 @@ export const ATENDIMENTO_ROUTE = '/atendimento'
 export const AGENTES_ROUTE = '/agentes'
 export const POSVENDA_ROUTE = '/posvenda'
 export const MARKETING_ROUTE = '/marketing'
+export const PAINEL_ROUTE = '/painel'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -48,6 +49,7 @@ export type AppView =
   | 'agentes'
   | 'posvenda'
   | 'marketing'
+  | 'painel'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -80,6 +82,7 @@ export type AppRouteId =
   | 'agentes'
   | 'posvenda'
   | 'marketing'
+  | 'painel'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -118,6 +121,7 @@ export const APP_ROUTES = [
   { id: 'agentes', path: AGENTES_ROUTE, view: 'agentes' },
   { id: 'posvenda', path: POSVENDA_ROUTE, view: 'posvenda' },
   { id: 'marketing', path: MARKETING_ROUTE, view: 'marketing' },
+  { id: 'painel', path: PAINEL_ROUTE, view: 'painel' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },

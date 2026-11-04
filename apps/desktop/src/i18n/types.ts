@@ -728,6 +728,31 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    painel: {
+      activeCampaigns: string
+      balance: string
+      hint: string
+      invoiced: string
+      lateTickets: string
+      loadFailed: string
+      money: string
+      noAfterSales: string
+      noAlerts: string
+      openTickets: string
+      operation: string
+      outOfStock: string
+      payable: string
+      receivable: string
+      revenue: string
+      satisfaction: string
+      staleCampaigns: string
+      invoicedOne: string
+      noAfterSalesOne: string
+      outOfStockOne: string
+      staleCampaignsOne: string
+      title: string
+      unavailable: string
+    },
     marketing: {
       active: string
       approve: string
