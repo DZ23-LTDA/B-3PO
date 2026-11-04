@@ -21,6 +21,7 @@ import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
 import { registerSalesIpc } from './sales-ipc'
+import { registerSchedulingCatalogIpc } from './scheduling-catalog-ipc'
 import { registerServicesIpc } from './services-ipc'
 import { ServicesStore, servicesStorePath } from './services-store'
 
@@ -35,12 +36,18 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): void {
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
-  registerServicesIpc(ipcMain, new ServicesStore(servicesStorePath(userDataDir)))
+  const services = new ServicesStore(servicesStorePath(userDataDir))
+
+  registerServicesIpc(ipcMain, services)
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
   registerFinanceIpc(ipcMain, finance)
-  registerSchedulingIpc(ipcMain, new SchedulingStore(schedulingStorePath(userDataDir)))
+  const scheduling = new SchedulingStore(schedulingStorePath(userDataDir))
+
+  registerSchedulingIpc(ipcMain, scheduling)
+  // Caminho novo: agendar exige servico do catalogo e deriva o fim do horario da duracao real.
+  registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
   registerPurchasesIpc(ipcMain, { inventory, store: new PurchasesStore(purchasesStorePath(userDataDir)) })
   // O ator e resolvido AQUI, no processo principal: o renderer nao diz quem e.
