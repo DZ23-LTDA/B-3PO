@@ -933,3 +933,34 @@ de runtime, e a ponte do CRM **nao e** runtime — e produto.
 isso deixa a fronteira explicita: o token da ponte e do B-3PO; o token de sessao do desktop continua sendo do Hermes.
 
 **Medido:** 10 testes pytest verdes de novo; gate **14 ok**.
+
+
+## O fio esta ligado nas duas pontas (rodada 187)
+
+O adapter oficial agora chama a ponte, **depois de validar a assinatura e antes do dispatch**:
+
+```python
+# Ponte para o CRM do desktop (opcional): so repassa o corpo cru + a assinatura ja validada.
+# Nao bloqueia o canal: forward_to_crm tem timeout curto e engole qualquer erro.
+forward_to_crm(raw, signature_header)
+await self._dispatch_payload(payload)
+```
+
+**Por que exatamente ali:**
+
+- **depois** da verificacao HMAC — nao repassamos corpo nao autenticado para outra camada;
+- **antes** do dispatch — o CRM recebe a mensagem mesmo se o runtime demorar para processar;
+- **sem `await` no fluxo critico**: `forward_to_crm` e sincrono com timeout de 2s e engole erro. Se o desktop estiver
+  fechado, a mensagem do cliente segue normal.
+
+O adapter importa e continua funcionando: `adapter importa ok, hook: True`, e os 10 testes da ponte seguem verdes.
+
+### As duas pontas, ligadas
+
+```
+Meta -> adapter oficial (valida HMAC) -> forward_to_crm -> 127.0.0.1:porta
+     -> ingestMetaWebhook -> CrmConversationStore -> tela /crm
+     \-> dispatch_payload -> sessao Hermes (canal, independente)
+```
+
+**66 testes** cobrindo cada elo. O que falta agora **nao e codigo**: e configurar as variaveis e ver a mensagem chegar.

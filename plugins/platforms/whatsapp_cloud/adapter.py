@@ -14,6 +14,8 @@ import asyncio
 import contextlib
 import hashlib
 import hmac
+
+from plugins.platforms.whatsapp_cloud.crm_bridge import forward_to_crm
 import importlib
 import json
 import logging
@@ -751,6 +753,9 @@ class WhatsAppCloudAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             payload = None
         if not isinstance(payload, dict):
             return web.Response(status=400)
+        # Ponte para o CRM do desktop (opcional): so repassa o corpo cru + a assinatura ja validada.
+        # Nao bloqueia o canal: forward_to_crm tem timeout curto e engole qualquer erro.
+        forward_to_crm(raw, signature_header)
         await self._dispatch_payload(payload)
         return web.Response(status=200)
 
