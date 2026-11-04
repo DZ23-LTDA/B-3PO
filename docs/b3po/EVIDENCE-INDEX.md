@@ -102,3 +102,14 @@ mascote de volta). É o próximo item de prova do F5.
 
 Todos capturados do **app empacotado** via CDP, com dados semeados no perfil (2 contatos, 1 oportunidade em
 negociação de R$ 15.000, 1 ganha de R$ 4.500, 2 tarefas com 1 atrasada) — não são mockups.
+
+## Capturas do WhatsApp CRM (rodada 190 a 197)
+
+| arquivo | o que prova |
+|---|---|
+| `crm-e2e-webhook.png` | prova visual no app empacotado |
+| `crm-acoes-pt.png` | prova visual no app empacotado |
+| `crm-busca-pt.png` | prova visual no app empacotado |
+| `crm-nota-interna.png` | prova visual no app empacotado |
+
+Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relatorio aponta para a captura correspondente.
