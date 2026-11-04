@@ -968,6 +968,8 @@ export interface Translations extends NoticeTranslations {
     }
     sales: {
       cancelInvoice: string
+      paymentMethod: string
+      paymentNone: string
       emitting: string
       emitInvoice: string
       printInvoice: string

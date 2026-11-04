@@ -126,12 +126,20 @@ export function draftPrice(texto: string): number {
 }
 
 /** Payload da venda. Nunca inclui `total_cents`: o main recalcula e ignora o que vier. */
+/**
+ * Formas de pagamento aceitas (r117). Duplicado do backend de propósito: o renderer não importa de
+ * `electron/`. A lista é fechada nos dois lados; o servidor descarta valor fora dela.
+ */
+export const PAYMENT_METHODS = ['dinheiro', 'pix', 'credito', 'debito', 'boleto', 'transferencia', 'outro'] as const
+
 export function salePayload(
   items: readonly { productSku: string; quantityMilli: number; unitPriceCents: number }[],
-  contactPhone = ''
+  contactPhone = '',
+  paymentMethod?: string
 ): Record<string, unknown> {
   return {
     contact_phone: contactPhone.trim(),
+    ...(paymentMethod ? { payment_method: paymentMethod } : {}),
     items: items.map(item => ({
       product_sku: item.productSku,
       quantity_milli: item.quantityMilli,

@@ -9,6 +9,7 @@ import {
   draftQuantity,
   draftTotal,
   listSales,
+  PAYMENT_METHODS,
   salePayload,
   salesAvailable,
   saveSale,
@@ -49,6 +50,7 @@ export function SalesView() {
   const [notas, setNotas] = useState<FiscalRow[]>([])
   const [emitindo, setEmitindo] = useState('')
   const [cancelando, setCancelando] = useState('')
+  const [pagamento, setPagamento] = useState('')
   const [falhaFiscal, setFalhaFiscal] = useState('')
 
   const carregar = useCallback(async () => {
@@ -161,13 +163,14 @@ export function SalesView() {
     setSaving(true)
 
     try {
-      const resultado = await saveSale(salePayload(itens), faturar)
+      const resultado = await saveSale(salePayload(itens, '', pagamento || undefined), faturar)
 
       if ('error' in resultado) {
         setFailure(erroDe(resultado.error))
       } else {
         setSales(resultado.sales)
         setItens([])
+        setPagamento('')
         setBalances(await loadBalances())
         setFailure(null)
       }
@@ -264,6 +267,21 @@ export function SalesView() {
                   </li>
                 ))}
               </ul>
+              <label className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
+                <span className="text-(--ui-text-tertiary)">{copy.paymentMethod}</span>
+                <select
+                  className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                  onChange={evento => setPagamento(evento.target.value)}
+                  value={pagamento}
+                >
+                  <option value="">{copy.paymentNone}</option>
+                  {PAYMENT_METHODS.map(forma => (
+                    <option key={forma} value={forma}>
+                      {forma}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
                   {copy.estimate}: {priceLabel(estimativa)}

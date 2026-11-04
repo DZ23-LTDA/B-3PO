@@ -1060,6 +1060,8 @@ export const en: Translations = {
       unavailable: 'Finance needs the desktop app to work.'
     },
     sales: {
+      paymentMethod: 'Payment method',
+      paymentNone: 'Not informed',
       cancelInvoice: 'Cancel invoice',
       emitting: 'Issuing…',
       emitInvoice: 'Issue invoice',
