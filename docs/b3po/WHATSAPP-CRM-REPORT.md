@@ -686,3 +686,33 @@ variam); corpo vazio tambem e assinavel.
 
 **Medido:** 9 testes em `electron/crm-whatsapp-signature.test.ts`, verdes (aceita correta, recusa corpo adulterado, recusa
 outro segredo, fail-closed, header ausente, formato errado, maiuscula, corpo vazio, tamanho diferente).
+
+
+## Webhook completo: assinatura + mapeamento + gravacao (rodada 181)
+
+`apps/desktop/electron/crm-whatsapp-ingest.ts` — `ingestMetaWebhook({ rawBody, signature, appSecret, sink })`.
+
+**A ordem das guardas e a decisao:** assinatura **primeiro**, antes de olhar o corpo. Webhook nao autenticado nao chega a
+ser interpretado — nem `list()` e chamado (o teste verifica isso com `sink.upsert` e `sink.list` sem chamada).
+
+**A deduplicacao nao pode depender so do store.** A Meta reentrega o mesmo evento, e o handler le a conversa existente,
+junta as mensagens e descarta o `external_id` repetido. Teste explicito: segunda entrega do mesmo corpo devolve
+`{ duplicated: 1, stored: 0 }` e a conversa **nao e reescrita** (`toBe` na mesma referencia).
+
+Outros comportamentos com teste: segunda mensagem de verdade entra, soma no nao lido e atualiza a previa; corpo sem JSON
+devolve `json_invalido`; evento de status nao grava nada; erro do store volta como `{ error }` sem excecao.
+
+**Medido:** 8 testes em `electron/crm-whatsapp-ingest.test.ts`, verdes; `tsc --noEmit` limpo.
+
+### O fio do WhatsApp esta fechado do lado do codigo
+
+| peca | arquivo | testes |
+|---|---|---|
+| store (idempotencia por `external_id`) | `crm-conversations-store.ts` | 16 |
+| mapear payload da Meta | `crm-meta-webhook-map.ts` | 8 |
+| verificar HMAC (fail-closed) | `crm-whatsapp-signature.ts` | 9 |
+| receber e gravar | `crm-whatsapp-ingest.ts` | 8 |
+
+**O que falta e so a conexao HTTP**: expor uma rota que leia o corpo cru, o header `X-Hub-Signature-256` e chame
+`ingestMetaWebhook` com o `CrmConversationStore`. Nao ha mais logica de negocio pendente — e por isso que a credencial
+passa a ser o unico item que muda **o que o produto e**.
