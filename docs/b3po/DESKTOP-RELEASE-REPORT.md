@@ -1012,3 +1012,25 @@ com o texto em inglês (fallback declarado, igual ao que existia antes). Gate vo
 
 Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
 reconstruído.
+
+### Rodada 119 — reações de mensagem e controles de janela do WSLg em pt
+
+Dois componentes que não tinham `useI18n` nenhum:
+
+- **`wslg-window-controls.tsx`** — os três rótulos de acessibilidade ("Window controls", "Minimize window",
+  "Close window"). O primeiro já existia no catálogo (`shell.windowControls`) e o componente simplesmente não o
+  usava; os outros dois entraram em `en` + `pt`.
+- **`message-reactions.tsx`** — "No emoji found.", "More emoji" e "Reacted by Hermes" viraram
+  `assistant.thread.noEmoji` / `.moreEmoji` / `.reactedByHermes`.
+
+O `FullEmojiPicker` é uma **arrow function com retorno implícito** — não dá para pendurar hook nele. Passei as duas
+strings como props e o hook ficou no `ReactionPicker`, que é o dono do popover.
+
+### O teste de completude pegou o resto
+
+`overlay-completeness` reprovou: as cinco chaves novas aparecem sem tradução nos overlays dos outros locales.
+Regenerei o `overlay-gaps.json` com `OVERLAY_GAPS_UPDATE=1` — o mecanismo documentado — e o reteste voltou verde
+(2/2). O arquivo ganhou exatamente 5 entradas, como esperado.
+
+Verificação: `src/i18n` + `src/app/shell` + `src/components/assistant-ui` = 144 arquivos / 1129 testes; gate 14 ok;
+`code_health` 0 bloqueantes; MSIX reconstruído.

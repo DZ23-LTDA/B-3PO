@@ -2,6 +2,7 @@ import { EmojiPicker } from 'frimousse'
 import { type FC, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/i18n'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { triggerHaptic } from '@/lib/haptics'
 import { Plus } from '@/lib/icons'
@@ -31,7 +32,11 @@ const CELL_TINTS = [
 const cellTint = (emoji: string) => CELL_TINTS[(emoji.codePointAt(0) ?? 0) % CELL_TINTS.length]
 
 /** The full emoji picker, revealed behind the quick row's "+". Headless — styled here. */
-const FullEmojiPicker: FC<{ onSelect: (emoji: string) => void }> = ({ onSelect }) => (
+const FullEmojiPicker: FC<{ moreEmoji: string; noEmoji: string; onSelect: (emoji: string) => void }> = ({
+  moreEmoji,
+  noEmoji,
+  onSelect
+}) => (
   <EmojiPicker.Root
     className="flex h-72 w-76 flex-col"
     emojibaseUrl={EMOJIBASE_URL}
@@ -50,7 +55,7 @@ const FullEmojiPicker: FC<{ onSelect: (emoji: string) => void }> = ({ onSelect }
         Loading emoji…
       </EmojiPicker.Loading>
       <EmojiPicker.Empty className="absolute inset-0 grid place-items-center text-xs text-(--ui-text-tertiary)">
-        No emoji found.
+        {noEmoji}
       </EmojiPicker.Empty>
       <EmojiPicker.List
         className="select-none pb-1"
@@ -97,6 +102,7 @@ export const ReactionPicker: FC<{
   open: boolean
   selected?: string
 }> = ({ align = 'end', children, onOpenChange, onSelect, open, selected }) => {
+  const { t } = useI18n()
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -122,7 +128,9 @@ export const ReactionPicker: FC<{
         side="top"
       >
         {expanded ? (
-          <FullEmojiPicker onSelect={onSelect} />
+          <FullEmojiPicker moreEmoji={t.assistant.thread.moreEmoji}
+            noEmoji={t.assistant.thread.noEmoji}
+            onSelect={onSelect} />
         ) : (
           <>
             {QUICK_REACTIONS.map(emoji => (
@@ -141,7 +149,7 @@ export const ReactionPicker: FC<{
                 {emoji}
               </Button>
             ))}
-            <Button aria-label="More emoji" onClick={() => setExpanded(true)} size="icon-sm" variant="ghost">
+            <Button aria-label={t.assistant.thread.moreEmoji} onClick={() => setExpanded(true)} size="icon-sm" variant="ghost">
               <Plus />
             </Button>
           </>
@@ -164,6 +172,7 @@ export const ReactionBadge: FC<{
   onRetract?: () => void
   reactions: MessageReaction[]
 }> = ({ className, onRetract, reactions }) => {
+  const { t } = useI18n()
   if (!reactions.length) {
     return null
   }
@@ -197,7 +206,7 @@ export const ReactionBadge: FC<{
           <span
             className="reaction-pop leading-none"
             key={`${reaction.author}-${reaction.emoji}`}
-            title="Reacted by Hermes"
+            title={t.assistant.thread.reactedByHermes}
           >
             {reaction.emoji}
           </span>

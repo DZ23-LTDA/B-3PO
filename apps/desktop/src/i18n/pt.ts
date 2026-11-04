@@ -258,6 +258,9 @@ export const ptOverrides: TranslationOverrides = {
     clarify: ptClarify,
     themePicker: ptThemePicker,
     thread: {
+      noEmoji: 'Nenhum emoji encontrado.',
+      moreEmoji: 'Mais emojis',
+      reactedByHermes: 'Reagido pelo B-3PO',
       ...ptErrorLayers,
       errorCodes: ptErrorCodes,
       stop: 'Parar'
@@ -266,6 +269,9 @@ export const ptOverrides: TranslationOverrides = {
   // Barra de status: o bloco do en.ts é `shell.statusbar` e não estava coberto aqui, então a barra
   // inteira aparecia em inglês ("Backend ready", "Gateway", "ready"). Traduzido o que o usuário vê.
   shell: {
+    minimizeWindow: 'Minimizar janela',
+    closeWindow: 'Fechar janela',
+    windowControls: 'Controles da janela',
     modelMenu: ptModelMenu,
     approvalMode: {
       title: 'Modo de aprovação',

@@ -3555,6 +3555,8 @@ export interface Translations extends NoticeTranslations {
 
   shell: {
     windowControls: string
+  minimizeWindow: string
+  closeWindow: string
     paneControls: string
     appControls: string
     modelMenu: ModelMenuTranslations
@@ -3916,6 +3918,9 @@ export interface Translations extends NoticeTranslations {
 
   assistant: {
     thread: {
+    noEmoji: string
+    moreEmoji: string
+    reactedByHermes: string
       loadingSession: string
       showEarlier: string
       loadingResponse: string

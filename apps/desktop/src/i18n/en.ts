@@ -4092,6 +4092,8 @@ export const en: Translations = {
 
   shell: {
     windowControls: 'Window controls',
+    minimizeWindow: 'Minimize window',
+    closeWindow: 'Close window',
     paneControls: 'Pane controls',
     appControls: 'App controls',
     modelMenu: enModelMenu,
@@ -4470,6 +4472,9 @@ export const en: Translations = {
 
   assistant: {
     thread: {
+      noEmoji: 'No emoji found.',
+      moreEmoji: 'More emoji',
+      reactedByHermes: 'Reacted by Hermes',
       loadingSession: 'Loading session',
       showEarlier: 'Show earlier messages',
       loadingResponse: 'Hermes is loading a response',
