@@ -18,6 +18,7 @@ import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 import { registerFiscalIpc } from './fiscal-ipc'
 import { FiscalStore, fiscalStorePath } from './fiscal-store'
+import { resolverProvedor } from './fiscal-provider'
 import { registerLookupIpc } from './lookup-ipc'
 import { registerPrivacyIpc } from './privacy-ipc'
 import { DocumentsStore, documentsStorePath } from './documents-store'
@@ -194,6 +195,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     catalog: new CatalogStore(catalogStorePath(userDataDir)),
     desk: new ServiceDeskStore(serviceDeskStorePath(userDataDir)),
     finance,
+    // O agente ve o mesmo emissor que a tela: resolvido do ambiente, nunca do renderer.
+    fiscal: { provider: resolverProvedor(process.env), store: new FiscalStore(fiscalStorePath(userDataDir)) },
     inventory,
     sales
   })

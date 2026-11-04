@@ -6,6 +6,8 @@
 import type { AgentTool } from './agent-tools'
 import type { CatalogStoreLike } from './catalog-ipc'
 import type { FinanceStoreLike } from './finance-ipc'
+import type { FiscalProvider } from './fiscal-provider'
+import type { FiscalStore } from './fiscal-store'
 import type { InventoryStoreLike } from './inventory-ipc'
 import type { SalesStoreLike } from './sales-ipc'
 import type { ServiceDeskLike } from './service-desk-ipc'
@@ -14,6 +16,8 @@ export interface DomainStores {
   catalog?: CatalogStoreLike
   desk?: ServiceDeskLike
   finance?: FinanceStoreLike
+  /** Emissor + registro. Sem iscal, o agente nao enxerga nota fiscal. */
+  fiscal?: { provider: FiscalProvider; store: FiscalStore }
   inventory?: InventoryStoreLike
   sales?: SalesStoreLike
 }
@@ -102,6 +106,51 @@ export function buildDomainTools(stores: DomainStores): AgentTool[] {
       domain: 'desk',
       name: 'desk.tickets',
       run: async () => desk.list()
+    })
+  }
+
+  if (stores.fiscal) {
+    const fiscal = stores.fiscal
+
+    tools.push({
+      action: 'read',
+      description: 'Documentos fiscais ja emitidos, com situacao, chave e URL do DANFE.',
+      domain: 'fiscal',
+      name: 'fiscal.documents',
+      run: async () => fiscal.store.list()
+    })
+
+    tools.push({
+      action: 'read',
+      description: 'Qual emissor esta ativo e se ele tem autoridade fiscal. Use antes de prometer nota ao cliente.',
+      domain: 'fiscal',
+      name: 'fiscal.status',
+      run: async () => ({
+        homologado: fiscal.provider.homologado,
+        id: fiscal.provider.id,
+        nome: fiscal.provider.nome
+      })
+    })
+
+    tools.push({
+      action: 'execute',
+      description: 'Emite a nota fiscal de uma venda faturada. Quando o emissor e de homologacao, o documento NAO tem validade fiscal - confira fiscal.status antes de dizer ao cliente que a nota saiu.',
+      domain: 'fiscal',
+      name: 'fiscal.emitir',
+      run: async args => {
+        const saleId = typeof args['sale_id'] === 'string' ? args['sale_id'] : ''
+
+        if (!saleId) return { error: 'venda_obrigatoria' }
+
+        const kind = args['kind'] === 'nfce' || args['kind'] === 'nfse' ? args['kind'] : 'nfe'
+
+        return fiscal.store.emitir(fiscal.provider, {
+          kind,
+          payload: { sale_id: saleId },
+          ref: 'venda:' + saleId,
+          tenant_id: 'local'
+        })
+      }
     })
   }
 
