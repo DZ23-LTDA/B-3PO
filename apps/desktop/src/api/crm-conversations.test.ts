@@ -13,6 +13,10 @@ const conversa = (status: 'aberta' | 'aguardando' | 'resolvida', unread = 0) => 
   last_message_preview: '',
   messages: [], notes: '', tags: [],
   status,
+  // O store ganhou `tenant_id` na rodada 83 (multiempresa). `conversationCounts` do processo principal
+  // recebe `CrmConversation`, então o fixture precisa do campo — sem ele o typecheck do renderer
+  // falha enquanto a contagem continua certa, que é o pior tipo de erro.
+  tenant_id: 'local',
   title: 'x',
   unread,
   updated_at: 1,
