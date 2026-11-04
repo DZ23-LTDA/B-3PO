@@ -230,10 +230,15 @@ export function registerFsIpc({
     return { path: dst }
   })
 
-  // Write a small UTF-8 text file (e.g. a project's IDEA.md at creation). The path
-  // is hardened (resolveRequestedPathForIpc) and the parent must already exist —
-  // this never creates directory trees or escapes the allowed roots, and content
-  // is size-capped so it can't be abused as a bulk-write primitive.
+  // Write a small UTF-8 text file (e.g. a project's IDEA.md at creation). The path is hardened
+  // (resolveRequestedPathForIpc) against unsafe syntax and the parent must already exist, so this cannot
+  // create directory trees, and content is size-capped so it can't be abused as a bulk-write primitive.
+  //
+  // IT DOES NOT CONFINE THE PATH TO A ROOT. `resolveRequestedPathForIpc` rejects NUL and Windows device
+  // paths, and `..` is resolved rather than refused — so an absolute path anywhere on disk is accepted. The
+  // renderer is this app's own code (contextIsolation, no nodeIntegration), so the threat model is "renderer
+  // XSS means arbitrary file write". Documented in docs/b3po/audit/PATH-TRAVERSAL-R156.md and pinned by
+  // hardening-traversal.test.ts; confining to a root is a product decision, not a missing check.
   ipcMain.handle('hermes:fs:writeText', async (_event, filePath, content) => {
     const raw = String(filePath || '').trim()
 
