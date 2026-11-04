@@ -693,6 +693,37 @@ export interface Translations extends NoticeTranslations {
       today: string
       unavailable: string
     }
+    compras: {
+      addItem: string
+      addSupplier: string
+      alreadyReceived: string
+      cnpj: string
+      duplicateSupplier: string
+      empty: string
+      hint: string
+      invalidQuantity: string
+      items: string
+      itemsRequired: string
+      loadFailed: string
+      number: string
+      pickProduct: string
+      pickSupplier: string
+      product: string
+      quantity: string
+      receive: string
+      removeItem: string
+      saveOrder: string
+      status: string
+      statuses: Record<string, string>
+      supplier: string
+      supplierName: string
+      supplierNameRequired: string
+      supplierRequired: string
+      title: string
+      total: string
+      unitCost: string
+      unavailable: string
+    }
     finance: {
       add: string
       alreadyPaid: string

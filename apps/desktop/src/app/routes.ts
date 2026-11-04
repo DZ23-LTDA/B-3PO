@@ -24,6 +24,7 @@ export const STOCK_ROUTE = '/stock'
 export const SALES_ROUTE = '/sales'
 export const FINANCE_ROUTE = '/finance'
 export const AGENDA_ROUTE = '/agenda'
+export const COMPRAS_ROUTE = '/compras'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -36,6 +37,7 @@ export type AppView =
   | 'capabilities'
   | 'chat'
   | 'command-center'
+  | 'compras'
   | 'crm'
   | 'cron'
   | 'finance'
@@ -60,6 +62,7 @@ export type AppRouteId =
   | 'artifacts'
   | 'capabilities'
   | 'command-center'
+  | 'compras'
   | 'crm'
   | 'cron'
   | 'finance'
@@ -90,6 +93,7 @@ export const APP_ROUTES = [
   { id: 'artifacts', path: ARTIFACTS_ROUTE, view: 'artifacts' },
   { id: 'cron', path: CRON_ROUTE, view: 'cron' },
   { id: 'agenda', path: AGENDA_ROUTE, view: 'agenda' },
+  { id: 'compras', path: COMPRAS_ROUTE, view: 'compras' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'finance', path: FINANCE_ROUTE, view: 'finance' },
   { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
