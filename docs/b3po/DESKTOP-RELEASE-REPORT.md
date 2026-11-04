@@ -1255,3 +1255,39 @@ frontend. Removi as duas chaves que eu tinha adicionado: código sem efeito é p
 Mesma família do "Stash" da rodada anterior: o que vem do schema precisa de outra camada para traduzir.
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 129 — memória, contexto, compressão, voz, aprovações e segurança em pt
+
+Segundo lote de texto de campos (o primeiro foi desktop/agente/terminal). Entraram os grupos
+**`memory`**, **`context`**, **`compression`**, **`delegation`**, **`voice`** (incluindo `gptLive`),
+**`approvals`**, **`security`** e **`checkpoints`** — rótulos e descrições:
+
+- memória persistente, perfil do usuário, orçamentos, provedor de memória
+- motor de contexto
+- compactação automática, limite, alvo, mensagens recentes protegidas
+- modelo/provedor/limites/esforço dos subagentes
+- duração da gravação, ler respostas em voz alta, modo de conversa por voz, voz e persona do GPT-Live (com a
+  explicação de que a camada de voz custa US$ 0,05 por minuto)
+- modo e tempo limite de aprovação, ocultar segredos, pontos de restauração
+
+Cobertura medida agora: **56 de ~104 rótulos** e **47 de ~64 descrições** (era 5 + 5 no início do dia).
+Evidência: `docs/b3po/evidence/memoria-pt.png`.
+
+### O teste pegou uma chave inventada
+
+`pt-coverage` reprovou com seis chaves: eu criei `fieldDescriptions.delegation.*` — esse grupo **não existe** no
+`FIELD_DESCRIPTIONS` do inglês (só no de rótulos). Removi inteiro. Era exatamente o tipo de erro que o teste existe
+para pegar: tradução bonita de chave que nunca é lida.
+
+### A limitação que agora está provada com experimento
+
+Hipótese: as descrições que vêm do **schema do backend** poderiam ser sobrescritas pelo `fieldDescriptions`.
+Testei com `memory.provider` (a tela mostrava "Memory provider plugin"), reconstruí o renderer e conferi no app em
+execução: **continua em inglês**. Somado ao teste da rodada anterior (`terminal.backend`), são duas evidências de que
+**não é sobrescrevível pelo frontend**. Removi a chave de teste — código sem efeito não fica.
+
+Isso delimita o que resta: o que está em inglês no painel agora é (a) ~48 rótulos e ~17 descrições do catálogo do
+frontend, que ainda posso traduzir, e (b) descrições e valores de enum vindos do schema, que exigem outra camada
+(i18n no backend ou um mapa no painel) — não é trabalho de tradução.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok; MSIX reconstruído.

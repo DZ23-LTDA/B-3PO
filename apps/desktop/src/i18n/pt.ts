@@ -573,6 +573,50 @@ export const ptOverrides: TranslationOverrides = {
         singularityImage: 'Imagem Singularity',
         modalImage: 'Imagem Modal',
         daytonaImage: 'Imagem Daytona'
+      },
+      memory: {
+        memoryEnabled: 'Memória persistente',
+        userProfileEnabled: 'Perfil do usuário',
+        memoryCharLimit: 'Orçamento da memória',
+        userCharLimit: 'Orçamento do perfil',
+        provider: 'Provedor de memória'
+      },
+      context: {
+        engine: 'Motor de contexto'
+      },
+      compression: {
+        enabled: 'Compactação automática',
+        threshold: 'Limite de compactação',
+        codexGpt55Autoraise: 'Aumento automático de compactação do Codex',
+        targetRatio: 'Alvo da compactação',
+        protectLastN: 'Mensagens recentes protegidas'
+      },
+      delegation: {
+        model: 'Modelo dos subagentes',
+        provider: 'Provedor dos subagentes',
+        maxIterations: 'Limite de turnos do subagente',
+        maxConcurrentChildren: 'Subagentes em paralelo',
+        childTimeoutSeconds: 'Tempo limite do subagente',
+        reasoningEffort: 'Esforço de raciocínio do subagente'
+      },
+      voice: {
+        maxRecordingSeconds: 'Duração máxima da gravação',
+        autoTts: 'Ler respostas em voz alta',
+        voiceChatMode: 'Modo de conversa por voz',
+        gptLive: {
+          voice: 'Voz do GPT-Live',
+          instructions: 'Persona do GPT-Live'
+        }
+      },
+      approvals: {
+        mode: 'Modo de aprovação',
+        timeout: 'Tempo limite da aprovação'
+      },
+      security: {
+        redactSecrets: 'Ocultar segredos'
+      },
+      checkpoints: {
+        enabled: 'Pontos de restauração'
       }
     }),
     fieldDescriptions: defineFieldCopy({
@@ -606,6 +650,37 @@ export const ptOverrides: TranslationOverrides = {
         singularityImage: 'Imagem usada quando o backend é Singularity.',
         modalImage: 'Imagem usada quando o backend é Modal.',
         daytonaImage: 'Imagem usada quando o backend é Daytona.'
+      },
+      memory: {
+        memoryEnabled: 'Guarda memórias duráveis que ajudam conversas futuras.',
+        userProfileEnabled: 'Mantém um perfil compacto das preferências do usuário.',
+      },
+      context: {
+        engine: 'Estratégia para lidar com conversas longas perto do limite de contexto.'
+      },
+      compression: {
+        enabled: 'Resume o contexto mais antigo quando as conversas crescem.',
+        codexGpt55Autoraise: 'Sobe a compactação para 85% nos modelos ChatGPT Codex OAuth suportados.'
+      },
+      voice: {
+        autoTts: 'Fala automaticamente as respostas do assistente.',
+        voiceChatMode:
+          'encadeado: fala para texto → B-3PO → texto para fala com os provedores abaixo. gpt-live: um modelo de voz full-duplex da OpenAI (gpt-live-1) escuta e fala, e repassa cada pedido real ao B-3PO — qualquer modelo escolhido responde com o conjunto completo de ferramentas. Exige uma chave de API da OpenAI; a camada de voz cobra US$ 0,05 por minuto.',
+        gptLive: {
+          voice: 'Voz do modo GPT-Live. IDs de voz personalizados são aceitos.',
+          instructions:
+            'Frases extras para a persona da voz ao vivo (tom, ritmo, idioma). O B-3PO mantém o próprio prompt de sistema.'
+        }
+      },
+      approvals: {
+        mode: 'Como o B-3PO trata comandos que exigem aprovação explícita.',
+        timeout: 'Quanto tempo os pedidos de aprovação esperam antes de expirar.'
+      },
+      security: {
+        redactSecrets: 'Esconde segredos detectados do conteúdo visível ao modelo quando possível.'
+      },
+      checkpoints: {
+        enabled: 'Cria pontos de restauração antes de editar arquivos.'
       }
     }),
     crmPipeline: {
