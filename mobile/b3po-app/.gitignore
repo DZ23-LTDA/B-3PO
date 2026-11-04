@@ -83,3 +83,6 @@ android/build/
 
 # GOAL 15.2: keystore nunca no Git (o Gradle gera o debug localmente)
 android/app/debug.keystore
+
+# Bundle empacotado por eact-native bundle (artefato de build, r152).
+android/app/src/main/assets/*.bundle
