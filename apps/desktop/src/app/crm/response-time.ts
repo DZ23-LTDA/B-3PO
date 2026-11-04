@@ -84,3 +84,21 @@ export function responseTimeLabel(ms: number): string {
 
   return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`
 }
+
+/**
+ * A conversa espera resposta nossa?
+ *
+ * A ultima mensagem foi do cliente e ninguem respondeu depois. E o sinal mais util de uma caixa de entrada — mais ate
+ * que "nao lida", porque conversa lida e sem resposta continua sendo cliente esperando.
+ *
+ * Conversa sem mensagem nenhuma nao "espera resposta": nao ha o que responder.
+ */
+export function needsReply(messages: readonly CrmMessageRow[]): boolean {
+  if (messages.length === 0) {
+    return false
+  }
+
+  const ultima = [...messages].sort((a, b) => a.sent_at - b.sent_at)[messages.length - 1]
+
+  return ultima.direction === 'entrada'
+}

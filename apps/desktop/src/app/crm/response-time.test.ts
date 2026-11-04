@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { averageResponseTime, responseTime, responseTimeLabel } from './response-time'
+import { averageResponseTime, needsReply, responseTime, responseTimeLabel } from './response-time'
 
 const msg = (direction: 'entrada' | 'saida', sent_at: number) => ({
   body: 'x',
@@ -57,5 +57,24 @@ describe('responseTimeLabel', () => {
     expect(responseTimeLabel(12 * 60000)).toBe('12 min')
     expect(responseTimeLabel((3 * 60 + 20) * 60000)).toBe('3 h 20 min')
     expect(responseTimeLabel(2 * 3600000)).toBe('2 h')
+  })
+})
+
+describe('needsReply', () => {
+  it('espera resposta quando a ultima mensagem e do cliente', () => {
+    expect(needsReply([msg('entrada', 1000)])).toBe(true)
+    expect(needsReply([msg('saida', 500), msg('entrada', 1000)])).toBe(true)
+  })
+
+  it('nao espera quando ja respondemos por ultimo', () => {
+    expect(needsReply([msg('entrada', 500), msg('saida', 1000)])).toBe(false)
+  })
+
+  it('conversa vazia nao espera resposta', () => {
+    expect(needsReply([])).toBe(false)
+  })
+
+  it('ordena por horario em vez de confiar na ordem de chegada', () => {
+    expect(needsReply([msg('entrada', 5000), msg('saida', 1000)])).toBe(true)
   })
 })
