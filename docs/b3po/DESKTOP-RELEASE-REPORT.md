@@ -1034,3 +1034,24 @@ Regenerei o `overlay-gaps.json` com `OVERLAY_GAPS_UPDATE=1` — o mecanismo docu
 
 Verificação: `src/i18n` + `src/app/shell` + `src/components/assistant-ui` = 144 arquivos / 1129 testes; gate 14 ok;
 `code_health` 0 bloqueantes; MSIX reconstruído.
+
+### Rodada 120 — seção `tools` do plugin de bots em pt + o que NÃO dá para traduzir ainda
+
+Medi a cobertura do catálogo do plugin: **9 seções**, e o `pt` cobria 6. Entrou a seção **`tools`** (24 chaves:
+instalar skill, busca na comunidade com "pode levar ~10s", adicionar servidor MCP, "Salvar e testar",
+autorizando, precisa configurar, central de skills, filtrar, nenhum servidor MCP).
+
+Restam **`screen`** (57 chaves) e **`cron`** (61) — o próximo par natural.
+
+### Duas coisas que a varredura mostrou e eu NÃO vou fingir que resolvi
+
+1. **Quick Entry** (a janela do atalho global) tem cinco textos em inglês ("Send to", "Current chat",
+   "New session", "Target session", "Quick Entry"). Ela é um renderer separado, **sem `I18nProvider` e sem cliente
+   de config** — a locale vem de `display.language` pelo backend, que essa janela não tem. Traduzir de verdade
+   exige passar a locale pelo bridge do Electron (main + preload + renderer, com teste). Fica no backlog com esse
+   motivo escrito, em vez de um `translateNow()` que cairia sempre no inglês.
+2. **`find-bar.tsx`** parecia ter "Right sidebar" solto: eram um comentário e um seletor CSS
+   (`aside[aria-label="Right sidebar"]`). Falso positivo — não mexi.
+
+Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
+reconstruído.
