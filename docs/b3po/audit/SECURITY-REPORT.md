@@ -23,13 +23,28 @@ Assinatura HMAC, comparação em tempo constante, limite de 1 MiB, deduplicaçã
 
 ## Achado 1 — IDOR no IPC: o renderer escolhe o tenant
 
-**Vinte canais** aceitam o tenant vindo do `payload`:
+Os canais aceitavam o tenant vindo do renderer:
 
-```
-admin-ipc, catalog-ipc, companies-ipc, crm-contacts-ipc, crm-conversations-ipc,
-crm-pipeline-ipc, crm-tasks-ipc, documents-ipc, finance-ipc, hr-ipc, inventory-ipc,
-marketing-ipc, purchases-ipc, sales-ipc, scheduling-ipc, service-desk-ipc, services-ipc
-```
+**Correção de medição (r87).** A primeira versão deste relatório dizia "vinte canais" — era um grep largo
+demais, que casava qualquer linha terminando em `payload`. Medido com o padrão certo (`tenant(payload)`
+**e** `tenant(tenantId)`, que é o mesmo defeito com outro nome de variável):
+
+| Arquivo | Chamadas que confiam no renderer |
+|---|---|
+| `scheduling-ipc.ts` | 4 |
+| `finance-ipc.ts` | 3 |
+| `catalog-ipc.ts` | 2 |
+| `inventory-ipc.ts` | 2 |
+| `purchases-ipc.ts` | 2 |
+| `sales-ipc.ts` | 2 |
+| `documents-ipc.ts` | **corrigido na r86** |
+
+**6 arquivos, 15 chamadas** ainda abertas. Os quatro canais do CRM **não** têm o defeito: o `list()` deles
+não recebe tenant. A lista anterior os incluía por erro de medição.
+
+O mesmo defeito aparecia com dois nomes — `tenant(payload)` em `documents-ipc` e `tenant(tenantId)` nos
+demais. Procurar por um só nome encontrou um só arquivo, e quase me fez concluir que o problema era
+pontual.
 
 Exemplo real (`documents-ipc.ts`):
 
