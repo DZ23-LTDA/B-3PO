@@ -32,6 +32,7 @@ está marcado como pronto**.
 | 5 | [Segurança e privacidade](05-seguranca-e-privacidade.md) | ✅ |
 | 6 | [Problemas comuns](06-problemas-comuns.md) | ✅ |
 | 7 | [Backup e atualização](07-backup-e-atualizacao.md) | ✅ |
+| 8 | [O que funciona hoje, o que é parcial e o que não existe](08-o-que-funciona-hoje.md) | ✅ |
 
 ## Resumo honesto do que existe hoje
 

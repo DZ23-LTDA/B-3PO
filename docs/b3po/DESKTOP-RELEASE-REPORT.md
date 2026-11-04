@@ -1697,3 +1697,16 @@ plural passou para **fora** do template e a suíte voltou a verde (732 testes em
 
 **Nota de escopo:** mudança de copy verificada por typecheck e suíte; não rebuildei o MSIX nesta rodada, então
 **não** afirmo captura de tela dela.
+
+### Rodada 156 — guia ganha a página que o GOAL exige: validado × parcial × planejado
+
+`docs/b3po/guia/` tinha 7 capítulos (instalar, criar bot, Android, WhatsApp/CRM, segurança, problemas, backup), mas
+nenhuma página única que diga com todas as letras o que funciona, o que funciona com limite e o que ainda não
+existe — que e o que o GOAL pede em §27 ("distinguir funcionalidade validada, parcial e planejada").
+
+Criado `08-o-que-funciona-hoje.md`, com tres marcas usadas sem excecao (✅ validado / 🟡 parcial / ⬜ planejado),
+o limite escrito ao lado de cada item parcial, e o motivo de cada item ausente. Inclui o comando de verificacao
+local. Linkado no indice do guia (`README.md`, linha 35).
+
+**Conteudo nao foi inventado:** cada linha ✅ corresponde a algo ja capturado no app empacotado ou coberto por teste
+nesta branch; cada ⬜ sai da lista de bloqueios de `RELEASE-READINESS.md`.
