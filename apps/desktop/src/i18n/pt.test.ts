@@ -66,6 +66,7 @@ describe('pt-BR', () => {
       'keepAwakeOffer',
       'language',
       'modelPicker',
+      'onboarding',
       'promptNotices',
       'remoteDisplayBanner',
       'settings',

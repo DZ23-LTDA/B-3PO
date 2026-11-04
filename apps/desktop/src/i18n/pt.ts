@@ -19,6 +19,7 @@ import { ptFirstRun } from './pt_first_run'
 import { ptGatewayHost } from './pt_gateway_host'
 import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
+import { ptOnboarding } from './pt_onboarding'
 import { ptNotifications } from './pt_notifications'
 import { ptPluginUpdate } from './pt_plugin_update'
 import { ptMemoryLayers } from './pt_memory_layers'
@@ -29,6 +30,7 @@ import { ptThemePicker } from './pt_theme_picker'
 import { ptUpdateChannel } from './pt_update_channel'
 
 export const ptOverrides: TranslationOverrides = {
+  onboarding: ptOnboarding,
   firstRun: ptFirstRun,
   ...ptNotices,
   sharedMetrics: ptSharedMetrics,

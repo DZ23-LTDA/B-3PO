@@ -854,3 +854,22 @@ Progresso do backlog: **18 de 26** famílias em pt. Restam `catalog`, `onboardin
 `connectors`/`connector_*`, `preview_web`.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 111 — configuração inicial em pt
+
+**`pt_onboarding`**: a tela que aparece quando ainda não há provedor — título, "rodar modelos localmente",
+pitch de cada provedor, os seis cartões de chave de API (Fireworks, OpenRouter, OpenAI, Gemini, xAI, endpoint
+local), os três fluxos de login (navegador, código de dispositivo, CLI externo), código de autorização, preço
+por Mtok e "Começar".
+
+`connectors` ficou de fora desta rodada: não existe `en_connectors.ts` — essa família está escrita dentro do
+`en.ts`, então precisa de outra estratégia de extração. Registrado no backlog.
+
+Progresso do backlog: **19 de 26** famílias em pt. Restam `catalog`, `projects`, `local_models`, `preview_web`,
+`connectors`/`connector_card`/`connector_accounts`.
+
+### Falha de build registrada
+
+O primeiro empacotamento desta rodada terminou em erro `TypeError: fetch failed` durante o download do
+`electron` — falha transitória de rede, já vista antes. Repetido, o MSIX saiu (191,3 MB, `21:12:25`). Nada foi
+commitado antes de o build passar.
