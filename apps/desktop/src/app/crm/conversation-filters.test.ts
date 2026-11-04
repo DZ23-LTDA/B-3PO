@@ -98,3 +98,16 @@ describe('usedTags', () => {
     expect(usedTags([])).toEqual([])
   })
 })
+
+describe('busca por etiqueta', () => {
+  it('busca acha por etiqueta, sem diferenciar maiuscula', () => {
+    const lista = conversa({ tags: ['VIP'] })
+
+    expect(matchesSearch(lista, 'vip')).toBe(true)
+    expect(matchesSearch(lista, 'VIP')).toBe(true)
+  })
+
+  it('busca por etiqueta nao casa pedaco de outra palavra', () => {
+    expect(matchesSearch(conversa({ tags: ['orcamento'] }), 'vip')).toBe(false)
+  })
+})

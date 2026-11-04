@@ -1323,3 +1323,20 @@ o campo nao quebra.
 
 **FALTA, e nao vou chamar de pronto:** nem `matchesTag` nem `usedTags` estao ligados a tela. A funcao existe e e testada;
 o filtro na tela nao existe.
+
+
+### Busca acha por etiqueta (rodada 220)
+
+Digitar `vip` na busca agora encontra conversa marcada `VIP`. Cabia no campo que ja existia — sem controle novo na tela.
+
+**2 testes novos** (16 no arquivo). Gate 14 ok, `tsc` limpo.
+
+**Sexta e setima vez que meu instrumento falhou, no mesmo patch:**
+
+1. o ancora do `replace` nao existia (texto real era outro) — o script disse "ANCORA NAO ENCONTRADA" e **o teste que eu tinha
+   acabado de escrever falhou**, provando que o codigo nao fazia o que o teste pedia. O teste pegou o que o script calou.
+2. na tentativa seguinte eu pus um guarda `if "tags ?? []" in t` — e ele casou com o `tags ?? []` do `matchesTag`, nao com a
+   busca. O script imprimiu "ja tinha" e pulou a correcao **sem alterar nada**. Guarda por substring em arquivo que ja contem
+   o mesmo padrao em outro contexto e falso positivo.
+
+Licao operacional: guarda de "ja apliquei" precisa ancorar no **trecho exato**, nao em substring do arquivo inteiro.

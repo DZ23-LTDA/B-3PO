@@ -30,7 +30,10 @@ export function matchesSearch(conversation: CrmConversationRow, termo: string): 
     ...conversation.messages.map(mensagem => mensagem.body),
   ]
 
-  if (alvos.some(alvo => (alvo ?? '').toLowerCase().includes(busca))) {
+  if (
+    alvos.some(alvo => (alvo ?? '').toLowerCase().includes(busca)) ||
+    (conversation.tags ?? []).some(tag => tag.toLowerCase().includes(busca))
+  ) {
     return true
   }
 
