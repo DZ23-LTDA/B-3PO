@@ -1126,3 +1126,38 @@ Sobra em inglês nessa tela só o `custom`, que é **id de provider** (dado, nã
 
 Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok (precisei limpar `.cache`
 antes — o `profile-archives` reprova com cache velho); MSIX reconstruído.
+
+### Rodada 124 — varredura das 13 telas de Configurações por CDP (e o mapa do que falta)
+
+Transformei o truque do CDP em ferramenta: um script abre `#/settings`, **clica** em cada item do menu lateral
+como um usuário (via `closest('button, a, [role="button"], li')` + `MouseEvent` com bubbles) e devolve a trilha e
+todo o texto visível de cada tela. Resultado salvo em `docs/b3po/evidence/settings-sweep-pt.json` (9,7 KB).
+
+**Trilhas corrigidas** (estavam em inglês só na trilha, porque `subpages` no pt era parcial):
+
+| Antes | Depois |
+|---|---|
+| Notificações › Desktop alerts | Notificações › **Alertas no desktop** |
+| Cobrança › Overview | Cobrança › **Visão geral** |
+| Sobre › Version & updates | Sobre › **Versão e atualizações** |
+| Avançado › Desktop & startup | Avançado › **Desktop e inicialização** |
+
+Também entraram os demais rótulos que faltavam (`keyboardShortcuts`, `hudGesture`, `screenCapture`,
+`notificationSounds`, `archivedSessions`, `defaultDirectory`, `vaultCredentials`, `vaultSources`, `uninstall`,
+`billingPlans`, `advancedDesktop` e os três `gatewayManagedUpdates*`).
+
+**O que a varredura mostrou que ainda está em inglês** — e está documentado com foto, não escondido:
+`docs/b3po/evidence/aparencia-pt-pendente.png` mostra a tela **Aparência › Geral** com a barra lateral inteira em
+português e os títulos/descrições de opção em inglês (Intro Splash, Model Pricing, Reopen Last Chat on Launch,
+In-App Tips, Guided Tours). É o bloco `settings.appearance` do catálogo, ~110 chaves, ainda sem pt. Também em
+inglês: as descrições longas de `settings.advanced.*` (sleep, F12, browser externo, quick entry).
+
+É o próximo alvo natural, e agora é mensurável.
+
+### Tropeços desta rodada
+
+- O `pt.ts` foi quebrado três vezes ao inserir os rótulos: meu casamento de chaves pegou o `subpages` **aninhado**
+  (recuo 8/10, não 4/6) e depois faltou a vírgula na última chave. `tsc` acusou na hora, corrigi na sequência.
+
+Verificação: `src/i18n` + `src/app/settings` = 93 arquivos / 725 testes; gate 14 ok (limpei `.cache` de novo —
+o `profile-archives` reprova com cache velho, e o script só remove depois do gate: ordem errada da minha parte).

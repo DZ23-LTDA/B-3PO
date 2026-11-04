@@ -80,3 +80,5 @@ mascote de volta). É o próximo item de prova do F5.
 | Árvore de acessibilidade em pt | captura UIA (nomes) | botão **"Aplicar"** do catálogo pt |
 | Regressão long path | `tests/pm/test_workspace_long_paths.py` | 2 testes verdes no Windows |
 | `evidence/configuracoes-pt-final.png` | Configurações › Modelo em pt-BR, app empacotado, capturado por CDP em 2026-11-03 |
+| `evidence/aparencia-pt-pendente.png` | Aparência › Geral: menu lateral em pt, opções ainda em inglês (limitação medida) |
+| `evidence/settings-sweep-pt.json` | Texto visível das 13 telas de Configurações, coletado por CDP |
