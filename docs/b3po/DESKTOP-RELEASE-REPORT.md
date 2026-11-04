@@ -873,3 +873,23 @@ Progresso do backlog: **19 de 26** famílias em pt. Restam `catalog`, `projects`
 O primeiro empacotamento desta rodada terminou em erro `TypeError: fetch failed` durante o download do
 `electron` — falha transitória de rede, já vista antes. Repetido, o MSIX saiu (191,3 MB, `21:12:25`). Nada foi
 commitado antes de o build passar.
+
+### Rodada 112 — preview embutido e projetos em pt
+
+**`pt_preview_web`** (painel de navegador: endereço, voltar/avançar, console, DevTools, reiniciar servidor,
+"servidor não encontrado", loopback remoto, MIME de módulo errado, anotar e comentar) e **`pt_projects`**
+(seção de projetos da sidebar: criar, renomear, pastas, IDEA.md, cor, mover conversa, worktrees, converter
+branch, ordenar/ocultar).
+
+### O erro que eu cometi e como achei
+
+Inserei `projects` no primeiro `sidebar: {` que apareceu — mas esse era o **sidebar de Configurações**
+(`title`/`description`/`toggle`), não o da conversa. O `tsc` acusou "objeto só pode declarar propriedades
+conhecidas". Pior: ao tentar corrigir, o bloco `projects` inline que já existia continuou lá e o mesmo arquivo
+passou a ter a chave duas vezes (`TS1117`). Corrigi localizando o `sidebar` de topo por indentação e trocando o
+bloco inline por `projects: ptProjects`. A lição: **nome de chave repetido em níveis diferentes é armadilha** —
+o script de caminho devolve o mesmo rótulo para os dois.
+
+Progresso do backlog: **21 de 26** famílias em pt. Restam `catalog`, `local_models` e os três de conectores.
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.

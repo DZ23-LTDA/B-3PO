@@ -20,6 +20,8 @@ import { ptGatewayHost } from './pt_gateway_host'
 import { ptModelMenu } from './pt_model_menu'
 import { ptNotices } from './pt_notices'
 import { ptOnboarding } from './pt_onboarding'
+import { ptPreviewWeb } from './pt_preview_web'
+import { ptProjects } from './pt_projects'
 import { ptNotifications } from './pt_notifications'
 import { ptPluginUpdate } from './pt_plugin_update'
 import { ptMemoryLayers } from './pt_memory_layers'
@@ -37,6 +39,7 @@ export const ptOverrides: TranslationOverrides = {
   cron: { control: ptCronControl },
   ...ptBoot,
   skills: { plugins: { ...ptPluginPreviewAccess, ...ptPluginUpdate } },
+  preview: { web: ptPreviewWeb },
   common: {
     apply: 'Aplicar',
     back: 'Voltar',
@@ -468,35 +471,7 @@ export const ptOverrides: TranslationOverrides = {
     loadCount: step => `Carregar mais ${step}`,
     messageCount: count => `${count} ${count === 1 ? 'mensagem' : 'mensagens'}`,
     toolCallCount: count => `${count} ${count === 1 ? 'chamada de ferramenta' : 'chamadas de ferramenta'}`,
-    projects: {
-      showAllSessions: 'Mostrar todas as conversas',
-      sectionLabel: 'Projetos',
-      home: 'Início',
-      autoDiscovered: 'Descobertos automaticamente',
-      newButton: 'Novo projeto',
-      createTitle: 'Novo projeto',
-      createDesc: 'Dê um nome ao workspace e adicione uma ou mais pastas.',
-      renameTitle: 'Renomear projeto',
-      addFolderTitle: 'Adicionar pasta',
-      namePlaceholder: 'ex.: Skunkworks',
-      foldersLabel: 'Pastas',
-      ideaLabel: 'Ideia',
-      ideaPlaceholder: 'Sobre o que é este projeto? (salvo em IDEA.md)',
-      ideaGenerate: 'Gerar ideia',
-      ideaGenerating: 'Gerando…',
-      ideaShuffle: 'Embaralhar modelos',
-      noFolders: 'Nenhuma pasta adicionada ainda.',
-      addFolder: 'Adicionar pasta',
-      primaryBadge: 'principal',
-      removeFolder: 'Remover',
-      create: 'Criar',
-      menu: 'Ações',
-      menuRename: 'Renomear…',
-      menuAppearance: 'Aparência',
-      noColor: 'Sem cor',
-      menuAddFolder: 'Adicionar pasta',
-      menuSetActive: 'Tornar ativo'
-    },
+    projects: ptProjects,
     profileRail: 'Trilho de perfis',
     filter: {
       grouping: 'Agrupamento',

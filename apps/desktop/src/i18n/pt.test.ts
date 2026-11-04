@@ -67,6 +67,7 @@ describe('pt-BR', () => {
       'language',
       'modelPicker',
       'onboarding',
+      'preview',
       'promptNotices',
       'remoteDisplayBanner',
       'settings',
