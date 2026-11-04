@@ -7,7 +7,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { exportarTitular, normalizarTelefone, preverEliminacao, telefoneValido } from './privacy'
+import { anonimizarRegistros, exportarTitular, normalizarTelefone, preverEliminacao, telefoneValido } from './privacy'
 
 const TELEFONE = '5511999998888'
 const OUTRO = '5511888887777'
@@ -163,12 +163,61 @@ describe('prever eliminacao', () => {
   })
 })
 
-describe('o que NAO foi implementado, de proposito', () => {
-  it('eliminar exige autorizacao do proprietario: nao existe funcao de exclusao', async () => {
-    const modulo = await import('./privacy')
+describe('anonimizacao (decisao do proprietario, r92)', () => {
+  it('tira o que identifica e mantem o que e fato', async () => {
+    const r = await exportarTitular(TELEFONE, deps())
 
-    // Se alguem adicionar `eliminarTitular` sem a decisao sobre o que a eliminacao alcanca (apagar as
-    // vendas junto? anonimizar o contato e manter o fato fiscal?), este teste falha e forca a conversa.
-    expect(Object.keys(modulo).filter(k => /^(eliminar|apagar|excluir)/i.test(k))).toEqual([])
+    if ('error' in r) throw new Error(r.error)
+
+    const a = anonimizarRegistros(TELEFONE, r.export)
+
+    for (const c of a.contatos) {
+      expect(c.name).toBe('Titular removido')
+      expect(c.email).toBe('')
+      expect(c.company).toBe('')
+      expect(c.tags).toEqual([])
+    }
+
+    expect(a.conversas[0]!.messages).toEqual([])
+    expect(a.conversas[0]!.notes).toBe('')
+    expect(a.oportunidades[0]!.value_cents).toBe(1000)
+  })
+
+  it('o telefone real nao sobrevive em nenhum dominio', async () => {
+    const r = await exportarTitular(TELEFONE, deps())
+
+    if ('error' in r) throw new Error(r.error)
+
+    const a = anonimizarRegistros(TELEFONE, r.export)
+    const tudo = JSON.stringify(a)
+
+    expect(tudo).not.toContain(TELEFONE)
+    expect(tudo).not.toContain('Ana')
+  })
+
+  it('o MESMO marcador em todos os dominios: a ligacao interna sobrevive', async () => {
+    const r = await exportarTitular(TELEFONE, deps())
+
+    if ('error' in r) throw new Error(r.error)
+
+    const a = anonimizarRegistros(TELEFONE, r.export)
+
+    expect(a.contatos[0]!.phone).toBe(a.marcador)
+    expect(a.conversas[0]!.contact_phone).toBe(a.marcador)
+    expect(a.oportunidades[0]!.contact_phone).toBe(a.marcador)
+    expect(a.tarefas[0]!.contact_phone).toBe(a.marcador)
+  })
+
+  it('o marcador e derivado e nao reversivel pelo formato', () => {
+    const a = anonimizarRegistros(TELEFONE, { contatos: [], conversas: [], gerado_em: 1, oportunidades: [], tarefas: [], telefone: TELEFONE, totais: { contatos: 0, conversas: 0, mensagens: 0, oportunidades: 0, tarefas: 0 } })
+
+    expect(a.marcador).toMatch(/^anon_[0-9a-f]{12}$/)
+    expect(a.marcador).not.toContain(TELEFONE)
+  })
+
+  it('o mesmo telefone gera sempre o mesmo marcador', () => {
+    const vazio = { contatos: [], conversas: [], gerado_em: 1, oportunidades: [], tarefas: [], telefone: TELEFONE, totais: { contatos: 0, conversas: 0, mensagens: 0, oportunidades: 0, tarefas: 0 } }
+
+    expect(anonimizarRegistros(TELEFONE, vazio).marcador).toBe(anonimizarRegistros(TELEFONE, vazio).marcador)
   })
 })

@@ -26,6 +26,8 @@
 // para o titular ver o que existe, e serve para o proprietário decidir o que a eliminação deve alcançar
 // quando autorizar.
 
+import { createHash } from 'node:crypto'
+
 import type { CrmContact } from './crm-contacts-store'
 import type { CrmConversation } from './crm-conversations-store'
 import type { CrmOpportunity } from './crm-pipeline-store'
@@ -129,4 +131,77 @@ export async function preverEliminacao(
   const r = await exportarTitular(telefoneBruto, deps, tenantId)
 
   return 'error' in r ? r : { alcance: r.export.totais, telefone: r.export.telefone }
+}
+
+/**
+ * Anonimiza o titular, preservando os fatos (decisão do proprietário, r92).
+ *
+ * O QUE "ANONIMIZAR" SIGNIFICA AQUI
+ *
+ * Some o que identifica a pessoa: nome, e-mail, empresa, etiquetas, texto das conversas, notas e títulos.
+ * Fica o que é fato: a venda aconteceu, o valor existe, a data existe.
+ *
+ * O TELEFONE TAMBÉM SAI
+ *
+ * Ele é a chave que liga os registros entre domínios. Apagá-lo sem substituir quebraria a ligação —
+ * conversa sem contato, oportunidade sem origem — e o histórico deixaria de fazer sentido interno.
+ *
+ * Por isso ele é trocado por um identificador derivado e irreversível, o MESMO em todos os domínios.
+ * A ligação sobrevive; a pessoa não é mais alcançável pelo dado.
+ *
+ * O QUE ESTA FUNÇÃO NÃO FAZ
+ *
+ * Não apaga nada. Devolve os registros anonimizados para quem for gravar. Apagar é do store, e cada
+ * store grava inteiro — ver a armadilha do `write` na rodada 83.
+ */
+export function anonimizarRegistros(telefoneBruto: unknown, exportacao: TitularExport): {
+  contatos: CrmContact[]
+  conversas: CrmConversation[]
+  oportunidades: CrmOpportunity[]
+  tarefas: CrmTask[]
+  marcador: string
+} {
+  const telefone = normalizarTelefone(telefoneBruto)
+  const marcador = `anon_${createHash('sha256').update(telefone).digest('hex').slice(0, 12)}`
+
+  // Os id dos registros carregam o telefone (c_5511…, o_5511…) porque foram gerados a partir
+  // dele. Anonimizar só os campos de contato deixaria o telefone no identificador — e um JSON
+  // exportado continuaria identificando a pessoa. O id vira um derivado do marcador.
+  const trocarNoId = (id: string) => id.split(telefone).join(marcador)
+
+  return {
+    contatos: exportacao.contatos.map(c => ({
+      ...c,
+      company: '',
+      email: '',
+      name: 'Titular removido',
+      phone: marcador,
+      tags: [],
+      updated_at: c.updated_at
+    })),
+    conversas: exportacao.conversas.map(c => ({
+      ...c,
+      contact_phone: marcador,
+      id: trocarNoId(c.id),
+      last_message_preview: '',
+      messages: [],
+      notes: '',
+      title: 'Titular removido',
+      unread: 0
+    })),
+    marcador,
+    oportunidades: exportacao.oportunidades.map(o => ({
+      ...o,
+      contact_phone: marcador,
+      id: trocarNoId(o.id),
+      title: 'Oportunidade'
+    })),
+    tarefas: exportacao.tarefas.map(t => ({
+      ...t,
+      contact_phone: marcador,
+      id: trocarNoId(t.id),
+      notes: '',
+      title: 'Tarefa'
+    }))
+  }
 }
