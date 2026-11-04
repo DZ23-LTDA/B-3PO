@@ -697,6 +697,8 @@ export const en: Translations = {
   },
   settings: {
     crmConversations: {
+      markRead: 'Mark as read',
+      resolve: 'Mark as resolved',
       empty: 'No conversations yet. Once the official WhatsApp is connected, messages show up here.',
       loading: 'Loading conversations…',
       naoLidasLabel: 'unread',

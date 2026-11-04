@@ -910,6 +910,8 @@ export const ptOverrides: TranslationOverrides = {
       empty: 'Nenhuma conversa ainda. Quando o WhatsApp oficial estiver conectado, as mensagens aparecem aqui.',
       loading: 'Carregando conversas…',
       naoLidasLabel: 'nao lidas',
+      markRead: 'Marcar como lida',
+      resolve: 'Marcar como resolvida',
       noMessages: 'Sem mensagens ainda.',
       pickOne: 'Escolha uma conversa para ler.',
       status: {

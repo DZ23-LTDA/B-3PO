@@ -1048,3 +1048,28 @@ estar de pe. O lado dele esta provado em teste unitario (10 testes pytest), nao 
 O primeiro screenshot desta rodada **de novo** nao mostrava a secao — ela estava abaixo da dobra e
 `captureBeyondViewport` nao rola o container. Antes de acusar o codigo, medi: `h2` incluia "Conversas" e o store tinha
 `["Cliente E2E"]`. **Verificar antes de culpar** — a licao da rodada 172, aplicada desta vez.
+
+
+## Acoes na conversa: lida e resolvida (rodada 193, provado no binario)
+
+A conversa deixou de ser so leitura. Dois botoes, **que somem quando nao tem mais o que fazer**:
+
+- **Marcar como lida** — zera `unread`, e some quando ja esta lida;
+- **Marcar como resolvida** — muda `status`, e some quando ja esta resolvida.
+
+Botao que nao faz nada e ruido; o GOAL pede explicitamente para evitar "botoes sem acao".
+
+**Prova no app empacotado** (`docs/b3po/evidence/crm-acoes-pt.png`), perfil semeado com 2 nao lidas:
+
+| antes | depois |
+|---|---|
+| badge **2** | **0 nao lidas**, badge sumiu |
+| "Aberta" | **"Resolvida"** |
+| dois botoes | nenhum (nada a fazer) |
+| `1 Aberta · 0 Aguardando · 2 nao lidas` | `0 Aberta · 0 Aguardando · 0 nao lidas` |
+
+E o store confirmou persistencia: `{status: "resolvida", unread: 0}`.
+
+**Tropeço do caminho:** `markRead` ja existia em outro ponto do catalogo, entao minha checagem "ja tem a chave?" passou e a insercao foi para o bloco errado — o `tsc` acusou na hora. Corrigido localizando o bloco `crmConversations` **contando chaves**, a tecnica que eu mesmo ja tinha registrado e nao usei na primeira tentativa.
+
+**Medido:** i18n 17 arquivos / 123 testes; gate 14 ok; tsc limpo; build e MSIX refeitos.

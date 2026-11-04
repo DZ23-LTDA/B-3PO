@@ -5,8 +5,10 @@ import {
   conversationTimeLabel,
   conversationsAvailable,
   listConversations,
+  saveConversation,
   type CrmConversationRow,
 } from '@/api/crm-conversations'
+import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
@@ -46,6 +48,22 @@ export function CrmConversationsSection() {
   useEffect(() => {
     void carregar()
   }, [carregar])
+
+  // acoes da conversa: gravam pelo mesmo store do IPC e recarregam a lista
+  const alterar = useCallback(
+    async (conversa: CrmConversationRow, mudanca: Partial<CrmConversationRow>) => {
+      const salvo = await saveConversation({ ...conversa, ...mudanca })
+
+      if ('error' in salvo) {
+        setFailure(section.unavailable)
+
+        return
+      }
+
+      setRows(await listConversations())
+    },
+    [section.unavailable]
+  )
 
   const agora = Date.now()
   const contagens = useMemo(() => conversationCounts(rows ?? []), [rows])
@@ -129,9 +147,31 @@ export function CrmConversationsSection() {
                 <p className="text-sm text-(--ui-text-tertiary)">{section.pickOne}</p>
               ) : (
                 <>
-                  <h3 className="text-sm font-semibold text-foreground">
-                    {selecionada.contact_phone || selecionada.title}
-                  </h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {selecionada.contact_phone || selecionada.title}
+                    </h3>
+                    {selecionada.unread > 0 ? (
+                      <Button
+                        onClick={() => void alterar(selecionada, { unread: 0 })}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        {section.markRead}
+                      </Button>
+                    ) : null}
+                    {selecionada.status === 'resolvida' ? null : (
+                      <Button
+                        onClick={() => void alterar(selecionada, { status: 'resolvida' })}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        {section.resolve}
+                      </Button>
+                    )}
+                  </div>
                   {selecionada.messages.length === 0 ? (
                     <p className="text-sm text-(--ui-text-tertiary)">{section.noMessages}</p>
                   ) : (
