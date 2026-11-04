@@ -147,9 +147,11 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   hr: {
     departments: () => ipcRenderer.invoke('hermes:hr:departments'),
     employees: withSalary => ipcRenderer.invoke('hermes:hr:employees', withSalary),
+    offboarding: payload => ipcRenderer.invoke('hermes:hr:offboarding', payload),
     policy: (operation, reason) => ipcRenderer.invoke('hermes:hr:policy', operation, reason),
     saveDepartment: payload => ipcRenderer.invoke('hermes:hr:saveDepartment', payload),
-    saveEmployee: payload => ipcRenderer.invoke('hermes:hr:saveEmployee', payload)
+    saveEmployee: payload => ipcRenderer.invoke('hermes:hr:saveEmployee', payload),
+    treinamentos: payload => ipcRenderer.invoke('hermes:hr:treinamentos', payload)
   },
   services: {
     find: name => ipcRenderer.invoke('hermes:services:find', name),
@@ -170,6 +172,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
   },
   purchases: {
+    cotacao: payload => ipcRenderer.invoke('hermes:purchases:cotacao', payload),
     orders: tenantId => ipcRenderer.invoke('hermes:purchases:orders', tenantId),
     receive: payload => ipcRenderer.invoke('hermes:purchases:receive', payload),
     saveOrder: payload => ipcRenderer.invoke('hermes:purchases:saveOrder', payload),
