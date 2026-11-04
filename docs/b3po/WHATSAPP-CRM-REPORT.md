@@ -644,3 +644,27 @@ Era um defeito visivel na tela principal do CRM — qualquer pessoa notaria. Fic
 corrigir; a licao e que registrar nao substitui consertar quando o custo e de uma linha.
 
 Evidencia atualizada: `docs/b3po/evidence/crm-conversas-pt.png` (sem duplicata, com os rotulos novos).
+
+
+## Mapeador do webhook da Meta (rodada 179)
+
+Primeiro pedaco do fio que falta, e o mais arriscado: traduzir o payload de terceiro para os tipos do CRM.
+`apps/desktop/electron/crm-meta-webhook-map.ts` — funcao **pura**, sem rede e sem disco; o handler futuro so valida a
+assinatura e chama isto. Assim o formato da Meta e testavel **sem credencial**.
+
+Decisoes no codigo:
+
+- `timestamp` da Meta vem em **segundos** (string) e o store trabalha em **ms** — convertido uma vez, aqui;
+- `id` (`wamid.*`) vira `external_id`: a chave que impede duplicata na reentrega;
+- `from` e o `wa_id`; vira telefone com `+` (e nao duplica quando ja vem com `+`);
+- nome vem de `contacts[].profile.name`; **sem nome, o titulo e o telefone normalizado** — nunca um nome inventado;
+- evento de **status** (entregue/lido) nao e mensagem: ignorado;
+- mensagem sem texto (audio, imagem) **nao entra como corpo vazio**: contada em `ignored`;
+- payload invalido devolve `{ error }`, nunca excecao.
+
+**Medido:** 8 testes em `electron/crm-meta-webhook-map.test.ts`, verdes; `tsc --noEmit` limpo.
+
+**Bug que o teste pegou:** o fallback do titulo devolvia o telefone **sem** `+` enquanto `contact_phone` tinha `+` — dois
+formatos para o mesmo dado. Corrigido passando o telefone normalizado ao fallback.
+
+**Falta:** o handler (validar HMAC e chamar este mapeador) e a gravacao pelo `CrmConversationStore`.
