@@ -91,6 +91,13 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     faturar: payload => ipcRenderer.invoke('hermes:sales:faturar', payload),
     list: tenantId => ipcRenderer.invoke('hermes:sales:list', tenantId)
   },
+  scheduling: {
+    book: payload => ipcRenderer.invoke('hermes:scheduling:book', payload),
+    cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:scheduling:cancel', id, tenantId, reason),
+    confirm: (id, tenantId) => ipcRenderer.invoke('hermes:scheduling:confirm', id, tenantId),
+    day: (tenantId, from, to, resourceId) => ipcRenderer.invoke('hermes:scheduling:day', tenantId, from, to, resourceId),
+    list: tenantId => ipcRenderer.invoke('hermes:scheduling:list', tenantId)
+  },
   finance: {
     append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
     list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),

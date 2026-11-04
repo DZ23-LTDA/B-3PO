@@ -974,6 +974,28 @@ export const ptOverrides: TranslationOverrides = {
       },
       unavailable: 'Produtos precisam do aplicativo desktop para funcionar.'
     },
+    agenda: {
+      book: 'Agendar',
+      cancel: 'Cancelar',
+      confirm: 'Confirmar',
+      conflict: 'Horário já ocupado:',
+      date: 'Data',
+      duration: 'Duração (min)',
+      empty: 'Nenhum compromisso ainda.',
+      hint: 'O conflito é conferido pelo backend, contra todos os compromissos do mesmo recurso.',
+      invalidPeriod: 'Informe data e hora válidas.',
+      loadFailed: 'Não foi possível carregar a agenda.',
+      resource: 'Recurso',
+      resourceHint: 'cadeira-1, sala-2, dra-ana…',
+      resourceRequired: 'Diga qual recurso vai ficar ocupado.',
+      service: 'Serviço',
+      status: 'Situação',
+      statuses: { cancelado: 'cancelado', concluido: 'concluído', confirmado: 'confirmado', faltou: 'faltou', marcado: 'marcado' },
+      time: 'Hora',
+      title: 'Agenda',
+      today: 'Hoje',
+      unavailable: 'A agenda precisa do aplicativo desktop para funcionar.'
+    },
     finance: {
       add: 'Lançar',
       alreadyPaid: 'Este lançamento já está liquidado.',

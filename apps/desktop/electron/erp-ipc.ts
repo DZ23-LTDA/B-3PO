@@ -11,6 +11,8 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
+import { SchedulingStore, schedulingStorePath } from './scheduling-store'
+import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
 import { registerSalesIpc } from './sales-ipc'
 
@@ -27,5 +29,6 @@ export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: strin
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
   registerFinanceIpc(ipcMain, finance)
+  registerSchedulingIpc(ipcMain, new SchedulingStore(schedulingStorePath(userDataDir)))
   registerSalesIpc(ipcMain, { finance, inventory, sales: new SalesStore(salesStorePath(userDataDir)) })
 }

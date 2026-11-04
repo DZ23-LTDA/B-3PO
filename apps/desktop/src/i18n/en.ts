@@ -764,6 +764,28 @@ export const en: Translations = {
       },
       unavailable: 'Products need the desktop app to work.'
     },
+    agenda: {
+      book: 'Schedule',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      conflict: 'Time already taken:',
+      date: 'Date',
+      duration: 'Duration (min)',
+      empty: 'No appointment yet.',
+      hint: 'Conflicts are checked by the backend, against every appointment of the same resource.',
+      invalidPeriod: 'Enter a valid date and time.',
+      loadFailed: 'Could not load the schedule.',
+      resource: 'Resource',
+      resourceHint: 'chair-1, room-2, dr-ana…',
+      resourceRequired: 'Name the resource that will be busy.',
+      service: 'Service',
+      status: 'Status',
+      statuses: { cancelado: 'cancelled', concluido: 'done', confirmado: 'confirmed', faltou: 'no-show', marcado: 'booked' },
+      time: 'Time',
+      title: 'Schedule',
+      today: 'Today',
+      unavailable: 'The schedule needs the desktop app to work.'
+    },
     finance: {
       add: 'Add entry',
       alreadyPaid: 'This entry is already settled.',

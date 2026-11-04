@@ -671,6 +671,28 @@ export interface Translations extends NoticeTranslations {
       units: Record<string, string>
       unavailable: string
     }
+    agenda: {
+      book: string
+      cancel: string
+      confirm: string
+      conflict: string
+      date: string
+      duration: string
+      empty: string
+      hint: string
+      invalidPeriod: string
+      loadFailed: string
+      resource: string
+      resourceHint: string
+      resourceRequired: string
+      service: string
+      status: string
+      statuses: Record<string, string>
+      time: string
+      title: string
+      today: string
+      unavailable: string
+    }
     finance: {
       add: string
       alreadyPaid: string
