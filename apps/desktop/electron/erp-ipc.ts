@@ -6,6 +6,8 @@
 import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
+import { CompaniesStore, companiesStorePath } from './companies-store'
+import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
 import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
@@ -29,6 +31,8 @@ export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: strin
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
+  // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
+  registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
   registerInventoryIpc(ipcMain, inventory)
   registerFinanceIpc(ipcMain, finance)
   registerSchedulingIpc(ipcMain, new SchedulingStore(schedulingStorePath(userDataDir)))

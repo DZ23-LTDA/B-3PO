@@ -91,6 +91,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     faturar: payload => ipcRenderer.invoke('hermes:sales:faturar', payload),
     list: tenantId => ipcRenderer.invoke('hermes:sales:list', tenantId)
   },
+  companies: {
+    branches: companyId => ipcRenderer.invoke('hermes:companies:branches', companyId),
+    list: () => ipcRenderer.invoke('hermes:companies:list'),
+    saveBranch: payload => ipcRenderer.invoke('hermes:companies:saveBranch', payload),
+    saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
+  },
   purchases: {
     orders: tenantId => ipcRenderer.invoke('hermes:purchases:orders', tenantId),
     receive: payload => ipcRenderer.invoke('hermes:purchases:receive', payload),
