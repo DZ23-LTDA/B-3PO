@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { emitirNota, fiscalAvailable, fiscalErrorText, listFiscal, type FiscalRow } from '@/api/fiscal'
 
 import { listProducts, priceLabel, type ProductRow } from '@/api/catalog'
 import { loadBalances, quantityLabel } from '@/api/inventory'
@@ -41,8 +42,14 @@ export function SalesView() {
   const [saving, setSaving] = useState(false)
 
   const disponivel = salesAvailable()
+  const fiscalDisponivel = fiscalAvailable()
+  const [notas, setNotas] = useState<FiscalRow[]>([])
+  const [emitindo, setEmitindo] = useState('')
+  const [falhaFiscal, setFalhaFiscal] = useState('')
 
   const carregar = useCallback(async () => {
+    setFalhaFiscal('')
+    if (fiscalDisponivel) setNotas(await listFiscal().catch(() => []))
     try {
       const [listaProdutos, saldos, listaVendas] = await Promise.all([listProducts(), loadBalances(), listSales()])
 
@@ -59,6 +66,33 @@ export function SalesView() {
   useEffect(() => {
     if (disponivel) void carregar()
   }, [carregar, disponivel])
+
+  function danfeDe(saleId: string): FiscalRow | null {
+    return notas.find(n => n.ref === 'venda:' + saleId && n.status === 'autorizado' && n.url_danfe) ?? null
+  }
+
+  /** Emitir nao fatura: so a venda faturada tem nota. O backend recusa o resto. */
+  async function emitirNotaDaVenda(saleId: string): Promise<void> {
+    setEmitindo(saleId)
+    setFalhaFiscal('')
+    try {
+      const r = await emitirNota(saleId)
+
+      if ('error' in r) {
+        setFalhaFiscal(fiscalErrorText(r.error))
+      } else {
+        setNotas(await listFiscal())
+      }
+    } finally {
+      setEmitindo('')
+    }
+  }
+
+  async function abrirDanfe(saleId: string): Promise<void> {
+    const nota = danfeDe(saleId)
+
+    if (nota?.url_danfe) window.open(nota.url_danfe, '_blank', 'noopener,noreferrer')
+  }
 
   const estimativa = useMemo(() => draftTotal(itens), [itens])
 
@@ -248,11 +282,27 @@ export function SalesView() {
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">{sale.items.length}</td>
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">{priceLabel(sale.total_cents)}</td>
                     <td className="border-b border-(--ui-border) py-1">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-1">
                         {sale.status === 'orcamento' || sale.status === 'pedido' ? (
                           <Button onClick={() => void cancelSale(sale.id).then(carregar)} variant="ghost">
                             {copy.cancel}
                           </Button>
+                        ) : null}
+                        {sale.status === 'faturado' && fiscalDisponivel ? (
+                          <>
+                            <Button
+                              disabled={emitindo === sale.id}
+                              onClick={() => void emitirNotaDaVenda(sale.id)}
+                              variant="ghost"
+                            >
+                              {emitindo === sale.id ? copy.emitting : copy.emitInvoice}
+                            </Button>
+                            {danfeDe(sale.id) ? (
+                              <Button onClick={() => void abrirDanfe(sale.id)} variant="ghost">
+                                {copy.printInvoice}
+                              </Button>
+                            ) : null}
+                          </>
                         ) : null}
                       </div>
                     </td>
