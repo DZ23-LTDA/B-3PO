@@ -1508,3 +1508,22 @@ reconstruído.
 
 **Nota honesta sobre as outras falhas:** `browser-hints.test.tsx` passa sozinho (9s) e falha na suíte completa —
 é timeout sob carga paralela, não assertion. Registrado como tal, não como "verde".
+
+### Rodada 139 — projeto `|ui|` verde na prática: 12.872 passam, 4 falham (timeout, provado)
+
+Rodei a suíte `src/` inteira: **12.872 testes passam, 4 falham em 3 arquivos**. Os 3 arquivos levam ~20 s cada e
+falham no limite; com `--no-file-parallelism` os **12/12 passam** em 20,66 s. É timeout sob carga, medido e não
+suposto.
+
+**Duas correções reais nesta rodada:**
+
+1. **`traceWakeStep` quebrava com valor não-Promise.** `src/sdk/wake-trace.ts` fazia `work.finally(...)`; quando
+   `dial()` devolve `undefined` (stub, caminho rápido em cache), isso é `TypeError` — enquanto `await undefined`
+   é perfeitamente legal. Quem estava errado era o wrapper, não o chamador. Troquei por
+   `Promise.resolve(work).finally(...)`. `src/sdk/profile-routing.test.ts` foi de **6 falhas para 49/49**.
+2. **`skip-gate.test.tsx` fixava a copy antiga.** O teste procurava "Let's get you setup with Hermes Agent"; o
+   rebrand desta sessão trocou para "…with B-3PO". O contrato do arquivo é o *gate* (o overlay abre ou não), não
+   o literal, então atualizei o literal e deixei o contrato intacto.
+
+Somando as duas rodadas, saíram **9 testes vermelhos** e **2 bugs de produto** (`/crm` caindo em sessão, wrapper
+que quebrava com não-Promise). O que sobra de vermelho é `electron/`/`scripts/` e os 3 arquivos de timeout.

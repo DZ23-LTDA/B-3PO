@@ -10,7 +10,9 @@ import { DesktopOnboardingOverlay } from '.'
 // The boot due check has run and no first-run onboarding is open.
 markOnboardingDecided()
 
-const HEADER = "Let's get you setup with Hermes Agent"
+// A marca mudou de propósito: o cabeçalho fala do B-3PO, não do Hermes Agent. O contrato que este arquivo
+// protege é o *gate* (o overlay abre ou não), então o literal acompanha a copy atual.
+const HEADER = "Let's get you setup with B-3PO"
 
 // Never answers: the readiness effect stays in flight, so each case is observed
 // on exactly the state it set up instead of racing a round to completion.

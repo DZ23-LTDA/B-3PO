@@ -49,3 +49,28 @@ keybinds e roteamento de perfil, com falha de mock, não de asserção de texto 
 
 Isso **não** isenta: o produto tem 56 testes vermelhos e eles precisam ser triados um a um. O que o registro
 garante é que o número não foi causado pelo trabalho de marca/i18n desta sessão.
+
+
+## Atualização (rodada 139) — o projeto `|ui|` está verde na prática
+
+Rodada a suíte `src/` inteira depois das correções: **12.872 passam, 4 falham em 3 arquivos** (de 12.877).
+
+Os 3 arquivos são justamente os que levam ~20 s por arquivo:
+
+- `src/lib/keybinds/browser-hints.test.tsx`
+- `src/app/right-sidebar/terminal/terminal-ownership.test.ts`
+- `src/app/hooks/use-keybinds-browser.test.tsx`
+
+Rodei os três com `--no-file-parallelism`: **12/12 passam**, 20,66 s no total. Ou seja: **timeout sob carga
+paralela**, não assertion. Está medido, não suposto.
+
+### Corrigido nesta rodada (com prova)
+
+| Arquivo | Antes | Causa | Correção |
+|---|---|---|---|
+| `src/sdk/profile-routing.test.ts` | 6 falhas | `traceWakeStep` chamava `.finally` no retorno de `dial()`; nos stubs ele é `undefined` e `await undefined` é legal, então quem quebrava era o wrapper | `Promise.resolve(work).finally(...)` — 49/49 passam |
+| `src/components/onboarding/skip-gate.test.tsx` | 1 falha | o teste fixava o cabeçalho antigo "…with Hermes Agent"; o rebrand mudou para "…with B-3PO" | literal atualizado (o contrato é o gate, não a copy) |
+
+O resto do arquivo (as falhas de `electron/` e `scripts/`) continua de pé e precisa de triagem própria: são
+empacotamento, tray, updater, assinatura de payload e instalador — dependem de Windows real, rede e artefato
+assinado.
