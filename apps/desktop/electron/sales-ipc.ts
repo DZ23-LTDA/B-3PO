@@ -41,6 +41,8 @@ export interface FinanceLike {
 export interface SalesDeps {
   /** Quem está agindo. Resolvido no processo principal, nunca recebido do renderer. */
   actorOf: () => Promise<Actor | null>
+  /** Opcional: quando presente, faturar cria os acompanhamentos de pos-venda. */
+  afterSales?: { create: (input: unknown) => Promise<unknown> }
   finance: FinanceLike
   inventory: InventoryLike
   sales: SalesStoreLike
@@ -163,6 +165,28 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
         finance = lancado.entry
       } else if (lancado.error !== 'ref_duplicado') {
         return { error: lancado.error }
+      }
+    }
+
+    // Pos-venda nasce daqui: sem isto o dominio existe e ninguem o alimenta. Satisfacao e recompra
+    // sao criadas com o `ref` da venda, entao refaturar (retry) nao duplica.
+    //
+    // Falha aqui NAO desfaz a venda. A venda ja esta gravada e o estoque ja saiu: devolver erro agora
+    // faria o operador achar que nao faturou e tentar de novo. Acompanhamento perdido e degradacao;
+    // venda fantasma e prejuizo.
+    if (deps.afterSales) {
+      for (const kind of ['satisfacao', 'recompra'] as const) {
+        try {
+          await deps.afterSales.create({
+            contact_phone: criada.sale.contact_phone ?? '',
+            kind,
+            sale_at: criada.sale.created_at,
+            sale_id: criada.sale.id,
+            tenant_id: criada.sale.tenant_id
+          })
+        } catch {
+          // Silencioso de proposito: o indicador `semAcompanhamento` revela o buraco na tela.
+        }
       }
     }
 
