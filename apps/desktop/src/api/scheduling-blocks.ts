@@ -28,11 +28,9 @@ export interface BlockInput {
 
 interface Ponte {
   schedulingBlocks?: {
-    block?: {
-      create: (input: BlockInput) => Promise<{ block?: BlockRow; error?: string }>
-      list: () => Promise<BlockRow[]>
-      remove: (id: string) => Promise<{ error?: string; removido?: boolean }>
-    }
+    create: (input: BlockInput) => Promise<{ block?: BlockRow; error?: string }>
+    list: () => Promise<BlockRow[]>
+    remove: (id: string) => Promise<{ error?: string; removido?: boolean }>
   }
 }
 
@@ -44,16 +42,16 @@ function ponte(): Ponte['schedulingBlocks'] | null {
 
 /** A tela pergunta isto antes de mostrar o botão: sem ponte, um botão que não faz nada mente. */
 export function blocksAvailable(): boolean {
-  return Boolean(ponte()?.block)
+  return Boolean(ponte()?.list)
 }
 
 export async function listBlocks(): Promise<BlockRow[]> {
   const api = ponte()
 
-  if (!api?.block) return []
+  if (!api?.list) return []
 
   try {
-    return await api.block.list()
+    return await api.list()
   } catch {
     // Falha de leitura não derruba a agenda: sem bloqueios conhecidos, a disponibilidade superestima —
     // e por isso a tela precisa mostrar que a lista falhou, não fingir que está vazia.
@@ -64,10 +62,10 @@ export async function listBlocks(): Promise<BlockRow[]> {
 export async function createBlock(input: BlockInput): Promise<{ block?: BlockRow; error?: string }> {
   const api = ponte()
 
-  if (!api?.block) return { error: 'indisponivel' }
+  if (!api) return { error: 'indisponivel' }
 
   try {
-    return await api.block.create(input)
+    return await api.create(input)
   } catch {
     return { error: 'falha_ao_gravar' }
   }
@@ -76,10 +74,10 @@ export async function createBlock(input: BlockInput): Promise<{ block?: BlockRow
 export async function removeBlock(id: string): Promise<{ error?: string; removido?: boolean }> {
   const api = ponte()
 
-  if (!api?.block) return { error: 'indisponivel' }
+  if (!api) return { error: 'indisponivel' }
 
   try {
-    return await api.block.remove(id)
+    return await api.remove(id)
   } catch {
     return { error: 'falha_ao_remover' }
   }
