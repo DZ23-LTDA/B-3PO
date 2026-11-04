@@ -45,6 +45,13 @@ export interface SalesDeps {
   afterSales?: { create: (input: unknown) => Promise<unknown> }
   finance: FinanceLike
   inventory: InventoryLike
+  /**
+   * Opcional: quando presente, faturar anuncia o evento para as automacoes.
+   *
+   * Recebe um resumo do que aconteceu, nao o payload cru: a automacao nao deve depender da forma do
+   * pedido, so do fato de que a venda foi faturada.
+   */
+  onEvent?: (event: { sale_id: string; tenant_id: string; total_cents: number; type: 'venda.faturada' }) => Promise<void>
   sales: SalesStoreLike
 }
 
@@ -165,6 +172,23 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
         finance = lancado.entry
       } else if (lancado.error !== 'ref_duplicado') {
         return { error: lancado.error }
+      }
+    }
+
+    // Evento para as automacoes. Mesma regra do pos-venda: a venda e o fato principal, e uma
+    // automacao que falha nao pode desfaze-la nem devolver erro ao operador. A diferenca e que aqui
+    // o silencio e mais estreito: o executor registra cada disparo (`onRun`), entao a falha aparece
+    // no relatorio de automacoes mesmo sem quebrar o faturamento.
+    if (deps.onEvent) {
+      try {
+        await deps.onEvent({
+          sale_id: criada.sale.id,
+          tenant_id: criada.sale.tenant_id,
+          total_cents: criada.sale.total_cents,
+          type: 'venda.faturada'
+        })
+      } catch {
+        // Ignorado de proposito, pelo mesmo motivo do pos-venda.
       }
     }
 

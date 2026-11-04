@@ -26,6 +26,7 @@ import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
+import { AutomationStore, automationStorePath, runRules } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
 import { registerMarketingIpc } from './marketing-ipc'
 import { MarketingStore, marketingStorePath } from './marketing-store'
@@ -103,7 +104,32 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // O pós-venda entra no faturamento: sem isto `deps.afterSales` fica undefined em produção e nenhum
   // acompanhamento é criado — o domínio existe no disco e ninguém o alimenta.
-  registerSalesIpc(ipcMain, { actorOf, afterSales, finance, inventory, sales })
+  // O elo que faltava: um fato do dominio vira evento, e o evento vira execucao de regra. Sem isto o
+  // executor de automacoes existe, passa nos testes e nunca roda em producao.
+  const automations = new AutomationStore(automationStorePath(userDataDir))
+
+  registerSalesIpc(ipcMain, {
+    actorOf,
+    afterSales,
+    finance,
+    inventory,
+    onEvent: async event => {
+      await runRules(await automations.list(event.tenant_id), event.type, {
+        actorFor: async id => {
+          const atores = await actors.list()
+          const achado = atores.find(a => a.id === id && a.active)
+
+          return achado
+            ? { id: achado.id, kind: achado.kind, level: achado.level, role: achado.role, scopes: achado.scopes }
+            : null
+        },
+        now: Date.now(),
+        tenantId: event.tenant_id,
+        tools
+      })
+    },
+    sales
+  })
   registerAfterSalesIpc(ipcMain, { actorOf, afterSales, sales })
   const marketing = new MarketingStore(marketingStorePath(userDataDir))
 
