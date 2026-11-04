@@ -716,3 +716,49 @@ devolve `json_invalido`; evento de status nao grava nada; erro do store volta co
 **O que falta e so a conexao HTTP**: expor uma rota que leia o corpo cru, o header `X-Hub-Signature-256` e chame
 `ingestMetaWebhook` com o `CrmConversationStore`. Nao ha mais logica de negocio pendente — e por isso que a credencial
 passa a ser o unico item que muda **o que o produto e**.
+
+
+## Onde o fio liga — auditoria que evita segunda fonte de verdade (rodada 182)
+
+Antes de escrever a rota HTTP, verifiquei o que o adapter oficial **ja faz**. Resultado da leitura de
+`plugins/platforms/whatsapp_cloud/adapter.py` (1129 linhas):
+
+- ele e um **`BasePlatformAdapter` do Hermes** — cuida do CANAL: recebe webhook, valida, e alimenta a sessao do runtime;
+- guarda apenas bookkeeping de mensagens ENVIADAS (`gateway/rich_sent_store`), para citacao/attachments;
+- **nao tem conceito de CRM**: nenhuma ocorrencia de `history`, `crm` ou persistencia de conversa.
+
+Ou seja: o adapter e dono do canal; o B-3PO e dono do CRM (§05 do GOAL). Nao ha duplicacao — mas isso define onde o fio
+liga.
+
+### Decisao de arquitetura (registrada)
+
+**NAO criar um segundo webhook publico no Electron.** A Meta precisa de uma URL publica e o adapter oficial ja resolve
+isso (com a verificacao HMAC que ele ja tem). O desenho correto:
+
+```
+Meta -> adapter oficial (python, URL publica, HMAC)
+      -> sessao Hermes (canal)
+      -> hook opt-in: POST no endpoint LOCAL do desktop (127.0.0.1)
+           -> ingestMetaWebhook (ja testado: 8 testes)
+                -> CrmConversationStore (ja testado: 16 testes)
+```
+
+Por que assim:
+
+1. **uma unica porta publica** — so o adapter; o desktop escuta em loopback e nao fica exposto;
+2. **sem segundo dono de sessao** — o Hermes continua sendo o runtime; o CRM guarda a visao de produto;
+3. **degrada bem** — sem o desktop aberto, o canal continua funcionando e o CRM simplesmente nao registra; nada quebra.
+
+O endpoint local deve exigir o **mesmo token de sessao do desktop** (ja existe: `HERMES_DESKTOP_REMOTE_TOKEN`) e recusar
+sem ele — loopback nao e autorizacao.
+
+### Proximo passo, agora preciso
+
+1. endpoint `POST /crm/whatsapp/ingest` no processo principal do Electron: corpo cru + header de assinatura + token
+   local, chamando `ingestMetaWebhook` com o `CrmConversationStore`;
+2. hook opt-in no adapter python: apos receber mensagem, POST no endpoint local, com timeout curto e falha silenciosa
+   (o canal nao pode depender do CRM);
+3. teste de integracao do endpoint com payload de exemplo (nao precisa de credencial — precisa de token local).
+
+**O que ainda depende do proprietario:** as `WHATSAPP_CLOUD_*` para o adapter subir de verdade. Sem elas, 1 e 3 podem ser
+feitos e provados com payload sintetico; so o ciclo real (celular -> inbox) exige credencial.
