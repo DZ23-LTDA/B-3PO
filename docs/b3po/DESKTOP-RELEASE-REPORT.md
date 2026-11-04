@@ -1055,3 +1055,27 @@ Restam **`screen`** (57 chaves) e **`cron`** (61) — o próximo par natural.
 
 Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok; MSIX
 reconstruído.
+
+### Rodada 121 — tarefas agendadas dos bots em pt (e um tropeço no meio)
+
+**`i18n-cron-pt.ts`**: as 61 chaves de tarefas agendadas do Bot Mode — criar ("uma tarefa recorrente que o bot
+executa numa agenda"), instrução, quando rodar, dia do mês, enviar resultados para, continuidade (cada execução vê a
+saída da anterior), as oito frequências, as unidades, e as frases prontas ("Roda de segunda a sexta às 09:00"),
+além dos estados (concluída / falhou / entrega falhou / bloqueada pela configuração / pausada por segurança).
+
+### O tropeço
+
+1. Primeiro escrevi o bloco direto no `i18n.ts`. O `code_health` barrou: `i18n.ts` do plugin **passou do teto de
+   linhas**.
+2. Para corrigir, rodei `git checkout -- i18n.ts` — e isso **apagou a tradução recém-feita**, porque ela ainda não
+   estava commitada. Refiz.
+3. A extração por faixa de linhas pegou trechos errados duas vezes (o fechamento de `en` não era `  },` como nos
+   outros locales, então o recorte invadiu o `ja`). Desisti da cirurgia no inglês.
+4. Solução que ficou: o **pt** mora em módulo próprio (`i18n-cron-pt.ts`, novo arquivo, dentro do alvo) e o
+   `i18n.ts` só referencia `cron: ptCron`. O arquivo encolheu, o `en` não foi tocado, e o `code_health` voltou a
+   **0 bloqueantes**.
+
+Lição registrada: não usar `git checkout --` para "consertar" trabalho não commitado.
+
+Verificação: `src/plugins/hermes-bots` + `src/i18n` = 132 arquivos / 1074 testes (1 skipped); gate 14 ok;
+`code_health` 0 bloqueantes; MSIX reconstruído.

@@ -34,6 +34,7 @@ import { useMemo } from 'react'
 
 import { CANONICAL_GROUP_LOCALES } from './canonical-group-locales'
 import { bind, type Bound } from './i18n-bind'
+import { ptCron } from './i18n-cron-pt'
 import { type BotsMessages } from './i18n-messages'
 import { getPluginCtx } from './shared'
 
@@ -1875,6 +1876,7 @@ export const BOTS_LOCALES: PluginLocaleBundles = {
       editMenu: 'Editar…',
       chatEmpty: 'Diga algo para começar.'
     },
+    cron: ptCron,
     tools: {
       installHint: name => `Instale "${name}" e adicione à lista acima`,
       installed: name => `Skill "${name}" instalada`,
