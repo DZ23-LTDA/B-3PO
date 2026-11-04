@@ -1377,3 +1377,19 @@ controle em script gerado e conferi com `tsc` antes de compilar — o erro apare
 
 **Estado da etiqueta, completo:** o campo edita e persiste (dedupe sem caixa), a busca encontra por texto e o seletor
 filtra. Falta apenas renomear/excluir uma etiqueta em uso.
+
+
+## Regras de anexo (rodada 228)
+
+`attachmentRejection({ mime, sizeBytes })` decide antes de qualquer upload. **6 testes.**
+
+| regra | motivo |
+|---|---|
+| teto de **16 MB** | e o limite de midia do proprio WhatsApp Cloud; aceitar acima seria prometer envio que nao sai |
+| lista fechada de tipos | pdf, docx, xlsx, txt, jpeg, png, webp, mp3, ogg, mp4 — tipo fora exige decisao humana, nao fallback silencioso |
+| **0 byte recusado** | anexo vazio costuma ser falha de gravacao no disco; deixar passar transfere o erro para o cliente |
+| tipo normalizado (maiuscula/espaco) | o mime vem do sistema de arquivos e nao e confiavel em formato |
+| teste garante que a lista nao tem html/js | impede que alguem acrescente tipo perigoso sem perceber |
+
+**FALTA, e nao e pouco:** nao existe upload, nem armazenamento, nem envio. Estas sao as regras que o upload vai obedecer
+quando existir. Nao ha tela de anexo hoje.
