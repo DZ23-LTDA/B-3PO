@@ -671,6 +671,32 @@ export interface Translations extends NoticeTranslations {
       units: Record<string, string>
       unavailable: string
     }
+    sales: {
+      addItem: string
+      alreadyIssued: string
+      cancel: string
+      empty: string
+      estimate: string
+      hint: string
+      insufficientStock: string
+      invalidQuantity: string
+      issue: string
+      items: string
+      itemsRequired: string
+      loadFailed: string
+      number: string
+      pickProduct: string
+      product: string
+      quantity: string
+      removeItem: string
+      saveDraft: string
+      status: string
+      statuses: Record<string, string>
+      title: string
+      total: string
+      unitPrice: string
+      unavailable: string
+    }
     stock: {
       balance: string
       count: (n: number) => string

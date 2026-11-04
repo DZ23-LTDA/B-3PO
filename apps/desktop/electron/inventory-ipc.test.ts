@@ -95,7 +95,7 @@ describe('IPC do estoque', () => {
     })
   })
 
-  it('mountErpIpc liga catalogo E estoque sobre o mesmo userData', async () => {
+  it('mountErpIpc liga catalogo, estoque e vendas sobre o mesmo userData', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'b3po-erp-mount-'))
 
     try {
@@ -105,7 +105,9 @@ describe('IPC do estoque', () => {
 
       expect(ipc.channels()).toContain('hermes:catalog:list')
       expect(ipc.channels()).toContain('hermes:inventory:append')
-      expect(ipc.channels()).toHaveLength(6)
+      expect(ipc.channels()).toContain('hermes:sales:faturar')
+      // 3 do catálogo + 3 do estoque + 4 de vendas.
+      expect(ipc.channels()).toHaveLength(10)
     } finally {
       await rm(dir, { force: true, recursive: true })
     }

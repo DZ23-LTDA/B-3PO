@@ -21,6 +21,7 @@ export const CRON_ROUTE = '/cron'
 export const CRM_ROUTE = '/crm'
 export const PRODUCTS_ROUTE = '/products'
 export const STOCK_ROUTE = '/stock'
+export const SALES_ROUTE = '/sales'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -42,6 +43,7 @@ export type AppView =
   | 'messaging'
   | 'profiles'
   | 'products'
+  | 'sales'
   | 'settings'
   | 'starmap'
   | 'stock'
@@ -59,6 +61,7 @@ export type AppRouteId =
   | 'new'
   | 'profiles'
   | 'products'
+  | 'sales'
   | 'settings'
   | 'starmap'
   | 'stock'
@@ -82,6 +85,7 @@ export const APP_ROUTES = [
   { id: 'cron', path: CRON_ROUTE, view: 'cron' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
+  { id: 'sales', path: SALES_ROUTE, view: 'sales' },
   { id: 'stock', path: STOCK_ROUTE, view: 'stock' },
   { id: 'profiles', path: PROFILES_ROUTE, view: 'profiles' },
   { id: 'agents', path: AGENTS_ROUTE, view: 'agents' },

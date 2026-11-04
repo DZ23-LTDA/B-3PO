@@ -7,14 +7,23 @@ import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
 import { registerCatalogIpc } from './catalog-ipc'
+import { FinanceStore, financeStorePath } from './finance-store'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
+import { SalesStore, salesStorePath } from './sales-store'
+import { registerSalesIpc } from './sales-ipc'
 
 /**
- * Monta os IPC do ERP. Catálogo e estoque; vendas, financeiro e agenda entram aqui conforme cada um
- * ganha tela — registrá-los antes disso exporia canal sem consumidor.
+ * Monta os IPC do ERP. Catálogo, estoque e vendas; financeiro e agenda ganham tela depois.
+ *
+ * Vendas recebe também estoque e financeiro porque faturar atravessa os três — a orquestração mora
+ * aqui, no processo principal, e não no renderer.
  */
 export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
+  const inventory = new InventoryStore(inventoryStorePath(userDataDir))
+  const finance = new FinanceStore(financeStorePath(userDataDir))
+
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
-  registerInventoryIpc(ipcMain, new InventoryStore(inventoryStorePath(userDataDir)))
+  registerInventoryIpc(ipcMain, inventory)
+  registerSalesIpc(ipcMain, { finance, inventory, sales: new SalesStore(salesStorePath(userDataDir)) })
 }
