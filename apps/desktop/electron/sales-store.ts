@@ -24,6 +24,21 @@ export const SALE_STATUSES = ['orcamento', 'pedido', 'faturado', 'cancelado'] as
 
 export type SaleStatus = (typeof SALE_STATUSES)[number]
 
+/**
+ * Forma de pagamento (rodada 117).
+ *
+ * Sem este campo o fechamento de caixa nao consegue separar dinheiro de PIX, e o operador nao tem como
+ * conferir a gaveta. A lista e fechada de proposito: texto livre viraria "pix", "PIX", "Pix" e "pixx" em
+ * quatro linhas do fechamento.
+ */
+export const PAYMENT_METHODS = ['dinheiro', 'pix', 'credito', 'debito', 'boleto', 'transferencia', 'outro'] as const
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
+
+export function isPaymentMethod(value: unknown): value is PaymentMethod {
+  return typeof value === 'string' && (PAYMENT_METHODS as readonly string[]).includes(value)
+}
+
 export interface SaleItem {
   /** SKU do catálogo, quando o item veio de um produto cadastrado. */
   product_sku: string
@@ -45,6 +60,11 @@ export interface Sale {
   /** Número sequencial por empresa: o número que o cliente vê. */
   number: number
   notes: string
+  /**
+   * Ausente em vendas anteriores a rodada 117. Ausencia e "nao informado", nunca "sem custo": o fechamento
+   * mostra essas vendas numa linha propria para o operador saber que faltou o dado.
+   */
+  payment_method?: PaymentMethod
   status: SaleStatus
   tenant_id: string
   total_cents: number
@@ -165,6 +185,7 @@ export function normalizeSale(input: unknown, now: number): { error: string } | 
       id: text(raw['id']) || `sale_${now}_${Math.random().toString(36).slice(2, 8)}`,
       items,
       notes: text(raw['notes']),
+      ...(isPaymentMethod(raw['payment_method']) ? { payment_method: raw['payment_method'] as PaymentMethod } : {}),
       status: isSaleStatus(status) ? status : 'orcamento',
       tenant_id: text(raw['tenant_id']) || DEFAULT_TENANT,
       total_cents: saleTotal(items),

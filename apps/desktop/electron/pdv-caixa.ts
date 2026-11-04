@@ -29,13 +29,23 @@ export interface ProdutoMaisVendido {
   total_cents: number
 }
 
+export interface FormaPagamentoTotal {
+  forma: string
+  quantidade: number
+  total_cents: number
+}
+
 export interface FechamentoDoDia {
   /** Fim do período (epoch ms), para o operador conferir o recorte. */
   ate: number
   /** Início do período (epoch ms). */
   de: number
-  /** Sempre `null` nesta versão: a venda não guarda forma de pagamento. */
-  por_forma_pagamento: null
+  /**
+   * Quebra por forma de pagamento. Vendas sem o campo (anteriores a r117) aparecem como
+   * `nao_informado`, numa linha propria: escondelas faria a soma das formas nao fechar com o
+   * total, e o operador procuraria a diferenca na gaveta.
+   */
+  por_forma_pagamento: FormaPagamentoTotal[]
   /** Contagem por situação, incluindo as que não são venda realizada. */
   por_situacao: Record<string, number>
   /** SKUs ordenados por faturamento, do maior para o menor. */
@@ -67,6 +77,7 @@ export function fechamentoDoDia(vendas: readonly Sale[], periodo: Periodo): Fech
 
   const porSituacao: Record<string, number> = {}
   const porSku = new Map<string, ProdutoMaisVendido>()
+  const porForma = new Map<string, FormaPagamentoTotal>()
 
   let total = 0
   let quantidade = 0
@@ -78,6 +89,13 @@ export function fechamentoDoDia(vendas: readonly Sale[], periodo: Periodo): Fech
 
     total += venda.total_cents
     quantidade++
+
+    const forma = venda.payment_method ?? 'nao_informado'
+    const linhaForma = porForma.get(forma) ?? { forma, quantidade: 0, total_cents: 0 }
+
+    linhaForma.quantidade++
+    linhaForma.total_cents += venda.total_cents
+    porForma.set(forma, linhaForma)
 
     for (const item of venda.items as SaleItem[]) {
       const atual = porSku.get(item.product_sku) ?? {
@@ -95,7 +113,7 @@ export function fechamentoDoDia(vendas: readonly Sale[], periodo: Periodo): Fech
   return {
     ate: periodo.ate,
     de: periodo.de,
-    por_forma_pagamento: null,
+    por_forma_pagamento: [...porForma.values()].sort((a, b) => b.total_cents - a.total_cents),
     por_situacao: porSituacao,
     produtos: [...porSku.values()].sort((a, b) => b.total_cents - a.total_cents),
     quantidade,

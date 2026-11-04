@@ -121,9 +121,33 @@ describe('fechamentoDoDia', () => {
     expect(f.produtos[0]!.total_cents).toBe(1500)
   })
 
-  it('declara que a quebra por forma de pagamento NAO existe', () => {
-    // `null` e a informacao: quem ler sabe que precisa perguntar, nao que a gaveta esta vazia.
-    expect(fechamentoDoDia([venda()], PERIODO).por_forma_pagamento).toBeNull()
+  it('quebra por forma de pagamento', () => {
+    const f = fechamentoDoDia(
+      [
+        venda({ id: 'a', payment_method: 'dinheiro', total_cents: 3000 }),
+        venda({ id: 'b', payment_method: 'pix', total_cents: 7000 }),
+        venda({ id: 'c', payment_method: 'dinheiro', total_cents: 2000 })
+      ],
+      PERIODO
+    )
+
+    expect(f.por_forma_pagamento).toEqual([
+      { forma: 'pix', quantidade: 1, total_cents: 7000 },
+      { forma: 'dinheiro', quantidade: 2, total_cents: 5000 }
+    ])
+  })
+
+  it('venda sem forma informada aparece como nao_informado, nao some', () => {
+    // Esconder faria a soma das formas nao fechar com o total, e o operador procuraria a diferenca
+    // na gaveta.
+    const f = fechamentoDoDia([venda({ id: 'a', payment_method: 'pix', total_cents: 1000 }), venda({ id: 'b', total_cents: 5000 })], PERIODO)
+
+    expect(f.por_forma_pagamento).toEqual([
+      { forma: 'nao_informado', quantidade: 1, total_cents: 5000 },
+      { forma: 'pix', quantidade: 1, total_cents: 1000 }
+    ])
+    // A soma das formas bate com o faturamento: nada ficou de fora.
+    expect(f.por_forma_pagamento.reduce((s, x) => s + x.total_cents, 0)).toBe(f.total_cents)
   })
 
   it('nao inventa situacao que nao ocorreu', () => {
