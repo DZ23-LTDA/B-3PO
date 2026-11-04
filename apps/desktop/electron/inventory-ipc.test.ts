@@ -125,7 +125,7 @@ describe('IPC do estoque', () => {
       // um total que quebra a cada domínio novo. A lista de domínios é explícita de propósito.
       expect(
         canais.every(canal =>
-          /^hermes:(admin|aftersales|analytics|automations|catalog|companies|documents|desk|finance|hr|inventory|marketing|purchases|sales|scheduling|services):/.test(canal)
+          /^hermes:(admin|aftersales|analytics|automations|catalog|companies|documents|desk|finance|hr|inventory|marketing|privacy|purchases|sales|scheduling|services):/.test(canal)
         )
       ).toBe(true)
     } finally {

@@ -20,6 +20,7 @@ import { receivableForSale, type FinanceEntry } from './finance-store'
 import { balanceFor, type InventoryMovement } from './inventory-store'
 import type { Actor } from './rbac'
 import { withPermission } from './permission-guard'
+import { estornoForDevolucao } from './sales-return'
 import { normalizeSale, stockMovementsFor, type Sale } from './sales-store'
 
 export interface SalesStoreLike {
@@ -213,6 +214,64 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
 
     return { finance, sale: criada.sale, sales: criada.sales, stock }
   }
+
+  /**
+   * Devolução de venda faturada: devolve ao estoque e estorna o recebível.
+   *
+   * Não reescreve a venda — cancelar uma faturada é recusado pelo store, e com razão: a venda aconteceu.
+   * Devolver é um fato posterior, registrado como dois lançamentos novos ligados à venda por `ref`.
+   *
+   * Mesma regra de falha do faturamento: erro no estorno não devolve erro ao operador depois que a
+   * mercadoria já voltou ao estoque. Devolver erro aqui faria ele tentar de novo e devolver duas vezes.
+   */
+  ipcMain.handle(
+    'hermes:sales:devolver',
+    async (
+      _event: IpcMainInvokeEvent,
+      saleId: unknown
+    ): Promise<{ error: string } | { finance: FinanceEntry | null; sale: Sale; stock: InventoryMovement[] }> => {
+      // Sem tenant do renderer: o servidor usa o da instalacao.
+      const vendas = await deps.sales.list()
+      const venda = vendas.find(v => v.id === saleId)
+
+      if (!venda) {
+        return { error: 'venda_nao_encontrada' }
+      }
+
+      const estorno = estornoForDevolucao(venda)
+
+      if ('error' in estorno) {
+        return { error: estorno.error }
+      }
+
+      const stock: InventoryMovement[] = []
+
+      for (const movimento of estorno.estoque) {
+        const entrada = await deps.inventory.append(movimento)
+
+        // `ref_duplicado` é a devolução já feita num retry: idempotência, não erro.
+        if ('movement' in entrada) {
+          stock.push((entrada as { movement: InventoryMovement }).movement)
+        } else if (entrada.error !== 'ref_duplicado') {
+          return { error: entrada.error }
+        }
+      }
+
+      let finance: FinanceEntry | null = null
+
+      if (estorno.financeiro) {
+        const lancado = await deps.finance.append(estorno.financeiro)
+
+        if ('entry' in lancado) {
+          finance = lancado.entry
+        } else if (lancado.error !== 'ref_duplicado') {
+          return { error: lancado.error }
+        }
+      }
+
+      return { finance, sale: venda, stock }
+    }
+  )
 }
 
 /** Saldo de um SKU, para a tela mostrar disponibilidade ao montar o pedido. */

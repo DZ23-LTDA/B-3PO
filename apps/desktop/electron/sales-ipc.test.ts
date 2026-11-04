@@ -169,11 +169,12 @@ describe('faturamento: os tres dominios juntos', () => {
 })
 
 describe('vendas: canais e ciclo', () => {
-  it('registra os quatro canais', async () => {
+  it('registra os cinco canais', async () => {
     await withErp(async ({ ipc }) => {
       expect(ipc.channels()).toEqual([
         'hermes:sales:cancel',
         'hermes:sales:create',
+        'hermes:sales:devolver',
         'hermes:sales:faturar',
         'hermes:sales:list'
       ])
