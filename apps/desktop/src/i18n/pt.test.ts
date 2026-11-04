@@ -60,6 +60,8 @@ describe('pt-BR', () => {
       'common',
       'composer',
       'connectorOffer',
+      'connectors',
+      'connectorsPage',
       'cron',
       'errors',
       'firstRun',

@@ -924,3 +924,23 @@ Progresso do backlog: **23 de 26** famílias em pt. Restam só os três de conec
 em vez do padrão `en_<família>`.
 
 Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
+
+### Rodada 115 — conectores (cartão e contas) em pt
+
+**`pt_connector_card`** (conectar apps na conversa: conectar, adiar, cancelar, reconectar, estados — conectado,
+expirado, indisponível, pulado — aviso de que conectar é opcional e só autorizar o que quiser, diretório de apps,
+recibo do que foi conectado, "conclua no navegador", fechado após 10 minutos) e **`pt_connector_accounts`**
+(contas do conector: adicionar outra, nome da conta com as regras do apelido, renomear, remover, contagem de
+contas em desuso e os seis status).
+
+### O teste pegou de novo
+
+`retiredCount` usava `${count}` duas vezes contra uma do inglês (plural por sufixo). Como o `pt-coverage` compara a
+lista de placeholders, troquei por uma forma com uma ocorrência só: "`${count}` em desuso". É a mesma armadilha da
+rodada 103 — **plural por condicional em pt custa uma segunda interpolação**.
+
+Estado do backlog: **25 de 26** famílias em pt. Falta só **`connectors`**, que não tem `en_connectors.ts` — o texto
+inglês está escrito dentro do `en.ts`, então exige extração (as outras traduções existentes, ar/ja/ru/zh-hant, foram
+feitas de outra forma).
+
+Verificação: 93 arquivos / 725 testes verdes; gate 14 ok; MSIX reconstruído.
