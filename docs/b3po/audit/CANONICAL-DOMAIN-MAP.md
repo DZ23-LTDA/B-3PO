@@ -13,7 +13,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 | Domínio | Arquivo canônico | Persistência | Estado | Testes |
 |---|---|---|---|---|
 | Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | **IMPLEMENTED + TESTED + VALIDATED** | 12 |
-| Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | IMPLEMENTED + TESTED | 14 |
+| Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | **IMPLEMENTED + TESTED + VALIDATED** | 14 |
 | Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | IMPLEMENTED + TESTED | 16 |
 | Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | IMPLEMENTED + TESTED | 10 |
 | Agenda (recursos/compromissos) | `apps/desktop/electron/scheduling-store.ts` | `userData/b3po/scheduling.json` | IMPLEMENTED + TESTED | 17 |
@@ -45,6 +45,24 @@ Registrar a `<Route>` em `surfaces.tsx` não basta — é preciso declarar o cam
 (`src/app/routes.ts`). Sem isso o roteador cai no catch-all e volta para a conversa nova, sem erro
 visível: `#/crm` mantinha o hash e `#/products` voltava para `#/`. Typecheck, testes de componente e
 teste de build passaram os três com a rota quebrada. Só o binário mostrou.
+
+### Estoque (rodada 11)
+
+Ciclo operacional completo executado na UI do app real, `userData` isolado:
+
+| Passo | Resultado observado |
+|---|---|
+| cadastro do produto em `/products` | `Café 500g (CAF-500)` disponível no seletor de estoque |
+| `#/stock` | tela renderiza com seletor, movimento, quantidade e motivo |
+| **entrada 10** | saldo `10 unidade`; histórico `Entrada · CAF-500 · 10 · compra inicial` |
+| **saída 3** | saldo `7 unidade`; histórico `Saída · CAF-500 · 3` |
+| **saída 100** | recusada: *"Não há saldo suficiente para esta saída."* |
+| estado no processo principal | `{"balances":{"CAF-500":7000}}` |
+| movimentações gravadas | `[["entrada",10000,"compra inicial"],["saida",3000,""]]` — a saída recusada **não** foi gravada |
+
+O saldo de 7 é derivado das duas movimentações, não de um campo gravado. O erro chegou ao usuário como
+texto, não como exceção ou lista vazia. Capturas: `stock-01-inicial.png`, `stock-02-saldo-sete.png`,
+`stock-03-saldo-insuficiente.png` em `docs/b3po-preview/` (fora do repositório).
 
 ## Contratos compartilhados
 
