@@ -119,3 +119,9 @@ Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relator
 - `crm-painel.png` — painel Visao rapida com os tres indicadores conferidos contra o seed
 - `crm-etiquetas.png` - campo de etiquetas, com duplicata descartada no store
 - `crm-busca-etiqueta.png` - busca encontrando conversa por etiqueta (sem contaminacao do titulo)
+- `crm-conversas-pt.png` - inbox com a conversa recebida do webhook
+- `crm-uma-tarefa-aberta-pt.png` - uma tarefa de CRM aberta
+- `crm-tarefas-concluidas-pt.png` - tarefas concluidas
+- `crm-contato-excluido-pt.png` - comportamento ao excluir contato com tarefa ligada
+- `crm-tarefa-contato-excluido-pt.png` - tarefa apontando para contato excluido
+- `crm-fone-com-mascara-pt.png` - busca por telefone com mascara
