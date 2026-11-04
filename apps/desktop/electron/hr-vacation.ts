@@ -117,6 +117,51 @@ export function tercoConstitucional(valorCents: number): number {
   return Math.floor(valorCents / 3)
 }
 
+/**
+ * Abono pecuniário (venda de férias) — art. 143 da CLT.
+ *
+ * O empregado pode vender ATÉ 1/3 dos dias que tem direito. O limite é sobre o direito do período: quem tem
+ * 30 dias vende no máximo 10; quem tem 12 (proporcional reduzido por faltas) vende no máximo 4.
+ *
+ * Arredonda para baixo porque conceder um dia a mais de abono do que a lei permite é passivo, e conceder a
+ * menos é apenas conservador — o empregado ainda pode vender o restante.
+ */
+export function diasAbonaveis(diasDeFerias: number): number {
+  if (!Number.isFinite(diasDeFerias) || diasDeFerias <= 0) return 0
+
+  return Math.floor(diasDeFerias / 3)
+}
+
+/**
+ * Valor do abono, em centavos.
+ *
+ * É o valor dos dias vendidos MAIS o terço constitucional sobre eles: o abono substitui o descanso, e o
+ * terço incide sobre o que foi pago. alorDiarioCents é o salário-dia do empregado.
+ */
+export function valorDoAbono(valorDiarioCents: number, diasVendidos: number): number {
+  if (!Number.isFinite(valorDiarioCents) || valorDiarioCents <= 0) return 0
+
+  const dias = Math.max(0, Math.floor(diasVendidos))
+
+  if (dias === 0) return 0
+
+  const base = valorDiarioCents * dias
+
+  return base + tercoConstitucional(base)
+}
+
+/**
+ * O pedido de abono tem prazo: até 15 dias antes do fim do período aquisitivo (art. 143, §1º).
+ *
+ * Depois disso o empregador não é obrigado a aceitar. O produto não recusa sozinho — informa para que a
+ * decisão seja de quem lê, com a data na mão.
+ */
+export const DIAS_ANTECEDENCIA_ABONO = 15
+
+export function prazoDoAbono(periodoFim: number): number {
+  return periodoFim - DIAS_ANTECEDENCIA_ABONO * DIA
+}
+
 export type SituacaoFerias = 'a_vencer' | 'disponivel' | 'vencida' | 'sem_direito'
 
 export interface FeriasSituacao {

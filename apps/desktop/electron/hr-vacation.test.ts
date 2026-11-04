@@ -6,7 +6,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  diasAbonaveis,
   diasDeFerias,
+  prazoDoAbono,
+  valorDoAbono,
   FALTAS_SEM_DIREITO,
   periodoAquisitivo,
   situacaoFerias,
@@ -151,5 +154,50 @@ describe('situacaoFerias', () => {
   it('a data de referencia nao altera o divisor: o direito do ciclo fechado e 30', () => {
     expect(situacaoFerias(utc('2024-03-01'), utc('2025-04-01'), 0, utc('2024-03-01')).dias).toBe(30)
     expect(situacaoFerias(utc('2024-03-01'), utc('2025-12-01'), 0, utc('2024-03-01')).dias).toBe(30)
+  })
+})
+
+describe('abono pecuniario (art. 143)', () => {
+  it('ate 1/3 dos dias: 30 dias vendem 10', () => {
+    expect(diasAbonaveis(30)).toBe(10)
+  })
+
+  it('proporcional reduzido: 12 dias vendem 4', () => {
+    expect(diasAbonaveis(12)).toBe(4)
+    expect(diasAbonaveis(27)).toBe(9)
+  })
+
+  it('arredonda para baixo: vender a mais que a lei permite e passivo', () => {
+    // 7/3 = 2.33 -> 2. Conceder 3 seria um dia alem do limite.
+    expect(diasAbonaveis(7)).toBe(2)
+    expect(Number.isInteger(diasAbonaveis(7))).toBe(true)
+  })
+
+  it('sem dias ou valor invalido nao ha abono', () => {
+    expect(diasAbonaveis(0)).toBe(0)
+    expect(diasAbonaveis(-5)).toBe(0)
+    expect(diasAbonaveis(Number.NaN)).toBe(0)
+  })
+
+  it('o valor do abono inclui o terco constitucional', () => {
+    // 10 dias a R$ 100 = R$ 1000 + 1/3 = R$ 1333,33 -> 133333 centavos
+    expect(valorDoAbono(10000, 10)).toBe(133333)
+  })
+
+  it('um dia de abono', () => {
+    // 100 + 33 = 133
+    expect(valorDoAbono(10000, 1)).toBe(13333)
+  })
+
+  it('zero dias vendidos nao gera valor', () => {
+    expect(valorDoAbono(10000, 0)).toBe(0)
+    expect(valorDoAbono(0, 10)).toBe(0)
+    expect(valorDoAbono(-100, 10)).toBe(0)
+  })
+
+  it('o prazo do pedido e 15 dias antes do fim do aquisitivo', () => {
+    const fim = utc('2026-03-01')
+
+    expect(prazoDoAbono(fim)).toBe(fim - 15 * DIA)
   })
 })
