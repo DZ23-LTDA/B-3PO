@@ -119,11 +119,12 @@ describe('IPC do estoque', () => {
       expect(canais).toContain('hermes:aftersales:list')
       expect(canais).toContain('hermes:marketing:campaigns')
       expect(canais).toContain('hermes:analytics:dashboard')
+      expect(canais).toContain('hermes:automations:list')
       // Todo canal registrado pertence a um domínio conhecido — pega typo e canal órfão sem fixar
       // um total que quebra a cada domínio novo. A lista de domínios é explícita de propósito.
       expect(
         canais.every(canal =>
-          /^hermes:(admin|aftersales|analytics|catalog|companies|desk|finance|hr|inventory|marketing|purchases|sales|scheduling|services):/.test(canal)
+          /^hermes:(admin|aftersales|analytics|automations|catalog|companies|desk|finance|hr|inventory|marketing|purchases|sales|scheduling|services):/.test(canal)
         )
       ).toBe(true)
     } finally {

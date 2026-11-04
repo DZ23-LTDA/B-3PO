@@ -770,7 +770,6 @@ export const ptOverrides: TranslationOverrides = {
         }
       },
       updates: {
-    appName: 'B-3PO',
         nonInteractiveLocalChanges: 'Alterações locais em atualizações pelo app'
       }
 
@@ -1031,6 +1030,29 @@ export const ptOverrides: TranslationOverrides = {
       total: 'Total',
       unitCost: 'Custo unitário',
       unavailable: 'As compras precisam do aplicativo desktop para funcionar.'
+    },
+    automacoes: {
+      actorNote: 'A regra roda como o proprietário. Para mudar isso, use a tela de Agentes.',
+      create: 'Criar regra',
+      disable: 'Desativar',
+      empty: 'Nenhuma automação ainda.',
+      enable: 'Ativar',
+      errAction: 'Escolha uma ação.',
+      errActor: 'A regra precisa de um responsável.',
+      errDuplicate: 'Já existe uma regra com esse nome.',
+      errNotFound: 'Regra não encontrada.',
+      errState: 'Estado inválido.',
+      errTrigger: 'Escolha um gatilho válido.',
+      hint: 'Uma regra reage a um evento da empresa e age pelas mesmas ferramentas que os agentes usam.',
+      inactive: 'inativa',
+      loadFailed: 'Não foi possível carregar as automações.',
+      name: 'Nome',
+      nameRequired: 'Informe o nome.',
+      noActions: 'Nenhuma ação executável disponível.',
+      then: 'Então',
+      title: 'Automações',
+      unavailable: 'As automações precisam do aplicativo desktop para funcionar.',
+      when: 'Quando'
     },
     painel: {
       activeCampaigns: 'campanhas ativas',
@@ -1674,6 +1696,7 @@ export const ptOverrides: TranslationOverrides = {
   },
   /** Só o que o painel de atualizações mostra hoje; o resto do bloco cai no inglês. */
   updates: {
+    appName: 'B-3PO',
     cantReach: 'Não foi possível falar com o servidor de atualizações.',
     latestBodyBackend: 'O backend já está na versão mais recente.'
   },

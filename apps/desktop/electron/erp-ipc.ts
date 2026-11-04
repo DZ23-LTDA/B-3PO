@@ -26,6 +26,7 @@ import type { AgentTool } from './agent-tools'
 import { ServiceDeskStore, serviceDeskStorePath } from './service-desk-store'
 import { registerServiceDeskIpc } from './service-desk-ipc'
 import { registerAfterSalesIpc } from './after-sales-ipc'
+import { registerAutomationIpc } from './automation-ipc'
 import { AutomationStore, automationStorePath, runRules } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
 import { registerMarketingIpc } from './marketing-ipc'
@@ -145,6 +146,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     inventory,
     sales
   })
+
+  // Automacoes: a tela precisa do catalogo REAL de ferramentas, entao o registro vem DEPOIS de 	ools.
+  registerAutomationIpc(ipcMain, { automations, tools })
 
   // Servidor MCP dos agentes. Disparado daqui (e nao do main.ts) porque este e o ponto que ja tem o
   // userDataDir E as ferramentas: o main.ts esta sob ratchet de tamanho e so pode encolher.

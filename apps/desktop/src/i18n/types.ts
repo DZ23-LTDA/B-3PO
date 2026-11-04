@@ -728,6 +728,29 @@ export interface Translations extends NoticeTranslations {
       unitCost: string
       unavailable: string
     }
+    automacoes: {
+      actorNote: string
+      create: string
+      disable: string
+      empty: string
+      enable: string
+      errAction: string
+      errActor: string
+      errDuplicate: string
+      errNotFound: string
+      errState: string
+      errTrigger: string
+      hint: string
+      inactive: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      noActions: string
+      then: string
+      title: string
+      unavailable: string
+      when: string
+    },
     painel: {
       activeCampaigns: string
       balance: string
