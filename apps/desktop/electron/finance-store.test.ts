@@ -86,6 +86,7 @@ describe('financeiro: totais derivados', () => {
   it('lançamento cancelado não entra em nenhum total', () => {
     const base = {
       amount_cents: 100,
+      cost_center: '',
       created_at: 1,
       currency: 'BRL',
       description: '',
@@ -178,6 +179,7 @@ describe('financeiro: venda vira receita', () => {
 
     expect(lancamentoGerado).toMatchObject({
       amount_cents: 2000,
+      cost_center: '',
       kind: 'receber',
       description: 'Venda 3',
       ref: `venda:${sale.id}`,

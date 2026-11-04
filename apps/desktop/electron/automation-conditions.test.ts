@@ -34,6 +34,7 @@ const ticket = (over: Partial<Ticket> = {}): Ticket => ({
 
 const entrada = (over: Partial<FinanceEntry> = {}): FinanceEntry => ({
   amount_cents: 10_000,
+  cost_center: '',
   created_at: T0,
   currency: 'BRL',
   description: 'Conta',

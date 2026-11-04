@@ -26,6 +26,8 @@ export type EntryStatus = (typeof ENTRY_STATUSES)[number]
 
 export interface FinanceEntry {
   amount_cents: number
+  /** Centro de custo: departamento, obra ou projeto que absorve o lancamento. Vazio = nao alocado. */
+  cost_center: string
   created_at: number
   currency: string
   description: string
@@ -152,6 +154,7 @@ export function normalizeEntry(input: unknown, now: number): { error: string } |
   return {
     entry: {
       amount_cents: amount,
+      cost_center: text(raw['cost_center']).slice(0, 60),
       created_at: typeof raw['created_at'] === 'number' ? raw['created_at'] : now,
       currency: (text(raw['currency']) || 'BRL').toUpperCase(),
       description: text(raw['description']),
@@ -167,6 +170,36 @@ export function normalizeEntry(input: unknown, now: number): { error: string } |
   }
 }
 
+/**
+ * Quanto cada centro de custo consome, separado por natureza.
+ *
+ * Centro vazio vira a chave `''` em vez de ser descartado: um lancamento sem alocacao precisa aparecer como
+ * "nao alocado", nao sumir do relatorio. Descartar daria um total por centro que nao fecha com o total geral —
+ * e a diferenca seria invisivel.
+ */
+export function totaisPorCentroDeCusto(
+  entries: readonly FinanceEntry[]
+): Record<string, { pago_cents: number; pendente_cents: number }> {
+  const out: Record<string, { pago_cents: number; pendente_cents: number }> = {}
+
+  for (const entry of entries) {
+    // Cancelado nao consome nada: incluí-lo faria o relatorio cobrar o que foi estornado.
+    if (entry.status === 'cancelado') continue
+
+    const chave = entry.cost_center || ''
+    const atual = out[chave] ?? { pago_cents: 0, pendente_cents: 0 }
+
+    if (entry.status === 'pago') {
+      atual.pago_cents += entry.amount_cents
+    } else {
+      atual.pendente_cents += entry.amount_cents
+    }
+
+    out[chave] = atual
+  }
+
+  return out
+}
 export function parseFinance(raw: string): FinanceFile {
   try {
     const parsed = JSON.parse(raw) as Partial<FinanceFile>
@@ -205,6 +238,7 @@ export function receivableForSale(sale: Sale, now: number = Date.now()): Omit<Fi
 
   return {
     amount_cents: sale.total_cents,
+    cost_center: '',
     currency: sale.currency,
     description: `Venda ${sale.number}`,
     due_at: now,
@@ -238,6 +272,7 @@ export function payableForPurchase(
 
   return {
     amount_cents: order.total_cents,
+    cost_center: '',
     currency: 'BRL',
     description: `Compra ${order.number}`,
     due_at: now,
