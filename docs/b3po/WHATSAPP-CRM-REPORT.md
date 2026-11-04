@@ -828,3 +828,29 @@ sem token 401; GET 405; corpo grande 413 sem tocar no store; reentrega 200 com `
 
 **Falta so o hook no adapter python** (postar em `http://127.0.0.1:<porta>/` com o header original) e a inicializacao do
 listener no processo principal do Electron com o token do app. Nada disso muda o que ja esta provado; e ligacao de fio.
+
+
+## Listener ligado no boot, com opt-in (rodada 185)
+
+`apps/desktop/electron/crm-whatsapp-boot.ts` — `maybeStartWhatsAppIngest(...)` devolve o handle ou `null`.
+
+A decisao tem **tres condicoes** que erram em silencio se ficarem soltas no `main.ts`:
+
+1. `HERMES_DESKTOP_WHATSAPP_INGEST=1` — opt-in **explicito**. Quem nao usa WhatsApp nao ganha porta aberta;
+2. `HERMES_DESKTOP_REMOTE_TOKEN` presente — sem token nao ha como autenticar o repasse;
+3. `WHATSAPP_CLOUD_APP_SECRET` presente — sem ele a assinatura nao pode ser verificada.
+
+Faltando qualquer uma, devolve `null` e o app segue normal. **CRM sem webhook e um CRM menor, nao um CRM quebrado.**
+
+O `main.ts` chama com `.catch()` vazio de proposito: falha ao abrir a porta **nao pode derrubar o app**.
+
+`mountCrmContacts` agora devolve o `CrmConversationStore` — o listener usa a **mesma instancia** do IPC, para nao existirem
+dois objetos escrevendo o mesmo arquivo.
+
+**Medido:** 5 testes em `electron/crm-whatsapp-boot.test.ts` (desligado nao abre; sem token nao abre; sem segredo nao
+abre; com tudo sobe e devolve porta real; e o opt-in so aceita `1`) + `tsc --noEmit` limpo.
+
+### Total do fio: 56 testes
+
+store 16 · mapeador 8 · assinatura 9 · ingestao 8 · endpoint 8 · listener 6 · boot 5 — e o listener **nunca sobe** sem as
+tres condicoes.

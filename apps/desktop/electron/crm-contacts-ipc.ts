@@ -40,10 +40,14 @@ export function registerCrmContactsIpc(ipcMain: Pick<IpcMain, 'handle'>, store: 
 }
 
 /** Monta o store do usuário e registra os handlers: `main.ts` só precisa de uma chamada. */
-export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): void {
+export function mountCrmContacts(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: string): CrmConversationStore {
   registerCrmCompanyLogoIpc(ipcMain)
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)))
   registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))
   registerCrmTasksIpc(ipcMain, new CrmTaskStore(tasksStorePath(userDataDir)))
-  registerCrmConversationsIpc(ipcMain, new CrmConversationStore(conversationsStorePath(userDataDir)))
+  const conversas = new CrmConversationStore(conversationsStorePath(userDataDir))
+  registerCrmConversationsIpc(ipcMain, conversas)
+
+  // devolvido para o listener do webhook usar o MESMO store do IPC (uma instancia, um arquivo)
+  return conversas
 }
