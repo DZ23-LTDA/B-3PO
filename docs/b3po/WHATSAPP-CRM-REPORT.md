@@ -631,3 +631,16 @@ imagem.
 
 **Pendencia visivel e nao minha:** a pagina `/crm` mostra "Tarefas do CRM" **duas vezes** (bloco duplicado, anterior a
 este trabalho). Fica registrado em vez de ignorado.
+
+
+## "Tarefas do CRM" duplicado: corrigido (rodada 177)
+
+A duplicacao que eu havia registrado como pendencia alheia era simples: `CrmContactsSection` ja monta
+`<CrmTasksSection />` internamente, e o `CrmView` montava de novo. Removido o segundo; a pagina passa a ter **uma**
+ocorrencia de "Tarefas do CRM" e **uma** de "Conversas" (medido no binario: `{ocorrenciasTarefas: 1,
+ocorrenciasConversas: 1}`).
+
+Era um defeito visivel na tela principal do CRM — qualquer pessoa notaria. Ficou duas rodadas no relatorio antes de eu
+corrigir; a licao e que registrar nao substitui consertar quando o custo e de uma linha.
+
+Evidencia atualizada: `docs/b3po/evidence/crm-conversas-pt.png` (sem duplicata, com os rotulos novos).
