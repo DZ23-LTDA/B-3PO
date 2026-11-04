@@ -6,6 +6,7 @@
 import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
+import { ActorsStore, actorsStorePath, primaryOwner } from './actors-store'
 import { CompaniesStore, companiesStorePath } from './companies-store'
 import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
@@ -38,5 +39,14 @@ export function mountErpIpc(ipcMain: Pick<IpcMain, 'handle'>, userDataDir: strin
   registerSchedulingIpc(ipcMain, new SchedulingStore(schedulingStorePath(userDataDir)))
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
   registerPurchasesIpc(ipcMain, { inventory, store: new PurchasesStore(purchasesStorePath(userDataDir)) })
-  registerSalesIpc(ipcMain, { finance, inventory, sales: new SalesStore(salesStorePath(userDataDir)) })
+  // O ator e resolvido AQUI, no processo principal: o renderer nao diz quem e.
+  const actors = new ActorsStore(actorsStorePath(userDataDir))
+  const actorOf = async () => primaryOwner(await actors.list())
+
+  registerSalesIpc(ipcMain, {
+    actorOf,
+    finance,
+    inventory,
+    sales: new SalesStore(salesStorePath(userDataDir))
+  })
 }

@@ -42,7 +42,12 @@ async function withErp<T>(
     const sales = new SalesStore(salesStorePath(dir))
     const ipc = fakeIpc()
 
-    registerSalesIpc(ipc, { finance, inventory, sales })
+    registerSalesIpc(ipc, {
+      actorOf: async () => ({ id: 'u1', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
+      finance,
+      inventory,
+      sales
+    })
 
     return await run({ catalog, finance, inventory, ipc, sales })
   } finally {

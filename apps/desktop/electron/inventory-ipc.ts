@@ -3,6 +3,7 @@
 // Mesmo desenho do catálogo: o processo principal valida e grava, erro volta como valor, e o saldo
 // nunca é aceito do chamador — ele é derivado das movimentações no main.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
@@ -19,7 +20,7 @@ function tenant(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-export function registerInventoryIpc(ipcMain: Pick<IpcMain, 'handle'>, store: InventoryStoreLike): void {
+export function registerInventoryIpc(ipcMain: IpcRegistrar, store: InventoryStoreLike): void {
   ipcMain.handle(
     'hermes:inventory:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ movements: InventoryMovement[] }> => ({

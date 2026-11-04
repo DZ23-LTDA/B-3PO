@@ -1,5 +1,6 @@
 // Empresas e filiais expostas ao renderer.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { Branch, Company, CompaniesStore } from './companies-store'
@@ -11,7 +12,7 @@ export interface CompaniesStoreLike {
   upsertCompany: (input: unknown) => Promise<{ companies: Company[]; company: Company } | { error: string }>
 }
 
-export function registerCompaniesIpc(ipcMain: Pick<IpcMain, 'handle'>, store: CompaniesStoreLike): void {
+export function registerCompaniesIpc(ipcMain: IpcRegistrar, store: CompaniesStoreLike): void {
   ipcMain.handle('hermes:companies:list', async (): Promise<{ companies: Company[] }> => ({
     companies: await store.list()
   }))

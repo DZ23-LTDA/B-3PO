@@ -12,10 +12,13 @@
 // O que isto NÃO é: atomicidade. Continua existindo uma janela entre as três gravações. O que existe é
 // (a) recusa antes de sujar o estado no caso previsível, e (b) idempotência que torna a repetição segura.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import { receivableForSale, type FinanceEntry } from './finance-store'
 import { balanceFor, type InventoryMovement } from './inventory-store'
+import type { Actor } from './rbac'
+import { withPermission } from './permission-guard'
 import { normalizeSale, stockMovementsFor, type Sale } from './sales-store'
 
 export interface SalesStoreLike {
@@ -34,6 +37,8 @@ export interface FinanceLike {
 }
 
 export interface SalesDeps {
+  /** Quem está agindo. Resolvido no processo principal, nunca recebido do renderer. */
+  actorOf: () => Promise<Actor | null>
   finance: FinanceLike
   inventory: InventoryLike
   sales: SalesStoreLike
@@ -69,7 +74,7 @@ export function stockShortage(sale: Sale, balances: Record<string, number>): nul
   return null
 }
 
-export function registerSalesIpc(ipcMain: Pick<IpcMain, 'handle'>, deps: SalesDeps): void {
+export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
   ipcMain.handle(
     'hermes:sales:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ sales: Sale[] }> => ({
@@ -96,7 +101,23 @@ export function registerSalesIpc(ipcMain: Pick<IpcMain, 'handle'>, deps: SalesDe
       )
   )
 
-  ipcMain.handle('hermes:sales:faturar', async (_event: IpcMainInvokeEvent, payload: unknown): Promise<FaturarResult> => {
+  ipcMain.handle('hermes:sales:faturar', async (_event: IpcMainInvokeEvent, payload: unknown): Promise<FaturarResult | { error: 'sem_permissao'; reason: string }> => {
+    const actor = await deps.actorOf()
+
+    if (!actor) {
+      return { error: 'sem_permissao', reason: 'sem_ator' }
+    }
+
+    const permitido = await withPermission(actor, 'execute', { resource: 'sales' }, async () => true)
+
+    if (permitido !== true) {
+      return { error: 'sem_permissao', reason: (permitido as { reason: string }).reason }
+    }
+
+    return faturar(payload)
+  })
+
+  async function faturar(payload: unknown): Promise<FaturarResult> {
     const normalized = normalizeSale({ ...(payload as object), status: 'faturado' }, Date.now())
 
     if ('error' in normalized) {
@@ -144,7 +165,7 @@ export function registerSalesIpc(ipcMain: Pick<IpcMain, 'handle'>, deps: SalesDe
     }
 
     return { finance, sale: criada.sale, sales: criada.sales, stock }
-  })
+  }
 }
 
 /** Saldo de um SKU, para a tela mostrar disponibilidade ao montar o pedido. */

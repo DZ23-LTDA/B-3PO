@@ -3,6 +3,7 @@
 // Mesmo desenho dos IPC do CRM: o processo principal valida e grava, e erro de validação volta como
 // `{ error }`. O renderer nunca recebe exceção nem decide o que é válido.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { Product } from './catalog-store'
@@ -19,7 +20,7 @@ function tenant(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-export function registerCatalogIpc(ipcMain: Pick<IpcMain, 'handle'>, store: CatalogStoreLike): void {
+export function registerCatalogIpc(ipcMain: IpcRegistrar, store: CatalogStoreLike): void {
   ipcMain.handle(
     'hermes:catalog:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ products: Product[] }> => ({

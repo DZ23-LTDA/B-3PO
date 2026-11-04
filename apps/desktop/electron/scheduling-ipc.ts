@@ -4,6 +4,7 @@
 // decide se um horário está livre — ela mostra o que o main recusou, junto do compromisso que ocupa o
 // horário.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { Appointment, SchedulingStore } from './scheduling-store'
@@ -31,7 +32,7 @@ function numero(value: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export function registerSchedulingIpc(ipcMain: Pick<IpcMain, 'handle'>, store: SchedulingStoreLike): void {
+export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingStoreLike): void {
   ipcMain.handle(
     'hermes:scheduling:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ appointments: Appointment[] }> => ({

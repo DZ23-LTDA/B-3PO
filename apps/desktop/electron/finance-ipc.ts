@@ -3,6 +3,7 @@
 // Mesmo desenho dos outros domínios: o main valida e grava, erro volta como valor, e os totais são
 // calculados lá — a tela nunca soma nem decide o que está vencido.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { FinanceEntry, FinanceTotals } from './finance-store'
@@ -18,7 +19,7 @@ function tenant(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-export function registerFinanceIpc(ipcMain: Pick<IpcMain, 'handle'>, store: FinanceStoreLike): void {
+export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLike): void {
   ipcMain.handle(
     'hermes:finance:list',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ entries: FinanceEntry[] }> => ({

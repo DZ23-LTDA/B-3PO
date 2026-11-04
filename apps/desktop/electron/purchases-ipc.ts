@@ -4,6 +4,7 @@
 // entradas passaram pelo ledger — e a `ref` determinística faz um retry completar o que faltou em vez de
 // duplicar mercadoria.
 
+import type { IpcRegistrar } from './ipc-types'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
@@ -33,7 +34,7 @@ function tenant(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-export function registerPurchasesIpc(ipcMain: Pick<IpcMain, 'handle'>, deps: PurchasesDeps): void {
+export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps): void {
   ipcMain.handle(
     'hermes:purchases:suppliers',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ suppliers: Supplier[] }> => ({
