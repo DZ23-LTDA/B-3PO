@@ -511,3 +511,28 @@ formato, nao o teste de caminho feliz, e quem pega isso.
 **Provado no app empacotado (rodada 159).** Perfil semeado com o contato gravado normalizado (`+5511999991111`) e a
 oportunidade com mascara (`+55 11 99999-1111`): o cartao renderizou "Proposta da Maria" com **R$ 9.000,00** e **sem**
 a marca de contato excluido. Evidencia: `docs/b3po/evidence/crm-fone-com-mascara-pt.png`.
+
+
+## Camada de dados das CONVERSAS (rodada 169)
+
+Antes do WhatsApp estar conectado, o CRM precisa de onde guardar mensagem — sem isso, ter credencial nao muda nada.
+
+Criado `apps/desktop/electron/crm-conversations-store.ts`, no mesmo desenho de contatos, funil e tarefas: JSON sob
+`userData`, gravacao atomica (`write` + `rename`), validacao no processo principal, `{ error }` em vez de excecao.
+
+**Decisoes que estao no codigo, com teste:**
+
+- **idempotencia por `external_id`** — o webhook da Meta **reentrega**; a mesma mensagem nao entra duas vezes. Sem
+  isso, uma conversa viraria um paredao de duplicatas no primeiro retry.
+- **ordem por `sent_at`, nao por chegada** — mensagem que chega fora de ordem nao bagunca a leitura.
+- **`last_message_at` / `last_message_preview`** na conversa: a lista nao precisa abrir cada conversa para mostrar
+  a ultima linha.
+- **`created_at` imutavel no upsert** — editar a conversa nao pode reescrever quando ela comecou.
+- **mensagem sem corpo ou com direcao invalida e descartada**, nao contamina a conversa; status desconhecido cai
+  para `aberta`; `unread` negativo vira 0.
+- **arquivo corrompido devolve lista vazia**, nunca excecao — instalacao nova nao e erro.
+
+**Medido:** 16 testes em `electron/crm-conversations-store.test.ts`, todos passando; `tsc --noEmit` limpo.
+
+**Proximo passo (nao depende de credencial):** IPC + preload + cliente tipado, e a lista/leitura no `/crm`. Depois
+disso, ligar o webhook do adapter oficial (`plugins/platforms/whatsapp_cloud/adapter.py`) ao store.
