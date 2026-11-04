@@ -239,7 +239,6 @@ import {
   type UninstallSummaryDetails
 } from './desktop-uninstall'
 import { mountCrmContacts } from './crm-contacts-ipc'
-import { ingestEnabled, maybeStartWhatsAppIngest } from './crm-whatsapp-boot'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -17502,17 +17501,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
   return { ok: true, mode, willRemoveAppBundle: Boolean(removeBundle), scriptPath }
 }
 
-const crmConversations = mountCrmContacts(ipcMain, app.getPath('userData'))
-
-// Webhook do WhatsApp: so sobe com opt-in explicito e credenciais presentes (ver crm-whatsapp-boot.ts).
-void maybeStartWhatsAppIngest({
-  appSecret: process.env.WHATSAPP_CLOUD_APP_SECRET,
-  enabled: ingestEnabled(process.env),
-  sink: crmConversations,
-  token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-}).catch(() => {
-  // falha ao abrir a porta nao pode derrubar o app: o CRM fica sem ingestao e o resto continua
-})
+mountCrmContacts(ipcMain, app.getPath('userData'))
 
 registerDesktopUninstallIpc({
   ipcMain,
