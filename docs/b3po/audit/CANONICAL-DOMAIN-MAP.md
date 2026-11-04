@@ -12,7 +12,7 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 
 | Domínio | Arquivo canônico | Persistência | Estado | Testes |
 |---|---|---|---|---|
-| Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | IMPLEMENTED + TESTED | 12 |
+| Catálogo de produtos | `apps/desktop/electron/catalog-store.ts` | `userData/b3po/catalog.json` | **IMPLEMENTED + TESTED + VALIDATED** | 12 |
 | Estoque (livro-razão) | `apps/desktop/electron/inventory-store.ts` | `userData/b3po/inventory.json` | IMPLEMENTED + TESTED | 14 |
 | Vendas (orçamento/pedido) | `apps/desktop/electron/sales-store.ts` | `userData/b3po/sales.json` | IMPLEMENTED + TESTED | 16 |
 | Financeiro (receber/pagar) | `apps/desktop/electron/finance-store.ts` | `userData/b3po/finance.json` | IMPLEMENTED + TESTED | 10 |
@@ -22,9 +22,24 @@ recebe o dado por contrato (função pura ou `ref` compartilhada), nunca por lei
 | Oportunidades (funil) | `apps/desktop/electron/crm-pipeline-store.ts` | `userData/b3po/crm-pipeline.json` | IMPLEMENTED + TESTED | 10 |
 | Tarefas | `apps/desktop/electron/crm-tasks-store.ts` | `userData/b3po/crm-tasks.json` | IMPLEMENTED + TESTED | 11 |
 
-**Nenhum destes tem tela ainda, exceto o CRM (contatos, funil, tarefas).** O Business Core está
-implementado e testado no processo principal; a UI dos cinco domínios novos vem na fase de integração.
-Chamar de "pronto" antes disso seria o que o GOAL proíbe.
+**Nenhum destes tem tela ainda, exceto o CRM (contatos, funil, tarefas) e o catálogo de produtos.**
+O Business Core está implementado e testado no processo principal; a UI de estoque, vendas, financeiro
+e agenda vem na fase de integração. Chamar de "pronto" antes disso seria o que o GOAL proíbe.
+
+## Evidência de validação (rodada 9)
+
+O catálogo é o primeiro domínio do Business Core validado no app real, não só em teste:
+
+- a tela `/products` renderizou no binário construído a partir do `dist`;
+- cadastro pela UI gravou `{"name":"Café 500g","sku":"CAF-500","price_cents":2490,"cost_cents":1000,"category":"Bebidas","unit":"un","tenant_id":"local"}` em `catalog.json`;
+- o preço apareceu como `R$ 24,90` e a unidade como `unidade` (pt-BR);
+- repetir o mesmo SKU mostrou **"Já existe um produto com este SKU."** na tela — o erro do processo principal chegou ao usuário.
+
+**O que a validação revelou e os testes não pegaram:** a rota `/products` não existia para o app.
+Registrar a `<Route>` em `surfaces.tsx` não basta — é preciso declarar o caminho em `APP_ROUTES`
+(`src/app/routes.ts`). Sem isso o roteador cai no catch-all e volta para a conversa nova, sem erro
+visível: `#/crm` mantinha o hash e `#/products` voltava para `#/`. Typecheck, testes de componente e
+teste de build passaram os três com a rota quebrada. Só o binário mostrou.
 
 ## Contratos compartilhados
 

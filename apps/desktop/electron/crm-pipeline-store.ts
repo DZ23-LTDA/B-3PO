@@ -7,6 +7,8 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
+import { cents } from './money'
+
 export const PIPELINE_STAGES = ['novo', 'contato', 'qualificacao', 'proposta', 'negociacao', 'ganho', 'perdido'] as const
 
 export type PipelineStage = (typeof PIPELINE_STAGES)[number]
@@ -44,27 +46,6 @@ export function isStage(value: unknown): value is PipelineStage {
 
 function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
-}
-
-function cents(value: unknown): number {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return Math.max(0, Math.round(value))
-  }
-
-  // "1.234,56" e "1234.56" chegam do mesmo campo de texto: normaliza antes de arredondar.
-  const raw = text(value).replace(/\s/g, '')
-
-  if (!raw) {
-    return 0
-  }
-
-  const normalizado = raw.includes(',')
-    ? raw.replace(/\./g, '').replace(',', '.')
-    : raw
-
-  const parsed = Number.parseFloat(normalizado)
-
-  return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed * 100)) : 0
 }
 
 export function normalizeOpportunity(input: unknown, now: number): { error: string } | { opportunity: CrmOpportunity } {
