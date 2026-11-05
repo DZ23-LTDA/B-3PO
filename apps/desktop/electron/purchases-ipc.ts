@@ -38,6 +38,7 @@ export interface PurchasesStoreLike {
   // r42 do GOAL V2: a solicitacao - etapa 1 do §26.
   criarSolicitacao: (input: unknown, solicitante: string) => Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }>
   mudarSolicitacao: (input: unknown) => Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }>
+  atenderSolicitacao: (input: unknown) => Promise<{ error: string } | { pedido: PurchaseOrder; solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }>
   solicitacoes: (tenantId?: string) => Promise<SolicitacaoCompra[]>
   upsertSupplier: (input: unknown) => Promise<{ error: string } | { supplier: Supplier; suppliers: Supplier[] }>
 }
@@ -268,7 +269,8 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
 
   // ─── Solicitacoes (r42 do GOAL V2) - etapa 1 do §26 ───────────────────────────────────────────
 
-  /** As solicitacoes do tenant. ead: consultar a fila nao exige poder de execucao. */
+  /** As solicitacoes do tenant. 
+ead: consultar a fila nao exige poder de execucao. */
   ipcMain.handle(
     'hermes:purchases:solicitacoes',
     async (_event: IpcMainInvokeEvent, tenantId: unknown) =>
@@ -298,6 +300,18 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
     'hermes:purchases:solicitacaoStatus',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>
       exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.mudarSolicitacao(payload))
+  )
+
+  /**
+   * Atende uma solicitacao criando o pedido que a cumpre (r44 do GOAL V2).
+   *
+   * E a LIGACAO: sem ela, a etapa 1 registrava uma necessidade e a etapa 5 comprava outra coisa.
+   * O pedido nasce em rascunho - a aprovacao e o limite continuam valendo.
+   */
+  ipcMain.handle(
+    'hermes:purchases:atenderSolicitacao',
+    async (_event: IpcMainInvokeEvent, payload: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.atenderSolicitacao(payload))
   )
 
 

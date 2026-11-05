@@ -38,6 +38,14 @@ export interface SolicitacaoCompra {
   motivo: string
   product_sku: string
   quantity_milli: number
+  /**
+   * O pedido que atendeu esta solicitação (r44 do GOAL V2).
+   *
+   * 
+ull = ainda não virou pedido. É a LIGAÇÃO que faltava: sem ela, a etapa 1 registrava uma
+   * necessidade e a etapa 5 comprava outra coisa, sem que as duas se encontrassem.
+   */
+  pedido_id: null | string
   /** Ator que pediu. Vem do resolvedor no processo principal, nunca do payload. */
   solicitante: string
   status: SolicitacaoStatus
@@ -87,6 +95,7 @@ export function normalizarSolicitacao(
       created_at: contexto.agora,
       id: contexto.id ?? `sol-${randomUUID()}`,
       motivo,
+      pedido_id: null,
       product_sku: sku,
       quantity_milli: Math.trunc(bruto),
       solicitante: contexto.solicitante,
@@ -135,4 +144,47 @@ export function quantidadePedida(solicitacoes: readonly SolicitacaoCompra[], sku
   return solicitacoesAbertas(solicitacoes)
     .filter(s => s.product_sku === sku)
     .reduce((soma, s) => soma + s.quantity_milli, 0)
+}
+/** O que falta para atender. Sem fornecedor não há pedido — e é a cotação que o descobre. */
+export type AtendimentoSolicitacao =
+  | { error: 'fornecedor_obrigatorio' | 'ja_atendida' | 'ja_cancelada' }
+  | { item: { product_sku: string; quantity_milli: number }; pedido_id: string }
+
+/**
+ * Prepara o pedido que atende uma solicitação (r44 do GOAL V2).
+ *
+ * A LIGAÇÃO QUE FALTAVA
+ *
+ * A r41 criou a solicitação e a r43 a pôs na tela. Até aqui, `atender` mudava o status e **nada
+ * acontecia**: a etapa 1 registrava uma necessidade e a etapa 5 comprava outra coisa, sem que as duas se
+ * encontrassem.
+ *
+ * POR QUE O FORNECEDOR É OBRIGATÓRIO
+ *
+ * `normalizePurchase` exige `supplier_id`, e com razão: um pedido sem fornecedor não é um pedido, é uma
+ * intenção. E é a **cotação** que descobre o fornecedor — então a solicitação **inicia** o pedido, não o
+ * cria sozinha.
+ *
+ * **A aprovação continua no caminho**: o pedido nasce em `rascunho`, e passar de rascunho a `pedido`
+ * (e a `recebido`) segue as regras de limite e aprovação da r26. Atender uma solicitação **não aprova
+ * nada**.
+ *
+ * O QUE ELE **NÃO** FAZ
+ *
+ * Não grava. Devolve o item e o `pedido_id` para quem chama criar o pedido e marcar a solicitação — as
+ * duas escritas pertencem ao store, que é quem tem a fila.
+ */
+export function prepararAtendimento(
+  solicitacao: SolicitacaoCompra,
+  fornecedor: string,
+  pedidoId: string
+): AtendimentoSolicitacao {
+  if (solicitacao.status === 'atendida') return { error: 'ja_atendida' }
+  if (solicitacao.status === 'cancelada') return { error: 'ja_cancelada' }
+  if (!fornecedor.trim()) return { error: 'fornecedor_obrigatorio' }
+
+  return {
+    item: { product_sku: solicitacao.product_sku, quantity_milli: solicitacao.quantity_milli },
+    pedido_id: pedidoId
+  }
 }

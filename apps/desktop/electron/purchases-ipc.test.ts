@@ -86,6 +86,8 @@ describe('IPC de compras', () => {
       // como ser resolvida. O canal nasceu COM guarda (exigirAtor) e o ratchet o confirmou.
       expect(ipc.channels()).toEqual([
         'hermes:purchases:aprovar',
+        // r44: a ligacao solicitacao -> pedido.
+        'hermes:purchases:atenderSolicitacao',
         'hermes:purchases:cotacao',
         'hermes:purchases:definirLimite',
         'hermes:purchases:limite',

@@ -19,6 +19,7 @@ import {
   isSolicitacaoStatus,
   mudarStatusSolicitacao,
   normalizarSolicitacao,
+  prepararAtendimento,
   type SolicitacaoCompra
 } from './purchases-solicitacao'
 
@@ -515,6 +516,74 @@ export class PurchasesStore {
 
     return { order, orders: await this.orders(order.tenant_id) }
   }
+
+  /**
+   * Atende uma solicitacao criando o pedido que a cumpre (r44 do GOAL V2).
+   *
+   * AS DUAS ESCRITAS FICAM AQUI: criar o pedido e marcar a solicitacao. Fazer isso em dois canais
+   * deixaria um estado intermediario se o segundo falhasse - solicitacao atendida sem pedido, ou pedido
+   * sem origem. Aqui as duas cabem na mesma fila e no mesmo arquivo, que e a unica transacao real que
+   * esta arquitetura oferece.
+   *
+   * O pedido nasce em RASCUNHO: a aprovacao e o limite (r26) continuam valendo na passagem para
+   * 'recebido'. Atender uma solicitacao NAO aprova nada.
+   */
+  async atenderSolicitacao(
+    input: unknown,
+    agora: number = Date.now()
+  ): Promise<{ error: string } | { pedido: PurchaseOrder; solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }> {
+    const raw = (input ?? {}) as Record<string, unknown>
+    const id = typeof raw['id'] === 'string' ? raw['id'] : ''
+    const fornecedor = typeof raw['supplier_id'] === 'string' ? raw['supplier_id'].trim() : ''
+
+    if (!id) return { error: 'solicitacao_obrigatoria' }
+
+    return this.fila.serializar(async () => {
+      const conteudo = await this.read()
+      const indice = conteudo.solicitacoes.findIndex(s => s.id === id)
+
+      if (indice < 0) return { error: 'solicitacao_inexistente' }
+
+      const atual = conteudo.solicitacoes[indice] as SolicitacaoCompra
+      const numero = conteudo.orders.reduce((maior, o) => Math.max(maior, o.number), 0) + 1
+      const preparo = prepararAtendimento(atual, fornecedor, `c-${atual.id}`)
+
+      if ('error' in preparo) return { error: preparo.error }
+
+      const normalizado = normalizePurchase(
+        { items: [{ product_sku: preparo.item.product_sku, quantity_milli: preparo.item.quantity_milli }], supplier_id: fornecedor },
+        agora
+      )
+
+      if ('error' in normalizado) return { error: normalizado.error }
+
+      const pedido: PurchaseOrder = {
+        ...normalizado.order,
+        approval: null,
+        // A LIGACAO: o pedido sabe de que solicitacao veio. Sem isto, a etapa 1 e a etapa 5 se
+        // encontrariam por acaso, nunca por registro.
+        notes: `solicitacao ${atual.id}: ${atual.motivo}`,
+        number: numero
+      }
+
+      conteudo.orders.push(pedido)
+      conteudo.solicitacoes[indice] = {
+        ...atual,
+        pedido_id: preparo.pedido_id,
+        status: 'atendida',
+        updated_at: agora
+      }
+
+      await this.write(conteudo)
+
+      return {
+        pedido,
+        solicitacao: conteudo.solicitacoes[indice] as SolicitacaoCompra,
+        solicitacoes: await this.solicitacoes(atual.tenant_id)
+      }
+    })
+  }
+
 
   private async read(): Promise<PurchasesFile> {
     try {

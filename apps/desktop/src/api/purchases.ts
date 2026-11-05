@@ -295,6 +295,7 @@ export interface SolicitacaoRow {
 }
 
 interface SolicitacaoBridge {
+  atenderSolicitacao: (payload: Record<string, unknown>) => Promise<{ error: string } | { pedido: unknown; solicitacoes: SolicitacaoRow[] }>
   solicitar: (payload: Record<string, unknown>) => Promise<{ error: string } | { solicitacao: SolicitacaoRow; solicitacoes: SolicitacaoRow[] }>
   solicitacaoStatus: (payload: Record<string, unknown>) => Promise<{ error: string } | { solicitacao: SolicitacaoRow; solicitacoes: SolicitacaoRow[] }>
   solicitacoes: (tenantId?: string) => Promise<{ solicitacoes: SolicitacaoRow[] }>
@@ -362,4 +363,23 @@ export const SOLICITACAO_ERRO: Record<string, string> = {
 
 export function solicitacaoErroText(codigo: string): string {
   return SOLICITACAO_ERRO[codigo] ?? codigo
+}
+/**
+ * Atende uma solicitação criando o pedido que a cumpre (r44 do GOAL V2).
+ *
+ * O fornecedor é obrigatório porque `normalizePurchase` o exige — e é a **cotação** que o descobre. A
+ * solicitação **inicia** o pedido; ela não o aprova. O pedido nasce em `rascunho`, e o limite (r26)
+ * continua valendo na passagem para `recebido`.
+ */
+export async function atenderSolicitacao(
+  id: string,
+  supplierId: string
+): Promise<{ error: string } | { solicitacoes: SolicitacaoRow[] }> {
+  const api = bridgeSolicitacao()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  const r = await api.atenderSolicitacao({ id, supplier_id: supplierId })
+
+  return 'error' in r ? r : { solicitacoes: r.solicitacoes }
 }

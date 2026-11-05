@@ -21,6 +21,7 @@ function aberta(extra: Partial<SolicitacaoCompra> = {}): SolicitacaoCompra {
     created_at: 0,
     id: 'sol-1',
     motivo: 'acabou o estoque',
+    pedido_id: null,
     product_sku: 'A',
     quantity_milli: 10_000,
     solicitante: 'ator-dono',

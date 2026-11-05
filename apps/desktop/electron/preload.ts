@@ -187,6 +187,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   purchases: {
     // r42 do GOAL V2: a solicitacao - etapa 1 do §26.
+    atenderSolicitacao: payload => ipcRenderer.invoke('hermes:purchases:atenderSolicitacao', payload),
     solicitacaoStatus: payload => ipcRenderer.invoke('hermes:purchases:solicitacaoStatus', payload),
     solicitacoes: tenantId => ipcRenderer.invoke('hermes:purchases:solicitacoes', tenantId),
     solicitar: payload => ipcRenderer.invoke('hermes:purchases:solicitar', payload),
