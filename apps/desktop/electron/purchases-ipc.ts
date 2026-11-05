@@ -141,11 +141,28 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
         //
         // Gravar em `pedido` resolve os dois lados: o pedido acima do teto existe (com o seu id) para ser
         // aprovado, e NÃO entrou no estoque nem no financeiro — que é o que "não recebido" significa.
-        // r50: pedido JÁ APROVADO (tem pproval com aprovador) não passa pelo limite outra vez. Sem
-        // isto, aprovar não serviria para nada: a segunda tentativa de receber seria barrada igual.
-        const jaAprovado = typeof (payload as Record<string, unknown>)?.['aprovado_por'] === 'string'
+        // r51 do GOAL V2 - A APROVACAO VEM DO PEDIDO GRAVADO, NUNCA DO PAYLOAD.
+        //
+        // A r50 tinha `jaAprovado = typeof payload["aprovado_por"] === "string"`: o RENDERER decidia se o
+        // pedido estava aprovado. Qualquer chamador mandaria `aprovado_por: "x"` e pularia o limite. O §15
+        // e explicito: "Nunca confiar no renderer para autorizar."
+        //
+        // E o §15 pede a VALIDADE, que a r50 nao fazia: `total_aprovado_cents` registrava o valor no
+        // momento da assinatura e NUNCA ERA LIDO. Mudar os itens depois herdaria silenciosamente uma
+        // aprovacao dada para outro montante. Agora o total tem de bater.
+        const idDoPedido =
+          typeof (payload as Record<string, unknown>)?.["id"] === "string"
+            ? String((payload as Record<string, unknown>)["id"])
+            : ""
+        const gravado = idDoPedido ? (await deps.store.orders()).find(o => o.id === idDoPedido) : null
+        const totalDoPayload = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
 
-        if (deps.limiteDeCompra && !jaAprovado) {
+        // A aprovacao so vale para O VALOR APROVADO. Mudar os itens depois invalida - e o pedido volta a
+        // precisar de assinatura, que e o que o §15 manda.
+        const aprovacaoValida =
+          !!gravado?.approval?.aprovador && gravado.approval.total_aprovado_cents === totalDoPayload
+
+        if (deps.limiteDeCompra && !aprovacaoValida) {
           const limite = await deps.limiteDeCompra()
           const total = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
           const situacao = situacaoDaCompra(total, limite)

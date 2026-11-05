@@ -206,19 +206,59 @@ export function normalizePurchase(
     return { error: 'status_invalid' }
   }
 
+  return { order: montarPedido(raw, items, supplierId, status, now) }
+}
+
+/**
+ * Monta o pedido normalizado (r51).
+ *
+ * Extraída de `normalizePurchase` porque a checagem de `approval` levou a função original a **CC 20** —
+ * o teto do projeto. A extração não muda comportamento: muda quem responde por ele, e devolve à
+ * `normalizePurchase` a responsabilidade única de **validar** a entrada.
+ */
+function montarPedido(
+  raw: Record<string, unknown>,
+  items: PurchaseItem[],
+  supplierId: string,
+  status: unknown,
+  now: number
+): Omit<PurchaseOrder, 'number'> {
   return {
-    order: {
-      created_at: typeof raw['created_at'] === 'number' ? raw['created_at'] : now,
-      id: text(raw['id']) || `po_${now}_${Math.random().toString(36).slice(2, 8)}`,
-      items,
-      notes: text(raw['notes']),
-      status: isPurchaseStatus(status) ? status : 'rascunho',
-      supplier_id: supplierId,
-      tenant_id: text(raw['tenant_id']) || DEFAULT_TENANT,
-      total_cents: items.reduce((total, item) => total + item.total_cents, 0),
-      updated_at: now
-    }
+    created_at: typeof raw['created_at'] === 'number' ? raw['created_at'] : now,
+    // r51 do GOAL V2: `approval` NUNCA era preservado. A r26-r28 criou a aprovação, o store a recebia e
+    // esta montagem a DESCARTAVA — a assinatura existia no retorno do canal e não no disco.
+    //
+    // É por isso que a validade (r51) não podia ser checada: não havia aprovação gravada para ler.
+    ...(isApproval(raw['approval']) ? { approval: raw['approval'] } : {}),
+    id: text(raw['id']) || `po_${now}_${Math.random().toString(36).slice(2, 8)}`,
+    items,
+    notes: text(raw['notes']),
+    status: isPurchaseStatus(status) ? status : 'rascunho',
+    supplier_id: supplierId,
+    tenant_id: text(raw['tenant_id']) || DEFAULT_TENANT,
+    total_cents: items.reduce((total, item) => total + item.total_cents, 0),
+    updated_at: now
   }
+}
+
+/**
+ * O formato de `approval` que veio de fora.
+ *
+ * Validar o shape é o que impede um payload qualquer de gravar `approval: "sim"` e passar por aprovado.
+ * Aprovação é o dado que libera dinheiro — o formato dela não pode ser "o que o chamador mandou".
+ */
+function isApproval(value: unknown): value is NonNullable<PurchaseOrder['approval']> {
+  if (!value || typeof value !== 'object') return false
+
+  const raw = value as Record<string, unknown>
+
+  return (
+    typeof raw['aprovador'] === 'string' &&
+    raw['aprovador'].trim() !== '' &&
+    typeof raw['total_aprovado_cents'] === 'number' &&
+    Number.isFinite(raw['total_aprovado_cents']) &&
+    typeof raw['aprovado_em'] === 'number'
+  )
 }
 
 export function parsePurchases(raw: string): PurchasesFile {

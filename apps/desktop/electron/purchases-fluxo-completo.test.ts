@@ -367,7 +367,8 @@ describe('o caminho APROVADO (r50)', () => {
 
     // Com a aprovação, a segunda tentativa de receber passa — e é `aprovado_por` que a libera.
     const recebido = await m.chamar('hermes:purchases:receive', {
-      aprovado_por: 'dono',
+      // r51: o id e essencial - a aprovacao vem do PEDIDO GRAVADO, nao do payload. Sem ele,
+      // provacaoValida e false e a recusa volta.
       id: pedidoId,
       items: [{ product_sku: 'SKU-B', quantity_milli: 10_000, unit_cost_cents: 5_000 }],
       supplier_id: 'forn-1'
