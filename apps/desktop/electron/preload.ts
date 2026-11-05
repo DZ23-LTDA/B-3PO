@@ -186,6 +186,10 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
   },
   purchases: {
+    // r42 do GOAL V2: a solicitacao - etapa 1 do §26.
+    solicitacaoStatus: payload => ipcRenderer.invoke('hermes:purchases:solicitacaoStatus', payload),
+    solicitacoes: tenantId => ipcRenderer.invoke('hermes:purchases:solicitacoes', tenantId),
+    solicitar: payload => ipcRenderer.invoke('hermes:purchases:solicitar', payload),
     // r28 do GOAL V2: os tres canais que faltavam na tela (r26/r27).
     aprovar: payload => ipcRenderer.invoke('hermes:purchases:aprovar', payload),
     definirLimite: payload => ipcRenderer.invoke('hermes:purchases:definirLimite', payload),

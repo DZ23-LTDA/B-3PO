@@ -96,6 +96,10 @@ describe('IPC de compras', () => {
         'hermes:purchases:saveOrder',
         'hermes:purchases:saveQuotation',
         'hermes:purchases:saveSupplier',
+        // r42: a solicitacao - etapa 1 do §26.
+        'hermes:purchases:solicitacaoStatus',
+        'hermes:purchases:solicitacoes',
+        'hermes:purchases:solicitar',
         'hermes:purchases:suppliers'
       ])
     })

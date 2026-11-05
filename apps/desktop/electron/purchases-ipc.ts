@@ -22,6 +22,7 @@ import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 import type { InventoryMovement } from './inventory-store'
 import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { aplicarConferencia, type DivergenciaConferencia, type ItemConferido } from './purchases-conferencia'
+import type { SolicitacaoCompra } from './purchases-solicitacao'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
 import { aprovarCompra } from './purchase-approval-decision'
@@ -34,6 +35,10 @@ export interface PurchasesStoreLike {
   lerLimite: () => Promise<{ aprovadores: string[]; cents: null | number }>
   saveOrder: (input: unknown) => Promise<{ error: string } | { order: PurchaseOrder; orders: PurchaseOrder[] }>
   suppliers: (tenantId?: string) => Promise<Supplier[]>
+  // r42 do GOAL V2: a solicitacao - etapa 1 do §26.
+  criarSolicitacao: (input: unknown, solicitante: string) => Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }>
+  mudarSolicitacao: (input: unknown) => Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }>
+  solicitacoes: (tenantId?: string) => Promise<SolicitacaoCompra[]>
   upsertSupplier: (input: unknown) => Promise<{ error: string } | { supplier: Supplier; suppliers: Supplier[] }>
 }
 
@@ -258,6 +263,41 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
           ator?.id ?? ''
         )
       })
+  )
+
+
+  // ─── Solicitacoes (r42 do GOAL V2) - etapa 1 do §26 ───────────────────────────────────────────
+
+  /** As solicitacoes do tenant. ead: consultar a fila nao exige poder de execucao. */
+  ipcMain.handle(
+    'hermes:purchases:solicitacoes',
+    async (_event: IpcMainInvokeEvent, tenantId: unknown) =>
+      exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({
+        solicitacoes: await deps.store.solicitacoes(serverTenant(tenantId))
+      }))
+  )
+
+  /**
+   * Cria uma solicitacao - xecute.
+   *
+   * O solicitante vem do RESOLVEDOR, nunca do payload: se viesse do renderer, bastaria escrever o nome
+   * de outra pessoa para pedir em nome dela - e a trilha mentiria sobre quem pediu.
+   */
+  ipcMain.handle(
+    'hermes:purchases:solicitar',
+    async (_event: IpcMainInvokeEvent, payload: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'purchases', async () => {
+        const ator = await deps.actorOf()
+
+        return deps.store.criarSolicitacao(payload, ator?.id ?? '')
+      })
+  )
+
+  /** Muda o status. As transicoes sao de mao unica: tendida e cancelada nao voltam. */
+  ipcMain.handle(
+    'hermes:purchases:solicitacaoStatus',
+    async (_event: IpcMainInvokeEvent, payload: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.mudarSolicitacao(payload))
   )
 
 

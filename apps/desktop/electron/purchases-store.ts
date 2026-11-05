@@ -15,7 +15,12 @@ import { DEFAULT_TENANT } from './catalog-store'
 import { cents } from './money'
 import { milli } from './quantity'
 import { refCompraItem } from './refs'
-import { normalizarSolicitacao, type SolicitacaoCompra } from './purchases-solicitacao'
+import {
+  isSolicitacaoStatus,
+  mudarStatusSolicitacao,
+  normalizarSolicitacao,
+  type SolicitacaoCompra
+} from './purchases-solicitacao'
 
 export const PURCHASE_STATUSES = ['rascunho', 'pedido', 'recebido', 'cancelado'] as const
 
@@ -350,6 +355,86 @@ export class PurchasesStore {
     const file = await this.read()
 
     return file.orders.filter(order => order.tenant_id === tenantId).sort((a, b) => b.number - a.number)
+  }
+
+  // ─── Solicitações (r42 do GOAL V2) ───────────────────────────────────────────────────────────────
+
+  /** As solicitações do tenant, mais recentes primeiro. */
+  async solicitacoes(tenantId: string = DEFAULT_TENANT): Promise<SolicitacaoCompra[]> {
+    const file = await this.read()
+
+    return file.solicitacoes
+      .filter(s => s.tenant_id === tenantId)
+      .sort((a, b) => b.created_at - a.created_at)
+  }
+
+  /**
+   * Cria uma solicitação.
+   *
+   * O `solicitante` **vem de quem chama**, não do payload — o canal o resolve de `actorOf`. Se viesse do
+   * payload, bastaria escrever o nome de outra pessoa para pedir em nome dela.
+   */
+  async criarSolicitacao(
+    input: unknown,
+    solicitante: string,
+    agora: number = Date.now()
+  ): Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }> {
+    return this.fila.serializar(async () => {
+      const conteudo = await this.read()
+      const r = normalizarSolicitacao(input, {
+        agora,
+        solicitante,
+        tenant_id: typeof (input as Record<string, unknown>)?.['tenant_id'] === 'string'
+          ? String((input as Record<string, unknown>)['tenant_id'])
+          : DEFAULT_TENANT
+      })
+
+      if ('error' in r) return { error: r.error }
+
+      conteudo.solicitacoes.push(r.solicitacao)
+      await this.write(conteudo)
+
+      return {
+        solicitacao: r.solicitacao,
+        solicitacoes: await this.solicitacoes(r.solicitacao.tenant_id)
+      }
+    })
+  }
+
+  /**
+   * Muda o status de uma solicitação.
+   *
+   * As transições são de mão única (§14): `atendida` e `cancelada` não voltam. Reabrir uma atendida faria
+   * a mesma necessidade pedir duas vezes; reabrir uma cancelada apagaria o cancelamento, que é um fato.
+   */
+  async mudarSolicitacao(
+    input: unknown,
+    agora: number = Date.now()
+  ): Promise<{ error: string } | { solicitacao: SolicitacaoCompra; solicitacoes: SolicitacaoCompra[] }> {
+    const raw = (input ?? {}) as Record<string, unknown>
+    const id = typeof raw['id'] === 'string' ? raw['id'] : ''
+
+    if (!id) return { error: 'solicitacao_obrigatoria' }
+    if (!isSolicitacaoStatus(raw['status'])) return { error: 'status_invalido' }
+
+    const novo = raw['status']
+
+    return this.fila.serializar(async () => {
+      const conteudo = await this.read()
+      const indice = conteudo.solicitacoes.findIndex(s => s.id === id)
+
+      if (indice < 0) return { error: 'solicitacao_inexistente' }
+
+      const atual = conteudo.solicitacoes[indice] as SolicitacaoCompra
+      const r = mudarStatusSolicitacao(atual, novo, agora)
+
+      if ('error' in r) return { error: r.error }
+
+      conteudo.solicitacoes[indice] = r.solicitacao
+      await this.write(conteudo)
+
+      return { solicitacao: r.solicitacao, solicitacoes: await this.solicitacoes(atual.tenant_id) }
+    })
   }
 
   async upsertSupplier(input: unknown): Promise<{ error: string } | { supplier: Supplier; suppliers: Supplier[] }> {
