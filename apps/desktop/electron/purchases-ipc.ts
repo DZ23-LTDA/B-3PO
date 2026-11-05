@@ -75,6 +75,9 @@ export interface PurchasesDeps {
 // r39 do GOAL V2: a conferencia entra no retorno. Um retorno que so diz ok obrigaria a tela a
 // reler o estoque para descobrir que faltou mercadoria.
 export type ReceiveResult =
+  // r50: a recusa por limite devolve o `pedido_id` do pedido que FICOU aguardando aprovação. Sem ele, o
+  // chamador teria uma recusa sem caminho — e `aprovarCompra` não teria o que aprovar.
+  | { error: 'aprovacao_necessaria'; excedente_cents: number; pedido_id: string }
   | { error: string }
   | {
       conferencia: { divergencias: DivergenciaConferencia[]; semConferencia: boolean }
@@ -129,13 +132,45 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
         // Limite de compra (GOAL §15). Sem limiteDeCompra configurado, nada muda: o controle e opt-in do dono.
         // Recusar AQUI, antes de gravar, e o que impede um pedido acima do teto de virar estoque e conta a pagar
         // para depois alguem descobrir que precisava de assinatura.
-        if (deps.limiteDeCompra) {
+        //
+        // r50 do GOAL V2: A RECUSA GRAVA O PEDIDO, em `pedido` e nao em `recebido`.
+        //
+        // Antes desta rodada a recusa saia ANTES de qualquer gravação — e `aprovarCompra` precisa de um
+        // pedido para aprovar. Resultado: `aprovacao_necessaria` → `aprovar` → `pedido_inexistente`. O
+        // beco sem saída da r25 tinha voltado, agora mais sutil: a aprovação não tinha o que aprovar.
+        //
+        // Gravar em `pedido` resolve os dois lados: o pedido acima do teto existe (com o seu id) para ser
+        // aprovado, e NÃO entrou no estoque nem no financeiro — que é o que "não recebido" significa.
+        // r50: pedido JÁ APROVADO (tem pproval com aprovador) não passa pelo limite outra vez. Sem
+        // isto, aprovar não serviria para nada: a segunda tentativa de receber seria barrada igual.
+        const jaAprovado = typeof (payload as Record<string, unknown>)?.['aprovado_por'] === 'string'
+
+        if (deps.limiteDeCompra && !jaAprovado) {
           const limite = await deps.limiteDeCompra()
           const total = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
           const situacao = situacaoDaCompra(total, limite)
 
           if (situacao.precisa) {
-            return { error: 'aprovacao_necessaria' }
+            // r50: o pedido aguardando leva o SOLICITANTE. Sem ele, `decidirAprovacao` compara
+            // `decisor === solicitante` contra uma string vazia — e a regra "quem pediu não aprova o
+            // próprio pedido" ficaria INERTE justamente no caminho que mais precisa dela.
+            const atorDoPedido = await deps.actorOf()
+
+            const aguardando = await deps.store.saveOrder({
+              ...(payload as object),
+              approval: {
+                aprovado_em: 0,
+                aprovador: '',
+                solicitante: atorDoPedido?.id ?? '',
+                total_aprovado_cents: 0
+              },
+              status: 'pedido'
+            })
+
+            // Se nem isso gravar, a recusa continua sendo a resposta — mas sem prometer um id que não existe.
+            if ('error' in aguardando) return { error: 'aprovacao_necessaria' }
+
+            return { error: 'aprovacao_necessaria', excedente_cents: situacao.excedente_cents, pedido_id: aguardando.order.id }
           }
         }
 

@@ -318,3 +318,68 @@ describe('o preço atravessa o fluxo (r49)', () => {
     expect((atendida['pedido'] as { total_cents: number }).total_cents).toBe(0)
   })
 })
+describe('o caminho APROVADO (r50)', () => {
+  it('a recusa grava o pedido aguardando, e o id devolvido é aprovAvel', async () => {
+    // O ator da montagem é dono; a lista de aprovadores tem de incluí-lo, senão a recusa é
+    // `nao_e_aprovador` e o teste mediria a coisa errada.
+    const m = montar({ atores: ['dono'], limite: { aprovadores: ['dono'], cents: 10_000 } })
+
+    await m.chamar('hermes:purchases:definirLimite', { aprovadores: ['dono'], cents: 10_000 })
+
+    const recusa = await m.chamar('hermes:purchases:receive', {
+      items: [{ product_sku: 'SKU-A', quantity_milli: 10_000, unit_cost_cents: 5_000 }],
+      supplier_id: 'forn-1'
+    })
+
+    expect(recusa['error']).toBe('aprovacao_necessaria')
+
+    // r50: o pedido EXISTE. Sem isto, `aprovarCompra` responderia `pedido_inexistente` — o beco da r25
+    // tinha voltado disfarçado.
+    const pedidoId = recusa['pedido_id'] as string
+
+    expect(pedidoId).toBeTruthy()
+
+    // E não entrou no estoque: "aguardando aprovação" significa que NADA aconteceu ainda.
+    expect((await m.inventory.balances())['SKU-A'] ?? 0).toBe(0)
+
+    // A aprovação aceita o id devolvido pela recusa.
+    const aprovado = await m.chamar('hermes:purchases:aprovar', { pedido_id: pedidoId })
+
+    expect(aprovado['error']).toBeUndefined()
+    expect(aprovado['aprovada']).toBe(true)
+  })
+
+  it('aprovado, o recebimento entra no estoque e no financeiro', async () => {
+    // O ator da montagem é dono; a lista de aprovadores tem de incluí-lo, senão a recusa é
+    // `nao_e_aprovador` e o teste mediria a coisa errada.
+    const m = montar({ atores: ['dono'], limite: { aprovadores: ['dono'], cents: 10_000 } })
+
+    await m.chamar('hermes:purchases:definirLimite', { aprovadores: ['dono'], cents: 10_000 })
+
+    const recusa = await m.chamar('hermes:purchases:receive', {
+      items: [{ product_sku: 'SKU-B', quantity_milli: 10_000, unit_cost_cents: 5_000 }],
+      supplier_id: 'forn-1'
+    })
+
+    const pedidoId = recusa['pedido_id'] as string
+
+    await m.chamar('hermes:purchases:aprovar', { pedido_id: pedidoId })
+
+    // Com a aprovação, a segunda tentativa de receber passa — e é `aprovado_por` que a libera.
+    const recebido = await m.chamar('hermes:purchases:receive', {
+      aprovado_por: 'dono',
+      id: pedidoId,
+      items: [{ product_sku: 'SKU-B', quantity_milli: 10_000, unit_cost_cents: 5_000 }],
+      supplier_id: 'forn-1'
+    })
+
+    expect(recebido['error']).toBeUndefined()
+
+    // Estoque e financeiro, como no caminho sem limite.
+    expect((await m.inventory.balances())['SKU-B'] ?? 0).toBe(10_000)
+
+    const contas = await m.finance.list()
+
+    expect(contas.some(c => c.kind === 'pagar' && c.amount_cents === 50_000)).toBe(true)
+  })
+})
