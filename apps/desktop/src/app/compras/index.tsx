@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { listProducts, priceLabel, type ProductRow } from '@/api/catalog'
+import { listActors } from '@/api/admin'
 import { loadBalances, quantityLabel } from '@/api/inventory'
 import {
   costValue,
@@ -192,6 +193,22 @@ export function ComprasView() {
       setAprovacaoErro('Informe um valor maior que zero, ou deixe vazio para desligar o limite.')
 
       return
+    }
+
+
+    // r30 do GOAL V2: valida os aprovadores contra os atores que EXISTEM.
+    //
+    // Sem isto, digitar chefe quando ninguem tem esse id salva um limite que NUNCA APROVA — e o
+    // erro so aparece quando alguem tenta aprovar, com o pedido ja barrado.
+    if (aprovadores.length > 0) {
+      const reais = new Set((await listActors()).map(a => a.id))
+      const faltando = aprovadores.filter(id => !reais.has(id))
+
+      if (faltando.length > 0) {
+        setAprovacaoErro('Nao existe ator com este id: ' + faltando.join(', ') + '. Use os ids da tela de Atores.')
+
+        return
+      }
     }
 
     const r = await definirLimite(cents, aprovadores)

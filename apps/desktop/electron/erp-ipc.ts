@@ -165,6 +165,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerPurchasesIpc(ipcMain, {
     // r222: compras exige ator. A guarda vem antes do limite de compra: primeiro quem age, depois se cabe no teto.
     actorOf: () => actorOf(),
+    // r30 do GOAL V2: os aprovadores de compra sao validados contra os atores que existem.
+    atores: async () => (await actors.list()).filter(a => a.active !== false).map(a => a.id),
     finance,
     inventory,
     // Sem esta injecao o canal de cotacao responde vazio e o save devolve cotacoes_indisponivel: o store
