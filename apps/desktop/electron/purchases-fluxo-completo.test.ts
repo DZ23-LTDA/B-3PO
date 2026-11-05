@@ -280,3 +280,41 @@ describe('o que o fluxo NÃO faz, e é importante saber', () => {
     expect(r['error']).toBe('ja_cancelada')
   })
 })
+describe('o preço atravessa o fluxo (r49)', () => {
+  it('o pedido nasce com o custo da proposta vencedora, não com zero', async () => {
+    const m = montar()
+
+    await m.chamar('hermes:purchases:solicitar', { motivo: 'x', product_sku: 'SKU-P', quantity_milli: 10_000 })
+
+    const lista = (await m.store.solicitacoes()) as { id: string }[]
+
+    // Sem o custo, o pedido nasceria com `total_cents: 0` — e um pedido de valor zero NÃO gera conta a
+    // pagar (`payableForPurchase` recusa `total <= 0`). A compra existiria no estoque e não no financeiro.
+    const atendida = await m.chamar('hermes:purchases:atenderSolicitacao', {
+      id: lista[0]?.id,
+      supplier_id: 'forn-1',
+      unit_cost_cents: 1_500
+    })
+
+    expect(atendida['error']).toBeUndefined()
+
+    const pedido = atendida['pedido'] as { total_cents: number }
+
+    expect(pedido.total_cents).toBe(15_000)
+  })
+
+  it('sem preço, o pedido nasce com zero — e o financeiro não é inventado', async () => {
+    const m = montar()
+
+    await m.chamar('hermes:purchases:solicitar', { motivo: 'x', product_sku: 'SKU-Q', quantity_milli: 10_000 })
+
+    const lista = (await m.store.solicitacoes()) as { id: string }[]
+    const atendida = await m.chamar('hermes:purchases:atenderSolicitacao', {
+      id: lista[0]?.id,
+      supplier_id: 'forn-1'
+    })
+
+    // Inventar um preço seria pior que um pedido incompleto: valor errado vira conta a pagar errada.
+    expect((atendida['pedido'] as { total_cents: number }).total_cents).toBe(0)
+  })
+})

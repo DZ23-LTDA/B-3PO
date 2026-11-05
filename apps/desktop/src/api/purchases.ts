@@ -415,13 +415,16 @@ export function solicitacaoErroText(codigo: string): string {
  */
 export async function atenderSolicitacao(
   id: string,
-  supplierId: string
+  supplierId: string,
+  /** r49: o preco da proposta vencedora. Sem ele o pedido nasce com custo zero - e um pedido de valor
+   * zero nao gera conta a pagar, entao a compra existiria no estoque e nao no financeiro. */
+  unitCostCents?: number
 ): Promise<{ error: string } | { solicitacoes: SolicitacaoRow[] }> {
   const api = bridgeSolicitacao()
 
   if (!api) return { error: 'compras_indisponivel' }
 
-  const r = await api.atenderSolicitacao({ id, supplier_id: supplierId })
+  const r = await api.atenderSolicitacao({ id, supplier_id: supplierId, unit_cost_cents: unitCostCents ?? 0 })
 
   return 'error' in r ? r : { solicitacoes: r.solicitacoes }
 }

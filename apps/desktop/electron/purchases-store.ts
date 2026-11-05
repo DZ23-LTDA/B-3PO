@@ -550,8 +550,22 @@ export class PurchasesStore {
 
       if ('error' in preparo) return { error: preparo.error }
 
+      // r49 do GOAL V2: o custo vem da PROPOSTA VENCEDORA, nao de zero.
+      //
+      // Antes desta rodada o pedido nascia com `unit_cost_cents: 0` — `cents(undefined)` e zero, e o
+      // resultado era um pedido de valor ZERO que nao gera conta a pagar (`payableForPurchase` recusa
+      // total <= 0). A compra existia no estoque e nao existia no financeiro.
+      //
+      // Sem preco informado, o campo fica 0 e o pedido nasce como estava: **inventar um preco seria pior
+      // que um pedido incompleto**, porque um valor errado vira conta a pagar errada.
+      const custoBruto = (raw['unit_cost_cents'] ?? 0) as number
+      const custo = Number.isFinite(custoBruto) && custoBruto > 0 ? Math.round(custoBruto) : 0
+
       const normalizado = normalizePurchase(
-        { items: [{ product_sku: preparo.item.product_sku, quantity_milli: preparo.item.quantity_milli }], supplier_id: fornecedor },
+        {
+          items: [{ product_sku: preparo.item.product_sku, quantity_milli: preparo.item.quantity_milli, unit_cost_cents: custo }],
+          supplier_id: fornecedor
+        },
         agora
       )
 

@@ -286,7 +286,13 @@ export function ComprasView() {
       return
     }
 
-    const r = await atenderSolicitacaoApi(id, fornecedor)
+    // r49: o preco vem da proposta vencedora daquele fornecedor. A cotacao JA SABE quanto custa - pedir
+    // que a pessoa digite de novo e a mesma amnesia, um campo adiante.
+    const propostaVencedora = cotacoesGravadas
+      .filter(c => c.product_sku === solicitacao?.product_sku && c.supplier_id === fornecedor)
+      .sort((a, b) => a.preco_unit_cents - b.preco_unit_cents)[0]
+
+    const r = await atenderSolicitacaoApi(id, fornecedor, propostaVencedora?.preco_unit_cents)
 
     if ('error' in r) {
       setSolErro(solicitacaoErroText(r.error))
