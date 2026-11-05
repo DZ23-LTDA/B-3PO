@@ -87,7 +87,7 @@ describe('o servico vem do CATALOGO', () => {
     const r = linkService({ service: 'Troca', starts_at: 1_000_000 }, CATALOGO as never)
 
     // Duas fontes para a mesma coisa fariam o fim do horario divergir do catalogo.
-    expect(r.error).toBeUndefined()
+    expect('linked' in r).toBe(true)
   })
 
   it('o PRECO vem do catalogo - o caixa nao redigita', () => {
