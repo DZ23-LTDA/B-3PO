@@ -45,7 +45,6 @@ const SEM_GUARDA: readonly string[] = [
   'crm-tasks-ipc.ts',
   'documents-ipc.ts',
   'erp-ipc.ts',
-  'finance-ipc.ts',
   'fiscal-ipc.ts',
   'fs-ipc.ts',
   'git-ipc.ts',
@@ -112,11 +111,12 @@ describe('cobertura de permissao', () => {
     // Os dois unicos que aplicam. Se um deles perder a guarda, o produto fica sem nenhuma autorizacao.
     expect(temGuarda('admin-ipc.ts')).toBe(true)
     expect(temGuarda('sales-ipc.ts')).toBe(true)
+    expect(temGuarda('finance-ipc.ts')).toBe(true)
   })
 
-  it('a divida medida hoje e 38 de 40', () => {
+  it('a divida medida hoje e 37 de 40', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(38)
+    expect(SEM_GUARDA).toHaveLength(37)
     expect(canais()).toHaveLength(40)
   })
 })

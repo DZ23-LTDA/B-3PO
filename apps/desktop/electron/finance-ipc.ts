@@ -2,9 +2,22 @@
 //
 // Mesmo desenho dos outros domínios: o main valida e grava, erro volta como valor, e os totais são
 // calculados lá — a tela nunca soma nem decide o que está vencido.
+//
+// PERMISSÃO (r215)
+//
+// Este foi o primeiro canal de domínio a passar pela guarda. Antes dela, qualquer código no renderer lia e
+// gravava o financeiro sem verificar nada — e sem deixar registro de quem fez.
+//
+// `actorOf` é OBRIGATÓRIO de propósito. Um parâmetro opcional com default "sem guarda" volta a ser o buraco
+// que a rodada 214 mediu em 38 canais: quem monta o canal esquece, e nada falha.
+//
+// O ator vem do processo principal (`erp-ipc` resolve o dono da instalação). Um ator recebido do renderer
+// seria a própria escalada de privilégio que o GOAL proíbe.
 
 import type { IpcRegistrar } from './ipc-types'
 import { totaisPorCentroDeCusto } from './finance-store'
+import { withPermission } from './permission-guard'
+import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
@@ -17,37 +30,67 @@ export interface FinanceStoreLike {
   totals: (tenantId?: string) => Promise<FinanceTotals>
 }
 
-export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLike): void {
+export interface FinanceIpcDeps {
+  /** Ator resolvido no processo principal. `null` recusa — não cai em "anônimo com todos os poderes". */
+  actorOf: () => Promise<Actor | null>
+}
+
+type Denied = { error: 'sem_permissao'; reason: string }
+
+export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLike, deps: FinanceIpcDeps): void {
+  /**
+   * Resolve o ator e passa pela guarda.
+   *
+   * Sem ator a resposta é `sem_permissao`, não um erro de sistema: o chamador precisa saber que faltou
+   * permissão, e não que o financeiro quebrou.
+   */
+  async function comGuarda<T>(action: 'execute' | 'read', resource: string, run: () => Promise<T>): Promise<Denied | T> {
+    const ator = await deps.actorOf()
+
+    if (!ator) {
+      return { error: 'sem_permissao', reason: 'sem_ator' }
+    }
+
+    return withPermission(ator, action, { resource }, run)
+  }
+
   ipcMain.handle(
     'hermes:finance:list',
-    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ entries: FinanceEntry[] }> => ({
-      entries: await store.list(serverTenant(tenantId))
-    })
+    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { entries: FinanceEntry[] }> =>
+      comGuarda('read', 'finance', async () => ({ entries: await store.list(serverTenant(tenantId)) }))
   )
 
   ipcMain.handle(
     'hermes:finance:totals',
-    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ totals: FinanceTotals }> => ({
-      totals: await store.totals(serverTenant(tenantId))
-    })
+    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { totals: FinanceTotals }> =>
+      comGuarda('read', 'finance', async () => ({ totals: await store.totals(serverTenant(tenantId)) }))
   )
 
   ipcMain.handle(
     'hermes:finance:append',
-    (_event: IpcMainInvokeEvent, payload: unknown): Promise<{ entries: FinanceEntry[]; entry: FinanceEntry } | { error: string }> =>
-      store.append(payload)
+    async (
+      _event: IpcMainInvokeEvent,
+      payload: unknown
+    ): Promise<Denied | { entries: FinanceEntry[]; entry: FinanceEntry } | { error: string }> =>
+      comGuarda('execute', 'finance', async () => store.append(payload))
   )
 
   ipcMain.handle(
     'hermes:finance:settle',
-    (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ entries: FinanceEntry[] } | { error: string }> =>
-      store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId))
+    async (
+      _event: IpcMainInvokeEvent,
+      id: unknown,
+      tenantId: unknown
+    ): Promise<Denied | { entries: FinanceEntry[] } | { error: string }> =>
+      comGuarda('execute', 'finance', async () => store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId)))
   )
+
   // Totais por centro de custo. Derivados dos lancamentos - nenhum total e somado no renderer.
   ipcMain.handle(
     'hermes:finance:costCenters',
-    async (_event: IpcMainInvokeEvent, tenantId: unknown) => ({
-      costCenters: totaisPorCentroDeCusto(await store.list(serverTenant(tenantId)))
-    })
+    async (_event: IpcMainInvokeEvent, tenantId: unknown) =>
+      comGuarda('read', 'finance', async () => ({
+        costCenters: totaisPorCentroDeCusto(await store.list(serverTenant(tenantId)))
+      }))
   )
 }

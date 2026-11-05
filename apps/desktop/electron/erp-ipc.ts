@@ -119,7 +119,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
       await dispatchQuietly(dispatch, { detail: info, tenant_id: info.tenant_id, type: 'estoque.zerado' })
     }
   })
-  registerFinanceIpc(ipcMain, finance)
+  // r215: o financeiro passou a exigir ator. A arrow so e chamada dentro do handler, entao a ordem
+  // de declaracao de ctorOf (mais abaixo) nao importa.
+  registerFinanceIpc(ipcMain, finance, { actorOf: () => actorOf() })
   const scheduling = new SchedulingStore(schedulingStorePath(userDataDir))
 
   registerSchedulingIpc(ipcMain, scheduling)

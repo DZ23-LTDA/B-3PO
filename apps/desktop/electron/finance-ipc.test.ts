@@ -9,6 +9,9 @@ import { registerFinanceIpc } from './finance-ipc'
 
 type Handler = (event: unknown, ...args: unknown[]) => unknown
 
+/** Dono da instalacao: nivel EXECUTE cobre ead e xecute. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', name: 'Dono', role: 'owner' } as const
+
 function fakeIpc() {
   const handlers = new Map<string, Handler>()
 
@@ -34,7 +37,9 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>, store: FinanceS
     const store = new FinanceStore(financeStorePath(dir))
     const ipc = fakeIpc()
 
-    registerFinanceIpc(ipc, store)
+    // r215: o canal exige ator. O dono da instalacao passa em qualquer acao - o que a guarda acrescenta
+    // aqui e o REGISTRO de quem fez, e a recusa quando nao ha dono.
+    registerFinanceIpc(ipc, store, { actorOf: async () => DONO })
 
     return await run(ipc, store)
   } finally {
