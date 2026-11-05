@@ -25,6 +25,7 @@ import { aplicarConferencia, type DivergenciaConferencia, type ItemConferido } f
 import type { SolicitacaoCompra } from './purchases-solicitacao'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { segregaçãoPermite, situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
+import { limitadorDe, mensagemDeLimite } from './rate-limit'
 import { aprovarCompra } from './purchase-approval-decision'
 import { escolherCotacao, type Cotacao } from './purchase-quotation'
 import type { CotacaoGravada } from './quotation-store'
@@ -179,6 +180,12 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
     'hermes:purchases:receive',
     async (_event: IpcMainInvokeEvent, payload: unknown): Promise<Denied | ReceiveResult> =>
       exigirAtor(deps.actorOf, 'execute', 'purchases', async () => {
+        // r71 do GOAL V2: rate limiting no canal que move ESTOQUE E DINHEIRO.
+        const atorDoReceive = await deps.actorOf()
+        const limite = limitadorDe('purchases:receive').registrar(atorDoReceive?.id ?? '')
+
+        if ('error' in limite) return { error: limite.error, message: mensagemDeLimite(limite) }
+
         const normalizado = normalizePurchase({ ...(payload as object), status: 'recebido' }, Date.now())
 
         if ('error' in normalizado) {
