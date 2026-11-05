@@ -35,6 +35,9 @@ const proposta = (over: Record<string, unknown> = {}) => ({
   id: 'cot-1',
   prazo_dias: 7,
   preco_unit_cents: 1_050,
+  // r47: o produto é obrigatório na gravação. Sem ele a cotação comparava fornecedores de itens
+  // diferentes — e escolhia o mais barato entre a proposta de parafuso e a de areia.
+  product_sku: 'SKU-1',
   quantidade_disponivel: 10,
   supplier_id: 'alfa',
   ...over

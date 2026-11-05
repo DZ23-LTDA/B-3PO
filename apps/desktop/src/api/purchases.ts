@@ -37,6 +37,8 @@ export interface CotacaoRow {
   /** Prazo em dias. `null` = nao informado, que nao e o mesmo que "imediato". */
   prazo_dias: number | null
   preco_unit_cents: number
+  /** r47: o produto cotado. Sem ele, comparar fornecedores e comparar maca com laranja. */
+  product_sku: string
   quantidade_disponivel: number
   supplier_id: string
 }
@@ -53,6 +55,8 @@ export interface CotacaoGravadaRow {
   id: string
   prazo_dias: number | null
   preco_unit_cents: number
+  /** r47: o produto cotado. Sem ele, comparar fornecedores e comparar maca com laranja. */
+  product_sku: string
   quantidade_disponivel: number
   supplier_id: string
   tenant_id: string

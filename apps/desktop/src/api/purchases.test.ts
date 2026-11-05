@@ -10,6 +10,8 @@ import { escolherCotacao, purchasesAvailable, type CotacaoRow } from './purchase
 const proposta = (supplier_id: string, preco: number): CotacaoRow => ({
   prazo_dias: 5,
   preco_unit_cents: preco,
+  // r47: o produto e obrigatorio - sem ele a cotacao compara itens diferentes.
+  product_sku: 'SKU-1',
   quantidade_disponivel: 100,
   supplier_id
 })
@@ -86,7 +88,7 @@ describe('disponibilidade', () => {
 describe('tipos', () => {
   it('a proposta aceita prazo desconhecido', () => {
     // `null` e "nao informado"; o tipo tem que permitir, senao a tela inventaria um prazo.
-    const c: CotacaoRow = { prazo_dias: null, preco_unit_cents: 100, quantidade_disponivel: 5, supplier_id: 'a' }
+    const c: CotacaoRow = { prazo_dias: null, preco_unit_cents: 100, product_sku: 'SKU-1', quantidade_disponivel: 5, supplier_id: 'a' }
 
     expect(c.prazo_dias).toBeNull()
   })

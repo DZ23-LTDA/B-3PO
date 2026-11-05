@@ -646,9 +646,13 @@ export function ComprasView() {
             gravadas={cotacoesGravadas.map(c => ({
               prazo_dias: c.prazo_dias,
               preco_unit_cents: c.preco_unit_cents,
+              // r47: cotacao gravada antes desta rodada nao tem SKU.
+              product_sku: c.product_sku ?? '',
               quantidade_disponivel: c.quantidade_disponivel,
               supplier_id: c.supplier_id
             }))}
+            // r47: a cotacao e PARA ESTE produto. Sem ele o painel compararia itens diferentes.
+            productSku={sku.trim()}
             quantidade={quantityValue(quantidade)}
             supplierNames={Object.fromEntries((suppliers ?? []).map(s => [s.id, s.name]))}
             onGravar={proposta => {
@@ -657,6 +661,8 @@ export function ComprasView() {
                 id: `cot-${proposta.supplier_id}`,
                 prazo_dias: proposta.prazo_dias,
                 preco_unit_cents: proposta.preco_unit_cents,
+                // r47: sem o produto, a cotacao gravada nao sabe de que item e.
+                product_sku: proposta.product_sku,
                 quantidade_disponivel: proposta.quantidade_disponivel,
                 supplier_id: proposta.supplier_id
               }).then(r => {

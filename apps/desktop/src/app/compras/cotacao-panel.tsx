@@ -28,6 +28,13 @@ import { Button } from '@/components/ui/button'
 
 export interface CotacaoPanelProps {
   /** Quantidade que se quer comprar. Chega do formulario de pedido. */
+  /**
+   * O produto das propostas (r47 do GOAL V2).
+   *
+   * Sem ele a cotacao comparava fornecedores SEM SABER DE QUE PRODUTO - e escolhia o mais
+   * barato entre propostas que podiam ser de itens diferentes.
+   */
+  productSku: string
   quantidade: number
   /** Rotulos vindos da tela, para o painel nao inventar texto proprio. */
   copy: {
@@ -76,7 +83,7 @@ function mili(texto: string): number {
   return Number.isFinite(valor) && valor > 0 ? Math.round(valor * 1000) : 0
 }
 
-export function CotacaoPanel({ copy, gravadas, onGravar, onRemover, quantidade, supplierNames }: CotacaoPanelProps) {
+export function CotacaoPanel({ copy, gravadas, onGravar, onRemover, productSku, quantidade, supplierNames }: CotacaoPanelProps) {
   const [form, setForm] = useState(VAZIA)
   // O estado nasce das propostas gravadas: quem sai da tela e volta nao perde o trabalho (r198).
   const [propostas, setPropostas] = useState<Proposta[]>(() => gravadas ?? [])
@@ -110,6 +117,8 @@ export function CotacaoPanel({ copy, gravadas, onGravar, onRemover, quantidade, 
     const nova: Proposta = {
       prazo_dias: form.prazo.trim() ? Number(form.prazo.trim()) : null,
       preco_unit_cents: preco,
+      // r47: sem o produto, comparar fornecedores e comparar maca com laranja.
+      product_sku: productSku,
       quantidade_disponivel: disponivel,
       supplier_id: form.supplier
     }

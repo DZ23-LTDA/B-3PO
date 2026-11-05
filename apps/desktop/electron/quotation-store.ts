@@ -26,6 +26,15 @@ export interface CotacaoGravada {
   /** Chave estavel para remover sem depender do indice na lista. */
   id: string
   preco_unit_cents: number
+  /**
+   * O produto cotado (r47 do GOAL V2).
+   *
+   * Sem ele a cotacao comparava fornecedores SEM SABER DE QUE PRODUTO - e escolhia o mais
+   * barato entre propostas que podiam ser de itens diferentes.
+   *
+   * Vazio em cotacao antiga (compatibilidade): a leitura aceita, a gravacao exige.
+   */
+  product_sku: string
   quantidade_disponivel: number
   supplier_id: string
   tenant_id: string
@@ -71,6 +80,9 @@ export function lerCotacao(bruto: unknown): CotacaoGravada | null {
     id,
     prazo_dias: typeof prazo === 'number' && Number.isFinite(prazo) && prazo >= 0 ? prazo : null,
     preco_unit_cents: Math.round(preco),
+    // r47: cotação gravada antes desta rodada não tem SKU. Ler como vazio é o que permite abrir um
+    // arquivo antigo — exigir aqui puniria o usuário por uma atualização.
+    product_sku: texto(raw['product_sku']),
     quantidade_disponivel: Math.round(quantidade),
     supplier_id,
     tenant_id: texto(raw['tenant_id']) || DEFAULT_TENANT
@@ -101,7 +113,7 @@ export function parseCotacaoStore(raw: string): CotacaoStoreFile {
 
 export type ResultadoCotacao =
   | { cotacoes: CotacaoGravada[] }
-  | { error: 'cotacao_sem_id' | 'cotacao_sem_fornecedor' | 'cotacao_preco_invalido' | 'cotacao_quantidade_invalida' }
+  | { error: 'cotacao_sem_id' | 'cotacao_produto_obrigatorio' | 'cotacao_sem_fornecedor' | 'cotacao_preco_invalido' | 'cotacao_quantidade_invalida' }
 
 export class QuotationStore {
   constructor(private readonly file: string) {}
@@ -152,11 +164,21 @@ export class QuotationStore {
     const estado = await this.carregar()
     const prazo = Number(raw['prazo_dias'])
 
+    // r47: a cotação agora SABE de que produto é. Sem isto ela comparava fornecedores de itens diferentes
+    // — e escolhia o mais barato entre a proposta de parafuso e a proposta de areia.
+    //
+    // Na GRAVAÇÃO é obrigatório (é o que corrige o modelo); na LEITURA é opcional (é o que abre o arquivo
+    // antigo). As duas decisões são diferentes de propósito.
+    const sku = texto(raw['product_sku'])
+
+    if (!sku) return { error: 'cotacao_produto_obrigatorio' }
+
     const nova: CotacaoGravada = {
       created_at: Number(raw['created_at']) > 0 ? Number(raw['created_at']) : Date.now(),
       id,
       prazo_dias: Number.isFinite(prazo) && prazo >= 0 ? Math.round(prazo) : null,
       preco_unit_cents: Math.round(preco),
+      product_sku: sku,
       quantidade_disponivel: Math.round(quantidade),
       supplier_id: texto(raw['supplier_id']),
       tenant_id: texto(raw['tenant_id']) || DEFAULT_TENANT
