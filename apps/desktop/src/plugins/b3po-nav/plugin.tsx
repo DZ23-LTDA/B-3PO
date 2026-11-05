@@ -52,6 +52,20 @@ interface ItemDeMenu {
   codicon: string
   label: string
   path: string
+  /**
+   * O grupo do §13:429-438 (r122 do GOAL V2).
+   *
+   * **Obrigatório, e é o que o comentário fazia antes.** A r92 agrupou por ordem e comentário porque
+   * `SidebarNavContribution` não tem campo de grupo — e continua não tendo. **O campo existe aqui**,
+   * na lista do produto, e é consumido por `lib/ambiente.ts` para filtrar por ambiente.
+   *
+   * **O SDK não precisa saber**: a contribuição continua `{ codicon, label, path }`. O grupo é
+   * informação **do produto sobre si mesmo**, não do contrato da sidebar.
+   *
+   * E ele resolve o que o comentário não resolvia: **um teste pode verificar** que todo módulo tem
+   * grupo, que os grupos são os do ambiente, e que nenhum rótulo se repete.
+   */
+  grupo: string
 }
 
 /**
@@ -71,50 +85,50 @@ const MODULOS: readonly ItemDeMenu[] = [
     // (/empresa e /organizacao). O §13:444-445 proibe exatamente essa confusao.
 
     // 1. VISAO GERAL
-    { codicon: 'dashboard', label: 'Painel', path: '/painel' },
+    { codicon: 'dashboard', label: 'Painel', path: '/painel' , grupo: 'Visão geral' },
     // r92: 'Empresa' e o AMBIENTE do §13:417, e vem logo apos o Painel - e o contexto de tudo o
     // que segue. A CONFIGURACAO da organizacao e 'Estrutura', que fica no ultimo grupo (§13:437).
-    { codicon: 'library', label: 'Empresa', path: '/empresa' },
+    { codicon: 'library', label: 'Empresa', path: '/empresa' , grupo: 'Visão geral' },
     // r98: a busca global (§13:450). Fica na visao geral porque e uma porta de entrada, como o Painel.
-    { codicon: 'search', label: 'Busca', path: '/busca' },
+    { codicon: 'search', label: 'Busca', path: '/busca' , grupo: 'Visão geral' },
 
     // 2. OPERACAO - o que chega e quem atende
     //
     // overview, indicadores e tempo de resposta) e O MENU NAO TINHA ENTRADA. A tela foi criada
     //
-    { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
-    { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
+    { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' , grupo: 'Operação' },
+    { codicon: 'calendar', label: 'Agenda', path: '/agenda' , grupo: 'Operação' },
     // r92: 'Serviços' e 'RH' sobem para Operacao. O §13:432 os poe aqui, e nao junto de 'Comercio':
     // o servico prestado e a equipe que presta sao operacao, nao venda de produto.
-    { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
-    { codicon: 'organization', label: 'RH', path: '/rh' },
+    { codicon: 'briefcase', label: 'Serviços', path: '/servicos' , grupo: 'Operação' },
+    { codicon: 'organization', label: 'RH', path: '/rh' , grupo: 'Operação' },
 
     // 3. COMERCIO - o que eu vendo, tenho, compro e recebo
-    { codicon: 'package', label: 'Produtos', path: '/products' },
-    { codicon: 'archive', label: 'Estoque', path: '/stock' },
-    { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
-    { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
+    { codicon: 'package', label: 'Produtos', path: '/products' , grupo: 'Comércio' },
+    { codicon: 'archive', label: 'Estoque', path: '/stock' , grupo: 'Comércio' },
+    { codicon: 'cloud-download', label: 'Compras', path: '/compras' , grupo: 'Comércio' },
+    { codicon: 'credit-card', label: 'Vendas', path: '/sales' , grupo: 'Comércio' },
     // r60: a entrega e a ultima etapa do vertical - a venda registra, a entrega leva.
-    { codicon: 'rocket', label: 'Entregas', path: '/entregas' },
-    { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
+    { codicon: 'rocket', label: 'Entregas', path: '/entregas' , grupo: 'Comércio' },
+    { codicon: 'pulse', label: 'Financeiro', path: '/finance' , grupo: 'Comércio' },
 
     // 4. TRABALHO - a secao que o §13 nao previu.
     //
     // O §13 foi escrito antes do §12, entao nao tem grupo para projeto e trabalho pontual. Eles nao
     // sao 'comercio' nem 'configuracao': sao o trabalho que atravessa os dois. A secao existe, e a
     // ausencia dela no texto do GOAL esta dita aqui em vez de escondida.
-    { codicon: 'checklist', label: 'Projetos', path: '/projetos' },
-    { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' },
+    { codicon: 'checklist', label: 'Projetos', path: '/projetos' , grupo: 'Trabalho' },
+    { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' , grupo: 'Trabalho' },
 
     // 5. CRESCIMENTO - como eu apareco e como o cliente fica
-    { codicon: 'megaphone', label: 'Marketing', path: '/marketing' },
-    { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' },
+    { codicon: 'megaphone', label: 'Marketing', path: '/marketing' , grupo: 'Crescimento' },
+    { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' , grupo: 'Crescimento' },
 
     // 6. INTELIGENCIA E AUTOMACAO
-    { codicon: 'robot', label: 'Agentes', path: '/agentes' },
-    { codicon: 'zap', label: 'Automações', path: '/automacoes' },
-    { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' },
-    { codicon: 'file', label: 'Documentos', path: '/documentos' },
+    { codicon: 'robot', label: 'Agentes', path: '/agentes' , grupo: 'Inteligência' },
+    { codicon: 'zap', label: 'Automações', path: '/automacoes' , grupo: 'Inteligência' },
+    { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' , grupo: 'Inteligência' },
+    { codicon: 'file', label: 'Documentos', path: '/documentos' , grupo: 'Inteligência' },
 
     // 7. CONFIGURACAO DA ORGANIZACAO
     //
@@ -124,9 +138,17 @@ const MODULOS: readonly ItemDeMenu[] = [
     //
     // A ROTA de /empresa continua: trocar quebraria links e deeplinks, e o §13:456 manda mapear
     // consumidores antes de remover. O rotulo resolve sem remover nada.
-    { codicon: 'organization', label: 'Estrutura', path: '/organizacao' },
-    { codicon: 'law', label: 'Privacidade', path: '/privacidade' }
+    { codicon: 'organization', label: 'Estrutura', path: '/organizacao' , grupo: 'Configuração' },
+    { codicon: 'law', grupo: 'Configuração', label: 'Privacidade', path: '/privacidade' }
   ]
+
+/**
+ * O menu como DADO, para que a regra do ambiente (`lib/ambiente.ts`) e os testes possam lê-lo.
+ *
+ * A contribuição da sidebar continua `{ codicon, label, path }` — o grupo é informação do produto
+ * sobre si mesmo, e não vaza para o contrato do SDK.
+ */
+export const MODULOS_DO_PRODUTO: readonly ItemDeMenu[] = MODULOS
 const b3poNavPlugin: HermesPlugin = {
   id: 'b3po-nav',
   name: 'B-3PO — Módulos',
