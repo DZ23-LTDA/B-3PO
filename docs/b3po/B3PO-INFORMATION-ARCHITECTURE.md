@@ -61,13 +61,24 @@ O mapa das **35 rotas registradas** em `apps/desktop/src/app/routes.ts` e das **
 
 ## OS TRÊS ACHADOS QUE O MAPA REVELOU
 
-### 1. `/crm` está **órfão**
+### 1. `/crm` **NÃO está órfão — e a r94 provou**
 
-**A rota existe, a view existe, e o menu não tem entrada para ela.**
+**A r93 escreveu que `/crm` era órfão. Estava errado, e o teste sabia.**
 
-> O §6 do GOAL chama isso de *"CRM ÓRFÃO — ACHADO PRIORITÁRIO"*.
+O `plugin.test.ts:99` tem a resposta:
+
+> *"A captura da r97 mostrou «CRM» duas vezes: **o menu do núcleo** (junto de Capabilities, Artefatos e Tarefas agendadas) **já contribui com /crm**, e o plugin contribu[ía também]... **e o usuário foi quem viu — não o teste**."*
+
+**Quando a r94 tentou adicionar `/crm` ao `b3po-nav`, o teste recusou:**
+
+```
+× nao repete um item que o menu do nucleo ja tem
+  /crm ja vem do menu do nucleo
+```
+
+> **A porta existe — ela está no menu do núcleo**, não no do produto. O mapa da r93 leu **só `b3po-nav`** e concluiu sobre **o menu inteiro**.
 >
-> **O que a r211 e as rodadas seguintes fecharam foi a SEGURANÇA do CRM** (tenant, guarda, webhook). **A porta de entrada continua faltando** — e um módulo seguro que ninguém alcança é um módulo morto.
+> **É o mesmo erro da r64**: olhar uma fonte e concluir sobre o produto. **O teste já sabia; eu não perguntei a ele.**
 
 ### 2. `/agents` e `/agentes` são **duas rotas para a mesma coisa**
 

@@ -77,6 +77,9 @@ const MODULOS: readonly ItemDeMenu[] = [
     { codicon: 'library', label: 'Empresa', path: '/empresa' },
 
     // 2. OPERACAO - o que chega e quem atende
+    //
+    // overview, indicadores e tempo de resposta) e O MENU NAO TINHA ENTRADA. A tela foi criada
+    //
     { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
     { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
     // r92: 'Serviços' e 'RH' sobem para Operacao. O §13:432 os poe aqui, e nao junto de 'Comercio':
