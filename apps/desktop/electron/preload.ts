@@ -102,6 +102,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   inventory: {
     append: payload => ipcRenderer.invoke('hermes:inventory:append', payload),
+    inventario: payload => ipcRenderer.invoke('hermes:inventory:inventario', payload),
     balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
     list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },

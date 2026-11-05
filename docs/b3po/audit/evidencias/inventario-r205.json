@@ -1,0 +1,9 @@
+{
+  "efeito_antes": [
+    "CAFE · 7 · -3×"
+  ],
+  "resultado": "caA contagem nao sobrescreve o saldo: cada diferenca vira movimento no historico.SKUContadoContadoNenhuma contagem adicionada.Aplicar contagemAjustes gerados: 1",
+  "saldo_depois": {
+    "CAFE": 7000
+  }
+}

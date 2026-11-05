@@ -1323,6 +1323,15 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'As vendas precisam do aplicativo desktop para funcionar.'
     },
     stock: {
+      inventoryApply: 'Aplicar contagem',
+      inventoryEmpty: 'Nenhuma contagem adicionada.',
+      inventoryHint: 'A contagem nao sobrescreve o saldo: cada diferenca vira movimento no historico.',
+      inventoryIgnored: 'sem saldo conhecido',
+      inventoryNoDifference: 'ja batia',
+      inventoryQuantity: 'Contado',
+      inventoryResult: 'Ajustes gerados',
+      inventorySku: 'SKU',
+      inventoryTitle: 'Contagem fisica',
       balance: 'Saldo',
       count: (n: number) => (n === 1 ? '1 produto' : `${n} produtos`),
       duplicateRef: 'Esta movimentação já foi registrada.',

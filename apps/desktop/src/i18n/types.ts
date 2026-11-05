@@ -1020,6 +1020,15 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     }
     stock: {
+      inventoryApply: string
+      inventoryEmpty: string
+      inventoryHint: string
+      inventoryIgnored: string
+      inventoryNoDifference: string
+      inventoryQuantity: string
+      inventoryResult: string
+      inventorySku: string
+      inventoryTitle: string
       balance: string
       count: (n: number) => string
       duplicateRef: string

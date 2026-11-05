@@ -23,6 +23,7 @@ export interface MovementRow {
 interface InventoryBridge {
   append: (payload: Record<string, unknown>) => Promise<{ error: string } | { balance: number; movement: MovementRow; movements: MovementRow[] }>
   balances: (tenantId?: string) => Promise<{ balances: Record<string, number> }>
+  inventario: (payload: Record<string, unknown>) => Promise<{ ajustes: number; ignoradas: string[]; sem_diferenca: string[] } | { error: string }>
   list: (tenantId?: string) => Promise<{ movements: MovementRow[] }>
 }
 
@@ -30,6 +31,38 @@ function bridge(): InventoryBridge | null {
   const host = (globalThis as { hermesDesktop?: { inventory?: InventoryBridge } }).hermesDesktop
 
   return host?.inventory ?? null
+}
+
+/** Uma linha de contagem fisica. */
+export interface ContagemRow {
+  /** Quanto o contador encontrou, em milesimos. */
+  contado_milli: number
+  product_sku: string
+}
+
+export interface ResultadoInventario {
+  ajustes: number
+  /** SKUs que a contagem nao pode reconciliar (saldo desconhecido ou contagem invalida). */
+  ignoradas: string[]
+  /** SKUs que ja batiam com o ledger. */
+  sem_diferenca: string[]
+}
+
+/**
+ * Aplica uma contagem fisica. O saldo NAO e sobrescrito: cada diferenca vira movimento com `ref` deterministica
+ * (`inventario:<id>:<sku>`), entao repetir o mesmo inventario completa o que faltou em vez de duplicar.
+ *
+ * Sem preload devolve `inventario_indisponivel`: a tela roda em teste e em navegador sem Electron.
+ */
+export async function registrarInventario(
+  id: string,
+  contagens: ContagemRow[]
+): Promise<ResultadoInventario | { error: string }> {
+  const api = bridge()
+
+  if (!api) return { error: 'inventario_indisponivel' }
+
+  return api.inventario({ contagens, id })
 }
 
 export function inventoryAvailable(): boolean {

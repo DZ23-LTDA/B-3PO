@@ -1113,6 +1113,15 @@ export const en: Translations = {
       unavailable: 'Sales need the desktop app to work.'
     },
     stock: {
+      inventoryApply: 'Apply count',
+      inventoryEmpty: 'No count added.',
+      inventoryHint: 'The count does not overwrite the balance: each difference becomes a movement.',
+      inventoryIgnored: 'unknown balance',
+      inventoryNoDifference: 'already matched',
+      inventoryQuantity: 'Counted',
+      inventoryResult: 'Adjustments generated',
+      inventorySku: 'SKU',
+      inventoryTitle: 'Physical count',
       balance: 'Balance',
       count: (n: number) => (n === 1 ? '1 product' : `${n} products`),
       duplicateRef: 'This movement was already recorded.',

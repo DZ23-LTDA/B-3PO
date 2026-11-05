@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
+import { InventarioPanel } from './inventario-panel'
+
 import {
   emptyStockDraft,
   filterStock,
@@ -227,6 +229,21 @@ export function StockView() {
               </tbody>
             </table>
           )}
+
+          <InventarioPanel
+            balances={balances}
+            copy={{
+              apply: copy.inventoryApply,
+              empty: copy.inventoryEmpty,
+              hint: copy.inventoryHint,
+              ignored: copy.inventoryIgnored,
+              noDifference: copy.inventoryNoDifference,
+              quantity: copy.inventoryQuantity,
+              result: copy.inventoryResult,
+              sku: copy.inventorySku,
+              title: copy.inventoryTitle
+            }}
+          />
 
           <section className="flex flex-col gap-1">
             <h2 className="text-[length:var(--conversation-caption-font-size)] font-medium text-foreground">{copy.recent}</h2>
