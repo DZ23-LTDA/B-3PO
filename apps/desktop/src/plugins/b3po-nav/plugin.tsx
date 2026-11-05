@@ -14,10 +14,34 @@
  * Isso não aparecia em teste porque um teste de rota prova que a rota resolve, não que alguém consegue
  * chegar nela. A verificação que faltava era a do mecanismo: quem popula a navegação.
  *
- * ORDEM
+ * ORDEM (r15 do GOAL V2)
  *
- * O painel vem primeiro (é a porta do produto), depois os módulos na ordem em que uma operação acontece:
- * quem entra → o que vende → o que tem → o que deve → quando atende → quem atende.
+ * O proprietário reportou: **"a criação da empresa está misturada com os demais"**. Ele estava certo.
+ * `Empresa` (o cadastro: CNPJ, fuso, moeda, impostos) estava na 17ª e última posição, logo depois de
+ * `Privacidade` e `Documentos` — três coisas sem nenhuma relação.
+ *
+ * A ordem agora segue a pergunta que o usuário faz, não o mapa de módulos:
+ *
+ *   1. **Onde eu estou** — Painel
+ *   2. **Quem eu sou** — Empresa. É o cadastro que dá sentido a tudo abaixo: sem empresa, fuso, moeda
+ *      e imposto, nenhum dos módulos seguintes tem contexto. Por isso vem ANTES deles.
+ *   3. **O que acontece hoje** — Atendimento, Agenda (a operação que chega sozinha)
+ *   4. **O que eu vendo e tenho** — Produtos, Estoque, Compras, Vendas, Serviços
+ *   5. **O que eu devo e recebo** — Financeiro
+ *   6. **Quem faz e como eu apareço** — RH, Marketing, Pós-venda
+ *   7. **O que automatiza** — Agentes, Automações
+ *   8. **O que registra e protege** — Documentos, Privacidade
+ *
+ * POR QUE NÃO EM SEÇÕES VISUAIS
+ *
+ * `SidebarNavContribution` é `{ codicon, label, path, tier? }` — **não tem campo de grupo**. Um
+ * separador visual exigiria mudar o SDK da sidebar (novo campo, novo render, migração dos outros dois
+ * consumidores: kanban e o de teste).
+ *
+ * **A ordem resolve o pedido sem essa mudança**, e é o que o proprietário descreveu: o problema era
+ * `Empresa` estar *entre* coisas que não são ela — não que faltasse uma linha divisória.
+ *
+ * Se o agrupamento visual for pedido depois, o lugar é o SDK, não este arquivo.
  *
  * ESTE PLUGIN NÃO CRIA TELA, NEM ROTA, NEM DADO. Ele só aponta para o que já existe.
  */
@@ -31,33 +55,50 @@ interface ItemDeMenu {
 }
 
 /**
- * A ordem é a da operação, não a alfabética: quem abre o produto às 8h quer ver o painel, depois o
- * atendimento que chegou, depois o que vendeu.
+ * A ordem é a da pergunta do usuário, não a alfabética nem a do mapa de módulos.
+ *
+ * `Empresa` vem logo depois de `Painel`: é o cadastro que dá contexto a tudo o mais. Um produto que
+ * abre no painel sem empresa cadastrada não sabe dizer a moeda, o fuso nem o imposto.
  */
 const MODULOS: readonly ItemDeMenu[] = [
+  // 1. Onde eu estou
   { codicon: 'dashboard', label: 'Painel', path: '/painel' },
+
+  // 2. Quem eu sou — antes dos módulos, porque é o contexto deles (r15)
+  { codicon: 'library', label: 'Empresa', path: '/empresa' },
+
+  // 3. O que chega sozinho
   { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
   { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
+
+  // 4. O que eu vendo e tenho
   { codicon: 'package', label: 'Produtos', path: '/products' },
   { codicon: 'archive', label: 'Estoque', path: '/stock' },
   { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
   { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
-  { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
+
+  // 5. O que eu devo e recebo
+  { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
+
+  // 6. Quem faz e como eu apareço
   { codicon: 'organization', label: 'RH', path: '/rh' },
   { codicon: 'megaphone', label: 'Marketing', path: '/marketing' },
   { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' },
+
+  // 7. O que automatiza
   { codicon: 'robot', label: 'Agentes', path: '/agentes' },
   { codicon: 'zap', label: 'Automações', path: '/automacoes' },
+
+  // 8. O que registra e protege
   { codicon: 'file', label: 'Documentos', path: '/documentos' },
-  { codicon: 'law', label: 'Privacidade', path: '/privacidade' },
-  { codicon: 'library', label: 'Empresa', path: '/empresa' }
+  { codicon: 'law', label: 'Privacidade', path: '/privacidade' }
 ]
 
 const b3poNavPlugin: HermesPlugin = {
   id: 'b3po-nav',
   name: 'B-3PO — Módulos',
-  description: 'Itens de menu para os módulos do produto: painel, CRM, operação, financeiro e privacidade.',
+  description: 'Itens de menu para os módulos do produto: painel, empresa, operação, financeiro e privacidade.',
   // Ligado por padrão: são as telas do produto. Um menu que o usuário precisa ativar não é menu.
   defaultEnabled: true,
   register(ctx) {

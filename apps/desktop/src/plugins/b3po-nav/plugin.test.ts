@@ -124,3 +124,46 @@ describe('menu dos módulos', () => {
     }).not.toThrow()
   })
 })
+describe('ordem do menu (r15 do GOAL V2)', () => {
+  it('Empresa vem logo depois de Painel, nao no fim', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+
+    // O proprietario reportou: "a criacao da empresa esta misturada com os demais". Empresa estava na
+    // 17a e ultima posicao, logo depois de Privacidade e Documentos - tres coisas sem relacao.
+    //
+    // Empresa e o cadastro que da contexto aos outros modulos (moeda, fuso, imposto). Vem antes deles.
+    expect(paths[0]).toBe('/painel')
+    expect(paths[1]).toBe('/empresa')
+
+    // E nao esta mais no fim.
+    expect(paths[paths.length - 1]).not.toBe('/empresa')
+  })
+
+  it('Empresa nao esta entre Documentos e Privacidade', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+    const empresa = paths.indexOf('/empresa')
+    const documentos = paths.indexOf('/documentos')
+    const privacidade = paths.indexOf('/privacidade')
+
+    // A ordenacao antiga colocava os tres no mesmo bloco final.
+    const noBlocoFinal = empresa > documentos && empresa > privacidade
+    expect(noBlocoFinal).toBe(false)
+  })
+
+  it('o menu tem exatamente os 17 modulos, sem duplicata e sem buraco', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+
+    expect(paths).toHaveLength(17)
+    expect(new Set(paths).size).toBe(17)
+  })
+
+  it('os itens de operacao mantem a ordem relativa', () => {
+    const paths = contribuicoes().map(i => i.data.path)
+
+    // O bloco comercial continua na ordem em que a operacao acontece.
+    expect(paths.indexOf('/products')).toBeLessThan(paths.indexOf('/stock'))
+    expect(paths.indexOf('/stock')).toBeLessThan(paths.indexOf('/compras'))
+    expect(paths.indexOf('/compras')).toBeLessThan(paths.indexOf('/sales'))
+    expect(paths.indexOf('/sales')).toBeLessThan(paths.indexOf('/finance'))
+  })
+})
