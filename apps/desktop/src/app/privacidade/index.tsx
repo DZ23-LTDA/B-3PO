@@ -1,6 +1,14 @@
 import { useCallback, useState } from 'react'
 
 import {
+  type AuditListing,
+  auditoriaDisponivel,
+  listarAuditoria,
+  motivoLabel,
+  quandoLabel,
+  vereditoLabel
+} from '@/api/auditoria'
+import {
   anonymizeTitular,
   exportTitular,
   previewEliminacao,
@@ -34,6 +42,28 @@ export function PrivacidadeView() {
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
   const [ocupado, setOcupado] = useState(false)
+
+  // r37 do GOAL V2: a trilha de auditoria, na mesma tela que trata dados pessoais.
+  //
+  // A trilha registra QUEM tentou o QUE sobre dados de QUEM. É o domínio de privacidade que olha para
+  // isso primeiro: um admin lendo a trilha de `finance` veria decisões de um domínio que talvez não
+  // governe.
+  const [trilha, setTrilha] = useState<AuditListing | null>(null)
+  const [trilhaErro, setTrilhaErro] = useState('')
+
+  const carregarTrilha = useCallback(async () => {
+    setTrilhaErro('')
+
+    const r = await listarAuditoria(200)
+
+    if (!r) {
+      setTrilhaErro('Auditoria indisponível neste ambiente.')
+
+      return
+    }
+
+    setTrilha(r)
+  }, [])
 
   const disponivel = privacyAvailable()
 
@@ -181,6 +211,61 @@ export function PrivacidadeView() {
           </button>
         </div>
       ) : null}
+
+      {/* r37 do GOAL V2: a trilha. O ledger existe desde a r35 e o canal desde a r36; sem esta seção ele
+          existiria apenas para quem abrisse o JSON no disco. */}
+      <div>
+        <h2>Trilha de auditoria</h2>
+        <p>
+          Toda decisão de permissão — permitida ou negada — fica registrada. É prova, não diagnóstico: nenhuma
+          entrada pode ser apagada pela interface.
+        </p>
+
+        {/* O aviso vem ANTES da lista, e por um motivo: uma lista que começa na "mais antiga que restou"
+            sem dizer que houve perda daria a impressão de histórico completo. */}
+        {trilha && trilha.descartadas > 0 ? (
+          <p>
+            <strong>{trilha.descartadas}</strong> entrada(s) antiga(s) foram descartadas por limite de espaço. A
+            lista abaixo <strong>não</strong> é o histórico completo.
+          </p>
+        ) : null}
+
+        {trilhaErro ? <p>{trilhaErro}</p> : null}
+
+        <button disabled={!auditoriaDisponivel()} onClick={() => void carregarTrilha()} type="button">
+          Carregar trilha
+        </button>
+
+        {trilha && trilha.entries.length === 0 ? <p>Nenhuma decisão registrada ainda.</p> : null}
+
+        {trilha && trilha.entries.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Quando</th>
+                <th>Quem</th>
+                <th>Ação</th>
+                <th>Recurso</th>
+                <th>Veredito</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trilha.entries.map((e, i) => (
+                <tr key={i}>
+                  <td>{quandoLabel(e.at)}</td>
+                  {/* `—` e não vazio: uma célula em branco parece dado que não carregou. */}
+                  <td>{e.actorId || '—'}</td>
+                  <td>{e.action}</td>
+                  <td>{e.resource}</td>
+                  <td>{vereditoLabel(e.allowed)}</td>
+                  <td>{motivoLabel(e.reason)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : null}
+      </div>
     </section>
   )
 }
