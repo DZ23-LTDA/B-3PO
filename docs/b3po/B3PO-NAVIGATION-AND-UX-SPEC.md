@@ -1,172 +1,102 @@
-# B-3PO — NAVEGAÇÃO E UX: ESPECIFICAÇÃO + MATRIZ DE MIGRAÇÃO
+# B3PO — NAVEGAÇÃO E UX SPEC
 
-**Rodada**: 23 do GOAL V2 (§13) · **Data**: 05/11/2026
-**Par**: `B3PO-INFORMATION-ARCHITECTURE.md`
-
----
-
-## 1. A REGRA QUE GOVERNA TODA MUDANÇA AQUI
-
-> *"Não remover rotas nem funcionalidades existentes sem mapear consumidores, permissões, links, deeplinks, testes e redirects."* — §13
-
-**Esta especificação não remove nada.** Cada linha da matriz diz, para cada rota: **quem consome**, **qual o teste**, e **qual o plano**.
+**Entregável do §13** · rodada 99 do GOAL V2 · o mapa é **teste**, não tabela
 
 ---
 
-## 2. MATRIZ DE MIGRAÇÃO — as 31 rotas
+## O MAPA DE ROTAS É UM TESTE
 
-Legenda de **plano**:
-- **MANTER** — entra no menu do ambiente, sem mudança de rota
-- **ROTULAR** — rota igual, rótulo do menu muda
-- **ADIAR** — existe, não entra no menu ainda (falta grupo/ambiente onde caiba)
-- **PLATAFORMA** — não é de negócio; fica fora dos dois ambientes
+> *"Um mapa de rotas num documento **envelhece na próxima rodada** — e um mapa errado **é pior que nenhum** (a r93 provou: três de três achados falsos)."*
 
-| # | Rota | Plano | Ambiente | Grupo | Consumidor hoje |
-|---|---|---|---|---|---|
-| 1 | `/painel` | MANTER | Empresa | Visão geral | menu (r21) |
-| 2 | `/empresa` | **ROTULAR → "Organização"** | Empresa | Configuração | menu, `plugin.test.ts` |
-| 3 | `/crm` | MANTER | Empresa | Operação | menu, `crm/*` |
-| 4 | `/atendimento` | MANTER | Empresa | Operação | menu |
-| 5 | `/agenda` | MANTER | Empresa | Operação | menu |
-| 6 | `/servicos` | MANTER | Empresa | Operação | menu |
-| 7 | `/rh` | MANTER | Empresa | Operação | menu |
-| 8 | `/products` | MANTER | Empresa | Comércio | menu |
-| 9 | `/stock` | MANTER | Empresa | Comércio | menu |
-| 10 | `/compras` | MANTER | Empresa | Comércio | menu |
-| 11 | `/sales` | MANTER | Empresa | Comércio | menu |
-| 12 | `/finance` | MANTER | Empresa | Comércio | menu |
-| 13 | `/marketing` | MANTER | Empresa | Crescimento | menu |
-| 14 | `/posvenda` | MANTER | Empresa | Crescimento | menu |
-| 15 | `/sofia` | MANTER | Empresa | Inteligência | menu, `sofia-*` (r17–r22) |
-| 16 | `/agentes` | MANTER | Empresa | Inteligência | menu |
-| 17 | `/automacoes` | MANTER | Empresa | Inteligência | menu |
-| 18 | `/documentos` | MANTER | Empresa | Inteligência | menu |
-| 19 | `/privacidade` | MANTER | Empresa | Configuração | menu |
-| 20 | `/artifacts` | MANTER | **Engenharia** | Trabalho | — **sem menu hoje** |
-| 21 | `/messaging` | ADIAR | — | — | **sem menu** |
-| 22 | `/webhooks` | ADIAR | — | — | **sem menu** |
-| 23 | `/cron` | ADIAR | — | — | **sem menu** |
-| 24 | `/capabilities` | PLATAFORMA | — | — | **sem menu** |
-| 25 | `/command-center` | PLATAFORMA | — | — | **sem menu** |
-| 26 | `/settings` | MANTER | Empresa | Configuração | **sem menu** |
-| 27 | `/profiles` | PLATAFORMA | — | — | — |
-| 28 | `/agents` | PLATAFORMA | — | — | — |
-| 29 | `/starmap` | PLATAFORMA | — | — | — |
-| 30 | `/new` | PLATAFORMA | — | — | — |
-| 31 | `/session-import` | PLATAFORMA | — | — | — |
+**`apps/desktop/electron/routes-map.test.ts`** lê `routes.ts` e `plugin.tsx` e **falha** quando o mapa deixa de ser verdade.
 
-### O que a matriz revela
-
-**5 rotas de negócio estão sem menu** (`/messaging`, `/webhooks`, `/cron`, `/settings`, `/artifacts`) — e **`/settings` é configuração da organização**, que o §13 quer no grupo Configuração.
-
-**6 são plataforma** e não pertencem a nenhum dos dois ambientes: `/profiles`, `/agents`, `/starmap`, `/new`, `/session-import`, `/command-center`, `/capabilities`.
-
----
-
-## 3. O PROBLEMA DO AMBIENTE ENGENHARIA
-
-O §13 quer um ambiente para *"projetos, repositórios, issues/tarefas, arquitetura, código, testes, CI/CD, artefatos e entregas"*.
-
-**O que existe**: `/artifacts`. **O que não existe**: todo o resto.
-
-Criar o ambiente agora daria **um menu de um item** — e um produto que se apresenta como "ambiente de engenharia" com **uma tela** é pior que um produto que **não promete** isso.
-
-**Decisão**: o ambiente ENGENHARIA **não é criado nesta fase**. Ele nasce quando houver **as telas que ele promete** — e o §12 do GOAL já lista o **Project Builder** como o componente que as produz.
-
-**Registrado como dependência explícita**, não como esquecimento.
-
----
-
-## 4. O SELETOR DE AMBIENTE — quando ele passa a fazer sentido
-
-O §13 pede *"seletor persistente de ambiente e organização/projeto ativos"*.
-
-**Com um ambiente só, um seletor de um item não é seletor.** Ele passa a valer quando houver **dois** — ou seja, quando a Engenharia existir.
-
-**O que fazer agora**: a estrutura de dados (o ambiente ativo, persistido) **nasce junto com o multiempresa**, que já existe (`tenant_id`). O **seletor visual** espera o segundo ambiente.
-
-> **Um controle que não muda nada é pior que a ausência dele**: ensina o usuário a ignorar a barra.
-
----
-
-## 5. O QUE ESTA ESPECIFICAÇÃO **NÃO** DECIDE
-
-| Decisão | Por quê |
+| Teste | O que impede |
 |---|---|
-| **Onde fica o seletor** (topo da sidebar? barra?) | é UX e depende do segundo ambiente existir |
-| **Agrupamento visual** (separadores, títulos de grupo) | o SDK não tem `group`; exige mudança de contrato (§4 do doc de arquitetura) |
-| **Busca global** | o §13 pede; não há hoje. É um componente próprio |
-| **Renomear `/empresa`** (rota, não rótulo) | exigiria redirects + mapear deeplinks; o §13 manda mapear antes. **Não fazer agora** |
+| 36 rotas declaradas | o documento diz um número que o código não tem |
+| **toda constante está registrada** | rota declarada e esquecida |
+| **toda registrada tem constante** | string mágica no `APP_ROUTES` |
+| sem path repetido | duas rotas para o mesmo lugar |
+| **todo item do menu aponta para rota que existe** | **link morto com aparência de módulo** |
+| menu tem 23 itens | item duplicado ou faltando |
+| **13 rotas fora do menu, nomeadas** | **rota removida sem decisão** |
 
 ---
 
-## 6. ORDEM DE IMPLEMENTAÇÃO PROPOSTA
+## O QUE O §13 PEDE, E ONDE ESTÁ
 
-| Fase | O que | Pré-requisito |
+| Item | §13 | Estado |
 |---|---|---|
-| **1** | Rotular `/empresa` → **"Organização"** no menu | nenhum — só rótulo |
-| **2** | Levar `/settings` para o grupo Configuração | nenhum |
-| **3** | Expor `/artifacts` e `/cron` no menu (hoje inalcançáveis) | decidir grupo do `cron` |
-| **4** | Agrupamento visual | estender `SidebarNavContribution` com `grupo?` |
-| **5** | Ambiente ENGENHARIA | **as telas do Project Builder (§12)** |
-| **6** | Seletor persistente | dois ambientes |
-
-**As fases 1–3 não exigem mudança de SDK.** As 4–6 exigem.
+| Navegação contextual por ambiente | :413-414 | ⚠️ **grupos sim, seletor não** |
+| **Modo Empresa com grupos por fluxo** | :429-438 | ✅ **r92** |
+| **`Empresa` ≠ configuração** | :444-445 | ✅ **r92** |
+| Não duplicar Mensageria/Atendimento | :440 | ✅ **não há duplicata** (r95) |
+| Agenda × Tarefas agendadas distintas | :441 | ✅ **são distintas** (r95) |
+| **Seletor persistente de ambiente** | :447 | ❌ |
+| **Menu conforme RBAC e plano** | :448 | ❌ menu estático |
+| **Sofia no contexto ativo** | :449 | ⚠️ `/sofia` está no menu |
+| **Busca global** | :450 | ✅ **r96–r98** |
+| **Modo Engenharia** | :452-454 | ❌ |
+| Não remover rota sem mapear | :456 | ✅ **o teste agora mapeia** |
 
 ---
 
-## 7. O QUE NÃO MUDOU NESTA RODADA
+## OS 7 GRUPOS — o Modo Empresa
 
-**Nenhuma rota, nenhum rótulo, nenhum item de menu.**
-
-Esta rodada produziu **dois documentos e uma matriz**, como o §13 pede nos entregáveis. Implementar antes de mapear era exatamente o que o §13 proíbe.
----
-
-# CORREÇÃO — r24 (esta seção substitui as afirmações erradas acima)
-
-## O QUE EU ESCREVI ERRADO NA r23
-
-A matriz acima tem uma coluna "sem menu" e eu a interpretei como **"inalcançável"**. **Está errado.**
-
-Medido na r24, **todas as 13 rotas "sem menu" têm acesso** — por outros caminhos:
-
-| Rota | Onde está acessível |
-|---|---|
-| `/settings` | **statusbar** (`use-statusbar-items.tsx:762` — `?tab=billing`) e `profile-switcher` |
-| `/cron` | **statusbar** (`use-statusbar-items.tsx:645`) |
-| `/webhooks` | **statusbar** (`use-statusbar-items.tsx:653`) |
-| `/messaging` | **rail da sidebar de chat** (`app/chat/sidebar/index.tsx:229`) |
-| `/artifacts` | **rail da sidebar de chat** (`app/chat/sidebar/index.tsx:239`) |
-| `/capabilities` | command-center |
-| `/command-center` | plataforma |
-| `/profiles`, `/agents`, `/starmap`, `/new`, `/session-import` | plataforma |
-
-**O que "sem menu" significava de verdade**: não estão no **menu do B-3PO** (`b3po-nav`). **Não** que o usuário não chega nelas.
-
-> **A diferença importa**: "não está no menu do produto" e "não existe porta" são diagnósticos diferentes, com consertos diferentes. Eu tratei os dois como o segundo.
-
-## FASE 1 IMPLEMENTADA
-
-`/empresa` → rótulo **"Organização"** no menu.
-
-```ts
-{ codicon: 'library', label: 'Organização', path: '/empresa' },
+```
+1. VISÃO GERAL      Painel · Empresa · Busca
+2. OPERAÇÃO         Atendimento · Agenda · Serviços · RH
+3. COMÉRCIO         Produtos · Estoque · Compras · Vendas · Entregas · Financeiro
+4. TRABALHO         Projetos · Trabalhos
+5. CRESCIMENTO      Marketing · Pós-venda
+6. INTELIGÊNCIA     Agentes · Automações · Sofia · Documentos
+7. CONFIGURAÇÃO     Estrutura · Privacidade
 ```
 
-**A rota não mudou.** Trocar `/empresa` quebraria `use-statusbar-items`, `profile-switcher`, `toolset-detail` e o `plugin.test.ts` — e o §13 manda **mapear consumidores antes de remover**.
+> **O grupo 4 não existe no §13** — ele foi escrito antes do §12. Projeto e trabalho pontual **não são comércio nem configuração**: são **o trabalho que atravessa os dois**.
 
-**O §13 pede exatamente isto**: *"'Empresa' como ambiente não deve ser confundida com configuração da organização; renomear a configuração para 'Organização' ou equivalente."*
+---
 
-## O QUE ISSO MUDA NA MATRIZ ACIMA
+## AS 13 ROTAS FORA DO MENU — e a matriz de migração
 
-| Linha da matriz | Estava | É |
+| Rota | Dono | Decisão |
 |---|---|---|
-| "5 rotas de negócio estão sem menu" | parecia dívida de alcançabilidade | **dívida de organização** — elas têm porta, mas não estão no menu do produto |
-| Ordem de implementação, fase 3 | "expor `/artifacts` e `/cron`" | **prioridade baixou**: eles já têm porta; expor no menu é conveniência, não conserto |
+| `/` | **núcleo** | é o chat, não um módulo |
+| `/settings` | **núcleo** | configuração do app |
+| `/command-center` · `/capabilities` · `/artifacts` · `/profiles` · `/starmap` · `/webhooks` | **núcleo** | avançado — não é uso diário |
+| `/session-import` | **núcleo** | fluxo pontual |
+| **`/crm`** | **núcleo** | **está no menu do núcleo** (r94) — a busca do produto não o vê |
+| **`/agents`** | **núcleo** | **subagentes do runtime** — diferente de `/agentes` (r95) |
+| **`/messaging`** | **núcleo** | **configuração de canais** — diferente de `/atendimento` (r95) |
+| **`/cron`** | **núcleo** | **cron do runtime** — mantido distinto de `/agenda`, como o §13:441 manda |
 
-## O QUE CONTINUA VALENDO DA r23
+> **Nenhuma rota foi removida.** A matriz de migração **não migra nada**: ela **declara a fronteira** entre o menu do produto (23) e o do núcleo (as 13).
 
-- **O ambiente ENGENHARIA não nasce com uma tela** — a decisão está de pé.
-- **O seletor de ambiente espera o segundo ambiente** — idem.
-- **O agrupamento visual exige mudança de SDK** — idem.
-- **Nenhuma rota foi removida** — idem.
+---
+
+## A FRONTEIRA QUE O MAPA REVELOU
+
+> **O produto tem DOIS menus** — o do núcleo (upstream) e o do plugin (`b3po-nav`).
+>
+> **O §13 fala de «um menu».** A arquitetura real tem dois, e **é por isso que a r93 errou três de três**: ela leu **um** e concluiu sobre **os dois**.
+
+**A decisão de produto que fica registrada**: o menu do produto **não repete** o do núcleo (o teste da r97 recusa), e **a busca do produto não vê o do núcleo** (a frase da tela diz isso).
+
+---
+
+## O QUE FALTA — as três lacunas do §13
+
+| Lacuna | Por que não foi feita |
+|---|---|
+| **Seletor de ambiente** | exige o **Modo Engenharia** existir primeiro — um seletor para um modo que não existe é um botão morto |
+| **Menu conforme RBAC** | o menu é **estático**; torná-lo dinâmico exige o canal de permissões no renderer, que hoje só valida **por ação** |
+| **Modo Engenharia** | é **um produto dentro do produto** (§13:452-454: projetos, repositórios, issues, arquitetura, código, testes, CI/CD, artefatos) |
+
+> **As três estão nomeadas.** Nenhuma delas é uma linha de código — as três são **trabalho de semanas**, e fingir que são uma rodada seria o tipo de relatório que o §20 proíbe.
+
+---
+
+## PRÓXIMA RODADA
+
+O §13 está **medido por inteiro**: o que existe tem teste, o que falta tem nome. **A próxima frente é o §11 — a definição operacional de Sofia**, que a ordem do dono pede no item 6.
+
+> **99 rodadas.** Este documento **não é um mapa** — é **a explicação de por que o mapa é um teste**. Um mapa em markdown envelhece; um mapa em `expect` **para de compilar quando mente**.
