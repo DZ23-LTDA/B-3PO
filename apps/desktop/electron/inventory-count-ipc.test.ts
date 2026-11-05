@@ -28,7 +28,8 @@ beforeEach(async () => {
         handlers.set(canal, fn)
       }
     } as never,
-    inventory
+    inventory,
+    { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) }
   )
 
   invocar = async (canal: string, ...args: unknown[]) => {

@@ -50,7 +50,6 @@ const SEM_GUARDA: readonly string[] = [
   'git-ipc.ts',
   'hr-ipc.ts',
   'hud-ipc.ts',
-  'inventory-ipc.ts',
   'lookup-ipc.ts',
   'marketing-ipc.ts',
   'mcp-oauth-callback-ipc.ts',
@@ -77,7 +76,8 @@ function canais(): string[] {
 function temGuarda(nome: string): boolean {
   const fonte = readFileSync(join(DIR, nome), 'utf8')
 
-  return fonte.includes('withPermission') || fonte.includes('guardedHandler')
+  // `exigirAtor` e o helper dos canais de dominio (r216). Nao reconhece-lo faria o ratchet mentir.
+  return fonte.includes('withPermission') || fonte.includes('guardedHandler') || fonte.includes('exigirAtor')
 }
 
 describe('cobertura de permissao', () => {
@@ -112,11 +112,12 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('admin-ipc.ts')).toBe(true)
     expect(temGuarda('sales-ipc.ts')).toBe(true)
     expect(temGuarda('finance-ipc.ts')).toBe(true)
+    expect(temGuarda('inventory-ipc.ts')).toBe(true)
   })
 
-  it('a divida medida hoje e 37 de 40', () => {
+  it('a divida medida hoje e 36 de 40', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(37)
+    expect(SEM_GUARDA).toHaveLength(36)
     expect(canais()).toHaveLength(40)
   })
 })

@@ -2,6 +2,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+/** Dono da instalacao: passa em qualquer acao. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' } as const
+
 import { describe, expect, it } from 'vitest'
 
 import { InventoryStore, inventoryStorePath, type InventoryMovement } from './inventory-store'
@@ -45,7 +48,12 @@ describe('IPC do estoque', () => {
   it('registra exatamente os canais do estoque', () => {
     const ipc = fakeIpc()
 
-    registerInventoryIpc(ipc, { append: async () => ({ error: 'x' }), balances: async () => ({}), list: async () => [] })
+    // r217: o canal exige ator. O dono passa; o que muda para os testes existentes e so a assinatura.
+    registerInventoryIpc(
+      ipc,
+      { append: async () => ({ error: 'x' }), balances: async () => ({}), list: async () => [] },
+      { actorOf: async () => DONO }
+    )
 
     expect(ipc.channels()).toEqual([
       'hermes:inventory:append',
@@ -59,7 +67,7 @@ describe('IPC do estoque', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerInventoryIpc(ipc, store)
+      registerInventoryIpc(ipc, store, { actorOf: async () => DONO })
 
       expect(await ipc.invoke('hermes:inventory:balances')).toEqual({ balances: {} })
 
@@ -78,7 +86,7 @@ describe('IPC do estoque', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerInventoryIpc(ipc, store)
+      registerInventoryIpc(ipc, store, { actorOf: async () => DONO })
 
       await expect(ipc.invoke('hermes:inventory:append', { kind: 'entrada', quantity: 1 })).resolves.toEqual({
         error: 'sku_required'
@@ -93,7 +101,7 @@ describe('IPC do estoque', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerInventoryIpc(ipc, store)
+      registerInventoryIpc(ipc, store, { actorOf: async () => DONO })
       await ipc.invoke('hermes:inventory:append', { kind: 'entrada', product_sku: 'A', quantity: 2 })
 
       const r = (await ipc.invoke('hermes:inventory:list')) as { movements: InventoryMovement[] }

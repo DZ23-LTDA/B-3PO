@@ -114,11 +114,18 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   })
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
-  registerInventoryIpc(ipcMain, inventory, {
-    stockRanOut: async info => {
-      await dispatchQuietly(dispatch, { detail: info, tenant_id: info.tenant_id, type: 'estoque.zerado' })
+  // r217: o estoque passou a exigir ator. `onEvent` continua quarto parametro — a guarda vem antes de
+  // proposito: um evento de automacao nao pode disparar por uma acao que nao foi autorizada.
+  registerInventoryIpc(
+    ipcMain,
+    inventory,
+    { actorOf: () => actorOf() },
+    {
+      stockRanOut: async info => {
+        await dispatchQuietly(dispatch, { detail: info, tenant_id: info.tenant_id, type: 'estoque.zerado' })
+      }
     }
-  })
+  )
   // r215: o financeiro passou a exigir ator. A arrow so e chamada dentro do handler, entao a ordem
   // de declaracao de ctorOf (mais abaixo) nao importa.
   registerFinanceIpc(ipcMain, finance, { actorOf: () => actorOf() })
