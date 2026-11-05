@@ -29,6 +29,17 @@ export interface CrmContactRow {
   last_purchase_at?: null | number
   last_purchase_cents?: null | number
   last_sale_id?: null | string
+  /**
+   * O último chamado de atendimento (r149 do GOAL V2).
+   *
+   * **O r146 gravou e não chegou aqui** — a mesma lacuna que a r136 apontou para a compra: **um campo que o tipo
+   * não declara é um campo que a tela não usa**, mesmo chegando no objeto pelo preload.
+   *
+   * **E o par importa**: quem atende precisa ver as DUAS coisas — quando o cliente comprou por último **e**
+   * quando reclamou por último. Uma ficha que mostra só a compra esconde o cliente insatisfeito.
+   */
+  last_ticket_at?: null | number
+  last_ticket_id?: null | string
   name: string
   phone: string
   tags: string[]

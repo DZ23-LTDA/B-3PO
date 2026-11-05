@@ -255,6 +255,18 @@ function formatarReais(centavos: null | number | undefined): string {
                     ? `última compra ${new Date(contact.last_purchase_at).toLocaleDateString()} · ${formatarReais(contact.last_purchase_cents)}`
                     : 'nunca comprou'}
                 </span>
+                {/*
+                  r149 do GOAL V2: o último chamado, ao lado da compra.
+
+                  As duas datas juntas são o que muda a conversa: "comprou semana passada e reclamou ontem" e
+                  "comprou semana passada e nunca reclamou" pedem abordagens opostas, e a ficha precisa dizer
+                  qual é qual sem ninguém abrir o histórico de tickets.
+                */}
+                <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                  {typeof contact.last_ticket_at === 'number'
+                    ? `último chamado ${new Date(contact.last_ticket_at).toLocaleDateString()}`
+                    : 'nunca chamou'}
+                </span>
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-1">
