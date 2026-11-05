@@ -24,7 +24,7 @@ import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { aplicarConferencia, type DivergenciaConferencia, type ItemConferido } from './purchases-conferencia'
 import type { SolicitacaoCompra } from './purchases-solicitacao'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
-import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
+import { segregaçãoPermite, situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
 import { aprovarCompra } from './purchase-approval-decision'
 import { escolherCotacao, type Cotacao } from './purchase-quotation'
 import type { CotacaoGravada } from './quotation-store'
@@ -89,7 +89,63 @@ export type ReceiveResult =
 
 type Denied = { error: 'sem_permissao'; reason: string }
 
+/**
+ * Pode receber? (r51 e r53 do GOAL V2)
+ *
+ * Extraida do handler porque ele chegou a CC 24 - o teto do projeto e 20. A funcao responde tres
+ * perguntas, na ordem em que elas importam:
+ *
+ *   1. O pedido esta APROVADO? E a aprovacao vale para ESTE valor? (r51)
+ *   2. Quem aprovou pode RECEBER? (r53, so quando a empresa separa funcoes)
+ *   3. Se nao esta aprovado, o valor passa do limite? (r26)
+ *
+ * Devolve `null` quando pode, ou a recusa que o canal deve devolver.
+ */
+async function podeReceber(
+  deps: PurchasesDeps,
+  items: readonly { total_cents?: number }[],
+  payload: unknown
+): Promise<{ error: string; excedente_cents?: number; pedido_id?: string } | null> {
+  const total = items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
+  const idDoPedido =
+    typeof (payload as Record<string, unknown>)?.["id"] === "string"
+      ? String((payload as Record<string, unknown>)["id"])
+      : ""
+  const gravado = idDoPedido ? (await deps.store.orders()).find(o => o.id === idDoPedido) : null
+
+  // A aprovacao so vale para O VALOR APROVADO. Mudar os itens depois invalida - e o pedido volta a
+  // precisar de assinatura, que e o que o §15 manda.
+  const aprovacaoValida =
+    !!gravado?.approval?.aprovador && gravado.approval.total_aprovado_cents === total
+
+  if (!deps.limiteDeCompra) return null
+
+  const limite = await deps.limiteDeCompra()
+
+  // r53: segregacao de funcoes. Ligada, quem aprovou NAO recebe. Desligada por padrao: um dono de
+  // instalacao pequena E as tres pessoas - pede, aprova e recebe.
+  if (aprovacaoValida) {
+    const atorAgora = await deps.actorOf()
+    const segregacao = segregaçãoPermite({
+      aprovador: gravado?.approval?.aprovador ?? null,
+      exige_segregacao: limite.exige_segregacao,
+      recebedor: atorAgora?.id ?? ""
+    })
+
+    if (segregacao && "erro" in segregacao) return { error: segregacao.erro }
+
+    return null
+  }
+
+  const situacao = situacaoDaCompra(total, limite)
+
+  if (!situacao.precisa) return null
+
+  return { error: "aprovacao_necessaria" }
+}
+
 export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps): void {
+
   ipcMain.handle(
     'hermes:purchases:suppliers',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { suppliers: Supplier[] }> =>
@@ -141,54 +197,36 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
         //
         // Gravar em `pedido` resolve os dois lados: o pedido acima do teto existe (com o seu id) para ser
         // aprovado, e NÃO entrou no estoque nem no financeiro — que é o que "não recebido" significa.
-        // r51 do GOAL V2 - A APROVACAO VEM DO PEDIDO GRAVADO, NUNCA DO PAYLOAD.
-        //
-        // A r50 tinha `jaAprovado = typeof payload["aprovado_por"] === "string"`: o RENDERER decidia se o
-        // pedido estava aprovado. Qualquer chamador mandaria `aprovado_por: "x"` e pularia o limite. O §15
-        // e explicito: "Nunca confiar no renderer para autorizar."
-        //
-        // E o §15 pede a VALIDADE, que a r50 nao fazia: `total_aprovado_cents` registrava o valor no
-        // momento da assinatura e NUNCA ERA LIDO. Mudar os itens depois herdaria silenciosamente uma
-        // aprovacao dada para outro montante. Agora o total tem de bater.
-        const idDoPedido =
-          typeof (payload as Record<string, unknown>)?.["id"] === "string"
-            ? String((payload as Record<string, unknown>)["id"])
-            : ""
-        const gravado = idDoPedido ? (await deps.store.orders()).find(o => o.id === idDoPedido) : null
-        const totalDoPayload = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
+        // r51/r53 do GOAL V2 - a verificacao saiu daqui para `podeReceber`, porque o handler chegou a
+        // CC 24 (o teto e 20). A extracao nao muda comportamento: muda quem responde por ele.
+        const recusa = await podeReceber(deps, normalizado.order.items, payload)
 
-        // A aprovacao so vale para O VALOR APROVADO. Mudar os itens depois invalida - e o pedido volta a
-        // precisar de assinatura, que e o que o §15 manda.
-        const aprovacaoValida =
-          !!gravado?.approval?.aprovador && gravado.approval.total_aprovado_cents === totalDoPayload
+        if (recusa) {
+          // `aprovacao_necessaria` GRAVA o pedido aguardando (r50) — sem isto `aprovarCompra` não tem o
+          // que aprovar, e o beco da r25 volta. As outras recusas (segregação) não gravam: elas negam uma
+          // AÇÃO sobre um pedido que já existe.
+          if (recusa.error !== 'aprovacao_necessaria') return recusa
 
-        if (deps.limiteDeCompra && !aprovacaoValida) {
-          const limite = await deps.limiteDeCompra()
-          const total = normalizado.order.items.reduce((soma, item) => soma + (item.total_cents ?? 0), 0)
-          const situacao = situacaoDaCompra(total, limite)
+          // r50: o pedido aguardando leva o SOLICITANTE. Sem ele, `decidirAprovacao` compara
+          // `decisor === solicitante` contra uma string vazia — e a regra "quem pediu não aprova o
+          // próprio pedido" ficaria INERTE justamente no caminho que mais precisa dela.
+          const atorDoPedido = await deps.actorOf()
 
-          if (situacao.precisa) {
-            // r50: o pedido aguardando leva o SOLICITANTE. Sem ele, `decidirAprovacao` compara
-            // `decisor === solicitante` contra uma string vazia — e a regra "quem pediu não aprova o
-            // próprio pedido" ficaria INERTE justamente no caminho que mais precisa dela.
-            const atorDoPedido = await deps.actorOf()
+          const aguardando = await deps.store.saveOrder({
+            ...(payload as object),
+            approval: {
+              aprovado_em: 0,
+              aprovador: '',
+              solicitante: atorDoPedido?.id ?? '',
+              total_aprovado_cents: 0
+            },
+            status: 'pedido'
+          })
 
-            const aguardando = await deps.store.saveOrder({
-              ...(payload as object),
-              approval: {
-                aprovado_em: 0,
-                aprovador: '',
-                solicitante: atorDoPedido?.id ?? '',
-                total_aprovado_cents: 0
-              },
-              status: 'pedido'
-            })
+          // Se nem isso gravar, a recusa continua sendo a resposta — mas sem prometer um id que não existe.
+          if ('error' in aguardando) return { error: 'aprovacao_necessaria' }
 
-            // Se nem isso gravar, a recusa continua sendo a resposta — mas sem prometer um id que não existe.
-            if ('error' in aguardando) return { error: 'aprovacao_necessaria' }
-
-            return { error: 'aprovacao_necessaria', excedente_cents: situacao.excedente_cents, pedido_id: aguardando.order.id }
-          }
+          return { error: 'aprovacao_necessaria', pedido_id: aguardando.order.id }
         }
 
         const salvo = await deps.store.saveOrder({ ...(payload as object), status: 'recebido' })

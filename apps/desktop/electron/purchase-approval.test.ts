@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  segregaçãoPermite,
   configuracaoUtil,
   decidirAprovacao,
   SEM_LIMITE,
@@ -107,5 +108,29 @@ describe('quem aprova', () => {
   it('compra que nao precisa nao pode ser aprovada', () => {
     // Aprovar o que nao exigia aprovacao criaria um registro de aprovacao sem objeto.
     expect(decidirAprovacao({ ...base, decisor: 'dono', precisa: false })).toEqual({ erro: 'compra_nao_precisa' })
+  })
+})
+describe('a segregação de funções (r53 do §15)', () => {
+  it('DESLIGADA por padrão: não há regra, e "não há regra" não é "pode"', () => {
+    // Um dono de instalação pequena é as três pessoas. Devolver `true` aqui esconderia que a pergunta
+    // nunca foi feita.
+    expect(segregaçãoPermite({ aprovador: 'dono', recebedor: 'dono' })).toBeNull()
+  })
+
+  it('ligada: quem aprovou não recebe', () => {
+    expect(segregaçãoPermite({ aprovador: 'chefe', exige_segregacao: true, recebedor: 'chefe' })).toEqual({
+      erro: 'aprovador_nao_recebe'
+    })
+  })
+
+  it('ligada: outra pessoa recebe', () => {
+    expect(segregaçãoPermite({ aprovador: 'chefe', exige_segregacao: true, recebedor: 'estoquista' })).toEqual({
+      ok: true
+    })
+  })
+
+  it('ligada, mas sem aprovador registrado: não há segregação a violar', () => {
+    // O pedido nunca passou por assinatura — não há dois papéis para separar.
+    expect(segregaçãoPermite({ aprovador: null, exige_segregacao: true, recebedor: 'dono' })).toEqual({ ok: true })
   })
 })

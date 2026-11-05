@@ -34,6 +34,19 @@ export type LimiteDeCompra = {
    * é uma configuração válida (um aprovador só para conferir, não para liberar).
    */
   alcadas?: Readonly<Record<string, number>>
+  /**
+   * Segregação de funções no recebimento (r53 do GOAL V2).
+   *
+   * Ligada: **quem aprovou não recebe**. É o "quatro olhos" que uma empresa com separação de funções
+   * espera — e o §15 chama de segregação.
+   *
+   * **Desligada por padrão, e isso é decisão de produto, não omissão.** Um dono de instalação pequena
+   * **é** as três pessoas: pede, aprova e recebe. Ligar isto por padrão faria o produto recusar o caso
+   * comum para atender o raro — e o dono teria de descobrir a configuração para voltar a trabalhar.
+   *
+   * Quem tem separação de funções liga; quem não tem, não é punido.
+   */
+  exige_segregacao?: boolean
   /** Valor que dispara revisao, em centavos. `null` desliga o controle. */
   cents: number | null
   /** Quem pode aprovar. Lista vazia com limite ligado e um erro de configuracao. */
@@ -135,4 +148,25 @@ export function decidirAprovacao(input: {
   }
 
   return { aprovada: true }
+}
+/**
+ * Quem aprovou pode receber? (r53 do GOAL V2)
+ *
+ * A pergunta só tem sentido quando a empresa **declarou** que separa funções. Sem `exige_segregacao`,
+ * devolve `null` — que significa "não há regra", e é diferente de "pode" e de "não pode". Uma função que
+ * respondesse `true` sem configuração esconderia que a pergunta nunca foi feita.
+ */
+export function segregaçãoPermite(input: {
+  aprovador: null | string
+  exige_segregacao?: boolean
+  recebedor: string
+}): null | { erro: 'aprovador_nao_recebe' } | { ok: true } {
+  if (!input.exige_segregacao) return null
+
+  // Sem aprovador registrado, não há segregação a violar: o pedido nunca passou por assinatura.
+  if (!input.aprovador) return { ok: true }
+
+  if (input.aprovador === input.recebedor) return { erro: 'aprovador_nao_recebe' }
+
+  return { ok: true }
 }
