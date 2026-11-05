@@ -48,6 +48,8 @@ import { registerAfterSalesIpc } from './after-sales-ipc'
 import { registerAutomationIpc } from './automation-ipc'
 import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
+import { registerSofiaIpc } from './sofia-ipc'
+import { openSofiaStore } from './sofia-store'
 import { registerMarketingIpc } from './marketing-ipc'
 import { MarketingStore, marketingStorePath } from './marketing-store'
 import { AfterSalesStore, afterSalesStorePath } from './after-sales-store'
@@ -239,6 +241,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Analytics le pelo dono de cada dominio. Nao tem store proprio - de proposito.
   // r8 do GOAL V2: o painel le todos os dominios de uma vez — exige ator.
   registerAnalyticsIpc(ipcMain, { actorOf: () => actorOf(), afterSales, desk, finance, inventory, marketing, sales })
+
+  // r19 do GOAL V2: os seis canais de Sofia nascem com guarda. openSofiaStore e sincrono no nome mas
+  // devolve uma Promise — a montagem nao espera: os canais so leem quando o renderer chamar.
+  void openSofiaStore(userDataDir).then(store => registerSofiaIpc(ipcMain, { actorOf: () => actorOf(), store }))
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools: AgentTool[] = buildDomainTools({
