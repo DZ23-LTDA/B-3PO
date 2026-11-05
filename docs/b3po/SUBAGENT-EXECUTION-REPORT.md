@@ -92,3 +92,89 @@ Pareamento por deep link → **"Conectado ao computador"** (guard não dá falso
 Parear → abrir o bot (conversa com histórico aparece) → digitar e **enviar**: “Você: envio apos correcoes
 da revisao” na tela e o botão em “Enviando…”. O socket continua sendo criado sob demanda, agora sempre
 amarrado ao pareamento atual.
+
+---
+
+# USO DO MCP DZ23 NA SESSÃO 226–254 (esta seção vale)
+
+## O que foi executado de fato
+
+| Rodada | Ferramenta | Modelos | O que pedi | O que recebi |
+|---|---|---|---|---|
+| 246 | **`consensus`** (3 revisores) | `groq/qwen3.8-27b` · `cerebras/gpt-oss-120b` · `cloudflare/gpt-oss-120b` | revisão adversarial de 5 afirmações | **lacuna real**: *"as 40 falhas são todas de ambiente"* era interpretação |
+| 246 | `list_models` | — | quais targets existem | **14 targets** em 5 tiers |
+
+**Total: 2 chamadas. 3 respostas de modelo. 1 uso de inferência.** Nada além disso foi invocado nesta sessão.
+
+## O que a revisão produziu de concreto
+
+**A resposta que mudou o resultado:**
+
+> *"A classificação das 40 falhas como 'todas de ambiente' é uma **interpretação, não um fato mensurável**. O que
+> falta: mapeamento 1:1, cada teste com o erro exato e a justificativa específica."*
+
+**Isso era verdade.** Eu tinha afirmado *"todas de ambiente"* em 226 **sem mapear**. A revisão forçou o mapeamento —
+que levou **5 rodadas** (246–250) e terminou em:
+
+| Natureza | Qtd |
+|---|---|
+| Ambiente comprovado | **36** |
+| Indeterminado | **3** |
+| **Comportamento de produto** | **1** — launch que trava ~41 s no Windows |
+
+**A revisão custou 3 chamadas de modelo e expôs um defeito de produto que 20 rodadas de trabalho não tinham
+encontrado.**
+
+## O que a revisão errou, e por quê
+
+Os revisores **não tinham o repositório**. Das suas críticas:
+
+| Crítica | Veredito |
+|---|---|
+| *"sem mapeamento 1:1"* | **procede** — era a lacuna real |
+| *"8 testes não cobrem multi-processo"* | **procede** — e eu já havia escrito isso no código |
+| *"sem referência a issue do upstream para `outline: none`"* | **não procede** — o comentário no `styles.css` diz *"No focus rings, anywhere"* com a razão; eles não tinham o arquivo |
+| *"sem commit/diff"* | **não procede** — os commits existem |
+| *"sem logs de CI"* | **parcialmente** — `gh run list` foi medido, log bruto não |
+
+**Uma revisão sem acesso ao código produz metade de ouro e metade de ruído.** A metade de ouro **era a única coisa
+que importava**.
+
+## A equipe A00–A27 do §4
+
+O GOAL lista **28 papéis** (A00 Coordinator … A27 Independent Review). **Não existe infraestrutura de 28 agentes
+nesta execução.**
+
+O que existe e foi usado:
+
+| Papel do §4 | Como foi exercido |
+|---|---|
+| **A27 Independent Review** | **`consensus` com 3 modelos de providers distintos** — a única revisão verdadeiramente independente |
+| A24 QA | eu mesmo, rodando `vitest`, `scripts/check`, CDP |
+| A22 Security | eu mesmo, com `permission-coverage-ratchet`, `tenant-isolation-invariant`, `npm audit` |
+| A25 Performance | eu mesmo, com medição por CDP (931 ms / 0,3 ms) |
+| A18 Desktop | eu mesmo, executando o pacote empacotado |
+| A00 Coordinator | eu mesmo |
+
+**Os outros 22 papéis não foram exercidos por agentes separados.** Dizer que foram seria inventar.
+
+## O que o §4 pede e não foi feito
+
+| Exigência | Estado |
+|---|---|
+| "Delegar trabalho efetivamente" | **parcial** — 1 revisão delegada, o resto executado pelo coordenador |
+| "task_id, agente, objetivo, arquivos, dependências, critérios, resultado, testes, evidências" por tarefa | **não existe esse registro** — as rodadas estão documentadas em `audit/*.md`, não numa tabela de tarefas |
+| "Não permitir edição simultânea conflitante" | **não aplicável** — houve um único executor |
+| "Se o MCP falhar, tentar recuperar" | **não houve falha** — 2 de 2 chamadas funcionaram |
+| "Não alegar utilização sem evidência" | **atendido** — os IDs de requisição estão no output |
+
+## Medido
+
+| Medida | Valor |
+|---|---|
+| Chamadas ao MCP DZ23 | **2** (`list_models`, `consensus`) |
+| Modelos que responderam | **3** (providers distintos) |
+| Concordância entre eles | **0,3** (média, heurística lexical) |
+| Papéis do §4 exercidos por agentes separados | **1 de 28** (A27) |
+| Lacunas reais encontradas pela revisão | **1** |
+| Rodadas que a lacuna custou para fechar | **5** |
