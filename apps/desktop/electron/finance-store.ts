@@ -285,6 +285,26 @@ export function payableForPurchase(
 }
 
 export class FinanceStore {
+  /**
+   * Fila de escrita (r235).
+   *
+   * Mesmo defeito da r234 no estoque: read -> valida -> write sem serializacao. Duas chamadas simultaneas leem o
+   * mesmo estado e a segunda grava por cima da primeira.
+   *
+   * A fila e por INSTANCIA, que e a unidade de escrita do arquivo. Duas instancias sobre o mesmo arquivo continuam
+   * sem protecao mutua - isso exigiria lock de sistema de arquivos, e o produto usa uma instancia por diretorio.
+   */
+  private fila: Promise<unknown> = Promise.resolve()
+
+  /** Serializa uma escrita: a proxima so comeca quando esta terminar. */
+  private serializar<T>(run: () => Promise<T>): Promise<T> {
+    const resultado = this.fila.then(run)
+
+    this.fila = resultado.catch(() => undefined)
+
+    return resultado
+  }
+
   constructor(private readonly filePath: string) {}
 
   async list(tenantId: string = DEFAULT_TENANT): Promise<FinanceEntry[]> {
@@ -300,6 +320,10 @@ export class FinanceStore {
   }
 
   async append(input: unknown): Promise<{ error: string } | { entries: FinanceEntry[]; entry: FinanceEntry }> {
+    return this.serializar(() => this.appendSerializado(input))
+  }
+
+  private async appendSerializado(input: unknown): Promise<{ error: string } | { entries: FinanceEntry[]; entry: FinanceEntry }> {
     const normalized = normalizeEntry(input, Date.now())
 
     if ('error' in normalized) {
