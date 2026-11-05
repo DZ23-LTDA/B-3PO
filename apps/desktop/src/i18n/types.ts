@@ -886,6 +886,12 @@ export interface Translations extends NoticeTranslations {
       addDepartment: string
       addEmployee: string
       approvalNeeded: string
+      offboardingBlocked: string
+      offboardingCheck: string
+      offboardingDone: string
+      offboardingHint: string
+      offboardingPending: string
+      offboardingTitle: string
       decisionAboutPerson: string
       department: string
       departmentName: string

@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
+import { DesligamentoPanel } from './desligamento-panel'
+
 /**
  * RH.
  *
@@ -174,6 +176,18 @@ export function RhView() {
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
       ) : (
         <>
+          {/* Desligamento: avalia o checklist e diz o que falta. Nao desliga ninguem — quem decide e uma pessoa. */}
+          <DesligamentoPanel
+            copy={{
+              blocked: copy.offboardingBlocked,
+              checkAll: copy.offboardingCheck,
+              done: copy.offboardingDone,
+              hint: copy.offboardingHint,
+              pending: copy.offboardingPending,
+              title: copy.offboardingTitle
+            }}
+          />
+
           <section className="grid gap-2 rounded-lg border border-(--ui-border) p-4 sm:grid-cols-2">
             {campo(copy.departmentName, depNome, setDepNome)}
             <div className="flex items-end">
