@@ -259,6 +259,29 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   automacoes = automations
 
+  // r109/r110 do GOAL V2: os três canais que a montagem não tinha.
+  //
+  // Eles tinham store, canal, preload, wrapper e tela — E NÃO ESTAVAM AQUI. Todos os testes de canal
+  // passavam porque testavam o REGISTER e não a MONTAGEM; o `erp-mounting.test.ts` é o que impede o
+  // cenário de voltar.
+  registerOrganizationIpc(ipcMain, {
+    actorOf,
+    store: new OrganizationStore(organizationStorePath(userDataDir), {
+      // A interface minima: o store da estrutura so precisa saber se a empresa EXISTE.
+      exists: async companyId => (await new CompaniesStore(companiesStorePath(userDataDir)).list()).some(c => c.id === companyId)
+    })
+  })
+
+  registerProjectIpc(ipcMain, {
+    actorOf,
+    store: new ProjectStore(projectStorePath(userDataDir))
+  })
+
+  registerWorkItemIpc(ipcMain, {
+    actorOf,
+    store: new WorkItemStore(workItemStorePath(userDataDir))
+  })
+
   registerSalesIpc(ipcMain, {
     actorOf,
     // r64 do GOAL V2: a venda consome a reserva. Sem isto, a reserva vencia sozinha e a
