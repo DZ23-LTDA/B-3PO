@@ -22,6 +22,7 @@ import {
   type SolicitacaoRow,
   APROVACAO_ERRO,
   aprovarPedido,
+  atenderSolicitacao as atenderSolicitacaoApi,
   criarSolicitacao,
   definirLimite,
   lerLimite,
@@ -87,6 +88,8 @@ export function ComprasView() {
   const [solQtd, setSolQtd] = useState('')
   const [solMotivo, setSolMotivo] = useState('')
   const [solErro, setSolErro] = useState('')
+  // r46: o fornecedor escolhido por solicitacao. Sem ele, o pedido nao pode nascer.
+  const [solFornecedor, setSolFornecedor] = useState<Record<string, string>>({})
 
   const disponivel = purchasesAvailable()
 
@@ -260,6 +263,29 @@ export function ComprasView() {
     else setSolicitacoes(r.solicitacoes)
   }, [])
 
+  /** r46: atender ESCOLHENDO o fornecedor - o caminho que cria o pedido de verdade. */
+  const atenderComFornecedor = useCallback(async (id: string) => {
+    setSolErro('')
+
+    const fornecedor = solFornecedor[id] ?? ''
+
+    if (!fornecedor) {
+      setSolErro(solicitacaoErroText('fornecedor_obrigatorio'))
+
+      return
+    }
+
+    const r = await atenderSolicitacaoApi(id, fornecedor)
+
+    if ('error' in r) {
+      setSolErro(solicitacaoErroText(r.error))
+    } else {
+      setSolicitacoes(r.solicitacoes)
+      // O pedido nasceu: recarrega para a lista de pedidos nao ficar velha.
+      setOrders(await listOrders())
+    }
+  }, [solFornecedor])
+
   const salvarLimite = useCallback(async () => {
     setAprovacaoErro('')
 
@@ -385,10 +411,26 @@ export function ComprasView() {
                   <span className="text-foreground">
                     {s.product_sku} · {quantityLabel(s.quantity_milli)} — {s.motivo}
                   </span>
-                  <span className="flex gap-1">
+                  <span className="flex items-center gap-1">
+                    {/* r46 do GOAL V2: o fornecedor é obrigatório porque um pedido sem fornecedor não é
+                        um pedido, é uma intenção — e é a COTAÇÃO que o descobre. Sem esta escolha, o botão
+                        chamava `mudarSolicitacao`, o status mudava e NENHUM pedido nascia. */}
+                    <select
+                      className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-1 py-0.5 text-xs text-foreground outline-none focus:border-(--ui-accent)"
+                      onChange={event => setSolFornecedor({ ...solFornecedor, [s.id]: event.target.value })}
+                      value={solFornecedor[s.id] ?? ''}
+                    >
+                      <option value="">fornecedor…</option>
+                      {(suppliers ?? []).map(forn => (
+                        <option key={forn.id} value={forn.id}>
+                          {forn.name}
+                        </option>
+                      ))}
+                    </select>
                     <button
                       className="rounded-md border border-(--ui-border) px-2 py-0.5 text-xs text-foreground hover:border-(--ui-accent)"
-                      onClick={() => void atender(s.id, 'atendida')}
+                      disabled={!solFornecedor[s.id]}
+                      onClick={() => void atenderComFornecedor(s.id)}
                       type="button"
                     >
                       Atender
