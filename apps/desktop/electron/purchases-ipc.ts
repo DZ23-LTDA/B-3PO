@@ -21,6 +21,7 @@ import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
 import type { InventoryMovement } from './inventory-store'
 import { payableForPurchase, type FinanceEntry } from './finance-store'
+import { aplicarConferencia, type DivergenciaConferencia, type ItemConferido } from './purchases-conferencia'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
 import { aprovarCompra } from './purchase-approval-decision'
@@ -65,9 +66,17 @@ export interface PurchasesDeps {
   store: PurchasesStoreLike
 }
 
+// r39 do GOAL V2: a conferencia entra no retorno. Um retorno que so diz ok obrigaria a tela a
+// reler o estoque para descobrir que faltou mercadoria.
 export type ReceiveResult =
   | { error: string }
-  | { finance: FinanceEntry | null; order: PurchaseOrder; orders: PurchaseOrder[]; stock: InventoryMovement[] }
+  | {
+      conferencia: { divergencias: DivergenciaConferencia[]; semConferencia: boolean }
+      finance: FinanceEntry | null
+      order: PurchaseOrder
+      orders: PurchaseOrder[]
+      stock: InventoryMovement[]
+    }
 
 type Denied = { error: 'sem_permissao'; reason: string }
 
@@ -130,9 +139,24 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
           return { error: salvo.error }
         }
 
+        // r39 do GOAL V2: a conferência. O que chegou difere do que foi pedido mais vezes do que parece —
+        // e sem esta etapa o estoque assumia sempre o pedido. Um pedido de 100 que chega com 80 entrava
+        // com 100, e não havia onde escrever que faltaram 20.
+        //
+        // `conferidos` é opcional: sem ele, o comportamento é o de antes. Isso mantém os 33 testes de
+        // compras válidos e não pune o caso comum (chegou o que foi pedido) por causa do raro.
+        const conferidos = Array.isArray((payload as Record<string, unknown>)['conferidos'])
+          ? ((payload as Record<string, unknown>)['conferidos'] as ItemConferido[])
+          : undefined
+
+        const conferencia = aplicarConferencia(salvo.order, conferidos)
+
+        // O pedido gravado já está com `status: 'recebido'`; a conferência ajusta as QUANTIDADES que vão
+        // para o estoque. O `total_cents` NÃO muda — o financeiro paga o que foi comprado, e a diferença
+        // fica registrada como pendência com o fornecedor, não como desconto automático.
         const stock: InventoryMovement[] = []
 
-        for (const movimento of stockMovementsFor(salvo.order)) {
+        for (const movimento of stockMovementsFor({ ...salvo.order, items: conferencia.pedido.items })) {
           const entrada = await deps.inventory.append(movimento)
 
           if ('balance' in entrada) {
@@ -156,7 +180,9 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
           }
         }
 
-        return { order: salvo.order, orders: salvo.orders, stock, finance }
+        // A divergência vai no retorno: quem chamou precisa saber que faltou mercadoria, e um retorno que
+        // só diz ok obrigaria a tela a reler o estoque para descobrir.
+        return { conferencia: { divergencias: conferencia.divergencias, semConferencia: conferencia.semConferencia }, finance, order: salvo.order, orders: salvo.orders, stock }
       })
   )
   // Cotacao: compara propostas para uma quantidade e devolve a escolha com a economia contra a segunda.
