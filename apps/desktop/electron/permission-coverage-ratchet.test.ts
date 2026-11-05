@@ -41,6 +41,7 @@ const SEM_GUARDA: readonly string[] = [
   'companies-ipc.ts',
 
   'crm-conversations-ipc.ts',
+
   'documents-ipc.ts',
   'erp-ipc.ts',
   'fiscal-ipc.ts',
