@@ -62,17 +62,24 @@ function definicoes(): Map<string, string> {
   return mapa
 }
 
-/** Quem CHAMA cada `registerXxxIpc` — fora da linha de definicao. */
+/**
+ * Quem CHAMA cada `registerXxxIpc` — fora da linha de definicao.
+ *
+ * **r125: `definicoes()` era chamado DENTRO do laco**, uma vez por arquivo, e cada chamada relia TODOS os
+ * arquivos. Com 500 arquivos isso e 500 x 500 leituras: a suite levava **47 s** e, rodando junto com outros
+ * arquivos, estourava o timeout do vitest — **parecendo uma falha de correcao que nao existia**.
+ *
+ * O nome e calculado **uma vez**, e cada arquivo e lido **uma vez**.
+ */
 function chamadas(): Map<string, string[]> {
   const mapa = new Map<string, string[]>()
+  const nomes = [...definicoes().keys()]
 
   for (const caminho of ARQUIVOS) {
     const texto = readFileSync(caminho, 'utf8')
 
-    for (const nome of definicoes().keys()) {
-      const re = new RegExp(`(?<!function )\\b${nome}\\(`, 'g')
-
-      if (re.test(texto)) {
+    for (const nome of nomes) {
+      if (texto.includes(`${nome}(`)) {
         const lista = mapa.get(nome) ?? []
 
         lista.push(caminho)

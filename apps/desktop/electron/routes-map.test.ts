@@ -53,7 +53,10 @@ function registradas(): string[] {
 /** `path: '/x'` no `b3po-nav` */
 function noMenu(): Set<string> {
   const set = new Set<string>()
-  const re = /\{ codicon: '[^']+', label: '[^']+', path: '([^']+)' \}/g
+  // r125: tolerante ao grupo (r122) e a espacos. A forma do item mudou e este regex e a UNICA leitura
+  // do plugin no ambiente electron (que nao importa .tsx) - entao ele aceita o campo novo em vez de exigir
+  // a forma antiga.
+  const re = /\{ codicon: '[^']+',(?: grupo: '[^']+',)? label: '[^']+', path: '([^']+)'[^}]*\}/g
   let m: RegExpExecArray | null
 
   while ((m = re.exec(NAV)) !== null) set.add(m[1] as string)
@@ -62,8 +65,8 @@ function noMenu(): Set<string> {
 }
 
 describe('o mapa de rotas', () => {
-  it('36 rotas declaradas — se o número mudou, o documento do §13 precisa mudar junto', () => {
-    expect(constantes().size).toBe(36)
+  it('37 rotas declaradas — se o número mudou, o documento do §13 precisa mudar junto', () => {
+    expect(constantes().size).toBe(37)
   })
 
   it('TODA constante está registrada em APP_ROUTES — nenhuma rota declarada e esquecida', () => {
@@ -111,6 +114,8 @@ describe('as rotas que existem e NÃO estão no menu do produto', () => {
     expect(fora).toEqual([
       '/',
       '/agents',
+    // r124: a tela do ambiente. Fica fora do menu porque o seletor de ambiente ainda nao filtra a barra.
+    '/ambiente',
       '/artifacts',
       '/capabilities',
       '/command-center',

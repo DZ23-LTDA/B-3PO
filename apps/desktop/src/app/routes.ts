@@ -52,6 +52,10 @@ export const ORGANIZACAO_ROUTE = '/organizacao'
 export const BUSCA_ROUTE = '/busca'
 export const DOCUMENTOS_ROUTE = '/documentos'
 export const PRIVACIDADE_ROUTE = '/privacidade'
+
+// r124 do GOAL V2: a tela dos ambientes do §13:413-419. Ela troca a preferencia de ambiente; o filtro
+// da barra lateral ainda depende do host do upstream (ver docs/b3po/V2-RODADA-124).
+export const AMBIENTE_ROUTE = '/ambiente'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -78,6 +82,7 @@ export type AppView =
   | 'busca'
   | 'documentos'
   | 'privacidade'
+  | 'ambiente'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -120,6 +125,7 @@ export type AppRouteId =
   | 'busca'
   | 'documentos'
   | 'privacidade'
+  | 'ambiente'
   | 'atendimento'
   | 'crm'
   | 'cron'
@@ -168,6 +174,7 @@ export const APP_ROUTES = [
   { id: 'busca', path: BUSCA_ROUTE, view: 'busca' },
   { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
   { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
+  { id: 'ambiente', path: AMBIENTE_ROUTE, view: 'ambiente' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
   { id: 'crm', path: CRM_ROUTE, view: 'crm' },
   { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },
