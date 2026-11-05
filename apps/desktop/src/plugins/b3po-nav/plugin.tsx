@@ -75,6 +75,8 @@ const MODULOS: readonly ItemDeMenu[] = [
     // r92: 'Empresa' e o AMBIENTE do §13:417, e vem logo apos o Painel - e o contexto de tudo o
     // que segue. A CONFIGURACAO da organizacao e 'Estrutura', que fica no ultimo grupo (§13:437).
     { codicon: 'library', label: 'Empresa', path: '/empresa' },
+    // r98: a busca global (§13:450). Fica na visao geral porque e uma porta de entrada, como o Painel.
+    { codicon: 'search', label: 'Busca', path: '/busca' },
 
     // 2. OPERACAO - o que chega e quem atende
     //

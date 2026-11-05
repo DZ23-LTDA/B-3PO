@@ -47,6 +47,9 @@ export const TRABALHOS_ROUTE = '/trabalhos'
 
 /** r91 do GOAL V2: a estrutura da organizacao - o desenho, separado do cadastro. */
 export const ORGANIZACAO_ROUTE = '/organizacao'
+
+/** r98 do GOAL V2: a busca global - achar modulo sem saber o menu (§13:450). */
+export const BUSCA_ROUTE = '/busca'
 export const DOCUMENTOS_ROUTE = '/documentos'
 export const PRIVACIDADE_ROUTE = '/privacidade'
 export const PROFILES_ROUTE = '/profiles'
@@ -72,6 +75,7 @@ export type AppView =
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
+  | 'busca'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -113,6 +117,7 @@ export type AppRouteId =
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
+  | 'busca'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -160,6 +165,7 @@ export const APP_ROUTES = [
   { id: 'projetos', path: PROJETOS_ROUTE, view: 'projetos' },
   { id: 'trabalhos', path: TRABALHOS_ROUTE, view: 'trabalhos' },
   { id: 'organizacao', path: ORGANIZACAO_ROUTE, view: 'organizacao' },
+  { id: 'busca', path: BUSCA_ROUTE, view: 'busca' },
   { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
   { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },

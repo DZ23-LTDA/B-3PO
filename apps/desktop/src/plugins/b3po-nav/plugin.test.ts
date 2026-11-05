@@ -150,11 +150,11 @@ describe('ordem do menu (r15 do GOAL V2)', () => {
     expect(noBlocoFinal).toBe(false)
   })
 
-  it('o menu tem exatamente os 22 modulos, sem duplicata e sem buraco', () => {
+  it('o menu tem exatamente os 23 modulos, sem duplicata e sem buraco', () => {
     const paths = contribuicoes().map(i => i.data.path)
 
-    expect(paths).toHaveLength(22)
-    expect(new Set(paths).size).toBe(22)
+    expect(paths).toHaveLength(23)
+    expect(new Set(paths).size).toBe(23)
   })
 
   it('os itens de operacao mantem a ordem relativa', () => {
