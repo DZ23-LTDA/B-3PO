@@ -126,3 +126,83 @@ Cada uma foi capturada no **aplicativo empacotado**, e cada afirmacao do relator
 - `crm-tarefa-contato-excluido-pt.png` - tarefa apontando para contato excluido
 - `crm-fone-com-mascara-pt.png` - busca por telefone com mascara
 - `crm-filtro-etiqueta.png` - seletor de etiqueta filtrando a lista
+
+---
+
+# EVIDÊNCIAS DAS RODADAS 226–253 (esta seção vale; acima é histórico)
+
+## Como ler este índice
+
+Cada linha é **uma afirmação do relatório final** e **o que a sustenta**. Se uma afirmação não tem linha aqui,
+ela **não está provada** — e várias não estão, e isso está dito.
+
+## Afirmações com evidência executada
+
+| Afirmação | Evidência | Rodada |
+|---|---|---|
+| "O gate passa" | `python scripts/check` → **14 checks, ok** | 251 |
+| "O typecheck passa" | `scripts/check-b3po-types` → **0 erros** em 2 projetos | 251 |
+| "Os stores de domínio funcionam" | **766 testes verdes** (17 módulos) | 251 |
+| "A concorrência está protegida" | **12 testes verdes**; **8 provados vermelhos** removendo a fila | 234–238 |
+| "O isolamento por tenant vale" | **33 testes** (invariante: 24 de 24 stores filtram) | 211, 251 |
+| "As permissões têm guard" | ratchet: **15 de 40 canais**, dívida congelada em 25 | 214 |
+| "A retenção de LGPD não apaga" | 14 testes: prazo `null` ≠ 0, exato não expira | 212 |
+| "A UI abre em menos de 1 s" | **931 ms** medidos por CDP | 227 |
+| "O IPC responde em sub-milissegundo" | **p50 0,3 ms**, p95 38 ms (primeira chamada) | 227 |
+| "O instalador existe e tem marca" | `B-3PO.exe` 235 MB · MSIX 191 MB · `ProductVersion 1.0.0.0` | 241 |
+| "O pacote abre e está em português" | screenshot `evidencias/instalado-r242.png` | 242 |
+| "A CI passa" | `gh run list`: **2 sucessos, 0 falhas** | 243 |
+| "A recusa aparece na tela" | DOM: `"Informe um valor."` após clique | 240 |
+| "Os 16 documentos do §29 existem" | verificação de presença | 244 |
+| "As 40 falhas estão classificadas" | tabela que fecha em 40 | 250 |
+| "A revisão independente aconteceu" | 3 modelos, providers distintos, concordância 0,3 | 246 |
+
+## Afirmações que **não** têm evidência de execução
+
+| Afirmação | Estado real |
+|---|---|
+| "O WhatsApp envia mensagem" | **não testado** — sem credencial Meta |
+| "Os agentes executam tarefas" | **não testado** — sem credencial de provider |
+| "O app instala pelo MSIX" | **não testado** — só executei `win-unpacked` |
+| "A atualização funciona" | **não testado** |
+| "macOS e Linux funcionam" | **não construído** neste host |
+| "A UI é acessível (WCAG AA)" | **PARTIAL** — 57 elementos ainda sem foco visível |
+| "pt-BR está completo" | **PARTIAL** — sem detector automático |
+| "Não há duplicidade relevante" | **não auditado** — `DUPLICATION-AUDIT.md` é um índice, não um inventário |
+| "O lock de reparo é rápido" | **falso no Windows** — ~41 s medidos |
+
+## As evidências visuais
+
+| Arquivo | O que mostra |
+|---|---|
+| `evidencias/instalado-r242.png` | **o executável empacotado aberto**, com mascote, logo "B-3PO BOT PLATFORM", e 25 itens de menu em português |
+
+**Há 130 PNGs em `docs/b3po/`**, mas **apenas 1 é citada aqui** — porque só ela foi aberta e verificada nesta
+sessão. As outras são de rodadas anteriores e **não foram reconferidas**.
+
+## Os relatórios de auditoria das rodadas 226–253
+
+| Arquivo | O que registra |
+|---|---|
+| `audit/REVISAO-INDEPENDENTE-R246.md` | a revisão por 3 modelos e a lacuna que ela apontou |
+| `audit/FALHAS-CLASSIFICADAS-R247.md` | 39 de 40 com causa — e o que faltava |
+| `audit/TIMEOUT-INVESTIGADO-R248.md` | o lock de 41 s: **produto, não ambiente** |
+| `audit/BUNDLE-CONFIG-R249.md` | 3 falhas de `config.yaml` não lido |
+| `TEST-RESULTS.md` | a tabela final: 36 + 3 + 1 = 40 |
+| `audit/REGRESSAO-FINAL-R251.md` | 7 checks, 811 testes verdes |
+| `audit/ACCESSIBILITY-REPORT.md` | 6 critérios medidos, `PARTIAL` |
+| `audit/FOCO-VISIVEL-R231.md` | a regra `outline: none` é decisão, não bug |
+| `audit/CONCORRENCIA-*.md` (4 arquivos) | o bug de venda fantasma e a fila |
+
+## O que a evidência **não** cobre, e que o §32 exige
+
+| Critério | Por que não há evidência |
+|---|---|
+| WhatsApp consolidado | credencial externa |
+| multiagent funcional | credencial de provider |
+| iOS | hardware |
+| instaladores assinados | certificado |
+| pt-BR completo | falta o detector |
+| duplicidades resolvidas | falta o inventário |
+
+**Seis critérios sem evidência possível neste ambiente.** Não são "quase prontos": **são não medidos**.
