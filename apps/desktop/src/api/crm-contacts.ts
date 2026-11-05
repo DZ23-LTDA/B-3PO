@@ -8,12 +8,32 @@
 
 export interface CrmContactRow {
   company: string
+  /**
+   * Base legal do contato (LGPD, r185).
+   *
+   * `null` = nunca registrado, que NAO e o mesmo que recusado: `false` diz "o titular disse nao",
+   * `null` diz "ninguem perguntou".
+   */
+  consent?: ConsentimentoRow | null
   created_at: number
   email: string
   name: string
   phone: string
   tags: string[]
   updated_at: number
+}
+
+export type BaseLegalRow = 'consentimento' | 'contrato' | 'legitimo_interesse' | 'obrigacao_legal'
+
+export interface ConsentimentoRow {
+  at: number
+  base: BaseLegalRow
+  granted: boolean
+}
+
+/** Pode receber comunicacao? Ausencia de registro nunca vira permissao. */
+export function podeReceberComunicacao(contato: CrmContactRow): boolean {
+  return contato.consent?.granted === true
 }
 
 export interface CrmContactsBridge {

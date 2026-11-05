@@ -1119,6 +1119,11 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     },
     crmContacts: {
+      consentDenied: string
+      consentDeny: string
+      consentGrant: string
+      consentGranted: string
+      consentUnknown: string
       export: string
       openCrm: string
       title: string

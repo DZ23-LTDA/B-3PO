@@ -1212,6 +1212,11 @@ export const en: Translations = {
       unavailable: 'This client has no local disk for the pipeline.',
     },
     crmContacts: {
+      consentDenied: 'Declined communication',
+      consentDeny: 'Record refusal',
+      consentGrant: 'Record consent',
+      consentGranted: 'Consented to communication',
+      consentUnknown: 'Consent not recorded',
       export: 'Export CSV',
       openCrm: 'Open the CRM page',
       title: 'CRM contacts',

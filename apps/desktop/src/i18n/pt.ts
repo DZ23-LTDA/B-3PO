@@ -1390,6 +1390,11 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'As tarefas precisam do aplicativo desktop para serem guardadas.'
     },
     crmContacts: {
+      consentDenied: 'Recusou comunicacao',
+      consentDeny: 'Registrar recusa',
+      consentGrant: 'Registrar autorizacao',
+      consentGranted: 'Autorizou comunicacao',
+      consentUnknown: 'Consentimento nao registrado',
       export: 'Exportar CSV',
       openCrm: 'Abrir a página do CRM',
       title: 'Contatos do CRM',

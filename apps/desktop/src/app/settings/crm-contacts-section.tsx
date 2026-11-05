@@ -39,6 +39,16 @@ function downloadText(fileName: string, text: string, mime: string): void {
  * O dado vive no disco do usuário (processo principal); esta tela lista e cadastra. Sem bridge (versão web) a
  * seção explica por que não há contatos em vez de mostrar lista vazia enganosa.
  */
+/** Traduz o registro de consentimento em texto. `null` nunca vira "autorizou". */
+function consentLabel(
+  consent: CrmContactRow['consent'],
+  copy: { consentDenied: string; consentGranted: string; consentUnknown: string }
+): string {
+  if (!consent) return copy.consentUnknown
+
+  return consent.granted ? copy.consentGranted : copy.consentDenied
+}
+
 export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boolean } = {}) {
   const { t } = useI18n()
   const copy = t.settings.crmContacts
@@ -66,6 +76,24 @@ export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boo
       setFailure(copy.unavailable)
     }
   }, [copy.unavailable])
+  /**
+   * Registra autorizacao ou recusa do titular (LGPD, r206).
+   *
+   * Grava `base: 'consentimento'` porque e o titular quem respondeu — nao ha contrato nem obrigacao legal por
+   * tras de um clique em "autorizou". `upsert` ja substitui pelo telefone, entao nao duplica contato.
+   */
+  async function registrarConsentimento(contact: CrmContactRow, granted: boolean) {
+    setSaving(true)
+
+    try {
+      await saveCrmContact({ ...contact, consent: { at: Date.now(), base: 'consentimento', granted } })
+      await load()
+    } catch {
+      setFailure(copy.unavailable)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   useEffect(() => {
     if (!crmAvailable()) {
@@ -197,11 +225,35 @@ export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boo
                 <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
                   {[contact.phone, contact.company, contact.email].filter(Boolean).join(' · ')}
                 </span>
+                {/*
+                  LGPD (r206): a tela mostra a base legal e NUNCA a inventa. `null` e ausencia de registro —
+                  dizer "autorizou" aqui seria pior que nao mostrar nada, porque o relatorio de conformidade
+                  passaria a mentir.
+                */}
+                <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                  {consentLabel(contact.consent, copy)}
+                </span>
                 </span>
               </div>
-              <Button onClick={() => void remove(contact.phone)} size="sm" variant="ghost">
-                {copy.remove}
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  onClick={() => void registrarConsentimento(contact, true)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {copy.consentGrant}
+                </Button>
+                <Button
+                  onClick={() => void registrarConsentimento(contact, false)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {copy.consentDeny}
+                </Button>
+                <Button onClick={() => void remove(contact.phone)} size="sm" variant="ghost">
+                  {copy.remove}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
