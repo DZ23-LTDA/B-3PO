@@ -51,7 +51,7 @@ function consentLabel(
 
 export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boolean } = {}) {
 
-/** Centavos -> reais. 
+/** Centavos -> reais.
 ull vira travessao, nunca R$ 0,00 (ver o comentario da lista). */
 function formatarReais(centavos: null | number | undefined): string {
   if (typeof centavos !== 'number') return '—'
