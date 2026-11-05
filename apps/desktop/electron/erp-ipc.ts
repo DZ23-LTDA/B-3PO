@@ -221,7 +221,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   const marketing = new MarketingStore(marketingStorePath(userDataDir))
 
-  registerMarketingIpc(ipcMain, { marketing })
+  // r6 do GOAL V2: `setPostStatus` publica em conta social e `setCampaignStatus` poe verba em
+  // circulacao — os canais exigem ator.
+  registerMarketingIpc(ipcMain, { actorOf: () => actorOf(), marketing })
   // Analytics le pelo dono de cada dominio. Nao tem store proprio - de proposito.
   registerAnalyticsIpc(ipcMain, { afterSales, desk, finance, inventory, marketing, sales })
 
