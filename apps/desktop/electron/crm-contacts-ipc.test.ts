@@ -1,5 +1,8 @@
 import { expect, it, vi } from 'vitest'
 
+/** Dono da instalacao: passa em qualquer acao. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' } as const
+
 import { registerCrmContactsIpc } from './crm-contacts-ipc'
 
 /**
@@ -30,7 +33,7 @@ it('registra os três canais e delega para o store', async () => {
   const { handlers, ipcMain } = fakeIpc()
   const s = store()
 
-  registerCrmContactsIpc(ipcMain, s as never)
+  registerCrmContactsIpc(ipcMain, s as never, { actorOf: async () => DONO })
 
   expect([...handlers.keys()].sort()).toEqual([
     'hermes:crm-contacts:list',
@@ -54,7 +57,7 @@ it('remove sem telefone válido não inventa argumento: passa string vazia', asy
   const { handlers, ipcMain } = fakeIpc()
   const s = store()
 
-  registerCrmContactsIpc(ipcMain, s as never)
+  registerCrmContactsIpc(ipcMain, s as never, { actorOf: async () => DONO })
 
   await handlers.get('hermes:crm-contacts:remove')!({}, 42)
   expect(s.remove).toHaveBeenCalledWith('')
