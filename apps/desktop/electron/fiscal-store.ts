@@ -15,6 +15,7 @@
 // Todo registro carrega `homologacao`. A tela mostra a diferença entre "nota autorizada" e "documento de
 // homologação" a partir deste campo — nunca de uma suposição sobre qual provedor está ativo.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -92,6 +93,9 @@ function parseFiscal(raw: string): FiscalFile {
 export class FiscalStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<FiscalRecord[]> {
     const file = await this.read()
 
@@ -110,6 +114,10 @@ export class FiscalStore {
    * emissão é o fato, não a data da última tentativa.
    */
   async emitir(provider: FiscalProvider, pedido: PedidoFiscal): Promise<{ error: string } | { existing: true; record: FiscalRecord } | { existing: false; record: FiscalRecord }> {
+    return this.fila.serializar(() => this.emitirSerializado(provider, pedido))
+  }
+
+  private async emitirSerializado(provider: FiscalProvider, pedido: PedidoFiscal): Promise<{ error: string } | { existing: true; record: FiscalRecord } | { existing: false; record: FiscalRecord }> {
     const file = await this.readAll()
     const jaTem = file.documents.find(d => d.ref === pedido.ref && d.tenant_id === pedido.tenant_id)
 
@@ -165,6 +173,10 @@ export class FiscalStore {
 
   /** Cancela pelo `ref` da venda. Recusa quando não há documento autorizado para cancelar. */
   async cancelar(provider: FiscalProvider, ref: string, motivo: string, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { record: FiscalRecord }> {
+    return this.fila.serializar(() => this.cancelarSerializado(provider, ref, motivo, tenantId))
+  }
+
+  private async cancelarSerializado(provider: FiscalProvider, ref: string, motivo: string, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { record: FiscalRecord }> {
     // Valida ANTES de tocar no registro: um motivo curto nao pode marcar documento como cancelado.
     const avaliado = avaliarMotivo(motivo)
 

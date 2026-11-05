@@ -12,6 +12,7 @@
 //   lugares para lançar a mesma despesa.
 // - Empresa com filial ativa não é removida por engano: filial órfã some da tela e continua no disco.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -130,6 +131,9 @@ export function branchesOf(branches: readonly Branch[], companyId: string): Bran
 export class CompaniesStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(): Promise<Company[]> {
     const file = await this.read()
 
@@ -141,6 +145,10 @@ export class CompaniesStore {
   }
 
   async upsertCompany(input: unknown): Promise<{ companies: Company[]; company: Company } | { error: string }> {
+    return this.fila.serializar(() => this.upsertCompanySerializado(input))
+  }
+
+  private async upsertCompanySerializado(input: unknown): Promise<{ companies: Company[]; company: Company } | { error: string }> {
     const normalized = normalizeCompany(input, Date.now())
 
     if ('error' in normalized) {
@@ -172,6 +180,10 @@ export class CompaniesStore {
   }
 
   async upsertBranch(input: unknown): Promise<{ branch: Branch; branches: Branch[] } | { error: string }> {
+    return this.fila.serializar(() => this.upsertBranchSerializado(input))
+  }
+
+  private async upsertBranchSerializado(input: unknown): Promise<{ branch: Branch; branches: Branch[] } | { error: string }> {
     const normalized = normalizeBranch(input, Date.now())
 
     if ('error' in normalized) {

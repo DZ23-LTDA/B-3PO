@@ -16,6 +16,7 @@
 // Sem isso, "quando vender, registre no financeiro" + "quando lancar no financeiro, venda" e um laco
 // que drena o disco em silencio.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -212,11 +213,18 @@ export async function runRules(
 export class AutomationStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<AutomationRule[]> {
     return (await this.read()).rules.filter(r => r.tenant_id === tenantId)
   }
 
   async create(input: unknown): Promise<{ rule: AutomationRule; rules: AutomationRule[] } | { error: string }> {
+    return this.fila.serializar(() => this.createSerializado(input))
+  }
+
+  private async createSerializado(input: unknown): Promise<{ rule: AutomationRule; rules: AutomationRule[] } | { error: string }> {
     const normalized = normalizeRule(input, Date.now())
 
     if ('error' in normalized) return normalized
@@ -234,6 +242,10 @@ export class AutomationStore {
   }
 
   async setActive(id: string, active: boolean): Promise<{ rules: AutomationRule[] } | { error: string }> {
+    return this.fila.serializar(() => this.setActiveSerializado(id, active))
+  }
+
+  private async setActiveSerializado(id: string, active: boolean): Promise<{ rules: AutomationRule[] } | { error: string }> {
     const file = await this.read()
     const indice = file.rules.findIndex(r => r.id === id)
 

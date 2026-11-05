@@ -318,6 +318,10 @@ export class SalesStore {
 
   /** Cancelar é mudar o estado; a venda continua no histórico. */
   async cancel(id: string, tenantId: string = DEFAULT_TENANT, reason = ''): Promise<{ error: string } | { sales: Sale[] }> {
+    return this.serializar(() => this.cancelSerializado(id, tenantId, reason))
+  }
+
+  private async cancelSerializado(id: string, tenantId: string = DEFAULT_TENANT, reason = ''): Promise<{ error: string } | { sales: Sale[] }> {
     const file = await this.read()
     const indice = file.sales.findIndex(sale => sale.id === id && sale.tenant_id === tenantId)
 

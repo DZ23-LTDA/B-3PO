@@ -7,6 +7,7 @@
 // inverter depois: sem a chave no registro, toda consulta, validação e arquivo precisaria migrar quando
 // a segunda empresa aparecer. Com ela, isolar é filtrar.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -126,6 +127,9 @@ export function parseCatalog(raw: string): CatalogFile {
 export class CatalogStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<Product[]> {
     const file = await this.read()
 
@@ -133,6 +137,10 @@ export class CatalogStore {
   }
 
   async upsert(input: unknown): Promise<{ error: string } | { products: Product[] }> {
+    return this.fila.serializar(() => this.upsertSerializado(input))
+  }
+
+  private async upsertSerializado(input: unknown): Promise<{ error: string } | { products: Product[] }> {
     const normalized = normalizeProduct(input, Date.now())
 
     if ('error' in normalized) {
@@ -169,6 +177,10 @@ export class CatalogStore {
   }
 
   async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ products: Product[] }> {
+    return this.fila.serializar(() => this.removeSerializado(id, tenantId))
+  }
+
+  private async removeSerializado(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ products: Product[] }> {
     const file = await this.read()
 
     // Remove apenas dentro da empresa: um id de outra empresa não pode ser apagado por engano.

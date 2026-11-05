@@ -8,6 +8,7 @@
 // - nível e escopo de bot só sobem por concessão registrada (`canGrantLevel`), nunca por edição
 //   direta do campo.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -95,6 +96,9 @@ export function primaryOwner(actors: readonly StoredActor[]): StoredActor | null
 export class ActorsStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(): Promise<StoredActor[]> {
     const file = await this.read()
 
@@ -102,6 +106,10 @@ export class ActorsStore {
   }
 
   async upsert(input: unknown): Promise<{ actors: StoredActor[]; actor: StoredActor } | { error: string }> {
+    return this.fila.serializar(() => this.upsertSerializado(input))
+  }
+
+  private async upsertSerializado(input: unknown): Promise<{ actors: StoredActor[]; actor: StoredActor } | { error: string }> {
     const normalized = normalizeActor(input, Date.now())
 
     if ('error' in normalized) {
@@ -125,6 +133,10 @@ export class ActorsStore {
 
   /** Desativa. Recusa quando tiraria o último dono ativo — sistema sem dono não tem quem reconceda. */
   async deactivate(id: string): Promise<{ actors: StoredActor[] } | { error: string }> {
+    return this.fila.serializar(() => this.deactivateSerializado(id))
+  }
+
+  private async deactivateSerializado(id: string): Promise<{ actors: StoredActor[] } | { error: string }> {
     const file = await this.read()
     const indice = file.actors.findIndex(entry => entry.id === id)
 
@@ -157,6 +169,10 @@ export class ActorsStore {
    * decisão de quem já é dono.
    */
   async ensureOwner(): Promise<StoredActor[]> {
+    return this.fila.serializar(() => this.ensureOwnerSerializado())
+  }
+
+  private async ensureOwnerSerializado(): Promise<StoredActor[]> {
     const file = await this.read()
 
     if (primaryOwner(file.actors)) {

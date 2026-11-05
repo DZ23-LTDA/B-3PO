@@ -12,6 +12,7 @@
 // Dado sensível: salário não sai em listagem por padrão. Quem precisa do valor pede explicitamente —
 // listagem que carrega salário para toda tela é vazamento esperando acontecer.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -178,6 +179,9 @@ export function headcountByDepartment(employees: readonly Employee[], tenantId: 
 export class HrStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async departments(tenantId: string = DEFAULT_TENANT): Promise<Department[]> {
     const file = await this.read()
 
@@ -191,6 +195,10 @@ export class HrStore {
   }
 
   async upsertDepartment(input: unknown): Promise<{ departments: Department[]; department: Department } | { error: string }> {
+    return this.fila.serializar(() => this.upsertDepartmentSerializado(input))
+  }
+
+  private async upsertDepartmentSerializado(input: unknown): Promise<{ departments: Department[]; department: Department } | { error: string }> {
     const normalized = normalizeDepartment(input, Date.now())
 
     if ('error' in normalized) {
@@ -220,6 +228,10 @@ export class HrStore {
    * quando o registro já existe, para que não exista caminho que as faça em silêncio.
    */
   async upsertEmployee(input: unknown): Promise<{ employee: Employee; employees: Employee[] } | { error: string }> {
+    return this.fila.serializar(() => this.upsertEmployeeSerializado(input))
+  }
+
+  private async upsertEmployeeSerializado(input: unknown): Promise<{ employee: Employee; employees: Employee[] } | { error: string }> {
     const file = await this.read()
     const normalized = normalizeEmployee(input, Date.now(), file.departments)
 

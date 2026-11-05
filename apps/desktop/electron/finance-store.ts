@@ -359,6 +359,10 @@ export class FinanceStore {
 
   /** Marca como pago. Pago é final: pagar de novo é erro, não no-op silencioso. */
   async settle(id: string, tenantId: string = DEFAULT_TENANT, paidAt: number = Date.now()): Promise<{ error: string } | { entries: FinanceEntry[] }> {
+    return this.serializar(() => this.settleSerializado(id, tenantId, paidAt))
+  }
+
+  private async settleSerializado(id: string, tenantId: string = DEFAULT_TENANT, paidAt: number = Date.now()): Promise<{ error: string } | { entries: FinanceEntry[] }> {
     const file = await this.read()
     const indice = file.entries.findIndex(item => item.id === id && item.tenant_id === tenantId)
 

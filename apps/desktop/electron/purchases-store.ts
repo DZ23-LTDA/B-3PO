@@ -7,6 +7,7 @@
 // (`compra:<id>:<sku>`). Dois arquivos JSON não têm transação entre si; fingir que têm esconderia o
 // caso em que o pedido é recebido e a mercadoria não entra.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -221,6 +222,9 @@ export function stockMovementsFor(order: PurchaseOrder): {
 export class PurchasesStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async suppliers(tenantId: string = DEFAULT_TENANT): Promise<Supplier[]> {
     const file = await this.read()
 
@@ -236,6 +240,10 @@ export class PurchasesStore {
   }
 
   async upsertSupplier(input: unknown): Promise<{ error: string } | { supplier: Supplier; suppliers: Supplier[] }> {
+    return this.fila.serializar(() => this.upsertSupplierSerializado(input))
+  }
+
+  private async upsertSupplierSerializado(input: unknown): Promise<{ error: string } | { supplier: Supplier; suppliers: Supplier[] }> {
     const normalized = normalizeSupplier(input, Date.now())
 
     if ('error' in normalized) {
@@ -269,6 +277,10 @@ export class PurchasesStore {
   }
 
   async saveOrder(input: unknown): Promise<{ error: string } | { order: PurchaseOrder; orders: PurchaseOrder[] }> {
+    return this.fila.serializar(() => this.saveOrderSerializado(input))
+  }
+
+  private async saveOrderSerializado(input: unknown): Promise<{ error: string } | { order: PurchaseOrder; orders: PurchaseOrder[] }> {
     const normalized = normalizePurchase(input, Date.now())
 
     if ('error' in normalized) {

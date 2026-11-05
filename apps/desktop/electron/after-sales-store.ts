@@ -13,6 +13,7 @@
 // 3. **Follow-up nasce de venda faturada.** Venda cancelada ou orçamento não gera pós-venda: cobrar
 //    satisfação de algo que não foi entregue é ruído.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -161,6 +162,9 @@ export function indicators(
 export class AfterSalesStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<FollowUp[]> {
     return followUpsFor((await this.read()).follow_ups, tenantId)
   }
@@ -176,6 +180,10 @@ export class AfterSalesStore {
   }
 
   async create(input: unknown): Promise<{ followUp: FollowUp; followUps: FollowUp[] } | { error: string }> {
+    return this.fila.serializar(() => this.createSerializado(input))
+  }
+
+  private async createSerializado(input: unknown): Promise<{ followUp: FollowUp; followUps: FollowUp[] } | { error: string }> {
     const normalized = normalizeFollowUp(input, Date.now())
 
     if ('error' in normalized) {
@@ -197,6 +205,10 @@ export class AfterSalesStore {
   }
 
   async setStatus(id: string, status: FollowUpStatus): Promise<{ followUps: FollowUp[] } | { error: string }> {
+    return this.fila.serializar(() => this.setStatusSerializado(id, status))
+  }
+
+  private async setStatusSerializado(id: string, status: FollowUpStatus): Promise<{ followUps: FollowUp[] } | { error: string }> {
     const file = await this.read()
     const indice = file.follow_ups.findIndex(f => f.id === id)
 

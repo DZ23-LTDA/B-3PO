@@ -14,6 +14,7 @@
 //    revisão. Um agente que "resolve" reclamação ruim sozinho é como uma empresa perde o cliente e
 //    não fica sabendo.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -187,11 +188,18 @@ export function needsHumanReview(satisfaction: null | number): boolean {
 export class ServiceDeskStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<Ticket[]> {
     return ticketsFor((await this.read()).tickets, tenantId)
   }
 
   async open(input: unknown): Promise<{ ticket: Ticket; tickets: Ticket[] } | { error: string }> {
+    return this.fila.serializar(() => this.openSerializado(input))
+  }
+
+  private async openSerializado(input: unknown): Promise<{ ticket: Ticket; tickets: Ticket[] } | { error: string }> {
     const file = await this.read()
     const nextNumber = file.tickets.reduce((maior, t) => Math.max(maior, t.number), 0) + 1
     const normalized = normalizeTicket(input, Date.now(), nextNumber)
@@ -208,6 +216,10 @@ export class ServiceDeskStore {
 
   /** Muda status. Fechar exige que tenha sido resolvido antes. */
   async setStatus(id: string, status: TicketStatus): Promise<{ tickets: Ticket[] } | { error: string }> {
+    return this.fila.serializar(() => this.setStatusSerializado(id, status))
+  }
+
+  private async setStatusSerializado(id: string, status: TicketStatus): Promise<{ tickets: Ticket[] } | { error: string }> {
     const file = await this.read()
     const indice = file.tickets.findIndex(t => t.id === id)
 
@@ -237,6 +249,10 @@ export class ServiceDeskStore {
 
   /** Avalia. Só depois de resolvido/fechado — avaliação de ticket aberto mede expectativa, não entrega. */
   async rate(id: string, satisfaction: number): Promise<{ review: boolean; tickets: Ticket[] } | { error: string }> {
+    return this.fila.serializar(() => this.rateSerializado(id, satisfaction))
+  }
+
+  private async rateSerializado(id: string, satisfaction: number): Promise<{ review: boolean; tickets: Ticket[] } | { error: string }> {
     const nota = Math.round(satisfaction)
 
     if (!Number.isFinite(nota) || nota < 1 || nota > 5) {

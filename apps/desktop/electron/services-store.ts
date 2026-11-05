@@ -12,6 +12,7 @@
 // - duração maior que zero: serviço de 0 min não ocupa horário e quebra a detecção de conflito;
 // - preço não negativo.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -144,6 +145,9 @@ export function servicesFor(services: readonly Service[], tenantId: string = DEF
 export class ServicesStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<Service[]> {
     return servicesFor((await this.read()).services, tenantId)
   }
@@ -156,6 +160,10 @@ export class ServicesStore {
   }
 
   async upsert(input: unknown): Promise<{ service: Service; services: Service[] } | { error: string }> {
+    return this.fila.serializar(() => this.upsertSerializado(input))
+  }
+
+  private async upsertSerializado(input: unknown): Promise<{ service: Service; services: Service[] } | { error: string }> {
     const normalized = normalizeService(input, Date.now())
 
     if ('error' in normalized) {
@@ -187,6 +195,10 @@ export class ServicesStore {
   }
 
   async remove(id: string): Promise<{ services: Service[] } | { error: string }> {
+    return this.fila.serializar(() => this.removeSerializado(id))
+  }
+
+  private async removeSerializado(id: string): Promise<{ services: Service[] } | { error: string }> {
     const file = await this.read()
     const restante = file.services.filter(s => s.id !== id)
 

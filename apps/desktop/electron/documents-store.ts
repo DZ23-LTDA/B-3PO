@@ -17,6 +17,7 @@
 // Limite de tamanho e lista de MIME vem de `src/app/crm/attachment-rules.ts`, que ja e a fonte dessas
 // duas regras no CRM. Um segundo par de constantes divergiria na primeira mudanca.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -183,6 +184,9 @@ export function documentTotals(documents: readonly DocumentRecord[]): {
 export class DocumentsStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   private async read(): Promise<DocumentsFile> {
     try {
       return parseDocuments(await readFile(this.filePath, 'utf8'))
@@ -212,6 +216,10 @@ export class DocumentsStore {
   }
 
   async upsert(input: unknown, now: number = Date.now()): Promise<{ document: DocumentRecord } | { error: string }> {
+    return this.fila.serializar(() => this.upsertSerializado(input, now))
+  }
+
+  private async upsertSerializado(input: unknown, now: number = Date.now()): Promise<{ document: DocumentRecord } | { error: string }> {
     const file = await this.read()
     const inputId = texto((input as Record<string, unknown>)?.['id'])
     const existente = inputId ? file.documents.find(d => d.id === inputId) : undefined
@@ -237,6 +245,10 @@ export class DocumentsStore {
   }
 
   async remove(id: string): Promise<{ ok: true } | { error: string }> {
+    return this.fila.serializar(() => this.removeSerializado(id))
+  }
+
+  private async removeSerializado(id: string): Promise<{ ok: true } | { error: string }> {
     const file = await this.read()
     const antes = file.documents.length
 

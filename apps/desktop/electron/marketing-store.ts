@@ -13,6 +13,7 @@
 // 3. **Encerrar antes de começar é recusado.** Campanha com fim anterior ao início produz métrica sem
 //    janela e relatório impossível.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -216,6 +217,9 @@ export function indicators(file: MarketingFile, now: number, tenantId: string = 
 export class MarketingStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async listCampaigns(tenantId: string = DEFAULT_TENANT): Promise<Campaign[]> {
     return (await this.read()).campaigns.filter(c => c.tenant_id === tenantId)
   }
@@ -232,6 +236,10 @@ export class MarketingStore {
   }
 
   async createCampaign(input: unknown): Promise<{ campaign: Campaign; campaigns: Campaign[] } | { error: string }> {
+    return this.fila.serializar(() => this.createCampaignSerializado(input))
+  }
+
+  private async createCampaignSerializado(input: unknown): Promise<{ campaign: Campaign; campaigns: Campaign[] } | { error: string }> {
     const normalized = normalizeCampaign(input, Date.now())
 
     if ('error' in normalized) return normalized
@@ -245,6 +253,10 @@ export class MarketingStore {
   }
 
   async setCampaignStatus(id: string, status: CampaignStatus): Promise<{ campaigns: Campaign[] } | { error: string }> {
+    return this.fila.serializar(() => this.setCampaignStatusSerializado(id, status))
+  }
+
+  private async setCampaignStatusSerializado(id: string, status: CampaignStatus): Promise<{ campaigns: Campaign[] } | { error: string }> {
     if (!CAMPAIGN_STATUSES.includes(status)) return { error: 'status_invalido' }
 
     const file = await this.read()
@@ -261,6 +273,10 @@ export class MarketingStore {
   }
 
   async createPost(input: unknown): Promise<{ post: EditorialPost; posts: EditorialPost[] } | { error: string }> {
+    return this.fila.serializar(() => this.createPostSerializado(input))
+  }
+
+  private async createPostSerializado(input: unknown): Promise<{ post: EditorialPost; posts: EditorialPost[] } | { error: string }> {
     const normalized = normalizePost(input, Date.now())
 
     if ('error' in normalized) return normalized
@@ -280,6 +296,10 @@ export class MarketingStore {
   }
 
   async setPostStatus(id: string, status: PostStatus): Promise<{ posts: EditorialPost[] } | { error: string }> {
+    return this.fila.serializar(() => this.setPostStatusSerializado(id, status))
+  }
+
+  private async setPostStatusSerializado(id: string, status: PostStatus): Promise<{ posts: EditorialPost[] } | { error: string }> {
     if (!POST_STATUSES.includes(status)) return { error: 'status_invalido' }
 
     const file = await this.read()
