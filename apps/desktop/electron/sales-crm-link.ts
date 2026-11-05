@@ -112,3 +112,32 @@ export function patchDoContato(intencao: Extract<IntencaoParaCrm, { tipo: 'regis
     last_sale_id: intencao.saleId
   }
 }
+
+/**
+ * O INPUT que o `crm-contacts-store.upsert` aceita — e ele **exige `name`**.
+ *
+ * A DESCOBERTA DA r134
+ *
+ * `normalizeContact` recusa sem nome (`name_required`) e o `upsert` faz **merge** com o contato existente. Se a
+ * venda mandasse um `name` vazio, ela **apagaria** o nome que o CRM tinha; se mandasse um nome novo, ela
+ * **sobrescreveria**. Nenhum dos dois e o que a r133 decidiu.
+ *
+ * A REGRA
+ *
+ * - **Contato que ja existe**: mantem o nome dele. A venda nao corrige cadastro.
+ * - **Contato novo**: o nome e **derivado do telefone** e **diz que veio de uma venda** - `Cliente da venda
+ *   9999`. Um nome inventado seria pior: alguem o tomaria por confirmado.
+ */
+export function inputDoContato(
+  intencao: Extract<IntencaoParaCrm, { tipo: 'registrar' }>,
+  existente?: { name?: null | string } | null
+): { name: string; phone: string; last_purchase_at: number; last_purchase_cents: number; last_sale_id: string } {
+  const nomeDoCrm = typeof existente?.name === 'string' ? existente.name.trim() : ''
+
+  return {
+    ...patchDoContato(intencao),
+    // O nome EXISTENTE vence sempre. So quando nao ha nenhum o telefone entra como identidade visivel.
+    name: nomeDoCrm || `Cliente da venda ${intencao.telefone.slice(-4)}`,
+    phone: intencao.telefone
+  }
+}

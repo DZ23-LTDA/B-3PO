@@ -45,6 +45,22 @@ ull = nunca registrado, que NAO e o mesmo
    */
   tenant_id: string
   updated_at: number
+  /**
+   * A última compra deste cliente (r134 do GOAL V2).
+   *
+   * **Por que no contato, e não numa tabela de ligação**: o CRM é a ficha de quem o cliente é, e "quando ele
+   * comprou por último e quanto" é o fato que quem atende precisa ver **sem navegar**. Guardar só o id da venda
+   * obrigaria uma segunda leitura para responder a pergunta mais comum do balcão.
+   *
+   * **`null` é "nunca comprou"** — e não "não sei". Um contato criado à mão no CRM tem `null` aqui, e a tela pode
+   * dizer isso em vez de mostrar `0`, que seria uma compra de zero real.
+   *
+   * **O histórico completo NÃO fica aqui**: `last_*` é o último, e o resto está no `sales-store`. Duplicar a
+   * lista de vendas no contato faria duas fontes para o mesmo fato.
+   */
+  last_purchase_at: null | number
+  last_purchase_cents: null | number
+  last_sale_id: null | string
 }
 
 export interface CrmStoreFile {
@@ -150,7 +166,12 @@ export function normalizeContact(input: unknown, now: number, tenantId: string =
       phone,
       tags: tags(raw['tags']),
       tenant_id: tenantId || DEFAULT_TENANT,
-      updated_at: now
+      updated_at: now,
+      // r134: `null` e "nunca comprou". Um contato criado a mao no CRM nao tem compra, e `0` seria uma venda
+      // de zero real - fato diferente de nao ter vendido nada.
+      last_purchase_at: typeof raw['last_purchase_at'] === 'number' ? raw['last_purchase_at'] : null,
+      last_purchase_cents: typeof raw['last_purchase_cents'] === 'number' ? raw['last_purchase_cents'] : null,
+      last_sale_id: typeof raw['last_sale_id'] === 'string' && raw['last_sale_id'] ? raw['last_sale_id'] : null
     }
   }
 }
