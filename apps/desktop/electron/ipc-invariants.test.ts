@@ -118,3 +118,78 @@ describe('invariantes dos canais IPC', () => {
     expect(mentirosos, `arquivos -ipc.ts sem nenhum ipcMain.handle: ${mentirosos.join(', ')}`).toEqual([])
   })
 })
+
+// ─── r32: a mesma invariante onde o padrão do bug também se aplica ────────────────────────────────
+//
+// A r30 encontrou 10 cópias de dois canais em `purchases-ipc.ts`. A r31 criou a guarda para arquivos
+// `-ipc.ts`. Esta rodada estende para os dois lugares onde o mesmo script poderia ter causado o mesmo
+// dano — e **mede o estado atual**, não só previne.
+
+describe('invariantes de main.ts', () => {
+  it('nenhum canal registrado duas vezes', () => {
+    const fonte = readFileSync(join(DIR, 'main.ts'), 'utf8')
+    const canais: string[] = []
+
+    for (const m of fonte.matchAll(/ipcMain\.handle\(\s*'([^']+)'/g)) {
+      if (m[1]) canais.push(m[1])
+    }
+
+    // Sem esta guarda, um regex errado passaria por vacuidade.
+    expect(canais.length).toBeGreaterThan(50)
+
+    const contagem = new Map<string, number>()
+
+    for (const canal of canais) contagem.set(canal, (contagem.get(canal) ?? 0) + 1)
+
+    const problemas = [...contagem.entries()].filter(([, n]) => n > 1).map(([canal, n]) => `${canal} x${n}`)
+
+    expect(problemas, `canais duplicados em main.ts:\n${problemas.join('\n')}`).toEqual([])
+  })
+})
+
+describe('invariantes dos stores', () => {
+  /**
+   * Métodos de instância declarados no corpo da classe.
+   *
+   * O padrão `^  async nome(` / `^  nome(` casa métodos de classe e **não** casa funções de módulo
+   * (que ficam na coluna 0) nem métodos privados (`private async`), que são internos e podem ter
+   * nomes repetidos em classes diferentes.
+   */
+  function metodosPublicos(fonte: string): string[] {
+    const nomes: string[] = []
+
+    for (const m of fonte.matchAll(/^ {2}(?:async )?([a-zA-Z_]\w*)\s*(?:<[^>]*>)?\(/gm)) {
+      const nome = m[1]
+
+      if (nome && !['catch', 'constructor', 'for', 'if', 'switch', 'while'].includes(nome)) nomes.push(nome)
+    }
+
+    return nomes
+  }
+
+  it('nenhum store declara o mesmo método público duas vezes', () => {
+    const problemas: string[] = []
+
+    for (const nome of readdirSync(DIR)) {
+      if (!nome.endsWith('-store.ts') || nome.endsWith('.test.ts')) continue
+
+      const lista = metodosPublicos(readFileSync(join(DIR, nome), 'utf8'))
+      const contagem = new Map<string, number>()
+
+      for (const m of lista) contagem.set(m, (contagem.get(m) ?? 0) + 1)
+
+      for (const [metodo, n] of contagem) {
+        if (n > 1) problemas.push(`${nome}: ${metodo}() declarado ${n} vezes`)
+      }
+    }
+
+    expect(problemas, `métodos duplicados em stores:\n${problemas.join('\n')}`).toEqual([])
+  })
+
+  it('o detector de métodos encontra algo (não passa por vacuidade)', () => {
+    // Se o regex parar de casar, o teste acima passa sem verificar nada. Este mede o detector.
+    const amostra = metodosPublicos(readFileSync(join(DIR, 'finance-store.ts'), 'utf8'))
+
+    expect(amostra.length).toBeGreaterThan(2)
+  })
+})
