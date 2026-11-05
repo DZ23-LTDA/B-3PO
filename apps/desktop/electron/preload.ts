@@ -181,6 +181,13 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     saveBranch: payload => ipcRenderer.invoke('hermes:companies:saveBranch', payload),
     saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
   },
+  logistica: {
+    // r59 do GOAL V2: a entrega - a ultima etapa do vertical (distribuidora de gas).
+    criar: payload => ipcRenderer.invoke('hermes:logistica:criar', payload),
+    entregas: tenantId => ipcRenderer.invoke('hermes:logistica:entregas', tenantId),
+    porPedido: orderId => ipcRenderer.invoke('hermes:logistica:porPedido', orderId),
+    transitar: payload => ipcRenderer.invoke('hermes:logistica:transitar', payload)
+  },
   auditoria: {
     // r36 do GOAL V2: leitura da trilha. O ledger existe desde a r35; este e o caminho ate a tela.
     listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
