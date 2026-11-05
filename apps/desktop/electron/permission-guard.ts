@@ -63,3 +63,30 @@ export function guardedHandler<Args extends unknown[], T>(
 ): (...args: Args) => Promise<Guarded<T>> {
   return async (...args: Args) => withPermission(actorOf(), action, options, () => handler(...args))
 }
+/**
+ * Passa pela guarda com ator possivelmente ausente.
+ *
+ * `guardedHandler` assume `Actor` e usa `withPermission(actorOf(), ...)` — o que ja e um bug latente: se
+ * `actorOf` devolver `null`, o `can()` explode com "cannot read properties". Esta funcao e o caminho para os
+ * canais de dominio, onde o ator pode nao existir (instalacao sem dono, perfil ainda nao montado).
+ *
+ * Sem ator a resposta e `sem_permissao` + `sem_ator`, nao um erro de sistema: o chamador precisa saber que
+ * faltou permissao, e nao que o dominio quebrou.
+ *
+ * A recusa NAO carrega o dado. Uma recusa que devolve o conteudo nao recusou nada.
+ */
+export async function exigirAtor<T>(
+  actorOf: () => Promise<Actor | null>,
+  action: Action,
+  resource: string,
+  run: () => Promise<T>,
+  options: { onAudit?: (entry: AuditEntry) => void; now?: () => number } = {}
+): Promise<Guarded<T>> {
+  const ator = await actorOf()
+
+  if (!ator) {
+    return { error: 'sem_permissao', reason: 'sem_ator' }
+  }
+
+  return withPermission(ator, action, { ...options, resource }, run)
+}
