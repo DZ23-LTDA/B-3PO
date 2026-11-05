@@ -64,7 +64,20 @@ export interface SalesDeps {
    * Recebe um resumo do que aconteceu, nao o payload cru: a automacao nao deve depender da forma do
    * pedido, so do fato de que a venda foi faturada.
    */
-  onEvent?: (event: { sale_id: string; tenant_id: string; total_cents: number; type: 'venda.faturada' }) => Promise<void>
+  onEvent?: (event: {
+    sale_id: string
+    tenant_id: string
+    total_cents: number
+    type: 'venda.faturada'
+    /**
+     * r135 do GOAL V2: o telefone do cliente vai no evento.
+     *
+     * **O dado sempre existiu na venda** (`criada.sale.contact_phone`) e o evento não o carregava — então
+     * **quem consome o evento não podia ligar a venda a ninguém**. O CRM é o primeiro consumidor que precisa
+     * disso, e o campo é opcional porque a venda avulsa (sem cliente identificado) é legítima.
+     */
+    contact_phone?: null | string
+  }) => Promise<void>
   sales: SalesStoreLike
 }
 
@@ -208,7 +221,10 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
           sale_id: criada.sale.id,
           tenant_id: criada.sale.tenant_id,
           total_cents: criada.sale.total_cents,
-          type: 'venda.faturada'
+          type: 'venda.faturada',
+          // r135: o telefone vai junto. Sem ele o consumidor nao podia ligar a venda a um cliente — e foi
+          // exatamente isso que deixou o CRM sem saber quem comprou.
+          contact_phone: criada.sale.contact_phone ?? null
         })
       } catch {
         // Ignorado de proposito, pelo mesmo motivo do pos-venda.

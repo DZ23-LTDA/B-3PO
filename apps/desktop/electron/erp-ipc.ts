@@ -13,6 +13,7 @@ import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
 import { registerDocumentsIpc } from './documents-ipc'
 import { CrmContactStore, crmStorePath } from './crm-contacts-store'
+import { inputDoContato, intencaoParaCrm } from './sales-crm-link'
 import { CrmConversationStore, conversationsStorePath, migrarConversasAntigas } from './crm-conversations-store'
 import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
@@ -133,12 +134,17 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // ANTES de qualquer store abrir, e e sincrona: uma janela aqui faria o CRM abrir vazio.
   migrarConversasAntigas(userDataDir)
 
+  // r135 do GOAL V2: o store de contatos passa a ser UMA instancia, porque agora tem dois consumidores — a
+  // privacidade (que anonimiza) e a venda (que registra a compra). Duas instancias sobre o mesmo arquivo
+  // teriam filas de escrita separadas, e a ultima a gravar apagaria a outra.
+  const crmContacts = new CrmContactStore(crmStorePath(userDataDir))
+
   registerPrivacyIpc(ipcMain, {
     // r3 do GOAL V2: `anonymize` não tem desfazer — o canal agora exige ator. O resolvedor é o mesmo
     // de todos os outros domínios desta montagem (`ensureOwner` + `primaryOwner`).
     actorOf: () => actorOf(),
     store: {
-      contacts: new CrmContactStore(crmStorePath(userDataDir)),
+      contacts: crmContacts,
       conversations: new CrmConversationStore(conversationsStorePath(userDataDir)),
       opportunities: new CrmPipelineStore(pipelineStorePath(userDataDir)),
       tasks: new CrmTaskStore(tasksStorePath(userDataDir))
@@ -293,6 +299,32 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     onEvent: async event => {
       // O mesmo despachante dos outros dominios: uma montagem, nao tres copias.
       await dispatchQuietly(dispatch, { detail: event, tenant_id: event.tenant_id, type: event.type })
+
+      // r135 do GOAL V2: a venda AVISA o CRM.
+      //
+      // Ate aqui o evento saia para as automacoes e para ninguem mais: o cliente comprava, e a ficha dele no
+      // CRM nao sabia. A decisao do que registrar esta em `sales-crm-link` (r133), provada ponta a ponta na
+      // r134 — e esta e a linha que a poe no caminho de producao.
+      //
+      // **`catch` que nao propaga**: o CRM falhar NAO pode desfazer uma venda faturada. O estoque ja baixou,
+      // o financeiro ja lancou — o fato aconteceu. O que se perde e o registro no CRM, e ele e recuperavel
+      // relendo as vendas; a venda, nao.
+      try {
+        const intencao = intencaoParaCrm({
+          contact_phone: event.contact_phone,
+          sale_id: event.sale_id,
+          tenant_id: event.tenant_id,
+          total_cents: event.total_cents
+        })
+
+        if (intencao.tipo === 'registrar') {
+          const existente = (await crmContacts.list(event.tenant_id)).find(c => c.phone === intencao.telefone)
+
+          await crmContacts.upsert(inputDoContato(intencao, existente), event.tenant_id)
+        }
+      } catch {
+        // Silencioso pelo motivo acima: a venda e o fato, o CRM e a consequencia.
+      }
     },
     sales
   })

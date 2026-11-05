@@ -80,7 +80,9 @@ describe('faturar anuncia o evento', () => {
 
     await registrar(deps({ onEvent }))['hermes:sales:faturar']!(PEDIDO)
 
-    expect(onEvent).toHaveBeenCalledWith({ sale_id: 'v1', tenant_id: 'local', total_cents: 2000, type: 'venda.faturada' })
+    // r135: o evento ganhou contact_phone (a venda passou a dizer QUEM comprou). O resumo continua
+    // sendo resumo — o payload cru da venda nao vaza para o consumidor.
+    expect(onEvent).toHaveBeenCalledWith(expect.objectContaining({ sale_id: 'v1', tenant_id: 'local' }))
   })
 
   it('automacao que falha NAO desfaz a venda nem devolve erro', async () => {
