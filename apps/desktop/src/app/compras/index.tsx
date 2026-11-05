@@ -16,7 +16,13 @@ import {
   saveOrder,
   saveSupplier,
   type PurchaseOrderRow,
-  type SupplierRow
+  type SupplierRow,
+  APROVACAO_ERRO,
+  aprovarPedido,
+  definirLimite,
+  lerLimite,
+  limiteLabel,
+  type LimiteRow
 } from '@/api/purchases'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
@@ -36,6 +42,12 @@ export function ComprasView() {
   const { t } = useI18n()
   const copy = t.settings.compras
 
+  // r28 do GOAL V2: o limite e a aprovacao ganharam tela. O backend os tem desde r26/r27; sem estes
+  // estados, a tela nao os alcanca — o padrao da r2, na quarta camada.
+  const [limite, setLimite] = useState<LimiteRow | null>(null)
+  const [limiteValor, setLimiteValor] = useState('')
+  const [limiteAprovadores, setLimiteAprovadores] = useState('')
+  const [aprovacaoErro, setAprovacaoErro] = useState('')
   const [cotacoesGravadas, setCotacoesGravadas] = useState<CotacaoGravadaRow[]>([])
   const [suppliers, setSuppliers] = useState<null | SupplierRow[]>(null)
   const [orders, setOrders] = useState<PurchaseOrderRow[]>([])
@@ -55,13 +67,15 @@ export function ComprasView() {
 
   const carregar = useCallback(async () => {
     try {
-      const [listaFornecedores, listaPedidos, listaProdutos, saldos, listaCotacoes] = await Promise.all([
+      const [listaFornecedores, listaPedidos, listaProdutos, saldos, listaCotacoes, limiteAtual] = await Promise.all([
         listSuppliers(),
         listOrders(),
         listProducts(),
         loadBalances(),
         // As propostas gravadas voltam com a tela: era o defeito da r194, fechado na r198 e ligado aqui.
-        listQuotations()
+        listQuotations(),
+        // r28: o limite vigente vem junto com a tela.
+        lerLimite()
       ])
 
       setSuppliers(listaFornecedores)
@@ -168,12 +182,102 @@ export function ComprasView() {
     }
   }
 
+  const salvarLimite = useCallback(async () => {
+    setAprovacaoErro('')
+
+    const cents = limiteValor.trim() === '' ? null : Math.round(Number(limiteValor.replace(',', '.')) * 100)
+    const aprovadores = limiteAprovadores.split(',').map(a => a.trim()).filter(Boolean)
+
+    if (cents !== null && (!Number.isFinite(cents) || cents <= 0)) {
+      setAprovacaoErro('Informe um valor maior que zero, ou deixe vazio para desligar o limite.')
+
+      return
+    }
+
+    const r = await definirLimite(cents, aprovadores)
+
+    if (r && typeof r === 'object' && 'error' in r) {
+      setAprovacaoErro('Limite nao salvo: ' + String((r as { error: string }).error))
+    } else {
+      setLimite((r as { limite: LimiteRow }).limite)
+      setLimiteValor('')
+      setLimiteAprovadores('')
+    }
+  }, [limiteAprovadores, limiteValor])
+
+  const aprovar = useCallback(
+    async (pedidoId: string) => {
+      setAprovacaoErro('')
+
+      const r = await aprovarPedido(pedidoId)
+
+      if (r && typeof r === 'object' && 'error' in r) {
+        const codigo = String((r as { error: string }).error)
+
+        setAprovacaoErro(APROVACAO_ERRO[codigo] ?? codigo)
+      } else {
+        void carregar()
+      }
+    },
+    [carregar]
+  )
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">{copy.title}</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.hint}</p>
       </header>
+
+        {/* r28 do GOAL V2: configuracao do limite. Antes dela, o limite so mudava editando codigo —
+            e a r27 mediu que ele nem era passado na montagem, entao o controle estava inerte. */}
+        <section className="rounded-lg border border-(--ui-border) p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-foreground">Limite de compra</h2>
+            <span className="text-xs text-(--ui-text-tertiary)">{limiteLabel(limite?.cents ?? null)}</span>
+          </div>
+          <p className="mt-1 text-xs text-(--ui-text-tertiary)">
+            Pedido acima do limite exige aprovacao de alguem da lista. Sem valor, o controle fica desligado.
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-(--ui-text-tertiary)">Valor (R$)</span>
+              <input
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                onChange={event => setLimiteValor(event.target.value)}
+                placeholder="vazio = desligado"
+                value={limiteValor}
+              />
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-(--ui-text-tertiary)">Aprovadores (ids separados por virgula)</span>
+              <input
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                onChange={event => setLimiteAprovadores(event.target.value)}
+                placeholder={limite?.aprovadores.join(', ') || 'ex.: dono, gerente'}
+                value={limiteAprovadores}
+              />
+            </label>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <Button onClick={() => void salvarLimite()} variant="ghost">
+              Salvar limite
+            </Button>
+            {limite?.cents !== null && limite !== null && (
+              <Button
+                onClick={() => {
+                  setLimiteValor('')
+                  setLimiteAprovadores('')
+                  void definirLimite(null, []).then(() => setLimite({ aprovadores: [], cents: null }))
+                }}
+                variant="ghost"
+              >
+                Desligar limite
+              </Button>
+            )}
+          </div>
+          {aprovacaoErro && <p className="mt-2 text-xs text-(--ui-warning)">{aprovacaoErro}</p>}
+        </section>
 
       {!disponivel ? (
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.unavailable}</p>
@@ -359,6 +463,18 @@ export function ComprasView() {
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">
                       {copy.statuses[order.status] ?? order.status}
                     </td>
+                      <td className="border-b border-(--ui-border) py-1 pr-2">
+                        {/* r28: o botao que faltava. So aparece quando o pedido e candidato a aprovacao */}
+                        {order.status === 'pedido' && limite?.cents !== null && limite !== null && (
+                          <button
+                            className="rounded-md border border-(--ui-border) px-2 py-0.5 text-xs text-foreground hover:border-(--ui-accent)"
+                            onClick={() => void aprovar(order.id)}
+                            type="button"
+                          >
+                            Aprovar
+                          </button>
+                        )}
+                      </td>
                   </tr>
                 ))}
               </tbody>

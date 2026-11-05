@@ -210,3 +210,66 @@ export function orderPayload(
     supplier_id: supplierId.trim()
   }
 }
+// ─── Limite de compra e aprovação (r28 do GOAL V2) ────────────────────────────────────────────────
+//
+// Os três canais que faltavam na tela. O backend os tem desde r26/r27; sem estas funções, a tela não os
+// alcança — e é o padrão da r2, agora na quarta camada.
+
+export interface LimiteRow {
+  aprovadores: string[]
+  /** `null` = sem limite. É o estado inicial, e o único jeito de desligar o controle. */
+  cents: null | number
+}
+
+interface LimiteBridge {
+  aprovar: (payload: Record<string, unknown>) => Promise<{ error: string } | { aprovada: true; pedido: unknown }>
+  definirLimite: (payload: Record<string, unknown>) => Promise<{ error: string } | { limite: LimiteRow }>
+  limite: () => Promise<{ limite: LimiteRow }>
+}
+
+function bridgeLimite(): LimiteBridge | null {
+  return (globalThis as { hermesDesktop?: { purchases?: LimiteBridge } }).hermesDesktop?.purchases ?? null
+}
+
+export async function lerLimite(): Promise<LimiteRow | null> {
+  const api = bridgeLimite()
+
+  if (!api) return null
+
+  const r = await api.limite()
+
+  return r?.limite ?? null
+}
+
+export async function definirLimite(cents: null | number, aprovadores: string[]): Promise<{ error: string } | { limite: LimiteRow }> {
+  const api = bridgeLimite()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  return api.definirLimite({ aprovadores, cents })
+}
+
+export async function aprovarPedido(pedidoId: string): Promise<{ error: string } | { aprovada: true }> {
+  const api = bridgeLimite()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  return api.aprovar({ pedido_id: pedidoId })
+}
+
+/** Valor em reais para a tela. `null` não é zero — é ausência de limite. */
+export function limiteLabel(cents: null | number): string {
+  if (cents === null) return 'sem limite'
+
+  return (cents / 100).toLocaleString('pt-BR', { currency: 'BRL', style: 'currency' })
+}
+
+/** As recusas da aprovação, em linguagem que diz o que fazer. */
+export const APROVACAO_ERRO: Record<string, string> = {
+  mesmo_solicitante: 'Quem pediu não pode aprovar o próprio pedido. Peça a outra pessoa.',
+  nao_e_aprovador: 'Você não está na lista de aprovadores deste limite.',
+  compra_nao_precisa: 'Este pedido está abaixo do limite — não precisa de aprovação.',
+  pedido_ja_recebido: 'Este pedido já foi recebido; aprovação é para antes do recebimento.',
+  pedido_inexistente: 'Pedido não encontrado.',
+  aprovador_obrigatorio: 'Não foi possível identificar quem aprova.'
+}

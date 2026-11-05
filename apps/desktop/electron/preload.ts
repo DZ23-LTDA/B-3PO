@@ -182,6 +182,10 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
   },
   purchases: {
+    // r28 do GOAL V2: os tres canais que faltavam na tela (r26/r27).
+    aprovar: payload => ipcRenderer.invoke('hermes:purchases:aprovar', payload),
+    definirLimite: payload => ipcRenderer.invoke('hermes:purchases:definirLimite', payload),
+    limite: () => ipcRenderer.invoke('hermes:purchases:limite'),
     cotacao: payload => ipcRenderer.invoke('hermes:purchases:cotacao', payload),
     quotations: tenantId => ipcRenderer.invoke('hermes:purchases:quotations', tenantId),
     removeQuotation: id => ipcRenderer.invoke('hermes:purchases:removeQuotation', id),
