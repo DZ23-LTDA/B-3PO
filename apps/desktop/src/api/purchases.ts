@@ -62,6 +62,44 @@ export interface CotacaoGravadaRow {
   tenant_id: string
 }
 
+/**
+ * O fornecedor vencedor da cotação de um produto (r48 do GOAL V2).
+ *
+ * A LIGAÇÃO QUE A r47 TORNOU POSSÍVEL
+ *
+ * Antes da r47, a cotação não sabia de que produto era — então não havia como responder "qual fornecedor
+ * ganhou para o SKU-1". As duas pontas agora têm `product_sku`, e esta função as encontra.
+ *
+ * TRÊS REGRAS, E CADA UMA TEM UMA RAZÃO
+ *
+ *   - **só propostas do SKU contam.** Cotação antiga tem `product_sku: ''` e não casa — o que é correto:
+ *     usar uma proposta sem produto seria voltar ao erro que a r47 corrigiu.
+ *   - **a mais barata vence.** É o critério que o painel usa desde a r198; divergir aqui faria a tela
+ *     sugerir um fornecedor e o painel mostrar outro.
+ *   - **empate vai para o `supplier_id` menor.** Sem desempate determinístico, dois cliques seguidos
+ *     poderiam sugerir fornecedores diferentes para a mesma situação.
+ *
+ * Devolve `null` quando não há proposta para o produto — e a tela **não pré-seleciona nada**, em vez de
+ * inventar um fornecedor. Um campo pré-preenchido errado é mais perigoso que um campo vazio.
+ */
+export function fornecedorVencedor(cotacoes: readonly CotacaoGravadaRow[], sku: string): null | string {
+  const alvo = sku.trim()
+
+  if (!alvo) return null
+
+  const candidatas = cotacoes.filter(
+    c => c.product_sku === alvo && Number.isFinite(c.preco_unit_cents) && c.preco_unit_cents > 0
+  )
+
+  if (candidatas.length === 0) return null
+
+  const ordenadas = [...candidatas].sort(
+    (a, b) => a.preco_unit_cents - b.preco_unit_cents || a.supplier_id.localeCompare(b.supplier_id)
+  )
+
+  return ordenadas[0]?.supplier_id ?? null
+}
+
 interface PurchasesBridge {
   cotacao: (payload: Record<string, unknown>) => Promise<CotacaoEscolhida | { motivo: string }>
   orders: (tenantId?: string) => Promise<{ orders: PurchaseOrderRow[] }>

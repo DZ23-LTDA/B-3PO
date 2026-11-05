@@ -24,6 +24,7 @@ import {
   aprovarPedido,
   atenderSolicitacao as atenderSolicitacaoApi,
   criarSolicitacao,
+  fornecedorVencedor,
   definirLimite,
   lerLimite,
   limiteLabel,
@@ -267,7 +268,17 @@ export function ComprasView() {
   const atenderComFornecedor = useCallback(async (id: string) => {
     setSolErro('')
 
-    const fornecedor = solFornecedor[id] ?? ''
+    // r48 do GOAL V2: quando ninguém escolheu, vale o VENCEDOR DA COTAÇÃO daquele produto.
+    //
+    // A r47 pôs `product_sku` nas duas pontas; esta é a ligação que ela tornou possível. Sem ela, a
+    // pessoa escolhia na cotação e escolhia DE NOVO aqui — a interface esquecendo o que ela acabou de
+    // fazer.
+    //
+    // O `?? ''` no fim é deliberado: sem cotação para o produto, o campo fica vazio e a recusa
+    // `fornecedor_obrigatorio` aparece. **Inventar um fornecedor seria pior que pedir que escolha.**
+    const solicitacao = solicitacoes.find(s => s.id === id)
+    const vencedor = solicitacao ? fornecedorVencedor(cotacoesGravadas, solicitacao.product_sku) : null
+    const fornecedor = solFornecedor[id] ?? vencedor ?? ''
 
     if (!fornecedor) {
       setSolErro(solicitacaoErroText('fornecedor_obrigatorio'))
@@ -284,7 +295,7 @@ export function ComprasView() {
       // O pedido nasceu: recarrega para a lista de pedidos nao ficar velha.
       setOrders(await listOrders())
     }
-  }, [solFornecedor])
+  }, [cotacoesGravadas, solicitacoes, solFornecedor])
 
   const salvarLimite = useCallback(async () => {
     setAprovacaoErro('')
@@ -418,7 +429,7 @@ export function ComprasView() {
                     <select
                       className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-1 py-0.5 text-xs text-foreground outline-none focus:border-(--ui-accent)"
                       onChange={event => setSolFornecedor({ ...solFornecedor, [s.id]: event.target.value })}
-                      value={solFornecedor[s.id] ?? ''}
+                      value={solFornecedor[s.id] ?? fornecedorVencedor(cotacoesGravadas, s.product_sku) ?? ''}
                     >
                       <option value="">fornecedor…</option>
                       {(suppliers ?? []).map(forn => (
@@ -429,7 +440,7 @@ export function ComprasView() {
                     </select>
                     <button
                       className="rounded-md border border-(--ui-border) px-2 py-0.5 text-xs text-foreground hover:border-(--ui-accent)"
-                      disabled={!solFornecedor[s.id]}
+                      disabled={!(solFornecedor[s.id] ?? fornecedorVencedor(cotacoesGravadas, s.product_sku))}
                       onClick={() => void atenderComFornecedor(s.id)}
                       type="button"
                     >
