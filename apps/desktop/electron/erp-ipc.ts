@@ -86,7 +86,12 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerLookupIpc(ipcMain)
 
   // Documento fiscal: o emissor vem do ambiente, nunca do renderer.
-  registerFiscalIpc(ipcMain, { store: new FiscalStore(fiscalStorePath(userDataDir)) })
+  // r4 do GOAL V2: `emitir` e `cancelar` têm efeito legal — os canais exigem ator. A closure resolve
+  // `actorOf` no momento da chamada, então a ordem de declaração abaixo não é problema.
+  registerFiscalIpc(ipcMain, {
+    actorOf: () => actorOf(),
+    store: new FiscalStore(fiscalStorePath(userDataDir))
+  })
   registerSchedulingBlockIpc(ipcMain, userDataDir)
 
   // Agentes: roster, execucoes e fila de aprovacao. Montado aqui, nao em main.ts, pelo mesmo motivo da r125:
