@@ -16,6 +16,7 @@ import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n/context'
 
 import { DesligamentoPanel } from './desligamento-panel'
+import { TreinamentosPanel } from './treinamentos-panel'
 
 /**
  * RH.
@@ -185,6 +186,20 @@ export function RhView() {
               hint: copy.offboardingHint,
               pending: copy.offboardingPending,
               title: copy.offboardingTitle
+            }}
+          />
+
+          <TreinamentosPanel
+            copy={{
+              add: copy.trainingAdd,
+              daysAgo: copy.trainingDaysAgo,
+              empty: copy.trainingEmpty,
+              hint: copy.trainingHint,
+              impeditive: copy.trainingImpeditive,
+              none: copy.trainingNone,
+              required: copy.trainingRequired,
+              title: copy.trainingTitle,
+              validity: copy.trainingValidity
             }}
           />
 
