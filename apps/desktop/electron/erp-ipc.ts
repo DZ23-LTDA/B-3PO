@@ -94,6 +94,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerAgentIpc(ipcMain, userDataDir)
 
   registerPrivacyIpc(ipcMain, {
+    // r3 do GOAL V2: `anonymize` não tem desfazer — o canal agora exige ator. O resolvedor é o mesmo
+    // de todos os outros domínios desta montagem (`ensureOwner` + `primaryOwner`).
+    actorOf: () => actorOf(),
     store: {
       contacts: new CrmContactStore(crmStorePath(userDataDir)),
       conversations: new CrmConversationStore(conversationsStorePath(userDataDir)),
