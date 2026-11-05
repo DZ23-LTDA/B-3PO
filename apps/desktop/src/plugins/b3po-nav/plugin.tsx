@@ -81,6 +81,9 @@ const MODULOS: readonly ItemDeMenu[] = [
   { codicon: 'archive', label: 'Estoque', path: '/stock' },
   { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
   { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
+  // r60 do GOAL V2: a entrega - a ultima etapa do vertical. Fica ao lado de Vendas porque e a
+  // continuacao dela: a venda registra, a entrega leva.
+  { codicon: 'rocket', label: 'Entregas', path: '/entregas' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
 
   // 5. O que eu devo e recebo

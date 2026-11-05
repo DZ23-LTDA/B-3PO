@@ -35,6 +35,9 @@ export const MARKETING_ROUTE = '/marketing'
 export const PAINEL_ROUTE = '/painel'
 export const AUTOMACOES_ROUTE = '/automacoes'
 export const SOFIA_ROUTE = '/sofia'
+
+/** r60 do GOAL V2: entregas - a ultima etapa do vertical (distribuidora de gas). */
+export const ENTREGAS_ROUTE = '/entregas'
 export const DOCUMENTOS_ROUTE = '/documentos'
 export const PRIVACIDADE_ROUTE = '/privacidade'
 export const PROFILES_ROUTE = '/profiles'
@@ -56,6 +59,7 @@ export type AppView =
   | 'painel'
   | 'automacoes'
   | 'sofia'
+  | 'entregas'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -93,6 +97,7 @@ export type AppRouteId =
   | 'painel'
   | 'automacoes'
   | 'sofia'
+  | 'entregas'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -136,6 +141,7 @@ export const APP_ROUTES = [
   { id: 'painel', path: PAINEL_ROUTE, view: 'painel' },
   { id: 'automacoes', path: AUTOMACOES_ROUTE, view: 'automacoes' },
   { id: 'sofia', path: SOFIA_ROUTE, view: 'sofia' },
+  { id: 'entregas', path: ENTREGAS_ROUTE, view: 'entregas' },
   { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
   { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
