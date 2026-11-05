@@ -84,6 +84,9 @@ const MODULOS: readonly ItemDeMenu[] = [
   // r60 do GOAL V2: a entrega - a ultima etapa do vertical. Fica ao lado de Vendas porque e a
   // continuacao dela: a venda registra, a entrega leva.
   { codicon: 'rocket', label: 'Entregas', path: '/entregas' },
+  // r80 do GOAL V2: o projeto - o plano que liga a empresa ao trabalho. Fica junto de Entregas
+  // porque e a mesma pergunta ('o que precisa sair?') numa escala maior.
+  { codicon: 'checklist', label: 'Projetos', path: '/projetos' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
 
   // 5. O que eu devo e recebo
