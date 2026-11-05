@@ -48,6 +48,7 @@ import { registerAfterSalesIpc } from './after-sales-ipc'
 import { registerAutomationIpc } from './automation-ipc'
 import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
+import { AuditStore, auditStorePath, configurarColetorDeAuditoria } from './audit-store'
 import { registerSofiaIpc } from './sofia-ipc'
 import { openSofiaStore } from './sofia-store'
 import { registerMarketingIpc } from './marketing-ipc'
@@ -75,6 +76,15 @@ export interface ErpMounted {
 }
 
 export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMounted {
+  // r35 do GOAL V2: a trilha de auditoria passa a existir em DISCO.
+  //
+  // Antes disto, onAudit nunca era passado (rp-ipc tinha zero ocorrencias) e a auditoria vivia so
+  // em memoria — mas o §26 exige auditoria em TRES dos quatro fluxos de aceite.
+  //
+  // O coletor e configurado AQUI, antes de qualquer canal, porque o permission-guard o consulta em toda
+  // chamada. Sem esta linha, nenhuma decisao e registrada.
+  configurarColetorDeAuditoria(new AuditStore(auditStorePath(userDataDir)))
+
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
 

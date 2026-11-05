@@ -9,6 +9,7 @@
 // A auditoria é registrada em toda chamada, permitida ou negada: auditoria que só guarda o que passou
 // não serve para investigar o que foi tentado.
 
+import { registrarNaTrilha } from './audit-store'
 import { audit, can, type Action, type Actor, type AuditEntry, type Decision } from './rbac'
 
 export interface Denied {
@@ -39,8 +40,21 @@ export async function withPermission<T>(
   handler: () => Promise<T>
 ): Promise<Guarded<T>> {
   const decision: Decision = can(actor, action, options.resource)
+  const entrada = audit(actor, action, options.resource, decision, (options.now ?? Date.now)())
 
-  options.onAudit?.(audit(actor, action, options.resource, decision, (options.now ?? Date.now)()))
+  // r35 do GOAL V2: quando o domínio não passa um `onAudit` próprio, a decisão vai para a trilha global.
+  //
+  // Antes disto, `onAudit` nunca era passado na montagem (`erp-ipc` tinha ZERO ocorrências) e a auditoria
+  // vivia só em memória — mas o §26 exige auditoria em TRÊS dos quatro fluxos de aceite.
+  //
+  // O coletor global existe porque este arquivo é chamado em 30 canais, cada um com o seu objeto `deps`:
+  // passar `onAudit` em todos exigiria tocar em 30 assinaturas, e a primeira esquecida seria um buraco
+  // silencioso. Aqui há um lugar.
+  if (options.onAudit) {
+    options.onAudit(entrada)
+  } else {
+    registrarNaTrilha(entrada)
+  }
 
   if (!decision.allowed) {
     return { error: 'sem_permissao', reason: decision.reason }
@@ -85,6 +99,26 @@ export async function exigirAtor<T>(
   const ator = await actorOf()
 
   if (!ator) {
+    // r35 do GOAL V2: a recusa por ausencia de ator TAMBEM vai para a trilha.
+    //
+    // Antes disto ela saia por aqui sem registro — e "alguem tentou agir sem identidade" e exatamente o
+    // tipo de evento que uma auditoria existe para mostrar. O `actorId` fica vazio de proposito: nao ha
+    // ator, e inventar um (`anonimo`) faria a trilha sugerir uma identidade que nao existe.
+    const entradaSemAtor: AuditEntry = {
+      action,
+      actorId: '',
+      allowed: false,
+      at: (options.now ?? Date.now)(),
+      reason: 'sem_ator',
+      resource
+    }
+
+    if (options.onAudit) {
+      options.onAudit(entradaSemAtor)
+    } else {
+      registrarNaTrilha(entradaSemAtor)
+    }
+
     return { error: 'sem_permissao', reason: 'sem_ator' }
   }
 
