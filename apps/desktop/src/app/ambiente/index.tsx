@@ -22,30 +22,42 @@ import { useStore } from '@nanostores/react'
 import { useMemo } from 'react'
 
 import { AMBIENTE_LABEL, AMBIENTES, foraDoAmbiente, gruposDoAmbiente, type Ambiente } from '@/lib/ambiente'
+import { MODULOS_DE_ENGENHARIA, proporcaoDeOrigem } from '@/lib/engenharia'
 import { MODULOS_DO_PRODUTO } from '@/plugins/b3po-nav/plugin'
 import { $ambiente, setAmbiente } from '@/store/ambiente'
+
+/** A forma comum às duas fontes — o menu do produto e o mapa da engenharia. */
+interface ItemVisivel {
+  grupo: string
+  label: string
+  path: string
+  origem?: 'produto' | 'upstream'
+}
 
 export function AmbienteScreen() {
   const ativo = useStore($ambiente)
 
-  // Os módulos de cada ambiente, calculados uma vez. `gruposDoAmbiente` é a regra da r121: o ambiente
-  // **filtra por grupo**, e os grupos do menu são os mesmos da regra (a r122 prova isso com 6 testes).
-  const porAmbiente = useMemo(() => {
-    const saida: Record<Ambiente, (typeof MODULOS_DO_PRODUTO)[number][]> = {
-      empresa: [],
-      engenharia: []
-    }
+  // Os módulos de cada ambiente.
+  //
+  // **Empresa** vem do MENU do produto (`b3po-nav`), filtrado por `gruposDoAmbiente` — a regra da r121.
+  //
+  // **Engenharia** vem do MAPA (`lib/engenharia`, r130), porque o menu do produto é só da Empresa: os 23
+  // módulos dele são todos de lá. Sem o mapa, o segundo ambiente ficaria vazio — que era o estado medido na
+  // r130 antes de ele existir.
+  const porAmbiente = useMemo<Record<Ambiente, ItemVisivel[]>>(
+    () => ({
+      empresa: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('empresa').includes(m.grupo)),
+      engenharia: [...MODULOS_DE_ENGENHARIA]
+    }),
+    []
+  )
 
-    for (const ambiente of AMBIENTES) {
-      const grupos = gruposDoAmbiente(ambiente)
+  // `foraDoAmbiente` só sabe ler o menu do produto — chamá-lo para engenharia diria "23 fora", que é verdade
+  // para o MENU e não para o AMBIENTE. A frase abaixo usa a contagem certa para cada lado.
+  const escondidos =
+    ativo === 'empresa' ? foraDoAmbiente(MODULOS_DO_PRODUTO, ativo) : `${MODULOS_DE_ENGENHARIA.length} do mapa`
 
-      saida[ambiente] = MODULOS_DO_PRODUTO.filter(m => grupos.includes(m.grupo))
-    }
-
-    return saida
-  }, [])
-
-  const escondidos = foraDoAmbiente(MODULOS_DO_PRODUTO, ativo)
+  const proporcao = proporcaoDeOrigem()
 
   return (
     <main aria-label="Ambiente de trabalho" className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-10">
@@ -91,8 +103,18 @@ export function AmbienteScreen() {
         <ul aria-label={`Modulos do ambiente ${AMBIENTE_LABEL[ativo]}`} className="flex flex-col gap-1">
           {porAmbiente[ativo].map(m => (
             <li className="flex items-center gap-2 text-sm text-(--ui-text-secondary)" key={m.path}>
-              <span className="text-(--ui-text-tertiary)">{m.grupo}</span>
+              <span className="w-28 shrink-0 text-(--ui-text-tertiary)">{m.grupo}</span>
               <span>{m.label}</span>
+              {/*
+                A ORIGEM, à vista. Cinco dos onze módulos de Engenharia são do produto; seis são do runtime
+                do Hermes. Esconder isso faria o Modo Engenharia parecer maior do que é — e foi o §13:452 que
+                pediu "arquitetura, código, testes, CI/CD, artefatos", coisas que o runtime já tinha.
+              */}
+              {m.origem === 'upstream' && (
+                <span className="ml-auto rounded bg-(--ui-surface-sunken) px-1.5 py-0.5 text-[0.65rem] text-(--ui-text-tertiary)">
+                  runtime
+                </span>
+              )}
             </li>
           ))}
         </ul>
