@@ -239,7 +239,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Automacoes: a tela precisa do catalogo REAL de ferramentas, entao o registro vem DEPOIS de 	ools.
   ferramentas = tools
 
-  registerAutomationIpc(ipcMain, { automations, sweep: () => varrer(), tools })
+  // r5 do GOAL V2: criar ou ativar uma automacao e armar um disparo de acoes em nome do usuario —
+  // os canais exigem ator.
+  registerAutomationIpc(ipcMain, { actorOf: () => actorOf(), automations, sweep: () => varrer(), tools })
 
   // Varredura das condicoes que NAO sao evento: atendimento atrasado e conta vencendo. Roda no mesmo
   // intervalo do resto e e idempotente por (gatilho, entidade) - ver utomation-sweep.ts.
