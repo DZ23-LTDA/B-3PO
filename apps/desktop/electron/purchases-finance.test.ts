@@ -62,7 +62,12 @@ describe('receber pelo canal IPC', () => {
 
     registerPurchasesIpc(
       { handle: (c: string, l: (e: unknown, p: unknown) => unknown) => mapa.set(c, l) } as never,
-      { finance, inventory, store }
+      {
+        actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }),
+        finance,
+        inventory,
+        store
+      }
     )
 
     return mapa

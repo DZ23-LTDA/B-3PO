@@ -137,6 +137,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
   registerPurchasesIpc(ipcMain, {
+    // r222: compras exige ator. A guarda vem antes do limite de compra: primeiro quem age, depois se cabe no teto.
+    actorOf: () => actorOf(),
     finance,
     inventory,
     // Sem esta injecao o canal de cotacao responde vazio e o save devolve cotacoes_indisponivel: o store

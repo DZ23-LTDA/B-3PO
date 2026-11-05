@@ -63,7 +63,7 @@ async function withDepot<T>(
     const finance = fakeFinance()
     const ipc = fakeIpc()
 
-    registerPurchasesIpc(ipc, { finance, inventory, store })
+    registerPurchasesIpc(ipc, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }), finance, inventory, store })
 
     return await run({ finance, inventory, ipc, store })
   } finally {
