@@ -50,6 +50,8 @@ import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
 import { AuditStore, auditStorePath, configurarColetorDeAuditoria } from './audit-store'
 import { registerAuditIpc } from './audit-ipc'
+import { DeliveryStore, deliveryStorePath } from './delivery-store'
+import { registerDeliveryIpc } from './delivery-ipc'
 import { registerSofiaIpc } from './sofia-ipc'
 
 import { openSofiaStore } from './sofia-store'
@@ -90,6 +92,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // r36 do GOAL V2: o canal de leitura da trilha. Sem ele, a auditoria existiria apenas para
   // quem abrisse o JSON no disco — o padrao da r2 que ja se repetiu nas r3-r8 e r25-r28.
   registerAuditIpc(ipcMain, { actorOf: () => actorOf(), store: new AuditStore(auditStorePath(userDataDir)) })
+
+  // r58 do GOAL V2: os canais da logistica - o caminhao que faltava para o vertical.
+  registerDeliveryIpc(ipcMain, { actorOf: () => actorOf(), store: new DeliveryStore(deliveryStorePath(userDataDir)) })
 
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
