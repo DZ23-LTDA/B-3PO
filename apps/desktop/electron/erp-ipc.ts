@@ -60,6 +60,7 @@ import { registerProjectIpc } from './projects-ipc'
 import { WorkItemStore, workItemStorePath } from './work-item-store'
 import { registerWorkItemIpc } from './work-items-ipc'
 import { registerDeliveryIpc } from './delivery-ipc'
+import { intencaoDeAtendimento } from './delivery-service-link'
 import { registerSofiaIpc } from './sofia-ipc'
 
 import { openSofiaStore } from './sofia-store'
@@ -102,7 +103,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerAuditIpc(ipcMain, { actorOf: () => actorOf(), store: new AuditStore(auditStorePath(userDataDir)) })
 
   // r58 do GOAL V2: os canais da logistica - o caminhao que faltava para o vertical.
-  registerDeliveryIpc(ipcMain, { actorOf: () => actorOf(), store: new DeliveryStore(deliveryStorePath(userDataDir)) })
+  // r141: a montagem do delivery saiu daqui para depois do `desk` — ela precisa dele para abrir o ticket.
 
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
@@ -156,6 +157,46 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
+
+  // r141 do GOAL V2: a entrega recusada ABRE TICKET no atendimento.
+  //
+  // O `service-desk-store` escrevia o ciclo ("venda → entrega → suporte → pós-venda") e a seta do meio nunca
+  // existiu: o cliente recusava o bujão e o atendimento não sabia. A decisão do que fazer está em
+  // `delivery-service-link` (r140), provada em 11 testes — e esta montagem a põe no caminho de produção.
+  //
+  // **Fica AQUI, e não junto dos outros canais de logística**, porque depende do `desk` — e montar antes o
+  // deixaria `undefined` na hora da recusa.
+  //
+  // **O ticket nasce com o `order_id` na descrição**, e não com o telefone: a `Entrega` não carrega telefone
+  // (a r141 mediu), e o atendente chega ao cliente abrindo o pedido. Inventar o campo seria a forma errada que
+  // a r101 já custou caro.
+  registerDeliveryIpc(ipcMain, {
+    actorOf: () => actorOf(),
+    onRecusa: async evento => {
+      const intencao = intencaoDeAtendimento('recusada', evento.status_anterior, {
+        destino: evento.destino,
+        entrega_id: evento.entrega_id,
+        order_id: evento.order_id,
+        tenant_id: evento.tenant_id
+      })
+
+      if (intencao.tipo !== 'abrir_ticket') return
+
+      try {
+        await desk.open({
+          channel: 'logistica',
+          // A entrega não tem telefone, então o ticket nasce sem contato — e a descrição diz o que fazer.
+          contact_phone: '',
+          description: intencao.descricao,
+          priority: intencao.prioridade,
+          subject: intencao.assunto
+        })
+      } catch {
+        // Silencioso: a entrega é o fato, o ticket é a consequência.
+      }
+    },
+    store: new DeliveryStore(deliveryStorePath(userDataDir))
+  })
 
   // r8 do GOAL V2: abrir, fechar e avaliar atendimento sao execucao. onEvent continua quarto —
   // a guarda vem antes de proposito: automacao nao dispara por acao nao autorizada.

@@ -25,6 +25,22 @@ export interface DeliveryIpcDeps {
   /** Ator resolvido no processo principal. `null` recusa — logística não é pública. */
   actorOf: () => Promise<Actor | null>
   store: DeliveryStore
+  /**
+   * r141 do GOAL V2: a entrega recusada avisa quem abre o ticket.
+   *
+   * **A montagem, e não a regra**: o que fazer com o aviso está em `delivery-service-link` (r140), e quem
+   * decide se vira ticket é aquele módulo. Aqui o canal só **conta o que aconteceu**.
+   *
+   * **Depois do store gravar, nunca antes**: o aviso descreve um fato consumado. Se o `transitar` falhar, não
+   * houve recusa a avisar.
+   */
+  onRecusa?: (evento: {
+    entrega_id: string
+    order_id: string
+    destino: null | string
+    status_anterior: null | string
+    tenant_id: string
+  }) => Promise<void>
 }
 
 type Recusa = { error: 'sem_permissao'; reason: string }
@@ -83,7 +99,34 @@ export function registerDeliveryIpc(ipcMain: IpcRegistrar, deps: DeliveryIpcDeps
         // errada como prova.
         if (!recebedor && raw['status'] === 'em_rota') raw['recebedor'] = ator?.id ?? ''
 
-        return deps.store.transitar(raw)
+        // r141: o status ANTERIOR precisa ser lido ANTES da transicao — depois ja nao existe.
+        //
+        // `DeliveryStore` nao tem `porId`, so `listar`: a leitura e a lista do tenant filtrada pelo id. E uma
+        // leitura a mais por transicao, e ela e o preco de saber se a recusa e NOVA ou a mesma vista duas vezes.
+        const idAlvo = String(raw['id'] ?? '')
+        const tenantDaEntrega = serverTenant(raw['tenant_id'])
+        const antes = (await deps.store.listar(tenantDaEntrega)).find(e => e.id === idAlvo)
+        const resultado = await deps.store.transitar(raw)
+
+        // So avisa quando a transicao ACONTECEU e virou recusa. O `catch` e silencioso pelo mesmo motivo do
+        // `sales-ipc`: o ticket falhar NAO pode desfazer uma entrega ja registrada.
+        if (deps.onRecusa && 'entrega' in resultado && resultado.entrega.status === 'recusada') {
+          try {
+            await deps.onRecusa({
+              // r141: a `Entrega` NAO tem telefone, motivo nem valor — ela tem `order_id` e `destino`. O
+              // aviso leva o que existe, e o ticket aponta para o pedido.
+              destino: resultado.entrega.destino ?? null,
+              entrega_id: resultado.entrega.id,
+              order_id: resultado.entrega.order_id,
+              status_anterior: antes?.status ?? null,
+              tenant_id: resultado.entrega.tenant_id
+            })
+          } catch {
+            // Silencioso: a entrega e o fato, o ticket e a consequencia.
+          }
+        }
+
+        return resultado
       })
   )
 }

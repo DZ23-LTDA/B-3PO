@@ -1,39 +1,39 @@
-// A LIGACAO ENTREGA -> ATENDIMENTO (r140 do GOAL V2).
+// A LIGACAO ENTREGA -> ATENDIMENTO (r140/r141 do GOAL V2).
 //
-// A NECESSIDADE COMPROVADA
+// A NECESSIDADE COMPROVADA (r140)
 //
-// A medicao desta rodada:
+//   ENTREGA_STATUS = ['pendente','em_rota','entregue','recusada']
+//   delivery-store / delivery-ipc: ZERO referencias a ticket
+//   service-desk-store: zero referencias a entrega (so um comentario)
 //
-//   `ENTREGA_STATUS = ['pendente', 'em_rota', 'entregue', 'recusada']`
-//   `delivery-store` / `delivery-ipc`: ZERO referencias a ticket
-//   `service-desk-store`: zero referencias a entrega (so um comentario)
+// O cliente recusa o bujao na porta - e ninguem abre um ticket. A entrega fica `recusada` e o atendimento nao
+// sabe; na segunda tentativa, o mesmo endereco, a mesma recusa.
 //
-// O efeito no vertical: **o cliente recusa o bujao na porta** — e ninguem abre um ticket. A entrega fica
-// `recusada` e o atendimento nao sabe que houve um problema; na segunda tentativa, o mesmo endereco, a mesma
-// recusa.
+// O QUE A r141 DESCOBRIU - e por que a forma mudou
 //
-// O §13 do proprio `service-desk-store` ja dizia o ciclo: *"venda -> entrega -> suporte -> pos-venda"*. A seta
-// `entrega -> suporte` era a que faltava.
+// A primeira versao desta ligacao pedia `contact_phone`, `motivo` e `total_cents`. **A `Entrega` nao tem NENHUM
+// dos tres.** Ela carrega `id`, `order_id`, `destino`, `status`, `entregador` e `comprovante`.
+//
+// O telefone e o valor estao na VENDA, apontada por `order_id`. Entao o ticket nasce **com o pedido** e o
+// atendente abre a venda - em vez de a ligacao inventar campos que o produto nao tem.
 //
 // AS TRES DECISOES
 //
-// 1. **So `recusada` abre ticket.** `pendente`, `em_rota` e `entregue` sao o caminho normal — e `entregue` e o
-//    sucesso. Um ticket para cada transicao encheria a fila de ruido.
+// 1. **So `recusada` abre ticket.** `pendente`, `em_rota` e `entregue` sao o caminho normal.
 //
-// 2. **A prioridade vem do valor, nao do gosto.** Uma recusa de R$ 20 e uma de R$ 2.000 nao tem a mesma urgencia
-//    para o negocio, e a fila do atendimento precisa saber a diferenca sem que alguem a digite.
+// 2. **A prioridade NAO vem do valor** - ela nao pode, porque a entrega nao tem valor. Vem do **destino
+//    conhecido**: uma recusa com endereco e reagendavel; uma sem endereco precisa de uma ligacao antes.
+//    **E a prioridade e o que a entrega sabe**, nao o que ela gostaria de saber.
 //
-// 3. **O ticket nao culpa ninguem.** O assunto e o FATO (`entrega recusada`) e a descricao diz o que fazer. Um
-//    ticket que diz "o motorista errou" fecha a investigacao antes de ela comecar.
+// 3. **O ticket nao culpa ninguem.** O assunto e o FATO e a descricao diz o que fazer.
 
 /** O que a entrega diz ao ser recusada. */
 export interface EntregaRecusada {
   entrega_id: string
-  /** `null` quando a entrega foi registrada sem cliente identificado. */
-  contact_phone?: null | string
-  motivo?: null | string
+  /** A venda que esta entrega cumpria. E por ela que o atendente chega ao cliente. */
+  order_id: string
+  destino?: null | string
   tenant_id: string
-  total_cents?: null | number
 }
 
 export type IntencaoDeAtendimento =
@@ -43,31 +43,26 @@ export type IntencaoDeAtendimento =
       assunto: string
       descricao: string
       prioridade: 'alta' | 'baixa' | 'media' | 'urgente'
-      contact_phone: null | string
+      order_id: string
+      destino: null | string
     }
 
 /**
- * A prioridade a partir do valor da entrega.
+ * A prioridade a partir do que a entrega TEM.
  *
- * **O corte e em reais, e o numero e dito**: R$ 500 e o ponto em que uma recusa deixa de ser um contratempo e
- * vira um prejuizo que alguem precisa Olhar hoje.
+ * **Destino vazio e mais urgente que destino conhecido**: sem endereco nao ha como reagendar, e a fila precisa
+ * de alguem ligando - nao de um segundo despacho que vai falhar no mesmo lugar.
  */
-export const LIMITE_ALTA_CENTS = 50_000
-export const LIMITE_URGENTE_CENTS = 200_000
+export function prioridadeDaRecusa(destino: null | string | undefined): 'alta' | 'baixa' | 'media' | 'urgente' {
+  if (typeof destino !== 'string' || !destino.trim()) return 'urgente'
 
-export function prioridadeDaRecusa(totalCents: null | number | undefined): 'alta' | 'baixa' | 'media' | 'urgente' {
-  if (typeof totalCents !== 'number') return 'media'
-
-  if (totalCents >= LIMITE_URGENTE_CENTS) return 'urgente'
-  if (totalCents >= LIMITE_ALTA_CENTS) return 'alta'
-
-  return 'baixa'
+  return 'media'
 }
 
 /**
  * Decide se a transicao de entrega vira ticket.
  *
- * **Recebe o status NOVO e o anterior**, porque `recusada -> recusada` nao e um fato novo: e a mesma recusa
+ * **Recebe o status NOVO e o ANTERIOR**, porque `recusada -> recusada` nao e um fato novo: e a mesma recusa
  * vista duas vezes, e abrir o segundo ticket faria a fila crescer sem que nada tivesse acontecido.
  */
 export function intencaoDeAtendimento(
@@ -77,30 +72,31 @@ export function intencaoDeAtendimento(
 ): IntencaoDeAtendimento {
   if (statusNovo !== 'recusada') return { motivo: 'status_normal', tipo: 'nada' }
 
-  // A mesma recusa ja registrada: o ticket ja existe.
   if (statusAnterior === 'recusada') return { motivo: 'status_normal', tipo: 'nada' }
 
-  const motivo = typeof entrega.motivo === 'string' && entrega.motivo.trim() ? entrega.motivo.trim() : null
+  const destino = typeof entrega.destino === 'string' && entrega.destino.trim() ? entrega.destino.trim() : null
 
   return {
     assunto: 'Entrega recusada',
-    // A descricao diz O QUE FAZER. Um ticket que so registra o fato deixa a fila parada.
-    descricao: motivo
-      ? `O cliente recusou a entrega. Motivo informado: ${motivo}. Confirmar com o cliente antes de reagendar.`
-      : 'O cliente recusou a entrega e o motivo nao foi informado. Ligar para confirmar antes de reagendar.',
-    contact_phone: typeof entrega.contact_phone === 'string' && entrega.contact_phone ? entrega.contact_phone : null,
-    prioridade: prioridadeDaRecusa(entrega.total_cents),
+    // A descricao diz O QUE FAZER, e nomeia o pedido - e por ele que o atendente abre a venda e acha o cliente.
+    descricao: destino
+      ? `O cliente recusou a entrega no destino "${destino}". Abrir o pedido ${entrega.order_id} para achar o contato e confirmar antes de reagendar.`
+      : `O cliente recusou a entrega e o destino nao foi informado. Abrir o pedido ${entrega.order_id} e ligar para o cliente antes de reagendar.`,
+    destino,
+    order_id: entrega.order_id,
+    prioridade: prioridadeDaRecusa(destino),
     tipo: 'abrir_ticket'
   }
 }
 
 /**
- * Se a recusa tem telefone.
+ * Se o ticket consegue chegar ao cliente sozinho.
  *
- * **Existe separado porque a resposta muda o que o canal faz**: com telefone, o ticket nasce ligado ao
- * contato do CRM; sem, ele nasce solto e o atendente precisa descobrir de quem e. **Dizer isso e melhor que
- * fingir que todo ticket tem dono.**
+ * **Ele nao consegue**: a entrega nao tem telefone. Este predicado existe para a tela poder dizer **"abra o
+ * pedido para achar o contato"** em vez de mostrar um campo vazio que parece um defeito.
  */
-export function recusaTemDono(entrega: EntregaRecusada): boolean {
-  return typeof entrega.contact_phone === 'string' && entrega.contact_phone.trim().length > 0
+export function ticketTemContato(entrega: EntregaRecusada): boolean {
+  // Sempre `false` hoje - e de proposito: `Entrega` nao carrega telefone. O dia em que carregar, este e o
+  // unico lugar a mudar, e os chamadores nao precisam saber.
+  return typeof (entrega as { contact_phone?: unknown }).contact_phone === 'string'
 }
