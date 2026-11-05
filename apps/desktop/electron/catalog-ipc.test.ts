@@ -2,6 +2,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+/** Dono da instalacao. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' } as const
+
 import { describe, expect, it } from 'vitest'
 
 import { CatalogStore, catalogStorePath, type Product } from './catalog-store'
@@ -45,11 +48,15 @@ describe('IPC do catalogo', () => {
   it('registra os tres canais e nada alem deles', () => {
     const ipc = fakeIpc()
 
-    registerCatalogIpc(ipc, {
-      list: async () => [],
-      remove: async () => ({ products: [] }),
-      upsert: async () => ({ products: [] })
-    })
+    registerCatalogIpc(
+      ipc,
+      {
+        list: async () => [],
+        remove: async () => ({ products: [] }),
+        upsert: async () => ({ products: [] })
+      },
+      { actorOf: async () => DONO }
+    )
 
     expect(ipc.channels()).toEqual(['hermes:catalog:list', 'hermes:catalog:remove', 'hermes:catalog:upsert'])
   })
@@ -58,7 +65,7 @@ describe('IPC do catalogo', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerCatalogIpc(ipc, store)
+      registerCatalogIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
       expect(await ipc.invoke('hermes:catalog:list')).toEqual({ products: [] })
     })
@@ -68,7 +75,7 @@ describe('IPC do catalogo', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerCatalogIpc(ipc, store)
+      registerCatalogIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
       const resultado = (await ipc.invoke('hermes:catalog:upsert', {
         name: 'Café 500g',
@@ -85,7 +92,7 @@ describe('IPC do catalogo', () => {
     await withStore(async store => {
       const ipc = fakeIpc()
 
-      registerCatalogIpc(ipc, store)
+      registerCatalogIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
       await expect(ipc.invoke('hermes:catalog:upsert', { sku: '' })).resolves.toEqual({ error: 'name_required' })
       await expect(ipc.invoke('hermes:catalog:upsert', { name: 'X' })).resolves.toEqual({ error: 'sku_required' })
@@ -99,7 +106,7 @@ describe('IPC do catalogo', () => {
 
       const ipc = fakeIpc()
 
-      registerCatalogIpc(ipc, store)
+      registerCatalogIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
       const deA = (await ipc.invoke('hermes:catalog:list', 'empresa-a')) as { products: Product[] }
       const invalido = (await ipc.invoke('hermes:catalog:list', 42)) as { products: Product[] }
@@ -120,7 +127,7 @@ describe('IPC do catalogo', () => {
 
       const ipc = fakeIpc()
 
-      registerCatalogIpc(ipc, store)
+      registerCatalogIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
       const restante = (await ipc.invoke('hermes:catalog:remove', { id: 'nao-e-string' })) as { products: Product[] }
       const vazio = (await ipc.invoke('hermes:catalog:remove', 'products' in criado ? criado.products[0]!.id : '')) as {

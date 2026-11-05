@@ -2,6 +2,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+/** Dono da instalacao. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' } as const
+
 import { describe, expect, it } from 'vitest'
 
 import { CompaniesStore, companiesStorePath, type Branch, type Company } from './companies-store'
@@ -34,7 +37,7 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>) => Promise<T>):
     const store = new CompaniesStore(companiesStorePath(dir))
     const ipc = fakeIpc()
 
-    registerCompaniesIpc(ipc, store)
+    registerCompaniesIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
     return await run(ipc)
   } finally {

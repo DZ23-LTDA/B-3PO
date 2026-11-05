@@ -76,7 +76,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
 
-  registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)))
+  registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)), { actorOf: () => actorOf() })
 
   // Registro de documentos. NAO guarda o binario - ver documents-store.ts para o porque.
   registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)))
@@ -114,7 +114,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     }
   })
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
-  registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)))
+  registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r217: o estoque passou a exigir ator. `onEvent` continua quarto parametro — a guarda vem antes de
   // proposito: um evento de automacao nao pode disparar por uma acao que nao foi autorizada.
   registerInventoryIpc(
