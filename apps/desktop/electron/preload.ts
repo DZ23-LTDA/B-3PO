@@ -173,9 +173,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   purchases: {
     cotacao: payload => ipcRenderer.invoke('hermes:purchases:cotacao', payload),
+    quotations: tenantId => ipcRenderer.invoke('hermes:purchases:quotations', tenantId),
+    removeQuotation: id => ipcRenderer.invoke('hermes:purchases:removeQuotation', id),
     orders: tenantId => ipcRenderer.invoke('hermes:purchases:orders', tenantId),
     receive: payload => ipcRenderer.invoke('hermes:purchases:receive', payload),
     saveOrder: payload => ipcRenderer.invoke('hermes:purchases:saveOrder', payload),
+    saveQuotation: payload => ipcRenderer.invoke('hermes:purchases:saveQuotation', payload),
     saveSupplier: payload => ipcRenderer.invoke('hermes:purchases:saveSupplier', payload),
     suppliers: tenantId => ipcRenderer.invoke('hermes:purchases:suppliers', tenantId)
   },

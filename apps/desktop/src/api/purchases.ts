@@ -48,11 +48,24 @@ export interface CotacaoEscolhida {
   segunda: { prazo_dias: number | null; preco_total_cents: number; quantidade: number; supplier_id: string } | null
 }
 
+export interface CotacaoGravadaRow {
+  created_at: number
+  id: string
+  prazo_dias: number | null
+  preco_unit_cents: number
+  quantidade_disponivel: number
+  supplier_id: string
+  tenant_id: string
+}
+
 interface PurchasesBridge {
   cotacao: (payload: Record<string, unknown>) => Promise<CotacaoEscolhida | { motivo: string }>
   orders: (tenantId?: string) => Promise<{ orders: PurchaseOrderRow[] }>
+  quotations: (tenantId?: string) => Promise<{ quotations: CotacaoGravadaRow[] }>
+  removeQuotation: (id: string) => Promise<{ cotacoes: CotacaoGravadaRow[] }>
   receive: (payload: Record<string, unknown>) => Promise<{ error: string } | { order: PurchaseOrderRow; orders: PurchaseOrderRow[] }>
   saveOrder: (payload: Record<string, unknown>) => Promise<{ error: string } | { order: PurchaseOrderRow; orders: PurchaseOrderRow[] }>
+  saveQuotation: (payload: Record<string, unknown>) => Promise<{ error: string } | { cotacoes: CotacaoGravadaRow[] }>
   saveSupplier: (payload: Record<string, unknown>) => Promise<{ error: string } | { supplier: SupplierRow; suppliers: SupplierRow[] }>
   suppliers: (tenantId?: string) => Promise<{ suppliers: SupplierRow[] }>
 }
@@ -93,6 +106,38 @@ export async function escolherCotacao(
   if (!api) return { motivo: 'sem_cotacoes' }
 
   return api.cotacao({ cotacoes, quantidade })
+}
+
+/**
+ * Cotacoes gravadas da empresa. Vazio quando nao ha preload — a tela trata como "nenhuma proposta salva".
+ */
+export async function listQuotations(tenantId?: string): Promise<CotacaoGravadaRow[]> {
+  const api = bridge()
+
+  if (!api) return []
+
+  const r = await api.quotations(tenantId)
+
+  return Array.isArray(r?.quotations) ? r.quotations : []
+}
+
+/** Grava uma proposta. Repetir o mesmo `id` substitui — recontar o mesmo fornecedor e correcao. */
+export async function saveQuotation(payload: Record<string, unknown>): Promise<{ error: string } | { cotacoes: CotacaoGravadaRow[] }> {
+  const api = bridge()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  return api.saveQuotation(payload)
+}
+
+export async function removeQuotation(id: string): Promise<CotacaoGravadaRow[]> {
+  const api = bridge()
+
+  if (!api) return []
+
+  const r = await api.removeQuotation(id)
+
+  return Array.isArray(r?.cotacoes) ? r.cotacoes : []
 }
 
 export async function listOrders(): Promise<PurchaseOrderRow[]> {
