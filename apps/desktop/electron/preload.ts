@@ -197,6 +197,16 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     mudar: payload => ipcRenderer.invoke('hermes:projetos:mudar', payload),
     podeIniciar: payload => ipcRenderer.invoke('hermes:projetos:podeIniciar', payload)
   },
+  trabalhos: {
+    // r86 do GOAL V2: o trabalho pontual - o terceiro tipo do §12. Ele EXPIRA, ao contrario da
+    // organizacao e do projeto, e e isso que impede a lista de virar arquivo de arrependimentos.
+    abertos: tenantId => ipcRenderer.invoke('hermes:trabalhos:abertos', tenantId),
+    criar: payload => ipcRenderer.invoke('hermes:trabalhos:criar', payload),
+    descartarVencidos: tenantId => ipcRenderer.invoke('hermes:trabalhos:descartarVencidos', tenantId),
+    listar: tenantId => ipcRenderer.invoke('hermes:trabalhos:listar', tenantId),
+    mudar: payload => ipcRenderer.invoke('hermes:trabalhos:mudar', payload),
+    vencidos: tenantId => ipcRenderer.invoke('hermes:trabalhos:vencidos', tenantId)
+  },
   auditoria: {
     // r36 do GOAL V2: leitura da trilha. O ledger existe desde a r35; este e o caminho ate a tela.
     listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
