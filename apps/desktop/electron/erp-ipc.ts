@@ -61,6 +61,7 @@ import { WorkItemStore, workItemStorePath } from './work-item-store'
 import { registerWorkItemIpc } from './work-items-ipc'
 import { registerDeliveryIpc } from './delivery-ipc'
 import { intencaoDeAtendimento } from './delivery-service-link'
+import { intencaoParaContato, patchDoContatoPorAtendimento } from './service-crm-link'
 import { registerSofiaIpc } from './sofia-ipc'
 
 import { openSofiaStore } from './sofia-store'
@@ -207,6 +208,47 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     {
       ticketOpened: async ticket => {
         await dispatchQuietly(dispatch, { detail: ticket, tenant_id: ticket.tenant_id, type: 'ticket.aberto' })
+
+        // r147 do GOAL V2: o ticket ABERTO registra o chamado na ficha do cliente.
+        //
+        // Ate a r146, quem reclamava ficava so no ticket: o CRM sabia da ultima compra e nao sabia dos tres
+        // chamados do mes. A decisao esta em `service-crm-link` (r146), provada em 10 testes — esta linha a poe
+        // no caminho de producao.
+        //
+        // **O nome do contato existente VENCE**: o ticket nao tem nome (r146 mediu), entao um contato criado
+        // aqui nasce "Cliente do atendimento" — e um contato que ja existia mantem o dele.
+        //
+        // **`catch` que nao propaga**: o CRM falhar NAO pode desfazer um ticket aberto. O atendimento e o fato,
+        // a ficha e a consequencia.
+        try {
+          const intencao = intencaoParaContato({
+            contact_phone: ticket.contact_phone,
+            opened_at: ticket.opened_at,
+            tenant_id: ticket.tenant_id,
+            ticket_id: ticket.id
+          })
+
+          if (intencao.tipo === 'registrar') {
+            const existente = (await crmContacts.list(ticket.tenant_id)).find(c => c.phone === intencao.telefone)
+
+            await crmContacts.upsert(
+              {
+                ...patchDoContatoPorAtendimento(intencao),
+                // r147: o `upsert` faz merge, mas o `normalizeContact` PREENCHE com `null` os campos ausentes —
+                // e `{ ...existente, ...contato }` deixa o null vencer. Então a ligação repassa o que o CRM já
+                // sabia, senão o atendimento APAGARIA a última compra.
+                last_purchase_at: existente?.last_purchase_at ?? null,
+                last_purchase_cents: existente?.last_purchase_cents ?? null,
+                last_sale_id: existente?.last_sale_id ?? null,
+                name: existente?.name || intencao.nomeSugerido,
+                phone: intencao.telefone
+              },
+              ticket.tenant_id
+            )
+          }
+        } catch {
+          // Silencioso: o atendimento e o fato, a ficha e a consequencia.
+        }
       }
     }
   )

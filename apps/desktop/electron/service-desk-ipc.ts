@@ -45,7 +45,21 @@ export function toView(ticket: Ticket, now: number): TicketView {
 
 /** Opcional: o dominio anuncia o fato para as automacoes depois de concluir a acao. */
 export interface ServiceDeskEventSink {
-  ticketOpened: (ticket: { id: string; tenant_id: string; number: number; priority: string }) => Promise<void>
+  /**
+   * r147 do GOAL V2: o resumo ganhou contact_phone e opened_at.
+   *
+   * **O ticket JÁ TINHA os dois** — o resumo não os levava, e por isso o consumidor não podia ligar o
+   * chamado a ninguém. É a mesma correção que a r135 fez no evento da venda: **o fato existia, o aviso
+   * não o carregava.**
+   */
+  ticketOpened: (ticket: {
+    id: string
+    tenant_id: string
+    number: number
+    priority: string
+    contact_phone?: null | string
+    opened_at?: number
+  }) => Promise<void>
 }
 
 export function registerServiceDeskIpc(
