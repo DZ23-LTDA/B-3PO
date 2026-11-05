@@ -17,6 +17,18 @@ export interface CrmContactRow {
   consent?: ConsentimentoRow | null
   created_at: number
   email: string
+  /**
+   * A última compra (r136 do GOAL V2).
+   *
+   * **`null` é "nunca comprou"** — não "não sei". Um contato criado à mão no CRM tem `null` aqui, e a tela
+   * precisa dizer isso em vez de mostrar `0`, que seria uma compra de zero real.
+   *
+   * **O histórico completo não está aqui**: `last_*` é o último, e a lista está no domínio de vendas. Este campo
+   * responde a pergunta do balcão ("quando ele comprou por último?") sem uma segunda leitura.
+   */
+  last_purchase_at?: null | number
+  last_purchase_cents?: null | number
+  last_sale_id?: null | string
   name: string
   phone: string
   tags: string[]

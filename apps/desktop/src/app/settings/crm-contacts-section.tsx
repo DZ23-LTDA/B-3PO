@@ -50,6 +50,14 @@ function consentLabel(
 }
 
 export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boolean } = {}) {
+
+/** Centavos -> reais. 
+ull vira travessao, nunca R$ 0,00 (ver o comentario da lista). */
+function formatarReais(centavos: null | number | undefined): string {
+  if (typeof centavos !== 'number') return '—'
+
+  return (centavos / 100).toLocaleString('pt-BR', { currency: 'BRL', style: 'currency' })
+}
   const { t } = useI18n()
   const copy = t.settings.crmContacts
 
@@ -232,6 +240,20 @@ export function CrmContactsSection({ showOpenLink = true }: { showOpenLink?: boo
                 */}
                 <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
                   {consentLabel(contact.consent, copy)}
+                </span>
+                {/*
+                  r136 do GOAL V2: a última compra.
+
+                  O r135 passou a GRAVAR `last_purchase_*` no contato; até esta linha, o dado existia e não
+                  aparecia em lugar nenhum — capacidade sem porta, no último metro.
+
+                  E `null` NÃO é zero: um contato que nunca comprou não mostra data nem valor. Mostrar
+                  "R$ 0,00" seria dizer que ele comprou de graça.
+                */}
+                <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                  {typeof contact.last_purchase_at === 'number'
+                    ? `última compra ${new Date(contact.last_purchase_at).toLocaleDateString()} · ${formatarReais(contact.last_purchase_cents)}`
+                    : 'nunca comprou'}
                 </span>
                 </span>
               </div>
