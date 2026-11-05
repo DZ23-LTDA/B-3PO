@@ -17,6 +17,7 @@
 import type { IpcRegistrar } from './ipc-types'
 import { totaisPorCentroDeCusto } from './finance-store'
 import { withPermission } from './permission-guard'
+import { limitadorDe } from './rate-limit'
 import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
@@ -44,14 +45,26 @@ export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLik
    * Sem ator a resposta é `sem_permissao`, não um erro de sistema: o chamador precisa saber que faltou
    * permissão, e não que o financeiro quebrou.
    */
-  async function comGuarda<T>(action: 'execute' | 'read', resource: string, run: () => Promise<T>): Promise<Denied | T> {
+  async function comGuarda<T>(
+    action: 'execute' | 'read',
+    resource: string,
+    run: (ator: Actor) => Promise<T>
+  ): Promise<Denied | T> {
     const ator = await deps.actorOf()
 
     if (!ator) {
       return { error: 'sem_permissao', reason: 'sem_ator' }
     }
 
-    return withPermission(ator, action, { resource }, run)
+    // r72 do GOAL V2: o `run` recebe o ator.
+    //
+    // Antes ele não recebia, e um canal que precisasse do id (para rate limiting, por exemplo) teria de
+    // chamar `deps.actorOf()` de novo — e um ator que muda entre as duas chamadas daria duas chaves de
+    // limite diferentes para a mesma pessoa.
+    //
+    // **A mudança é compatível**: `() => Promise<T>` continua valendo onde o ator não é usado, porque uma
+    // função com menos parâmetros satisfaz uma com mais. Nenhum call site precisou mudar.
+    return withPermission(ator, action, { resource }, () => run(ator))
   }
 
   ipcMain.handle(
@@ -82,7 +95,15 @@ export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLik
       id: unknown,
       tenantId: unknown
     ): Promise<Denied | { entries: FinanceEntry[] } | { error: string }> =>
-      comGuarda('execute', 'finance', async () => store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId)))
+      comGuarda('execute', 'finance', async ator => {
+        // r72 do GOAL V2: rate limiting no canal que da BAIXA EM DINHEIRO. O ator vem da guarda,
+        // nao de uma segunda chamada a actorOf - as duas poderiam divergir.
+        const limite = limitadorDe('finance:settle').registrar(ator.id)
+
+        if ('error' in limite) return { error: limite.error }
+
+        return store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId))
+      })
   )
 
   // Totais por centro de custo. Derivados dos lancamentos - nenhum total e somado no renderer.
