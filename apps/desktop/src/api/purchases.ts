@@ -273,3 +273,93 @@ export const APROVACAO_ERRO: Record<string, string> = {
   pedido_inexistente: 'Pedido não encontrado.',
   aprovador_obrigatorio: 'Não foi possível identificar quem aprova.'
 }
+// ─── Solicitação de compra (r43 do GOAL V2) ──────────────────────────────────────────────────────
+//
+// Etapa 1 do §26. O canal e o store existem desde a r41/r42; sem estas funções, a fila de solicitações
+// existiria apenas para quem abrisse o JSON no disco.
+
+export const SOLICITACAO_STATUS = ['aberta', 'atendida', 'cancelada'] as const
+
+export type SolicitacaoStatus = (typeof SOLICITACAO_STATUS)[number]
+
+export interface SolicitacaoRow {
+  created_at: number
+  id: string
+  motivo: string
+  product_sku: string
+  quantity_milli: number
+  solicitante: string
+  status: SolicitacaoStatus
+  tenant_id: string
+  updated_at: number
+}
+
+interface SolicitacaoBridge {
+  solicitar: (payload: Record<string, unknown>) => Promise<{ error: string } | { solicitacao: SolicitacaoRow; solicitacoes: SolicitacaoRow[] }>
+  solicitacaoStatus: (payload: Record<string, unknown>) => Promise<{ error: string } | { solicitacao: SolicitacaoRow; solicitacoes: SolicitacaoRow[] }>
+  solicitacoes: (tenantId?: string) => Promise<{ solicitacoes: SolicitacaoRow[] }>
+}
+
+function bridgeSolicitacao(): SolicitacaoBridge | null {
+  return (globalThis as { hermesDesktop?: { purchases?: SolicitacaoBridge } }).hermesDesktop?.purchases ?? null
+}
+
+export async function listarSolicitacoes(): Promise<SolicitacaoRow[]> {
+  const api = bridgeSolicitacao()
+
+  if (!api) return []
+
+  const r = await api.solicitacoes()
+
+  return Array.isArray(r?.solicitacoes) ? r.solicitacoes : []
+}
+
+export async function criarSolicitacao(payload: {
+  motivo: string
+  productSku: string
+  quantityMilli: number
+}): Promise<{ error: string } | { solicitacoes: SolicitacaoRow[] }> {
+  const api = bridgeSolicitacao()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  // O `solicitante` NÃO vai no payload: o processo principal o resolve de `actorOf`. Mandá-lo daqui
+  // seria oferecer ao renderer a chance de pedir em nome de outra pessoa.
+  const r = await api.solicitar({
+    motivo: payload.motivo,
+    product_sku: payload.productSku,
+    quantity_milli: payload.quantityMilli
+  })
+
+  return 'error' in r ? r : { solicitacoes: r.solicitacoes }
+}
+
+export async function mudarSolicitacao(id: string, status: SolicitacaoStatus): Promise<{ error: string } | { solicitacoes: SolicitacaoRow[] }> {
+  const api = bridgeSolicitacao()
+
+  if (!api) return { error: 'compras_indisponivel' }
+
+  const r = await api.solicitacaoStatus({ id, status })
+
+  return 'error' in r ? r : { solicitacoes: r.solicitacoes }
+}
+
+/** As que ainda precisam de ação. Cancelada e atendida não aparecem na fila. */
+export function solicitacoesAbertas(lista: readonly SolicitacaoRow[]): SolicitacaoRow[] {
+  return lista.filter(s => s.status === 'aberta')
+}
+
+/** As recusas, em linguagem que diz o que fazer. */
+export const SOLICITACAO_ERRO: Record<string, string> = {
+  ja_atendida: 'Esta solicitação já virou compra — reabrir faria a mesma necessidade pedir duas vezes.',
+  ja_cancelada: 'Esta solicitação foi cancelada. Reabrir apagaria o cancelamento.',
+  motivo_obrigatorio: 'Escreva por que a compra é necessária.',
+  quantidade_invalida: 'Informe uma quantidade maior que zero.',
+  sku_obrigatorio: 'Escolha o produto.',
+  solicitacao_inexistente: 'Solicitação não encontrada.',
+  status_invalido: 'Status desconhecido.'
+}
+
+export function solicitacaoErroText(codigo: string): string {
+  return SOLICITACAO_ERRO[codigo] ?? codigo
+}

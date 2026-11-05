@@ -18,12 +18,18 @@ import {
   saveSupplier,
   type PurchaseOrderRow,
   type SupplierRow,
+  type LimiteRow,
+  type SolicitacaoRow,
   APROVACAO_ERRO,
   aprovarPedido,
+  criarSolicitacao,
   definirLimite,
   lerLimite,
   limiteLabel,
-  type LimiteRow
+  listarSolicitacoes,
+  mudarSolicitacao,
+  solicitacaoErroText,
+  solicitacoesAbertas
 } from '@/api/purchases'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
@@ -72,19 +78,31 @@ export function ComprasView() {
   // Vazio por SKU = "não contei este item", e o pedido vale. Diferente de "0", que é "não chegou nada".
   const [conferidos, setConferidos] = useState<Record<string, string>>({})
 
+  // r43 do GOAL V2: a fila de solicitações — etapa 1 do §26.
+  //
+  // Antes dela, o fluxo começava na cotação: alguém já sabia o que queria e por quanto, e nada registrava
+  // POR QUÊ. A solicitação é o único registro que responde "por que esta compra foi feita?".
+  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoRow[]>([])
+  const [solSku, setSolSku] = useState('')
+  const [solQtd, setSolQtd] = useState('')
+  const [solMotivo, setSolMotivo] = useState('')
+  const [solErro, setSolErro] = useState('')
+
   const disponivel = purchasesAvailable()
 
   const carregar = useCallback(async () => {
     try {
-      const [listaFornecedores, listaPedidos, listaProdutos, saldos, listaCotacoes, limiteAtual] = await Promise.all([
+        const [listaFornecedores, listaPedidos, listaProdutos, saldos, listaCotacoes, limiteAtual, listaSolicitacoes] =
+          await Promise.all([
         listSuppliers(),
         listOrders(),
         listProducts(),
         loadBalances(),
         // As propostas gravadas voltam com a tela: era o defeito da r194, fechado na r198 e ligado aqui.
         listQuotations(),
-        // r28: o limite vigente vem junto com a tela.
-        lerLimite()
+        lerLimite(),
+        // r43: a fila de solicitacoes vem junto com a tela.
+        listarSolicitacoes()
       ])
 
       setSuppliers(listaFornecedores)
@@ -92,6 +110,8 @@ export function ComprasView() {
       setProducts(listaProdutos)
       setBalances(saldos)
       setCotacoesGravadas(listaCotacoes)
+      setLimite(limiteAtual)
+      setSolicitacoes(listaSolicitacoes)
       setFailure(null)
     } catch {
       setFailure(copy.loadFailed)
@@ -210,6 +230,36 @@ export function ComprasView() {
     }
   }
 
+  const salvarSolicitacao = useCallback(async () => {
+    setSolErro('')
+
+    const q = quantityValue(solQtd)
+
+    if (!solSku.trim()) { setSolErro(solicitacaoErroText('sku_obrigatorio')); return }
+    if (q <= 0) { setSolErro(solicitacaoErroText('quantidade_invalida')); return }
+    if (!solMotivo.trim()) { setSolErro(solicitacaoErroText('motivo_obrigatorio')); return }
+
+    const r = await criarSolicitacao({ motivo: solMotivo, productSku: solSku, quantityMilli: q })
+
+    if ('error' in r) {
+      setSolErro(solicitacaoErroText(r.error))
+    } else {
+      setSolicitacoes(r.solicitacoes)
+      setSolSku('')
+      setSolQtd('')
+      setSolMotivo('')
+    }
+  }, [solMotivo, solQtd, solSku])
+
+  const atender = useCallback(async (id: string, status: 'atendida' | 'cancelada') => {
+    setSolErro('')
+
+    const r = await mudarSolicitacao(id, status)
+
+    if ('error' in r) setSolErro(solicitacaoErroText(r.error))
+    else setSolicitacoes(r.solicitacoes)
+  }, [])
+
   const salvarLimite = useCallback(async () => {
     setAprovacaoErro('')
 
@@ -272,6 +322,90 @@ export function ComprasView() {
         <h1 className="text-lg font-semibold text-foreground">{copy.title}</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">{copy.hint}</p>
       </header>
+
+        {/* r43 do GOAL V2: a fila de solicitacoes — etapa 1 do §26.
+            Antes dela o fluxo comecava na cotacao: alguem ja sabia o que queria e por quanto, e nada
+            registrava POR QUE. */}
+        <section className="rounded-lg border border-(--ui-border) p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-foreground">Solicitacoes de compra</h2>
+            <span className="text-xs text-(--ui-text-tertiary)">{solicitacoesAbertas(solicitacoes).length} aberta(s)</span>
+          </div>
+          <p className="mt-1 text-xs text-(--ui-text-tertiary)">
+            O que falta comprar, e por que. Uma solicitacao atendida nao volta — reabrir faria a mesma
+            necessidade pedir duas vezes.
+          </p>
+
+          <div className="mt-2 grid gap-2 sm:grid-cols-4">
+            <label className="flex flex-col gap-1">
+              <span className="text-(--ui-text-tertiary)">Produto</span>
+              <select
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                onChange={event => setSolSku(event.target.value)}
+                value={solSku}
+              >
+                <option value="">—</option>
+                {products.map(p => (
+                  <option key={p.sku} value={p.sku}>
+                    {p.sku}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-(--ui-text-tertiary)">Quantidade</span>
+              <input
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                inputMode="decimal"
+                onChange={event => setSolQtd(event.target.value)}
+                value={solQtd}
+              />
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-(--ui-text-tertiary)">Por que (obrigatorio)</span>
+              <input
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                onChange={event => setSolMotivo(event.target.value)}
+                placeholder="ex.: acabou no deposito e ha venda marcada"
+                value={solMotivo}
+              />
+            </label>
+          </div>
+          <div className="mt-2">
+            <Button onClick={() => void salvarSolicitacao()} variant="ghost">
+              Pedir
+            </Button>
+          </div>
+          {solErro && <p className="mt-2 text-xs text-(--ui-warning)">{solErro}</p>}
+
+          {solicitacoesAbertas(solicitacoes).length > 0 && (
+            <ul className="mt-2 flex flex-col gap-1 text-xs">
+              {solicitacoesAbertas(solicitacoes).map(s => (
+                <li className="flex items-center justify-between gap-2" key={s.id}>
+                  <span className="text-foreground">
+                    {s.product_sku} · {quantityLabel(s.quantity_milli)} — {s.motivo}
+                  </span>
+                  <span className="flex gap-1">
+                    <button
+                      className="rounded-md border border-(--ui-border) px-2 py-0.5 text-xs text-foreground hover:border-(--ui-accent)"
+                      onClick={() => void atender(s.id, 'atendida')}
+                      type="button"
+                    >
+                      Atender
+                    </button>
+                    <button
+                      className="rounded-md border border-(--ui-border) px-2 py-0.5 text-xs text-foreground hover:border-(--ui-accent)"
+                      onClick={() => void atender(s.id, 'cancelada')}
+                      type="button"
+                    >
+                      Cancelar
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* r28 do GOAL V2: configuracao do limite. Antes dela, o limite so mudava editando codigo —
             e a r27 mediu que ele nem era passado na montagem, entao o controle estava inerte. */}
