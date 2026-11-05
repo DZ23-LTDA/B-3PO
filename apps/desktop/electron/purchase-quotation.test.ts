@@ -35,6 +35,25 @@ describe('escolha', () => {
     if ('proposta' in r) expect(r.proposta.preco_total_cents).toBe(9_000)
   })
 
+  it('preco total e em CENTAVOS de unidades, nao de milesimos', () => {
+    // A r195 fotografou a tela mostrando R\$ 105.000,00 para uma compra de R\$ 105,00 porque o painel passou
+    // milesimos onde este modulo espera unidades. Este teste fixa o contrato: 10 unidades a R\$ 10,50 = R\$ 105,00.
+    const r = escolherCotacao([c({ preco_unit_cents: 1_050, quantidade_disponivel: 10 })], 10)
+
+    if ('proposta' in r) {
+      expect(r.proposta.preco_total_cents).toBe(10_500)
+      expect(r.proposta.quantidade).toBe(10)
+    }
+  })
+
+  it('quantidade em milesimos NAO e aceita como unidades', () => {
+    // Se alguem passar 10000 querendo dizer 10 unidades, o total sai mil vezes maior. O modulo nao adivinha:
+    // ele multiplica pelo que recebe, e e por isso que o painel converte antes.
+    const r = escolherCotacao([c({ preco_unit_cents: 1_050, quantidade_disponivel: 10 })], 10_000)
+
+    // Proposta parcial: 10 disponiveis nao atendem 10000 pedidos.
+    expect('motivo' in r && r.motivo).toBe('sem_proposta_valida')
+  })
   it('devolve quanto economiza contra a segunda', () => {
     // "Escolhi o A" nao convence; "o A custa 200 a menos que o B" justifica a decisao.
     const r = escolherCotacao(

@@ -722,6 +722,7 @@ export interface Translations extends NoticeTranslations {
       needQuantity: string
       noValidOffer: string
       orderQuantity: string
+      prazo: string
       status: string
       statuses: Record<string, string>
       supplier: string

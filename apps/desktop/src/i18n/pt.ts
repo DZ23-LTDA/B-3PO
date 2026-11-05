@@ -1025,6 +1025,7 @@ export const ptOverrides: TranslationOverrides = {
       needQuantity: 'Informe a quantidade do pedido para comparar.',
       noValidOffer: 'Nenhuma proposta atende a quantidade pedida.',
       orderQuantity: 'Quantidade a comprar',
+      prazo: 'Prazo (dias)',
       status: 'Situação',
       statuses: { cancelado: 'cancelado', pedido: 'pedido', recebido: 'recebido', rascunho: 'rascunho' },
       supplier: 'Fornecedor',

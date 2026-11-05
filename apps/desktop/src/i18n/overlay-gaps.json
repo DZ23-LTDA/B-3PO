@@ -1411,6 +1411,7 @@
   "settings.compras.orderQuantity": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.compras.pickProduct": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.compras.pickSupplier": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
+  "settings.compras.prazo": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.compras.product": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.compras.quantity": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "settings.compras.receive": ["ar","de","es","fr","ja","ru","zh","zh-hant"],

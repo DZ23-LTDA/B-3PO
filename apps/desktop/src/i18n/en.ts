@@ -815,6 +815,7 @@ export const en: Translations = {
       needQuantity: 'Enter the order quantity to compare.',
       noValidOffer: 'No proposal meets the requested quantity.',
       orderQuantity: 'Quantity to buy',
+      prazo: 'Lead time (days)',
       status: 'Status',
       statuses: { cancelado: 'cancelled', pedido: 'ordered', recebido: 'received', rascunho: 'draft' },
       supplier: 'Supplier',

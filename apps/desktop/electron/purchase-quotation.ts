@@ -51,6 +51,21 @@ export type PropostaAvaliada = {
  * 4. **A diferenca para a segunda melhor e devolvida** porque "escolhi o A" nao convence ninguem; "o A custa
  *    R$ 120 menos que o B" e o que justifica a decisao.
  */
+/**
+ * Compara propostas para uma quantidade PEDIDA EM UNIDADES.
+ *
+ * A unidade importa e ja custou um defeito: a r188 escreveu `preco * pedida` supondo unidades, enquanto o
+ * estoque deste produto guarda milesimos (`quantity_milli`). A r195 fotografou a tela mostrando **R$ 105.000,00**
+ * para uma compra de R$ 105,00 — mil vezes o valor certo.
+ *
+ * Por isso a conversao e explicita aqui e nao ha uma segunda regra em lugar nenhum:
+ *
+ *   `quantidade` (unidades)        -> o que se quer comprar
+ *   `quantidade_disponivel` (unid) -> o que o fornecedor entrega
+ *   `preco_total_cents`            -> `preco_unit_cents * quantidade`, em centavos
+ *
+ * Quem tem milesimos converte ANTES de chamar. O modulo nao adivinha.
+ */
 export function escolherCotacao(
   cotacoes: readonly Cotacao[],
   quantidadePedida: number

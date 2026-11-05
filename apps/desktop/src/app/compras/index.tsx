@@ -292,6 +292,7 @@ export function ComprasView() {
               needQuantity: copy.needQuantity,
               noValidOffer: copy.noValidOffer,
               orderQuantity: copy.orderQuantity,
+              prazo: copy.prazo,
               price: copy.unitCost,
               quantity: copy.quantity,
               remove: copy.removeItem,
