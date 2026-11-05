@@ -178,6 +178,22 @@ export function parseInventory(raw: string): InventoryFile {
 }
 
 export class InventoryStore {
+  /**
+   * Fila de escrita (r234).
+   *
+   * O \`append\` faz read -> valida -> push -> write. O write e atomico (temp + rename), mas a SEQUENCIA nao era
+   * serializada: duas chamadas simultaneas liam o mesmo saldo e a segunda gravava por cima da primeira.
+   *
+   * O teste \`inventory-concurrency.test.ts\` provou o efeito: duas saidas de 8 com saldo 10 responderam as DUAS
+   * com sucesso, e o ledger ficou com UMA - saldo 2000000 em vez de recusar. Venda fantasma: o cliente paga e o
+   * estoque nao baixa.
+   *
+   * A fila e por INSTANCIA, que e a unidade de escrita do arquivo. Duas instancias sobre o mesmo arquivo
+   * continuam sem protecao mutua - isso exigiria lock de sistema de arquivos, e o produto usa uma instancia por
+   * diretorio (ver \`erp-ipc\`).
+   */
+  private fila: Promise<unknown> = Promise.resolve()
+
   constructor(private readonly filePath: string) {}
 
   /** Livro-razão completo da empresa, na ordem em que os lançamentos aconteceram. */
@@ -200,6 +216,17 @@ export class InventoryStore {
    * ou de venda sem mercadoria, e aceitar isso silenciosamente esconde o problema em vez de mostrá-lo.
    */
   async append(
+    input: unknown
+  ): Promise<{ error: string } | { balance: number; movement: InventoryMovement; movements: InventoryMovement[] }> {
+    // Serializa: a proxima so comeca quando esta terminar. Sem isto, read-modify-write concorrente perde escrita.
+    const resultado = this.fila.then(() => this.appendSerializado(input))
+
+    this.fila = resultado.catch(() => undefined)
+
+    return resultado
+  }
+
+  private async appendSerializado(
     input: unknown
   ): Promise<{ error: string } | { balance: number; movement: InventoryMovement; movements: InventoryMovement[] }> {
     const normalized = normalizeMovement(input, Date.now())
