@@ -59,74 +59,62 @@ O mapa das **35 rotas registradas** em `apps/desktop/src/app/routes.ts` e das **
 
 ---
 
-## OS TRÊS ACHADOS QUE O MAPA REVELOU
+## OS TRÊS "ACHADOS" — e os três estavam ERRADOS
 
-### 1. `/crm` **NÃO está órfão — e a r94 provou**
+**A r93 nomeou três problemas. A r94 e a r95 foram verificar, um por um, e nenhum resistiu.**
 
-**A r93 escreveu que `/crm` era órfão. Estava errado, e o teste sabia.**
+### 1. `/crm` órfão → **falso** (r94)
 
-O `plugin.test.ts:99` tem a resposta:
+Está no **menu do núcleo**, não no do plugin. A r93 leu **um** arquivo de menu e concluiu sobre **o menu inteiro**.
 
-> *"A captura da r97 mostrou «CRM» duas vezes: **o menu do núcleo** (junto de Capabilities, Artefatos e Tarefas agendadas) **já contribui com /crm**, e o plugin contribu[ía também]... **e o usuário foi quem viu — não o teste**."*
+### 2. `/agents` duplica `/agentes` → **falso** (r95)
 
-**Quando a r94 tentou adicionar `/crm` ao `b3po-nav`, o teste recusou:**
+| Tela | O que é | Evidência |
+|---|---|---|
+| `/agentes` (produto) | **agentes departamentais** + aprovações pendentes | `AprovacoesPendentes`, 344 linhas |
+| `/agents` (upstream) | **subagentes do runtime** | `$subagentsBySession`, `$activeSessionId`, 370 linhas |
 
-```
-× nao repete um item que o menu do nucleo ja tem
-  /crm ja vem do menu do nucleo
-```
-
-> **A porta existe — ela está no menu do núcleo**, não no do produto. O mapa da r93 leu **só `b3po-nav`** e concluiu sobre **o menu inteiro**.
+> **São conceitos diferentes** — um é *"quem cuida de quê na empresa"*, o outro é *"o que o runtime está executando agora"*.
 >
-> **É o mesmo erro da r64**: olhar uma fonte e concluir sobre o produto. **O teste já sabia; eu não perguntei a ele.**
+> **A confusão era de nome, e era minha.**
 
-### 2. `/agents` e `/agentes` são **duas rotas para a mesma coisa**
+### 3. `/messaging` duplica `/atendimento` → **falso** (r95)
 
-O menu mostra `/agentes`. `/agents` existe e não aparece.
+| Tela | O que é | Tamanho |
+|---|---|---|
+| `/atendimento` (produto) | a **fila de atendimento** do CRM | 1 arquivo |
+| `/messaging` (upstream) | **configuração de canais** — Telegram QR, allowlist, ícones de plataforma | 5 arquivos, **2000+ linhas** |
 
-> **Uma delas é legado do upstream.** O §13:456 proíbe remover rota sem mapear consumidores — então **o mapa é o primeiro passo**, e ele está aqui.
-
-### 3. `/messaging` e `/atendimento` — a duplicata que o §13:440 nomeia
-
-> *"Não duplicar Mensageria e Atendimento sem definir responsabilidades."*
->
-> **Hoje: `/atendimento` está no menu, `/messaging` não.** A duplicata **existe e está assimétrica** — uma é porta, a outra é rota.
-
-E `/agenda` (menu) + `/cron` (fora) é a segunda metade do §13:441:
-
-> *"Unificar Agenda e Tarefas agendadas somente se forem o mesmo conceito; se uma for cron do runtime, manter distinta e nomear claramente."*
->
-> **`/cron` é cron do runtime** — então **manter distinta está certo**; o que falta é **nomear claramente**, e o menu não a mostra.
+> **Não há duplicata.** Uma é **operar o atendimento**; a outra é **configurar por onde ele chega**.
 
 ---
 
-## O QUE ESTÁ **CORRETO**
+## O QUE ISSO ENSINA — e é a lição central do mapa
+
+> **Uma lista de rotas não é um mapa de funções.**
+>
+> A r93 mediu **os caminhos** e inferiu **os propósitos**. **Um caminho parecido não faz duas telas fazerem a mesma coisa** — e a única forma de saber é **abrir as duas**.
+
+**O documento que a r93 entregou estava errado em três de três achados.** Ele é mantido aqui, corrigido, porque **um mapa que esconde as próprias correções não é um mapa — é uma opinião com formatação de tabela**.
+
+---
+
+## O QUE **É** VERDADEIRO — e agora está medido
 
 | Item | Estado |
 |---|---|
-| Grupos por fluxo (§13:429-438) | ✅ r92 |
+| 35 rotas registradas | ✅ |
+| **23 no menu do produto** (`b3po-nav`) | ✅ |
+| **`/messaging`, `/crm`, `/agents`, `/cron` estão no menu do NÚCLEO** | ✅ **r94–r95** |
+| 7 grupos por fluxo (§13:429-438) | ✅ r92 |
 | `Empresa` ≠ configuração (§13:444) | ✅ r92 |
 | Nenhuma rota removida (§13:456) | ✅ r92 |
-| **Empresa logo após Painel** | ✅ r92 |
 
----
+### O que **continua** faltando
 
-## O QUE **FALTA** — medido
-
-| Item | §13 | Estado |
-|---|---|---|
-| **Seletor de ambiente** | :447 | ❌ |
-| **Menu conforme RBAC e plano** | :448 | ❌ — o menu é estático |
-| **Busca global** | :450 | ❌ |
-| **Modo Engenharia** | :452-454 | ❌ |
-| **Resolver `/crm` órfão** | §6 | ❌ |
-| **Resolver `/agents` duplicada** | :456 | ❌ |
-| **Nomear `/cron` claramente** | :441 | ❌ |
-
----
-
-## PRÓXIMA RODADA
-
-**O `/crm` órfão** — a rota existe, a tela existe, e **ninguém chega nela**. É o item que o §6 chama de *"achado prioritário"* e que a navegação pode resolver **sem criar módulo nenhum**: uma linha no menu.
-
-> **93 rodadas.** O mapa foi **medido**, e mediu três coisas que eu não sabia: **`/crm` está órfão**, **`/agents` duplica `/agentes`**, e **`/messaging` duplica `/atendimento` de forma assimétrica** — as três nomeadas pelo GOAL e nenhuma delas corrigida.
+| Item | §13 |
+|---|---|
+| Seletor de ambiente | :447 |
+| Menu conforme RBAC e plano | :448 |
+| Busca global | :450 |
+| Modo Engenharia | :452 |
