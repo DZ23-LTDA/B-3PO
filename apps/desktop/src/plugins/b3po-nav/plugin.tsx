@@ -61,58 +61,67 @@ interface ItemDeMenu {
  * abre no painel sem empresa cadastrada não sabe dizer a moeda, o fuso nem o imposto.
  */
 const MODULOS: readonly ItemDeMenu[] = [
-  // 1. Onde eu estou
-  { codicon: 'dashboard', label: 'Painel', path: '/painel' },
+    // OS GRUPOS DO §13 (r92 do GOAL V2).
+    //
+    // O §13:429-438 manda agrupar os modulos por FLUXO DE TRABALHO no Modo Empresa. Sem um campo
+    // grupo no SDK, os comentarios fazem o papel: a ordem E o agrupamento, e o test prova que
+    // nao ha buraco nem duplicata.
+    //
+    // E ele corrige uma ambiguidade que a r91 criou: label: 'Organização' aparecia DUAS vezes
+    // (/empresa e /organizacao). O §13:444-445 proibe exatamente essa confusao.
 
-  // 2. Quem eu sou — antes dos módulos, porque é o contexto deles (r15)
-  // r24 do GOAL V2 / §13: o rótulo passa a ser **Organização**. O §13 cria um ambiente chamado
-  // EMPRESA, e manter esta tela rotulada como "Empresa" seria exatamente a confusão que ele proíbe.
-  //
-  // A ROTA continua `/empresa`: trocá-la quebraria links, deeplinks e o `plugin.test.ts` — o §13 manda
-  // mapear consumidores antes de remover, e o rótulo resolve sem remover nada.
-  { codicon: 'library', label: 'Organização', path: '/empresa' },
+    // 1. VISAO GERAL
+    { codicon: 'dashboard', label: 'Painel', path: '/painel' },
+    // r92: 'Empresa' e o AMBIENTE do §13:417, e vem logo apos o Painel - e o contexto de tudo o
+    // que segue. A CONFIGURACAO da organizacao e 'Estrutura', que fica no ultimo grupo (§13:437).
+    { codicon: 'library', label: 'Empresa', path: '/empresa' },
 
-  // 3. O que chega sozinho
-  { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
-  { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
+    // 2. OPERACAO - o que chega e quem atende
+    { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },
+    { codicon: 'calendar', label: 'Agenda', path: '/agenda' },
+    // r92: 'Serviços' e 'RH' sobem para Operacao. O §13:432 os poe aqui, e nao junto de 'Comercio':
+    // o servico prestado e a equipe que presta sao operacao, nao venda de produto.
+    { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
+    { codicon: 'organization', label: 'RH', path: '/rh' },
 
-  // 4. O que eu vendo e tenho
-  { codicon: 'package', label: 'Produtos', path: '/products' },
-  { codicon: 'archive', label: 'Estoque', path: '/stock' },
-  { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
-  { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
-  // r60 do GOAL V2: a entrega - a ultima etapa do vertical. Fica ao lado de Vendas porque e a
-  // continuacao dela: a venda registra, a entrega leva.
-  { codicon: 'rocket', label: 'Entregas', path: '/entregas' },
-  // r80 do GOAL V2: o projeto - o plano que liga a empresa ao trabalho. Fica junto de Entregas
-  // porque e a mesma pergunta ('o que precisa sair?') numa escala maior.
-  { codicon: 'checklist', label: 'Projetos', path: '/projetos' },
-  // r87: trabalhos pontuais - o que comeca e termina. Ao lado de Projetos porque a diferenca e
-  // exatamente essa: projeto tem criterio e prazo como meta; trabalho pontual VENCE.
-  { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' },
-  // r91: a estrutura da organizacao - quem faz o que. Fica junto do trabalho porque e o
-  // mesmo assunto na escala da empresa: o desenho que faz o trabalho acontecer.
-  { codicon: 'organization', label: 'Organização', path: '/organizacao' },
-  { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
+    // 3. COMERCIO - o que eu vendo, tenho, compro e recebo
+    { codicon: 'package', label: 'Produtos', path: '/products' },
+    { codicon: 'archive', label: 'Estoque', path: '/stock' },
+    { codicon: 'cloud-download', label: 'Compras', path: '/compras' },
+    { codicon: 'credit-card', label: 'Vendas', path: '/sales' },
+    // r60: a entrega e a ultima etapa do vertical - a venda registra, a entrega leva.
+    { codicon: 'rocket', label: 'Entregas', path: '/entregas' },
+    { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
 
-  // 5. O que eu devo e recebo
-  { codicon: 'pulse', label: 'Financeiro', path: '/finance' },
+    // 4. TRABALHO - a secao que o §13 nao previu.
+    //
+    // O §13 foi escrito antes do §12, entao nao tem grupo para projeto e trabalho pontual. Eles nao
+    // sao 'comercio' nem 'configuracao': sao o trabalho que atravessa os dois. A secao existe, e a
+    // ausencia dela no texto do GOAL esta dita aqui em vez de escondida.
+    { codicon: 'checklist', label: 'Projetos', path: '/projetos' },
+    { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' },
 
-  // 6. Quem faz e como eu apareço
-  { codicon: 'organization', label: 'RH', path: '/rh' },
-  { codicon: 'megaphone', label: 'Marketing', path: '/marketing' },
-  { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' },
+    // 5. CRESCIMENTO - como eu apareco e como o cliente fica
+    { codicon: 'megaphone', label: 'Marketing', path: '/marketing' },
+    { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' },
 
-  // 7. O que automatiza
-  { codicon: 'robot', label: 'Agentes', path: '/agentes' },
-  { codicon: 'zap', label: 'Automações', path: '/automacoes' },
-  { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' },
+    // 6. INTELIGENCIA E AUTOMACAO
+    { codicon: 'robot', label: 'Agentes', path: '/agentes' },
+    { codicon: 'zap', label: 'Automações', path: '/automacoes' },
+    { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' },
+    { codicon: 'file', label: 'Documentos', path: '/documentos' },
 
-  // 8. O que registra e protege
-  { codicon: 'file', label: 'Documentos', path: '/documentos' },
-  { codicon: 'law', label: 'Privacidade', path: '/privacidade' }
-]
-
+    // 7. CONFIGURACAO DA ORGANIZACAO
+    //
+    // r92: /empresa volta a se chamar **Empresa** - e o AMBIENTE do §13:417, nao a configuracao.
+    // /organizacao passa a se chamar **Estrutura** - nome preciso do que ela e (quem faz o que),
+    // e sem colidir com nenhum outro rotulo.
+    //
+    // A ROTA de /empresa continua: trocar quebraria links e deeplinks, e o §13:456 manda mapear
+    // consumidores antes de remover. O rotulo resolve sem remover nada.
+    { codicon: 'organization', label: 'Estrutura', path: '/organizacao' },
+    { codicon: 'law', label: 'Privacidade', path: '/privacidade' }
+  ]
 const b3poNavPlugin: HermesPlugin = {
   id: 'b3po-nav',
   name: 'B-3PO — Módulos',
