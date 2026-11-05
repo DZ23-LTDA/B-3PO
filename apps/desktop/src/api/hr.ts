@@ -29,15 +29,65 @@ export interface PolicyAnswer {
 interface HrBridge {
   departments: () => Promise<{ departments: DepartmentRow[] }>
   employees: (withSalary: boolean) => Promise<{ employees: EmployeeRow[] }>
+  offboarding: (payload: Record<string, unknown>) => Promise<{
+    bloqueia_acesso: boolean
+    pendentes: string[]
+    pode_encerrar: boolean
+  }>
   policy: (operation: string, reason: string) => Promise<PolicyAnswer>
   saveDepartment: (payload: Record<string, unknown>) => Promise<{ error: string } | { departments: DepartmentRow[] }>
   saveEmployee: (payload: Record<string, unknown>) => Promise<{ error: string } | { employees: EmployeeRow[] }>
+  treinamentos: (payload: Record<string, unknown>) => Promise<{ impeditivos: { id: string; situacao: string }[] }>
 }
 
 function bridge(): HrBridge | null {
   const host = (globalThis as { hermesDesktop?: { hr?: HrBridge } }).hermesDesktop
 
   return host?.hr ?? null
+}
+
+/** Itens que a empresa exige de volta no desligamento. */
+export type ItemDevolucao = 'acesso_sistemas' | 'cracha' | 'equipamento' | 'ferramentas' | 'veiculo' | 'documentos_confidenciais'
+
+export interface ResultadoOffboarding {
+  /** `true` quando o pendente e acesso a sistemas — o unico que continua permitindo agir em nome da empresa. */
+  bloqueia_acesso: boolean
+  pendentes: string[]
+  pode_encerrar: boolean
+}
+
+/**
+ * Avalia o checklist de desligamento. Devolve o que falta, com os itens nomeados.
+ *
+ * Sem preload, devolve "nada a fazer" em vez de lancar: a tela de RH roda em teste e em navegador sem Electron.
+ */
+export async function avaliarOffboarding(
+  exigidos: readonly ItemDevolucao[],
+  concluidos: readonly ItemDevolucao[]
+): Promise<ResultadoOffboarding> {
+  const api = bridge()
+
+  if (!api) return { bloqueia_acesso: false, pendentes: [], pode_encerrar: true }
+
+  return api.offboarding({ concluidos, exigidos })
+}
+
+/**
+ * Treinamentos obrigatorios pendentes ou vencidos.
+ *
+ * `agora` e parametro e nao relogio: dois relatorios do mesmo dia tem que concordar.
+ */
+export async function treinamentosImpeditivos(
+  treinamentos: readonly { concluido_em: number | null; id: string; obrigatorio: boolean; validade_dias: number | null }[],
+  agora: number
+): Promise<{ id: string; situacao: string }[]> {
+  const api = bridge()
+
+  if (!api) return []
+
+  const r = await api.treinamentos({ agora, treinamentos })
+
+  return Array.isArray(r?.impeditivos) ? r.impeditivos : []
 }
 
 export function hrAvailable(): boolean {
