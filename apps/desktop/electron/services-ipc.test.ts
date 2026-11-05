@@ -33,7 +33,7 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>) => Promise<T>):
   try {
     const ipc = fakeIpc()
 
-    registerServicesIpc(ipc, new ServicesStore(servicesStorePath(dir)))
+    registerServicesIpc(ipc, new ServicesStore(servicesStorePath(dir)), { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
     return await run(ipc)
   } finally {

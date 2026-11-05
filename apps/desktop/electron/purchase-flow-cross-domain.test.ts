@@ -51,6 +51,7 @@ beforeEach(async () => {
       }
     } as never,
     {
+      actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }),
       finance,
       inventory,
       limiteDeCompra: async () => limiteAtual ?? { aprovadores: [], cents: null },

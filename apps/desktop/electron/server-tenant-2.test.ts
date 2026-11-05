@@ -31,7 +31,7 @@ afterEach(async () => {
 
 type Canal = (event: unknown, payload: unknown) => unknown
 
-function registrar(register: (ipc: never, store: never) => void, store: unknown) {
+function registrar(register: (ipc: never, store: never, deps?: never) => void, store: unknown) {
   const canais = new Map<string, Canal>()
 
   register(
@@ -40,7 +40,10 @@ function registrar(register: (ipc: never, store: never) => void, store: unknown)
         canais.set(canal, listener)
       }
     } as never,
-    store as never
+    store as never,
+    // r224: os canais de dominio exigem ator desde r215 (financeiro) e r217 (estoque). O teste de
+    // isolamento testa o TENANT, nao a permissao: o dono passa para que o isolamento seja o que se mede.
+    { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) } as never
   )
 
   return canais

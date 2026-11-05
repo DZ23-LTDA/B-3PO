@@ -1,8 +1,15 @@
-// Catálogo de serviços exposto ao renderer.
-
-import type { IpcMainInvokeEvent } from 'electron'
+// Serviços expostos ao renderer por IPC.
+//
+// PERMISSÃO (r224)
+//
+// Serviço carrega preço e duração: `list` já revela a tabela de preços do negócio. `read` para list/find,
+// `execute` para save/remove.
 
 import type { IpcRegistrar } from './ipc-types'
+import { exigirAtor } from './permission-guard'
+import type { Actor } from './rbac'
+import type { IpcMainInvokeEvent } from 'electron'
+
 import type { Service } from './services-store'
 
 export interface ServicesStoreLike {
@@ -12,25 +19,37 @@ export interface ServicesStoreLike {
   upsert: (input: unknown) => Promise<{ error: string } | { service: Service; services: Service[] }>
 }
 
-export function registerServicesIpc(ipcMain: IpcRegistrar, store: ServicesStoreLike): void {
-  ipcMain.handle('hermes:services:list', async (): Promise<{ services: Service[] }> => ({ services: await store.list() }))
+export interface ServicesIpcDeps {
+  /** Ator resolvido no processo principal. `null` recusa. */
+  actorOf: () => Promise<Actor | null>
+}
+
+type Denied = { error: 'sem_permissao'; reason: string }
+
+export function registerServicesIpc(ipcMain: IpcRegistrar, store: ServicesStoreLike, deps: ServicesIpcDeps): void {
+  ipcMain.handle(
+    'hermes:services:list',
+    async (): Promise<Denied | { services: Service[] }> =>
+      exigirAtor(deps.actorOf, 'read', 'services', async () => ({ services: await store.list() }))
+  )
 
   ipcMain.handle(
     'hermes:services:find',
-    async (_event: IpcMainInvokeEvent, name: unknown): Promise<{ service: Service | null }> => ({
-      service: await store.findByName(typeof name === 'string' ? name : '')
-    })
+    async (_event: IpcMainInvokeEvent, name: unknown): Promise<Denied | { service: Service | null }> =>
+      exigirAtor(deps.actorOf, 'read', 'services', async () => ({
+        service: await store.findByName(typeof name === 'string' ? name : '')
+      }))
   )
 
   ipcMain.handle(
     'hermes:services:save',
-    (_event: IpcMainInvokeEvent, payload: unknown): Promise<{ error: string } | { service: Service; services: Service[] }> =>
-      store.upsert(payload)
+    async (_event: IpcMainInvokeEvent, payload: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'services', async () => store.upsert(payload))
   )
 
   ipcMain.handle(
     'hermes:services:remove',
-    (_event: IpcMainInvokeEvent, id: unknown): Promise<{ error: string } | { services: Service[] }> =>
-      store.remove(typeof id === 'string' ? id : '')
+    async (_event: IpcMainInvokeEvent, id: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'services', async () => store.remove(typeof id === 'string' ? id : ''))
   )
 }

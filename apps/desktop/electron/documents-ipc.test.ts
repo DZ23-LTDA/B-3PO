@@ -36,7 +36,8 @@ function fake(over: Partial<Record<'list' | 'remove' | 'totals' | 'upsert', unkn
         canais.set(canal, listener as (event: unknown, payload: unknown) => unknown)
       }
     },
-    store as never
+    store as never,
+    { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) }
   )
 
   return { canais, store }

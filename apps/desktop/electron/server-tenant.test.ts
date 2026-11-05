@@ -50,7 +50,8 @@ describe('canal de documentos', () => {
           canais.set(canal, listener as (event: unknown, payload: unknown) => unknown)
         }
       },
-      store
+      store,
+      { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) }
     )
 
     // O renderer pede explicitamente a outra empresa.
@@ -74,7 +75,8 @@ describe('canal de documentos', () => {
           canais.set(canal, listener as (event: unknown, payload: unknown) => unknown)
         }
       },
-      store
+      store,
+      { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) }
     )
 
     const r = (await canais.get('hermes:documents:list')!(null, { tenant_id: OUTRA_EMPRESA })) as {

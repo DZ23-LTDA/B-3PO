@@ -79,7 +79,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)), { actorOf: () => actorOf() })
 
   // Registro de documentos. NAO guarda o binario - ver documents-store.ts para o porque.
-  registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)))
+  registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)), { actorOf: () => actorOf() })
 
   // Pedido do titular (LGPD). Reusa os MESMOS stores do CRM: nenhum armazenamento paralelo.
   // Consulta publica de CNPJ/CEP: leitura pura, sem gravacao.
@@ -103,7 +103,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   })
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
-  registerServicesIpc(ipcMain, services)
+  registerServicesIpc(ipcMain, services, { actorOf: () => actorOf() })
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))

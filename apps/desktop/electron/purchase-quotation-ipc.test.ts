@@ -29,6 +29,7 @@ beforeEach(async () => {
       }
     } as never,
     {
+      actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }),
       finance: new FinanceStore(financeStorePath(dir)),
       inventory: new InventoryStore(inventoryStorePath(dir)),
       store: new PurchasesStore(purchasesStorePath(dir))
