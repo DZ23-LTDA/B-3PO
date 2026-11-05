@@ -20,6 +20,7 @@ import { receivableForSale, type FinanceEntry } from './finance-store'
 import { balanceFor, type InventoryMovement } from './inventory-store'
 import type { Actor } from './rbac'
 import { withPermission } from './permission-guard'
+import { limitadorDe, mensagemDeLimite } from './rate-limit'
 import { estornoForDevolucao } from './sales-return'
 import { normalizeSale, stockMovementsFor, type Sale } from './sales-store'
 
