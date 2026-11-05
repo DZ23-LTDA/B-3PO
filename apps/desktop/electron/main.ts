@@ -285,6 +285,7 @@ import { resolveGatewayVersion } from './gateway-version'
 import { probeGatewayWebSocket } from './gateway-ws-probe'
 import { windowsGitCandidates } from './git-binary-candidates'
 import { registerGitIpc } from './git-ipc'
+import { atorDeMaquina } from './machine-actor'
 import {
   assertExistingPathForOpen,
   ATTACHMENT_UPLOAD_DEFAULT_MAX_BYTES,
@@ -17053,8 +17054,7 @@ registerFsIpc({
   resolveGitBinary
 })
 
-// Git-driven features (worktrees, review pane, repo scan) — see git-ipc.ts.
-registerGitIpc({ resolveGitBinary, resolveGhBinary })
+registerGitIpc({ actorOf: () => atorDeMaquina(app.getPath('userData')), resolveGhBinary, resolveGitBinary })  // ver git-ipc.ts e machine-actor.ts (fronteira de MAQUINA)
 
 // Client-side loopback callback for MCP OAuth against remote backends — see
 // mcp-oauth-callback-ipc.ts.
