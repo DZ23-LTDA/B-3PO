@@ -12,6 +12,8 @@
  * - mensagem sem texto (audio, imagem) nao vira corpo vazio no CRM: fica fora desta versao, contada em `ignored`.
  */
 
+import { JANELA_REPLAY_MS } from './crm-whatsapp-signature'
+
 import type { CrmConversation, CrmMessage } from './crm-conversations-store'
 
 export interface MetaEvent {
@@ -93,6 +95,20 @@ export function parseMetaWebhook(payload: unknown, now: number = Date.now()): Me
       }
 
       const sentAt = Number.isFinite(segundos) && segundos > 0 ? Math.round(segundos * 1000) : now
+
+      // r69 do GOAL V2: o FRESCOR, por mensagem.
+      //
+      // A idempotência por `external_id` já cobre a reentrega do MESMO payload. O que ela não cobre é um
+      // payload NOVO carregando uma mensagem antiga — e é isso que a janela pega.
+      //
+      // Falta de `timestamp` recusa a mensagem: aceitá-la sem tempo seria acreditar sem verificar. E o
+      // futuro NÃO é recusado — relógio dessincronizado é NTP, não ataque.
+      if (!(Number.isFinite(segundos) && segundos > 0) || now - sentAt > JANELA_REPLAY_MS) {
+        ignored += 1
+
+        continue
+      }
+
       const telefone = de.startsWith('+') ? de : `+${de}`
       const mensagem: CrmMessage = { body: corpo, direction: 'entrada', external_id: externalId, sent_at: sentAt }
 

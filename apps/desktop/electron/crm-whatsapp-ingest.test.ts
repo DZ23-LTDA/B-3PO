@@ -16,7 +16,7 @@ const corpoDe = (texto: string, wamid = 'wamid.ABC123', de = '5511999991111') =>
           {
             value: {
               contacts: [{ wa_id: de, profile: { name: 'Maria Souza' } }],
-              messages: [{ from: de, id: wamid, timestamp: '1793772076', text: { body: texto }, type: 'text' }],
+              messages: [{ from: de, id: wamid, timestamp: String(Math.floor(Date.now() / 1000)), text: { body: texto }, type: 'text' }],
             },
           },
         ],
@@ -48,7 +48,7 @@ describe('ingestMetaWebhook', () => {
     const corpo = corpoDe('Oi! Vi o anuncio.')
     const sink = sinkFalso()
 
-    const r = await ingestMetaWebhook({ appSecret: SEGREDO, now: 1793772077000, rawBody: corpo, signature: assinar(corpo), sink })
+    const r = await ingestMetaWebhook({ appSecret: SEGREDO, now: Date.now(), rawBody: corpo, signature: assinar(corpo), sink })
 
     expect(r).toEqual({ duplicated: 0, ignored: 0, stored: 1 })
     const [conversa] = [...sink.dados.values()]
@@ -60,7 +60,7 @@ describe('ingestMetaWebhook', () => {
   it('REENTREGA do mesmo evento nao duplica mensagem nem mexe na conversa', async () => {
     const corpo = corpoDe('Oi!')
     const sink = sinkFalso()
-    const base = { appSecret: SEGREDO, now: 1793772077000, rawBody: corpo, signature: assinar(corpo), sink }
+    const base = { appSecret: SEGREDO, now: Date.now(), rawBody: corpo, signature: assinar(corpo), sink }
 
     await ingestMetaWebhook(base)
     const depoisDaPrimeira = [...sink.dados.values()][0]

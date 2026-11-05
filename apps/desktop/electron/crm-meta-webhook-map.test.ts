@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { parseMetaWebhook } from './crm-meta-webhook-map'
 
 // Payload no formato da Meta Cloud API. O `timestamp` vem em SEGUNDOS; o store trabalha em ms.
+/** r69: um instante fixo, para os testes serem determinísticos E frescos. */
+const NOW = 1_800_000_000_000
+
 const payload = (texto: string, extra: Record<string, unknown> = {}) => ({
   object: 'whatsapp_business_account',
   entry: [
@@ -18,7 +21,8 @@ const payload = (texto: string, extra: Record<string, unknown> = {}) => ({
               {
                 from: '5511999991111',
                 id: 'wamid.ABC123',
-                timestamp: '1793772076',
+                // r69: dentro da janela de replay (10 min).
+                timestamp: String(Math.floor(NOW / 1000)),
                 text: { body: texto },
                 type: 'text',
               },
@@ -42,12 +46,12 @@ describe('parseMetaWebhook', () => {
     const [evento] = r.events
     expect(evento.phone).toBe('+5511999991111')
     expect(evento.externalId).toBe('wamid.ABC123')
-    expect(evento.sentAt).toBe(1793772076000)
+    expect(evento.sentAt).toBe(NOW)
     expect(evento.conversation.messages[0]).toEqual({
       body: 'Oi! Vi o anuncio.',
       direction: 'entrada',
       external_id: 'wamid.ABC123',
-      sent_at: 1793772076000,
+      sent_at: NOW,
     })
 
     expect(evento.conversation).toMatchObject({
@@ -103,14 +107,15 @@ describe('parseMetaWebhook', () => {
     expect(parseMetaWebhook('lixo')).toEqual({ error: 'payload_invalido' })
   })
 
-  it('timestamp ausente usa "agora" em vez de 1970', () => {
+  it('timestamp ausente é IGNORADA — aceitar sem tempo seria acreditar sem verificar (r69)', () => {
     const semTs = payload('Oi')
     ;(semTs.entry[0].changes[0].value as { messages: Record<string, unknown>[] }).messages[0].timestamp = undefined
 
-    const r = parseMetaWebhook(semTs, 1793772000000)
+      const r = parseMetaWebhook(semTs, NOW)
     if (!('events' in r)) throw new Error('esperava eventos')
-
-    expect(r.events[0].sentAt).toBe(1793772000000)
+      // r68/r69: sem timestamp nao ha como provar frescor - a mensagem nao entra.
+      expect(r.events).toHaveLength(0)
+      expect(r.ignored).toBeGreaterThan(0)
   })
 
   it('duas entregas do MESMO payload produzem o mesmo external_id (idempotencia a jusante)', () => {

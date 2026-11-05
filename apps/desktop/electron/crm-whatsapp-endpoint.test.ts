@@ -17,7 +17,7 @@ const corpoDe = (texto = 'Oi! Vi o anuncio.') =>
           {
             value: {
               contacts: [{ wa_id: '5511999991111', profile: { name: 'Maria Souza' } }],
-              messages: [{ from: '5511999991111', id: 'wamid.ABC123', timestamp: '1793772076', text: { body: texto } }],
+              messages: [{ from: '5511999991111', id: 'wamid.ABC123', timestamp: String(Math.floor(Date.now() / 1000)), text: { body: texto } }],
             },
           },
         ],
@@ -45,6 +45,9 @@ const pedido = (extra: Record<string, unknown> = {}) => {
 
   return {
     appSecret: SEGREDO,
+    // r69: now explicito, coerente com o timestamp do payload. Sem ele o frescor usa o relogio
+    // do modulo, e o teste fica dependente de timing entre arquivos.
+    now: Date.now(),
     body,
     expectedToken: TOKEN,
     headers: { 'x-b3po-token': TOKEN, 'x-hub-signature-256': assinar(body) },

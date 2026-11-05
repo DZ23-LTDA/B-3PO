@@ -17,7 +17,7 @@ const corpoDe = (texto = 'Oi! Vi o anuncio.') =>
           {
             value: {
               contacts: [{ wa_id: '5511999991111', profile: { name: 'Maria Souza' } }],
-              messages: [{ from: '5511999991111', id: 'wamid.ABC123', timestamp: '1793772076', text: { body: texto } }],
+              messages: [{ from: '5511999991111', id: 'wamid.ABC123', timestamp: String(Math.floor(Date.now() / 1000)), text: { body: texto } }],
             },
           },
         ],
