@@ -52,6 +52,12 @@ import { AuditStore, auditStorePath, configurarColetorDeAuditoria } from './audi
 import { registerAuditIpc } from './audit-ipc'
 import { DeliveryStore, deliveryStorePath } from './delivery-store'
 import { ReservationStore, reservationStorePath } from './reservation-store'
+import { registerOrganizationIpc } from './organization-ipc'
+import { OrganizationStore, organizationStorePath } from './organization-store'
+import { ProjectStore, projectStorePath } from './project-store'
+import { registerProjectIpc } from './projects-ipc'
+import { WorkItemStore, workItemStorePath } from './work-item-store'
+import { registerWorkItemIpc } from './work-items-ipc'
 import { registerDeliveryIpc } from './delivery-ipc'
 import { registerSofiaIpc } from './sofia-ipc'
 
