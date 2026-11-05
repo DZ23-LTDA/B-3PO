@@ -23,7 +23,8 @@ export interface CrmContact {
   /**
    * Base legal do contato para receber comunicacao (LGPD).
 ull = nunca registrado, que NAO e o mesmo
-   * que ecusado: ausencia de registro e ausencia de consentimento, mas precisa aparecer como tal em vez
+   * que 
+ecusado: ausencia de registro e ausencia de consentimento, mas precisa aparecer como tal em vez
    * de virar um alse que ninguem sabe se foi recusa ou esquecimento.
    */
   consent: Consentimento | null
@@ -61,6 +62,14 @@ ull = nunca registrado, que NAO e o mesmo
   last_purchase_at: null | number
   last_purchase_cents: null | number
   last_sale_id: null | string
+  /**
+   * O ultimo chamado de atendimento (r146).
+   *
+   * **O CRM ve so a data e o id** — uma contagem de reclamacoes seria uma opiniao; a data e um fato. E o
+   * historico completo esta no service-desk-store, nao aqui.
+   */
+  last_ticket_at: null | number
+  last_ticket_id: null | string
 }
 
 export interface CrmStoreFile {
@@ -171,7 +180,9 @@ export function normalizeContact(input: unknown, now: number, tenantId: string =
       // de zero real - fato diferente de nao ter vendido nada.
       last_purchase_at: typeof raw['last_purchase_at'] === 'number' ? raw['last_purchase_at'] : null,
       last_purchase_cents: typeof raw['last_purchase_cents'] === 'number' ? raw['last_purchase_cents'] : null,
-      last_sale_id: typeof raw['last_sale_id'] === 'string' && raw['last_sale_id'] ? raw['last_sale_id'] : null
+      last_sale_id: typeof raw['last_sale_id'] === 'string' && raw['last_sale_id'] ? raw['last_sale_id'] : null,
+      last_ticket_at: typeof raw['last_ticket_at'] === 'number' ? raw['last_ticket_at'] : null,
+      last_ticket_id: typeof raw['last_ticket_id'] === 'string' && raw['last_ticket_id'] ? raw['last_ticket_id'] : null
     }
   }
 }
