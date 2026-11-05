@@ -1266,6 +1266,11 @@ export const ptOverrides: TranslationOverrides = {
       unavailable: 'As empresas precisam do aplicativo desktop para funcionar.'
     },
     finance: {
+      costCenter: 'Centro de custo',
+      costCenters: 'Por centro de custo',
+      noCostCenter: 'Nao alocado',
+      open: 'Em aberto',
+      paid: 'Pago',
       add: 'Lançar',
       alreadyPaid: 'Este lançamento já está liquidado.',
       amount: 'Valor',

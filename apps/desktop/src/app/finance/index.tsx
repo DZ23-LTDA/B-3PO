@@ -8,6 +8,7 @@ import {
   financeAvailable,
   isOverdue,
   listEntries,
+  loadCostCenters,
   loadTotals,
   settleEntry,
   type FinanceEntryRow,
@@ -31,6 +32,7 @@ export function FinanceView() {
   const { t } = useI18n()
   const copy = t.settings.finance
 
+  const [centros, setCentros] = useState<Record<string, { pago_cents: number; pendente_cents: number }>>({})
   const [entries, setEntries] = useState<null | FinanceEntryRow[]>(null)
   const [totals, setTotals] = useState<FinanceTotalsRow | null>(null)
   const [failure, setFailure] = useState<null | string>(null)
@@ -44,8 +46,9 @@ export function FinanceView() {
 
   const carregar = useCallback(async () => {
     try {
-      const [lista, totais] = await Promise.all([listEntries(), loadTotals()])
+      const [lista, totais, porCentro] = await Promise.all([listEntries(), loadTotals(), loadCostCenters()])
 
+      setCentros(porCentro)
       setEntries(lista)
       setTotals(totais)
       setFailure(null)
@@ -234,6 +237,41 @@ export function FinanceView() {
               </tbody>
             </table>
           )}
+
+          {/* Centros de custo: derivados dos lancamentos, nao somados aqui. `''` aparece como nao alocado. */}
+          {Object.keys(centros).length > 0 ? (
+            <section className="flex flex-col gap-1">
+              <h2 className="text-[length:var(--conversation-caption-font-size)] font-medium text-foreground">
+                {copy.costCenters}
+              </h2>
+              <table className="w-full border-collapse text-left text-[length:var(--conversation-caption-font-size)]">
+                <thead>
+                  <tr className="text-(--ui-text-tertiary)">
+                    <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.costCenter}</th>
+                    <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.paid}</th>
+                    <th className="border-b border-(--ui-border) py-1 font-medium">{copy.open}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(centros)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([centro, total]) => (
+                      <tr key={centro || '(vazio)'}>
+                        <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">
+                          {centro || copy.noCostCenter}
+                        </td>
+                        <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">
+                          {priceLabel(total.pago_cents)}
+                        </td>
+                        <td className="border-b border-(--ui-border) py-1 text-(--ui-text-secondary)">
+                          {priceLabel(total.pendente_cents)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </section>
+          ) : null}
         </>
       )}
     </div>

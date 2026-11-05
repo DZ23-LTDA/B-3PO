@@ -209,6 +209,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   },
   finance: {
     append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
+    costCenters: tenantId => ipcRenderer.invoke('hermes:finance:costCenters', tenantId),
     list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),
     settle: (id, tenantId) => ipcRenderer.invoke('hermes:finance:settle', id, tenantId),
     totals: tenantId => ipcRenderer.invoke('hermes:finance:totals', tenantId)

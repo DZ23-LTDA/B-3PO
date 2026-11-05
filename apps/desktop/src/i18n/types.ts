@@ -963,6 +963,11 @@ export interface Translations extends NoticeTranslations {
       unavailable: string
     }
     finance: {
+      costCenter: string
+      costCenters: string
+      noCostCenter: string
+      open: string
+      paid: string
       add: string
       alreadyPaid: string
       amount: string

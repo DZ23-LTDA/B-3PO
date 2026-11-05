@@ -7,6 +7,13 @@
 
 export interface FinanceEntryRow {
   amount_cents: number
+  /**
+   * Centro de custo (r184).
+   *
+   * `''` = nao alocado. Ausencia do campo em registros antigos tambem significa nao alocado — a tela trata os
+   * dois casos igual, mas nao inventa um centro.
+   */
+  cost_center?: string
   created_at: number
   currency: string
   description: string
@@ -20,6 +27,11 @@ export interface FinanceEntryRow {
   updated_at: number
 }
 
+export interface CostCenterTotalRow {
+  pago_cents: number
+  pendente_cents: number
+}
+
 export interface FinanceTotalsRow {
   openPayableCents: number
   openReceivableCents: number
@@ -31,6 +43,7 @@ export interface FinanceTotalsRow {
 interface FinanceBridge {
   append: (payload: Record<string, unknown>) => Promise<{ error: string } | { entry: FinanceEntryRow; entries: FinanceEntryRow[] }>
   list: (tenantId?: string) => Promise<{ entries: FinanceEntryRow[] }>
+  costCenters: (tenantId?: string) => Promise<{ costCenters: Record<string, CostCenterTotalRow> }>
   settle: (id: string, tenantId?: string) => Promise<{ error: string } | { entries: FinanceEntryRow[] }>
   totals: (tenantId?: string) => Promise<{ totals: FinanceTotalsRow }>
 }
@@ -43,6 +56,17 @@ function bridge(): FinanceBridge | null {
 
 export function financeAvailable(): boolean {
   return bridge() !== null
+}
+
+/** Totais por centro de custo. `''` aparece como "nao alocado" — nao some do relatorio. */
+export async function loadCostCenters(tenantId?: string): Promise<Record<string, CostCenterTotalRow>> {
+  const api = bridge()
+
+  if (!api) return {}
+
+  const r = await api.costCenters(tenantId)
+
+  return r?.costCenters ?? {}
 }
 
 export async function listEntries(tenantId?: string): Promise<FinanceEntryRow[]> {

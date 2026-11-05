@@ -4,6 +4,7 @@
 // calculados lá — a tela nunca soma nem decide o que está vencido.
 
 import type { IpcRegistrar } from './ipc-types'
+import { totaisPorCentroDeCusto } from './finance-store'
 import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
@@ -41,5 +42,12 @@ export function registerFinanceIpc(ipcMain: IpcRegistrar, store: FinanceStoreLik
     'hermes:finance:settle',
     (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ entries: FinanceEntry[] } | { error: string }> =>
       store.settle(typeof id === 'string' ? id : '', serverTenant(tenantId))
+  )
+  // Totais por centro de custo. Derivados dos lancamentos - nenhum total e somado no renderer.
+  ipcMain.handle(
+    'hermes:finance:costCenters',
+    async (_event: IpcMainInvokeEvent, tenantId: unknown) => ({
+      costCenters: totaisPorCentroDeCusto(await store.list(serverTenant(tenantId)))
+    })
   )
 }

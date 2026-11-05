@@ -45,10 +45,13 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>, store: FinanceS
 const amanha = () => Date.now() + 86_400_000
 
 describe('IPC do financeiro', () => {
-  it('registra os quatro canais', async () => {
+  // r209: eram quatro canais; costCenters entrou para o 18 (centros de custo).
+  // A lista continua FECHADA: protege contra canal acidental, nao um numero.
+  it('registra exatamente os canais do financeiro', async () => {
     await withIpc(async ipc => {
       expect(ipc.channels()).toEqual([
         'hermes:finance:append',
+        'hermes:finance:costCenters',
         'hermes:finance:list',
         'hermes:finance:settle',
         'hermes:finance:totals'

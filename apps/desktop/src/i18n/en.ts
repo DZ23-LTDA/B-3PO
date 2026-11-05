@@ -1056,6 +1056,11 @@ export const en: Translations = {
       unavailable: 'Companies need the desktop app to work.'
     },
     finance: {
+      costCenter: 'Cost center',
+      costCenters: 'By cost center',
+      noCostCenter: 'Unallocated',
+      open: 'Open',
+      paid: 'Paid',
       add: 'Add entry',
       alreadyPaid: 'This entry is already settled.',
       amount: 'Amount',
