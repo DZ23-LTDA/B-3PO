@@ -104,7 +104,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
   registerServicesIpc(ipcMain, services)
-  registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)))
+  // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
+  registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
 
   registerServiceDeskIpc(ipcMain, desk, {

@@ -2,6 +2,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+/** Dono da instalacao: passa em qualquer acao. */
+const DONO = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' } as const
+
 import { describe, expect, it } from 'vitest'
 
 import { HrStore, hrStorePath, type Department } from './hr-store'
@@ -33,7 +36,7 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>) => Promise<T>):
   try {
     const ipc = fakeIpc()
 
-    registerHrIpc(ipc, new HrStore(hrStorePath(dir)))
+    registerHrIpc(ipc, new HrStore(hrStorePath(dir)), { actorOf: async () => DONO })
 
     return await run(ipc)
   } finally {
