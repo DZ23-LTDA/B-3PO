@@ -19,7 +19,7 @@
  * separada, com aprovacao propria (r182). O painel compara e mostra; quem compra decide.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { priceLabel } from '@/api/catalog'
 import { escolherCotacao, type CotacaoEscolhida, type CotacaoRow } from '@/api/purchases'
@@ -44,6 +44,12 @@ export interface CotacaoPanelProps {
     result: string
     supplier: string
   }
+  /** Propostas ja gravadas, carregadas ao montar. Ausente = tela nova. */
+  gravadas?: CotacaoRow[]
+  /** Grava a proposta. Ausente = so memoria (comportamento da r194). */
+  onGravar?: (proposta: CotacaoRow) => void
+  /** Remove a proposta gravada do fornecedor. */
+  onRemover?: (supplierId: string) => void
   /** Nomes de fornecedor por id, para exibir o nome em vez do id cru. */
   supplierNames: Record<string, string>
 }
@@ -70,9 +76,17 @@ function mili(texto: string): number {
   return Number.isFinite(valor) && valor > 0 ? Math.round(valor * 1000) : 0
 }
 
-export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelProps) {
+export function CotacaoPanel({ copy, gravadas, onGravar, onRemover, quantidade, supplierNames }: CotacaoPanelProps) {
   const [form, setForm] = useState(VAZIA)
-  const [propostas, setPropostas] = useState<Proposta[]>([])
+  // O estado nasce das propostas gravadas: quem sai da tela e volta nao perde o trabalho (r198).
+  const [propostas, setPropostas] = useState<Proposta[]>(() => gravadas ?? [])
+
+  // `useState` com inicializador NAO reage a prop que chega depois. O `listQuotations` e async, entao o painel
+  // monta com lista vazia e a proposta gravada so aparece se houver este efeito. A r201 mediu exatamente isso:
+  // o canal gravava e a tela continuava vazia.
+  useEffect(() => {
+    if (gravadas) setPropostas(gravadas)
+  }, [gravadas])
   const [resultado, setResultado] = useState<CotacaoEscolhida | { motivo: string } | null>(null)
   const [error, setError] = useState('')
   const [volume, setVolume] = useState('')
@@ -92,15 +106,17 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
     }
 
     setError('')
-    setPropostas([
-      ...propostas,
-      {
-        prazo_dias: form.prazo.trim() ? Number(form.prazo.trim()) : null,
-        preco_unit_cents: preco,
-        quantidade_disponivel: disponivel,
-        supplier_id: form.supplier
-      }
-    ])
+
+    const nova: Proposta = {
+      prazo_dias: form.prazo.trim() ? Number(form.prazo.trim()) : null,
+      preco_unit_cents: preco,
+      quantidade_disponivel: disponivel,
+      supplier_id: form.supplier
+    }
+
+    setPropostas([...propostas, nova])
+    // Gravar e efeito de fora: o painel nao sabe onde a proposta mora, so avisa que ela existe.
+    onGravar?.(nova)
     // So o fornecedor e limpo: quem cota varios itens do mesmo fornecedor nao quer redigitar o resto.
     setForm({ ...VAZIA, supplier: form.supplier })
     setResultado(null)
@@ -208,6 +224,7 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
               </span>
               <Button
                 onClick={() => {
+                  onRemover?.(p.supplier_id)
                   setPropostas(propostas.filter((_, i) => i !== index))
                   setResultado(null)
                 }}

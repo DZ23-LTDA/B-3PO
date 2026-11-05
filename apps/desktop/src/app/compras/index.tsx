@@ -7,7 +7,11 @@ import {
   listOrders,
   listSuppliers,
   orderPayload,
+  listQuotations,
   purchasesAvailable,
+  removeQuotation,
+  saveQuotation,
+  type CotacaoGravadaRow,
   quantityValue,
   saveOrder,
   saveSupplier,
@@ -32,6 +36,7 @@ export function ComprasView() {
   const { t } = useI18n()
   const copy = t.settings.compras
 
+  const [cotacoesGravadas, setCotacoesGravadas] = useState<CotacaoGravadaRow[]>([])
   const [suppliers, setSuppliers] = useState<null | SupplierRow[]>(null)
   const [orders, setOrders] = useState<PurchaseOrderRow[]>([])
   const [products, setProducts] = useState<ProductRow[]>([])
@@ -50,17 +55,20 @@ export function ComprasView() {
 
   const carregar = useCallback(async () => {
     try {
-      const [listaFornecedores, listaPedidos, listaProdutos, saldos] = await Promise.all([
+      const [listaFornecedores, listaPedidos, listaProdutos, saldos, listaCotacoes] = await Promise.all([
         listSuppliers(),
         listOrders(),
         listProducts(),
-        loadBalances()
+        loadBalances(),
+        // As propostas gravadas voltam com a tela: era o defeito da r194, fechado na r198 e ligado aqui.
+        listQuotations()
       ])
 
       setSuppliers(listaFornecedores)
       setOrders(listaPedidos)
       setProducts(listaProdutos)
       setBalances(saldos)
+      setCotacoesGravadas(listaCotacoes)
       setFailure(null)
     } catch {
       setFailure(copy.loadFailed)
@@ -299,8 +307,29 @@ export function ComprasView() {
               result: copy.bestOffer,
               supplier: copy.supplier
             }}
+            gravadas={cotacoesGravadas.map(c => ({
+              prazo_dias: c.prazo_dias,
+              preco_unit_cents: c.preco_unit_cents,
+              quantidade_disponivel: c.quantidade_disponivel,
+              supplier_id: c.supplier_id
+            }))}
             quantidade={quantityValue(quantidade)}
             supplierNames={Object.fromEntries((suppliers ?? []).map(s => [s.id, s.name]))}
+            onGravar={proposta => {
+              // Id derivado do fornecedor: recontar o mesmo fornecedor substitui, nao duplica (regra do store).
+              void saveQuotation({
+                id: `cot-${proposta.supplier_id}`,
+                prazo_dias: proposta.prazo_dias,
+                preco_unit_cents: proposta.preco_unit_cents,
+                quantidade_disponivel: proposta.quantidade_disponivel,
+                supplier_id: proposta.supplier_id
+              }).then(r => {
+                if ('cotacoes' in r) setCotacoesGravadas(r.cotacoes)
+              })
+            }}
+            onRemover={supplierId => {
+              void removeQuotation(`cot-${supplierId}`).then(setCotacoesGravadas)
+            }}
           />
 
           {suppliers === null ? (

@@ -34,6 +34,7 @@ import { dueSoonConditions, overdueConditions } from './automation-conditions'
 import { SweepStore, sweepStatePath } from './automation-sweep'
 import { PurchasesStore, purchasesStorePath } from './purchases-store'
 import { registerPurchasesIpc } from './purchases-ipc'
+import { QuotationStore, quotationsStorePath } from './quotation-store'
 import { SchedulingStore, schedulingStorePath } from './scheduling-store'
 import { registerSchedulingIpc } from './scheduling-ipc'
 import { SalesStore, salesStorePath } from './sales-store'
@@ -125,7 +126,14 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Caminho novo: agendar exige servico do catalogo e deriva o fim do horario da duracao real.
   registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
-  registerPurchasesIpc(ipcMain, { finance, inventory, store: new PurchasesStore(purchasesStorePath(userDataDir)) })
+  registerPurchasesIpc(ipcMain, {
+    finance,
+    inventory,
+    // Sem esta injecao o canal de cotacao responde vazio e o save devolve cotacoes_indisponivel: o store
+    // existia e ninguem alcancava. A captura da r201 pegou exatamente isso.
+    quotations: new QuotationStore(quotationsStorePath(userDataDir)),
+    store: new PurchasesStore(purchasesStorePath(userDataDir))
+  })
   // O ator e resolvido AQUI, no processo principal: o renderer nao diz quem e.
   const actors = new ActorsStore(actorsStorePath(userDataDir))
 
