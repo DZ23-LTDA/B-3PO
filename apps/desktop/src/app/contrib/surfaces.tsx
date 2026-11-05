@@ -64,6 +64,8 @@ const OrganizacaoView = lazy(async () => ({ default: (await import('../organizac
 const BuscaView = lazy(async () => ({ default: (await import('../busca')).BuscaView }))
 const DocumentosView = lazy(async () => ({ default: (await import('../documentos')).DocumentosView }))
 const PrivacidadeView = lazy(async () => ({ default: (await import('../privacidade')).PrivacidadeView }))
+// r124 do GOAL V2: a tela do ambiente (§13:413-419) - mostra os dois ambientes e troca a preferencia.
+const AmbienteView = lazy(async () => ({ default: (await import('../ambiente')).AmbienteScreen }))
 
 export function LegacySessionRedirect() {
   const { sessionId } = useParams()
@@ -243,6 +245,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
           <Route element={page(<BuscaView />)} path="busca" />
       <Route element={page(<DocumentosView />)} path="documentos" />
         <Route element={page(<PrivacidadeView />)} path="privacidade" />
+            <Route element={page(<AmbienteView />)} path="ambiente" />
       <Route element={null} path="agents" />
       <Route element={null} path="command-center" />
       <Route element={null} path="cron" />
