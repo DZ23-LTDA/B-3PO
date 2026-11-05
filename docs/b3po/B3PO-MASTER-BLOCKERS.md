@@ -14,6 +14,7 @@
 | **B4** | **Gateway de pagamento** | BLOCKED | §16, sem credencial |
 | **B5** | **Instalação real do MSIX** | **não testada** | exige instalar o pacote no Windows |
 | **B6** | **Foco, tabulação, contraste** | não auditado | exige o app aberto |
+| **B7** | **Filtro do ambiente na barra lateral** | **BLOCKED** | o host é pp/chat/sidebar — código do upstream |
 
 > **O §22 diz**: *"Se uma credencial/serviço/hardware faltar, registrar BLOCKED_BY_EXTERNAL_DEPENDENCY e continuar tarefas independentes. **Nunca declarar sucesso simulado.**"*
 

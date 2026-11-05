@@ -67,8 +67,10 @@
 | grupos de menu no contexto Empresa | ✅ **r92** |
 | **busca global** | ✅ **r96–r98** |
 | **Sofia no contexto** | ⚠️ está no menu, **não é contextual** |
+| **conteúdo do ambiente Engenharia** | ✅ **11 módulos, 4 grupos** (r130) |
+| **tela mostrando os dois ambientes** | ✅ **r131, com a origem à vista** |
 
-**IMPLEMENTED** — falta o **Modo Engenharia**.
+**IMPLEMENTED** — o Modo Engenharia **tem mapa e tela** (r130–r131); o que falta é **o filtro na barra**, que é do host upstream (**B7**).
 
 ---
 

@@ -24,7 +24,7 @@
 | **Gate** | **14 checks, ok** |
 | **Typecheck** | **0 erros** (2 projetos) |
 | **Status do produto** | **NOT_READY** |
-| **Rodada** | **120 de 256** |
+| **Rodada** | **132 de 256** |
 | **Fases VERIFIED (P0–P8)** | **4 de 9** |
 | **Fluxos ponta a ponta provados** | **4** |
 
@@ -58,6 +58,8 @@
 
 ## A PRÓXIMA AÇÃO EXATA (§23: "indicar próxima ação")
 
-**Rodada 121** — o **Modo Engenharia** (§13:452-454), que é a **única fase P3/P7 bloqueada por trabalho, não por credencial**.
+**Rodada 133** — **expansão do vertical** com o que **não depende de credencial**.
 
-> **É o maior item restante**: projetos, repositórios, issues, arquitetura, código, testes, CI/CD, artefatos. **Semanas**, e começa pelo que já existe (`/projetos`, `/artefatos`).
+> O §17 foi medido na **r102** (9 de 9 domínios) e provado em **4 fluxos** (compras, venda, orquestração, atendimento). O que sobra é **ligar o quinto** ou **aprofundar um dos quatro** — e o critério é o do §17: *"somente com necessidade comprovada"*.
+>
+> **O Modo Engenharia não é mais a resposta**: a r130 e a r131 o fecharam até onde o produto controla (11 módulos, 4 grupos, tela mostrando os dois ambientes). O que falta dele é **o host da barra lateral**, que é do upstream — **B7**.

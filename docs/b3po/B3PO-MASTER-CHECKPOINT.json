@@ -1,60 +1,82 @@
 {
-  "schemaVersion": 1,
   "medido": {
-    "modulosNoMenu": 23,
-    "gate": "14 checks, ok",
+    "suiteRenderer": "13103 testes: 13075 verdes, 10 upstream, 18 skipped",
     "canaisComGuarda": "17 de 46",
-    "typecheck": "0 erros",
-    "rotas": 36,
-    "testesElectron": "5352 passaram, 41 falharam (ambiente), 207 skipped",
+    "suiteElectron": "5604 testes: 5357 verdes, 40 de ambiente, 207 skipped",
     "fluxosProvados": 4,
-    "dominiosDo17": "9 de 9"
+    "modulosNoMenu": 23,
+    "ambientesComConteudo": "2 de 2",
+    "testesSofia": 117,
+    "typecheck": "0 erros (2 projetos)",
+    "rotas": 37,
+    "gate": "14 checks, ok",
+    "modulosDeEngenharia": 11
   },
+  "documentos": {
+    "goalRegistro": "docs/b3po/B3PO-MASTER-GOAL-V2-REGISTRO.md",
+    "goalArquivoOriginal": "AUSENTE - verificado na r129",
+    "setimaOrdem": {
+      "ipc": "17 de 46 com guarda, ratchet vigia",
+      "navegacao": "2 ambientes, 23 + 11 modulos, tela pronta; filtro depende do host",
+      "sofia": "definida, 117 testes, contrato com a spec (r128)",
+      "protegido": "ok",
+      "crm": "nao era orfao (r94)",
+      "orquestrador": "4 fluxos provados",
+      "desktop": "build, pack e MSIX 1.0.0 verificados"
+    }
+  },
+  "checkpoint": {
+    "fase": "GOAL V2 — rodada 132 de 256",
+    "dataHora": "2026-11-05T17:34:29-03:00",
+    "commit": "947cdf49269b",
+    "tarefa": "reconciliacao dos checkpoints (23) apos as rodadas 129-131",
+    "status": "IN_PROGRESS",
+    "branch": "b3po-brand"
+  },
+  "schemaVersion": 1,
   "bloqueios": [
     {
-      "motivo": "AZURE_SIGN_* ausente",
       "estado": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
       "item": "assinatura Authenticode",
-      "id": "B1"
+      "id": "B1",
+      "motivo": "AZURE_SIGN_* ausente"
     },
     {
-      "motivo": "16, sem credencial",
       "estado": "BLOCKED",
       "item": "marketplace BR",
-      "id": "B2"
+      "id": "B2",
+      "motivo": "16, sem credencial"
     },
     {
-      "motivo": "16, sem credencial",
       "estado": "BLOCKED",
       "item": "WhatsApp Cloud API",
-      "id": "B3"
+      "id": "B3",
+      "motivo": "16, sem credencial"
     },
     {
-      "motivo": "16, sem credencial",
       "estado": "BLOCKED",
       "item": "gateway de pagamento",
-      "id": "B4"
+      "id": "B4",
+      "motivo": "16, sem credencial"
     },
     {
-      "motivo": "exige instalar no Windows",
       "estado": "PENDING",
       "item": "instalacao real do MSIX",
-      "id": "B5"
+      "id": "B5",
+      "motivo": "exige instalar no Windows"
     },
     {
-      "motivo": "exige o app aberto",
       "estado": "PENDING",
       "item": "foco, tabulacao, contraste",
-      "id": "B6"
+      "id": "B6",
+      "motivo": "exige o app aberto"
+    },
+    {
+      "estado": "BLOCKED",
+      "item": "filtro do ambiente na barra lateral",
+      "id": "B7",
+      "motivo": "host e do upstream (app/chat/sidebar)"
     }
   ],
-  "proximaAcao": "rodada 118 — consolidar o STATE e o ROADMAP com os equivalentes existentes",
-  "checkpoint": {
-    "branch": "b3po-brand",
-    "status": "IN_PROGRESS",
-    "fase": "GOAL V2 — rodada 117 de 256",
-    "tarefa": "checkpoints persistentes (23)",
-    "dataHora": "2026-11-05T15:58:41-03:00",
-    "commit": "df02a3d738c3"
-  }
+  "proximaAcao": "rodada 133 — o que o §22 autoriza sem pergunta: continuar a expansao do vertical com o que nao depende de credencial"
 }
