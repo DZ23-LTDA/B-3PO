@@ -87,6 +87,8 @@ describe('IPC de compras', () => {
       expect(ipc.channels()).toEqual([
         'hermes:purchases:aprovar',
         'hermes:purchases:cotacao',
+        'hermes:purchases:definirLimite',
+        'hermes:purchases:limite',
         'hermes:purchases:orders',
         'hermes:purchases:quotations',
         'hermes:purchases:receive',

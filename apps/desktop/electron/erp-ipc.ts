@@ -157,6 +157,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerSchedulingIpc(ipcMain, scheduling, { actorOf: () => actorOf() })
   // Caminho novo: agendar exige servico do catalogo e deriva o fim do horario da duracao real.
   registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
+  // r27 do GOAL V2: o limite de compra vem do STORE, nao de injecao de codigo. Medido na r25:
+  // limiteDeCompra nunca era passado e o controle de valor estava INERTE desde a r182.
+  const purchases = new PurchasesStore(purchasesStorePath(userDataDir))
+
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.
   registerPurchasesIpc(ipcMain, {
     // r222: compras exige ator. A guarda vem antes do limite de compra: primeiro quem age, depois se cabe no teto.
@@ -166,8 +170,13 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     // Sem esta injecao o canal de cotacao responde vazio e o save devolve cotacoes_indisponivel: o store
     // existia e ninguem alcancava. A captura da r201 pegou exatamente isso.
     quotations: new QuotationStore(quotationsStorePath(userDataDir)),
-    store: new PurchasesStore(purchasesStorePath(userDataDir))
+    limiteDeCompra: () => purchases.lerLimite(),
+    store: purchases
   })
+
+  // r27 do GOAL V2: o limite de compra passa a vir do STORE, nao de injecao de codigo.
+  //
+  // Medido na r25: `limiteDeCompra` nunca era passado — `deps.limiteDeCompra` era `undefined`, e
   // O ator e resolvido AQUI, no processo principal: o renderer nao diz quem e.
   const actors = new ActorsStore(actorsStorePath(userDataDir))
 

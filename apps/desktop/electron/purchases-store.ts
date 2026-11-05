@@ -69,13 +69,39 @@ export interface PurchaseOrder {
 }
 
 export interface PurchasesFile {
+  /**
+   * O limite de compra vigente (r27 do GOAL V2).
+   *
+   * Antes desta rodada ele era **injetado na montagem** — ou seja, só mudava editando código. A r25
+   * auditou e a r27 fechou: agora mora no mesmo arquivo do domínio, como todo o resto de Compras.
+   *
+   * `cents: null` significa **sem limite** — e é o estado inicial. Um número inventado por mim daria a
+   * impressão de controle sem exercer nenhum.
+   */
+  limite: { aprovadores: string[]; cents: null | number }
   orders: PurchaseOrder[]
   schema_version: 1
   suppliers: Supplier[]
 }
 
+/**
+ * Normaliza o limite lido do disco.
+ *
+ * Ausente (arquivo de versão anterior) vira **sem limite** — e não um erro: um produto que recusa abrir
+ * porque o arquivo não tem um campo novo puniria o usuário por uma atualização.
+ */
+export function normalizarLimite(bruto: unknown): { aprovadores: string[]; cents: null | number } {
+  const raw = (bruto ?? {}) as Record<string, unknown>
+  const cents = typeof raw['cents'] === 'number' && Number.isFinite(raw['cents']) && raw['cents'] > 0 ? raw['cents'] : null
+  const aprovadores = Array.isArray(raw['aprovadores'])
+    ? raw['aprovadores'].filter((a): a is string => typeof a === 'string' && a.trim() !== '').map(a => a.trim())
+    : []
+
+  return { aprovadores, cents }
+}
+
 function emptyPurchases(): PurchasesFile {
-  return { orders: [], schema_version: 1, suppliers: [] }
+  return { limite: { aprovadores: [], cents: null }, orders: [], schema_version: 1, suppliers: [] }
 }
 
 export function purchasesStorePath(userDataDir: string): string {
@@ -199,7 +225,7 @@ export function parsePurchases(raw: string): PurchasesFile {
         )
       : []
 
-    return { orders, schema_version: 1, suppliers }
+    return { limite: normalizarLimite(parsed.limite), orders, schema_version: 1, suppliers }
   } catch {
     return emptyPurchases()
   }
@@ -240,6 +266,61 @@ export class PurchasesStore {
 
   /** Fila de escrita (r238): read -> valida -> write nao era serializado. Ver write-queue.ts. */
   private readonly fila = new WriteQueue()
+
+  /**
+   * O limite vigente. Sem isso, situacaoDaCompra recebe SEM_LIMITE e nada exige aprovação.
+   *
+   * É a leitura que o rp-ipc injeta em limiteDeCompra — antes da r27, nenhum chamador passava
+   * nada, e o controle estava **inerte**.
+   */
+  async lerLimite(): Promise<{ aprovadores: string[]; cents: null | number }> {
+    return (await this.read()).limite
+  }
+
+  /**
+   * Define o limite — cents e provadores juntos.
+   *
+   * Duas recusas, e cada uma diz o que corrigir:
+   *
+   *   limite_invalido       cents não é um número positivo. Limite zero ou negativo não é limite:
+   *                           é "revisar tudo", e tratar isso como limite barraria toda compra
+   *   provadores_obrigatorios  limite ligado sem aprovador não protege ninguém — a recusa viraria
+   *                           bloqueio permanente, que é o beco que a r26 fechou
+   */
+  async definirLimite(input: unknown): Promise<{ error: string } | { limite: { aprovadores: string[]; cents: null | number } }> {
+    const raw = (input ?? {}) as Record<string, unknown>
+
+    // Passar `cents: null` desliga o controle de propósito — é o único jeito de voltar ao inicial.
+    if (raw['cents'] === null) {
+      return this.fila.serializar(async () => {
+        const conteudo = await this.read()
+
+        conteudo.limite = { aprovadores: [], cents: null }
+        await this.write(conteudo)
+
+        return { limite: conteudo.limite }
+      })
+    }
+
+    const cents = typeof raw['cents'] === 'number' ? raw['cents'] : Number.NaN
+
+    if (!Number.isFinite(cents) || cents <= 0) return { error: 'limite_invalido' }
+
+    const aprovadores = Array.isArray(raw['aprovadores'])
+      ? raw['aprovadores'].filter((a): a is string => typeof a === 'string' && a.trim() !== '').map(a => a.trim())
+      : []
+
+    if (aprovadores.length === 0) return { error: 'aprovadores_obrigatorios' }
+
+    return this.fila.serializar(async () => {
+      const conteudo = await this.read()
+
+      conteudo.limite = { aprovadores, cents }
+      await this.write(conteudo)
+
+      return { limite: conteudo.limite }
+    })
+  }
 
   async suppliers(tenantId: string = DEFAULT_TENANT): Promise<Supplier[]> {
     const file = await this.read()

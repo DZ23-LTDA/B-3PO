@@ -28,6 +28,8 @@ import { escolherCotacao, type Cotacao } from './purchase-quotation'
 import type { CotacaoGravada } from './quotation-store'
 
 export interface PurchasesStoreLike {
+  definirLimite: (input: unknown) => Promise<{ error: string } | { limite: { aprovadores: string[]; cents: null | number } }>
+  lerLimite: () => Promise<{ aprovadores: string[]; cents: null | number }>
   orders: (tenantId?: string) => Promise<PurchaseOrder[]>
   saveOrder: (input: unknown) => Promise<{ error: string } | { order: PurchaseOrder; orders: PurchaseOrder[] }>
   suppliers: (tenantId?: string) => Promise<Supplier[]>
@@ -61,6 +63,20 @@ export type ReceiveResult =
 type Denied = { error: 'sem_permissao'; reason: string }
 
 export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps): void {
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:suppliers',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { suppliers: Supplier[] }> =>
@@ -69,10 +85,38 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
       }))
   )
 
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:saveSupplier',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>
       exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.upsertSupplier(payload))
+  )
+
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
   )
 
   ipcMain.handle(
@@ -83,6 +127,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
       }))
   )
 
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:saveOrder',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>
@@ -90,6 +148,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
   )
 
   // Receber: marca como recebido e lança as entradas no estoque, nesta ordem.
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:receive',
     async (_event: IpcMainInvokeEvent, payload: unknown): Promise<Denied | ReceiveResult> =>
@@ -157,6 +229,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
   //
   // O aprovador vem do RESOLVEDOR, nunca do payload: se viesse do renderer, bastaria escrever o nome
   // de um aprovador para liberar o proprio gasto — e a regra 'mesmo_solicitante' viraria decorativa.
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:aprovar',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>
@@ -191,6 +277,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
   )
 
 
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:cotacao',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>
@@ -203,12 +303,40 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
       })
   )
   // Cotacoes persistidas. Sem store injetado, a lista sai vazia em vez de lancar: o canal nao derruba a tela.
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
+  )
+
   ipcMain.handle(
     'hermes:purchases:quotations',
     async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { quotations: CotacaoGravada[] }> =>
       exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({
         quotations: deps.quotations ? await deps.quotations.list(serverTenant(tenantId)) : []
       }))
+  )
+
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
   )
 
   ipcMain.handle(
@@ -219,6 +347,20 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
 
         return deps.quotations.save(payload)
       })
+  )
+
+  /** Le o limite vigente (r27 do GOAL V2). cents: null = sem limite, e o estado inicial. */
+  ipcMain.handle('hermes:purchases:limite', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'purchases', async () => ({ limite: await deps.store.lerLimite() }))
+  )
+
+  /**
+   * Define o limite — xecute.
+   *
+   * Antes da r27 ele era injetado na montagem: so mudava editando codigo. Agora mora no store.
+   */
+  ipcMain.handle('hermes:purchases:definirLimite', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'purchases', async () => deps.store.definirLimite(payload))
   )
 
   ipcMain.handle(
