@@ -322,3 +322,70 @@ describe('a venda consome a reserva (r64)', () => {
     expect(criada['error']).toBeUndefined()
   })
 })
+describe('o pagamento é confirmado (r65) — corrigindo a suposição da r64', () => {
+  it('a conta a receber pode ser BAIXADA, e o total muda', async () => {
+    const m = montar()
+
+    await m.inventory.append({
+      kind: 'entrada',
+      product_sku: 'P',
+      quantity_milli: 10_000,
+      reason: 'carga',
+      ref: 'inicial:P',
+      tenant_id: 'local'
+    })
+
+    const criada = await m.chamar('hermes:sales:faturar', {
+      items: [{ product_sku: 'P', quantity_milli: 1_000, unit_price_cents: 100 }],
+      party: 'c1'
+    })
+
+    const venda = criada['sale'] as { id: string; total_cents: number }
+    const contas = await m.finance.list()
+    const conta = contas.find(c => c.kind === 'receber' && c.ref.includes(venda.id))
+
+    expect(conta).toBeDefined()
+    expect(conta?.status).toBe('aberto')
+
+    const antes = await m.finance.totals()
+
+    // A r64 eu escrevi "ninguém confirma o pagamento". ESTAVA ERRADO: `settle` existe e a tela tem o
+    // botão. O que faltava era ESTE teste — o fluxo não exercitava a confirmação.
+    const baixada = await m.finance.settle(conta?.id as string)
+
+    expect('error' in baixada).toBe(false)
+
+    const depois = await m.finance.totals()
+
+    // O aberto cai; o pago sobe. É a prova de que a baixa MOve o total em vez de só mudar o rótulo.
+    expect(depois.openReceivableCents).toBeLessThan(antes.openReceivableCents)
+    expect(depois.paidReceivableCents).toBeGreaterThan(antes.paidReceivableCents)
+  })
+
+  it('baixar duas vezes não dobra o pago — a segunda é recusada', async () => {
+    const m = montar()
+
+    await m.inventory.append({
+      kind: 'entrada',
+      product_sku: 'Q',
+      quantity_milli: 10_000,
+      reason: 'carga',
+      ref: 'inicial:Q',
+      tenant_id: 'local'
+    })
+
+    await m.chamar('hermes:sales:faturar', {
+      items: [{ product_sku: 'Q', quantity_milli: 1_000, unit_price_cents: 100 }],
+      party: 'c1'
+    })
+
+    const contas = await m.finance.list()
+    const conta = contas.find(c => c.kind === 'receber')
+
+    await m.finance.settle(conta?.id as string)
+
+    const denovo = await m.finance.settle(conta?.id as string)
+
+    expect(denovo).toEqual({ error: 'lancamento_ja_pago' })
+  })
+})
