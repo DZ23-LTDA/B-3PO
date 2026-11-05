@@ -65,7 +65,7 @@ export function BuscaView() {
   const grupos = [...new Set(resultados.map(r => r.grupo))]
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-12">
+    <main aria-label="Busca de módulos" className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-12">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Busca</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -95,7 +95,7 @@ export function BuscaView() {
         </div>
       ) : (
         <section className="rounded-lg border border-(--ui-border) p-2">
-          <ul className="flex flex-col">
+          <ul aria-label="Resultados" className="flex flex-col">
             {grupos.map(grupo => (
               <li key={grupo}>
                 {/* O grupo é cabeçalho: o resultado precisa dizer ONDE o módulo mora. */}

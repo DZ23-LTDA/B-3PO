@@ -88,7 +88,7 @@ export function EntregasView() {
 
   if (!disponivel) {
     return (
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <main aria-label="Entregas" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-foreground">Entregas</h1>
         </header>
@@ -102,7 +102,7 @@ export function EntregasView() {
   const emAberto = entregasEmAberto(entregas)
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+    <main aria-label="Entregas" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Entregas</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -120,6 +120,7 @@ export function EntregasView() {
           <label className="flex flex-col gap-1">
             <span className="text-(--ui-text-tertiary)">Venda</span>
             <select
+  aria-label="Venda desta entrega"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setOrderId(event.target.value)}
               value={orderId}
@@ -135,6 +136,7 @@ export function EntregasView() {
           <label className="flex flex-col gap-1 sm:col-span-2">
             <span className="text-(--ui-text-tertiary)">Destino</span>
             <input
+  aria-label="Endereço de destino"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setDestino(event.target.value)}
               placeholder="endereço ou ponto de referência"

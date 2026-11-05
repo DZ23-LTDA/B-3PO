@@ -89,7 +89,7 @@ export function ProjetosView() {
 
   if (!disponivel) {
     return (
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <main aria-label="Projetos" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-foreground">Projetos</h1>
         </header>
@@ -103,7 +103,7 @@ export function ProjetosView() {
   const emAndamento = projetosAtivosDe(projetos)
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+    <main aria-label="Projetos" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Projetos</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -122,6 +122,7 @@ export function ProjetosView() {
           <label className="flex flex-col gap-1">
             <span className="text-(--ui-text-tertiary)">Nome</span>
             <input
+  aria-label="Nome do projeto"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setNome(event.target.value)}
               placeholder="Loja online"
@@ -132,6 +133,7 @@ export function ProjetosView() {
           <label className="flex flex-col gap-1">
             <span className="text-(--ui-text-tertiary)">Para que existe</span>
             <input
+  aria-label="Para que o projeto existe"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setObjetivo(event.target.value)}
               placeholder="vender os botijões sem depender de telefone"
@@ -144,6 +146,7 @@ export function ProjetosView() {
               Como saber que terminou — <em>uma linha por critério</em>
             </span>
             <textarea
+  aria-label="Critérios de aceite"
               className="min-h-16 rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setCriterios(event.target.value)}
               placeholder={'o cliente consegue comprar pelo site\no estoque baixa sozinho'}
@@ -154,6 +157,7 @@ export function ProjetosView() {
           <label className="flex w-40 flex-col gap-1">
             <span className="text-(--ui-text-tertiary)">Prazo</span>
             <input
+  aria-label="Prazo do projeto"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setPrazo(event.target.value)}
               type="date"

@@ -98,7 +98,7 @@ export function TrabalhosView() {
 
   if (!disponivel) {
     return (
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <main aria-label="Trabalhos pontuais" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-foreground">Trabalhos</h1>
         </header>
@@ -113,7 +113,7 @@ export function TrabalhosView() {
   const abertos = trabalhos.filter(t => t.status === 'pedido' && !vencidos.some(v => v.id === t.id))
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+    <main aria-label="Trabalhos pontuais" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Trabalhos</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -128,6 +128,7 @@ export function TrabalhosView() {
           <label className="flex flex-col gap-1 sm:col-span-3">
             <span className="text-(--ui-text-tertiary)">O que precisa ser feito</span>
             <input
+  aria-label="O que precisa ser feito"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setPedido(event.target.value)}
               placeholder="pesquisar os preços dos três concorrentes"
@@ -137,6 +138,7 @@ export function TrabalhosView() {
           <label className="flex flex-col gap-1">
             <span className="text-(--ui-text-tertiary)">Tipo</span>
             <select
+  aria-label="Tipo de trabalho"
               className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
               onChange={event => setTipo(event.target.value as TrabalhoTipo)}
               value={tipo}
