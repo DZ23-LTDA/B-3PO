@@ -25,6 +25,7 @@
 // mostra que entrou e que voltou. Apagar o recebível esconderia a operação de quem ler o extrato depois.
 
 import type { Sale } from './sales-store'
+import { refVendaDevolucao, refVendaDevolucaoItem } from './refs'
 
 export interface DevolucaoEstoque {
   kind: 'entrada'
@@ -81,7 +82,7 @@ export function estornoForDevolucao(sale: Sale, now: number = Date.now()): { err
       product_sku: item.product_sku,
       quantity_milli: item.quantity_milli,
       reason: `devolucao da venda ${sale.number}`,
-      ref: `venda:${sale.id}:devolucao:${item.product_sku}`,
+      ref: refVendaDevolucaoItem(sale.id, item.product_sku),
       tenant_id: sale.tenant_id
     }))
 
@@ -94,7 +95,7 @@ export function estornoForDevolucao(sale: Sale, now: number = Date.now()): { err
           due_at: now,
           kind: 'pagar' as const,
           party: sale.contact_phone,
-          ref: `venda:${sale.id}:devolucao`,
+          ref: refVendaDevolucao(sale.id),
           status: 'aberto' as const,
           tenant_id: sale.tenant_id
         }

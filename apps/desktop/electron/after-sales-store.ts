@@ -18,6 +18,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 import { DEFAULT_TENANT } from './catalog-store'
+import { idDaVenda, refVendaFollowUp } from './refs'
 
 export const FOLLOW_UP_KINDS = ['satisfacao', 'recompra', 'fidelizacao'] as const
 
@@ -88,7 +89,7 @@ export function normalizeFollowUp(input: unknown, now: number): { error: string 
     return { error: 'sale_required' }
   }
 
-  const ref = `venda:${saleId}:${kind}`
+  const ref = refVendaFollowUp(saleId, kind)
 
   return {
     followUp: {
@@ -149,7 +150,7 @@ export function indicators(
   tenantId: string = DEFAULT_TENANT
 ): AfterSalesIndicators {
   const doTenant = followUps.filter(f => f.tenant_id === tenantId && f.status === 'pendente')
-  const comFollowUp = new Set(doTenant.map(f => f.ref.split(':')[1] ?? ''))
+  const comFollowUp = new Set(doTenant.map(f => idDaVenda(f.ref) ?? ''))
   const faturadas = sales.filter(s => s.tenant_id === tenantId && s.status === 'faturado')
 
   return {

@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path'
 import { DEFAULT_TENANT } from './catalog-store'
 import { cents } from './money'
 import { milli } from './quantity'
+import { refCompraItem } from './refs'
 
 export const PURCHASE_STATUSES = ['rascunho', 'pedido', 'recebido', 'cancelado'] as const
 
@@ -214,7 +215,7 @@ export function stockMovementsFor(order: PurchaseOrder): {
       product_sku: item.product_sku,
       quantity_milli: item.quantity_milli,
       reason: `compra ${order.number}`,
-      ref: `compra:${order.id}:${item.product_sku}`,
+      ref: refCompraItem(order.id, item.product_sku),
       tenant_id: order.tenant_id
     }))
 }

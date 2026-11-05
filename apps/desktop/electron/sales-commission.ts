@@ -20,6 +20,7 @@
 // decisão; `null` significa "não há comissão definida".
 
 import type { Sale } from './sales-store'
+import { refVendaComissao } from './refs'
 
 /** 10.000 basis points = 100%. 500 = 5%. */
 export const BPS_TOTAL = 10_000
@@ -59,7 +60,7 @@ export function comissaoDaVenda(sale: Sale, bps: number | null): Comissao | null
     amount_cents: Math.round((sale.total_cents * bps) / BPS_TOTAL),
     base_cents: sale.total_cents,
     bps,
-    ref: `venda:${sale.id}:comissao`
+    ref: refVendaComissao(sale.id)
   }
 }
 

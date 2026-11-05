@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path'
 import { DEFAULT_TENANT } from './catalog-store'
 import { cents } from './money'
 import type { Sale } from './sales-store'
+import { refCompra, refVenda } from './refs'
 
 export const ENTRY_KINDS = ['receber', 'pagar'] as const
 export const ENTRY_STATUSES = ['aberto', 'pago', 'cancelado'] as const
@@ -244,7 +245,7 @@ export function receivableForSale(sale: Sale, now: number = Date.now()): Omit<Fi
     due_at: now,
     kind: 'receber',
     party: sale.contact_phone,
-    ref: `venda:${sale.id}`,
+    ref: refVenda(sale.id),
     status: 'aberto',
     tenant_id: sale.tenant_id
   }
@@ -278,7 +279,7 @@ export function payableForPurchase(
     due_at: now,
     kind: 'pagar',
     party: order.supplier_id,
-    ref: `compra:${order.id}`,
+    ref: refCompra(order.id),
     status: 'aberto',
     tenant_id: order.tenant_id
   }

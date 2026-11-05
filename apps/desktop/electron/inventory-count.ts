@@ -1,4 +1,5 @@
-// Inventario: a contagem fisica que corrige o saldo (rodada 186).
+
+import { refInventario } from './refs'// Inventario: a contagem fisica que corrige o saldo (rodada 186).
 //
 // O PROBLEMA QUE ISTO RESOLVE
 //
@@ -114,6 +115,6 @@ export function movimentosDoInventario(
     product_sku: ajuste.product_sku,
     quantity_milli: Math.abs(ajuste.diferenca_milli),
     reason: 'inventario',
-    ref: `inventario:${inventarioId}:${ajuste.product_sku}`
+    ref: refInventario(inventarioId, ajuste.product_sku)
   }))
 }

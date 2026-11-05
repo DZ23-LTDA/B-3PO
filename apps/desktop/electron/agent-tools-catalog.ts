@@ -11,6 +11,7 @@ import type { FiscalStore } from './fiscal-store'
 import type { InventoryStoreLike } from './inventory-ipc'
 import type { SalesStoreLike } from './sales-ipc'
 import type { ServiceDeskLike } from './service-desk-ipc'
+import { refVenda } from './refs'
 
 export interface DomainStores {
   catalog?: CatalogStoreLike
@@ -147,7 +148,7 @@ export function buildDomainTools(stores: DomainStores): AgentTool[] {
         return fiscal.store.emitir(fiscal.provider, {
           kind,
           payload: { sale_id: saleId },
-          ref: 'venda:' + saleId,
+          ref: refVenda(saleId),
           tenant_id: 'local'
         })
       }

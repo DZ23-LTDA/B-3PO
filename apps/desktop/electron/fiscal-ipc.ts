@@ -15,6 +15,7 @@ import { resolverProvedor, variaveisFaltando, type FiscalDocumentKind } from './
 import { FiscalStore, type FiscalRecord } from './fiscal-store'
 import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
+import { refVenda } from './refs'
 
 export interface FiscalDeps {
   provider?: ReturnType<typeof resolverProvedor>
@@ -74,7 +75,7 @@ export function registerFiscalIpc(ipcMain: IpcRegistrar, deps: FiscalDeps): void
         // O payload fiscal completo (itens, valores, destinatário) é montado quando o adapter real existir.
         // O sandbox não precisa dele, e inventar campos agora criaria um contrato que o emissor real recusaria.
         payload: { sale_id: saleId },
-        ref: `venda:${saleId}`,
+        ref: refVenda(saleId),
         tenant_id: serverTenant(p['tenant_id'])
       })
     })
@@ -97,7 +98,7 @@ export function registerFiscalIpc(ipcMain: IpcRegistrar, deps: FiscalDeps): void
       if (!saleId) return { error: 'venda_obrigatoria' }
       if (!motivo.trim()) return { error: 'motivo_obrigatorio' }
 
-      return deps.store.cancelar(provider, `venda:${saleId}`, motivo, serverTenant(p['tenant_id']))
+      return deps.store.cancelar(provider, refVenda(saleId), motivo, serverTenant(p['tenant_id']))
     })
   )
 }

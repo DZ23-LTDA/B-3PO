@@ -19,6 +19,7 @@ import { dirname, join } from 'node:path'
 import { DEFAULT_TENANT } from './catalog-store'
 import { cents } from './money'
 import { milli } from './quantity'
+import { refVendaItem } from './refs'
 
 export const SALE_STATUSES = ['orcamento', 'pedido', 'faturado', 'cancelado'] as const
 
@@ -238,7 +239,7 @@ export function stockMovementsFor(sale: Sale): { kind: 'saida'; product_sku: str
       product_sku: item.product_sku,
       quantity_milli: item.quantity_milli,
       reason: `venda ${sale.number}`,
-      ref: `venda:${sale.id}:${item.product_sku}`,
+      ref: refVendaItem(sale.id, item.product_sku),
       tenant_id: sale.tenant_id
     }))
 }
