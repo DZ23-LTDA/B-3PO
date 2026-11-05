@@ -75,16 +75,21 @@ const item = (over: Record<string, unknown> = {}) => ({ product_sku: 'CAF-500', 
 const pedido = (over: Record<string, unknown> = {}) => ({ items: [item()], supplier_id: 'sup_1', ...over })
 
 describe('IPC de compras', () => {
-  // r190: eram cinco canais; cotacao entrou para comparar fornecedores antes de comprar (GOAL §15).
-  // O teste continua sendo a lista FECHADA de canais — o que ele protege e que um canal apareca por acidente,
+  // r190: eram cinco canais; cotacao entrou para comparar fornecedores antes de comprar (GOAL 15).
+  // r199: os tres canais de cotacao gravada entraram para a proposta sobreviver ao fechar a tela.
+  // O teste continua sendo a lista FECHADA de canais: protege contra canal acidental, nao um numero.
+  // Atualizado com a razao escrita, nao afrouxado para toContain.
   // nao um numero especifico. Atualizado com a razao, nao afrouxado para 	oContain.
   it('registra exatamente os canais de compras', async () => {
     await withDepot(async ({ ipc }) => {
       expect(ipc.channels()).toEqual([
         'hermes:purchases:cotacao',
         'hermes:purchases:orders',
+        'hermes:purchases:quotations',
         'hermes:purchases:receive',
+        'hermes:purchases:removeQuotation',
         'hermes:purchases:saveOrder',
+        'hermes:purchases:saveQuotation',
         'hermes:purchases:saveSupplier',
         'hermes:purchases:suppliers'
       ])

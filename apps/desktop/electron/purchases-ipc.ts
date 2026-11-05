@@ -13,6 +13,7 @@ import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
 import { escolherCotacao, type Cotacao } from './purchase-quotation'
+import type { CotacaoGravada } from './quotation-store'
 
 export interface PurchasesStoreLike {
   orders: (tenantId?: string) => Promise<PurchaseOrder[]>
@@ -30,6 +31,12 @@ export interface PurchasesDeps {
   /** Limite de compra da empresa. Ausente ou com cents: null desliga o controle. */
   limiteDeCompra?: () => Promise<LimiteDeCompra>
   inventory: InventoryLike
+  /** Store de cotacoes persistidas. Ausente = o canal responde lista vazia em vez de quebrar. */
+  quotations?: {
+    list: (tenantId?: string) => Promise<CotacaoGravada[]>
+    remove: (id: unknown) => Promise<{ cotacoes: CotacaoGravada[] }>
+    save: (payload: unknown) => Promise<unknown>
+  }
   store: PurchasesStoreLike
 }
 
@@ -133,4 +140,23 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
       return escolherCotacao(cotacoes, quantidade)
     }
   )
+  // Cotacoes persistidas. Sem store injetado, a lista sai vazia em vez de lancar: o canal nao derruba a tela.
+  ipcMain.handle(
+    'hermes:purchases:quotations',
+    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ quotations: CotacaoGravada[] }> => ({
+      quotations: deps.quotations ? await deps.quotations.list(serverTenant(tenantId)) : []
+    })
+  )
+
+  ipcMain.handle('hermes:purchases:saveQuotation', async (_event: IpcMainInvokeEvent, payload: unknown) => {
+    if (!deps.quotations) return { error: 'cotacoes_indisponivel' }
+
+    return deps.quotations.save(payload)
+  })
+
+  ipcMain.handle('hermes:purchases:removeQuotation', async (_event: IpcMainInvokeEvent, id: unknown) => {
+    if (!deps.quotations) return { cotacoes: [] }
+
+    return deps.quotations.remove(id)
+  })
 }
