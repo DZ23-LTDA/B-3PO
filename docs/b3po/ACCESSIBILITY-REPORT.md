@@ -1,43 +1,112 @@
-# ACCESSIBILITY-REPORT — B-3PO
+# ACESSIBILIDADE — auditoria medida na janela (rodada 228)
 
-**Data:** 2026-11-02 · **Escopo:** o que foi medido e o que **não** foi.
+## Como foi medido
 
-## 1. Medido (com evidência)
+Electron real, CDP, varredura do DOM nas telas **Home, `/crm`, `/finance`, `/stock`**. Não é checklist
+teórico — são os elementos que existem na tela.
 
-| Item | Resultado | Evidência |
+## O que está CERTO
+
+| Item | Valor | Norma |
 |---|---|---|
-| Contraste texto/fundo da marca | **20,49:1** (AA exige 4,5) | `scripts/brand_check.py` |
-| Contraste texto secundário | **15,04:1** | idem |
-| Contraste texto discreto | **10,16:1** (mínimo 3,0) | idem |
-| Contraste accent/fundo | **10,74:1** (mínimo 3,0) | idem |
-| Cor como único sinal? | regra de marca: accent = interativo/vivo, nunca decoração | `brand/palette.json → rules` |
+| **`documentElement.lang`** | **`pt`** | WCAG 3.1.1 ✅ |
+| **`document.title`** | **`B-3PO`** | marca correta, sem "Hermes" ✅ |
+| **Imagens sem `alt`** | **0 de 1** | WCAG 1.1.1 ✅ |
+| `h1` em `/crm`, `/finance`, `/stock` | **1 em cada** | WCAG 1.3.1 ✅ nessas telas |
 
-O gate roda no CI local: qualquer token abaixo do mínimo reprova o build.
+**O rebranding está correto no nível do documento**: `lang="pt"` e `title="B-3PO"`.
 
-## 2. Não medido (não pode ser alegado)
+## O que FALTA — com número
 
-| Item | Situação |
+### 1. Foco visível — **57 elementos interativos** — WCAG 2.4.7 (AA)
+
+```
+interativos_sem_foco_visivel: 57
+```
+
+Elementos com `outline-style: none` **e** sem `box-shadow` de foco. **Esta é a violação mais séria**: quem
+navega por teclado não vê onde está.
+
+### 2. Landmarks ausentes — WCAG 1.3.6 / 2.4.1
+
+| Landmark | Quantidade |
 |---|---|
-| Navegação por teclado no desktop | **NÃO MEDIDO** |
-| Leitor de tela (NVDA/VoiceOver/TalkBack) | **NÃO MEDIDO** |
-| Escala de fonte / zoom do sistema | **NÃO MEDIDO** |
-| Foco visível em todos os controles | **NÃO MEDIDO** |
-| Semântica de ARIA no renderer | **NÃO MEDIDO** |
-| Acessibilidade do APK Android | **NÃO MEDIDO** |
-| Idioma pt-BR | **AUSENTE** — desktop tem 9 locales, nenhum `pt` |
+| `main` / `role="main"` | **0** |
+| `nav` / `role="navigation"` | **0** |
 
-## 3. Riscos relacionados
+Sem `main`, o leitor de tela não tem como pular para o conteúdo. Sem `nav`, a navegação não é anunciada como
+região.
 
-1. **Idioma:** um usuário brasileiro usa o produto em inglês — barreira de acessibilidade linguística, não
-   apenas de tradução. `pt` está na Fase de i18n, não nesta.
-2. **Tema escuro fixo:** o produto assume fundo `#000105`; usuários com sensibilidade a contraste alto não
-   têm alternativa clara. O desktop tem seletor de tema, mas o tema B-3PO ainda não foi empacotado.
-3. **Mascotes como avatar:** o avatar é decorativo; se carregar informação de estado, precisa de alternativa
-   textual (`alt`/rótulo) — o contrato prevê `mascot_id`, a UI ainda não implementa.
+### 3. Botão sem rótulo acessível — WCAG 4.1.2
 
-## 4. Plano mínimo antes do piloto
+**1 botão**, consistente nas quatro telas. Está na **barra de status**:
 
-1. Rodar auditoria de acessibilidade no desktop (teclado + leitor de tela) e registrar screenshots.
-2. Garantir `alt`/rótulo nos avatares e estados.
-3. Adicionar `pt` (junto com a Fase de i18n).
-4. Verificar contraste de todos os tokens **em uso real** (não só a paleta declarada).
+```html
+<button class="inline-flex h-full items-center gap-1 rounded-none text-[0.6875rem] text-(--ui-text-tertiary)...">
+```
+Pai: `flex min-w-0 items-stretch gap-0.5 overflow-x-clip`
+
+**Sem `aria-label`, sem `title`, sem texto** — um leitor de tela anuncia "botão" e nada mais.
+
+### 4. Home sem `h1` — WCAG 1.3.1
+
+`h1: 0` na Home; `1` nas telas de módulo.
+
+### 5. Inputs sem label — intermitente
+
+| Tela | Inputs sem label |
+|---|---|
+| Home | **1** |
+| `/crm` | 0 |
+| `/finance` | 0 |
+| `/stock` | **1** |
+
+## O que é NOSSO e o que é do UPSTREAM
+
+| Achado | Origem |
+|---|---|
+| `lang="pt"`, `title="B-3PO"`, `alt` nas imagens | **nosso rebranding** — e está certo |
+| `h1` nas telas de módulo | **nosso** (as telas que criamos têm `h1`) |
+| **Foco visível (57)** | **shell do upstream** — CSS global |
+| **Landmarks `main`/`nav`** | **shell do upstream** |
+| **Botão da barra de status** | **shell do upstream** |
+| **Home sem `h1`** | **shell do upstream** |
+
+**Eu não vou "corrigir" os itens do shell nesta rodada.** Mexer no CSS global e na estrutura do shell é o tipo
+de mudança que afeta **toda** a aplicação por um ganho que precisa ser verificado em todas as telas — e o F2-A
+mantém o `main` como espelho limpo do upstream.
+
+## O que isso significa para o §26 ("WCAG 2.2 AA quando aplicável")
+
+| Critério | Estado |
+|---|---|
+| 3.1.1 Idioma da página | **ATENDE** (`pt`) |
+| 1.1.1 Conteúdo não textual | **ATENDE** (0 imagens sem alt) |
+| 4.1.2 Nome, função, valor | **FALHA PARCIAL** — 1 botão de status |
+| 1.3.1 Informação e relações | **FALHA PARCIAL** — Home sem `h1` |
+| **2.4.7 Foco visível (AA)** | **FALHA** — 57 elementos |
+| 1.3.6 Identificar finalidade | **FALHA** — sem landmarks |
+
+**Classificação honesta: `PARTIAL`.** O produto **não** atende WCAG 2.2 AA hoje, e **a maior parte do que falta
+está no shell herdado, não nas telas de negócio que construímos**.
+
+## O que continua sem medição
+
+| Item | Estado |
+|---|---|
+| Contraste de cores (1.4.3) | **não medido** — precisaria calcular luminância par a par |
+| Navegação por teclado ponta a ponta | **não testada** com teclado real |
+| Leitor de tela (NVDA/JAWS) | **nunca executado** |
+| Zoom 200% (1.4.4) | **não testado** |
+| Movimento/redução (2.3.3) | **não testado** |
+
+## Medido
+
+| Medida | Valor |
+|---|---|
+| Telas auditadas | 4 |
+| Botões na Home | 73 |
+| Botões sem rótulo | **1** |
+| Interativos sem foco visível | **57** |
+| Landmarks `main`/`nav` | **0 / 0** |
+| Imagens sem alt | **0** |
