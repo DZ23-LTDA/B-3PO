@@ -1,0 +1,12 @@
+{
+  "passos": [],
+  "volume_input_existe": true,
+  "inputs_proposta": 3,
+  "linhas": [
+    "Atacado Beta · 10.00 × 10 · 7dRemover"
+  ],
+  "melhor_oferta_visivel": false,
+  "economia_visivel": false,
+  "fornecedor_escolhido": null,
+  "texto_final": "Comparar fornecedoresFornecedorAtacado BetaDistribuidora AlfaAdicionar itemAtacado Beta · 10.00 × 10 · 7dRemoverComparar fornecedoresNenhuma proposta atende a quantidade pedida."
+}

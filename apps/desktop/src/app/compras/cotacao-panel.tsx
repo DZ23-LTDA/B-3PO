@@ -25,6 +25,9 @@ export interface CotacaoPanelProps {
     add: string
     compare: string
     empty: string
+    needQuantity: string
+    noValidOffer: string
+    orderQuantity: string
     price: string
     quantity: string
     remove: string
@@ -59,6 +62,12 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
   const [resultado, setResultado] = useState<CotacaoEscolhida | { motivo: string } | null>(null)
   const [error, setError] = useState('')
 
+  // O volume tem campo proprio porque o painel nao pode depender de o usuario ter digitado a quantidade no
+  // formulario de pedido: a r195 mediu que, sem isso, comparar responde "informe a quantidade" e o botao parece
+  // quebrado. Inicializa com o valor do pedido (quando ha) e aceita ajuste — comparar 10 e comparar 100 sao
+  // cotacoes diferentes.
+  const [volume, setVolume] = useState('')
+
   const adicionar = () => {
     const preco = centavos(form.preco)
     const disponivel = mili(form.quantidade)
@@ -83,6 +92,9 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
     setResultado(null)
   }
 
+  // O volume digitado vence; sem ele, usa o do pedido. `mili` converte "10" em 10_000, a unidade do ledger.
+  const volumeEfetivo = volume.trim() ? mili(volume) : quantidade
+
   const comparar = async () => {
     if (propostas.length === 0) return
 
@@ -101,6 +113,14 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
       </h2>
 
       <div className="flex flex-wrap gap-2">
+        {/* Volume da comparacao, com rotulo PROPRIO: a proposta tem o proprio campo de quantidade, e dois
+            campos com o mesmo aria-label sao indistinguiveis para leitor de tela. */}
+        <Input
+          aria-label={copy.orderQuantity}
+          onChange={event => setVolume(event.target.value)}
+          placeholder={copy.orderQuantity}
+          value={volume}
+        />
         <select
           aria-label={copy.supplier}
           className="rounded-md border border-(--ui-border) bg-transparent px-2 py-1 text-[length:var(--conversation-caption-font-size)]"
@@ -174,10 +194,15 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
       ) : null}
 
       {motivo ? (
-        // `sem_cotacoes` e `sem_proposta_valida` sao acoes diferentes: a primeira pede mais propostas, a segunda
-        // pede propostas que atendam o volume.
-        <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
-          {motivo === 'sem_cotacoes' ? copy.empty : copy.result}
+        // A tela NAO pode dizer "melhor oferta" quando nao ha oferta. Cada motivo pede uma acao diferente:
+        // sem propostas = adicionar; sem proposta valida = propostas que atendam o volume; quantidade zero =
+        // informar o volume. Dizer "melhor oferta" em qualquer desses casos seria um botao que mente.
+        <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-warning,var(--ui-text-tertiary))">
+          {motivo === 'sem_cotacoes'
+            ? copy.empty
+            : volumeEfetivo <= 0
+              ? copy.needQuantity
+              : copy.noValidOffer}
         </p>
       ) : null}
 

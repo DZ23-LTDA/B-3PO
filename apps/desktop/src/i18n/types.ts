@@ -719,6 +719,9 @@ export interface Translations extends NoticeTranslations {
       receive: string
       removeItem: string
       saveOrder: string
+      needQuantity: string
+      noValidOffer: string
+      orderQuantity: string
       status: string
       statuses: Record<string, string>
       supplier: string
