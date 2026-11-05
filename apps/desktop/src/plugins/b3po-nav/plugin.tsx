@@ -87,6 +87,9 @@ const MODULOS: readonly ItemDeMenu[] = [
   // r80 do GOAL V2: o projeto - o plano que liga a empresa ao trabalho. Fica junto de Entregas
   // porque e a mesma pergunta ('o que precisa sair?') numa escala maior.
   { codicon: 'checklist', label: 'Projetos', path: '/projetos' },
+  // r87: trabalhos pontuais - o que comeca e termina. Ao lado de Projetos porque a diferenca e
+  // exatamente essa: projeto tem criterio e prazo como meta; trabalho pontual VENCE.
+  { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
 
   // 5. O que eu devo e recebo

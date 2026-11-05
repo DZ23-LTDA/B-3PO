@@ -41,6 +41,9 @@ export const ENTREGAS_ROUTE = '/entregas'
 
 /** r80 do GOAL V2: projetos - o plano persistente do §12. */
 export const PROJETOS_ROUTE = '/projetos'
+
+/** r87 do GOAL V2: trabalhos pontuais - o terceiro tipo do §12. Ele expira. */
+export const TRABALHOS_ROUTE = '/trabalhos'
 export const DOCUMENTOS_ROUTE = '/documentos'
 export const PRIVACIDADE_ROUTE = '/privacidade'
 export const PROFILES_ROUTE = '/profiles'
@@ -64,6 +67,7 @@ export type AppView =
   | 'sofia'
   | 'entregas'
   | 'projetos'
+  | 'trabalhos'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -103,6 +107,7 @@ export type AppRouteId =
   | 'sofia'
   | 'entregas'
   | 'projetos'
+  | 'trabalhos'
   | 'documentos'
   | 'privacidade'
   | 'atendimento'
@@ -148,6 +153,7 @@ export const APP_ROUTES = [
   { id: 'sofia', path: SOFIA_ROUTE, view: 'sofia' },
   { id: 'entregas', path: ENTREGAS_ROUTE, view: 'entregas' },
   { id: 'projetos', path: PROJETOS_ROUTE, view: 'projetos' },
+  { id: 'trabalhos', path: TRABALHOS_ROUTE, view: 'trabalhos' },
   { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
   { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
   { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
