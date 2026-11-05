@@ -64,6 +64,14 @@ export function ComprasView() {
   const [itens, setItens] = useState<{ productSku: string; quantityMilli: number; unitCostCents: number }[]>([])
   const [saving, setSaving] = useState(false)
 
+  // r40 do GOAL V2: a conferência no recebimento — a última camada da etapa 7 do §26.
+  //
+  // Antes, receber assumia que chegou o que foi pedido: um pedido de 100 que chegava com 80 entrava com
+  // 100 no estoque. O canal aceita `conferidos` desde a r39; aqui é onde alguém os digita.
+  //
+  // Vazio por SKU = "não contei este item", e o pedido vale. Diferente de "0", que é "não chegou nada".
+  const [conferidos, setConferidos] = useState<Record<string, string>>({})
+
   const disponivel = purchasesAvailable()
 
   const carregar = useCallback(async () => {
@@ -167,13 +175,32 @@ export function ComprasView() {
     setSaving(true)
 
     try {
-      const r = await saveOrder(orderPayload(fornecedor, itens), receber)
+      // r40: ao RECEBER, o que foi conferido vai junto. Só as SKUs preenchidas entram — as em branco
+      // significam "não contei", e o pedido vale para elas. Mandar todas como 0 zeraria o estoque de quem
+      // preencheu uma linha só.
+      const listaConferida = receber
+        ? itens
+            .filter(item => (conferidos[item.productSku] ?? '').trim() !== '')
+            .map(item => ({
+              // `quantityValue` JÁ devolve mili-unidades (multiplica por 1000 dentro). Multiplicar aqui de
+              // novo daria um erro de 1000× que o typecheck não pega — os dois lados são `number`.
+              quantity_milli: Math.max(0, quantityValue(conferidos[item.productSku] ?? '')),
+              sku: item.productSku
+            }))
+        : []
+
+      const payload = orderPayload(fornecedor, itens)
+
+      if (listaConferida.length > 0) payload['conferidos'] = listaConferida
+
+      const r = await saveOrder(payload, receber)
 
       if ('error' in r) {
         setFailure(erroDe(r.error))
       } else {
         setOrders(r.orders)
         setItens([])
+        setConferidos({})
         // Receber mexeu no estoque: recarrega para a tela não mostrar saldo velho.
         setBalances(await loadBalances())
         setFailure(null)
@@ -386,10 +413,22 @@ export function ComprasView() {
             <section className="flex flex-col gap-2 rounded-lg border border-(--ui-border) p-4">
               <ul className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
                 {itens.map((item, index) => (
-                  <li className="flex items-center justify-between" key={`${item.productSku}-${index}`}>
+                  <li className="flex items-center justify-between gap-2" key={`${item.productSku}-${index}`}>
                     <span className="text-foreground">
                       {item.productSku} · {quantityLabel(item.quantityMilli)} × {priceLabel(item.unitCostCents)}
                     </span>
+                    {/* r40: o que CHEGOU, por item. Vazio = não contei (o pedido vale). "0" = não chegou
+                        nada. A distinção é a razão de o campo ser texto e não número. */}
+                    <label className="flex items-center gap-1">
+                      <span className="text-(--ui-text-tertiary)">chegou</span>
+                      <input
+                        className="w-20 rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-0.5 text-foreground outline-none focus:border-(--ui-accent)"
+                        inputMode="decimal"
+                        onChange={event => setConferidos({ ...conferidos, [item.productSku]: event.target.value })}
+                        placeholder={quantityLabel(item.quantityMilli)}
+                        value={conferidos[item.productSku] ?? ''}
+                      />
+                    </label>
                     <Button onClick={() => setItens(itens.filter((_, i) => i !== index))} variant="ghost">
                       {copy.removeItem}
                     </Button>
