@@ -13,7 +13,7 @@ import { registerCompaniesIpc } from './companies-ipc'
 import { registerCatalogIpc } from './catalog-ipc'
 import { registerDocumentsIpc } from './documents-ipc'
 import { CrmContactStore, crmStorePath } from './crm-contacts-store'
-import { CrmConversationStore, conversationsStorePath } from './crm-conversations-store'
+import { CrmConversationStore, conversationsStorePath, migrarConversasAntigas } from './crm-conversations-store'
 import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 import { registerFiscalIpc } from './fiscal-ipc'
@@ -98,6 +98,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // Agentes: roster, execucoes e fila de aprovacao. Montado aqui, nao em main.ts, pelo mesmo motivo da r125:
   // main.ts esta no teto de linhas e a montagem de dominio mora neste arquivo.
   registerAgentIpc(ipcMain, userDataDir)
+
+  // r11 do GOAL V2: conversas passaram a morar em b3po/, como os outros 24 stores. A migracao roda
+  // ANTES de qualquer store abrir, e e sincrona: uma janela aqui faria o CRM abrir vazio.
+  migrarConversasAntigas(userDataDir)
 
   registerPrivacyIpc(ipcMain, {
     // r3 do GOAL V2: `anonymize` não tem desfazer — o canal agora exige ator. O resolvedor é o mesmo

@@ -12,6 +12,7 @@
 // conversa nem mensagem.
 
 import { WriteQueue } from './write-queue'
+import { existsSync, mkdirSync, renameSync } from 'node:fs'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -256,8 +257,54 @@ export function conversationCounts(conversations: readonly CrmConversation[]): {
   return { abertas, aguardando, naoLidas, resolvidas }
 }
 
+/**
+ * Onde as conversas moram — DENTRO de `b3po/`, como os outros 24 stores.
+ *
+ * r11 do GOAL V2: esta função gravava em `userData/crm-conversations.json`, um nível acima. Os outros 24
+ * stores usam `userData/b3po/`. O efeito não era cosmético: quem fizesse backup de `b3po/` — a pasta que o
+ * produto documenta como seu estado — **perderia todas as conversas do WhatsApp**.
+ *
+ * MIGRAÇÃO: `migrarConversasAntigas` move o arquivo antigo na primeira abertura. Sem isso, a correção
+ * trocaria um bug (arquivo no lugar errado) por um pior (histórico invisível de repente).
+ */
 export function conversationsStorePath(userDataDir: string): string {
-  return join(userDataDir, 'crm-conversations.json')
+  return join(userDataDir, 'b3po', 'crm-conversations.json')
+}
+
+/**
+ * Move o arquivo do lugar antigo para o novo, uma única vez.
+ *
+ * Devolve `true` quando moveu. Nunca lança: se não der para mover, o store segue com o arquivo novo vazio —
+ * inventar exceção aqui derrubaria a abertura do CRM por causa de um arquivo legado.
+ *
+ * Não sobrescreve: se o novo já existe, o antigo fica onde está. Preferir o novo é a escolha certa porque é
+ * ele que o produto passou a escrever.
+ */
+export function migrarConversasAntigas(userDataDir: string): boolean {
+  const antigo = join(userDataDir, 'crm-conversations.json')
+  const novo = conversationsStorePath(userDataDir)
+
+  // SÍNCRONA de propósito: `mountErpIpc` é síncrono e o store é construído logo depois desta chamada.
+  // Uma versão assíncrona abriria uma janela em que o store lê o caminho novo antes de o arquivo antigo
+  // ter sido movido — o CRM abriria vazio, e o usuário concluiria que perdeu as conversas.
+  if (existsSync(novo)) {
+    // Já existe: o novo é a verdade. O antigo fica para quem quiser inspecionar.
+    return false
+  }
+
+  if (!existsSync(antigo)) {
+    // Nem antigo nem novo: instalação nova, nada a migrar.
+    return false
+  }
+
+  try {
+    mkdirSync(join(userDataDir, 'b3po'), { recursive: true })
+    renameSync(antigo, novo)
+
+    return true
+  } catch {
+    return false
+  }
 }
 
 export class CrmConversationStore {
