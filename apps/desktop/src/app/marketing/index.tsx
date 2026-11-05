@@ -158,6 +158,7 @@ export function MarketingView() {
 
             <div className="flex gap-2">
               <input
+            aria-label="Nome da campanha"
                 className="flex-1 rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
                 onChange={e => setNome(e.target.value)}
                 placeholder={copy.namePlaceholder}
@@ -198,6 +199,7 @@ export function MarketingView() {
 
             <div className="flex gap-2">
               <input
+            aria-label="Conteúdo do post"
                 className="flex-1 rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
                 onChange={e => setConteudo(e.target.value)}
                 placeholder={copy.contentPlaceholder}

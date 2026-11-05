@@ -74,6 +74,7 @@ export function BuscaView() {
       </header>
 
       <input
+        aria-label="Buscar módulo pelo nome ou pelo que ele faz"
         className="w-full rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-3 py-2 text-foreground outline-none focus:border-(--ui-accent)"
         onChange={evento => setTermo(evento.target.value)}
         onKeyDown={aoTeclar}
