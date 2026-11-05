@@ -190,6 +190,10 @@ export function StockView() {
               onChange={event => setQuery(event.target.value)}
               placeholder={copy.search}
               value={query}
+              // r230: `placeholder` NAO e nome acessivel - ele desaparece ao digitar, e um leitor de tela
+              // anunciava "campo de edicao" sem dizer de que. `aria-label` usa o mesmo texto do placeholder,
+              // entao a tela nao muda e o campo passa a ter nome (WCAG 1.3.1 / 4.1.2).
+              aria-label={copy.search}
             />
             <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
               {copy.count(rows.length)}
