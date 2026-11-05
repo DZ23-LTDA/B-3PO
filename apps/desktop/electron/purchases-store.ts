@@ -15,6 +15,7 @@ import { DEFAULT_TENANT } from './catalog-store'
 import { cents } from './money'
 import { milli } from './quantity'
 import { refCompraItem } from './refs'
+import { normalizarSolicitacao, type SolicitacaoCompra } from './purchases-solicitacao'
 
 export const PURCHASE_STATUSES = ['rascunho', 'pedido', 'recebido', 'cancelado'] as const
 
@@ -81,6 +82,13 @@ export interface PurchasesFile {
   limite: { aprovadores: string[]; cents: null | number }
   orders: PurchaseOrder[]
   schema_version: 1
+  /**
+   * Solicitações de compra (r41 do GOAL V2).
+   *
+   * Aditivo: ausente no arquivo antigo vira lista vazia, e voltar atrás é remover a lista. Nenhum campo
+   * existente muda de forma, então não há migração a escrever.
+   */
+  solicitacoes: SolicitacaoCompra[]
   suppliers: Supplier[]
 }
 
@@ -101,7 +109,7 @@ export function normalizarLimite(bruto: unknown): { aprovadores: string[]; cents
 }
 
 function emptyPurchases(): PurchasesFile {
-  return { limite: { aprovadores: [], cents: null }, orders: [], schema_version: 1, suppliers: [] }
+  return { limite: { aprovadores: [], cents: null }, orders: [], schema_version: 1, solicitacoes: [], suppliers: [] }
 }
 
 export function purchasesStorePath(userDataDir: string): string {
@@ -225,7 +233,15 @@ export function parsePurchases(raw: string): PurchasesFile {
         )
       : []
 
-    return { limite: normalizarLimite(parsed.limite), orders, schema_version: 1, suppliers }
+    return {
+      limite: normalizarLimite(parsed.limite),
+      orders,
+      schema_version: 1,
+      // Ausente no arquivo antigo vira lista vazia: um produto que recusa abrir porque falta um campo
+      // novo puniria o usuario por uma atualizacao.
+      solicitacoes: Array.isArray(parsed.solicitacoes) ? parsed.solicitacoes.filter(s => s && typeof s === 'object') : [],
+      suppliers
+    }
   } catch {
     return emptyPurchases()
   }

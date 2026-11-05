@@ -116,7 +116,7 @@ describe('pedido de compra', () => {
   })
 
   it('trata arquivo corrompido como vazio', () => {
-    expect(parsePurchases('nao e json')).toEqual({ limite: { aprovadores: [], cents: null }, orders: [], schema_version: 1, suppliers: [] })
+    expect(parsePurchases('nao e json')).toEqual({ limite: { aprovadores: [], cents: null }, orders: [], schema_version: 1, solicitacoes: [], suppliers: [] })
     expect(isPurchaseStatus('recebido')).toBe(true)
     expect(isPurchaseStatus('pago')).toBe(false)
   })
