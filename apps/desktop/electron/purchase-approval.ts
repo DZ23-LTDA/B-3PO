@@ -20,6 +20,20 @@
 
 /** Limite de compra: sem valor aqui, nada exige aprovacao. */
 export type LimiteDeCompra = {
+  /**
+   * Alçada por aprovador, em centavos (r52 do GOAL V2).
+   *
+   * O §15 dá o exemplo literal: *"aprovador com limite de R$ 2.000 não pode aprovar pedido de
+   * R$ 5.000."* Sem este mapa, `aprovadores: ['chefe', 'diretoria']` dizia **quem** pode aprovar e
+   * **nada sobre quanto** — e um estagiário na lista valia o mesmo que a diretoria.
+   *
+   * **Ausente = sem alçada própria**, e o aprovador pode aprovar qualquer valor que o limite da empresa
+   * já tenha deixado passar. É aditivo: nenhuma configuração existente muda de comportamento.
+   *
+   * `undefined` em uma entrada e `sem alçada`; `0` é uma alçada de zero — que recusa tudo acima de zero e
+   * é uma configuração válida (um aprovador só para conferir, não para liberar).
+   */
+  alcadas?: Readonly<Record<string, number>>
   /** Valor que dispara revisao, em centavos. `null` desliga o controle. */
   cents: number | null
   /** Quem pode aprovar. Lista vazia com limite ligado e um erro de configuracao. */
@@ -64,7 +78,7 @@ export function configuracaoUtil(limite: LimiteDeCompra): boolean {
 }
 
 export type DecisaoAprovacao =
-  | { erro: 'mesmo_solicitante' | 'nao_e_aprovador' | 'compra_nao_precisa' }
+  | { erro: 'acima_da_alcada' | 'mesmo_solicitante' | 'nao_e_aprovador' | 'compra_nao_precisa' }
   | { aprovada: true }
 
 /**
@@ -73,12 +87,26 @@ export type DecisaoAprovacao =
  * Duas regras iguais em dois lugares e diferente de duas regras divergentes: aqui a coincidencia e deliberada,
  * porque o motivo e o mesmo (uma pessoa nao valida o proprio gasto), mas o dado e outro (o limite vem da
  * empresa, nao do nivel do agente).
+ *
+ * A ORDEM DAS RECUSAS (r52 do GOAL V2), e ela importa:
+ *
+ *   1. `compra_nao_precisa`       nao ha o que decidir
+ *   2. `mesmo_solicitante`        a pessoa nao pode assinar o proprio gasto — vale mesmo se tiver alcada
+ *   3. `nao_e_aprovador`          nao esta na lista
+ *   4. `acima_da_alcada`          esta na lista, mas o valor passa do que ele pode liberar
+ *
+ * **A alcada vem por ultimo de proposito**: quem nao e aprovador nao deve descobrir que "faltou alcada" —
+ * isso sugeriria que basta pedir mais limite, quando o problema e nao estar na lista.
  */
 export function decidirAprovacao(input: {
+  /** Alçada por aprovador, em centavos. Ausente = sem limite próprio. */
+  alcadas?: Readonly<Record<string, number>>
   aprovadores: readonly string[]
   decisor: string
   precisa: boolean
   solicitante: string
+  /** O valor que está sendo aprovado, em centavos. Sem ele, a alçada não é verificada. */
+  valor_cents?: number
 }): DecisaoAprovacao {
   if (!input.precisa) {
     return { erro: 'compra_nao_precisa' }
@@ -90,6 +118,20 @@ export function decidirAprovacao(input: {
 
   if (!input.aprovadores.includes(input.decisor)) {
     return { erro: 'nao_e_aprovador' }
+  }
+
+  // r52: a alçada do aprovador. `undefined` = sem alçada própria (pode o que o limite da empresa deixou
+  // passar). `0` é alçada de zero — válida, e recusa qualquer valor acima.
+  const alcada = input.alcadas?.[input.decisor]
+
+  if (
+    typeof alcada === 'number' &&
+    Number.isFinite(alcada) &&
+    typeof input.valor_cents === 'number' &&
+    Number.isFinite(input.valor_cents) &&
+    input.valor_cents > alcada
+  ) {
+    return { erro: 'acima_da_alcada' }
   }
 
   return { aprovada: true }

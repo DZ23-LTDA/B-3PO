@@ -77,10 +77,14 @@ export async function aprovarCompra(
   if (!aprovador) return { error: 'aprovador_obrigatorio', motivo: 'aprovador_obrigatorio' }
 
   const decisao = decidirAprovacao({
+    // r52: a alcada de QUEM assina, e o valor que ele esta liberando. Sem os dois, o §15 fica pela
+    // metade: a lista dizia quem, e nada dizia quanto.
+    alcadas: limite.alcadas,
     aprovadores: limite.aprovadores,
     decisor: aprovador,
     precisa,
-    solicitante: pedido.approval?.solicitante ?? ''
+    solicitante: pedido.approval?.solicitante ?? '',
+    valor_cents: total
   })
 
   if ('erro' in decisao) return { error: decisao.erro, motivo: decisao.erro }

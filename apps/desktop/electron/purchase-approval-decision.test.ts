@@ -61,6 +61,14 @@ function deps(over: Partial<AprovacaoDeps> = {}, inicial: PurchaseOrder = pedido
   }
 }
 
+/** Um pedido cujo total DOS ITENS é o valor dado — provarCompra recalcula a partir deles. */
+function pedidoDe(totalCents: number) {
+  return pedido({
+    items: [{ product_sku: 'SKU', quantity_milli: 1, total_cents: totalCents, unit_cost_cents: totalCents }],
+    total_cents: totalCents
+  })
+}
+
 describe('o caminho de saída existe', () => {
   it('um aprovador da lista aprova o pedido acima do teto', async () => {
     const d = deps()
@@ -141,5 +149,55 @@ describe('as guardas do canal', () => {
     const d = deps({ salvar: async () => ({ error: 'disco_cheio' }) })
 
     expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ error: 'disco_cheio' })
+  })
+})
+describe('a alçada de aprovação (r52 do §15)', () => {
+  it('o exemplo literal do §15: alçada de R$ 2.000 não aprova pedido de R$ 5.000', async () => {
+    // O §15 dá este caso com todas as letras. Antes da r52, `aprovadores: ['chefe']` dizia QUEM podia
+    // aprovar e NADA sobre quanto — e um chefe com alçada de R$ 2.000 liberava R$ 5.000.
+    const limite: LimiteDeCompra = { alcadas: { chefe: 200_000 }, aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ error: 'acima_da_alcada' })
+    expect(d.salvos).toHaveLength(0)
+  })
+
+  it('dentro da alçada, aprova', async () => {
+    const limite: LimiteDeCompra = { alcadas: { chefe: 600_000 }, aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ aprovada: true })
+  })
+
+  it('sem alçada configurada, o aprovador pode o que o limite da empresa deixou passar', async () => {
+    // Aditivo: nenhuma configuração existente muda de comportamento.
+    const limite: LimiteDeCompra = { aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ aprovada: true })
+  })
+
+  it('alçada exatamente igual ao valor aprova — o teto é inclusivo', async () => {
+    const limite: LimiteDeCompra = { alcadas: { chefe: 500_000 }, aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ aprovada: true })
+  })
+
+  it('a alçada de OUTRO aprovador não vale para este', async () => {
+    const limite: LimiteDeCompra = { alcadas: { diretor: 900_000 }, aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    // `chefe` não tem alçada própria: pode o que o limite da empresa deixou passar.
+    expect(await aprovarCompra(d.deps, 'p1', 'chefe')).toMatchObject({ aprovada: true })
+  })
+
+  it('quem NÃO está na lista não descobre que faltou alçada', async () => {
+    // A ordem das recusas importa: `nao_e_aprovador` vem antes de `acima_da_alcada`. Dizer "faltou
+    // alçada" sugeriria que basta pedir mais limite, quando o problema é não estar na lista.
+    const limite: LimiteDeCompra = { alcadas: { chefe: 1 }, aprovadores: ['chefe'], cents: 100_000 }
+    const d = deps({ limiteDeCompra: async () => limite }, pedidoDe(500_000))
+
+    expect(await aprovarCompra(d.deps, 'p1', 'estranho')).toMatchObject({ error: 'nao_e_aprovador' })
   })
 })
