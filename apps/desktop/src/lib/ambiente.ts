@@ -1,0 +1,109 @@
+// O AMBIENTE (r121 do GOAL V2).
+//
+// O QUE O §13:413-419 PEDE
+//
+// *"Não escolher a opção A/B sugerida pelo DeepSeek como arranjo definitivo. **Adotar navegação contextual por
+// ambiente.** Ambientes principais: 1. EMPRESA — criar, administrar e operar negócios. 2. ENGENHARIA E CRIACAO
+// — desenvolver SaaS, sites, apps, APIs, jogos, sistemas e produtos."*
+//
+// O QUE EXISTIA
+//
+// A r92 agrupou o menu em **7 grupos** — e isso é o **Modo Empresa**. O que **não existia** era o **ambiente**:
+// o menu é **um só**, e um desenvolvedor vendo "Compras, Estoque, Financeiro" **não tem onde dizer que está
+// construindo um site**.
+//
+// A DECISÃO — e ela é sobre o que **NÃO** muda
+//
+// **O ambiente filtra o MENU; ele não esconde CAPACIDADE.** Um módulo fora do ambiente ativo **continua
+// existindo**: a rota responde, o canal responde, o dado está lá.
+//
+// **Trocar de ambiente não é trocar de produto** — é trocar **o que a barra lateral mostra**. E essa distinção
+// é o que impede o seletor de virar uma segunda permissão disfarçada: **RBAC já existe (r66, r75), e um
+// seletor de menu não é RBAC.**
+//
+// O QUE ESTE ARQUIVO **NÃO** FAZ
+//
+// **Não valida nada.** Filtrar menu não é autorizar: `permission-guard` continua sendo a única porta, e um item
+// escondido **não fica mais seguro** — só menos visível.
+
+export const AMBIENTES = ['empresa', 'engenharia'] as const
+
+export type Ambiente = (typeof AMBIENTES)[number]
+
+export function isAmbiente(valor: unknown): valor is Ambiente {
+  return typeof valor === 'string' && (AMBIENTES as readonly string[]).includes(valor)
+}
+
+export const AMBIENTE_LABEL: Record<Ambiente, string> = {
+  empresa: 'Empresa',
+  engenharia: 'Engenharia'
+}
+
+/**
+ * Os grupos de cada ambiente.
+ *
+ * **Os 7 grupos do §13:429-438 são o Modo Empresa** — e eles vieram do texto do GOAL, não de uma escolha.
+ *
+ * **O Modo Engenharia tem 4.** O §13:452-454 lista oito coisas (projetos, repositórios, issues, arquitetura,
+ * código, testes, CI/CD, artefatos) — e elas **cabem em quatro grupos**, porque **três das oito são a mesma
+ * tela vista de ângulos diferentes** (`/artifacts` mostra o que CI/CD produziu).
+ *
+ * **Um grupo por tela seria um menu de oito itens para uma pessoa que constrói uma coisa.**
+ */
+const GRUPOS_POR_AMBIENTE: Record<Ambiente, readonly string[]> = {
+  empresa: ['Visão geral', 'Operação', 'Comércio', 'Trabalho', 'Crescimento', 'Inteligência', 'Configuração'],
+  engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Configuração']
+}
+
+export function gruposDoAmbiente(ambiente: Ambiente): readonly string[] {
+  return GRUPOS_POR_AMBIENTE[ambiente]
+}
+
+export interface ModuloDoAmbiente {
+  grupo: string
+  label: string
+  path: string
+}
+
+/**
+ * Filtra os módulos pelo ambiente.
+ *
+ * **O "Visão geral" é comum aos dois** — Painel e Busca servem a qualquer ambiente, e esconder o Painel de quem
+ * está no Modo Engenharia seria esconder **onde a pessoa está**.
+ *
+ * **O que sobra fora é dito, não sumido**: `foraDoAmbiente` devolve a lista, para a tela poder dizer *"há N
+ * módulos no outro ambiente"* em vez de o menu simplesmente parecer menor.
+ */
+export function modulosDoAmbiente(
+  modulos: readonly ModuloDoAmbiente[],
+  ambiente: Ambiente
+): { dentro: ModuloDoAmbiente[]; fora: ModuloDoAmbiente[] } {
+  const grupos = new Set(gruposDoAmbiente(ambiente))
+
+  // "Visão geral" é sempre visível: é onde a pessoa se localiza.
+  grupos.add('Visão geral')
+
+  const dentro = modulos.filter(m => grupos.has(m.grupo))
+
+  return { dentro, fora: modulos.filter(m => !grupos.has(m.grupo)) }
+}
+
+/**
+ * A frase que a tela mostra quando há módulos escondidos.
+ *
+ * **Não é "N módulos ocultos"**: é a informação de que **existe outro ambiente**, e o nome dele — porque um
+ * menu menor sem explicação parece um menu quebrado.
+ */
+export function foraDoAmbiente(modulos: readonly ModuloDoAmbiente[], ambiente: Ambiente): string {
+  const { fora } = modulosDoAmbiente(modulos, ambiente)
+  const outro = ambiente === 'empresa' ? 'Engenharia' : 'Empresa'
+
+  if (fora.length === 0) return ''
+
+  return `${fora.length} módulo(s) do ambiente ${outro}.`
+}
+
+/** O outro ambiente — para a tela poder oferecer a troca. */
+export function outroAmbiente(ambiente: Ambiente): Ambiente {
+  return ambiente === 'empresa' ? 'engenharia' : 'empresa'
+}
