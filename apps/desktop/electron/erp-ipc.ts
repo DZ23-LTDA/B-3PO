@@ -51,6 +51,7 @@ import { registerAnalyticsIpc } from './analytics-ipc'
 import { AuditStore, auditStorePath, configurarColetorDeAuditoria } from './audit-store'
 import { registerAuditIpc } from './audit-ipc'
 import { DeliveryStore, deliveryStorePath } from './delivery-store'
+import { ReservationStore, reservationStorePath } from './reservation-store'
 import { registerDeliveryIpc } from './delivery-ipc'
 import { registerSofiaIpc } from './sofia-ipc'
 
@@ -254,6 +255,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   registerSalesIpc(ipcMain, {
     actorOf,
+    // r64 do GOAL V2: a venda consome a reserva. Sem isto, a reserva vencia sozinha e a
+    // venda nunca sabia que havia uma promessa.
+    reservations: new ReservationStore(reservationStorePath(userDataDir)),
     afterSales,
     finance,
     inventory,

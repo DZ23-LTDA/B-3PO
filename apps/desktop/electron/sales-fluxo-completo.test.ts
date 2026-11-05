@@ -26,6 +26,7 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import type { Actor } from './rbac'
 import { SalesStore, salesStorePath } from './sales-store'
+import { ReservationStore, reservationStorePath } from './reservation-store'
 import { registerSalesIpc } from './sales-ipc'
 
 let dir = ''
@@ -253,5 +254,71 @@ describe('o que o fluxo de venda NÃO tem, e o §26 pede', () => {
 
     // Saiu na hora: não há "reservado" separado de "disponível".
     expect((await m.inventory.balances())['R'] ?? 0).toBe(9_000)
+  })
+})
+describe('a venda consome a reserva (r64)', () => {
+  it('faturar confirma a reserva daquela venda — a promessa vira fato', async () => {
+    const mapa = new Map<string, (e: unknown, p: unknown) => Promise<unknown>>()
+    const sales = new SalesStore(salesStorePath(dir))
+    const reservation = new ReservationStore(reservationStorePath(dir))
+    const finance = new FinanceStore(financeStorePath(dir))
+    const inventory = new InventoryStore(inventoryStorePath(dir))
+
+    registerSalesIpc(
+      { handle: (c: string, l: (e: unknown, p: unknown) => Promise<unknown>) => mapa.set(c, l) } as never,
+      { actorOf: async () => DONO, finance, inventory, reservations: reservation, sales } as never
+    )
+
+    const chamar = async (canal: string, payload?: unknown): Promise<Record<string, unknown>> =>
+      (await mapa.get(canal)?.(null, payload)) as Record<string, unknown>
+
+    await inventory.append({
+      kind: 'entrada',
+      product_sku: 'W',
+      quantity_milli: 10_000,
+      reason: 'carga',
+      ref: 'inicial:W',
+      tenant_id: 'local'
+    })
+
+    // A reserva existe ANTES da venda — é ela que segura o produto para este cliente.
+    const r = await reservation.criar({ product_sku: 'W', quantity_milli: 1_000, sale_id: 'venda-r' }, 'local')
+
+    expect('error' in r).toBe(false)
+
+    // A venda é faturada com o MESMO id.
+    const criada = await chamar('hermes:sales:faturar', {
+      id: 'venda-r',
+      items: [{ product_sku: 'W', quantity_milli: 1_000, unit_price_cents: 100 }],
+      party: 'c1'
+    })
+
+    expect(criada['error']).toBeUndefined()
+
+    // E a reserva virou `confirmada` — sem isto ela venceria sozinha e o produto ficaria prometido.
+    const depois = await reservation.porVenda('venda-r')
+
+    expect(depois?.status).toBe('confirmada')
+  })
+
+  it('faturar SEM reserva continua funcionando — o balcão não é obrigado a reservar', async () => {
+    const m = montar()
+
+    await m.inventory.append({
+      kind: 'entrada',
+      product_sku: 'V',
+      quantity_milli: 10_000,
+      reason: 'carga',
+      ref: 'inicial:V',
+      tenant_id: 'local'
+    })
+
+    const criada = await m.chamar('hermes:sales:faturar', {
+      items: [{ product_sku: 'V', quantity_milli: 1_000, unit_price_cents: 100 }],
+      party: 'c1'
+    })
+
+    // A montagem de `montar()` não tem `reservations` — e a venda passa igual.
+    expect(criada['error']).toBeUndefined()
   })
 })

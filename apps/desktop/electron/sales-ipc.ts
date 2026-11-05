@@ -46,6 +46,16 @@ export interface SalesDeps {
   /** Opcional: quando presente, faturar cria os acompanhamentos de pos-venda. */
   afterSales?: { create: (input: unknown) => Promise<unknown> }
   finance: FinanceLike
+  /**
+   * Opcional: quando presente, faturar CONSOME a reserva daquela venda (r64 do GOAL V2).
+   *
+   * Sem isto, uma reserva criada nunca mudava de estado: o produto ficava prometido e a venda
+   * nao sabia. A reserva existe para ser consumida - e o momento em que ela importa e este.
+   *
+   * Opcional de proposito: quem monta sem reservas (teste, uso programatico) continua
+   * funcionando, e o balcao que vende sem reservar nao passa a exigir uma.
+   */
+  reservations?: { confirmarDaVenda: (saleId: string) => Promise<unknown> }
   inventory: InventoryLike
   /**
    * Opcional: quando presente, faturar anuncia o evento para as automacoes.
@@ -170,6 +180,20 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
         finance = lancado.entry
       } else if (lancado.error !== 'ref_duplicado') {
         return { error: lancado.error }
+      }
+    }
+
+    // r64 do GOAL V2: a venda CONSOME a reserva. Sem isto, a reserva vencia sozinha e a venda nunca
+    // sabia que havia uma promessa — o produto ficava reservado e depois liberado sem que ninguém
+    // tivesse faturado nada.
+    //
+    // Falhar aqui NÃO desfaz a venda: o fato principal já aconteceu (estoque baixou, conta a receber
+    // nasceu). O que falha é o registro da reserva, e a reconciliação o encontra.
+    if (deps.reservations) {
+      try {
+        await deps.reservations.confirmarDaVenda(criada.sale.id)
+      } catch {
+        // Engolido de propósito: ver o comentário acima.
       }
     }
 
