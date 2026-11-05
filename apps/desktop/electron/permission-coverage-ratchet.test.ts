@@ -51,7 +51,6 @@ const SEM_GUARDA: readonly string[] = [
   'privacy-ipc.ts',
   'scheduling-block-ipc.ts',
   'scheduling-catalog-ipc.ts',
-  'scheduling-ipc.ts',
   'service-desk-ipc.ts',
   'spellcheck-dictionary-ipc.ts',
   'startup-latency-ipc.ts',
@@ -113,11 +112,12 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('companies-ipc.ts')).toBe(true)
     expect(temGuarda('services-ipc.ts')).toBe(true)
     expect(temGuarda('documents-ipc.ts')).toBe(true)
+    expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-  it('a divida medida hoje e 26 de 40', () => {
+  it('a divida medida hoje e 25 de 40', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(26)
+    expect(SEM_GUARDA).toHaveLength(25)
     expect(canais()).toHaveLength(40)
   })
 })

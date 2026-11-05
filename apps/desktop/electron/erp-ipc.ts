@@ -132,7 +132,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerFinanceIpc(ipcMain, finance, { actorOf: () => actorOf() })
   const scheduling = new SchedulingStore(schedulingStorePath(userDataDir))
 
-  registerSchedulingIpc(ipcMain, scheduling)
+  registerSchedulingIpc(ipcMain, scheduling, { actorOf: () => actorOf() })
   // Caminho novo: agendar exige servico do catalogo e deriva o fim do horario da duracao real.
   registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
   // Compras recebe o estoque porque receber um pedido entra mercadoria no ledger.

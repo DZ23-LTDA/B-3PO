@@ -34,7 +34,7 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>, store: Scheduli
     const store = new SchedulingStore(schedulingStorePath(dir))
     const ipc = fakeIpc()
 
-    registerSchedulingIpc(ipc, store)
+    registerSchedulingIpc(ipc, store, { actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) })
 
     return await run(ipc, store)
   } finally {

@@ -5,6 +5,8 @@
 // horário.
 
 import type { IpcRegistrar } from './ipc-types'
+import { exigirAtor } from './permission-guard'
+import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
 import type { IpcMain, IpcMainInvokeEvent } from 'electron'
 
@@ -29,12 +31,24 @@ function numero(value: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingStoreLike): void {
+export interface SchedulingIpcDeps {
+  /** Ator resolvido no processo principal. `null` recusa. */
+  actorOf: () => Promise<Actor | null>
+}
+
+type Denied = { error: 'sem_permissao'; reason: string }
+
+export function registerSchedulingIpc(
+  ipcMain: IpcRegistrar,
+  store: SchedulingStoreLike,
+  deps: SchedulingIpcDeps
+): void {
   ipcMain.handle(
     'hermes:scheduling:list',
-    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<{ appointments: Appointment[] }> => ({
-      appointments: await store.list(serverTenant(tenantId))
-    })
+    async (_event: IpcMainInvokeEvent, tenantId: unknown): Promise<Denied | { appointments: Appointment[] }> =>
+      exigirAtor(deps.actorOf, 'read', 'scheduling', async () => ({
+        appointments: await store.list(serverTenant(tenantId))
+      }))
   )
 
   ipcMain.handle(
@@ -45,31 +59,46 @@ export function registerSchedulingIpc(ipcMain: IpcRegistrar, store: SchedulingSt
       from: unknown,
       to: unknown,
       resourceId: unknown
-    ): Promise<{ appointments: Appointment[] }> => ({
-      appointments: await store.day(
-        serverTenant(tenantId) ?? 'local',
-        numero(from),
-        numero(to),
-        typeof resourceId === 'string' && resourceId.trim() ? resourceId.trim() : undefined
-      )
-    })
+    ): Promise<Denied | { appointments: Appointment[] }> =>
+      exigirAtor(deps.actorOf, 'read', 'scheduling', async () => ({
+        appointments: await store.day(
+          serverTenant(tenantId) ?? 'local',
+          numero(from),
+          numero(to),
+          typeof resourceId === 'string' && resourceId.trim() ? resourceId.trim() : undefined
+        )
+      }))
   )
 
   ipcMain.handle(
     'hermes:scheduling:book',
-    (_event: IpcMainInvokeEvent, payload: unknown): Promise<BookResult> => store.book(payload)
+    async (_event: IpcMainInvokeEvent, payload: unknown): Promise<Denied | BookResult> =>
+      exigirAtor(deps.actorOf, 'execute', 'scheduling', async () => store.book(payload))
   )
 
   ipcMain.handle(
     'hermes:scheduling:cancel',
-    (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown, reason: unknown): Promise<{ appointments: Appointment[] } | { error: string }> =>
-      store.cancel(typeof id === 'string' ? id : '', serverTenant(tenantId), typeof reason === 'string' ? reason : '')
+    async (
+      _event: IpcMainInvokeEvent,
+      id: unknown,
+      tenantId: unknown,
+      reason: unknown
+    ): Promise<Denied | { appointments: Appointment[] } | { error: string }> =>
+      exigirAtor(deps.actorOf, 'execute', 'scheduling', async () =>
+        store.cancel(typeof id === 'string' ? id : '', serverTenant(tenantId), typeof reason === 'string' ? reason : '')
+      )
   )
 
   ipcMain.handle(
     'hermes:scheduling:confirm',
-    (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown): Promise<{ appointments: Appointment[] } | { error: string }> =>
-      store.confirm(typeof id === 'string' ? id : '', serverTenant(tenantId))
+    async (
+      _event: IpcMainInvokeEvent,
+      id: unknown,
+      tenantId: unknown
+    ): Promise<Denied | { appointments: Appointment[] } | { error: string }> =>
+      exigirAtor(deps.actorOf, 'execute', 'scheduling', async () =>
+        store.confirm(typeof id === 'string' ? id : '', serverTenant(tenantId))
+      )
   )
 }
 
