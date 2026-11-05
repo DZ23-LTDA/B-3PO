@@ -1,98 +1,92 @@
-# TEST-RESULTS — estado real do suite (rodada 226)
+# TEST-RESULTS — classificação completa das 40 falhas
 
-## O número, medido no suite inteiro
-
-```
-npx vitest run electron        (apps/desktop)
-Tests  40 failed | 4760 passed | 207 skipped (5007)
-```
-
-**Não é o número de um subconjunto escolhido por mim.** A r224 corrigiu exatamente esse vício: durante onze
-rodadas eu reportei "N testes verdes" a partir de `vitest run <arquivos que toquei>`.
-
-## As 40 falhas, classificadas por causa — com evidência
-
-### 1. `python3` não existe neste Windows — **13 falhas**
+## O resultado da suíte
 
 ```
-Error: Command failed: python3 -c import sys; print(sys.executable)
+Tests  40 failed | 4772 passed | 207 skipped (5019)
 ```
 
-| Arquivo | Falhas |
+**40 falhas, 40 investigadas.** Os números abaixo vêm do relatório JSON (`--reporter=json`) e de execução isolada
+de cada arquivo — não de estimativa.
+
+## A tabela, e a conta que fecha
+
+| # | Causa | Qtd | Como foi provado |
+|---|---|---|---|
+| 1 | **`python3` no PATH é o stub da Microsoft Store** | **13** | `WindowsApps\python3.exe` abre a loja em vez de executar |
+| 2 | **`EPERM` ao criar symlink no Windows** | **12** | o teste precisa de symlink; Windows exige privilégio |
+| 3 | **`sun_path` longo** | **4** | `control socket ... must fit sun_path (got 105: C:\Users\...)` |
+| 4 | **`config.yaml` não lido** (`bundle-electron-main`) | **3** | `electron_flags: [--ozone-platform=x11]` ignorado; recebe `wayland` |
+| 5 | **CRLF vs LF** | **2** | `expected 'reviewed\r\n' to be 'reviewed\n'` |
+| 6 | **recuperação de lock lenta** (`desktop-installation`) | **1** | 41,9 s contra limite de 30 s |
+| 7 | **`ruamel`/`hermes_cli` ausentes no Python global** | **1** | `ModuleNotFoundError: No module named 'ruamel'` |
+| 8 | **ferramenta Windows ausente** | **1** | `Missing Windows tool` |
+| 9 | **fixture `electron` sem export `session`** | **1** | `No matching export in "fixture:electron"` |
+| 10 | **variável de ambiente do host** | **1** | `PATH` com 2 entradas vs 1 esperada |
+| 11 | **path macOS vs Windows** | **1** | `/Applications/...` vs `D:\Applications\...` |
+| | **TOTAL** | **40** | **13+12+4+3+2+1+1+1+1+1+1 = 40** ✓ |
+
+## Por natureza
+
+| Natureza | Qtd | Itens |
+|---|---|---|
+| **Ambiente comprovado** | **36** | 1, 2, 3, 5, 7, 8, 9, 10, 11 |
+| **Indeterminado** | **3** | 4 — sintoma claro (`config` ignorado), causa entre caminho / YAML / bug |
+| **Comportamento de produto** | **1** | 6 — launch que trava ~40 s no Windows |
+| | **40** | |
+
+## O que eu afirmei em cada rodada, e o que era verdade
+
+| Rodada | Afirmação | O que era |
+|---|---|---|
+| 226 | *"40 falhas, todas `ENVIRONMENT-BLOCKED`"* | **sem mapeamento — alegação não sustentada** |
+| 246 | *"37 de 40 classificadas"* | primeiro mapeamento real |
+| 247 | *"39 de 40"* | otimista: contei `bundle` como ambiente sem investigar |
+| 248 | *"35, 1 produto, 4 desconhecidas"* | melhor |
+| 249 | *"34, 1, 3, 2"* | melhor |
+| **250** | **"36 ambiente, 3 indeterminadas, 1 produto"** | **cada uma lida, e a soma fecha** |
+
+> **A frase final é mais forte que a inicial em um sentido e mais fraca em outro**: agora eu **sei o que cada uma
+> é** — mas **não posso mais dizer "nenhuma é do produto"**, porque **uma é**.
+
+## O defeito de produto encontrado
+
+`electron/desktop-installation.ts`:
+
+```ts
+for (let attempt = 0; attempt < 40; attempt++) {
+  try { repairFd = fs.openSync(repairPath, 'wx', 0o600) }
+  catch (error) {
+    if (error?.code !== 'EEXIST') throw error
+    ...
+    emptyPolls = waitOnContendedRepairLock(...)   // julga o dono do lock
+    continue
+  }
+}
+```
+
+`waitForRepair()` espera **25 ms** — mas `waitOnContendedRepairLock` consulta a **criação de processo** a cada
+tentativa, e isso é lento no Windows. **40 × ~1 s ≈ 41 s antes de recusar.**
+
+**Um usuário Windows com lock de reparo órfão espera ~40 segundos antes de o app decidir.** Não é falha de teste:
+**é latência de produto.**
+
+## O que NÃO foi feito
+
+| Item | Por quê |
 |---|---|
-| `updater/state-db-preflight.test.ts` | 3 |
-| `no-console-git.test.ts` | 3 |
-| `ui-preferences.test.ts` | 3 |
-| `channel-build-version.test.ts` | 2 |
-| `updater/checkout-legacy.test.ts` | 1 |
-| `updater/checkout-source.test.ts` | 1 |
+| Corrigir o lock lento | mexer em recuperação de lock sem medir pode **travar o launch para sempre** |
+| Trocar `python3` por `python` nos testes | resolveria 13 aqui e **quebraria o CI em Linux** |
+| Descobrir por que `config.yaml` não é lido | 3 sintomas, 3 causas possíveis, **nenhuma medida** |
 
-**No Windows o interpretador é `python`, não `python3`.** Os testes chamam `python3` explicitamente.
+## Medido
 
-### 2. Symlink bloqueado pelo Windows — **14 falhas**
-
-```
-Error: EPERM: operation not permitted, symlink '...\home\.hermes' -> '...\innocent'
-```
-
-| Arquivo | Falhas |
+| Medida | Valor |
 |---|---|
-| `plugin-files.test.ts` | 8 |
-| `desktop-plugin-install.test.ts` | 5 |
-| `desktop-plugin-remove.test.ts` | 1 |
-
-**Criar symlink no Windows exige Developer Mode ou privilégio de administrador.** Estes testes exercitam
-justamente a defesa **contra symlink** — são os que provam que um plugin não escapa da raiz. **A defesa existe;
-o teste não consegue montar o cenário neste host.**
-
-### 3. Ambiente/plataforma — **9 falhas**
-
-| Arquivo | Falhas |
-|---|---|
-| `ssh-connection.test.ts` | 4 |
-| `backend-probes-runtime.test.ts` | 1 |
-| `command-screenshot-monitor.test.ts` | 1 |
-| `desktop-installation.test.ts` | 1 |
-| `packaged-working-directory.test.ts` | 1 |
-| `updater/system-proxy-env.test.ts` | 1 |
-
-## O que isso significa
-
-| Classificação | Quantidade |
-|---|---|
-| **`ENVIRONMENT-BLOCKED`** — `python3` ausente | **13** |
-| **`ENVIRONMENT-BLOCKED`** — symlink EPERM | **14** |
-| **`ENVIRONMENT-BLOCKED`** — plataforma/host | **9** |
-| **Falha de código do produto** | **0** |
-| **Causadas pelas minhas mudanças** | **0** |
-
-**Nenhuma das 40 é defeito do B-3PO.** Todas são o produto testado num host que não oferece o que o teste
-precisa.
-
-## Por que eu NÃO as "corrijo"
-
-Corrigir significaria **alterar código ou testes do upstream** para acomodar o meu Windows:
-
-- trocar `python3` por `python` nos testes **quebraria o CI do repositório** (que roda em Linux, onde `python3` é o correto);
-- pular os testes de symlink **esconderia a cobertura** que eles dão em Linux/macOS.
-
-**O caminho honesto é registrar a limitação, não apagar o teste.**
-
-## O que a r224 corrigiu, e agora está provado
-
-Na r224 eu identifiquei **14 falhas causadas por mim** (13 em `purchases`, 1 no ratchet) e as corrigi. **Aquelas eram minhas; estas 40 não são** — e a diferença só apareceu porque rodei o suite inteiro e li o erro de cada arquivo, em vez de presumir.
-
-## O que continua valendo
-
-| Verificação | Estado |
-|---|---|
-| Gate (`scripts/check`) | **14 checks, ok** |
-| Typecheck (2 projetos) | **0 erros** |
-| Testes de permissão | **todos verdes** |
-| Testes de CRM | **210 verdes** |
-| Suite `electron/` | **4760 verdes / 40 environment-blocked** |
-
-## A frase que fecha
-
-> **"40 testes falham" e "40 testes estão cobertos e o host não os deixa rodar" são a mesma string no terminal e
-> estados diferentes do produto.** A diferença está em abrir o erro e ler.
+| Testes totais | **5019** |
+| Verdes | **4772** |
+| Pulados | **207** |
+| **Falhas investigadas** | **40 de 40** |
+| Ambiente comprovado | **36** |
+| Indeterminadas | **3** |
+| Comportamento de produto | **1** |
