@@ -21,6 +21,7 @@
 
 import { useState } from 'react'
 
+import { priceLabel } from '@/api/catalog'
 import { escolherCotacao, type CotacaoEscolhida, type CotacaoRow } from '@/api/purchases'
 
 import { Button } from '@/components/ui/button'
@@ -67,10 +68,6 @@ function mili(texto: string): number {
   const valor = Number(texto.trim().replace(',', '.'))
 
   return Number.isFinite(valor) && valor > 0 ? Math.round(valor * 1000) : 0
-}
-
-function reais(centavosValor: number): string {
-  return (centavosValor / 100).toFixed(2)
 }
 
 export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelProps) {
@@ -205,7 +202,7 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
           {propostas.map((p, index) => (
             <li className="flex items-center justify-between" key={`${p.supplier_id}-${index}`}>
               <span className="text-foreground">
-                {supplierNames[p.supplier_id] ?? p.supplier_id} · {reais(p.preco_unit_cents)} ×{' '}
+                {supplierNames[p.supplier_id] ?? p.supplier_id} · {priceLabel(p.preco_unit_cents)} ×{' '}
                 {p.quantidade_disponivel}
                 {p.prazo_dias === null ? '' : ` · ${p.prazo_dias}d`}
               </span>
@@ -236,13 +233,13 @@ export function CotacaoPanel({ copy, quantidade, supplierNames }: CotacaoPanelPr
         <div className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
           <p className="text-foreground">
             {copy.result}: {supplierNames[escolhida.supplier_id] ?? escolhida.supplier_id} ·{' '}
-            {reais(escolhida.preco_total_cents)}
+            {priceLabel(escolhida.preco_total_cents)}
           </p>
           {resultado && 'economia_contra_segunda_cents' in resultado && resultado.economia_contra_segunda_cents !== null ? (
             // A economia e o que justifica a escolha; sem ela, "escolhi o A" nao convence ninguem.
             <p className="text-(--ui-text-tertiary)">
               {segunda ? `${supplierNames[segunda.supplier_id] ?? segunda.supplier_id}: ` : ''}
-              economiza {reais(resultado.economia_contra_segunda_cents)} em relacao a proxima
+              economiza {priceLabel(resultado.economia_contra_segunda_cents)} em relacao a proxima
             </p>
           ) : null}
         </div>
