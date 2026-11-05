@@ -7,6 +7,8 @@
 import type { IpcMainInvokeEvent } from 'electron'
 
 import type { IpcRegistrar } from './ipc-types'
+import { exigirAtor } from './permission-guard'
+import type { Actor } from './rbac'
 import {
   ABERTO_STATUSES,
   indicators,
@@ -49,48 +51,63 @@ export interface ServiceDeskEventSink {
 export function registerServiceDeskIpc(
   ipcMain: IpcRegistrar,
   store: ServiceDeskLike,
+  deps: { actorOf: () => Promise<Actor | null> },
   onEvent?: ServiceDeskEventSink
 ): void {
-  ipcMain.handle(
-    'hermes:desk:tickets',
-    async (): Promise<{ aberto_statuses: readonly TicketStatus[]; tickets: TicketView[] }> => {
+  ipcMain.handle('hermes:desk:tickets', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'service-desk', async () => {
       const agora = Date.now()
 
       return { aberto_statuses: ABERTO_STATUSES, tickets: (await store.list()).map(t => toView(t, agora)) }
-    }
+    })
   )
 
-  ipcMain.handle('hermes:desk:indicators', async (): Promise<DeskIndicators> => indicators(await store.list(), Date.now()))
+  ipcMain.handle('hermes:desk:indicators', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'service-desk', async () => indicators(await store.list(), Date.now()))
+  )
 
-  ipcMain.handle('hermes:desk:open', async (_event: IpcMainInvokeEvent, payload: unknown) => {
-    const r = await store.open(payload)
+  /**
+   * Abre atendimento — EXECUTE.
+   *
+   * O ticket nasce com SLA correndo e aparece na fila de alguem. Abrir e compromisso de atendimento.
+   */
+  ipcMain.handle('hermes:desk:open', async (_event: IpcMainInvokeEvent, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'service-desk', async () => {
+      const r = await store.open(payload)
 
-    // Depois de gravar, nunca antes: se o atendimento nao abriu, nao ha fato a anunciar.
-    if (!('error' in r) && onEvent) {
-      try {
-        await onEvent.ticketOpened({
-          id: r.ticket.id,
-          number: r.ticket.number,
-          priority: r.ticket.priority,
-          tenant_id: r.ticket.tenant_id
-        })
-      } catch {
-        // A automacao falhar nao desfaz o atendimento aberto.
+      // Depois de gravar, nunca antes: se o atendimento nao abriu, nao ha fato a anunciar.
+      if (!('error' in r) && onEvent) {
+        try {
+          await onEvent.ticketOpened({
+            id: r.ticket.id,
+            number: r.ticket.number,
+            priority: r.ticket.priority,
+            tenant_id: r.ticket.tenant_id
+          })
+        } catch {
+          // A automacao falhar nao desfaz o atendimento aberto.
+        }
       }
-    }
 
-    return r
-  })
+      return r
+    })
+  )
 
+  /** Muda o status do ticket — EXECUTE: echado encerra o SLA e o atendimento. */
   ipcMain.handle(
     'hermes:desk:setStatus',
-    (_event: IpcMainInvokeEvent, id: unknown, status: unknown) =>
-      store.setStatus(typeof id === 'string' ? id : '', (typeof status === 'string' ? status : 'aberto') as TicketStatus)
+    async (_event: IpcMainInvokeEvent, id: unknown, status: unknown): Promise<unknown> =>
+      exigirAtor(deps.actorOf, 'execute', 'service-desk', async () =>
+        store.setStatus(typeof id === 'string' ? id : '', (typeof status === 'string' ? status : 'aberto') as TicketStatus)
+      )
   )
 
+  /** Avalia a satisfação — EXECUTE: a nota entra no indicador e pode disparar revisão humana. */
   ipcMain.handle(
     'hermes:desk:rate',
-    (_event: IpcMainInvokeEvent, id: unknown, satisfaction: unknown) =>
-      store.rate(typeof id === 'string' ? id : '', typeof satisfaction === 'number' ? satisfaction : 0)
+    async (_event: IpcMainInvokeEvent, id: unknown, satisfaction: unknown): Promise<unknown> =>
+      exigirAtor(deps.actorOf, 'execute', 'service-desk', async () =>
+        store.rate(typeof id === 'string' ? id : '', typeof satisfaction === 'number' ? satisfaction : 0)
+      )
   )
 }

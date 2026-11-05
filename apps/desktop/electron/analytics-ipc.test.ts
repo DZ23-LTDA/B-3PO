@@ -32,6 +32,7 @@ afterEach(async () => {
 
 function deps() {
   return {
+    actorOf: async () => ({ id: 'teste', kind: 'human' as const, level: 'EXECUTE_ALLOWED' as const, role: 'owner' as const }),
     afterSales: new AfterSalesStore(afterSalesStorePath(dir)),
     desk: new ServiceDeskStore(serviceDeskStorePath(dir)),
     finance: new FinanceStore(financeStorePath(dir)),

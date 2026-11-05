@@ -33,7 +33,9 @@ async function withIpc<T>(run: (ipc: ReturnType<typeof fakeIpc>) => Promise<T>):
   try {
     const ipc = fakeIpc()
 
-    registerServiceDeskIpc(ipc, new ServiceDeskStore(serviceDeskStorePath(dir)))
+    registerServiceDeskIpc(ipc, new ServiceDeskStore(serviceDeskStorePath(dir)), {
+      actorOf: async () => ({ id: 'teste', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' })
+    })
 
     return await run(ipc)
   } finally {

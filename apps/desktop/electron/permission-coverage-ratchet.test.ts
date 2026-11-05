@@ -32,7 +32,6 @@ const DIR = join(__dirname)
  */
 const SEM_GUARDA: readonly string[] = [
   'agent-ipc.ts',
-  'analytics-ipc.ts',
   'challenge-window-ipc.ts',
   'clipboard-ipc.ts',
   'erp-ipc.ts',
@@ -44,9 +43,7 @@ const SEM_GUARDA: readonly string[] = [
   'notification-ipc.ts',
   'pet-overlay-ipc.ts',
   'plugin-files-ipc.ts',
-  'scheduling-block-ipc.ts',
   'scheduling-catalog-ipc.ts',
-  'service-desk-ipc.ts',
   'spellcheck-dictionary-ipc.ts',
   'startup-latency-ipc.ts',
   'terminal-ipc.ts',
@@ -110,9 +107,9 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-  it('a divida medida hoje e 20 de 40', () => {
+  it('a divida medida hoje e 17 de 40', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(20)
+    expect(SEM_GUARDA).toHaveLength(17)
     expect(canais()).toHaveLength(40)
   })
 })

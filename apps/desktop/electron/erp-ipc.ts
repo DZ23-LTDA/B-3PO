@@ -92,7 +92,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     actorOf: () => actorOf(),
     store: new FiscalStore(fiscalStorePath(userDataDir))
   })
-  registerSchedulingBlockIpc(ipcMain, userDataDir)
+  // r8 do GOAL V2: bloquear agenda impede horario de ser vendido — exige ator.
+  registerSchedulingBlockIpc(ipcMain, { actorOf: () => actorOf(), userData: userDataDir })
 
   // Agentes: roster, execucoes e fila de aprovacao. Montado aqui, nao em main.ts, pelo mesmo motivo da r125:
   // main.ts esta no teto de linhas e a montagem de dominio mora neste arquivo.
@@ -116,11 +117,18 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
 
-  registerServiceDeskIpc(ipcMain, desk, {
-    ticketOpened: async ticket => {
-      await dispatchQuietly(dispatch, { detail: ticket, tenant_id: ticket.tenant_id, type: 'ticket.aberto' })
+  // r8 do GOAL V2: abrir, fechar e avaliar atendimento sao execucao. onEvent continua quarto —
+  // a guarda vem antes de proposito: automacao nao dispara por acao nao autorizada.
+  registerServiceDeskIpc(
+    ipcMain,
+    desk,
+    { actorOf: () => actorOf() },
+    {
+      ticketOpened: async ticket => {
+        await dispatchQuietly(dispatch, { detail: ticket, tenant_id: ticket.tenant_id, type: 'ticket.aberto' })
+      }
     }
-  })
+  )
   // Empresas nao tem tenant_id: ela E o tenant. Fica fora do filtro por empresa de proposito.
   registerCompaniesIpc(ipcMain, new CompaniesStore(companiesStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r217: o estoque passou a exigir ator. `onEvent` continua quarto parametro — a guarda vem antes de
@@ -225,7 +233,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // circulacao — os canais exigem ator.
   registerMarketingIpc(ipcMain, { actorOf: () => actorOf(), marketing })
   // Analytics le pelo dono de cada dominio. Nao tem store proprio - de proposito.
-  registerAnalyticsIpc(ipcMain, { afterSales, desk, finance, inventory, marketing, sales })
+  // r8 do GOAL V2: o painel le todos os dominios de uma vez — exige ator.
+  registerAnalyticsIpc(ipcMain, { actorOf: () => actorOf(), afterSales, desk, finance, inventory, marketing, sales })
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools: AgentTool[] = buildDomainTools({

@@ -12,8 +12,15 @@ import type { SalesStore } from './sales-store'
 import type { ServiceDeskStore } from './service-desk-store'
 import { indicators as deskIndicators } from './service-desk-store'
 import type { IpcRegistrar } from './ipc-types'
+import { exigirAtor } from './permission-guard'
+import type { Actor } from './rbac'
 
 export interface AnalyticsDeps {
+  /**
+   * Ator resolvido no processo principal. O painel le TODOS os dominios de uma vez — financeiro,
+   * vendas, estoque, atendimento. Sem ator, e um retrato completo do negocio entregue a qualquer um.
+   */
+  actorOf: () => Promise<Actor | null>
   afterSales: AfterSalesStore
   desk: ServiceDeskStore
   finance: FinanceStore
@@ -71,7 +78,12 @@ export function deskToSnapshot(tickets: Parameters<typeof deskIndicators>[0], no
 }
 
 export function registerAnalyticsIpc(ipcMain: IpcRegistrar, deps: AnalyticsDeps): void {
-  ipcMain.handle('hermes:analytics:dashboard', async (): Promise<DashboardPayload> => {
-    return gatherSnapshot(deps, Date.now())
-  })
+  /**
+   * O painel e o canal mais amplo do sistema: le financeiro, vendas, estoque, atendimento, pos-venda
+   * e marketing num unico payload. Acao ead — mas exige ator, porque o agregado revela o negocio
+   * inteiro mesmo que cada parte isolada pareca inofensiva.
+   */
+  ipcMain.handle('hermes:analytics:dashboard', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'analytics', async () => gatherSnapshot(deps, Date.now()))
+  )
 }
