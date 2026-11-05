@@ -269,7 +269,7 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
 
   // ─── Solicitacoes (r42 do GOAL V2) - etapa 1 do §26 ───────────────────────────────────────────
 
-  /** As solicitacoes do tenant. 
+  /** As solicitacoes do tenant.
 ead: consultar a fila nao exige poder de execucao. */
   ipcMain.handle(
     'hermes:purchases:solicitacoes',

@@ -41,7 +41,7 @@ export interface SolicitacaoCompra {
   /**
    * O pedido que atendeu esta solicitação (r44 do GOAL V2).
    *
-   * 
+   *
 ull = ainda não virou pedido. É a LIGAÇÃO que faltava: sem ela, a etapa 1 registrava uma
    * necessidade e a etapa 5 comprava outra coisa, sem que as duas se encontrassem.
    */
