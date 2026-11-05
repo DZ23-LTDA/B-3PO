@@ -188,6 +188,15 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     porPedido: orderId => ipcRenderer.invoke('hermes:logistica:porPedido', orderId),
     transitar: payload => ipcRenderer.invoke('hermes:logistica:transitar', payload)
   },
+  projetos: {
+    // r79 do GOAL V2: o plano persistente do §12. O projeto liga a organizacao (o que a empresa e) a
+    // tarefa (o que precisa ser feito) - e sem ele, um conjunto de tarefas e uma lista.
+    ativos: tenantId => ipcRenderer.invoke('hermes:projetos:ativos', tenantId),
+    criar: payload => ipcRenderer.invoke('hermes:projetos:criar', payload),
+    listar: tenantId => ipcRenderer.invoke('hermes:projetos:listar', tenantId),
+    mudar: payload => ipcRenderer.invoke('hermes:projetos:mudar', payload),
+    podeIniciar: payload => ipcRenderer.invoke('hermes:projetos:podeIniciar', payload)
+  },
   auditoria: {
     // r36 do GOAL V2: leitura da trilha. O ledger existe desde a r35; este e o caminho ate a tela.
     listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
