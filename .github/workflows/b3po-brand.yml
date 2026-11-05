@@ -55,7 +55,11 @@ jobs:
 
       - name: auditoria de producao (nenhuma alta)
         run: npm audit --omit=dev --audit-level=high
-      - name: testes do CRM (consentimento, webhook, contatos)
+      # r10 do GOAL V2: este passo NAO testa o CRM que o aplicativo usa. crm/ e uma biblioteca de
+      # dominio puro sem consumidor: 19 arquivos, zero imports em todo o repo. O CRM em producao sao os
+      # stores apps/desktop/electron/crm-*-store.ts, cobertos pelo passo de domain stores. O nome antigo
+      # dava a impressao de cobertura que nao existia.
+      - name: testes da biblioteca crm/ (dominio puro, sem consumidor)
         run: npx vitest run --root crm
       - name: typecheck do desktop
         working-directory: apps/desktop

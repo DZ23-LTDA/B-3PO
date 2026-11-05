@@ -2,7 +2,7 @@
   "name": "@dz23/crm-core",
   "version": "0.0.0",
   "private": true,
-  "description": "Núcleo do WhatsApp CRM oficial do B-3PO: consentimento, webhook, contatos e funil. Sem marca de terceiros.",
+  "description": "Biblioteca de DOMINIO PURO do CRM — NAO e o CRM que o aplicativo usa. O CRM em producao sao os stores apps/desktop/electron/crm-*-store.ts, que persistem com tenant e tem canais IPC. Este pacote nao tem consumidor: ver docs/b3po/V2-RODADA-10-CRM-ORFAO.md",
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
