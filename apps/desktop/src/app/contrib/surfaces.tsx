@@ -60,6 +60,7 @@ const SofiaView = lazy(async () => ({ default: (await import('../sofia')).SofiaV
 const EntregasView = lazy(async () => ({ default: (await import('../entregas')).EntregasView }))
 const ProjetosView = lazy(async () => ({ default: (await import('../projetos')).ProjetosView }))
 const TrabalhosView = lazy(async () => ({ default: (await import('../trabalhos')).TrabalhosView }))
+const OrganizacaoView = lazy(async () => ({ default: (await import('../organizacao')).OrganizacaoView }))
 const DocumentosView = lazy(async () => ({ default: (await import('../documentos')).DocumentosView }))
 const PrivacidadeView = lazy(async () => ({ default: (await import('../privacidade')).PrivacidadeView }))
 
@@ -237,6 +238,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
           <Route element={page(<EntregasView />)} path="entregas" />
           <Route element={page(<ProjetosView />)} path="projetos" />
           <Route element={page(<TrabalhosView />)} path="trabalhos" />
+          <Route element={page(<OrganizacaoView />)} path="organizacao" />
       <Route element={page(<DocumentosView />)} path="documentos" />
         <Route element={page(<PrivacidadeView />)} path="privacidade" />
       <Route element={null} path="agents" />

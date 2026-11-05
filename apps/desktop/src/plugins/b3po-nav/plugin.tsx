@@ -90,6 +90,9 @@ const MODULOS: readonly ItemDeMenu[] = [
   // r87: trabalhos pontuais - o que comeca e termina. Ao lado de Projetos porque a diferenca e
   // exatamente essa: projeto tem criterio e prazo como meta; trabalho pontual VENCE.
   { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' },
+  // r91: a estrutura da organizacao - quem faz o que. Fica junto do trabalho porque e o
+  // mesmo assunto na escala da empresa: o desenho que faz o trabalho acontecer.
+  { codicon: 'organization', label: 'Organização', path: '/organizacao' },
   { codicon: 'briefcase', label: 'Serviços', path: '/servicos' },
 
   // 5. O que eu devo e recebo
