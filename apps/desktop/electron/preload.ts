@@ -197,6 +197,16 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     mudar: payload => ipcRenderer.invoke('hermes:projetos:mudar', payload),
     podeIniciar: payload => ipcRenderer.invoke('hermes:projetos:podeIniciar', payload)
   },
+  organizacao: {
+    // r90 do GOAL V2: o DESENHO da empresa - departamentos e o que cada um faz. O cadastro continua em
+    // companies-store; este bloco e a estrutura (r81/r88).
+    definir: payload => ipcRenderer.invoke('hermes:organizacao:definir', payload),
+    estrutura: companyId => ipcRenderer.invoke('hermes:organizacao:estrutura', companyId),
+    listar: tenantId => ipcRenderer.invoke('hermes:organizacao:listar', tenantId),
+    setorConhecido: setor => ipcRenderer.invoke('hermes:organizacao:setorConhecido', setor),
+    // A sugestao e canal, e nao import do catalogo: a tela nao pode carregar uma copia que envelhece.
+    sugestao: setor => ipcRenderer.invoke('hermes:organizacao:sugestao', setor)
+  },
   trabalhos: {
     // r86 do GOAL V2: o trabalho pontual - o terceiro tipo do §12. Ele EXPIRA, ao contrario da
     // organizacao e do projeto, e e isso que impede a lista de virar arquivo de arrependimentos.
