@@ -49,7 +49,9 @@ import { registerAutomationIpc } from './automation-ipc'
 import { AutomationStore, automationStorePath } from './automation-store'
 import { registerAnalyticsIpc } from './analytics-ipc'
 import { AuditStore, auditStorePath, configurarColetorDeAuditoria } from './audit-store'
+import { registerAuditIpc } from './audit-ipc'
 import { registerSofiaIpc } from './sofia-ipc'
+
 import { openSofiaStore } from './sofia-store'
 import { registerMarketingIpc } from './marketing-ipc'
 import { MarketingStore, marketingStorePath } from './marketing-store'
@@ -84,6 +86,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // O coletor e configurado AQUI, antes de qualquer canal, porque o permission-guard o consulta em toda
   // chamada. Sem esta linha, nenhuma decisao e registrada.
   configurarColetorDeAuditoria(new AuditStore(auditStorePath(userDataDir)))
+
+  // r36 do GOAL V2: o canal de leitura da trilha. Sem ele, a auditoria existiria apenas para
+  // quem abrisse o JSON no disco — o padrao da r2 que ja se repetiu nas r3-r8 e r25-r28.
+  registerAuditIpc(ipcMain, { actorOf: () => actorOf(), store: new AuditStore(auditStorePath(userDataDir)) })
 
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))

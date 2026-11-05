@@ -181,6 +181,10 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     saveBranch: payload => ipcRenderer.invoke('hermes:companies:saveBranch', payload),
     saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
   },
+  auditoria: {
+    // r36 do GOAL V2: leitura da trilha. O ledger existe desde a r35; este e o caminho ate a tela.
+    listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
+  },
   purchases: {
     // r28 do GOAL V2: os tres canais que faltavam na tela (r26/r27).
     aprovar: payload => ipcRenderer.invoke('hermes:purchases:aprovar', payload),
