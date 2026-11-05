@@ -31,7 +31,6 @@ const DIR = join(__dirname)
  * Esta lista e a divida. Ela pode encolher livremente; crescer exige justificativa escrita no commit.
  */
 const SEM_GUARDA: readonly string[] = [
-  'after-sales-ipc.ts',
   'agent-ipc.ts',
   'analytics-ipc.ts',
   'challenge-window-ipc.ts',
@@ -111,9 +110,9 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-  it('a divida medida hoje e 21 de 40', () => {
+  it('a divida medida hoje e 20 de 40', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(21)
+    expect(SEM_GUARDA).toHaveLength(20)
     expect(canais()).toHaveLength(40)
   })
 })
