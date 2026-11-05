@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "medido": {
+    "modulosNoMenu": 23,
+    "gate": "14 checks, ok",
+    "canaisComGuarda": "17 de 46",
+    "typecheck": "0 erros",
+    "rotas": 36,
+    "testesElectron": "5352 passaram, 41 falharam (ambiente), 207 skipped",
+    "fluxosProvados": 4,
+    "dominiosDo17": "9 de 9"
+  },
+  "bloqueios": [
+    {
+      "motivo": "AZURE_SIGN_* ausente",
+      "estado": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+      "item": "assinatura Authenticode",
+      "id": "B1"
+    },
+    {
+      "motivo": "16, sem credencial",
+      "estado": "BLOCKED",
+      "item": "marketplace BR",
+      "id": "B2"
+    },
+    {
+      "motivo": "16, sem credencial",
+      "estado": "BLOCKED",
+      "item": "WhatsApp Cloud API",
+      "id": "B3"
+    },
+    {
+      "motivo": "16, sem credencial",
+      "estado": "BLOCKED",
+      "item": "gateway de pagamento",
+      "id": "B4"
+    },
+    {
+      "motivo": "exige instalar no Windows",
+      "estado": "PENDING",
+      "item": "instalacao real do MSIX",
+      "id": "B5"
+    },
+    {
+      "motivo": "exige o app aberto",
+      "estado": "PENDING",
+      "item": "foco, tabulacao, contraste",
+      "id": "B6"
+    }
+  ],
+  "proximaAcao": "rodada 118 — consolidar o STATE e o ROADMAP com os equivalentes existentes",
+  "checkpoint": {
+    "branch": "b3po-brand",
+    "status": "IN_PROGRESS",
+    "fase": "GOAL V2 — rodada 117 de 256",
+    "tarefa": "checkpoints persistentes (23)",
+    "dataHora": "2026-11-05T15:58:41-03:00",
+    "commit": "df02a3d738c3"
+  }
+}
