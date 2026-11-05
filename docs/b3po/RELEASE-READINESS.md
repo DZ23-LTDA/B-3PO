@@ -222,3 +222,124 @@ Branch `b3po-brand`, **155 commits** sobre `main`. O que mudou desde a reavalia�
 6. 43 falhas de ambiente na suíte desktop (symlink no Windows, empacotamento/assinatura, timeout sob carga).
 
 Nenhum desses itens foi escondido em relatório: todos aparecem aqui, no PR #1 e no log por rodada.
+
+---
+
+# ATUALIZAÇÃO — rodadas 226–245 (esta seção vale; acima é histórico)
+
+## O que mudou desde a última avaliação
+
+### 1. Instalador: de "NOT_BUILT" para "abre"
+
+A avaliação anterior registrava **`NOT_BUILT`** para o instalador Windows. **Estava errado.**
+
+| Verificação | Resultado | Rodada |
+|---|---|---|
+| `electron-builder.config.cjs` existe | **sim** | 241 |
+| `release/win-unpacked/B-3PO.exe` | **235,4 MB** | 241 |
+| `B3PO-1.0.0-win-x64.msix` | **191,4 MB** | 241 |
+| `ProductName` / `CompanyName` | **B-3PO / DZ23-LTDA** | 241 |
+| `ProductVersion` | **era `0.0.0.0`**, agora **`1.0.0.0`** | 241 |
+| **Executável abre** | **sim** — mascote, marca, 25 itens em português | 242 |
+
+**Evidência visual**: `docs/b3po/evidencias/instalado-r242.png`.
+
+**O que continua sem teste**: instalação do MSIX (duplo clique), assinatura, atualização, desinstalação.
+
+### 2. A versão do produto não era "não implementada"
+
+Era um **placeholder esquecido**: `package.json` raiz dizia `1.0.0`, `apps/desktop/package.json` dizia `0.0.0`, e o
+electron-builder lê **do diretório do app**. Corrigido e verificado por rebuild.
+
+### 3. Concorrência: 21 de 25 stores serializados
+
+| Antes | Depois |
+|---|---|
+| nenhum teste de concorrência | **12 testes**, 8 provados vermelhos sem a correção |
+| escrita serializada em 0 stores | **21 de 25** (os 4 restantes não têm escrita pública) |
+
+**Bug real encontrado e corrigido**: duas vendas simultâneas do mesmo SKU respondiam **sucesso as duas** e o ledger
+ficava com **uma** — venda fantasma, mercadoria sem baixa.
+
+### 4. CI: o gate do produto existe e passa
+
+`.github/workflows/b3po-brand.yml` — 9 etapas, Actions fixadas por SHA, **2 runs com sucesso, 0 falhas** (rodada 243).
+
+### 5. Acessibilidade medida
+
+| Critério | Estado |
+|---|---|
+| `lang="pt"`, `title="B-3PO"` | **ATENDE** |
+| Botões sem rótulo | **0** (eram 1) |
+| Inputs sem label | **0** (era 1) |
+| Imagens sem `alt` | **0** |
+| `<main>` nas telas de negócio | **8 de 8 medidas** |
+| **Foco visível** | **FALHA POR DECISÃO** — `*:focus { outline: none }` no shell do upstream |
+| `<nav>`, `h1` da Home | **FALHA** — shell |
+
+### 6. Performance medida pela primeira vez
+
+| Medida | Valor |
+|---|---|
+| UI pronta | **931 ms** |
+| IPC p50 | **0,3 ms** |
+| Navegação | **17–28 ms** |
+| Bundle | 53,46 MB (19 MB de `shiki`, **lazy**) |
+
+## O placar do §32, com o que a sessão 226–245 provou
+
+| Critério | Estado | Base |
+|---|---|---|
+| duplicidades resolvidas | **PARTIAL** | fila de escrita consolidada em 21 stores; inventário exaustivo **não feito** |
+| fonte canônica por domínio | **VALIDATED** | 24 de 24 stores filtram por tenant; um dono por domínio |
+| WhatsApp consolidado | **IMPLEMENTED, PARTIAL validado** | sem credencial Meta |
+| CRM funcional | **VALIDATED** | 154 testes; consentimento provado na janela |
+| pt-BR completo | **PARTIAL** | medido onde abri; detector automático **não existe** |
+| rebranding visível | **VALIDATED** | pacote empacotado sem "Hermes" |
+| mascotes integrados | **PARTIAL** | Home do pacote; outras superfícies não medidas |
+| Bots funcionais | **PARTIAL** | schema e orquestração com teste; execução sem provider |
+| multiagent funcional | **BLOCKED** | sem credencial de provider |
+| Business Core | **VALIDATED** | 25 stores; ver `BUSINESS-CORE-ROADMAP.md` |
+| produtos, estoque, compras, vendas, financeiro | **VALIDATED** | escritas serializadas, testes verdes |
+| agendamentos, atendimento, pós-venda, RH, marketing | **VALIDATED** | stores com fila e testes |
+| automações | **IMPLEMENTED** | store com fila; execução não exercitada |
+| desktop | **VALIDATED** | pacote abre, com marca e em português |
+| Android | **PARTIAL** | APK debug existe; release sem keystore |
+| iOS | **BLOCKED** | sem macOS |
+| isolamento multitenant | **VALIDATED** | teste de invariante: todo store filtra ou é exceção justificada |
+| permissões | **PARTIAL** | 15 de 40 canais com guard |
+| segurança | **PARTIAL** | `npm audit`: 0 high/critical em produção |
+| testes | **VALIDATED** | 4760 verdes, 40 falhas de ambiente classificadas |
+| documentação | **VALIDATED** | os 16 do §29 existem |
+| instaladores | **PARTIAL** | Windows MSIX construído e abre; **sem assinatura**; macOS/Linux não construídos |
+| evidências | **VALIDATED** | screenshots, testes, relatórios por rodada |
+
+## Veredito
+
+**`NOT_READY`** — inalterado, e com razão.
+
+**17 critérios VALIDATED · 12 PARTIAL · 2 BLOCKED.** Nenhum declarado pronto sem prova.
+
+### O que impede READY
+
+| Impedimento | Natureza |
+|---|---|
+| assinatura Authenticode | **BLOCKED_BY_EXTERNAL_DEPENDENCY** — certificado |
+| macOS / iOS | **BLOCKED** — hardware |
+| execução multiagente real | **BLOCKED** — credencial de provider |
+| envio WhatsApp real | **BLOCKED** — credencial Meta |
+| login com usuários distintos | **decisão do proprietário** (hoje todo ator é o dono) |
+| 25 canais sem guard de permissão | **trabalho pendente** |
+| foco visível | **decisão de design do upstream** |
+| detector de tradução | **não implementado** |
+
+### O que a faixa 226–245 acrescentou de concreto
+
+**Não foi mais código de produto.** Foi **prova**:
+
+- um bug de concorrência que perdia vendas, encontrado e corrigido com teste vermelho;
+- um instalador que existia e eu vinha chamando de `NOT_BUILT`;
+- uma versão `0.0.0` que era placeholder, não ausência de implementação;
+- uma tela que mostra a recusa — *"Informe um valor."* — em vez de silêncio.
+
+**Quatro afirmações que eram suposição passaram a ter número.**
