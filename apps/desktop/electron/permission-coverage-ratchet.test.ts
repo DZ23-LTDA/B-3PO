@@ -39,6 +39,7 @@ const SEM_GUARDA: readonly string[] = [
   'challenge-window-ipc.ts',
   'clipboard-ipc.ts',
   'companies-ipc.ts',
+
   'crm-conversations-ipc.ts',
   'crm-pipeline-ipc.ts',
   'crm-tasks-ipc.ts',
