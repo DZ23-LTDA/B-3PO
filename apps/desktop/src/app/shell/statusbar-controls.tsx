@@ -30,6 +30,18 @@ import {
 const STATUSBAR_ACTION_CLASS =
   'inline-flex h-full items-center gap-1 rounded-none px-1.5 text-[0.6875rem] text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground disabled:cursor-default disabled:opacity-45'
 
+/**
+ * Nome acessivel de um item de status (r229).
+ *
+ * Fica fora do componente de proposito: \`StatusbarItemView\` estava exatamente no teto de complexidade
+ * (CC 20) e o \`||\` + \`typeof\` inline levava a 22. O gate barrou, corretamente.
+ */
+function rotuloAcessivel(item: StatusbarItem): string | undefined {
+  if (item.title) return item.title
+
+  return typeof item.label === 'string' ? item.label : undefined
+}
+
 export interface StatusbarMenuItem {
   id: string
   icon?: ReactNode
@@ -353,6 +365,10 @@ const StatusbarItemView = memo(function StatusbarItemView({
           item.onSelect?.({ shiftKey: event.shiftKey })
         }}
         type="button"
+        // r229: um item de status so com icone ficava sem nome acessivel - o leitor de tela anunciava
+        // "botao" e nada mais (WCAG 4.1.2). `title`/`label` e a mesma string que o item ja usa no
+        // tooltip, entao isto nao inventa texto novo nem muda o visual.
+        aria-label={rotuloAcessivel(item)}
       >
         {content}
       </button>
