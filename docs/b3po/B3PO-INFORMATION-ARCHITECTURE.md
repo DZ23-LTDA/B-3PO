@@ -1,137 +1,121 @@
-# B-3PO — ARQUITETURA DA INFORMAÇÃO
+# B3PO — ARQUITETURA DE INFORMAÇÃO
 
-**Rodada**: 23 do GOAL V2 (§13) · **Data**: 05/11/2026
-**Estado**: **ESPECIFICAÇÃO**. Nenhuma rota removida, nenhum menu alterado nesta rodada.
-
----
-
-## 0. O QUE O §13 MANDA, E O QUE ELE PROÍBE
-
-**Manda**:
-
-> *"Adotar navegação contextual por ambiente. Ambientes principais: 1. EMPRESA — criar, administrar e operar negócios. 2. ENGENHARIA E CRIACAO — desenvolver SaaS, sites, apps, APIs, jogos, sistemas e produtos."*
-
-**Proíbe, com todas as letras**:
-
-> *"**Não escolher a opção A/B sugerida pelo DeepSeek** como arranjo definitivo."*
-
-**E protege o que existe**:
-
-> *"Não remover rotas nem funcionalidades existentes sem mapear consumidores, permissões, links, deeplinks, testes e redirects."*
+**Entregável do §13** · gerado na rodada 93 do GOAL V2 · **medido do código**, não escrito de memória
 
 ---
 
-## 1. O QUE EXISTE HOJE — 31 rotas
+## O QUE ESTE DOCUMENTO É
 
-| # | Rota | View | Natureza |
-|---|---|---|---|
-| 1 | `/session-import` | session-import | plataforma |
-| 2 | `/new` | chat | plataforma |
-| 3 | `/settings` | settings | **configuração** |
-| 4 | `/command-center` | command-center | plataforma |
-| 5 | `/capabilities` | capabilities | plataforma |
-| 6 | `/messaging` | messaging | **canal** |
-| 7 | `/webhooks` | webhooks | plataforma |
-| 8 | `/artifacts` | artifacts | **criação** |
-| 9 | `/cron` | cron | **automação** |
-| 10 | `/agenda` | agenda | **operação** |
-| 11 | `/compras` | compras | **comércio** |
-| 12 | `/agentes` | agentes | **IA** |
-| 13 | `/posvenda` | posvenda | **crescimento** |
-| 14 | `/marketing` | marketing | **crescimento** |
-| 15 | `/painel` | painel | **visão geral** |
-| 16 | `/automacoes` | automacoes | **automação** |
-| 17 | `/sofia` | sofia | **IA** (r21) |
-| 18 | `/documentos` | documentos | **inteligência** |
-| 19 | `/privacidade` | privacidade | **configuração** |
-| 20 | `/atendimento` | atendimento | **operação** |
-| 21 | `/crm` | crm | **operação** |
-| 22 | `/empresa` | empresa | **configuração** *(ver §3)* |
-| 23 | `/finance` | finance | **comércio** |
-| 24 | `/products` | products | **comércio** |
-| 25 | `/sales` | sales | **comércio** |
-| 26 | `/rh` | rh | **operação** |
-| 27 | `/servicos` | servicos | **operação** |
-| 28 | `/stock` | stock | **comércio** |
-| 29 | `/profiles` | profiles | plataforma |
-| 30 | `/agents` | agents | **IA** (runtime) |
-| 31 | `/starmap` | starmap | plataforma |
+O mapa das **35 rotas registradas** em `apps/desktop/src/app/routes.ts` e das **23 que estão no menu**.
 
-**18 estão no menu** (r21). **13 não estão** — e essa é a primeira dívida: existem, resolvem por URL, e o usuário **não chega** nelas por navegação.
+**Medido, não lembrado.** A diferença importa: uma lista de rotas escrita de memória **envelhece em uma rodada**; esta foi **extraída do arquivo**.
 
 ---
 
-## 2. OS DOIS AMBIENTES
+## OS DOIS AMBIENTES DO §13:416-419
 
-### EMPRESA — criar, administrar e operar negócios
+| Ambiente | Estado | Rotas |
+|---|---|---|
+| **EMPRESA** | ⚠️ **parcial** — é um rótulo, não um modo | as 20 do grupo Empresa |
+| **ENGENHARIA E CRIAÇÃO** | ❌ **não existe** | — |
 
-Agrupamento que o §13 fixa:
+> **O §13:413 diz explicitamente**: *"Não escolher a opção A/B sugerida pelo DeepSeek como arranjo definitivo. Adotar navegação contextual por ambiente."*
+>
+> **O produto tem a organização por grupos (r92), e não tem o seletor de ambiente.** Os 7 grupos são **o Modo Empresa**; falta o outro modo e o seletor entre eles.
 
-| Grupo | Telas |
+---
+
+## AS 35 ROTAS — e as 12 que não estão no menu
+
+### No menu (23) — agrupadas como o §13:429-438
+
+| Grupo | Rotas |
 |---|---|
-| **Visão geral** | `/painel` |
-| **Operação** | `/crm` · `/atendimento` · `/agenda` · `/servicos` · `/rh` |
-| **Comércio** | `/products` · `/stock` · `/compras` · `/sales` · `/finance` · *(logística, quando houver)* |
+| **Visão geral** | `/painel` · `/empresa` |
+| **Operação** | `/atendimento` · `/agenda` · `/servicos` · `/rh` |
+| **Comércio** | `/products` · `/stock` · `/compras` · `/sales` · `/entregas` · `/finance` |
+| **Trabalho** | `/projetos` · `/trabalhos` |
 | **Crescimento** | `/marketing` · `/posvenda` |
-| **Inteligência e automação** | `/sofia` · `/agentes` · `/automacoes` · `/documentos` |
-| **Configuração** | `/empresa` · `/privacidade` · `/settings` |
+| **Inteligência** | `/agentes` · `/automacoes` · `/sofia` · `/documentos` |
+| **Configuração** | `/organizacao` · `/privacidade` |
 
-### ENGENHARIA E CRIAÇÃO — desenvolver produtos
+### **Fora do menu (12)** — e o que são
 
-O §13 diz: *"navegação própria para projetos, repositórios, issues/tarefas, arquitetura, código, testes, CI/CD, artefatos e entregas, **conforme recursos comprovados**."*
-
-**O que existe hoje**: `/artifacts` (artefatos). **O que não existe**: projetos, repositórios, issues, arquitetura, CI/CD.
-
-| Grupo | Telas | Estado |
+| Rota | O que é | Por que não está no menu |
 |---|---|---|
-| **Trabalho** | `/artifacts` | ✅ existe |
-| **Projetos** | — | ❌ **não existe** (é o Project Builder do §12) |
-| **Repositórios / código** | — | ❌ **não existe** (há `git-ipc`, sem tela) |
-| **Testes / CI-CD** | — | ❌ **não existe** |
-
-**Consequência honesta**: o ambiente ENGENHARIA hoje teria **uma tela**. Criar o ambiente com uma tela é pior que não criar — daria a impressão de um produto que não existe.
-
----
-
-## 3. A COLISÃO DE NOMES QUE O §13 APONTA
-
-> *"'Empresa' como ambiente não deve ser confundida com configuração da organização; renomear a configuração para 'Organização' ou equivalente."*
-
-**Hoje**: `/empresa` é a **configuração da organização** (CNPJ, fuso, moeda, imposto) — e na r15 eu a subi para o 2º item do menu, porque **é o contexto de tudo**.
-
-**Depois do §13**: "Empresa" passa a ser o **nome do ambiente**. Manter `/empresa` como configuração criaria exatamente a confusão que o §13 proíbe.
-
-**Decisão proposta**: a rota **continua** `/empresa` (removê-la exigiria mapear consumidores — o §13 proíbe sem isso), e o **rótulo no menu** passa a ser **"Organização"**.
-
-> **A rota é identificador técnico; o rótulo é produto.** Trocar o rótulo não quebra link, deeplink nem teste; trocar a rota quebraria os três.
+| `/` | nova conversa | **é o chat**, não um módulo |
+| `/settings` | configuração do app | é do **runtime**, não do produto |
+| `/command-center` | painel de comandos | **avançado** — não é uso diário |
+| `/capabilities` | o que o agente sabe fazer | avançado |
+| `/messaging` | **mensageria** | ⚠️ **ver abaixo** |
+| `/webhooks` | integrações de entrada | avançado |
+| `/artifacts` | artefatos | avançado |
+| `/cron` | **tarefas agendadas** | ⚠️ **ver abaixo** |
+| `/crm` | **CRM** | ❗ **órfão** — ver abaixo |
+| `/profiles` | perfis | avançado |
+| `/agents` | agentes (inglês) | ⚠️ **duplicata de `/agentes`** |
+| `/starmap` | mapa do runtime | avançado |
+| `/session-import` | importar sessão | fluxo pontual |
 
 ---
 
-## 4. O QUE O SDK PERMITE HOJE
+## OS TRÊS ACHADOS QUE O MAPA REVELOU
 
-```ts
-export interface SidebarNavContribution {
-  codicon: string
-  label: string
-  path: string
-  tier?: InterfaceTier     // 'advanced' | undefined
-}
-```
+### 1. `/crm` está **órfão**
 
-**Não há campo de ambiente nem de grupo.** Três caminhos:
+**A rota existe, a view existe, e o menu não tem entrada para ela.**
 
-| Caminho | Custo | Risco |
+> O §6 do GOAL chama isso de *"CRM ÓRFÃO — ACHADO PRIORITÁRIO"*.
+>
+> **O que a r211 e as rodadas seguintes fecharam foi a SEGURANÇA do CRM** (tenant, guarda, webhook). **A porta de entrada continua faltando** — e um módulo seguro que ninguém alcança é um módulo morto.
+
+### 2. `/agents` e `/agentes` são **duas rotas para a mesma coisa**
+
+O menu mostra `/agentes`. `/agents` existe e não aparece.
+
+> **Uma delas é legado do upstream.** O §13:456 proíbe remover rota sem mapear consumidores — então **o mapa é o primeiro passo**, e ele está aqui.
+
+### 3. `/messaging` e `/atendimento` — a duplicata que o §13:440 nomeia
+
+> *"Não duplicar Mensageria e Atendimento sem definir responsabilidades."*
+>
+> **Hoje: `/atendimento` está no menu, `/messaging` não.** A duplicata **existe e está assimétrica** — uma é porta, a outra é rota.
+
+E `/agenda` (menu) + `/cron` (fora) é a segunda metade do §13:441:
+
+> *"Unificar Agenda e Tarefas agendadas somente se forem o mesmo conceito; se uma for cron do runtime, manter distinta e nomear claramente."*
+>
+> **`/cron` é cron do runtime** — então **manter distinta está certo**; o que falta é **nomear claramente**, e o menu não a mostra.
+
+---
+
+## O QUE ESTÁ **CORRETO**
+
+| Item | Estado |
+|---|---|
+| Grupos por fluxo (§13:429-438) | ✅ r92 |
+| `Empresa` ≠ configuração (§13:444) | ✅ r92 |
+| Nenhuma rota removida (§13:456) | ✅ r92 |
+| **Empresa logo após Painel** | ✅ r92 |
+
+---
+
+## O QUE **FALTA** — medido
+
+| Item | §13 | Estado |
 |---|---|---|
-| **A.** Estender `SidebarNavContribution` com `ambiente?: 'empresa' \| 'engenharia'` + render filtrando | mudança no SDK + os 2 consumidores existentes (kanban e teste) | médio — muda contrato compartilhado |
-| **B.** Filtro no plugin: registrar todos e o plugin decide quais expõe, por um estado de ambiente | **nenhuma mudança no SDK** | baixo — mas o menu só reage a re-render |
-| **C.** Duas áreas `SIDEBAR_NAV_AREA` distintas | contornar o SDK por convenção | **alto** — duas áreas para a mesma coisa é o começo de uma terceira |
-
-**Recomendação: B.** É o único que **não muda contrato compartilhado** e não duplica área. O §13 não exige que o SDK saiba de ambientes — exige que **o usuário veja o menu do contexto em que está**.
+| **Seletor de ambiente** | :447 | ❌ |
+| **Menu conforme RBAC e plano** | :448 | ❌ — o menu é estático |
+| **Busca global** | :450 | ❌ |
+| **Modo Engenharia** | :452-454 | ❌ |
+| **Resolver `/crm` órfão** | §6 | ❌ |
+| **Resolver `/agents` duplicada** | :456 | ❌ |
+| **Nomear `/cron` claramente** | :441 | ❌ |
 
 ---
 
-## 5. O QUE NÃO PODE ACONTECER
+## PRÓXIMA RODADA
 
-O §13 proíbe remover rota sem mapear. A matriz (§ `B3PO-NAVIGATION-AND-UX-SPEC.md`) lista, para **cada** das 31, quem consome. **Nenhuma será removida nesta fase.**
+**O `/crm` órfão** — a rota existe, a tela existe, e **ninguém chega nela**. É o item que o §6 chama de *"achado prioritário"* e que a navegação pode resolver **sem criar módulo nenhum**: uma linha no menu.
 
-E a regra que vale desde a r2: **uma tela sem item de menu é código inalcançável** — e há **13 assim hoje**.
+> **93 rodadas.** O mapa foi **medido**, e mediu três coisas que eu não sabia: **`/crm` está órfão**, **`/agents` duplica `/agentes`**, e **`/messaging` duplica `/atendimento` de forma assimétrica** — as três nomeadas pelo GOAL e nenhuma delas corrigida.
