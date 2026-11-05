@@ -65,7 +65,12 @@ const MODULOS: readonly ItemDeMenu[] = [
   { codicon: 'dashboard', label: 'Painel', path: '/painel' },
 
   // 2. Quem eu sou — antes dos módulos, porque é o contexto deles (r15)
-  { codicon: 'library', label: 'Empresa', path: '/empresa' },
+  // r24 do GOAL V2 / §13: o rótulo passa a ser **Organização**. O §13 cria um ambiente chamado
+  // EMPRESA, e manter esta tela rotulada como "Empresa" seria exatamente a confusão que ele proíbe.
+  //
+  // A ROTA continua `/empresa`: trocá-la quebraria links, deeplinks e o `plugin.test.ts` — o §13 manda
+  // mapear consumidores antes de remover, e o rótulo resolve sem remover nada.
+  { codicon: 'library', label: 'Organização', path: '/empresa' },
 
   // 3. O que chega sozinho
   { codicon: 'inbox', label: 'Atendimento', path: '/atendimento' },

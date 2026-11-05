@@ -120,3 +120,53 @@ O §13 pede *"seletor persistente de ambiente e organização/projeto ativos"*.
 **Nenhuma rota, nenhum rótulo, nenhum item de menu.**
 
 Esta rodada produziu **dois documentos e uma matriz**, como o §13 pede nos entregáveis. Implementar antes de mapear era exatamente o que o §13 proíbe.
+---
+
+# CORREÇÃO — r24 (esta seção substitui as afirmações erradas acima)
+
+## O QUE EU ESCREVI ERRADO NA r23
+
+A matriz acima tem uma coluna "sem menu" e eu a interpretei como **"inalcançável"**. **Está errado.**
+
+Medido na r24, **todas as 13 rotas "sem menu" têm acesso** — por outros caminhos:
+
+| Rota | Onde está acessível |
+|---|---|
+| `/settings` | **statusbar** (`use-statusbar-items.tsx:762` — `?tab=billing`) e `profile-switcher` |
+| `/cron` | **statusbar** (`use-statusbar-items.tsx:645`) |
+| `/webhooks` | **statusbar** (`use-statusbar-items.tsx:653`) |
+| `/messaging` | **rail da sidebar de chat** (`app/chat/sidebar/index.tsx:229`) |
+| `/artifacts` | **rail da sidebar de chat** (`app/chat/sidebar/index.tsx:239`) |
+| `/capabilities` | command-center |
+| `/command-center` | plataforma |
+| `/profiles`, `/agents`, `/starmap`, `/new`, `/session-import` | plataforma |
+
+**O que "sem menu" significava de verdade**: não estão no **menu do B-3PO** (`b3po-nav`). **Não** que o usuário não chega nelas.
+
+> **A diferença importa**: "não está no menu do produto" e "não existe porta" são diagnósticos diferentes, com consertos diferentes. Eu tratei os dois como o segundo.
+
+## FASE 1 IMPLEMENTADA
+
+`/empresa` → rótulo **"Organização"** no menu.
+
+```ts
+{ codicon: 'library', label: 'Organização', path: '/empresa' },
+```
+
+**A rota não mudou.** Trocar `/empresa` quebraria `use-statusbar-items`, `profile-switcher`, `toolset-detail` e o `plugin.test.ts` — e o §13 manda **mapear consumidores antes de remover**.
+
+**O §13 pede exatamente isto**: *"'Empresa' como ambiente não deve ser confundida com configuração da organização; renomear a configuração para 'Organização' ou equivalente."*
+
+## O QUE ISSO MUDA NA MATRIZ ACIMA
+
+| Linha da matriz | Estava | É |
+|---|---|---|
+| "5 rotas de negócio estão sem menu" | parecia dívida de alcançabilidade | **dívida de organização** — elas têm porta, mas não estão no menu do produto |
+| Ordem de implementação, fase 3 | "expor `/artifacts` e `/cron`" | **prioridade baixou**: eles já têm porta; expor no menu é conveniência, não conserto |
+
+## O QUE CONTINUA VALENDO DA r23
+
+- **O ambiente ENGENHARIA não nasce com uma tela** — a decisão está de pé.
+- **O seletor de ambiente espera o segundo ambiente** — idem.
+- **O agrupamento visual exige mudança de SDK** — idem.
+- **Nenhuma rota foi removida** — idem.
