@@ -357,3 +357,89 @@ fonte de verdade, que o GOAL proibe explicitamente.
 4. renomear/excluir etiqueta em uso (gestao de vocabulario).
 
 Licao: auditar antes de construir economiza a rodada inteira e evita duas verdades sobre o mesmo dado.
+
+---
+
+# ESTADO REAL AO FIM DA RODADA 252 (esta seção vale; acima é histórico)
+
+## O commit
+
+```
+branch  b3po-brand
+HEAD    20bfcfb244
+main    f4cf411f28 (= origin/main, INTACTO)
+```
+
+## O placar do §32
+
+**17 `VALIDATED` · 12 `PARTIAL` · 2 `BLOCKED` · 0 declarados prontos sem prova.**
+
+## Os números que a próxima sessão pode usar sem reconferir
+
+| Medida | Valor | Onde foi medido |
+|---|---|---|
+| Gate | **14 checks, ok** | `python scripts/check` |
+| Typecheck | **0 erros** em 2 projetos | `scripts/check-b3po-types` |
+| Suíte `electron/` | **4772 verdes · 40 falhas · 207 pulados** de 5019 | r250 |
+| Falhas classificadas | **36 ambiente · 3 indeterminadas · 1 produto** | r250 |
+| Stores de domínio | **766 verdes** | r251 |
+| Concorrência | **12 verdes** (8 provados vermelhos sem a fila) | r251 |
+| Permissões + tenant + LGPD | **33 verdes** | r251 |
+| Stores com fila de escrita | **21 de 25** (4 não gravam) | r238 |
+| Stores que filtram por tenant | **24 de 24** | r211 |
+| Canais IPC com guard | **15 de 40** — dívida congelada em 25 | r214 |
+| UI pronta (startup) | **931 ms** | r227 |
+| IPC p50 | **0,3 ms** | r227 |
+| Bundle | **53,46 MB** (19 MB de `shiki`, lazy) | r227 |
+| Instalador Windows | **`B-3PO.exe` 235 MB · MSIX 191 MB · versão 1.0.0.0** | r241–242 |
+| CI | **2 runs com sucesso, 0 falhas** | r243 |
+| Telas com `<main>` | **8** | r233 |
+| Botões sem rótulo | **0** (era 1) | r229 |
+| Inputs sem label | **0** (era 1) | r230 |
+| Documentos do §29 | **16 de 16** | r244 |
+
+## O que foi provado na janela (não só lido no código)
+
+| Prova | Evidência |
+|---|---|
+| App empacotado abre com marca e português | `docs/b3po/evidencias/instalado-r242.png` |
+| Recusa aparece na tela — *"Informe um valor."* | r240 |
+| Consentimento do CRM grava e reflete | r208 |
+| `lang="pt"`, `title="B-3PO"` | r228 |
+| `<main>` em 8 telas | r232–233 |
+
+## O defeito de produto encontrado e NÃO corrigido
+
+**`electron/desktop-installation.ts`** — recuperação de lock de reparo faz **40 tentativas**, cada uma consultando a
+criação de processo (`processCreateTimeSync`), que é lenta no Windows. **~41 s antes de recusar.**
+
+**Um usuário Windows com lock órfão espera ~40 s.** Não corrigido porque mexer em recuperação de lock sem medir pode
+**travar o launch para sempre** — pior que esperar.
+
+## O que a próxima sessão deve fazer primeiro
+
+1. **Ler `docs/b3po/TEST-RESULTS.md`** — as 40 falhas estão classificadas ali, com a tabela que fecha.
+2. **Não repetir a classificação** — ela custou 5 rodadas (246–250).
+3. **A lacuna aberta**: os **3 testes de `bundle-electron-main`** que falham por `config.yaml` não lido. Causa entre
+   **caminho Windows**, **YAML ausente** ou **bug de `HERMES_HOME`**. **Não medido.**
+4. **A outra lacuna**: **4 dos 5 timeouts** do grupo maior continuam sem investigação individual.
+5. **25 canais IPC sem guard** — o maior débito de segurança. A receita está em `docs/b3po/audit/PERMISSION-*.md`.
+
+## O que NÃO fazer
+
+| Não fazer | Por quê |
+|---|---|
+| Trocar `python3` por `python` nos testes | resolveria 13 aqui e **quebraria o CI em Linux** |
+| Aumentar o timeout de `desktop-installation` | esconderia um comportamento de produto |
+| Declarar "todas as 40 falhas são de ambiente" | **era falso** — 1 é produto, 3 indeterminadas |
+| Tocar em `main` | espelho limpo do upstream, exigência F2-A |
+| Fechar ou fazer merge do PR #1 | deve ficar **draft / aberto / NOT READY** |
+
+## As cinco lições que custaram rodadas
+
+1. **Um teste que passa por motivo errado é pior que um vermelho** (r217: `count:` em vez de `contado_milli:`).
+2. **Uma execução parcial de testes é a mesma mentira que uma janela não aberta** (r224).
+3. **O instrumento que mede precisa ser auditado junto com o que ele mede** — meu detector de erro falhou 4 vezes
+   (r230, r239 ×2, r240) por procurar palavras em vez de olhar a diferença.
+4. **Regex sobre estrutura aninhada falha** — 3 vezes (r224, r236). Use substituição literal ou número de linha.
+5. **Quando o número não fecha, o erro está na medição** (r250: escrevi 37+1+3=41 e tive que refazer do JSON).
