@@ -89,6 +89,7 @@ const MODULOS: readonly ItemDeMenu[] = [
   // 7. O que automatiza
   { codicon: 'robot', label: 'Agentes', path: '/agentes' },
   { codicon: 'zap', label: 'Automações', path: '/automacoes' },
+  { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' },
 
   // 8. O que registra e protege
   { codicon: 'file', label: 'Documentos', path: '/documentos' },

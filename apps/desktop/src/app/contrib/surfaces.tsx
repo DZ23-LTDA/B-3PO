@@ -56,6 +56,7 @@ const PosVendaView = lazy(async () => ({ default: (await import('../posvenda')).
 const MarketingView = lazy(async () => ({ default: (await import('../marketing')).MarketingView }))
 const PainelView = lazy(async () => ({ default: (await import('../painel')).PainelView }))
 const AutomacoesView = lazy(async () => ({ default: (await import('../automacoes')).AutomacoesView }))
+const SofiaView = lazy(async () => ({ default: (await import('../sofia')).SofiaView }))
 const DocumentosView = lazy(async () => ({ default: (await import('../documentos')).DocumentosView }))
 const PrivacidadeView = lazy(async () => ({ default: (await import('../privacidade')).PrivacidadeView }))
 
@@ -229,6 +230,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       <Route element={page(<MarketingView />)} path="marketing" />
       <Route element={page(<PainelView />)} path="painel" />
       <Route element={page(<AutomacoesView />)} path="automacoes" />
+          <Route element={page(<SofiaView />)} path="sofia" />
       <Route element={page(<DocumentosView />)} path="documentos" />
         <Route element={page(<PrivacidadeView />)} path="privacidade" />
       <Route element={null} path="agents" />

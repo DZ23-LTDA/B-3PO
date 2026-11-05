@@ -106,6 +106,15 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
     list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },
+  // r21 do GOAL V2: Sofia. Os seis canais nasceram com guarda na r19 — o bridge so repassa.
+  sofia: {
+    aprovar: payload => ipcRenderer.invoke('hermes:sofia:aprovar', payload),
+    criar: payload => ipcRenderer.invoke('hermes:sofia:criar', payload),
+    plano: planoId => ipcRenderer.invoke('hermes:sofia:plano', planoId),
+    planos: () => ipcRenderer.invoke('hermes:sofia:planos'),
+    status: payload => ipcRenderer.invoke('hermes:sofia:status', payload),
+    tarefa: payload => ipcRenderer.invoke('hermes:sofia:tarefa', payload)
+  },
   automations: {
     create: payload => ipcRenderer.invoke('hermes:automations:create', payload),
     list: () => ipcRenderer.invoke('hermes:automations:list'),
