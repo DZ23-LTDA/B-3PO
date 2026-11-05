@@ -4,6 +4,7 @@
 // um JSON sob o `userData` do app, gravado com `write` + `rename` para uma queda no meio não deixar arquivo
 // pela metade. A lógica de funil/automação continua em `@dz23/crm-core` — este arquivo só guarda contatos.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -179,6 +180,9 @@ export function parseStore(raw: string): CrmStoreFile {
 export class CrmContactStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r237): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<CrmContact[]> {
     const store = await this.read()
 
@@ -186,6 +190,10 @@ export class CrmContactStore {
   }
 
   async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] } | { error: string }> {
+    return this.fila.serializar(() => this.upsertSerializado(input, tenantId))
+  }
+
+  private async upsertSerializado(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] } | { error: string }> {
     const normalized = normalizeContact(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
@@ -210,6 +218,10 @@ export class CrmContactStore {
   }
 
   async remove(phone: string, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] }> {
+    return this.fila.serializar(() => this.removeSerializado(phone, tenantId))
+  }
+
+  private async removeSerializado(phone: string, tenantId: string = DEFAULT_TENANT): Promise<{ contacts: CrmContact[] }> {
     const store = await this.read()
     const wanted = digitsOnly(phone)
     store.contacts = store.contacts.filter(entry => !(entry.phone === wanted && entry.tenant_id === tenantId))

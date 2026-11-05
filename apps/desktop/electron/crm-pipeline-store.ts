@@ -4,6 +4,7 @@
 // oportunidade é ligada ao contato pelo telefone (o índice do CRM) e o estágio anda pelo funil; "ganho" e
 // "perdido" são terminais e não voltam por acidente.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -136,6 +137,9 @@ export function pipelineTotals(opportunities: readonly CrmOpportunity[]): { open
 export class CrmPipelineStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r237): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<CrmOpportunity[]> {
     const file = await this.read()
     const ordem = new Map(PIPELINE_STAGES.map((stage, index) => [stage, index]))
@@ -150,6 +154,10 @@ export class CrmPipelineStore {
   }
 
   async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { opportunities: CrmOpportunity[] }> {
+    return this.fila.serializar(() => this.upsertSerializado(input, tenantId))
+  }
+
+  private async upsertSerializado(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { opportunities: CrmOpportunity[] }> {
     const normalized = normalizeOpportunity(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
@@ -179,6 +187,10 @@ export class CrmPipelineStore {
   }
 
   async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ opportunities: CrmOpportunity[] }> {
+    return this.fila.serializar(() => this.removeSerializado(id, tenantId))
+  }
+
+  private async removeSerializado(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ opportunities: CrmOpportunity[] }> {
     const file = await this.read()
     file.opportunities = file.opportunities.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))
     await this.write(file)

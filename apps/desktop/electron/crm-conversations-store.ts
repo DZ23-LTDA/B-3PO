@@ -11,6 +11,7 @@
 // `message_id` é a chave de idempotência — o webhook da Meta reentrega, e reentrega não pode duplicar
 // conversa nem mensagem.
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -262,6 +263,9 @@ export function conversationsStorePath(userDataDir: string): string {
 export class CrmConversationStore {
   private readonly file: string
 
+  /** Fila de escrita (r237): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   // Recebe o CAMINHO DO ARQUIVO, igual a CrmTaskStore/CrmPipelineStore: quem chama resolve o nome uma vez
   // (`conversationsStorePath`). Receber diretório aqui criava `<userData>/crm-conversations.json/crm-conversations.json`
   // — verificado no app empacotado, não no teste.
@@ -281,6 +285,10 @@ export class CrmConversationStore {
   }
 
   async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ conversation: CrmConversation } | { error: string }> {
+    return this.fila.serializar(() => this.upsertSerializado(input, tenantId))
+  }
+
+  private async upsertSerializado(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ conversation: CrmConversation } | { error: string }> {
     const normalized = normalizeConversation(input, Date.now(), tenantId)
     if ('error' in normalized) {
       return normalized
@@ -306,6 +314,10 @@ export class CrmConversationStore {
   }
 
   async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ ok: true } | { error: string }> {
+    return this.fila.serializar(() => this.removeSerializado(id, tenantId))
+  }
+
+  private async removeSerializado(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ ok: true } | { error: string }> {
     // Le TODAS: `write` grava o arquivo inteiro. Filtrar por tenant aqui apagaria as outras empresas.
     const conversations = await this.readAll()
     const remaining = conversations.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))

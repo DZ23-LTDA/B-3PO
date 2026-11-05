@@ -7,6 +7,7 @@
 // `due_at` é timestamp em ms, nunca data local: o fuso de quem digitou não pode mudar o vencimento quando a
 // máquina muda de fuso. Vazio significa "sem prazo", que é diferente de "venceu".
 
+import { WriteQueue } from './write-queue'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -188,11 +189,18 @@ export function taskCounts(tasks: readonly CrmTask[], now: number): { done: numb
 export class CrmTaskStore {
   constructor(private readonly filePath: string) {}
 
+  /** Fila de escrita (r237): read -> valida -> write nao era serializado. Ver write-queue.ts. */
+  private readonly fila = new WriteQueue()
+
   async list(tenantId: string = DEFAULT_TENANT): Promise<CrmTask[]> {
     return sortTasks((await this.read()).tasks.filter(t => t.tenant_id === tenantId))
   }
 
   async upsert(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { tasks: CrmTask[] }> {
+    return this.fila.serializar(() => this.upsertSerializado(input, tenantId))
+  }
+
+  private async upsertSerializado(input: unknown, tenantId: string = DEFAULT_TENANT): Promise<{ error: string } | { tasks: CrmTask[] }> {
     const normalized = normalizeTask(input, Date.now(), tenantId)
 
     if ('error' in normalized) {
@@ -219,6 +227,10 @@ export class CrmTaskStore {
   }
 
   async remove(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ tasks: CrmTask[] }> {
+    return this.fila.serializar(() => this.removeSerializado(id, tenantId))
+  }
+
+  private async removeSerializado(id: string, tenantId: string = DEFAULT_TENANT): Promise<{ tasks: CrmTask[] }> {
     const file = await this.read()
     file.tasks = file.tasks.filter(entry => !(entry.id === id && entry.tenant_id === tenantId))
     await this.write(file)
