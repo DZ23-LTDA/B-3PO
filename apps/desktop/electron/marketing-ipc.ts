@@ -78,7 +78,7 @@ export function registerMarketingIpc(ipcMain: IpcRegistrar, deps: MarketingDeps)
    * Campanha é verba: cria um compromisso de gasto e um alvo de público. Não é leitura.
    */
   ipcMain.handle('hermes:marketing:createCampaign', async (_event: unknown, payload: unknown): Promise<unknown> =>
-    exigirAtor(deps.actorOf, 'execute', 'marketing', async () => deps.marketing.createCampaign(payload))
+    exigirAtor(deps.actorOf, 'publish_external', 'marketing', async () => deps.marketing.createCampaign(payload))
   )
 
   /**
@@ -89,7 +89,7 @@ export function registerMarketingIpc(ipcMain: IpcRegistrar, deps: MarketingDeps)
   ipcMain.handle(
     'hermes:marketing:setCampaignStatus',
     async (_event: unknown, payload: unknown): Promise<unknown> =>
-      exigirAtor(deps.actorOf, 'execute', 'marketing', async () => {
+      exigirAtor(deps.actorOf, 'publish_external', 'marketing', async () => {
         const raw = (payload ?? {}) as Record<string, unknown>
         const id = typeof raw['id'] === 'string' ? raw['id'] : ''
 
@@ -103,7 +103,7 @@ export function registerMarketingIpc(ipcMain: IpcRegistrar, deps: MarketingDeps)
 
   /** Cria post no calendário editorial — EXECUTE: é conteúdo que vai sair em nome da empresa. */
   ipcMain.handle('hermes:marketing:createPost', async (_event: unknown, payload: unknown): Promise<unknown> =>
-    exigirAtor(deps.actorOf, 'execute', 'marketing', async () => deps.marketing.createPost(payload))
+    exigirAtor(deps.actorOf, 'publish_external', 'marketing', async () => deps.marketing.createPost(payload))
   )
 
   /**
@@ -113,7 +113,7 @@ export function registerMarketingIpc(ipcMain: IpcRegistrar, deps: MarketingDeps)
    * `read` deixaria o renderer publicar sem responsável.
    */
   ipcMain.handle('hermes:marketing:setPostStatus', async (_event: unknown, payload: unknown): Promise<unknown> =>
-    exigirAtor(deps.actorOf, 'execute', 'marketing', async () => {
+    exigirAtor(deps.actorOf, 'publish_external', 'marketing', async () => {
       const raw = (payload ?? {}) as Record<string, unknown>
       const id = typeof raw['id'] === 'string' ? raw['id'] : ''
 

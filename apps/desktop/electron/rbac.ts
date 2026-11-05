@@ -42,13 +42,25 @@ export const ACTIONS = [
   'settle_real_payment',
   'approve',
   'manage_actor',
-  'change_role'
+  'change_role',
+  // r66 do GOAL V2: o §19 nomeia 'campanhas, publicacoes, precos' como sensiveis. Antes desta
+  // rodada as tres passavam por 'execute' - e um bot com EXECUTE_ALLOWED podia mudar preco e
+  // gastar verba de campanha.
+  'publish_external',
+  'set_price'
 ] as const
 
 export type Action = (typeof ACTIONS)[number]
 
 /** Ações que nenhum agente pode executar, em nenhum nível. */
-const HUMAN_ONLY: readonly Action[] = ['manage_actor', 'change_role', 'settle_real_payment']
+const HUMAN_ONLY: readonly Action[] = [
+  // r66: as tres que o §19 nomeia e que NAO podem ser de um agente, mesmo com alcada.
+  'publish_external',
+  'set_price',
+  'manage_actor',
+  'change_role',
+  'settle_real_payment'
+]
 
 /** Nível mínimo que cada ação exige de um humano. */
 const MIN_LEVEL: Record<Action, Level> = {
@@ -57,6 +69,9 @@ const MIN_LEVEL: Record<Action, Level> = {
   execute: 'EXECUTE_ALLOWED',
   manage_actor: 'SUPERVISED_AUTONOMY',
   prepare: 'PREPARE',
+  // r66: mudar preco e publicar externamente sao de supervisao, como aprovar.
+  publish_external: 'SUPERVISED_AUTONOMY',
+  set_price: 'SUPERVISED_AUTONOMY',
   read: 'READ',
   recommend: 'RECOMMEND',
   settle_real_payment: 'SUPERVISED_AUTONOMY'

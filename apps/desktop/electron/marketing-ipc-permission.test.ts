@@ -23,7 +23,9 @@ import type { Actor } from './rbac'
 
 type Handler = (event: unknown, arg: unknown) => Promise<unknown>
 
-const DONO: Actor = { id: 'ator-dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }
+// r66: campanha e publicacao passaram a exigir SUPERVISED_AUTONOMY (o §19 as nomeia como sensiveis).
+// O ator de teste sobe um nivel - e o que um dono de verdade tem.
+const DONO: Actor = { id: 'ator-dono', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }
 
 function negado(resposta: unknown): boolean {
   return typeof resposta === 'object' && resposta !== null && (resposta as { error?: string }).error === 'sem_permissao'
