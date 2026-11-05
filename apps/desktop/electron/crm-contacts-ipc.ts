@@ -79,8 +79,8 @@ export function mountCrmContacts(ipcMain: IpcRegistrar, userDataDir: string): Cr
 
   registerCrmCompanyLogoIpc(ipcMain)
   registerCrmContactsIpc(ipcMain, new CrmContactStore(crmStorePath(userDataDir)), deps)
-  registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)))
-  registerCrmTasksIpc(ipcMain, new CrmTaskStore(tasksStorePath(userDataDir)))
+  registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)), deps)
+  registerCrmTasksIpc(ipcMain, new CrmTaskStore(tasksStorePath(userDataDir)), deps)
   const conversas = new CrmConversationStore(conversationsStorePath(userDataDir))
   registerCrmConversationsIpc(ipcMain, conversas)
 
