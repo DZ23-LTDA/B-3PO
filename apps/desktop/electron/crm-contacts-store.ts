@@ -23,7 +23,7 @@ export interface CrmContact {
   /**
    * Base legal do contato para receber comunicacao (LGPD).
 ull = nunca registrado, que NAO e o mesmo
-   * que 
+   * que
 ecusado: ausencia de registro e ausencia de consentimento, mas precisa aparecer como tal em vez
    * de virar um alse que ninguem sabe se foi recusa ou esquecimento.
    */
