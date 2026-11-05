@@ -82,7 +82,7 @@ export function mountCrmContacts(ipcMain: IpcRegistrar, userDataDir: string): Cr
   registerCrmPipelineIpc(ipcMain, new CrmPipelineStore(pipelineStorePath(userDataDir)), deps)
   registerCrmTasksIpc(ipcMain, new CrmTaskStore(tasksStorePath(userDataDir)), deps)
   const conversas = new CrmConversationStore(conversationsStorePath(userDataDir))
-  registerCrmConversationsIpc(ipcMain, conversas)
+  registerCrmConversationsIpc(ipcMain, conversas, deps)
 
   // Webhook do WhatsApp: sobe apenas com opt-in explicito e credenciais presentes (crm-whatsapp-boot.ts).
   // Fica aqui, e nao no main.ts, porque main.ts esta no teto do ratchet de saude e nao pode crescer.
