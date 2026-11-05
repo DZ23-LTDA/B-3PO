@@ -41,6 +41,21 @@ export interface PurchaseItem {
 }
 
 export interface PurchaseOrder {
+  /**
+   * A decisão de aprovação, quando o pedido passou do limite (r26 do GOAL V2).
+   *
+   * `null` significa "não precisou" — e é diferente de "precisou e ninguém aprovou", que é o estado em
+   * que o pedido simplesmente não existe como recebido.
+   *
+   * `total_aprovado_cents` guarda o valor no momento da assinatura: se os itens mudarem depois, a
+   * diferença fica visível em vez de herdar silenciosamente uma autorização dada para outro montante.
+   */
+  approval?: null | {
+    aprovado_em: number
+    aprovador: string
+    solicitante: string
+    total_aprovado_cents: number
+  }
   created_at: number
   id: string
   items: PurchaseItem[]

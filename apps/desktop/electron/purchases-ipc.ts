@@ -23,6 +23,7 @@ import type { InventoryMovement } from './inventory-store'
 import { payableForPurchase, type FinanceEntry } from './finance-store'
 import { normalizePurchase, stockMovementsFor, type PurchaseOrder, type Supplier } from './purchases-store'
 import { situacaoDaCompra, type LimiteDeCompra } from './purchase-approval'
+import { aprovarCompra } from './purchase-approval-decision'
 import { escolherCotacao, type Cotacao } from './purchase-quotation'
 import type { CotacaoGravada } from './quotation-store'
 
@@ -151,6 +152,45 @@ export function registerPurchasesIpc(ipcMain: IpcRegistrar, deps: PurchasesDeps)
   //
   // NAO grava nada: uma cotacao e proposta, nao compromisso. Persistir aqui faria uma proposta vencida virar
   // divida; quem compra decide se vira pedido.
+  // r26 do GOAL V2: o canal de aprovacao fecha o beco sem saida da r25. Antes dele,
+  // 'aprovacao_necessaria' era uma recusa correta sem caminho de saida.
+  //
+  // O aprovador vem do RESOLVEDOR, nunca do payload: se viesse do renderer, bastaria escrever o nome
+  // de um aprovador para liberar o proprio gasto — e a regra 'mesmo_solicitante' viraria decorativa.
+  ipcMain.handle(
+    'hermes:purchases:aprovar',
+    async (_event: IpcMainInvokeEvent, payload: unknown) =>
+      exigirAtor(deps.actorOf, 'execute', 'purchases', async () => {
+        const raw = (payload ?? {}) as Record<string, unknown>
+        const pedidoId = typeof raw['pedido_id'] === 'string' ? raw['pedido_id'] : ''
+
+        if (!pedidoId) return { error: 'pedido_obrigatorio' }
+        if (!deps.limiteDeCompra) return { error: 'limite_indisponivel' }
+
+        const ator = await deps.actorOf()
+        const limiteDeCompra = deps.limiteDeCompra
+
+        return aprovarCompra(
+          {
+            limiteDeCompra,
+            obterPedido: async id => {
+              const lista = await deps.store.orders()
+
+              return lista.find(o => o.id === id) ?? null
+            },
+            salvar: async pedido => {
+              const salvo = await deps.store.saveOrder(pedido as unknown as Record<string, unknown>)
+
+              return 'error' in salvo ? { error: salvo.error } : { order: salvo.order }
+            }
+          },
+          pedidoId,
+          ator?.id ?? ''
+        )
+      })
+  )
+
+
   ipcMain.handle(
     'hermes:purchases:cotacao',
     async (_event: IpcMainInvokeEvent, payload: unknown) =>

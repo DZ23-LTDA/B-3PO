@@ -82,7 +82,10 @@ describe('IPC de compras', () => {
   // nao um numero especifico. Atualizado com a razao, nao afrouxado para 	oContain.
   it('registra exatamente os canais de compras', async () => {
     await withDepot(async ({ ipc }) => {
+      // r26: provar fecha o beco sem saida da r25 — a recusa provacao_necessaria nao tinha
+      // como ser resolvida. O canal nasceu COM guarda (exigirAtor) e o ratchet o confirmou.
       expect(ipc.channels()).toEqual([
+        'hermes:purchases:aprovar',
         'hermes:purchases:cotacao',
         'hermes:purchases:orders',
         'hermes:purchases:quotations',
