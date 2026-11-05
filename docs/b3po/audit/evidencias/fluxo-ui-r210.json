@@ -1,0 +1,12 @@
+{
+  "lancamento": {
+    "cc": "Comercial",
+    "desc": "Consultoria outubro"
+  },
+  "centros": {
+    "Comercial": {
+      "pago_cents": 0,
+      "pendente_cents": 150000
+    }
+  }
+}

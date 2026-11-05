@@ -37,6 +37,7 @@ export function FinanceView() {
   const [totals, setTotals] = useState<FinanceTotalsRow | null>(null)
   const [failure, setFailure] = useState<null | string>(null)
   const [kind, setKind] = useState('receber')
+  const [centro, setCentro] = useState('')
   const [descricao, setDescricao] = useState('')
   const [valor, setValor] = useState('')
   const [vencimento, setVencimento] = useState('')
@@ -91,11 +92,19 @@ export function FinanceView() {
     setSaving(true)
 
     try {
-      const r = await addEntry({ amount_cents: centavos, description: descricao.trim(), due_at: vence, kind })
+      // `''` = nao alocado. O store trata assim e a tela nao inventa um centro.
+      const r = await addEntry({
+        amount_cents: centavos,
+        cost_center: centro.trim(),
+        description: descricao.trim(),
+        due_at: vence,
+        kind
+      })
 
       if ('error' in r) {
         setFailure(erroDe(r.error))
       } else {
+        setCentro('')
         setDescricao('')
         setValor('')
         setVencimento('')
@@ -177,6 +186,15 @@ export function FinanceView() {
                 onChange={event => setVencimento(event.target.value)}
                 type="date"
                 value={vencimento}
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 text-[length:var(--conversation-caption-font-size)]">
+              <span className="text-(--ui-text-tertiary)">{copy.costCenter}</span>
+              <input
+                className="rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-foreground outline-none focus:border-(--ui-accent)"
+                onChange={event => setCentro(event.target.value)}
+                value={centro}
               />
             </label>
 
