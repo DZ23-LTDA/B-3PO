@@ -4099,7 +4099,8 @@ export interface Translations extends NoticeTranslations {
       connection: (label: string) => string
       recentActivity: string
       viewAllLogs: string
-      messagingPlatforms: string
+      messagingPlatforms: string,
+      gatewayNeedsProvider: string
     }
     approvalMode: {
       title: string

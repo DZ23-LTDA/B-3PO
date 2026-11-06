@@ -3975,7 +3975,9 @@ export const zhOverrides = {
       connection: label => `连接：${label}`,
       recentActivity: '最近活动',
       viewAllLogs: '查看全部日志 →',
-      messagingPlatforms: '消息平台'
+      messagingPlatforms: '消息平台',
+      gatewayNeedsProvider:
+        '未配置 AI 提供商。请打开 设置 → 提供商 添加密钥，或选择本地模型。',
     },
     approvalMode: {
       title: '审批模式',
@@ -4016,7 +4018,6 @@ export const zhOverrides = {
       messagingDegraded: name => `${name} 异常`,
       gatewayReady: '就绪',
       gatewayNeedsSetup: '需要设置',
-      gatewayUnavailable: '推理不可用',
       gatewayChecking: '检查中',
       gatewayConnecting: '连接中',
       gatewayOffline: '离线',

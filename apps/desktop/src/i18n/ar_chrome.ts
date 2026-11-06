@@ -421,7 +421,9 @@ export const arChrome = {
       connection: label => `الاتصال: ${label}`,
       recentActivity: 'النشاط الأخير',
       viewAllLogs: 'عرض كل السجلات',
-      messagingPlatforms: 'منصات المراسلة'
+      messagingPlatforms: 'منصات المراسلة',
+      gatewayNeedsProvider:
+        'لم يتم تكوين مزوّد ذكاء اصطناعي. افتح الإعدادات ← المزوّدون وأضف مفتاحًا، أو اختر نموذجًا محليًا.',
     },
     statusbar: {
       unknown: 'غير معروف',
@@ -446,7 +448,6 @@ export const arChrome = {
       messagingDegraded: name => `${name} متوقف`,
       gatewayReady: 'جاهز',
       gatewayNeedsSetup: 'البوابة تحتاج إعدادا',
-      gatewayUnavailable: 'الاستدلال غير متاح',
       gatewayChecking: 'جار فحص البوابة',
       gatewayConnecting: 'جار اتصال البوابة',
       gatewayOffline: 'البوابة غير متصلة',

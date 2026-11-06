@@ -33,3 +33,70 @@
 | `scripts/run-electron-builder.test.mjs` | 1 | `Cannot consume packaging inputs` |
 
 > **7 flaky** adicionais passam sozinhos (provado arquivo por arquivo). **0 de UX.**
+
+---
+
+## B1 do aditivo V3 — "Servidor inferência indisponível" (INVESTIGADO em r280)
+
+**Estado**: `BLOCKED_BY_EXTERNAL_DEPENDENCY` para a PARTE invertível; **corrigido** o que era nosso.
+
+### A causa raiz, medida
+
+O `HERMES_HOME` de teste (`%TEMP%\b3po-menu-view6`) tem:
+
+| Arquivo | Estado |
+|---|---|
+| `config.yaml` | `model.default: "anthropic/claude-opus-4.6"` — **modelo escolhido** |
+| `.env` | **27,9 KB, 0 chaves ativas, 29 `*_API_KEY` COMENTADAS** |
+
+**Nenhum provedor configurado.** O backend responde `AuthError` em
+`hermes_cli/auth.py:1698` com `code="no_provider_configured"`:
+
+> "Hermes is not connected to any AI provider yet. Run `hermes model` to pick one, type `/login` in
+> chat, or add a key with `hermes auth add <provider>`."
+
+**Não é bug do app, não é corrupção, não é "o servidor caiu".** É credencial ausente.
+
+### O que EU corrigi (era nosso)
+
+O aviso chegava **em inglês** ao painel do gateway, num produto em pt-BR, e **não dizia o caminho
+para quem está no app** — mandava rodar `hermes model` num terminal.
+
+**Correção** (`lib/gateway-health-pill.ts` + `app/shell/gateway-menu-panel.tsx`):
+
+- `ehAvisoSemProvedor(motivo)` reconhece as DUAS formas do aviso num lugar só — a constante
+  `DEFAULT_NOT_READY_REASON` e o texto livre do `AuthError` (comparação por trecho, porque a do
+  servidor interpola o `HERMES_HOME` no fim);
+- a UI troca pelo texto traduzido: **"Nenhum provedor de IA configurado. Abra Configurações →
+  Provedores e adicione uma chave, ou escolha um modelo local."**
+- a chave `gatewayMenu.gatewayNeedsProvider` foi para os **9 locales** + `types.ts`.
+
+**Prova medida** (Playwright sobre o painel aberto):
+
+```
+antes:   "Hermes is not connected to any AI provider yet. Run `hermes model`…"   (inglês)
+depois:  "Nenhum provedor de IA configurado. Abra Configurações → Provedores…"    (pt-BR)
+         { pt: true, en: false, enDefault: false }
+```
+
+### O que NÃO posso resolver
+
+**Adicionar a chave do provedor.** Isso exige uma credencial que só o dono tem.
+
+**Ação exata de desbloqueio** (qualquer uma):
+
+1. **No app**: Configurações → Provedores → escolher um provedor e colar a chave;
+2. **No terminal**: `hermes model` (escolhe provedor) ou `hermes auth add <provider>`;
+3. **No arquivo**: descomentar e preencher a chave em `%TEMP%\b3po-menu-view6\.env`
+   (ex.: `OPENROUTER_API_KEY=sk-or-…`).
+
+**Até lá, o status `Servidor · inferência indisponível` está CORRETO** — o app não tem com quem
+falar. A diferença é que agora ele diz isso em português e aponta a porta.
+
+### B1 — veredito por escopo
+
+| Escopo | Estado |
+|---|---|
+| causa raiz identificada e medida | **READY** |
+| aviso traduzido e acionável | **READY** (prova acima) |
+| inferência funcionando de ponta a ponta | **BLOCKED_BY_EXTERNAL_DEPENDENCY** — chave do provedor |

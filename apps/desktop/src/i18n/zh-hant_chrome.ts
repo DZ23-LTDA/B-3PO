@@ -323,7 +323,9 @@ export const zhHantChrome = {
       connection: label => `連線：${label}`,
       recentActivity: '最近活動',
       viewAllLogs: '查看全部記錄 →',
-      messagingPlatforms: '訊息平台'
+      messagingPlatforms: '訊息平台',
+      gatewayNeedsProvider:
+        '未設定 AI 供應商。請開啟 設定 → 供應商 新增金鑰，或選擇本機模型。',
     },
     approvalMode: {
       title: '核准模式',
@@ -363,7 +365,6 @@ export const zhHantChrome = {
       messagingDegraded: name => `${name} 異常`,
       gatewayReady: '就緒',
       gatewayNeedsSetup: '需要設定',
-      gatewayUnavailable: '推論不可用',
       gatewayChecking: '檢查中',
       gatewayConnecting: '連線中',
       gatewayOffline: '離線',

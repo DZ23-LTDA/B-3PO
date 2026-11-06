@@ -28,7 +28,8 @@
 | **Sidebar contextual** | **IMPLEMENTED_AND_TESTED** | 7 seções em Empresa, 3 em Administração; group? no SDK + render |
 | **Home com 6 cartões** | **IMPLEMENTED_AND_TESTED** | mascote oficial, "Bem-vindo ao B-3PO", 6 botões com ria-pressed |
 | **RBAC no menu** | **IMPLEMENTED_AND_TESTED** |
-av-rbac filtra por ead, **depois** do ambiente |
+av-rbac filtra por
+ead, **depois** do ambiente |
 | **Contexto da Sofia** | **IMPLEMENTED_AND_TESTED** (renderer+backend) | monta, limita por RBAC, mostra, viaja em todo prompt.submit, vira **nota no turno** |
 | **pt-BR** | **IMPLEMENTED_AND_TESTED** | 5 rotas, zero string em inglês |
 | **Dropdowns legíveis** | **IMPLEMENTED_AND_TESTED** | 311 <select>, contraste 16,28:1 (AA) |

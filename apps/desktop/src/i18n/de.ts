@@ -4570,7 +4570,9 @@ export const deOverrides = {
       connection: label => `Verbindung: ${label}`,
       recentActivity: 'Letzte Aktivität',
       viewAllLogs: 'Alle Logs ansehen →',
-      messagingPlatforms: 'Messaging-Plattformen'
+      messagingPlatforms: 'Messaging-Plattformen',
+      gatewayNeedsProvider:
+        'Kein KI-Anbieter konfiguriert. Öffne Einstellungen → Anbieter und füge einen Schlüssel hinzu oder wähle ein lokales Modell.',
     },
     approvalMode: {
       title: 'Genehmigungsmodus',
@@ -4607,7 +4609,6 @@ export const deOverrides = {
       gateway: 'Gateway',
       gatewayReady: 'bereit',
       gatewayNeedsSetup: 'braucht Einrichtung',
-      gatewayUnavailable: 'Inference nicht verfügbar',
       gatewayChecking: 'wird geprüft',
       gatewayConnecting: 'wird verbunden',
       gatewayOffline: 'offline',

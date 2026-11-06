@@ -4649,7 +4649,9 @@ export const en: Translations = {
       connection: label => `Connection: ${label}`,
       recentActivity: 'Recent activity',
       viewAllLogs: 'View all logs →',
-      messagingPlatforms: 'Messaging platforms'
+      messagingPlatforms: 'Messaging platforms',
+      gatewayNeedsProvider:
+        'No AI provider is configured. Open Settings → Providers and add a key, or pick a local model.',
     },
     approvalMode: {
       title: 'Approval mode',

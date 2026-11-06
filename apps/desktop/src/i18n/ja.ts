@@ -2990,7 +2990,9 @@ export const jaOverrides = {
       connection: label => `接続: ${label}`,
       recentActivity: '最近のアクティビティ',
       viewAllLogs: 'すべてのログを見る →',
-      messagingPlatforms: 'メッセージングプラットフォーム'
+      messagingPlatforms: 'メッセージングプラットフォーム',
+      gatewayNeedsProvider:
+        'AIプロバイダーが設定されていません。設定 → プロバイダーでキーを追加するか、ローカルモデルを選択してください。',
     },
     approvalMode: {
       title: '承認モード',
@@ -3030,7 +3032,6 @@ export const jaOverrides = {
       messagingDegraded: name => `${name} 停止`,
       gatewayReady: '準備完了',
       gatewayNeedsSetup: '設定が必要',
-      gatewayUnavailable: '推論を利用できません',
       gatewayChecking: '確認中',
       gatewayConnecting: '接続中',
       gatewayOffline: 'オフライン',

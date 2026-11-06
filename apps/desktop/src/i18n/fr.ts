@@ -4579,7 +4579,9 @@ export const frOverrides = {
       connection: label => `Connexion : ${label}`,
       recentActivity: 'Activité récente',
       viewAllLogs: 'Voir tous les journaux →',
-      messagingPlatforms: 'Plateformes de messagerie'
+      messagingPlatforms: 'Plateformes de messagerie',
+      gatewayNeedsProvider:
+        'Aucun fournisseur d\'IA n\'est configuré. Ouvrez Réglages → Fournisseurs et ajoutez une clé, ou choisissez un modèle local.',
     },
     approvalMode: {
       title: "Mode d'approbation",
@@ -4616,7 +4618,6 @@ export const frOverrides = {
       gateway: 'Gateway',
       gatewayReady: 'prêt',
       gatewayNeedsSetup: 'nécessite une configuration',
-      gatewayUnavailable: 'inférence indisponible',
       gatewayChecking: 'vérification',
       gatewayConnecting: 'connexion',
       gatewayOffline: 'hors ligne',
