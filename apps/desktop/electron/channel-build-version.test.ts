@@ -448,7 +448,23 @@ test('actual MSIX manifest writer consumes the channel quad across rollover inst
       const output: string = execFileSync(process.execPath, ['-e', script], {
         cwd: root,
         encoding: 'utf8',
-        env: { ...process.env, HERMES_DESKTOP_VARIANT: 'bundled', _HERMES_CHANNEL_REQUEST_JSON: JSON.stringify(build) }
+        env: { ...process.env, HERMES_DESKTOP_VARIANT: 'bundled', _HERMES_CHANNEL_REQUEST_JSON: JSON.stringify(build) },
+        // r196 do GOAL V2: o `stdio` é EXPLÍCITO, e o stderr vira uma string em vez de vazar.
+        //
+        // **Sob a suíte completa, este teste falhava com:**
+        //
+        //   node.exe: Cannot process the XML from the 'Error' stream of '...\node.exe':
+        //   Data at the root level is invalid.
+        //
+        // **O `electron-builder` escreve XML no stderr** (o manifesto do MSIX sai por lá em algum caminho), e **sem
+        // `stdio` declarado o `execFileSync` herda o stderr do processo pai** — **o vitest então tenta interpretar
+        // aquilo como saída do worker**, e o erro aparece como se fosse do teste.
+        //
+        // **Com `pipe`, o stderr fica contido**: o teste continua lendo só o `stdout` (o JSON da última linha) e o
+        // XML não escapa para o runner.
+        stdio: ['ignore', 'pipe', 'pipe'],
+        // E o teto explícito, pela mesma razão do `checkout-source` (r195): este script sobe o `node` inteiro.
+        timeout: 120_000
       })
 
       const row: ManifestFacts = JSON.parse(output.trim().split('\n').at(-1)!)
