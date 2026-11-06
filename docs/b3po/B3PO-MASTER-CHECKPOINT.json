@@ -1,8 +1,8 @@
 {
   "medido": {
-    "suiteRenderer": "13121 testes: 13092 verdes, 11 upstream/flaky, 18 skipped",
+    "suiteRenderer": "13121 testes: 13114 verdes, 6 fixos, 1 skipped (r249) - e o valor normal em 5 de 6 medicoes",
     "canaisComGuarda": "30 de 46 (16 sem guarda, 0 do produto) — r175 corrigiu o contador, r176 fechou o ultimo",
-    "suiteElectron": "5679 testes: 5446 verdes, 26 de ambiente, 207 skipped",
+    "suiteElectron": "5679 testes: 5451 verdes, 11 fixos, 217 skipped (r248) - os quatro arquivos sem nenhum flaky",
     "fluxosProvados": "8 ligacoes do §17 + o ciclo de 7 stores (r157)",
     "modulosNoMenu": 23,
     "ambientesComConteudo": "2 de 2",
@@ -14,7 +14,7 @@
     "bugsDaQuartaOrdem": "6 de 6 (r184, r186, r188, r189, r190, r192, r196, r200, r203)",
     "telasAuditadas": "7, com 5 campos revelados (r161, r162, r164, r165, r166)",
     "build": "3.4mb / 60.7kb, identico em 12 medicoes",
-    "testesSomados": "18 800 nas duas suites, 37 vermelhos, 0 do produto"
+    "testesSomados": "18 800 nas duas suites, 17 vermelhos (11 + 6, sem flaky), 0 do produto - o menor de toda a sessao"
   },
   "documentos": {
     "goalRegistro": "docs/b3po/B3PO-MASTER-GOAL-V2-REGISTRO.md",
@@ -30,9 +30,9 @@
     }
   },
   "checkpoint": {
-    "fase": "GOAL V2 — rodada 207 de 256",
+    "fase": "GOAL V2 — rodada 250 de 256 (97,7%)",
     "dataHora": "2026-11-06T05:20:00-03:00",
-    "commit": "27fd82c3bf",
+    "commit": "29ba261779",
     "tarefa": "reconciliacao dos checkpoints (23) apos as rodadas 132-206",
     "status": "IN_PROGRESS",
     "branch": "b3po-brand"
@@ -88,5 +88,5 @@
       "motivo": "concorrencia no Msix/app-builder-lib; retry:1 no config cobre, mas o teste segue vulneravel ao redor da biblioteca"
     }
   ],
-  "proximaAcao": "rodada 208 — nao ha ordem pendente. O que resta depende do dono (B1-B5). O que a sessao pode fazer e aprofundar o uso: medir onde o operador sente falta, como a r161 fez"
+  "proximaAcao": "rodada 251 — as 7 ordens estao fechadas, os 5 arquivos de estado reconciliados, e as 6 causas do vermelho nomeadas. O que resta e o dono: B1 (certificado), B2-B4 (credenciais), B5 (instalar o MSIX). As 6 rodadas finais sao de verificacao, nao de trabalho pendente"
 }
