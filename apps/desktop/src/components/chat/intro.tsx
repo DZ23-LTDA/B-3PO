@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { BrandHero } from '@/components/chat/brand-hero'
+import { HomeB3po } from '@/components/chat/home-b3po'
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
@@ -184,22 +184,34 @@ export function Intro({ personality, seed }: IntroProps) {
 
   return (
     <div
-      className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8"
+      className={`flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8 ${
+        // r268: a home tem CARTÕES, e o container do intro existe para ser decorativo
+        // (`pointer-events-none`, para o composer e o arraste do fundo funcionarem). No chat
+        // genérico a home precisa de clique; no chat de um bot a tela continua decorativa.
+        isBrand ? 'pointer-events-auto' : 'pointer-events-none'
+      }`}
       data-slot="aui_intro"
     >
       <div className="flex w-full min-w-0 flex-col items-center">
-        {/*
-         * Marca = o robô B-3PO, não o lettering gigante. O wordmark ocupava a largura toda (`.fit-text`)
-         * e, em janela baixa, passava por cima do compositor — o "deslocado" que o dono viu. A imagem
-         * tem altura limitada por viewport e o texto acessível continua no `aria-label`.
-         */}
         {isBrand ? (
-          <BrandHero alt={WORDMARK} />
+          /*
+           * r268: **a home do produto**, no lugar da frase rotativa em inglês.
+           *
+           * A referência visual da missão final pede marca + posicionamento + os seis
+           * ambientes. O `Intro` do Hermes é uma boa tela para um agente de código e a tela
+           * errada para um produto de gestão: ela não diz o que o produto faz nem por onde
+           * começar.
+           *
+           * **Só no chat genérico.** O chat de um bot continua com o `Wordmark` e a fala dele
+           * — trocar aquilo apagaria a identidade do bot.
+           */
+          <HomeB3po />
         ) : (
-          <Wordmark className="mb-1" text={wordmarkText} />
+          <>
+            <Wordmark className="mb-1" text={wordmarkText} />
+            <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
+          </>
         )}
-
-        <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
       </div>
     </div>
   )

@@ -203,3 +203,63 @@ IA E AGENTES:    8 itens (Painel, Empresa, Busca, Agentes, Automações, Sofia, 
 | **G4** — persistência | ✅ **localStorage, versionada; sobrevive ao reload** |
 | **G6** — home com 6 cards | ❌ **a home ainda é o logo + composer** |
 | **G7** — pt-BR | ⚠️ **o seletor e a nova UI estão em pt-BR; falta varrer o resto** |
+---
+
+## FASE 4 — A HOME COM OS SEIS CARTÕES (r268) — **G6**
+
+**O que havia**: o `Intro` do Hermes — o robô e uma frase rotativa **em inglês** ("What are we moving today?"). **É uma boa tela para um agente de código e a tela errada para um produto de gestão**: ela não diz o que o produto faz nem por onde começar.
+
+**O que a referência pede, e o que foi feito**: mascote, "Bem-vindo ao B-3PO", a linha de posicionamento, e **seis cartões de ambiente**.
+
+### O componente — `components/chat/home-b3po.tsx`
+
+| Peça | Detalhe |
+|---|---|
+| **Marca** | **o `BrandHero` oficial** (`public/b3po-hero.png`, 192 KB) — a mesma arte da referência, não uma nova |
+| **Título** | "Bem-vindo ao **B-3PO**" — o nome na cor da marca |
+| **Posicionamento** | "Sua plataforma de gestão, automação e inteligência empresarial." |
+| **Cartões** | **os 6 ambientes**, cada um com ícone, nome e **o que a pessoa vai FAZER ali** |
+
+> **A frase de cada cartão é do vocabulário do dono, não do código**: "Operação e gestão do negócio" diz o que a pessoa faz; "módulos de CRM, vendas e financeiro" diria o que o sistema tem — e a segunda é a que ninguém lê.
+
+### Uma fonte de verdade, dois lugares de acesso
+
+**Os cartões chamam `setAmbiente`** — **o MESMO store do seletor da barra lateral** (r267).
+
+> **Escolher na home muda a barra; escolher na barra muda o cartão aceso.** Não há segunda cópia da escolha, e é por isso que os dois sempre concordam.
+
+### Acessibilidade, não enfeite
+
+- **`aria-pressed`** no cartão aceso — o mesmo que a borda diz a quem enxerga.
+- **`role="group"` com `aria-label="Escolher ambiente"`** — **seis botões de escolha, não seis itens de lista**.
+- **`pointer-events-auto` no chat genérico**: o container do intro existe para ser decorativo (`pointer-events-none`, para o composer e o arraste do fundo funcionarem). **A home tem cartões e precisa de clique** — e o chat de um bot continua decorativo.
+
+### O que preserva
+
+**O chat de um BOT não mudou**: continua com o `Wordmark` e a fala da persona. **Trocar aquilo apagaria a identidade do bot** — e é a distinção que o `isBrand` já fazia.
+
+### A prova, medida no app
+
+```
+n: 6
+  Empresa        Operação e gestão do negócio
+  Engenharia     Software, projetos e desenvolvimento
+  Automação      Fluxos, integrações e execuções
+  IA e Agentes   Sofia, bots, equipes e orquestração
+  Estratégico    Análises, indicadores e decisões
+  Administração  Organizações, usuários e segurança     <- aceso (aria-pressed=true)
+```
+
+**E o teste do `intro` foi ATUALIZADO, não removido**: o corpo rotativo só existe no chat de bot, então o loop de tradução passou a percorrer só as personalidades com corpo — **e ganhou uma asserção nova** que afirma o que a home renderiza (6 cartões, exatamente 1 aceso).
+
+### Estado dos gates
+
+| Gate | Estado |
+|---|---|
+| **G1** — seletor | ✅ |
+| **G2** — sidebar contextual | ✅ |
+| **G3** — RBAC | ✅ |
+| **G4** — persistência | ✅ |
+| **G6** — home com 6 cards | ✅ **implementado e medido** |
+| **G7** — pt-BR | ⚠️ **a home e a barra estão em pt-BR; o composer ainda diz "O que vamos construir?"** |
+| **G5, G8, G9, G10** | ❌ **não iniciados** |
