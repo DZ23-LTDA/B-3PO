@@ -167,6 +167,17 @@ export function EntregasView() {
                   {e.destino} · {STATUS_LABEL[e.status]}
                   {e.entregador ? ` · ${e.entregador}` : ''}
                   {e.comprovante ? ` · recebeu ${e.comprovante.recebedor}` : ''}
+                  {/*
+                    r162 do GOAL V2: a recusa AVISA que abriu um chamado.
+
+                    A r142 liga a recusa ao atendimento — e esta tela nao dizia nada. Quem despacha via
+                    "recusada" e seguia para a proxima entrega, sem saber que **o cliente virou um ticket na fila
+                    do atendimento** e que alguem vai ligar.
+
+                    Dizer isso aqui evita a ligacao duplicada: o operador da logistica NAO precisa abrir o proprio
+                    ticket, porque um ja existe.
+                  */}
+                  {e.status === 'recusada' ? ' · abriu chamado no atendimento' : ''}
                 </span>
                 <span className="flex items-center gap-1">
                   {e.status === 'pendente' ? (
