@@ -268,12 +268,23 @@ function ZoneBodyMenu({ children, label, ...menu }: ZoneBodyMenuProps) {
 
   return (
     <ZoneMenu {...menu} allowOpen={() => !touchOwnedByBrowser.current} includeAppActions>
+      {/*
+       * r291 — `role="group"` porque `aria-label` num `div` sem role é PROIBIDO
+       * (`aria-prohibited-attr`, medido pelo `axe-core` em /settings e /cron): o navegador descarta o
+       * rótulo, então o menu da zona se anunciava sem nome para quem usa leitor de tela.
+       *
+       * `group` e não `region`: o corpo é um agrupamento de controles, não uma landmark navegável —
+       * `region` entraria no atalho de landmarks e mudaria a lista de regiões do app inteiro.
+       *
+       * `display: contents` continua: o wrapper não pinta caixa, e role não depende de layout.
+       */}
       <div
         aria-label={label}
         data-zone-body={menu.nodeId}
         onPointerCancel={() => void (touchOwnedByBrowser.current = false)}
         onPointerDown={event => void (touchOwnedByBrowser.current = isBrowserOwnedTouch(event.nativeEvent))}
         onPointerUp={() => void (touchOwnedByBrowser.current = false)}
+        role="group"
         style={{ display: 'contents' }}
       >
         {children}

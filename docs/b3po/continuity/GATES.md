@@ -877,3 +877,67 @@ não filho. Isso toca o `.group/tab` do CSS, o hover, o fade e o layout de **tod
 é mudança de arquitetura de componente, não de rodada de auditoria.
 
 **Registro como aberto, com a proposta.** Preferi um placar honesto de 1 violação a um verde falso.
+
+---
+
+## G8 · ADENDO 4 — a11y em 29 telas: **27 livres**, e as 5 violações novas corrigidas
+
+**Rodada 22.** A home estava limpa; ela não é o produto. Rodei o `axe-core` em **29 rotas**.
+
+### O resultado (antes e depois)
+
+| Momento | Telas livres |
+|---|---|
+| Antes desta rodada | **26 de 29** |
+| **Depois** | **27 de 29** |
+
+**As 5 violações encontradas e o que eram:**
+
+| Tela | Regra | Impacto | Causa raiz | Estado |
+|---|---|---|---|---|
+| /settings | **`button-name`** | **critical** | `Tip` dá tooltip mas **não o nome**: Radix emite `aria-describedby`, que é descrição | **corrigido** |
+| /settings | `color-contrast` | serious | `<kbd>` a 38 % → **2.14:1** (o pior do app) | **corrigido** (72 %) |
+| /settings · /cron | `aria-prohibited-attr` | serious | `aria-label` num `div` **sem role** + `display:contents` — descartado pelo navegador | **corrigido** (`role="group"`) |
+| /capabilities | `label-content-name-mismatch` | serious | `aria-label="Mostrar mais"` escondia o `+221` visível | **corrigido** (`"+221 — Mostrar mais"`) |
+| /settings · /cron | `nested-interactive` | serious | `PaneTab` (`role="tab"`) contém o botão de fechar | **aberto, estrutural** |
+
+### As duas correções de CLASSE (não de caso)
+
+**1. `Tip` virou o nome acessível de filho só-ícone** (`components/ui/tooltip.tsx`)
+
+Era o achado mais grave da rodada, e o mais **sistêmico**: qualquer `<Tip label="...">` em volta de
+um botão-ícone sem `aria-label` próprio herdava o vazio — **os ~107 pontos de uso**, não só os três
+do rodapé de Configurações.
+
+A correção injeta `aria-label` **só quando** o filho não tem texto renderizável nem nome declarado.
+O cuidado existe porque sobrescrever um botão com texto (ex.: `<button>Salvar</button>` dentro de
+`<Tip label="Salvar arquivo">`) criaria o **outro** defeito — `label-content-name-mismatch`.
+
+**2. `rotuloAcessivel` passou a liderar pelo texto visível** (`app/shell/statusbar-controls.tsx`)
+
+O statusbar escolhia entre tooltip **ou** label; agora usa os dois, com o visível na frente.
+
+### O experimento que ensinou sobre o axe
+
+Com `/capabilities` eu tentei primeiro `aria-label="Mostrar mais (+221)"` — o número **estava no
+nome** e o `axe` continuou reprovando. Invertendo para `"+221 — Mostrar mais"`, passou.
+
+**A regra compara pela ordem de leitura**, não pela mera presença da substring: quem dita por voz
+começa pelo que está vendo. **Isso vale registrar** — a correção "óbvia" teria ficado verde no
+raciocínio e vermelho na ferramenta.
+
+### O que continua aberto — e é honesto
+
+**`nested-interactive`** em `/settings` e `/cron`: o `PaneTab` tem `role="tab"` e contém o `<button>`
+de fechar. **A correção é estrutural** (o botão precisa ser irmão do tab, não filho) e mexe no
+`.group/tab`, hover, fade e layout de **toda** aba. Uma linha com `aria-hidden` deixaria o axe verde
+e **cegaria** o leitor de tela para o fechar — recusei.
+
+### Cobertura final
+
+| Métrica | Valor |
+|---|---|
+| rotas auditadas | **29** |
+| rotas **sem nenhuma violação WCAG A/AA** | **27** |
+| violações restantes | **2**, ambas a mesma causa estrutural |
+| regras que passam | 26–30 por tela |

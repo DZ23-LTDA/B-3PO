@@ -65,7 +65,12 @@ export function CatalogFilterBar(props: CatalogFilterBarProps) {
           <span aria-hidden className="px-1 text-(--ui-text-quaternary)">/</span>
           {visible.map(row => <Button aria-pressed={selected.includes(row.value)} key={row.value} onClick={() => onSelect(row.value)} size="xs" variant={selected.includes(row.value) ? 'default' : 'outline'}>{row.label}</Button>)}
           {overflow.length > 0 && <Popover onOpenChange={setMore} open={more}>
-            <PopoverTrigger asChild><Button aria-label={c.more} size="xs" variant="secondary">{`+${overflow.length}`}</Button></PopoverTrigger>
+            {/* r291 — WCAG 2.5.3: o texto visível é "+221" e precisa LIDERAR o nome acessível.
+                O `axe-core` reprova mesmo quando o número aparece no fim ("Mostrar mais (+221)")
+                porque a comparação é pela ordem de leitura: quem dita por voz começa pelo que vê.
+                Antes desta correção o `aria-label` era só "Mostrar mais" — o número visível não
+                estava em lugar nenhum do nome. */}
+            <PopoverTrigger asChild><Button aria-label={`+${overflow.length} — ${c.more}`} size="xs" variant="secondary">{`+${overflow.length}`}</Button></PopoverTrigger>
             <PopoverContent align="start" className="w-72 max-h-80 overflow-y-auto p-2" variant="menu">
               <div className="flex flex-wrap gap-1.5">{overflow.map(row => <Button aria-pressed={selected.includes(row.value)} key={row.value} onClick={() => onSelect(row.value)} size="xs" variant={selected.includes(row.value) ? 'default' : 'outline'}>{row.label}</Button>)}</div>
             </PopoverContent>
