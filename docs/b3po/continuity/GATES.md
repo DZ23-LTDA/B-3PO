@@ -1238,3 +1238,72 @@ no desktop não via nada.
 
 **A lista acima é o que separa "medi" de "medi tudo".** Ela existe para que ninguém leia a matriz
 como cobertura total.
+
+---
+
+## G8 · ADENDO 9 — alvo de toque: medido, e o critério certo muda a resposta
+
+**Rodada 29.** Fechei o último `NOT_TESTED` que eu mesmo tinha listado: **alvo de toque em mobile**,
+que o `axe` não cobre.
+
+### O erro de critério que quase cometi
+
+Medi em 375 px e vi **quase todos os alvos abaixo de 44 px**:
+
+```
+/crm       alvos: 28 | <44px: 28
+/compras   alvos: 32 | <44px: 32
+/settings  alvos: 18 | <44px: 18
+```
+
+**Quase declarei falha.** Mas **44×44 é Apple HIG / WCAG 2.5.5 (AAA)** — e o alvo AA do projeto é
+**WCAG 2.5.8, que pede 24×24**.
+
+### E o critério tem uma exceção que muda tudo: espaçamento
+
+A 2.5.8 aceita alvo menor **se** um círculo de 24 px centrado em cada um **não cruzar** outro alvo.
+Medido:
+
+| Elemento | Tamanho | Centro ao mais próximo | Veredito |
+|---|---|---|---|
+| statusbar inteiro | altura **20** | **83,1 px** | **PASSA** |
+| `Modelo` (/settings) | 42 × **16** | **43 px** | **PASSA** |
+| `/`, `/crm`, `/compras` fora do statusbar | — | — | **nenhum alvo pequeno** |
+
+**Todos conformes.** O statusbar é **baixo** (20 px) mas **espaçado** (83 px entre centros): o
+critério é sobre a **área de acerto isolada**, não sobre a altura do pixel pintado.
+
+### Por que isso importa
+
+**Duas vezes em duas rodadas o critério mudou a conclusão:**
+
+| Rodada | O que eu vi | O critério certo | Resultado |
+|---|---|---|---|
+| 27 | `#bb4d00` ilegível no escuro | contraste **por tema** | achei um bug meu |
+| 29 | alvos de 20 px | **24 px + exceção de espaçamento** | **sem defeito** |
+
+**Na 27 o rigor achou defeito; na 29 o rigor me impediu de inventar um.** É o mesmo método — medir
+com o critério correto — e ele protege nas duas direções.
+
+### Cobertura de a11y — consolidada
+
+| Dimensão | Medido | Resultado |
+|---|---|---|
+| rotas × viewports × temas | 30 × 3 × 2 = **6 combinações** | **27/30** (1440), **8/10** (768 e 375) |
+| contraste | todas as combinações | **0 violações** |
+| nomes acessíveis | `axe` (button-name, label-content-name) | **0 violações** |
+| landmarks | `nav` + `main` | **presentes** |
+| **alvo de toque** | **375 px, 8 telas** | **conforme 2.5.8 (AA)** |
+| formulários CRUD | 6 | **limpos** |
+| Tab | amostra CRM | ordem contida |
+| Esc + retorno de foco | 4 telas | funcionam |
+
+### O que continua fora do alcance automatizado
+
+| Item | Por quê |
+|---|---|
+| leitor de tela real (NVDA/VoiceOver) | nenhum teste com AT de verdade |
+| `prefers-contrast: more` | o CSS tem `reduced-transparency`, esse não medi |
+| zoom 150 % | medido em rodada antiga, não repetido |
+| Tab nas outras 29 rotas | só o CRM |
+| **`nested-interactive`** | **estrutural — depende de autorização** |
