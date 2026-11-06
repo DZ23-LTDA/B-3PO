@@ -40,14 +40,17 @@ const INICIO = 1_700_000_000_000
 
 async function withChannel<T>(
   run: (ipc: ReturnType<typeof fakeIpc>, gravados: Record<string, unknown>[]) => Promise<T>,
-  catalogo: Service[] = [servico()]
+  catalogo: Service[] = [servico()],
+  /** r177: o ator e parametro, para o teste de negacao passar um sem EXECUTE. */
+  ator: unknown = { id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }
 ): Promise<T> {
   const ipc = fakeIpc()
   const gravados: Record<string, unknown>[] = []
 
   registerSchedulingCatalogIpc(ipc, {
     // r176: o ctorOf e obrigatorio - o canal passou a exigir xecute em scheduling. O dono tem tudo.
-    actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) as never,
+    // r176: o actorOf e obrigatorio - o canal passou a exigir execute em scheduling.
+    actorOf: async () => ator as never,
     scheduling: {
       book: async (input: unknown) => {
         gravados.push(input as Record<string, unknown>)
@@ -117,5 +120,49 @@ describe('agendamento pelo catalogo', () => {
       })
       expect(gravados).toHaveLength(0)
     })
+  })
+})
+
+describe('a guarda do canal (r176/r177)', () => {
+  /**
+   * O caminho NEGADO — o que os 120 testes anteriores não cobriam.
+   *
+   * **A guarda estava montada desde a r176 e só o caminho feliz era exercitado.** Um `actorOf` que devolvesse
+   * `null` por engano faria o canal **recusar tudo**, e nenhum teste veria — **mesma classe da r149: o ator existe
+   * e não é exercitado onde importa.**
+   */
+  it('ator com READ nao agenda — agendar e EXECUTE', async () => {
+    await withChannel(
+      async (ipc, gravados) => {
+        const r = (await ipc.invoke('hermes:scheduling:bookFromCatalog', {
+          contact_phone: '+5511',
+          service: 'corte',
+          starts_at: INICIO
+        })) as { error: string }
+
+        expect(r.error).toBe('sem_permissao')
+        // **E nada foi gravado**: a recusa acontece ANTES do store, não depois.
+        expect(gravados).toHaveLength(0)
+      },
+      [servico()],
+      { id: 'leitor', kind: 'human', level: 'READ', role: 'viewer' }
+    )
+  })
+
+  it('sem ator nenhum tambem recusa', async () => {
+    await withChannel(
+      async (ipc, gravados) => {
+        const r = (await ipc.invoke('hermes:scheduling:bookFromCatalog', {
+          contact_phone: '+5511',
+          service: 'corte',
+          starts_at: INICIO
+        })) as { error: string }
+
+        expect(r.error).toBe('sem_permissao')
+        expect(gravados).toHaveLength(0)
+      },
+      [servico()],
+      null
+    )
   })
 })
