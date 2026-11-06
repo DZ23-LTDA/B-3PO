@@ -1,35 +1,39 @@
 {
   "medido": {
-    "suiteRenderer": "13103 testes: 13075 verdes, 10 upstream, 18 skipped",
-    "canaisComGuarda": "17 de 46",
-    "suiteElectron": "5604 testes: 5357 verdes, 40 de ambiente, 207 skipped",
-    "fluxosProvados": 4,
+    "suiteRenderer": "13121 testes: 13092 verdes, 11 upstream/flaky, 18 skipped",
+    "canaisComGuarda": "30 de 46 (16 sem guarda, 0 do produto) — r175 corrigiu o contador, r176 fechou o ultimo",
+    "suiteElectron": "5679 testes: 5446 verdes, 26 de ambiente, 207 skipped",
+    "fluxosProvados": "8 ligacoes do §17 + o ciclo de 7 stores (r157)",
     "modulosNoMenu": 23,
     "ambientesComConteudo": "2 de 2",
     "testesSofia": 117,
     "typecheck": "0 erros (2 projetos)",
     "rotas": 37,
     "gate": "14 checks, ok",
-    "modulosDeEngenharia": 11
+    "modulosDeEngenharia": 11,
+    "bugsDaQuartaOrdem": "6 de 6 (r184, r186, r188, r189, r190, r192, r196, r200, r203)",
+    "telasAuditadas": "7, com 5 campos revelados (r161, r162, r164, r165, r166)",
+    "build": "3.4mb / 60.7kb, identico em 12 medicoes",
+    "testesSomados": "18 800 nas duas suites, 37 vermelhos, 0 do produto"
   },
   "documentos": {
     "goalRegistro": "docs/b3po/B3PO-MASTER-GOAL-V2-REGISTRO.md",
     "goalArquivoOriginal": "AUSENTE - verificado na r129",
     "setimaOrdem": {
-      "ipc": "17 de 46 com guarda, ratchet vigia",
-      "navegacao": "2 ambientes, 23 + 11 modulos, tela pronta; filtro depende do host",
+      "ipc": "30 de 46 com guarda, 16 sem e 0 do produto; ratchet vigia em permission-coverage-ratchet",
+      "navegacao": "2 ambientes, 23 + 11 modulos; menu conforme RBAC desde r170-r171; filtro de ambiente depende do host (B7)",
       "sofia": "definida, 117 testes, contrato com a spec (r128)",
       "protegido": "ok",
-      "crm": "nao era orfao (r94)",
-      "orquestrador": "4 fluxos provados",
-      "desktop": "build, pack e MSIX 1.0.0 verificados"
+      "crm": "nao era orfao (r94); as tres fontes ligadas (r134, r146, r147)",
+      "orquestrador": "8 ligacoes provadas + o ciclo de 7 stores",
+      "desktop": "6 bugs de inicializacao/atualizacao corrigidos; B5 (instalar o MSIX) segue pendente"
     }
   },
   "checkpoint": {
-    "fase": "GOAL V2 — rodada 132 de 256",
-    "dataHora": "2026-11-05T17:34:29-03:00",
-    "commit": "947cdf49269b",
-    "tarefa": "reconciliacao dos checkpoints (23) apos as rodadas 129-131",
+    "fase": "GOAL V2 — rodada 207 de 256",
+    "dataHora": "2026-11-06T05:20:00-03:00",
+    "commit": "27fd82c3bf",
+    "tarefa": "reconciliacao dos checkpoints (23) apos as rodadas 132-206",
     "status": "IN_PROGRESS",
     "branch": "b3po-brand"
   },
@@ -45,25 +49,25 @@
       "estado": "BLOCKED",
       "item": "marketplace BR",
       "id": "B2",
-      "motivo": "16, sem credencial"
+      "motivo": "§16, sem credencial"
     },
     {
       "estado": "BLOCKED",
       "item": "WhatsApp Cloud API",
       "id": "B3",
-      "motivo": "16, sem credencial"
+      "motivo": "§16, sem credencial"
     },
     {
       "estado": "BLOCKED",
       "item": "gateway de pagamento",
       "id": "B4",
-      "motivo": "16, sem credencial"
+      "motivo": "§16, sem credencial"
     },
     {
       "estado": "PENDING",
       "item": "instalacao real do MSIX",
       "id": "B5",
-      "motivo": "exige instalar no Windows"
+      "motivo": "exige instalar no Windows; os testes provam o gerador, nao a instalacao"
     },
     {
       "estado": "PENDING",
@@ -75,8 +79,14 @@
       "estado": "BLOCKED",
       "item": "filtro do ambiente na barra lateral",
       "id": "B7",
-      "motivo": "host e do upstream (app/chat/sidebar)"
+      "motivo": "host e do upstream (app/chat/sidebar); SidebarNavContribution nao tem predicado de visibilidade"
+    },
+    {
+      "estado": "BLOQUEADO_POR_TERCEIRO",
+      "item": "channel-build-version, 1 de 4 sob carga",
+      "id": "B8",
+      "motivo": "concorrencia no Msix/app-builder-lib; retry:1 no config cobre, mas o teste segue vulneravel ao redor da biblioteca"
     }
   ],
-  "proximaAcao": "rodada 133 — o que o §22 autoriza sem pergunta: continuar a expansao do vertical com o que nao depende de credencial"
+  "proximaAcao": "rodada 208 — nao ha ordem pendente. O que resta depende do dono (B1-B5). O que a sessao pode fazer e aprofundar o uso: medir onde o operador sente falta, como a r161 fez"
 }
