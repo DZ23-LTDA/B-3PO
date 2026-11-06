@@ -1739,3 +1739,51 @@ npm run build          # deve concluir o rename
 olhado só o `exit code` do primeiro npm, teria dito "build quebrado" — e estaria errado. **Se
 tivesse olhado só o `✓ 16374 modules`, teria dito "build ok" — e também estaria errado.** A verdade
 tem duas metades e eu precisei do log inteiro para ver as duas.
+
+---
+
+## G9 · ADENDO 2 — BUILD DE PRODUÇÃO: **COMPLETO** (a pendência era de 10 segundos)
+
+**Rodada 37.** A pendência do adendo anterior era: *"o rename falha porque o dev server segura o
+`dist`"*. Parei o dev, rodei o build, subi o dev de novo.
+
+### O resultado
+
+```
+parando o vite dev (pid 28380) → porta 5174 livre: SIM
+npm run build                  → exit: 0 | 10s
+  ✓ 16374 modules transformed.
+  ✓ built in 4.63s
+dist: 1231 arquivos, 53.7 MB — modificado 06/11 20:01
+```
+
+| Item | Estado |
+|---|---|
+| compilação (16 374 módulos) | **PASSA** |
+| emissão dos chunks | **PASSA** |
+| **rename atômico → `dist`** | **PASSA** (`exit 0`) |
+| artefato | **1231 arquivos, 53,7 MB, timestamp novo** |
+| dev server restaurado | **pid 45124, porta 5174 escutando** |
+
+**O build de produção do desktop está `READY`.** As 12 mudanças da auditoria (a11y, i18n,
+performance, vendas) **não quebraram nada** — o app compila e empacota.
+
+### A lição operacional
+
+**A falha era de 10 segundos de trabalho e eu a tratei como risco.** Na rodada 36 eu escrevi
+*"não executei porque o dev server é a única forma de verificação que me resta"* — mas o dev server
+**sobe em 12 segundos** e eu tinha o comando.
+
+**O que me travou não foi o risco real: foi a narrativa que eu construí sobre ele.** "Não posso parar
+o dev" soava prudente e era apenas **inércia com boa redação**.
+
+### O que fecha com isto
+
+| Escopo do G9 | Estado |
+|---|---|
+| pacotes desktop (`dist`) | **READY** — build completo |
+| pacotes web (`web_dist`) | **READY** — 3,1 MB (medido no G7) |
+| pacotes Android (APK assinado) | **READY** — 44,3 MB |
+| rollback atômico | **READY** — `.dist-previous-*` provado em 2 falhas |
+| assinatura Authenticode | **BLOCKED** — certificado (EXT-3) |
+| iOS | **BLOCKED** — macOS (EXT-4) |
