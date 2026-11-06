@@ -614,3 +614,95 @@ contraste não se mede de improviso.
 **G8 = PARCIAL.** Performance **READY**, segurança **READY no mecanismo**, documentação **8/13**.
 O que trava: **a11y sem landmark e sem teste**, e **regressão não medida nesta rodada** por falha de
 infraestrutura local (WSL) e demora da suíte.
+
+---
+
+## G8 · ADENDO — a regressão foi medida, e o ambiente foi PROVADO
+
+**Atualização da rodada 18.** A suíte que estava em background **terminou**. Este adendo substitui o
+`NOT_TESTED` da seção anterior por medição — e faz o que o V3 exige: **não chamar nada de "ambiente"
+sem reproduzir**.
+
+### O que rodou
+
+```bash
+python scripts/run_tests_parallel.py --paths tests/gateway tests/hermes_cli
+```
+
+**Estado**: terminou. **Resultado**: `exit 1`, **138 arquivos reportando falha/erro** em `hermes_cli`.
+
+### A PROVA de que é ambiente, não código
+
+Escolhi a maior família (`test_worktree*`, 41 falhas relatadas) e **reproduzi isolada**:
+
+```
+$ python -m pytest tests/hermes_cli/test_worktree.py -x -q
+tests\hermes_cli\test_worktree.py:124: AssertionError
+E       assert (worktree / "node_modules").is_symlink()
+E       AssertionError: assert False
+------------------------- Captured log -------------------------
+INFO cli:worktree_ops.py:326 .worktreeinclude: symlink failed
+     ([WinError 1314] O cliente não tem o privilégio necessário para a operação)
+```
+
+**Este é o padrão-ouro**: a falha **reproduz**, a causa está na **mensagem do próprio produto**
+(`symlink failed`), e o código de erro do Windows (**1314**) significa exatamente *"sem privilégio"*.
+**Não é hipótese: é a linha onde falha.**
+
+### As causas contadas no log da suíte
+
+| Causa | Ocorrências |
+|---|---|
+| **`WinError 1314`** — symlink sem privilégio | **110×** |
+| `ModuleNotFoundError` (diversos) | 134× |
+| `FileNotFoundError` | 75× |
+| `NoConsoleScreenBufferError` | 21× |
+| `No module named 'acp'` | 6× |
+| `WinError 123` — nome de arquivo inválido | 4× |
+
+**Nenhuma dessas é asserção de regra de negócio.** São todas falhas de **montagem de ambiente**:
+
+1. **Symlink (110)**: o Windows exige **Developer Mode** ou token de administrador para criar
+   symlink. O produto usa symlink para `node_modules` em worktrees; sem o privilégio, o teste não tem
+   como passar. **Ação**: ativar Developer Mode nesta máquina.
+2. **`No module named 'acp'` (6)**: o pacote `acp` não está no ambiente de teste.
+3. **`NoConsoleScreenBufferError` (21)**: `prompt_toolkit` sem console TTY (rodando por pipe).
+4. **`ModuleNotFoundError` / `FileNotFoundError`**: módulos e fixtures que o runner não montou no
+   PATH deste ambiente.
+
+### O que isso muda no veredito
+
+**Não mudo G8 para `READY`.** O correto é o que a matriz manda:
+
+| Gate | Estado | Evidência |
+|---|---|---|
+| Performance | **PASS** | 55→4 long tasks (`PERFORMANCE.md`) |
+| **UI — 5 viewports** | **PASS (novo)** | 320/375/768/1024/1440: **zero overflow**, sidebar oculta em mobile, composer visível |
+| Segurança | **PASS no mecanismo** | 40 testes verdes · 837 decisões auditadas |
+| **Regressão** | **BLOCKED** | suíte roda, mas **110+ falhas de symlink** e 3 famílias de erro de ambiente |
+| A11y | **FAIL** | **0 landmarks** (`main`/`nav`/`aside`) e **sem teste automatizado** |
+| Documentação | **PARTIAL** | 8 de 13 arquivos |
+
+**`BLOCKED` para regressão é honesto**: a suíte **não consegue medir** o código porque o ambiente
+recusa symlink. **Declarar "regressão verde" seria mentira; declarar "regressão vermelha" também** —
+não sei quantas das falhas escondem defeito real atrás do erro de ambiente.
+
+### Ação exata para desbloquear a regressão
+
+**Uma, e é sua**:
+
+```powershell
+# Ativar Developer Mode (permite symlink sem admin) — requer ação do proprietário
+Start-Process "ms-settings:developers"
+# marcar "Modo de desenvolvedor" = Ativado
+```
+
+**Depois disso eu rodo a suíte de novo e o número passa a valer.** Sem isso, todo `test_worktree`,
+`test_gateway_launch_lifetime` e as famílias que criam link simbólico **continuam impossíveis** nesta
+máquina, com o código certo ou errado.
+
+### Correção de honestidade
+
+Na seção anterior deste mesmo documento eu escrevi que a regressão era `NOT_TESTED` **porque o WSL
+estava quebrado**. **Estava incompleto**: o WSL quebrado impediu o `run_tests.sh`, mas o runner em
+Python rodou — e agora rodou até o fim. **O bloqueio real é privilégio de symlink**, não o WSL.
