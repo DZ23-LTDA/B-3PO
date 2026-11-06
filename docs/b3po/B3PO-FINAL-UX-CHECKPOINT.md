@@ -715,3 +715,49 @@ main.tsx                        instala uma vez, no shell
 ### **G8 — FECHADO**, com a ressalva nomeada
 
 **A missão pede "testes de navegação, acessibilidade e regressão executados"** — e eles foram, com o resultado separado por causa. **O que a missão proíbe é trocar FAILED por VERIFIED removendo teste**; nenhum foi removido, e **as 12 falhas reais estão declaradas com o nome do bloqueio que as causa.**
+---
+
+## FASE 12 — A VARIÁVEL QUE NUNCA EXISTIU (r276)
+
+### O que a revisão encontrou
+
+**Revisando os arquivos novos, verifiquei cada token CSS que usei contra o `styles.css`.** Nove existiam. **Um não:**
+
+```
+--ui-border    NAO DEFINIDO
+```
+
+**E não era um problema meu — era do produto inteiro.** `border-(--ui-border)` aparece em **dezenas** de componentes:
+
+```
+agenda/blocks.tsx        agenda/index.tsx        trabalhos/livres.tsx
+compras/index.tsx        compras/cotacao-panel   agenda/index.tsx (várias)
+```
+
+**Nenhum arquivo CSS declarava a variável.**
+
+### Por que isso passa despercebido
+
+**O `border-(...)` do Tailwind com uma variável inexistente NÃO falha o build.** Ele deixa a cor de borda sem valor, e o componente **perde a borda que o autor pediu** — silenciosamente. O typecheck não vê CSS; o gate não valida variável usada; e o componente continua renderizando, só que sem a linha.
+
+**É a mesma classe de três bugs desta entrega**: o `Get-FileHash` que não existe no ConstrainedLanguage, o `option` sem estilo, o `overflow-hidden` que corta. **O código está certo; o ambiente em que ele roda é que não tem o que ele espera.**
+
+### A correção — na raiz
+
+```css
+--ui-border: var(--ui-stroke-tertiary);
+```
+
+> **Na raiz, e não em cada tela**: conserta os que já existiam (agenda, compras, trabalhos) **e os que eu escrevi**. O alias aponta para `--ui-stroke-tertiary`, o nível de contraste que uma borda de card já usa em `SidebarMenuButton` e `SidebarGroup` — **não inventei um valor novo**.
+
+### A prova
+
+**No CSS compilado**: `--ui-border:` presente. **No app rodando:**
+
+```
+ui_border_definido: color-mix(in srgb, #0053fd 10%, ...)
+card_borda:         color(srgb 0.038 0.267 0.733 / 0.145)
+select_borda:       color(srgb 0.038 0.267 0.733 / 0.145)
+```
+
+**As bordas dos cartões da home e do seletor agora resolvem** — e as das telas de agenda, compras e trabalhos também.

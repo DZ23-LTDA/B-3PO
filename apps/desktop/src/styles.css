@@ -387,6 +387,19 @@
       var(--ui-accent) var(--theme-stroke-tertiary-accent-mix),
       color-mix(in srgb, var(--ui-base) 5%, transparent)
     );
+    /*
+     * r276: o `--ui-border` que o produto usa em DEZENAS de componentes nunca foi definido.
+     *
+     * Medido: `border-(--ui-border)` aparece em `agenda/blocks.tsx`, `agenda/index.tsx`,
+     * `trabalhos/livres.tsx`, `compras/index.tsx` e mais — e NENHUM arquivo CSS declarava a
+     * variável. O `border-(...)` do Tailwind com uma variável inexistente **não falha o build**:
+     * ele deixa a cor de borda sem valor, e o componente perde a borda que o autor pediu.
+     *
+     * **A correção é aqui, na raiz, e vale para os que já existiam** — não em cada tela. O alias
+     * aponta para `--ui-stroke-tertiary`, o nível de contraste que uma borda de card usa no resto
+     * do sistema (`SidebarMenuButton`, `SidebarGroup`).
+     */
+    --ui-border: var(--ui-stroke-tertiary);
     --ui-stroke-quaternary: color-mix(
       in srgb,
       var(--ui-accent) var(--theme-stroke-quaternary-accent-mix),
