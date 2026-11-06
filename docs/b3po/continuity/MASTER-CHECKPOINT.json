@@ -1,8 +1,8 @@
 {
-  "head": "b1493eeeb64fbe76af94d040be0fda77bcf892bc",
+  "head": "ee37b5a11a27537d418fab129e305e3b831c48e5",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 41,
+  "round": 46,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -51,6 +51,26 @@
       "desktop": "FORTE - axe runtime, 30 rotas x 3 viewports x 2 temas, 27/30",
       "web": "FORTE - axe runtime, 17 rotas x 2 temas, 17/17 LIVRE",
       "mobile": "FRACO - auditoria ESTATICA, 6/6 atributos; axe nao existe para RN; sem leitor de tela"
+    },
+    "revisao_visual": {
+      "telas_olhadas": 8,
+      "achados": [
+        "Vendas: venda faturada com R$ 0,00 (R-9)",
+        "Estoque: 0 produtos com 6 movimentacoes (catalogo nao exigido)"
+      ],
+      "limpas": [
+        "CRM",
+        "Compras",
+        "Financeiro",
+        "Projetos",
+        "Empresa",
+        "Sofia"
+      ],
+      "confirmados_na_tela": [
+        "B4 Compras (#2 Fornecedor E2E R$ 150,00 recebido)",
+        "B6 Sofia (plano 2/2, exec-e2e-001/002, depende de t1)",
+        "B7 Empresa (Empresa E2E r283)"
+      ]
     }
   },
   "blockers": [
@@ -90,10 +110,10 @@
   "next_action": "destravar EXT-2 e remedir a regressao; ou autorizar EXT-5 e zerar as 2 violacoes a11y restantes",
   "docs": "docs/b3po/continuity/",
   "coverage_gaps": [
-    "a11y do MOBILE: so estatica (sem runtime, sem leitor de tela, sem alvo de toque)",
-    "teclado no WEB nao percorrido (so axe)",
-    "leitor de tela real em nenhuma plataforma",
-    "remocao de aba por Delete nao observada",
+    "12 capturas de baseline-layout ainda nao olhadas",
+    "a11y do MOBILE: so estatica",
+    "estoque/compras nao exigem catalogo (2 caminhos abertos)",
+    "preco zero em vendas (decisao de negocio)",
     "regressao BLOCKED (EXT-2)"
   ]
 }
