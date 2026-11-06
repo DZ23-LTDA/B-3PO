@@ -522,3 +522,95 @@ Apple Developer** para assinar. O projeto **existe**; o que falta é a plataform
 
 **G7 = PARCIAL.** **Desktop, Web e o código mobile estão `READY` com evidência de execução.** O que
 trava: **iOS não pode ser construído aqui** e **o APK não foi executado num dispositivo**.
+
+---
+
+## G8 · Regressão, segurança, performance, acessibilidade e documentação — **PARCIAL**
+
+### Performance — **READY** (medido)
+
+Detalhe em `PERFORMANCE.md`. O resumo:
+
+| Métrica | Antes | Depois |
+|---|---|---|
+| long tasks na tela de Configurações | **55** | **4** (−93 %) |
+| soma | ~5 700 ms | **281 ms** (−95 %) |
+| acima de 100 ms | **20** | **1** |
+
+**Correção**: os doze painéis de settings viraram `lazy` + `Suspense` (`e782845382`).
+
+### Segurança — **READY no mecanismo, PARCIAL na cobertura**
+
+Detalhe no G1. Resumo medido:
+
+- **40 testes de permissão verdes** (`rbac` 16 · `exigir-ator` 9 · `guard` 10 · `ratchet` 5)
+- **837 decisões na trilha de auditoria** (`%APPDATA%\B-3PO\b3po\auditoria.json`)
+- **30 de 46 canais** com guarda; **16 na dívida congelada**
+
+### Acessibilidade — **PARCIAL**, e com um achado estrutural
+
+| Verificação | Medido |
+|---|---|
+| `htmlLang` | **`pt`** — correto |
+| imagens sem `alt` | **0 de 1** |
+| botões sem nome acessível | **0 de 48** |
+| `prefers-reduced-motion` no CSS | **SIM** (`styles.css:24`, `:1342`) |
+| `prefers-reduced-transparency` no CSS | **SIM** (`:58`) |
+| regra de `focus-visible` | **SIM** (`:875`) |
+| **`<main>` / `<nav>` / `<aside>` na home** | **0 · 0 · 0** |
+| **teste automatizado de a11y** | **NÃO EXISTE** |
+
+**O achado**: **a home não tem um único landmark ARIA.** Não há `<main>`, `<nav>` nem `<aside>`; a
+sidebar é um `<div class="scrollbar-fade">`, o conteúdo é outro `<div>`. Para um leitor de tela, a
+página **não anuncia "conteúdo principal" nem "navegação"** — quem usa NVDA/VoiceOver percorre tudo
+como um bloco só.
+
+**O que o CSS acerta**: as três preferências de sistema (`reduced-motion`, `reduced-transparency`,
+`focus-visible`) estão implementadas — o que mostra que houve cuidado com a11y. **O que falta é a
+estrutura semântica** e **a medição automatizada**.
+
+**Confissão de método**: tentei medir contraste por script **três vezes** e as três deram resultado
+absurdo (razão 33 701 578 : 1, depois 1 : 1 em texto visível). Errei a resolução do fundo
+transparente e, na terceira, o filtro cortou a amostra. **Não tenho medição de contraste confiável** —
+e prefiro dizer isso a inventar um número. **`axe-core` e `pa11y` não estão instalados**; sem eles,
+contraste não se mede de improviso.
+
+### Regressão — **NOT_TESTED nesta rodada**
+
+**A suíte não rodou.** Duas tentativas:
+
+1. `bash scripts/run_tests.sh` → **`WSL ERROR: execvpe(/bin/bash) failed`** — o WSL está quebrado
+   nesta máquina;
+2. `python scripts/run_tests_parallel.py --paths tests/gateway tests/hermes_cli` → **ficou em
+   execução por mais de 10 minutos** e virou job de background.
+
+**O baseline que tenho é da r275**: 19 083 testes, 18 806 verdes, 246 skipped, **31 vermelhos** =
+7 flaky + 1 corrigido + 12 de infra + 0 de UX. **Não é o estado de hoje.**
+
+**Isso é `NOT_TESTED`, não PASS.** A suíte está rodando; quando terminar, o número entra aqui.
+
+### Documentação — **PARCIAL**
+
+| Documento | Estado |
+|---|---|
+| `MASTER-STATE.md` | **criado** |
+| `MASTER-CHECKPOINT.json` | **criado** |
+| `BLOCKERS.md` | **criado** |
+| `AUDIT-MATRIX.md` | **criado** |
+| `TEST-EVIDENCE.md` | **criado** (7 provas E2E) |
+| `PERFORMANCE.md` | **criado** |
+| `GATES.md` | **criado** |
+| `PLATFORM-MATRIX.txt` | **criado** |
+| `TASK-QUEUE.json` | **FALTA** |
+| `DECISIONS.md` | **FALTA** |
+| `UPSTREAM-PATCH-REGISTER.md` | **FALTA** |
+| `HANDOFF.txt` | **FALTA** |
+| `FINAL-DELIVERY.txt` | **FALTA** |
+
+**8 de 13 criados.**
+
+### Veredito
+
+**G8 = PARCIAL.** Performance **READY**, segurança **READY no mecanismo**, documentação **8/13**.
+O que trava: **a11y sem landmark e sem teste**, e **regressão não medida nesta rodada** por falha de
+infraestrutura local (WSL) e demora da suíte.
