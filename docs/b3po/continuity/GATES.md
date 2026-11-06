@@ -1546,3 +1546,66 @@ precisa ganhar foco por gesto do usuário (Tab), não por chamada programática.
 1. Instrumentar `HTMLElement.prototype.focus` para ver **quem** chama `focus()` no composer.
 2. Se for `useEffect` de mount: adicionar exceção quando o foco atual já é uma aba.
 3. **Testar no navegador, não no vitest** — a lição da r32.
+
+---
+
+## G8 · ADENDO 14 — CORREÇÃO: o `Delete` não estava quebrado; o meu teste estava
+
+**Rodada 34.** Os adendos 12 e 13 registraram *"Delete NÃO funciona no app real"*. **Isso estava
+errado** e esta seção corrige.
+
+### O que eu tinha medido (e interpretei mal)
+
+```
+aba "workspace" + Delete → 4 abas antes, 4 depois
+aba "workspace" + clique no ✕ → 4 abas antes, 4 depois
+```
+
+Concluí: *"o Delete não funciona"*. **A conclusão certa era outra.**
+
+### O que o código diz
+
+`tree-group.tsx`, comentário do `closeTab`:
+
+> *"A pane whose store owns Close keeps the gesture even when the pane itself is uncloseable — the
+> **workspace tab empties to a fresh draft** rather than leaving the tree."*
+
+**O `workspace` NÃO FECHA POR DESIGN.** Ele se esvazia para um rascunho novo. **O clique no ✕
+também não o remove** — e eu usei justamente ele como cobaia por duas rodadas.
+
+### O que a rodada 34 provou de verdade
+
+| Fato | Evidência |
+|---|---|
+| **`Tab` real alcança as abas** | 16 paradas → `DIV[tab=sessions]`; depois `[tab=workspace]` |
+| **`tabIndex={0}` funciona** | sem ele, `tabindex` era `null` e nenhuma parada pousava em aba |
+| **o `Delete` chega no elemento** | `keydown no tab: Delete` (listener nativo no capture) |
+| **`focus()` programático é roubado** | `tab.focus()` → `activeElement` vira `composer-rich-input` |
+| **`workspace` não fecha** | nem pelo ✕ — **é design**, não bug |
+
+### O que continua sem prova
+
+**Não consegui demonstrar o `Delete` removendo uma aba de verdade.** O `workspace` não remove (por
+design) e o `terminal` **não foi alcançado em 40 paradas de Tab** — a ordem de tabulação o coloca
+depois de muitos outros elementos.
+
+**Status honesto do `Delete`: `IMPLEMENTADO · TESTADO NO UNIT · HANDLER ALCANÇADO NO APP ·
+REMOÇÃO NÃO OBSERVADA`.** Quatro qualificações porque são quatro coisas diferentes — e eu já
+confundi a primeira com a última uma vez.
+
+### As três correções que ficaram desta série
+
+| # | O que | Onde |
+|---|---|---|
+| 1 | `tabIndex={0}` no `role="tab"` | `pane-tab.tsx` — WCAG 2.1.1 (a aba era inalcançável) |
+| 2 | `Delete`/`Backspace` + `aria-keyshortcuts` | `pane-tab.tsx` — handler e anúncio |
+| 3 | `fecharPorTeclado` / `atalhoFechar` extraídos | mantém `PaneTab` em CC 20 (gate) |
+
+### A lição que vale mais que o `Delete`
+
+**Duas rodadas testando a cobaia errada.** O `workspace` parecia o alvo óbvio — é a aba principal,
+tem `data-closeable="true"`, tem `aria-keyshortcuts="Delete"`. **Tudo apontava para "deve fechar".**
+E o código dizia, num comentário de quatro linhas, que ele **não deve**.
+
+**Eu li o comentário só agora — depois de duas rodadas.** A informação estava a 20 linhas de onde eu
+estava editando.
