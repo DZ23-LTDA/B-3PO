@@ -151,7 +151,22 @@ import { WorkspacePageHeaderHostContext } from './workspace-page-header'
 // WORKSPACE_PAGE_HEADER_AREA; route tiles and the HUD render outside it.
 const renderWorkspacePane = () => (
   <WorkspacePageHeaderHostContext.Provider value={true}>
-    <WiredPane part="chatRoutes" />
+    {/*
+     * r289 — LANDMARK: o conteúdo de trabalho vira `<main>`.
+     *
+     * Medido na auditoria (G8): a home não tinha `<main>`, `<nav>` nem `<aside>` — zero
+     * landmarks. Um leitor de tela não tinha como pular para "conteúdo principal"; tudo era um
+     * bloco só.
+     *
+     * Este é o pane do workspace (`part="chatRoutes"`), o irmão do `part="sidebar"` — então o
+     * `<main>` NÃO engole a navegação, que é o erro clássico de quem marca o shell inteiro.
+     *
+     * `flex min-h-0 min-w-0 flex-1 flex-col` repete o contrato de layout que o `WiredPane` já
+     * esperava do pai: sem isso, o pane perderia a altura e a rolagem do shell.
+     */}
+    <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <WiredPane part="chatRoutes" />
+    </main>
   </WorkspacePageHeaderHostContext.Provider>
 )
 
