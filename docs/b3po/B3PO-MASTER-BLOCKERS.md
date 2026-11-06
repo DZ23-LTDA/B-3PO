@@ -1,6 +1,6 @@
 # B-3PO — BLOCKERS
 
-**Checkpoint do §23** · atualizado em 2026-11-05T15:58:32-03:00 · commit `df02a3d738c3`
+**Checkpoint do §23** · atualizado em 2026-11-06T05:40:00-03:00 · commit `ae4829c5f0`
 
 ---
 
@@ -14,7 +14,8 @@
 | **B4** | **Gateway de pagamento** | BLOCKED | §16, sem credencial |
 | **B5** | **Instalação real do MSIX** | **não testada** | exige instalar o pacote no Windows |
 | **B6** | **Foco, tabulação, contraste** | não auditado | exige o app aberto |
-| **B7** | **Filtro do ambiente na barra lateral** | **BLOCKED** | o host é pp/chat/sidebar — código do upstream |
+| **B7** | **Filtro do ambiente na barra lateral** | **BLOCKED** | o host e app/chat/sidebar - codigo do upstream; o SidebarNavContribution NAO TEM PREDICADO DE VISIBILIDADE (medido na r171) |
+| **B8** | **channel-build-version sob carga** | **BLOQUEADO_POR_TERCEIRO** | concorrencia no Msix/app-builder-lib: 1 de 4 testes falha so na suite completa. retry: 1 no config cobre (r203), mas o teste segue vulneravel ao redor da biblioteca |
 
 > **O §22 diz**: *"Se uma credencial/serviço/hardware faltar, registrar BLOCKED_BY_EXTERNAL_DEPENDENCY e continuar tarefas independentes. **Nunca declarar sucesso simulado.**"*
 
@@ -24,7 +25,8 @@
 
 | Item | Por quê |
 |---|---|
-| **41 testes falhando** | **ambiente**: `python3` não existe no Windows (r111) |
+| **26 testes falhando** | **ambiente**: eram 41 na r111; **a r188 resolveu o python3** (o globalSetup pulava no Windows) e **a r203 pôs 
+etry: 1**. Os 26 que restam são plugins, SSH, build de Electron, Linux e instalação |
 | **shiki 19.5 MB** | **dívida medida**, não bloqueio (r112) |
 | **2 imports dinâmicos ineficazes** | **dívida medida** (r112) |
 | **MSIX não assinado** | **o próprio build diz**: `reason=Windows Store only build` |

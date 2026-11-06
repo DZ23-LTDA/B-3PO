@@ -1,6 +1,6 @@
 # B-3PO — RESULTADOS DE TESTE
 
-**Checkpoint do §23** · atualizado em 2026-11-05T15:58:41-03:00 · commit `df02a3d738c3`
+**Checkpoint do §23** · atualizado em 2026-11-06T05:45:00-03:00 · commit `ae4829c5f0`
 
 ---
 
@@ -31,12 +31,12 @@
 |---|---|
 | **Gate** | ✅ **14 checks, ok** |
 | **Typecheck** | ✅ **0 erros** |
-| **Suíte `electron`** | **5352 passaram · 41 falharam · 207 skipped** (5600) |
+| **Suíte `electron`** | **5446 passaram · 26 falharam · 207 skipped** (5679) — r205 |
 | **branch** | `b3po-brand` |
 | **`main`** | ✅ **intacta** (espelho do upstream) |
 | **sincronizado** | ✅ **sim** |
 
-### As 41 falhas — diagnosticadas na r111
+### As 41 falhas da r111 → 26 na r205
 
 > **Não são do produto.** Elas procuram `python3`, que **não existe neste Windows** (é `python`).
 >
@@ -67,7 +67,7 @@
 |---|---|
 | `erp-mounting` | **capacidade sem porta** (r110) |
 | `ipc-invariants` | canal duplicado ou string mágica |
-| `permission-coverage-ratchet` | 17 de 46 sem guarda |
+| `permission-coverage-ratchet` | **16 de 46 sem guarda, 0 do produto** (r176) |
 | `routes-map` | rota morta no menu |
 | `b3po-modulos` | catálogo da busca divergindo do menu |
 
