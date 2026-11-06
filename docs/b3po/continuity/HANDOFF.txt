@@ -1,0 +1,57 @@
+B-3PO — HANDOFF
+
+HEAD: 9f662fc67c · branch: b3po-brand · main intacto (f4cf411f28)
+Data: 06/11/2026 · Rodada: 19
+
+ONDE ESTAMOS
+------------
+Prioridade zero do V3 (8 itens) FECHADA. Gates G0-G8 auditados, G9 pendente.
+
+  G0 READY           inventario + continuity docs
+  G1 PARCIAL         40 testes de permissao, 837 decisoes auditadas, 16/46 canais sem guarda
+  G2 PARCIAL         overall "ok" ignora inferencia; has_env nao significa chave
+  G3 PARCIAL         Compras READY, Estoque READY, CRM READY, Vendas com 2 falhas
+  G4 NOT_IMPLEMENTED vertical gas/agua nao existe; espera decisao do dono
+  G5 PARCIAL         27/27 rotas, foco/rolagem/persistencia OK; 5 modos sem identidade propria
+  G6 PARCIAL         99 plugins oficiais, 27 de mensageria, ZERO ativos
+  G7 PARCIAL         desktop/web/android READY, iOS BLOCKED (precisa macOS), 169 testes mobile
+  G8 PARCIAL         perf PASS (55->4 long tasks), UI PASS (5 viewports), a11y CORRIGIDA,
+                     regressao BLOCKED (symlink), docs 8/13
+  G9 PENDENTE        pacotes, rollback, riscos, veredito
+
+O QUE ESTA PROVADO (nao repetir)
+--------------------------------
+- Compras: 7 etapas E2E, estoque 3000, financeiro R$ 150   (TEST-EVIDENCE.md)
+- Vendas: baixa no estoque 3000->2000, conta a receber R$ 80
+- Estoque: entrada/saida/inventario, 1000->6000->4000->5000
+- Sofia: plano persiste, execucao_id por tarefa, autoaprovacao bloqueia
+- Projetos/Trabalhos/Automacoes/Empresa: 4 de 4 criam e persistem
+- Bots: criar/editar SOUL/renomear/revogar; default protegido
+- Performance: 55 -> 4 long tasks na tela de Configuracoes
+- UI: zero overflow em 320/375/768/1024/1440
+- a11y: nav+main existem agora (era 0)
+
+BLOQUEIOS (acao do proprietario)
+--------------------------------
+EXT-1 chave de provedor de IA      -> Configuracoes > Provedores, ou hermes auth add
+EXT-2 Developer Mode do Windows    -> ms-settings:developers (destrava a regressao)
+EXT-3 macOS + Xcode + Apple acct   -> build iOS
+EXT-4 decisao sobre a vertical     -> construir / fora de escopo / redefinir G4
+
+PROXIMO PASSO
+-------------
+1. Desbloquear EXT-2 e remedir a regressao (hoje BLOCKED por WinError 1314)
+2. G9: pacotes de entrega, rollback, matriz de riscos, veredito final
+3. Completar continuity: TASK-QUEUE.json, UPSTREAM-PATCH-REGISTER.md, FINAL-DELIVERY.txt
+
+ARMADILHAS APRENDIDAS (nao repetir)
+-----------------------------------
+- `bash scripts/run_tests.sh` NAO roda nesta maquina (WSL quebrado). Use
+  `python scripts/run_tests_parallel.py`.
+- Testes do mobile sao VITEST, nao jest. `npx vitest run`.
+- `errors` != `failures` no pytest: errors sao de setup, nao de assercao.
+- Medir contraste por script falhou 3x (fundo transparente). Sem axe-core, nao medir.
+- Payloads de dominio: projetos/trabalhos usam portugues (objetivo/pedido);
+  companies/automations usam ingles (name/action_name).
+- `sofia.tarefa` espera `{plano_id, tarefa_id, patch}`, nao status solto.
+- `inventory.append` exige `kind` (entrada/saida/ajuste).

@@ -706,3 +706,40 @@ máquina, com o código certo ou errado.
 Na seção anterior deste mesmo documento eu escrevi que a regressão era `NOT_TESTED` **porque o WSL
 estava quebrado**. **Estava incompleto**: o WSL quebrado impediu o `run_tests.sh`, mas o runner em
 Python rodou — e agora rodou até o fim. **O bloqueio real é privilégio de symlink**, não o WSL.
+
+---
+
+## G8 · ADENDO 2 — a11y: os landmarks foram CORRIGIDOS
+
+**Achado do G8**: a home não tinha `<main>`, `<nav>` nem `<aside>` — **zero landmarks**.
+**Corrigido em `9f662fc67c`.**
+
+| Antes | Depois |
+|---|---|
+| `nav: 0` | **`nav: 1`** — `aria-label="Barra lateral"` |
+| `main: 0` | **`main: 1`** — envolve o pane do workspace |
+| sidebar dentro do `main` | **`false`** — a navegação ficou FORA, como deve ser |
+
+**Como foi feito** (`components/ui/sidebar.tsx` + `app/contrib/controller.tsx`): `role="navigation"`
+nas três variantes da sidebar (desktop, mobile, `collapsible='none'`) e um `<main>` em volta do
+`<WiredPane part="chatRoutes" />` — que é o **irmão** do `part="sidebar"`, não o pai.
+
+**Verificado que não quebrou o layout** (5 viewports, após a mudança):
+
+| Viewport | overflow | main | nav |
+|---|---|---|---|
+| 320x568 | **não** | 312x1092 | oculta |
+| 375x667 | **não** | 367x1001 | oculta |
+| 768x1024 | **não** | 500x977 | 260 px |
+| 1024x768 | **não** | 756x908 | 260 px |
+| 1440x900 | **não** | 1180x783 | 260 px |
+
+**Gate · typecheck**: `14 checks ok` · `0 erros`.
+
+**O que continua em aberto na a11y**:
+
+| Item | Estado |
+|---|---|
+| contraste medido | **NOT_TESTED** — falhei 3× ao medir por script; sem `axe-core` |
+| teclado (Tab/Esc/retorno de foco) | **NOT_TESTED** |
+| `axe` automatizado no CI | **NÃO EXISTE** |

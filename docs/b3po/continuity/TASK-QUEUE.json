@@ -1,0 +1,58 @@
+{
+  "head": "9f662fc67c",
+  "round": 19,
+  "queue": [
+    {
+      "id": "T-01",
+      "what": "Desbloquear EXT-2 (Developer Mode) e remedir a regressao",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "EXT-2"
+    },
+    {
+      "id": "T-02",
+      "what": "G9: pacotes de entrega, rollback, matriz de riscos, veredito",
+      "owner": "dsh",
+      "status": "todo"
+    },
+    {
+      "id": "T-03",
+      "what": "Completar UPSTREAM-PATCH-REGISTER.md",
+      "owner": "dsh",
+      "status": "todo"
+    },
+    {
+      "id": "T-04",
+      "what": "FINAL-DELIVERY.txt",
+      "owner": "dsh",
+      "status": "todo",
+      "blocked_by": "T-02"
+    },
+    {
+      "id": "T-05",
+      "what": "Diferenciar os 5 modos sem identidade (G5)",
+      "owner": "proprietario+dsh",
+      "status": "blocked",
+      "blocked_by": "decisao de produto"
+    },
+    {
+      "id": "T-06",
+      "what": "Provar ativacao de UM conector sem credencial comercial (ntfy/irc)",
+      "owner": "dsh",
+      "status": "todo",
+      "blocked_by": "autorizacao"
+    },
+    {
+      "id": "T-07",
+      "what": "Corrigir mensagem de SKU inexistente em Vendas",
+      "owner": "dsh",
+      "status": "todo"
+    },
+    {
+      "id": "T-08",
+      "what": "Decidir preco zero em Vendas (cortesia ou bloqueio)",
+      "owner": "proprietario",
+      "status": "blocked"
+    }
+  ]
+}
