@@ -1307,3 +1307,45 @@ com o critério correto — e ele protege nas duas direções.
 | zoom 150 % | medido em rodada antiga, não repetido |
 | Tab nas outras 29 rotas | só o CRM |
 | **`nested-interactive`** | **estrutural — depende de autorização** |
+
+---
+
+## G8 · ADENDO 10 — `prefers-reduced-motion` testado: **promete e cumpre**
+
+**Rodada 30.** O `styles.css` declara duas preferências do sistema (`:24` e `:1342` para
+`prefers-reduced-motion`, `:58` para `prefers-reduced-transparency`), mas **declarar no CSS não é
+provar**. Uma regra que não pega é bug de a11y (WCAG 2.3.3) — e passaria despercebida porque o CSS
+*parece* certo.
+
+### A medição
+
+`emulateMedia({ reducedMotion: 'reduce' })` e comparação das transições computadas:
+
+| Estado | elementos com transição | duração máxima |
+|---|---|---|
+| sem redução | 41 | **0.22 s** |
+| **com redução** | 257 | **0 s** |
+
+**A duração máxima cai para zero.** O número de elementos **sobe** (257) porque a regra passa a
+declarar `transition-duration: 0s` explicitamente em vez de deixar o padrão — o que é o efeito
+correto, não o contrário.
+
+**Animações CSS ativas**: `0` em ambos os estados — o produto usa **transições**, não keyframes.
+
+### O que isso fecha
+
+| Item | Antes | Agora |
+|---|---|---|
+| `prefers-reduced-motion` | declarado no CSS, não testado | **medido e funcionando** |
+
+### O que continua fora
+
+| Item | Estado |
+|---|---|
+| `prefers-reduced-transparency` | declarado (`:58`), **não medido** — o efeito é visual (vibrancy), difícil de asserir por número |
+| `prefers-contrast: more` | **o CSS não trata**; não há o que medir |
+| zoom 150 % | medido em rodada anterior, não repetido |
+| leitor de tela real | sem AT de verdade |
+
+**O `prefers-reduced-transparency` eu deixo nomeado como não medido** em vez de inferir do
+`reduced-motion`: são media queries diferentes e o efeito é outro.
