@@ -1475,3 +1475,74 @@ diferença que apareceu aqui.
 **Não vou declarar o teclado "entregue".** O handler existe, o atributo existe, e o caminho que
 liga os dois **falha no app real** em pelo menos uma aba. Chamar isso de pronto seria o tipo de
 relatório que este projeto proíbe.
+
+---
+
+## G8 · ADENDO 13 — o foco das abas: o que medi, o que não sei, e onde paro
+
+**Rodada 33.** Investiguei o bug de foco aberto na r32. **Não resolvi** — mas o diagnóstico
+avançou, e é importante não confundir "investiguei" com "consertei".
+
+### O que a instrumentação mostrou
+
+```
+tab.focus()
+  → focusin disparado em: DIV[composer-rich-input][contenteditable]
+  → activeElement logo depois: composer-rich-input
+  → 300 ms depois: composer-rich-input
+```
+
+**O evento de foco vai para o composer, não para o tab.** `tab.focus()` é chamado e **não produz
+`focusin` no tab**.
+
+### O que eu eliminei (com medição)
+
+| Hipótese | Como testei | Resultado |
+|---|---|---|
+| ancestral com `inert` | varri 14 níveis | **nenhum** |
+| ancestral `aria-hidden` | idem | **nenhum** |
+| `display:none` / `visibility:hidden` / `opacity:0` | idem | **nenhum** |
+| `content-visibility: hidden` | idem | **nenhum** |
+| elemento recriado pelo React entre o `querySelector` e o `focus()` | comparei referências | **mesma referência** |
+| `tabindex` ausente | leitura do DOM | **`"0"`, `tabIndex` prop = 0** |
+| elemento invisível | `getBoundingClientRect` | **91 × 34, visível** |
+| boot ainda roubando foco | esperei 8 s | **continua** |
+
+**Todas as causas óbvias estão descartadas.** O que resta é o **gerenciador de foco do composer**,
+que refoca a si mesmo — e que eu **não isolei**.
+
+### Por que eu paro aqui
+
+**Investigar o sistema de foco do composer é outro trabalho**: provavelmente `useEffect` de
+autofocus no mount, mais um `focus()` em `pointerdown` global. Descobrir qual exigiria instrumentar
+o React (não só o DOM), e a correção tocaria o caminho de entrada de texto — **o controle mais
+usado do app**.
+
+**Risco × ganho**: mexer no autofocus do composer para fazer o `Delete` de aba funcionar é
+**trocar o certo pelo duvidoso**. Se eu quebrar o autofocus, o usuário perde a digitação imediata —
+e isso é **muito pior** do que uma aba fechar só pelo ✕.
+
+### O que fica, medido
+
+| Item | Estado |
+|---|---|
+| `tabIndex={0}` no `role="tab"` | **no DOM**, corrige WCAG 2.1.1 |
+| `Delete` no handler | **existe**, 24/24 no vitest |
+| `Delete` no app real | **`NOT_PROVEN_IN_APP`** — o foco não chega |
+| `nested-interactive` | **aberto** — precisa do botão irmão do tab |
+| autofocus do composer | **funciona como projetado** (e é o que impede o achado acima) |
+
+### A conclusão honesta
+
+**A aba não é alcançável por teclado hoje** — e agora eu sei **por quê não é trivial**: não é um
+`tabindex` faltando (esse eu coloquei), é um **conflito com o autofocus do composer**.
+
+**Isso é um achado de arquitetura, não de atributo.** Registrado com nome, para quem for atacar:
+*"o boot foca o composer e o foco é re-afirmado de forma que nenhum `focus()` de fora gruda — a aba
+precisa ganhar foco por gesto do usuário (Tab), não por chamada programática."*
+
+### Próximo passo (se alguém pegar isto)
+
+1. Instrumentar `HTMLElement.prototype.focus` para ver **quem** chama `focus()` no composer.
+2. Se for `useEffect` de mount: adicionar exceção quando o foco atual já é uma aba.
+3. **Testar no navegador, não no vitest** — a lição da r32.
