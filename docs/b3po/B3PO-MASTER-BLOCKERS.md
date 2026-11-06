@@ -23,6 +23,22 @@
 
 ## O QUE **NÃO** É BLOQUEIO — e por isso não está aqui
 
+### As 13 falhas do `electron` — seis causas, nenhuma do produto (r228)
+
+| Arquivo | Falhas | Causa | Natureza |
+|---|---|---|---|
+| `ssh-connection` | **4 de 89** | **`sun_path`** de 108 bytes e **sinais POSIX** | plataforma |
+| `run-electron-builder` | **1 de 5** | **`prepared-packaging`** recusa os inputs | hospedeiro |
+| `bundle-electron-main` | **3 de 5** | **`desktop.electron_flags`** não lido | hospedeiro |
+| `desktop-plugin-install` | **5 de 54** | **CRLF do git** e **symlink sem elevação** | ambiente |
+
+> **Cinco são diferenças de plataforma; uma é uma garantia do app hospedeiro que não está sendo cumprida.**
+> **Nenhuma é do B-3PO, e nenhuma é um defeito de funcionalidade do produto.**
+> 
+> **A linha `13 failed | 5451 passed` é o mesmo número que esta tabela, sem a informação que a torna útil.**
+> **Um vermelho sem causa é uma suspeita; um vermelho com causa é um fato sobre a máquina.**
+
+
 | Item | Por quê |
 |---|---|
 | **26 testes falhando** | **ambiente**: eram 41 na r111; **a r188 resolveu o python3** (o globalSetup pulava no Windows) e **a r203 pôs
