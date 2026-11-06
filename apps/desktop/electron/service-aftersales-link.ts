@@ -43,7 +43,7 @@ export interface TicketResolvido {
 
 export type IntencaoDePosVenda =
   | { tipo: 'nada'; motivo: 'sem_telefone' | 'satisfacao_boa' | 'sem_satisfacao' }
-  | { tipo: 'criar'; contact_phone: string; kind: 'satisfacao'; nota: number; ref: string; baseEm: number }
+  | { tipo: 'criar'; contact_phone: string; kind: 'satisfacao'; nota: number; origem: string; baseEm: number }
 
 /**
  * O corte da satisfacao.
@@ -67,8 +67,17 @@ export function intencaoDePosVenda(ticket: TicketResolvido): IntencaoDePosVenda 
     contact_phone: telefone,
     kind: 'satisfacao',
     nota: ticket.satisfaction,
-    // O `ref` e o TICKET: uma reclamacao nao colide com o follow-up de recompra da mesma venda.
-    ref: `ticket:${ticket.ticket_id}`,
+    /**
+     * A ORIGEM vai no lugar do `sale_id` — e a r153 descobriu por que.
+     *
+     * O `normalizeFollowUp` **exige `sale_id`** e **deriva o `ref` dele** (`refVendaFollowUp(saleId, kind)`).
+     * Um `ref` passado pelo chamador **é ignorado**, e sem `sale_id` o store devolve `sale_required`.
+     *
+     * **O atendimento não tem venda**: o `Ticket` carrega `contact_phone`, `subject` e `closed_at`, não um
+     * `order_id`. Então a origem é o próprio ticket, e o `ref` derivado fica `venda:ticket:<id>:satisfacao` —
+     * **único**, e **sem colidir com o follow-up de recompra de uma venda real**.
+     */
+    origem: `ticket:${ticket.ticket_id}`,
     tipo: 'criar'
   }
 }

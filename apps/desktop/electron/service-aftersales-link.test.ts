@@ -63,7 +63,7 @@ describe('o ref e o TICKET, nao a venda', () => {
 
     // Se fosse `venda:<id>`, uma reclamacao de uma venda que ja tem follow-up de recompra COLIDIRIA com ele — e
     // nao criaria nada. A r146 descobriu que `ref` e a chave de idempotencia.
-    expect(r.ref).toBe('ticket:t1')
+    expect(r.origem).toBe('ticket:t1')
   })
 })
 

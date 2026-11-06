@@ -230,8 +230,11 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
             contact_phone: intencao.contact_phone,
             kind: intencao.kind,
             notes: notaDoFollowUp(intencao),
-            ref: intencao.ref,
+            // r153: o store EXIGE sale_id e DERIVA o ref dele. O atendimento nao tem venda, entao a origem
+            // e o ticket - e o ref derivado fica unico por (origem, kind).
+            // origem e o ticket - e o ref derivado fica enda:ticket:<id>:satisfacao, unico.
             sale_at: intencao.baseEm,
+            sale_id: intencao.origem,
             tenant_id: ticket.tenant_id
           })
         } catch {
