@@ -32,6 +32,7 @@
 | `bundle-electron-main` | **3 de 5** | **`desktop.electron_flags`** não lido | hospedeiro |
 | `desktop-plugin-install` | **3 de 54** | **CRLF do git em mais de um ponto** (`add`, `checkout`, `archive`) - o symlink saiu com `skipIf` na r233 | ambiente |
 | `audit-store` | **2 de 13** (intermitente) | **flaky de longa data** - aparece e desaparece desde a r154 | ambiente |
+| `channel-build-version` | **1 de 4** (intermitente) | **`B8`**: concorrência no `Msix`/`app-builder-lib`. O `retry: 1` segurou **36 rodadas**; na r239 ele levou **100 s** (o normal é 22 s) e falhou duas vezes | terceiro |
 
 > **A soma não é a soma das linhas**: em 06/11/2026 (r236) os quatro primeiros deram **11** e o total medido foi **13**, porque o `audit-store` entrou com 2. **Em outra rodada ele pode não entrar, e o total cai sem que nenhum arquivo mude.**
 >
