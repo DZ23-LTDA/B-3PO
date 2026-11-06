@@ -1857,3 +1857,57 @@ quebrado":**
 **Nenhuma era código.** E as três só apareceram porque eu li a mensagem até o fim — a terceira
 estava numa linha que parece um erro de *meu* código (`electron-main.mjs:5810`) e era do **ambiente
 de onde eu executo**.
+
+---
+
+## G7 · ADENDO 2 — os três frontends são independentes, e isso foi MEDIDO
+
+**Rodada 38.** Mudei componentes em `apps/desktop/src/components/ui/` e precisava saber se o build do
+`web/` continuaria. Fui verificar em vez de supor.
+
+### O que a verificação mostrou
+
+| Componente que eu mudei | Existe em `web/src`? |
+|---|---|
+| `components/ui/sidebar.tsx` | **NÃO** |
+| `components/ui/tooltip.tsx` | **NÃO** |
+| `components/ui/pane-tab.tsx` | **NÃO** |
+| `kbd.tsx` · `statusbar-controls.tsx` | **NÃO** |
+
+Os "achados" iniciais de `sidebar` no `web/src` eram **strings de i18n** (`hideFromSidebar` em
+`af.ts`, `ar.ts`, `de.ts`…), **não imports de componente**.
+
+**O web tem os seus próprios**: `ChatSidebar.tsx` e o seu próprio catálogo de i18n.
+
+### O build do web, medido
+
+```
+npm run build   → exit: 0 | 13s
+✓ built in 3.99s
+web_dist: 60 arquivos, 3.1 MB
+```
+
+**Passa.** Não porque eu não quebrei nada — **porque nunca dependeu do que eu mexi.**
+
+### Por que isto importa para o veredito
+
+**"O build do web passa" e "minhas mudanças não quebraram o web" são afirmações diferentes**, e só
+a primeira está provada aqui. A segunda é verdadeira **por construção**: os arquivos nem existem
+do lado do web.
+
+**Confirma o que o G7 já registrava**: compartilhado é o **backend** (gateway + agent + JSON-RPC);
+a UI são **três frontends independentes** — Electron/React, SPA, React Native.
+
+### A consequência prática
+
+**Uma correção de a11y no desktop NÃO corrige o web.** Se o `web/` tem `button-name` ou
+`role=navigation` faltando, isso é uma **auditoria separada** que **eu não fiz** — e agora o
+`PLATFORM-MATRIX` precisa dizer isso explicitamente.
+
+| Plataforma | a11y auditada? |
+|---|---|
+| **Desktop** | **SIM** — 30 rotas × 3 viewports × 2 temas |
+| **Web** | **NÃO** — o build passa, a a11y nunca foi medida |
+| **Android/iOS** | **NÃO** — nenhuma medição de a11y |
+
+**Isso é um buraco de cobertura que eu não tinha nomeado até agora.** O `axe` rodou só no desktop.
