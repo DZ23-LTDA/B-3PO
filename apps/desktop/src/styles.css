@@ -1470,6 +1470,26 @@ button {
   -webkit-app-region: no-drag;
 }
 
+/*
+ * r277: foco visível para as superfícies do B-3PO.
+ *
+ * A regra acima (`*:focus-visible { outline: none }`) é uma **decisão de produto**: nenhum anel de
+ * foco em lugar nenhum. Ela é unlayered de propósito, para vencer o `utilities` do Tailwind — e
+ * por isso `focus-visible:ring-2` numa classe **não funciona**: a regra global ganha.
+ *
+ * **A missão final pede "navegação por teclado, foco visível"**, e as duas coisas se contradizem.
+ * A saída não é reverter a decisão global (mudaria o produto inteiro, e é do upstream): é **marcar
+ * as superfícies onde o foco é necessário para operar** — os cartões de ambiente da home e o
+ * seletor de modo de trabalho, que são os controles desta entrega.
+ *
+ * `outline` e não `ring`: a regra global zera `--tw-ring-*` com `!important`, e o `outline` não
+ * depende dela. Unlayered pelo mesmo motivo do original — é assim que se vence o `utilities`.
+ */
+[data-b3po-foco]:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
 /* Button variant styling lives entirely in the cva in components/ui/button.tsx
    (the single source of truth). Don't re-add [data-slot='button'] rules here —
    attribute selectors out-specify the Tailwind utilities and silently override

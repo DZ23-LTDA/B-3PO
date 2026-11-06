@@ -41,6 +41,7 @@ export function SeletorDeAmbiente() {
       <select
         aria-label="Modo de trabalho"
         className="w-full rounded-md border border-(--ui-border) bg-(--ui-bg-secondary) px-2 py-1 text-[0.8125rem] font-medium text-foreground"
+        data-b3po-foco
         onChange={event => setAmbiente(event.target.value)}
         value={ativo}
       >

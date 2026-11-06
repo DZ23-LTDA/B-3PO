@@ -761,3 +761,55 @@ select_borda:       color(srgb 0.038 0.267 0.733 / 0.145)
 ```
 
 **As bordas dos cartões da home e do seletor agora resolvem** — e as das telas de agenda, compras e trabalhos também.
+---
+
+## FASE 13 — O FOCO QUE O PRODUTO MATOU (r277)
+
+### O que a revisão de acessibilidade encontrou
+
+**Os três componentes novos têm a semântica certa**: `role="group"` com rótulo, `aria-pressed` no cartão aceso, `aria-hidden` nos ícones e no cabeçalho de seção, `type="button"` explícito, `<label>` em volta do `<select>`.
+
+**Mas nenhum tinha `focus-visible`.** Fui ver o padrão do produto — e a resposta não era "os meus componentes estão fora do padrão":
+
+```css
+/* styles.css:1454 — "No focus rings, anywhere." */
+*:focus,
+*:focus-visible { outline: none; }
+
+*:focus-visible {
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+```
+
+> **O produto REMOVEU os anéis de foco — globalmente, e de propósito.** A regra é **unlayered** justamente para vencer o `utilities` do Tailwind, e zera `--tw-ring-*` com `!important`. **Por isso `focus-visible:ring-2` numa classe não funciona:** a regra global ganha.
+
+### A contradição, e a saída
+
+**A missão final pede "navegação por teclado, foco visível". O produto diz "nenhum anel de foco, em lugar nenhum".** As duas coisas não podem estar certas ao mesmo tempo.
+
+**A saída não é reverter a decisão global** — ela é do upstream e vale para o produto inteiro. **É marcar as superfícies onde o foco é necessário para OPERAR**:
+
+```css
+[data-b3po-foco]:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+```
+
+**`outline` e não `ring`**: a regra global zera `--tw-ring-*` com `!important`, e o `outline` não depende dela. **Unlayered pelo mesmo motivo do original** — é assim que se vence o `utilities`.
+
+**Marcados**: os **seis cartões** de ambiente da home e o **seletor de modo de trabalho**.
+
+### A prova, no app
+
+```
+marcador:       SELECT
+outline_style:  solid
+outline_width:  2px
+outline_color:  rgb(0, 83, 253)     <- azul da marca
+```
+
+**E a regra está no CSS compilado**: `[data-b3po-foco]:focus-visible{outline:2px solid var(--theme-primary);outline-offset:2px}`.
+
+> **O que fica declarado**: o foco visível **não** é global neste produto — é uma exceção deliberada nas superfícies desta entrega. **Reverter a regra do upstream seria uma decisão de produto inteira, e não é minha.**

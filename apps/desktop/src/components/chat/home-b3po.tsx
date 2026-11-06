@@ -113,6 +113,7 @@ export function HomeB3po() {
                   ? 'border-(--theme-primary) bg-(--theme-accent-soft) text-(--ui-text-primary)'
                   : 'border-(--ui-border) bg-(--ui-bg-secondary) text-(--ui-text-secondary) hover:border-(--theme-primary) hover:text-(--ui-text-primary)'
               )}
+              data-b3po-foco
               key={ambiente}
               onClick={() => setAmbiente(ambiente)}
               type="button"
