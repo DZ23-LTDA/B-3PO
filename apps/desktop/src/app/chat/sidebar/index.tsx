@@ -24,6 +24,7 @@ import {
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { useContributions } from '@/contrib/react/use-contributions'
 import { linhasDeContribuicoes, NavRowWithHeader } from './nav-group-header'
+import { SeletorDeAmbiente } from './seletor-de-ambiente'
 import { type SessionInfo, type SessionSearchResult } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { comboTokens } from '@/lib/keybinds/combo'
@@ -414,8 +415,7 @@ export function ChatSidebar({
   const { t } = useI18n()
   const s = t.sidebar
   const { pathname } = useLocation()
-  // Contributed nav rows (plugins pairing a page with a sidebar entry) render
-  // below the built-ins with the same chrome; active = at their route.
+  // Contributed nav rows render below the built-ins with the same chrome; active = at their route.
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
 
   const contributedNav = useMemo<SidebarNavItem[]>(
@@ -1552,6 +1552,7 @@ export function ChatSidebar({
       <SidebarContent className={`gap-0 bg-transparent px-2.5 ${SCROLL_Y}`}>
         <SidebarGroup className="shrink-0 p-0 pb-2 pt-[calc(var(--titlebar-height)+0.375rem)]">
           <SidebarGroupContent>
+            <SeletorDeAmbiente />
             <SidebarMenu className="gap-px">
               {navItems.map((item, indice) => {
                 const isInteractive = Boolean(item.action) || Boolean(item.route)

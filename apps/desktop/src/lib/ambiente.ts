@@ -113,11 +113,16 @@ export interface ModuloDoAmbiente {
  *
  * **O que sobra fora é dito, não sumido**: `foraDoAmbiente` devolve a lista, para a tela poder dizer *"há N
  * módulos no outro ambiente"* em vez de o menu simplesmente parecer menor.
+ *
+ * **Genérica desde a r267**: a função só lê `grupo`, então aceita qualquer item que o tenha — o
+ * `ItemDeMenu` do plugin (com `codicon`) e o `ModuloDoAmbiente` (sem) passam os dois, e o tipo
+ * de retorno preserva o do argumento. Antes ela exigia `ModuloDoAmbiente` e o plugin não
+ * conseguia passar o seu próprio tipo sem um cast.
  */
-export function modulosDoAmbiente(
-  modulos: readonly ModuloDoAmbiente[],
+export function modulosDoAmbiente<T extends { grupo: string }>(
+  modulos: readonly T[],
   ambiente: Ambiente
-): { dentro: ModuloDoAmbiente[]; fora: ModuloDoAmbiente[] } {
+): { dentro: T[]; fora: T[] } {
   const grupos = new Set(gruposDoAmbiente(ambiente))
 
   // "Visão geral" é sempre visível: é onde a pessoa se localiza.

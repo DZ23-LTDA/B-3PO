@@ -136,3 +136,70 @@ scrollTop: 0 → 223   rolou: true
 | **G3** — RBAC | ✅ **`nav-rbac` filtra por `read`** |
 | **G4** — persistência do contexto | ❌ **a preferência de ambiente ainda não tem store** |
 | **G6** — home com 6 cards | ❌ **a home ainda é o logo + composer** |
+---
+
+## FASE 3 — O SELETOR DE AMBIENTE (r267) — **G1 e G4**
+
+**O que faltava**: os 6 ambientes existiam no MODELO, e a escolha já era persistida em `store/ambiente.ts` (localStorage, versionada). **O que não existia era o seletor na barra** — e um modelo que ninguém vê não muda o produto.
+
+### O componente
+
+**`app/chat/sidebar/seletor-de-ambiente.tsx`** — `<select>` nativo, acima dos itens, com o rótulo **"Modo de Trabalho"** da referência visual.
+
+**Por que nativo**: seis opções cabem num `<select>`, e ele já funciona com teclado, leitor de tela e o tema do sistema. Um popover próprio custaria `Tab`, `Esc` e `aria-*` — e a barra já tem itens demais para navegar.
+
+### O filtro — duas fontes, nesta ordem
+
+```
+1. O AMBIENTE  (store/ambiente)  ->  recorta o menu pelo contexto   <- navegação
+2. O RBAC      (lib/nav-rbac)    ->  esconde o que não pode LER     <- permissão
+```
+
+> **Ambiente primeiro, permissão depois** — e a ordem não é arbitrária: **o RBAC é a única porta, então ele tem de ser o ÚLTIMO a falar.** O contrário daria o mesmo resultado hoje, mas inverteria a mensagem: um item escondido pelo ambiente pareceria escondido por falta de permissão.
+
+### O bug que eu criei, e a medição que o pegou
+
+**Primeira tentativa: a barra ficou VAZIA.** Medido no app: 0 itens, sem erro no console.
+
+```
+menuDoAtor(itens, ator)  ->  return podeLer(ator) ? [...itens] : []
+```
+
+> **Com `ator = null`, `menuDoAtor` devolve `[]`** — que é a regra certa para PERMISSÃO e a errada para um `null` que só quer dizer *"a ponte ainda não respondeu"*. E o `subscribe` do nanostores **chama o listener imediatamente**, então o `remontar(null)` rodava na montagem e desregistrava tudo.
+
+**A correção, em duas partes:**
+
+1. **Sem ator, o recorte de ambiente continua e o RBAC não esconde nada** — `ator ? menuDoAtor(doAmbiente, ator) : [...doAmbiente]`.
+2. **O primeiro aviso do `subscribe` não é uma troca de ambiente** — é a leitura inicial, e é ignorado.
+
+### A prova, medida na sidebar (não no body)
+
+```
+EMPRESA:         7 seções  23 itens
+  Visão geral, Operação, Comércio, Trabalho, Crescimento, Inteligência, Configuração
+
+ADMINISTRAÇÃO:   3 seções   7 itens
+  Visão geral, Trabalho, Configuração
+  Painel, Empresa, Busca, Projetos, Trabalhos, Estrutura, Privacidade
+
+IA E AGENTES:    8 itens (Painel, Empresa, Busca, Agentes, Automações, Sofia, Documentos, Privacidade)
+```
+
+> **Trocar o seletor muda a barra de verdade**: seções, itens e ordem.
+
+### Uma decisão registrada
+
+**Os itens do Hermes (Nova conversa, Capacidades, Mensageria, CRM, Artefatos, Tarefas agendadas) ficam em TODOS os ambientes.**
+
+> **São infraestrutura do runtime, não módulo de negócio.** Esconder "Artefatos" de quem está no Modo Empresa esconderia a ferramenta que produz o artefato, não o domínio. **O ambiente recorta o MENU DO PRODUTO** — e isso está dito aqui para não ser redescoberto.
+
+### Estado dos gates
+
+| Gate | Estado |
+|---|---|
+| **G1** — seletor de ambientes | ✅ **implementado e medido** |
+| **G2** — sidebar contextual | ✅ **7 seções, com scroll** |
+| **G3** — RBAC | ✅ **filtra por `read`, depois do ambiente** |
+| **G4** — persistência | ✅ **localStorage, versionada; sobrevive ao reload** |
+| **G6** — home com 6 cards | ❌ **a home ainda é o logo + composer** |
+| **G7** — pt-BR | ⚠️ **o seletor e a nova UI estão em pt-BR; falta varrer o resto** |

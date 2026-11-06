@@ -48,8 +48,10 @@
 
 import { type HermesPlugin, SIDEBAR_NAV_AREA, type SidebarNavContribution } from '@hermes/plugin-sdk'
 
-import { whoami } from '@/api/admin'
+import { type ActorRow, whoami } from '@/api/admin'
+import { modulosDoAmbiente } from '@/lib/ambiente'
 import { menuDoAtor } from '@/lib/nav-rbac'
+import { $ambiente } from '@/store/ambiente'
 
 interface ItemDeMenu {
   codicon: string
@@ -185,23 +187,71 @@ const b3poNavPlugin: HermesPlugin = {
      *
      * **A ordem importa**: primeiro tudo, depois o filtro. Se fosse ao contrário, uma ponte lenta deixaria a barra
      * vazia — e um menu vazio por erro de carregamento é menos seguro e menos diagnóstico que o menu completo.
+     *
+     * r267 — AS DUAS FONTES, NESTA ORDEM
+     *
+     *  1. **O AMBIENTE** (`store/ambiente`): recorta o menu pelo contexto escolhido. É navegação.
+     *  2. **O RBAC** (`lib/nav-rbac`): esconde o que o ator não pode LER. É permissão.
+     *
+     * **Ambiente primeiro, permissão depois** — e a ordem não é arbitrária: o RBAC é a única
+     * porta, então ele tem de ser o ÚLTIMO a falar. Filtrar por permissão e depois recortar
+     * por ambiente daria o mesmo resultado hoje, mas inverteria a mensagem: um item escondido
+     * pelo ambiente pareceria escondido por falta de permissão.
+     *
+     * **Trocar de ambiente não re-autoriza nada**: `setAmbiente` só muda o recorte; quem decide
+     * o acesso continua sendo o `exigirAtor` de cada canal.
      */
     let desfazer = registrar(MODULOS)
 
+    /**
+     * O menu para o ambiente ativo, já filtrado pelo ator.
+     *
+     * **Sem ator, o recorte de ambiente continua e o RBAC não esconde nada.** A r170 diz que
+     * sem ator o menu aparece inteiro — e "inteiro" aqui significa **inteiro dentro do
+     * ambiente**: `menuDoAtor` devolve `[]` quando não há ator (`podeLer(null)` é falso), o
+     * que é a regra certa para PERMISSÃO e a errada para um null que só quer dizer "a ponte
+     * ainda não respondeu". Chamar `menuDoAtor(items, null)` logo no início esvaziava a
+     * barra inteira — e foi o que aconteceu na primeira tentativa.
+     */
+    const montar = (ator: ActorRow | null): readonly ItemDeMenu[] => {
+      const doAmbiente = modulosDoAmbiente(MODULOS, $ambiente.get()).dentro
+
+      return ator ? menuDoAtor(doAmbiente, ator) : [...doAmbiente]
+    }
+
+    const remontar = (ator: ActorRow | null): void => {
+      desfazer()
+      desfazer = registrar(montar(ator))
+    }
+
+    let ator: ActorRow | null = null
+    let primeiroAviso = true
+
+    // O `subscribe` do nanostores chama o listener IMEDIATAMENTE com o valor atual — então a
+    // primeira chamada não é uma troca de ambiente, é a leitura inicial. Ignorá-la evita
+    // desregistrar/registrar a mesma lista duas vezes na montagem.
+    const cancelarAssinatura = $ambiente.subscribe(() => {
+      if (primeiroAviso) {
+        primeiroAviso = false
+        return
+      }
+
+      remontar(ator)
+    })
+
     void whoami()
-      .then(ator => {
-        const visiveis = menuDoAtor(MODULOS, ator)
-
-        if (visiveis.length === MODULOS.length) return
-
-        desfazer()
-        desfazer = registrar(visiveis)
+      .then(resposta => {
+        ator = resposta
+        remontar(ator)
       })
       .catch(() => {
-        // Silencioso: sem ator, o menu inteiro ja esta registrado — que e o estado seguro (r170).
+        // Silencioso: sem ator, o menu do ambiente ja esta registrado — o estado seguro (r170).
       })
 
-    ctx.onDispose(() => desfazer())
+    ctx.onDispose(() => {
+      cancelarAssinatura()
+      desfazer()
+    })
   }
 }
 
