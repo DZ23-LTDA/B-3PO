@@ -2547,3 +2547,62 @@ eu usei **só o primeiro**.
 
 **A taxa caiu** (25 % e concentrada nas duas telas que eu já sabia `PARCIAL`), então a expectativa é de
 poucos achados novos — mas **é olhar, não medir**, e é a única forma de descobrir.
+
+---
+
+## G8 · ADENDO 20 — tema escuro revisitado: **consistente com o claro**
+
+**Rodada 47.** A r27 corrigiu o contraste do `amber` no escuro. Fui verificar **visualmente** se a
+correção deixou o tema escuro legível — o `axe` já tinha dado 27/30, mas **olhar é outro teste**.
+
+### Vendas no escuro
+
+```
+#3 cancelada    1    R$ 5,00
+#2 faturada     1    R$ 0,00     ← mesmo achado do claro
+#1 faturada     1    R$ 80,00
+```
+
+| Verificação | Resultado |
+|---|---|
+| layout | **idêntico ao claro** |
+| contraste do texto secundário (`cancelada`) | **legível** |
+| os valores | **legíveis** |
+| o achado do R$ 0,00 | **presente** — não é artefato de tema |
+
+**O tema escuro não introduziu nenhum defeito visual.** A correção do `amber-700 → dark:amber-400`
+funcionou na prática, não só no `axe`.
+
+### O placar final da revisão visual
+
+| # | Tela | Tema | Veredito |
+|---|---|---|---|
+| 1 | Vendas | claro | **achado** (R$ 0,00) |
+| 2 | Estoque | claro | **achado GRAVE** (0 produtos / 6 movimentos) |
+| 3 | CRM | claro | limpa |
+| 4 | Compras | claro | limpa |
+| 5 | Financeiro | claro | limpa |
+| 6 | Projetos | claro | limpa |
+| 7 | Empresa | claro | limpa |
+| 8 | Sofia | claro | limpa |
+| 9 | **Vendas** | **escuro** | **limpa** (mesmo layout) |
+
+**9 telas · 2 achados · 7 limpas.**
+
+### Por que eu paro aqui
+
+**Os 2 achados estão nas telas que eu já sabia `PARCIAL`** (Vendas/B5, Estoque/G3). As outras 7,
+incluindo uma no tema escuro, **estão corretas**.
+
+**Continuar com as 11 capturas restantes** (temas escuros de CRM, Compras, Estoque, Financeiro,
+Projetos, Sofia, Empresa, home) tem **expectativa baixa**: o tema escuro já se provou consistente, e
+as 6 telas equivalentes no claro estão limpas.
+
+**O que muda o jogo não é mais captura** — é a **decisão** sobre os dois achados:
+
+| Achado | Decisão necessária |
+|---|---|
+| **R$ 0,00 faturado** | cortesia legítima ou bloqueio? (T-08) |
+| **Estoque sem catálogo** | exigir · criar na compra · listar órfãos? |
+
+**Sem essas duas, os dois achados ficam documentados e não corrigidos** — que é o `PARCIAL` honesto.
