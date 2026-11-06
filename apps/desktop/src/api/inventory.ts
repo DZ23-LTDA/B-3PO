@@ -123,3 +123,18 @@ export const LOW_STOCK_MILLI = 5000
 export function isLowStock(milli: number): boolean {
   return Number.isFinite(milli) && milli < LOW_STOCK_MILLI
 }
+
+/**
+ * O saldo é ZERO (r164 do GOAL V2).
+ *
+ * **`isLowStock` já cobre zero** (`0 < 5000`), e por isso a tela dizia "baixo" para um produto **zerado** — duas
+ * situações que pedem coisas diferentes:
+ *
+ * - **baixo**: ainda tem, e vale repor na próxima compra;
+ * - **zerado**: **não tem**, e o `inventory-ipc` **anuncia `stockRanOut`** para as automações.
+ *
+ * Um produto zerado não pode ser vendido; um baixo, sim. **A tela precisa da diferença.**
+ */
+export function isZeroStock(milli: number): boolean {
+  return Number.isFinite(milli) && milli <= 0
+}

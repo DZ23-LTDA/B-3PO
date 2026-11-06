@@ -5,6 +5,7 @@ import {
   appendMovement,
   inventoryAvailable,
   isLowStock,
+  isZeroStock,
   listMovements,
   loadBalances,
   MOVEMENT_KINDS,
@@ -224,7 +225,20 @@ export function StockView() {
                       <span className={isLowStock(row.balanceMilli) ? 'text-(--ui-danger)' : 'text-foreground'}>
                         {quantityLabel(row.balanceMilli)} {copy.unitsOf[row.unit] ?? row.unit}
                       </span>
-                      {isLowStock(row.balanceMilli) ? (
+                      {/*
+                        r164 do GOAL V2: ZERADO e BAIXO sao coisas diferentes.
+
+                        `isLowStock` cobre zero (`0 < 5000`), entao a tela dizia "baixo" para um produto que acabou
+                        — e um produto zerado **nao pode ser vendido**, enquanto um baixo **pode**. Alem disso, o
+                        `inventory-ipc` **anuncia `stockRanOut`** no zero, e e esse o fato que as automacoes
+                        consomem.
+
+                        A frase do zerado nomeia a consequencia ("repor agora"), e nao so o estado — mesmo criterio
+                        das recusas do §17: dizer o que fazer, nao so o que houve.
+                      */}
+                      {isZeroStock(row.balanceMilli) ? (
+                        <span className="ml-2 text-(--ui-danger)">zerado — repor agora · automação avisada</span>
+                      ) : isLowStock(row.balanceMilli) ? (
                         <span className="ml-2 text-(--ui-text-tertiary)">{copy.low}</span>
                       ) : null}
                     </td>
