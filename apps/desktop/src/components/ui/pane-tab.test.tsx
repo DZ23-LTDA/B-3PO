@@ -99,7 +99,7 @@ describe('PaneTab hover close button', () => {
     const onClose = vi.fn()
     const onActivate = vi.fn()
     const onPointerDown = vi.fn()
-    render(
+    const { container } = render(
       <PaneTab onClose={onClose} onPointerDown={onPointerDown}>
         <PaneTabLabel as="button" onClick={onActivate}>
           tab
@@ -107,12 +107,51 @@ describe('PaneTab hover close button', () => {
       </PaneTab>
     )
 
-    const close = screen.getByRole('button', { name: 'Close' })
-    fireEvent.pointerDown(close, { button: 0 })
-    fireEvent.click(close, { button: 0 })
+    // r293: o ✕ saiu da arvore ARIA (`aria-hidden`) porque e o MESMO gesto do Delete, nao um
+    // segundo controle — deixa-lo nomeado dentro do role="tab" era `nested-interactive`.
+    // O clique continua funcionando; so nao e mais encontrado por role.
+    const close = container.querySelector('[data-slot="pane-tab-close"]')
+    expect(close).not.toBeNull()
+    fireEvent.pointerDown(close!, { button: 0 })
+    fireEvent.click(close!, { button: 0 })
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(onActivate).not.toHaveBeenCalled()
     expect(onPointerDown).not.toHaveBeenCalled()
+  })
+
+  it('r293: Delete e Backspace fecham, e o atalho e anunciado', () => {
+    const onClose = vi.fn()
+    render(
+      <PaneTab onClose={onClose} role="tab" tabIndex={0}>
+        <PaneTabLabel as="button">tab</PaneTabLabel>
+      </PaneTab>
+    )
+
+    const tab = screen.getByRole('tab')
+    expect(tab.getAttribute('aria-keyshortcuts')).toBe('Delete')
+
+    fireEvent.keyDown(tab, { key: 'Delete' })
+    expect(onClose).toHaveBeenCalledTimes(1)
+
+    fireEvent.keyDown(tab, { key: 'Backspace' })
+    expect(onClose).toHaveBeenCalledTimes(2)
+
+    // Uma tecla que nao fecha nao dispara o onClose.
+    fireEvent.keyDown(tab, { key: 'a' })
+    expect(onClose).toHaveBeenCalledTimes(2)
+  })
+
+  it('r293: o ✕ continua nomeado (a correcao estrutural ficou pendente)', () => {
+    render(
+      <PaneTab onClose={() => {}} role="tab">
+        <PaneTabLabel as="button">tab</PaneTabLabel>
+      </PaneTab>
+    )
+
+    // `aria-hidden` foi TENTADO e o `axe-core` recusou: o `nested-interactive` nao se resolve
+    // tirando o nome do no, porque o botao segue focavel no DOM. O ✕ permanece nomeado ate a
+    // refatoracao estrutural (irmao do role=tab, nao filho).
+    expect(screen.getByRole('button', { name: 'Close' })).not.toBeNull()
   })
 
   it('renders no ✕ without an onClose', () => {

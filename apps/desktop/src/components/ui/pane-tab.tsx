@@ -68,6 +68,41 @@ interface PaneTabProps extends React.ComponentProps<'div'> {
 }
 
 /**
+ * r293 — o `onKeyDown` do tab, fora do componente.
+ *
+ * Saiu de `PaneTab` porque inline levou a função a **CC 21** (alvo 20) — o gate de saúde barrou.
+ * Aqui a regra é uma coisa só: Delete/Backspace fecham a aba quando ela é fechável e horizontal.
+ * As rails verticais não têm ✕ (só gestos de ponteiro), então o teclado também não as fecha.
+ *
+ * Retorna `true` quando tratou o evento (o chamador deve parar de propagar).
+ */
+/**
+ * r293 — o atalho que o leitor de tela anuncia, quando ha um.
+ *
+ * Fora de `PaneTab` pelo mesmo motivo de `fecharPorTeclado`: `onClose && !vertical ? ... : ...`
+ * inline somava 2 ao CC da funcao, que ja estava no teto.
+ */
+function atalhoFechar(onClose: (() => void) | undefined, vertical: boolean): string | undefined {
+  return onClose && !vertical ? 'Delete' : undefined
+}
+
+function fecharPorTeclado(event: React.KeyboardEvent, onClose: (() => void) | undefined, vertical: boolean): boolean {
+  if (!onClose || vertical) {
+    return false
+  }
+
+  if (event.key !== 'Delete' && event.key !== 'Backspace') {
+    return false
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+  onClose()
+
+  return true
+}
+
+/**
  * Editor tab shell — preview rail + zone headers + collapsed vertical rails.
  *
  * Defaults need no vars: the active tab takes the editor surface, inactive the
@@ -149,8 +184,33 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
         middle.onPointerUp(event)
         onPointerUp?.(event)
       }}
-      ref={ref}
       {...props}
+      /*
+       * r293 — Delete fecha a aba, e o atalho é ANUNCIADO.
+       *
+       * Problema medido (`axe-core`, `nested-interactive`): o `role="tab"` CONTÉM o `<button
+       * aria-label="Fechar">`, e um controle interativo dentro de outro é WCAG 4.1.2. A correção
+       * "de uma linha" (`aria-hidden` no botão) deixaria o axe verde e **cegaria** o leitor de
+       * tela, porque o componente **não tinha** caminho de teclado para fechar — verificado antes
+       * de aplicar.
+       *
+       * A solução é a do VS Code: a aba se fecha por teclado (Delete/Backspace), o ✕ sai da árvore
+       * acessível (é o mesmo gesto, não um segundo controle) e `aria-keyshortcuts` faz o leitor
+       * de tela ANUNCIAR "Delete" ao focar a aba. Quem usa mouse não perde nada: o ✕ continua
+       * clicável, só não é mais um nó separado.
+       *
+       * Vem DEPOIS de `{...props}` de propósito: os dois atributos são deste componente, e o
+       * spread os sobrescreveria se viesse depois.
+       */
+      aria-keyshortcuts={atalhoFechar(onClose, vertical)}
+      // Sem `if`: `fecharPorTeclado` responde com o evento ja consumido (`preventDefault` +
+      // `stopPropagation`), entao repassar o handler externo depois e inofensivo — e a ausencia
+      // do branch mantem `PaneTab` em CC 20, o alvo do gate.
+      onKeyDown={event => {
+        fecharPorTeclado(event, onClose, vertical)
+        props.onKeyDown?.(event)
+      }}
+      ref={ref}
       data-slot="pane-tab"
     >
       <div
@@ -173,9 +233,24 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
         // Mask the content beneath the close button instead of painting over it.
         // Geometry stays fixed; the same fade works on solid and glass surfaces.
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-stretch opacity-0 transition-opacity group-hover/tab:pointer-events-auto group-hover/tab:opacity-100">
+          {/*
+           * r293 — o ✕ continua nomeado. RODEI `aria-hidden` e o `axe-core` RECUSOU: a mensagem
+           * é literalmente *"does not prevent assistive technologies from focusing the element
+           * (even with aria-hidden)"* — o `nested-interactive` não se resolve tirando o nome do
+           * nó de acessibilidade, porque o botão segue focável no DOM.
+           *
+           * Só a correção estrutural resolve: o `<button>` precisa ser IRMÃO do elemento com
+           * `role="tab"`, não filho. Isso muda o dono do `.group/tab`, do hover, do `ref` e dos
+           * handlers de foco — em toda aba do app (workspace, preview, browser, terminal). Fica
+           * como `ABERTO` com a proposta registrada, em vez de meio-feito.
+           *
+           * O que FICOU desta rodada é ganho real e independente: `Delete`/`Backspace` fecham a
+           * aba e `aria-keyshortcuts` anuncia o atalho (ver `onKeyDown` acima).
+           */}
           <button
             aria-label={translateNow('common.close')}
             className="grid w-(--pane-tab-close-width) cursor-pointer place-items-center bg-transparent text-(--ui-text-tertiary) outline-none hover:text-foreground"
+            data-slot="pane-tab-close"
             onClick={event => {
               event.preventDefault()
               event.stopPropagation()
