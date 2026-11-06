@@ -86,6 +86,12 @@ jobs:
       - name: install
         run: npm install --no-audit --no-fund
 
+      - name: make gradlew executable
+        # O checkout do Actions nao preserva o bit de execucao em todos os runners,
+        # e o gradlew e um script de shell: sem +x, o step morre com exit 126.
+        run: chmod +x gradlew
+        working-directory: mobile/b3po-app/android
+
       - name: build apk
         # assembleDebug, e o nome do artefato diz isso: um APK de release precisa de
         # um keystore que não está aqui, e chamá-lo de release sem assinar seria mentir.
@@ -101,7 +107,10 @@ jobs:
 
   ios:
     name: ios build (simulator, unsigned)
-    runs-on: macos-latest
+    # macos-15 (Xcode 16), nao macos-latest (Xcode 17): a biblioteca fmt que o
+    # React Native 0.81 traz falha em consteval com o clang novo. Visto no primeiro
+    # build real (run 42234148321): "call to consteval function" em format-inl.h:1394.
+    runs-on: macos-15
     steps:
       - name: checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
