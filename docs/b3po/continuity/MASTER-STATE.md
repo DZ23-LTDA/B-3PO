@@ -27,7 +27,7 @@
 | **Seletor de 6 ambientes** | **IMPLEMENTED_AND_TESTED** | <select> "Modo de Trabalho", persistido em hermes.desktop.b3po-ambiente.v1; troca muda a barra 14→12 itens; sobrevive a reload (E2E) |
 | **Sidebar contextual** | **IMPLEMENTED_AND_TESTED** | 7 seções em Empresa, 3 em Administração; group? no SDK + render |
 | **Home com 6 cartões** | **IMPLEMENTED_AND_TESTED** | mascote oficial, "Bem-vindo ao B-3PO", 6 botões com ria-pressed |
-| **RBAC no menu** | **IMPLEMENTED_AND_TESTED** | 
+| **RBAC no menu** | **IMPLEMENTED_AND_TESTED** |
 av-rbac filtra por ead, **depois** do ambiente |
 | **Contexto da Sofia** | **IMPLEMENTED_AND_TESTED** (renderer+backend) | monta, limita por RBAC, mostra, viaja em todo prompt.submit, vira **nota no turno** |
 | **pt-BR** | **IMPLEMENTED_AND_TESTED** | 5 rotas, zero string em inglês |
