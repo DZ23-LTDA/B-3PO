@@ -1,8 +1,8 @@
 {
-  "head": "7d414fd71bc76a8105485d7d58a58e65bc3615cb",
+  "head": "b1493eeeb64fbe76af94d040be0fda77bcf892bc",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 40,
+  "round": 41,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -48,9 +48,9 @@
     "build_web": "READY - exit 0, web_dist 60 arquivos 3.1 MB",
     "frontends": "INDEPENDENTES - desktop/web/mobile nao compartilham componentes de UI",
     "a11y": {
-      "desktop": "30 rotas x 3 viewports x 2 temas - 27/30 (1 causa: PaneTab nested-interactive)",
-      "web": "17 rotas x 2 temas - 17/17 LIVRE",
-      "mobile": "NAO MEDIDO"
+      "desktop": "FORTE - axe runtime, 30 rotas x 3 viewports x 2 temas, 27/30",
+      "web": "FORTE - axe runtime, 17 rotas x 2 temas, 17/17 LIVRE",
+      "mobile": "FRACO - auditoria ESTATICA, 6/6 atributos; axe nao existe para RN; sem leitor de tela"
     }
   },
   "blockers": [
@@ -90,7 +90,7 @@
   "next_action": "destravar EXT-2 e remedir a regressao; ou autorizar EXT-5 e zerar as 2 violacoes a11y restantes",
   "docs": "docs/b3po/continuity/",
   "coverage_gaps": [
-    "a11y do MOBILE nao medida (desktop e web estao medidos)",
+    "a11y do MOBILE: so estatica (sem runtime, sem leitor de tela, sem alvo de toque)",
     "teclado no WEB nao percorrido (so axe)",
     "leitor de tela real em nenhuma plataforma",
     "remocao de aba por Delete nao observada",
