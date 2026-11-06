@@ -743,3 +743,67 @@ nas três variantes da sidebar (desktop, mobile, `collapsible='none'`) e um `<ma
 | contraste medido | **NOT_TESTED** — falhei 3× ao medir por script; sem `axe-core` |
 | teclado (Tab/Esc/retorno de foco) | **NOT_TESTED** |
 | `axe` automatizado no CI | **NÃO EXISTE** |
+
+---
+
+## G9 · Pacotes de entrega, rollback, riscos e veredito — **PARCIAL**
+
+### Pacotes (medidos)
+
+| Artefato | Tamanho | Data | Estado |
+|---|---|---|---|
+| `apps/desktop/release/win-unpacked/B-3PO.exe` | **235,4 MB** | 05/11 15:53 | **não assinado** |
+| `apps/desktop/release/win-unpacked.bak/B-3PO.exe` | 235,4 MB | 05/11 15:52 | **rollback presente** |
+| `apps/desktop/dist` | **53,7 MB / 1231 arquivos** | build do G7 | ok |
+| `hermes_cli/web_dist` | **3,1 MB / 60 arquivos** | build do G7 | ok |
+| `app-release-signed.apk` | **44,3 MB** | 11/06 11:22 | assinado |
+| `app-release-aligned.apk` / `app-release.apk` | 44,2 MB cada | — | presentes |
+| iOS `.ipa` | — | — | **não existe** (precisa macOS) |
+
+### Rollback — como funciona de fato
+
+| Mecanismo | Evidência |
+|---|---|
+| build atômico do desktop | troca `.dist-build-*` → `dist`, deixa `.dist-previous-*` ao lado |
+| **backup do pacote** | `release/win-unpacked.bak/` existe ao lado do atual |
+| **builds fora do Git** | `.gitignore` L92 (`web_dist/`), L96 (`dist/`), L334/L344 (atomic build) |
+| rollback de código | `git revert`/`reset` em `b3po-brand` — **nunca** `force push` |
+| espelho | `main` == `origin/main` — pode ser restaurado do upstream |
+
+### A matriz de riscos
+
+| # | Risco | Severidade | Estado | Mitigação |
+|---|---|---|---|---|
+| R-1 | **Regressão não medida** — a suíte não roda por falta de symlink | **CRITICAL** | aberto | ativar Developer Mode (EXT-2) e remedir |
+| R-2 | **Executável não assinado** (Authenticode `NotSigned`) | **HIGH** | aberto | certificado de assinatura (EXT-3 do V2) |
+| R-3 | **Sem provedor de IA** — inferência indisponível | **HIGH** | bloqueado | chave de provedor (EXT-1) |
+| R-4 | **iOS nunca construído** | **HIGH** | bloqueado | macOS + Xcode + conta Apple |
+| R-5 | **16 canais IPC sem guarda** — inclui `fs`, `terminal`, `git` | **HIGH** | aberto | ligar `exigirAtor` quando houver ator com escopo |
+| R-6 | **5 dos 6 modos sem item próprio**; Estratégico ≡ IA | MEDIUM | aberto | decisão de produto |
+| R-7 | **Contraste não medido** | MEDIUM | aberto | instalar `axe-core` no CI |
+| R-8 | **Bot nasce com 0 skills** (default tem 44) | MEDIUM | aberto | decisão de produto |
+| R-9 | **Preço zero vende sem financeiro** | MEDIUM | aberto | decisão de negócio |
+| R-10 | **SKU inexistente culpa o saldo** | LOW | aberto | vocabulário de erro do backend |
+| R-11 | 99 plugins oficiais, **0 ativos** | MEDIUM | bloqueado | credencial ou teste com `ntfy`/`irc` |
+| R-12 | Contratos de payload mistos (pt/en) | LOW | aberto | padronizar |
+
+### VEREDITO — por escopo, nunca global
+
+| Escopo | Estado | Base |
+|---|---|---|
+| **Domínios de negócio** (CRM, Compras, Estoque, Vendas, Financeiro, Projetos, Trabalhos, Automações, Empresa) | **READY** | 7 provas E2E em `TEST-EVIDENCE.md` |
+| **Sofia** (plano persistido + execução verificável) | **READY** | 8 passos medidos, reload confirmado |
+| **Performance** | **READY** | 55 → 4 long tasks |
+| **UI responsiva** | **READY** | 5 viewports, zero overflow |
+| **Bot Mode** (criar/editar SOUL/renomear/revogar) | **READY** | 5 de 8 etapas |
+| **Segurança/RBAC** | **PARCIAL** | 40 testes + 837 decisões, mas 16 canais sem guarda |
+| **Diagnóstico de inferência** | **PARCIAL** | funciona, mas `overall: ok` e `has_env` enganam |
+| **A11y** | **PARCIAL** | landmarks corrigidos; contraste e teclado `NOT_TESTED` |
+| **Regressão** | **BLOCKED** | ambiente sem symlink (WinError 1314, reproduzido) |
+| **iOS** | **BLOCKED** | sem macOS |
+| **Integrações ativas** | **BLOCKED** | 0 plataformas conectadas |
+| **Vertical gás/água** | **NOT_IMPLEMENTED** | decisão do dono |
+| **RELEASE** | **NOT_READY** | exe não assinado + regressão bloqueada + 0 integrações |
+
+**A declaração que o V3 exige**: **não há defeito conhecido nos cenários verificados**. Os
+`BLOCKED` não são "tudo certo" — são "não foi possível medir", e estão nomeados um a um.

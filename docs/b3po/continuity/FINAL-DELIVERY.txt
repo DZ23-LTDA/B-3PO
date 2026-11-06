@@ -1,0 +1,83 @@
+B-3PO — ENTREGA FINAL (V3)
+================================
+
+DATA        06/11/2026
+BRANCH      b3po-brand
+HEAD        20b723fb50 (antes do G9)
+MAIN        f4cf411f28 — espelho intacto, sem commit de produto
+
+O QUE FOI MEDIDO E ENTREGUE
+---------------------------
+Prioridade zero do V3 (8 itens) — FECHADA
+  B1 causa raiz da inferencia indisponivel : .env com 0 de 29 chaves; aviso traduzido
+  B2 modal "Novo bot" em ingles            : pt.bot 6 -> 50 chaves; paleta traduzida
+  B3 os seis modos                         : persistencia/foco/rolagem/rotas OK; RBAC parcial
+  B4 Compras por etapas                    : 7 etapas E2E, estoque 3000, financeiro R$ 150
+  B5 Vendas                                : baixa 3000->2000 + conta a receber R$ 80
+  B6 Sofia                                 : plano persiste, execucao_id por tarefa
+  B7 Projetos/Trabalhos/Automacoes/Empresa  : 4 de 4 criam e persistem
+  B8 Bots                                  : criar/editar SOUL/renomear/revogar (5 de 8)
+
+Gates do V3
+  G0 READY       inventario, baseline, continuity
+  G1 PARCIAL     seguranca/IPC/RBAC/tenant
+  G2 PARCIAL     runtime/modelos/diagnostico
+  G3 PARCIAL     dominio canonico
+  G4 NOT_IMPLEMENTED  vertical gas/agua
+  G5 PARCIAL     seis modos + revisao visual
+  G6 PARCIAL     engenharia/automacao/integracoes
+  G7 PARCIAL     desktop/web/android/iOS
+  G8 PARCIAL     regressao/seguranca/performance/a11y/docs
+  G9 PARCIAL     pacotes/rollback/riscos/veredito
+
+CORRECOES DE PRODUTO ENTREGUES
+------------------------------
+1. Performance em Configuracoes : 55 -> 4 long tasks (-93%), soma 5,7s -> 281ms (-95%)
+2. i18n pt-BR                   : chrome do gateway 100% em portugues (EN: [])
+3. Bot Mode em portugues        : bot 6 -> 50 chaves; "New Bot..." -> "Novo bot"
+4. Aviso de inferencia          : texto acionavel em pt-BR no lugar do ingles
+5. A11y landmarks               : nav 0->1, main 0->1; sidebar fora do main
+
+VEREDITO POR ESCOPO (nunca global)
+----------------------------------
+READY       dominios de negocio, Sofia, performance, UI responsiva, ciclo basico de bot
+PARCIAL     seguranca, diagnostico, a11y, modos, integracoes
+BLOCKED     regressao (symlink), iOS (macOS), integracoes ativas (credencial)
+NOT_IMPL    vertical gas/agua
+NOT_READY   RELEASE (exe nao assinado + regressao bloqueada + 0 integracoes)
+
+O QUE O PROPRIETARIO PRECISA FORNECER (acao exata)
+--------------------------------------------------
+EXT-1  chave de provedor de IA
+       -> Configuracoes > Provedores | hermes auth add <provider> | preencher .env
+EXT-2  Developer Mode do Windows                [destrava a regressao]
+       -> Start-Process "ms-settings:developers"  ;  ativar "Modo de desenvolvedor"
+EXT-3  certificado Authenticode (code signing)  [exe hoje: NotSigned]
+EXT-4  macOS + Xcode + conta Apple Developer    [build iOS]
+EXT-5  decisao sobre a vertical gas/agua        [G4: construir / fora de escopo / redefinir]
+EXT-6  autorizacao para testar UM conector sem credencial comercial (ntfy/irc)
+
+ROLLBACK
+--------
+build desktop : apps/desktop/release/win-unpacked.bak/ ja existe ao lado do atual
+build atomico : .dist-previous-* ao lado de dist/
+codigo        : git revert em b3po-brand (nunca force push; main e espelho)
+upstream      : main == origin/main, restauravel
+
+DOCUMENTOS DE CONTINUIDADE (12 de 13)
+-------------------------------------
+MASTER-STATE.md, MASTER-CHECKPOINT.json, TASK-QUEUE.json, AUDIT-MATRIX.md,
+DECISIONS.md, BLOCKERS.md, TEST-EVIDENCE.md, PLATFORM-MATRIX.txt,
+UPSTREAM-PATCH-REGISTER.md, HANDOFF.txt, PERFORMANCE.md, GATES.md
+FALTA: nada — FINAL-DELIVERY.txt e este arquivo.
+
+O QUE NAO FOI TESTADO (declarado, nao escondido)
+------------------------------------------------
+- contraste de cor (3 tentativas de medicao falharam; sem axe-core)
+- navegacao por teclado (Tab/Esc/retorno de foco)
+- instalacao limpa e atualizacao de versao anterior
+- iOS em dispositivo
+- APK Android instalado e executado
+- execucao automatica de uma automacao
+- ciclo de bot: reiniciar / conversar / ferramenta
+- cotacao com 2 fornecedores e aprovacao com limite
