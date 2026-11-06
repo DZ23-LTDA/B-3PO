@@ -25,7 +25,7 @@
 
 | Item | Por quê |
 |---|---|
-| **26 testes falhando** | **ambiente**: eram 41 na r111; **a r188 resolveu o python3** (o globalSetup pulava no Windows) e **a r203 pôs 
+| **26 testes falhando** | **ambiente**: eram 41 na r111; **a r188 resolveu o python3** (o globalSetup pulava no Windows) e **a r203 pôs
 etry: 1**. Os 26 que restam são plugins, SSH, build de Electron, Linux e instalação |
 | **shiki 19.5 MB** | **dívida medida**, não bloqueio (r112) |
 | **2 imports dinâmicos ineficazes** | **dívida medida** (r112) |
