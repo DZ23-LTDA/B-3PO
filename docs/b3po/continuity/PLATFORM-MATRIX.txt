@@ -1,0 +1,33 @@
+B-3PO — PLATFORM MATRIX
+medido em 06/11/2026 · HEAD df2b186a78 (antes do G7) · Windows 11 Pro
+
+PLATAFORMA   ESTADO        EVIDENCIA MEDIDA
+-----------  ------------  -------------------------------------------------------------
+DESKTOP      READY         apps/desktop/dist presente; build exit 0 (main 3.3 MB, context 2.7 MB);
+                           e2e-desktop + desktop-bundle-smoke no CI; 193 bridges no preload
+WEB          READY         npm run build exit 0 em 4.92s -> hermes_cli/web_dist/
+                           3.1 MB em 60 arquivos (assets, fonts, favicon, .hermes-product)
+ANDROID      READY         app-release-signed.apk 44.3 MB (11/06/2026);
+                           app-debug.apk 94.5 MB; build:android:release no package.json
+IOS          BLOCKED       B3PO.xcodeproj + Podfile presentes; xcodebuild NAO EXISTE no Windows.
+                           BLOCKED_BY_EXTERNAL_DEPENDENCY: exige macOS + conta Apple Developer
+MOBILE TESTS READY         npx vitest run: 19 arquivos passed, 1 skipped; 169 tests passed,
+                           8 skipped (177 total) em 879ms
+
+O QUE CADA PLATAFORMA COMPARTILHA
+---------------------------------
+O nucleo e o mesmo: o backend Hermes (gateway + agent) e o JSON-RPC. Desktop e Web falam
+REST/WS com ele; Android e iOS falam pelo mesmo contrato (src/api/gateway*.ts no app mobile).
+
+O QUE NAO E COMPARTILHADO
+-------------------------
+UI. Cada plataforma tem a sua: React/Electron (desktop), SPA (web), React Native (mobile).
+Um bug de UI em uma NAO aparece na outra. Por isso a matriz e por plataforma, nunca global.
+
+O QUE NAO FOI TESTADO EM NENHUMA
+-------------------------------
+- Instalacao limpa em maquina sem dependencias
+- Atualizacao de versao anterior
+- Mensageria ativa (gateway_platforms vazio)
+- iOS: nenhum build, nenhum teste em dispositivo
+- Android: APK assinado existe, mas NAO foi instalado nem executado nesta rodada

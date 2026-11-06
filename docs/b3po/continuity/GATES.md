@@ -456,3 +456,69 @@ ter sem credencial.
 
 **Não declarei `READY` por contagem de arquivo.** O V3 é explícito: *"Ferramenta só conta depois de
 exercitada"*.
+
+---
+
+## G7 · Desktop / Web / Android / iOS — **PARCIAL**
+
+**Três plataformas `READY`, uma `BLOCKED`, e uma correção importante: os testes do mobile PASSAM.**
+
+### A matriz (detalhe em `PLATFORM-MATRIX.txt`)
+
+| Plataforma | Estado | Evidência medida |
+|---|---|---|
+| **Desktop** | **READY** | `apps/desktop/dist` presente · build exit 0 · CI `e2e-desktop` + `desktop-bundle-smoke` · **193 bridges** no preload |
+| **Web** | **READY** | `npm run build` **exit 0 em 4,92 s** → `hermes_cli/web_dist/` · **3,1 MB em 60 arquivos** |
+| **Android** | **READY** | `app-release-signed.apk` **44,3 MB** (11/06/2026) · `app-debug.apk` 94,5 MB · `build:android:release` |
+| **iOS** | **BLOCKED** | `B3PO.xcodeproj` + `Podfile` presentes · **`xcodebuild` não existe no Windows** |
+| **Testes mobile** | **READY** | `npx vitest run` → **19 passed / 1 skipped** · **169 tests passed** / 8 skipped (879 ms) |
+
+### A correção que precisei fazer em mim mesmo
+
+**Na primeira tentativa eu declarei os testes do mobile quebrados**: `20 failed, 20 total`,
+`Test suite failed to run`.
+
+**Estava errado.** Rodei com **`jest`**; os testes importam de **`vitest`**:
+
+```
+Vitest cannot be imported in a CommonJS module using require().
+  > 1 | import { describe, expect, it } from 'vitest'
+```
+
+**Com `npx vitest run`: 169 testes passam.** O erro era **meu**, não do produto — e eu quase
+registrei um `NOT_READY` falso num gate.
+
+**Isso é o mesmo tipo de erro que o B1 me ensinou**: uma medição que não reproduz o fenômeno
+**não é medição**. `jest` num projeto `vitest` não mede nada.
+
+### O que cada plataforma compartilha — e o que não
+
+**Compartilhado**: o backend (gateway + agent) e o contrato JSON-RPC/REST. Desktop, Web e mobile
+falam com o **mesmo** backend.
+
+**NÃO compartilhado**: a UI. React/Electron, SPA e React Native são três frontends.
+
+**Consequência para o veredito**: um bug de UI numa plataforma **não** aparece na outra. **Por isso a
+matriz é por plataforma** — e por isso "o desktop funciona" nunca foi evidência para Android ou iOS.
+
+### O que NENHUMA plataforma tem testado
+
+| Item | Estado |
+|---|---|
+| Instalação limpa em máquina sem dependências | **NOT_TESTED** |
+| Atualização de versão anterior | **NOT_TESTED** |
+| Mensageria ativa | **NOT_TESTED** — `gateway_platforms: {}` (ver G6) |
+| **iOS**: build ou teste em dispositivo | **BLOCKED** — nenhum, nunca |
+| **Android**: instalar e executar o APK | **NOT_TESTED** — o APK existe, não foi rodado nesta rodada |
+
+### Ação exata para o iOS
+
+**`BLOCKED_BY_EXTERNAL_DEPENDENCY`**: exige **macOS** (ou runner macOS) com **Xcode** e uma **conta
+Apple Developer** para assinar. O projeto **existe**; o que falta é a plataforma de build.
+
+**Nada que eu faça no Windows produz um `.ipa` verificável.**
+
+### Veredito
+
+**G7 = PARCIAL.** **Desktop, Web e o código mobile estão `READY` com evidência de execução.** O que
+trava: **iOS não pode ser construído aqui** e **o APK não foi executado num dispositivo**.
