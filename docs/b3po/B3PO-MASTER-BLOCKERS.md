@@ -31,6 +31,11 @@
 | `run-electron-builder` | **1 de 5** | **`prepared-packaging`** recusa os inputs | hospedeiro |
 | `bundle-electron-main` | **3 de 5** | **`desktop.electron_flags`** não lido | hospedeiro |
 | `desktop-plugin-install` | **3 de 54** | **CRLF do git em mais de um ponto** (`add`, `checkout`, `archive`) - o symlink saiu com `skipIf` na r233 | ambiente |
+| `audit-store` | **2 de 13** (intermitente) | **flaky de longa data** - aparece e desaparece desde a r154 | ambiente |
+
+> **A soma não é a soma das linhas**: em 06/11/2026 (r236) os quatro primeiros deram **11** e o total medido foi **13**, porque o `audit-store` entrou com 2. **Em outra rodada ele pode não entrar, e o total cai sem que nenhum arquivo mude.**
+>
+> **É por isso que esta tabela lista CAUSAS, não um total**: um total que muda de 11 para 13 sem código novo não informa nada.
 
 > **Cinco são diferenças de plataforma; uma é uma garantia do app hospedeiro que não está sendo cumprida.**
 > **Nenhuma é do B-3PO, e nenhuma é um defeito de funcionalidade do produto.**
