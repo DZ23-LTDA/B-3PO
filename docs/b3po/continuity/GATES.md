@@ -109,3 +109,76 @@ O ator de teste foi **desativado** (`active: false`); o `owner` segue o único a
 | Antes eu disse | O correto |
 |---|---|
 | "RBAC recusando em runtime: não testado" | **parcialmente resolvido**: a guarda está ativa (837 decisões), mas a **negativa** só existe em teste |
+
+---
+
+## G2 · Runtime / modelos / diagnóstico de inferência — **PARCIAL**
+
+### O que existe e responde
+
+| Superfície | Resposta medida |
+|---|---|
+| `/api/status` | `gateway_running: true` · `gateway_state: "running"` · `active_sessions: 0` · `release_date: "2026.9.24"` · `config_version: 52` |
+| Componentes | `gateway ok` · `dashboard ok` (0 erros, selftest ok) · `storage ok` · `platforms ok` (0 configuradas) |
+| `profiles.list` | `model: "anthropic/claude-opus-4.6"` · `provider: "auto"` · `skill_count: 44` |
+| `setup.runtime_check` | **falha** — `no_provider_configured` (B1) |
+| `runtime-readiness.ts` | 4 estados (`checking · needs_setup · ready · unavailable`) e motivo em toda negativa |
+
+**O runtime ESTÁ de pé.** Gateway rodando, storage saudável, dashboard sem erro, versão de config
+atual. **O problema é credencial, não processo.**
+
+### Os dois diagnósticos que mentem
+
+#### 1. `overall: "ok"` não inclui a inferência
+
+`status.py:609`:
+
+```python
+status["overall"] = ("ok" if all(item.get("status") == "ok" for item in comp…))
+```
+
+**Os componentes são `gateway · dashboard · storage · platforms`. A inferência NÃO está entre eles.**
+
+Medido: **`overall: "ok"` com `setup.runtime_check` falhando.** Uma pessoa que abra um painel de
+saúde lê "tudo certo" enquanto o produto não consegue responder uma mensagem.
+
+#### 2. `has_env: true` quando não há chave nenhuma
+
+`hermes_cli/profiles.py:976`:
+
+```python
+has_env=(path / ".env").exists()
+```
+
+**É testemunho de EXISTÊNCIA DE ARQUIVO, não de credencial configurada.** Medido no HOME de teste:
+`has_env: true` com **0 chaves ativas de 29** — o `.env` é o template inteiro, todo comentado.
+
+**`has_env` não distingue "configurado" de "o arquivo está lá".** Quem ler `has_env: true` e
+`provider: auto` vai concluir que a inferência está pronta. **Não está.**
+
+### O que o produto acerta
+
+- **`runtime-readiness.ts`** tem 4 estados e **devolve motivo em toda negativa** (`sem_nivel` não se
+  aplica aqui; os motivos de inferência são o erro do backend e o default).
+- **A recusa é explícita**: `gatewayUnavailable` + o painel com a frase acionável (corrigida no B1).
+- **A trilha de auditoria foi exercitada** (ver G1): 837 decisões, incluindo `read` em `admin`.
+
+### O que falta
+
+| Item | Estado |
+|---|---|
+| **Inferência no `overall`** | **NÃO EXISTE** — diagnóstico de saúde ignora o item que mais falha |
+| **`has_env` significar "tem chave"** | **NÃO** — só diz que o arquivo existe |
+| **`/api/status` expor modelo/provider** | **NÃO** — só via `profiles.list` |
+| **Diagnóstico de causa raiz na UI** | **PARCIAL** — o painel diz o que falta (após B1), mas não guia até a correção |
+| **Teste de inferência sob demanda** | **NÃO LOCALIZADO** — há `setup.runtime_check`, mas não achei botão "testar conexão" na UI |
+
+### Correção do veredito
+
+**G2 = PARCIAL.** O runtime funciona; **o diagnóstico não conta a verdade inteira** — e num produto
+cujo sintoma número um é "inferência indisponível", **um `overall: ok` que ignora a inferência é o
+pior lugar para economizar**.
+
+**Não corrigi** porque `status.py` é superfície compartilhada com o dashboard e a CLI: mudar o
+`overall` para incluir inferência mudaria o veredito de saúde em todas as telas, e isso pede decisão
+de produto sobre o que "saudável" significa.
