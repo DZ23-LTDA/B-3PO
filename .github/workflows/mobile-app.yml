@@ -86,6 +86,12 @@ jobs:
       - name: install
         run: npm install --no-audit --no-fund
 
+      - name: setup android sdk
+        # SHA verificado: gh api repos/android-actions/setup-android/tags
+        # (o anterior, que eu escrevi de memória, tinha os 24 primeiros caracteres
+        #  certos e os 16 últimos inventados — e não resolvia)
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
       - name: make gradlew executable
         # O checkout do Actions nao preserva o bit de execucao em todos os runners,
         # e o gradlew e um script de shell: sem +x, o step morre com exit 126.
