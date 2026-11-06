@@ -312,3 +312,66 @@ tela. **Testar o fluxo de uma revenda com os domínios que existem** prova (ou r
 em uma rodada. **Modelar comodato de botijão** é um projeto.
 
 **Não inventei a vertical para "passar o gate".** Isso seria exatamente o mock que o V3 proíbe.
+
+---
+
+## G5 · Seis modos de navegação + revisão visual — **PARCIAL**
+
+**O funcional já estava medido no B3** (`AUDIT-MATRIX.md`). Esta rodada fecha a **revisão visual**.
+
+### Funcional (herdado do B3, medido)
+
+| Aspecto | Estado |
+|---|---|
+| Persistência da escolha | **READY** — sobrevive ao reload |
+| Foco no seletor | **READY** — `outline: solid 2px rgb(0,83,253)`, `:focus-visible` |
+| Rolagem | **READY** — Empresa 1215 de conteúdo em 937 visíveis |
+| Rotas | **READY** — **27 itens clicados, 27 navegaram** |
+| RBAC por modo | **PARCIAL** — 5 de 6 modos sem item exclusivo |
+
+### Visual (novo, 6 capturas em `docs/b3po/evidence/g5-modo-*.png`)
+
+| Modo | itens na sidebar | altura | cabe? |
+|---|---|---|---|
+| **Empresa** | **35** | **1215 px** | **rola** |
+| Engenharia | 17 | 937 | cabe |
+| Automação | 21 | 937 | cabe |
+| IA e Agentes | 19 | 937 | cabe |
+| Estratégico | 19 | 937 | cabe |
+| Administração | 19 | 937 | cabe |
+
+### O que está bem, visto nas capturas
+
+- **Hierarquia clara**: `CONVERSAS | BOTS` → `MODO DE TRABALHO` → grupos (`VISÃO GERAL`, `OPERAÇÃO`, `COMÉRCIO`, `TRABALHO`, `CRESCIMENTO`, `INTELIGÊNCIA`) → itens.
+- **Identidade presente**: mascote B-3PO com "BOT PLATFORM", `Bem-vindo ao B-3PO`, subtítulo.
+- **Cards de modo 3×2** alinhados, com ícone + nome + uma linha de descrição; o card do modo ativo tem **borda de destaque**.
+- **Composer** consistente: *"No que você está pensando?"* + modelo (`Opus 4.6 · Med`).
+- **O aviso de inferência aparece** (badge laranja `Servidor · inferência indisponível`) — **o B1 está visível onde deve**.
+
+### O que a revisão visual revelou — e não é cosmético
+
+**1. A sidebar do modo Engenharia tem um vazio estrutural.**
+
+Empresa mostra **5 grupos densos**. Engenharia mostra **um único grupo** (`CONFIGURAÇÃO`: Estrutura, Privacidade) e, entre o último item e *"Nenhuma conversa ainda"*, **um bloco vazio de ~250 px**.
+
+**Não é bug de CSS** — é a consequência visual do achado do B3: **5 dos 6 modos não têm conteúdo próprio**. O vazio é a *arquitetura de informação* aparecendo.
+
+**2. O mesmo acontece em Estratégico e IA e Agentes**, que **compartilham a mesma lista** (12 itens idênticos, medido no B3). Visualmente são **indistinguíveis** — trocar o seletor entre os dois muda a borda do card e nada mais.
+
+**3. Empresa é o único modo que "puxa" a rolagem** (1215 px). Não é problema — mas significa que **o modo mais completo precisa de rolagem para caber**, enquanto cinco modos têm espaço sobrando.
+
+### O que NÃO foi verificado
+
+| Item | Por quê |
+|---|---|
+| **Contraste medido** de cada texto nas 6 telas | fiz inspeção visual, não medição de razão de contraste |
+| **Zoom** 125%/150% nos 6 modos | medido antes em outra rodada; não repetido aqui |
+| Tema **escuro** | as capturas são do tema claro |
+| **Teclado**: Tab pelos 6 modos | não percorrido |
+| Telas **críticas** além da home | o V3 diz "telas críticas"; só revisitei a home de cada modo |
+
+### Veredito
+
+**G5 = PARCIAL.** O funcional está `READY` (persistência, foco, rolagem, 27/27 rotas). O que trava é **o mesmo item do B3**: **cinco modos sem identidade própria** — e agora eu sei que isso **aparece na tela** como espaço vazio, não só como lista repetida.
+
+**Corrigir isso é decisão de produto, não de CSS.** Preencher a sidebar com itens inventados seria maquiar o vazio.
