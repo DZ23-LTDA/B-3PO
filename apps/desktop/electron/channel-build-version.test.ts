@@ -469,6 +469,22 @@ with zipfile.ZipFile(package, 'w') as archive:
     archive.writestr('AppxManifest.xml', (root / 'manifest.xml').read_bytes())
     archive.writestr('app/resources/install-stamp.json', json.dumps({
         'source': 'channel-build', 'channelBuild': request, 'commit': request['commit'], 'tag': None}))
+# r192 do GOAL V2: o caminho do Windows exige o binario desempacotado.
+#
+# record faz, SO em os.name == "nt":
+#
+#   executable = single(root.glob(f"*-unpacked/{executable_name}"))
+#   row["executableVersion"] = ... powershell Get-Item ... VersionInfo.ProductVersion
+#
+# Porque o MSIX carrega a versao no binario, e o manifesto pode mentir. O fixture nao criava o arquivo, e o
+# teste falhava com "Expected exactly one artifact, found []" antes de exercitar o writer.
+#
+# A limitacao, declarada: um arquivo vazio nao tem ProductVersion, entao este teste NAO prova a leitura do
+# binario — prova o resto do record (o applicationId, a version e o channelBuild do manifesto), que e o
+# que ele se chama para provar. Um .exe de verdade aqui seria um binario versionado dentro do repo.
+unpacked = root / 'Recorder-win-x64-unpacked'
+unpacked.mkdir(exist_ok=True)
+(unpacked / 'hermes-no-registry-needed.exe').write_bytes(b'')
 out = root / 'metadata.json'
 record('windows', 'x64', root, '', request['commit'], out, channel_request=request)
 manifest = ET.fromstring((root / 'manifest.xml').read_bytes())
