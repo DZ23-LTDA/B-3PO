@@ -40,13 +40,16 @@ const electronNative: TestProjectConfiguration = {
     // case corpus; pwsh alone takes several seconds to start on a loaded CI
     // runner, so vitest's 5s default timed the Windows marker judge out.
     //
-    // r194 do GOAL V2: 60 s, não 30. **Sob a suíte completa, dois contratos
-    // estouraram EXATAMENTE o teto** — `checkout-source` em 30 017 ms e
-    // `channel-build-version` em 69 983 ms — **enquanto passavam em 230 testes
-    // rodando isolados**. **Um interpretador que leva 3 s vazio leva 30 s com
-    // 5 000 outros testes disputando a máquina**, e o timeout media a carga, não
-    // o produto. **O teto é o orçamento do pior caso, como no `esperarMorrer`.**
-    testTimeout: 60_000,
+    // r194/r195 do GOAL V2: 120 s, não 5 nem 30.
+    //
+    // **Sob a suíte completa, dois contratos estouraram o teto** — `checkout-source` em 30 040 ms (o teto
+    // explícito dele, 30 s) e `channel-build-version` em 72 042 ms — **enquanto passavam isolados: 5 e 4 verdes, e
+    // 230 na r193 com os seis da 4ª ordem juntos**. **Um interpretador que leva 3 s vazio leva 30 s com 5 679
+    // testes disputando a máquina**, e o terceiro arquivo leva mais porque exercita o `record` três vezes.
+    //
+    // **O teto é o orçamento do pior caso, não o tempo que o teste levou uma vez** — e um timeout só mata o que
+    // trava de verdade.
+    testTimeout: 120_000,
     // Only these contracts need the Hermes test interpreter; resolving it may
     // sync the Python environment, which UI-only runs must not wait for.
     globalSetup: ['./vitest.hermes-python.ts']

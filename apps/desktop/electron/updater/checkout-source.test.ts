@@ -501,4 +501,9 @@ if not getattr(urllib.request, '_hermes_loopback', False):
     })
     fs.rmSync(temporary, { recursive: true, force: true })
   }
-}, 30000)
+  // r195 do GOAL V2: 120 s, e o número é esse porque **este teste chama Python**.
+  //
+  // O teto explícito sobrepunha o `testTimeout` do projeto — **e 30 s era o tempo de um Python vazio**. Com 5 679
+  // testes disputando a máquina, ele levava mais: **30 040 ms, quase exatamente o teto**. **O arquivo já passava
+  // sozinho e em grupo (r193, 230 verdes); falhava só na suíte completa.**
+}, 120_000)
