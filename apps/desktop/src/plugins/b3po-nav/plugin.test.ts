@@ -25,8 +25,13 @@ function contribuicoes(): Contribuicao[] {
   const vistas: Contribuicao[] = []
 
   b3poNavPlugin.register({
+    // r171: o `register` agora devolve disposer e registra limpeza — o mock precisa dos dois para ser o contrato
+    // real, e nao uma versao mais frouxa dele. Sem `onDispose`, o plugin quebraria so no teste.
+    onDispose: () => {},
     registerMany: (itens: Contribuicao[]) => {
       vistas.push(...itens)
+
+      return () => vistas.splice(0, vistas.length)
     }
   } as never)
 
@@ -119,8 +124,13 @@ describe('menu dos módulos', () => {
 
   it('registrar duas vezes nao lanca', () => {
     expect(() => {
-      b3poNavPlugin.register({ registerMany: vi.fn() } as never)
-      b3poNavPlugin.register({ registerMany: vi.fn() } as never)
+      // r171: o contrato do ctx cresceu (onDispose e o disposer do registerMany), e o mock acompanha -
+      // um mock mais frouxo que o contrato deixa o plugin quebrar so no teste.
+      // um mock mais frouxo que o contrato deixa o plugin quebrar so no teste.
+      const ctx = { onDispose: vi.fn(), registerMany: vi.fn(() => () => {}) }
+
+      b3poNavPlugin.register(ctx as never)
+      b3poNavPlugin.register(ctx as never)
     }).not.toThrow()
   })
 })

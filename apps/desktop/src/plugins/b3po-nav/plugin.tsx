@@ -48,6 +48,9 @@
 
 import { type HermesPlugin, SIDEBAR_NAV_AREA, type SidebarNavContribution } from '@hermes/plugin-sdk'
 
+import { whoami } from '@/api/admin'
+import { menuDoAtor } from '@/lib/nav-rbac'
+
 interface ItemDeMenu {
   codicon: string
   label: string
@@ -156,14 +159,42 @@ const b3poNavPlugin: HermesPlugin = {
   // Ligado por padrão: são as telas do produto. Um menu que o usuário precisa ativar não é menu.
   defaultEnabled: true,
   register(ctx) {
-    ctx.registerMany(
-      MODULOS.map((item, indice) => ({
-        area: SIDEBAR_NAV_AREA,
-        data: { codicon: item.codicon, label: item.label, path: item.path } satisfies SidebarNavContribution,
-        id: `nav-${item.path.replace('/', '')}`,
-        order: 100 + indice
-      }))
-    )
+    const registrar = (itens: readonly ItemDeMenu[]): (() => void) =>
+      ctx.registerMany(
+        itens.map((item, indice) => ({
+          area: SIDEBAR_NAV_AREA,
+          data: { codicon: item.codicon, label: item.label, path: item.path } satisfies SidebarNavContribution,
+          id: `nav-${item.path.replace('/', '')}`,
+          order: 100 + indice
+        }))
+      )
+
+    /**
+     * r171 do GOAL V2: o menu segue o nível do ator — e `register` é SÍNCRONO.
+     *
+     * `register: (ctx) => void`: não há como esperar o `whoami()` aqui. Mas **`registerMany` devolve um disposer**,
+     * e é isso que torna a montagem possível: **registra o menu inteiro agora** (a r170 diz que sem ator o menu
+     * aparece inteiro), e **se o ator chegar sem `read`, desfaz e registra a lista vazia**.
+     *
+     * **A ordem importa**: primeiro tudo, depois o filtro. Se fosse ao contrário, uma ponte lenta deixaria a barra
+     * vazia — e um menu vazio por erro de carregamento é menos seguro e menos diagnóstico que o menu completo.
+     */
+    let desfazer = registrar(MODULOS)
+
+    void whoami()
+      .then(ator => {
+        const visiveis = menuDoAtor(MODULOS, ator)
+
+        if (visiveis.length === MODULOS.length) return
+
+        desfazer()
+        desfazer = registrar(visiveis)
+      })
+      .catch(() => {
+        // Silencioso: sem ator, o menu inteiro ja esta registrado — que e o estado seguro (r170).
+      })
+
+    ctx.onDispose(() => desfazer())
   }
 }
 
