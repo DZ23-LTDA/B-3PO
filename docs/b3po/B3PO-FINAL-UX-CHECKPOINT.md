@@ -263,3 +263,67 @@ n: 6
 | **G6** — home com 6 cards | ✅ **implementado e medido** |
 | **G7** — pt-BR | ⚠️ **a home e a barra estão em pt-BR; o composer ainda diz "O que vamos construir?"** |
 | **G5, G8, G9, G10** | ❌ **não iniciados** |
+---
+
+## FASE 5 — RESOLUÇÕES, ZOOM E pt-BR (r269) — **G7, G8, G9**
+
+### G7 — o português, medido (não presumido)
+
+**Coletado o texto REAL de cinco rotas** (`/`, `/painel`, `/crm`, `/agentes`, `/sofia`):
+
+```
+Conversas · Bots · Modo de Trabalho · Empresa · Engenharia · Automação · IA e Agentes · Estratégico
+Administração · Nova conversa · Capacidades · Mensageria · CRM · Artefatos · Tarefas agendadas
+Visão geral · Painel · Busca · Trabalho · Projetos · Trabalhos · Configuração · Estrutura · Privacidade
+Nenhuma conversa ainda · Dinheiro · R$ 0,00 · a receber · a pagar · saldo previsto
+Contatos · Oportunidades abertas · Valor em aberto · Ganho · Tarefas abertas
+Agentes · Aprovações de negócio · Nenhuma aprovação esperando · Sofia · Terminal
+Servidor · inferência indisponível · Inteligente · cliente dev
+```
+
+> **Nenhuma string em inglês nas superfícies visíveis.** **O pt-BR não precisou de trabalho — precisou de MEDIÇÃO**, que é o que o gate pede e o que faltava para afirmar.
+
+### G8/G9 — as resoluções e o zoom
+
+**Medido no app, em sete combinações:**
+
+| Tela | Colunas | Cortados |
+|---|---|---|
+| 1920×1080 100% | 3 | **0** |
+| 1600×900 100% | 3 | **0** |
+| 1366×768 100% | 3 | **0** |
+| 1280×720 100% | 3 | **0** |
+| **1366×768 125%** | **2** | **0** |
+| **1366×768 150%** | **2** | **0** |
+| 1920×1080 150% | 3 | **0** |
+
+### O bug que a medição encontrou
+
+**Primeira versão do grid: `grid-cols-2 sm:grid-cols-3`.**
+
+```
+1366x768 100%   0 cortados
+1366x768 125%   2 cortados      <- BUG
+1366x768 150%   4 cortados      <- BUG
+```
+
+> **O `sm:` dispara pelo `min-width` do viewport, e o zoom no navegador REDUZ o viewport CSS** — então o layout achava que ainda havia espaço para três colunas com o conteúdo já ampliado.
+
+**A correção**: `grid-cols-2 xl:grid-cols-3` — **duas colunas viram o padrão; a terceira só entra com 1280px de viewport efetivo.** A referência mostra 3×2, e continua sendo 3×2 numa tela larga; vira 2×3 onde três não cabem, **que é o que "não cortar" significa**.
+
+### E o meu primeiro teste do zoom estava errado
+
+**Medi com `document.documentElement.style.zoom = 1.25`** — e ele **não reduz o `window.innerWidth`**, então o `xl:` continuava disparando e o bug parecia não ter sido corrigido.
+
+> **O zoom do navegador é o viewport CSS dividido pelo fator** — testar assim (1366÷1,25 = **1093**) reproduz o que o Ctrl+ faz. **Uma medição que não reproduz o fenômeno não é uma medição.**
+
+### Estado dos gates
+
+| Gate | Estado |
+|---|---|
+| **G1, G2, G3, G4, G6** | ✅ |
+| **G7** — pt-BR | ✅ **medido em 5 rotas, zero inglês** |
+| **G8** — testes de navegação/acessibilidade/regressão | ⚠️ **resoluções e zoom medidos; falta a varredura completa da suíte** |
+| **G9** — app real em diferentes resoluções | ✅ **7 combinações, 0 cortados** |
+| **G5** — Sofia com contexto | ❌ **não iniciado** |
+| **G10** — pacote de entrega | ❌ **não iniciado** |

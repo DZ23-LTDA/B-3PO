@@ -88,8 +88,19 @@ export function HomeB3po() {
       {/*
        * `role="group"` e não `list`: são SEIS botões de escolha, não seis itens de uma lista
        * que se percorre. O rótulo nomeia o grupo para o leitor de tela.
+       *
+       * r269 — O GRID MUDOU POR CAUSA DO ZOOM
+       *
+       * Medido: em 1366x768 a 100% os 6 cartões cabiam; **a 125% dois ficavam cortados e a
+       * 150%, quatro**. O `sm:grid-cols-3` dispara pelo `min-width` do VIEWPORT, e o zoom
+       * reduz o viewport efetivo — então o layout achava que ainda havia espaço para três
+       * colunas com o conteúdo já ampliado.
+       *
+       * **Duas colunas viram o padrão** e a terceira só entra em `xl` (1280px de viewport
+       * efetivo). A referência mostra 3x2; ela continua sendo 3x2 numa tela larga — e vira
+       * 2x3 onde três não cabem, que é o que "não cortar" significa.
        */}
-      <div aria-label="Escolher ambiente" className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3" role="group">
+      <div aria-label="Escolher ambiente" className="grid w-full grid-cols-2 gap-3 xl:grid-cols-3" role="group">
         {AMBIENTES.map(ambiente => {
           const selecionado = ambiente === ativo
 
