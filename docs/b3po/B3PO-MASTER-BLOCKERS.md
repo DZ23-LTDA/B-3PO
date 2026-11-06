@@ -34,7 +34,7 @@
 
 > **Cinco são diferenças de plataforma; uma é uma garantia do app hospedeiro que não está sendo cumprida.**
 > **Nenhuma é do B-3PO, e nenhuma é um defeito de funcionalidade do produto.**
-> 
+>
 > **A linha `13 failed | 5451 passed` é o mesmo número que esta tabela, sem a informação que a torna útil.**
 > **Um vermelho sem causa é uma suspeita; um vermelho com causa é um fato sobre a máquina.**
 
