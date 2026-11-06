@@ -92,3 +92,47 @@
 ## PRÓXIMO PASSO — FASE 1
 
 **Expandir `lib/ambiente.ts` de 2 para 6**, com os grupos de cada um, **sem quebrar os dois que já consomem**.
+
+---
+
+## FASE 2.1 — O SCROLL DA SIDEBAR (r266, reportado pelo dono)
+
+**O dono reportou**: *"tem itens escondidos no menu que nao da pra acessar no final do menu"*.
+
+**Medido no app rodando**, antes da correção:
+
+```
+container:  overflow-y: hidden
+            scrollHeight: 937   clientHeight: 937   temScroll: false
+DOM:        Sofia ✓ Documentos ✓ Privacidade ✓ CONFIGURAÇÃO ✓  (os itens ESTAVAM lá)
+```
+
+> **Os itens existiam no DOM e não havia scroll nenhum.** **O `overflow-hidden` no `SidebarContent` cortava tudo o que passava de 937px** — e a barra agrupada ficou mais alta que isso.
+
+**A correção**: `overflow-hidden` → **o `SCROLL_Y` que o próprio arquivo já tinha** (L263):
+
+```
+const SCROLL_Y = 'overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-fade'
+```
+
+**Depois**:
+
+```
+rolavel: true
+scrollHeight: 1161   clientHeight: 937   overflowY: auto
+scrollTop: 0 → 223   rolou: true
+```
+
+> **E a captura do fim da lista mostra `CONFIGURAÇÃO` com `Estrutura` e `Privacidade`** — os que não apareciam.
+
+**O gate pegou o meu crescimento três vezes nesta fase** (`2104 → 2064`, depois `876 > 874` duas vezes), e as três soluções foram as que ele recomenda: **extrair para irmão tópico** e **usar a constante que já existia**, não repetir classes.
+
+## O QUE AINDA FALTA NESTA FASE
+
+| Gate | Estado |
+|---|---|
+| **G1** — seletor de ambientes | ⚠️ **os 6 existem no modelo; o SELETOR na sidebar ainda não** |
+| **G2** — sidebar contextual | ✅ **agrupada (7 seções) e com scroll** |
+| **G3** — RBAC | ✅ **`nav-rbac` filtra por `read`** |
+| **G4** — persistência do contexto | ❌ **a preferência de ambiente ainda não tem store** |
+| **G6** — home com 6 cards | ❌ **a home ainda é o logo + composer** |
