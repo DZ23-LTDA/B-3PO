@@ -327,3 +327,68 @@ Servidor · inferência indisponível · Inteligente · cliente dev
 | **G9** — app real em diferentes resoluções | ✅ **7 combinações, 0 cortados** |
 | **G5** — Sofia com contexto | ❌ **não iniciado** |
 | **G10** — pacote de entrega | ❌ **não iniciado** |
+---
+
+## FASE 6 — O CONTEXTO DA SOFIA (r270) — **G5**
+
+### O que a missão pede
+
+*"Sofia deve receber contexto do ambiente, organização e projeto sem contornar RBAC."*
+
+### As três peças não têm o mesmo dono
+
+| Peça | Autoridade | Onde está |
+|---|---|---|
+| **ambiente** | **esta janela** | `store/ambiente` (localStorage) |
+| **projeto** | **esta janela** | `store/project-scope` (persistido) |
+| **ator** | **o backend** | `hermes:admin:whoami` |
+
+> **Organização não existe como campo separado no renderer** — e criar um seria inventar uma segunda fonte para um dado que o servidor já tem (`PlanoComGrafo.tenant_id`). As duas divergiriam. **O contexto daqui diz "onde estou e o que posso ver"; quem sabe "de quem é este dado" continua sendo o backend.**
+
+### O contrato — `lib/contexto-da-sofia.ts`
+
+```ts
+interface ContextoDaSofia {
+  acesso: 'autorizado' | 'desconhecido' | 'negado'
+  ambiente: Ambiente
+  ambienteRotulo: string
+  projeto: null | string
+  escopos: string[]
+}
+```
+
+**A garantia central, e é o que o teste guarda:**
+
+> **O contexto é DESCRITIVO.** Não libera canal, não filtra resposta, não é lido por `permission-guard`. **E o recorte é LIMITADO pelo que o ator pode ler**: sem `read`, `escopos` é vazio e `acesso` é `'negado'`. **Não há caminho em que este arquivo CONCEDA alguma coisa — só caminhos em que ele DESCREVE MENOS.**
+
+### "Ainda não sei" ≠ "não pode"
+
+**Os dois resultam em `escopos: []`, mas `acesso` os separa** — porque pedem reações diferentes na tela: **a primeira é espera, a segunda é fim de linha**.
+
+| Situação | `acesso` | A frase mostrada |
+|---|---|---|
+| ator `null` (ponte não respondeu) | `desconhecido` | "… · identidade ainda não resolvida" |
+| ator sem `read` | `negado` | "… · sem permissão de leitura" |
+| ator com `read`, sem escopos | `autorizado` | "… · **nenhum escopo liberado**" |
+| ator com `read` e escopos | `autorizado` | "… · 3 escopos" |
+
+> **"0 escopos" é informação**: quer dizer que o ator existe e lê, mas nenhum domínio está liberado — e sem essa frase a linha ficaria idêntica à de quem tem escopos.
+
+### Medido no app
+
+```
+Administração · nenhum escopo liberado
+```
+
+**O ambiente veio do seletor, e o `whoami` devolveu um ator sem escopos** — os dois fatos, na mesma linha.
+
+### O que falta para o G5 completo — e é declarado, não escondido
+
+**O contexto é montado e mostrado no renderer.** **Para chegar ao modelo**, ele precisa entrar no prompt do turno — e **isso é o backend**, não o React. **O que existe hoje é a metade verificável sem o runtime**: o dado é construído a partir das autoridades certas, o recorte respeita o RBAC, e há teste provando que ele nunca descreve mais do que o ator pode ler.
+
+| Gate | Estado |
+|---|---|
+| **G1–G4, G6, G7, G9** | ✅ |
+| **G5** — Sofia com contexto | ⚠️ **metade verificável feita** (contexto + RBAC + teste); o prompt do turno é backend |
+| **G8** — regressão completa | ⚠️ **resoluções e zoom medidos; falta a varredura da suíte** |
+| **G10** — pacote | ❌ **não iniciado** |

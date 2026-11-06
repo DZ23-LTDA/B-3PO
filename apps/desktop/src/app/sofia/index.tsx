@@ -23,7 +23,14 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
+import { type ActorRow, whoami } from '@/api/admin'
 import { chamarSofia, type PlanoComGrafo } from '@/api/sofia'
+import { useStore } from '@nanostores/react'
+
+import { contextoDaSofia, descreverContexto } from '@/lib/contexto-da-sofia'
+import { $ambiente } from '@/store/ambiente'
+import { $projectScope } from '@/store/project-scope'
+
 
 const CARTAO = 'rounded-lg border border-(--ui-border) p-4'
 const ROTULO = 'text-xs uppercase tracking-wide text-(--ui-text-tertiary)'
@@ -144,6 +151,11 @@ function PlanoCard({
 }
 
 export function SofiaView(): React.ReactElement {
+  const ambiente = useStore($ambiente)
+  const projetoAtivo = useStore($projectScope)
+  // O ator vem do BACKEND (whoami), nao de um palpite do renderer: e ele que diz o nivel e os
+  // escopos, e e o mesmo canal que o resto do produto ja usa.
+  const [ator, setAtor] = useState<ActorRow | null>(null)
   const [planos, setPlanos] = useState<PlanoComGrafo[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -167,12 +179,38 @@ export function SofiaView(): React.ReactElement {
     void carregar()
   }, [carregar])
 
+  useEffect(() => {
+    let vivo = true
+
+    void whoami()
+      .then(resposta => {
+        if (vivo) setAtor(resposta)
+      })
+      .catch(() => {
+        // Sem ator o contexto diz "identidade ainda nao resolvida" - que e a verdade, nao um erro.
+      })
+
+    return () => {
+      vivo = false
+    }
+  }, [])
+
   return (
     <main className="flex flex-col gap-4 p-4">
       <header>
         <h1 className="text-lg font-medium text-foreground">Sofia</h1>
         <p className="text-sm text-(--ui-text-tertiary)">
           Planos de coordenação: o que foi pedido, o que depende do quê, e o que já terminou.
+        </p>
+        {/*
+         * r270 (G5): o contexto em que a Sofia está trabalhando.
+         *
+         * É DESCRITIVO. Ele não libera canal nem filtra resposta — diz em que recorte a pergunta
+         * foi feita, para a resposta não vir de outro ambiente. Quando o ator não pode ler, o
+         * contexto diz isso em vez de fingir um escopo que ele não tem.
+         */}
+        <p className="mt-1 text-xs text-(--ui-text-tertiary)" data-testid="sofia-contexto">
+          {descreverContexto(contextoDaSofia({ ambiente, ator, projeto: projetoAtivo }))}
         </p>
       </header>
 
