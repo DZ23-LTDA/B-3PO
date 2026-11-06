@@ -738,7 +738,9 @@ export default {
       area: PALETTE_AREA,
       data: {
         id: `${ID}.new-agent`,
-        label: 'New Bot…',
+        // r280: era `'New Bot…'` fixo — o comando da paleta era o único rótulo do plugin que
+        // ignorava o idioma. `bot.newTitle` já existe traduzido em todos os locales do plugin.
+        label: ctx.i18n.t('bot.newTitle'),
         keywords: ['bot', 'agent', 'profile', 'teammate', 'create'],
         run: () => {
           host.notify({
