@@ -407,8 +407,37 @@ function Initialize-ResolvedPaths {
     }
 }
 
-# Resolve the pm store root (same resolution as pm's store_root()):
-# $env:HERMES_RUNTIME_DIR wins, else <HermesHome>\tools.
+# r257: SHA-256 de um arquivo sem depender de Get-FileHash.
+#
+# Get-FileHash vem do modulo Microsoft.PowerShell.Utility. Em ConstrainedLanguage (o modo em que
+# alguns hospedeiros - e o instalador quando roda sob um sandbox - executam o script) e nos
+# processos filhos em que o modulo nao carrega, o cmdlet simplesmente NAO EXISTE, e o instalador
+# morria em "O termo 'Get-FileHash' nao e reconhecido" antes de baixar qualquer coisa.
+#
+# certutil e um executavel do sistema (C:\Windows\system32\certutil.exe) e responde em qualquer
+# modo de linguagem. O Get-FileHash fica como primeiro caminho porque e mais rapido e nao abre
+# processo.
+function Get-Sha256Hex {
+  param([Parameter(Mandatory = $true)][string]$Path)
+
+  try {
+    $hashed = Get-FileHash -Path $Path -Algorithm SHA256 -ErrorAction Stop
+    if ($hashed -and $hashed.Hash) { return $hashed.Hash.ToLowerInvariant() }
+  } catch {
+    # cai para o certutil
+  }
+
+  $lines = & certutil.exe -hashfile $Path SHA256 2>$null
+  if ($LASTEXITCODE -ne 0 -or -not $lines) {
+    Fail "could not hash $Path with either Get-FileHash or certutil" download_hash_failed
+  }
+  foreach ($line in $lines) {
+    $clean = ($line -replace '[^0-9a-fA-F]', '')
+    if ($clean.Length -eq 64) { return $clean.ToLowerInvariant() }
+  }
+  Fail "certutil returned no SHA-256 digest for $Path" download_hash_failed
+}
+
 function Get-PmStoreRoot {
     if ($env:HERMES_RUNTIME_DIR) { return $env:HERMES_RUNTIME_DIR }
     return (Join-Path $HermesHome "tools")
@@ -453,7 +482,9 @@ function Invoke-VerifiedDownload {
             $httpFailure = $_.Exception.Message
             continue
         }
-        $digest = (Get-FileHash -Path $OutFile -Algorithm SHA256).Hash.ToLowerInvariant()
+        # r257: Get-FileHash pode nao existir no processo filho (ConstrainedLanguage, ou modulo
+        # Utility ausente). certutil e um executavel do sistema e responde em qualquer modo.
+        $digest = Get-Sha256Hex -Path $OutFile
         if ($digest -eq $Sha256.ToLowerInvariant()) { return }
         Remove-Item -Path $OutFile -Force -ErrorAction SilentlyContinue
         # Wrong bytes = tampering or a corrupt mirror, not a routing problem.
