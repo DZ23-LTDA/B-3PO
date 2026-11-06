@@ -2480,3 +2480,70 @@ o produto, confirmando o `G4 = NOT_IMPLEMENTED` da rodada 13.
 
 **A taxa de 33 % sugere que vale continuar** — mas as duas melhores já foram (Vendas e Estoque eram
 as que eu tinha marcado como `PARCIAL` no B5 e no G3).
+
+---
+
+## G8 · ADENDO 19 — revisão visual fechada: **8 telas, 2 achados, 6 limpas**
+
+**Rodada 46.** Terminei as telas principais das 20 capturas de `baseline-layout/`.
+
+### O placar completo
+
+| Tela | Veredito | O que vi |
+|---|---|---|
+| **Vendas** | **ACHADO** | venda `faturada` com **R$ 0,00** |
+| **Estoque** | **ACHADO GRAVE** | `"0 produtos"` com **6 movimentações** |
+| **CRM** | **limpa** | cards + forms + lista |
+| **Compras** | **limpa** | 5 cards, `#2 Fornecedor E2E · R$ 150,00 · recebido` |
+| **Financeiro** | **limpa** | "Vencido R$ 230,00" **correto** (venceu hoje 00:00) |
+| **Projetos** | **limpa** | `0 em andamento` + 1 *a começar* = consistente |
+| **Empresa** | **limpa** | 1 empresa, 0 filiais, CNPJ vazio (`—`) esperado |
+| **Sofia** | **limpa** | **B6 visível**: plano 2/2, `exec-e2e-001/002`, `depende de t1` |
+
+**Taxa final: 2 achados em 8 telas (25 %).**
+
+### O que a revisão visual **validou** de graça
+
+**A tela de Sofia é a prova visual do B6** que eu só tinha por bridge:
+
+```
+Validar a jornada de planos da Sofia (r282)     2/2
+ORGANIZACAO · CONCLUIDO · 1 NÍVEIS
+
+  Primeira tarefa do plano — concluída · execução exec-e2e-001
+  Segunda tarefa, depende da primeira
+  concluída · depende de t1 · execução exec-e2e-002
+```
+
+**Plano persistido · 2 de 2 tarefas · `execucao_id` em cada uma · grafo de dependência (`depende de t1`)
+· status `CONCLUIDO`.** Tudo na tela, sem precisar de chamada de API.
+
+**A tela de Compras** idem: `#2 · Fornecedor E2E · 1 item · R$ 150,00 · recebido` — o **B4 completo**
+visível.
+
+**A tela de Empresa** mostra `Empresa E2E r283 · Nenhuma filial ainda · — · BRL · America/Sao_Paulo` —
+o **B7** com o CNPJ vazio que o E2E não preencheu (esperado, não bug).
+
+### O que a revisão visual **não** achou
+
+**Nenhum problema de layout** nas 8 telas olhadas **depois** do fix do `h-full` (r41). Antes do fix,
+**todas** estariam 182 px erradas — e eu só descobri porque o dono olhou.
+
+### O padrão que fecha
+
+| Categoria de defeito | Foi achada por |
+|---|---|
+| acessibilidade (contraste, labels, landmarks) | **`axe`** — 30 rotas + 17 rotas web |
+| **coerência de conteúdo** (R$ 0,00, "0 produtos" com 6 movimentos) | **olhar a captura** |
+| **layout deslocado** (182 px) | **o dono olhou** |
+
+**Três categorias, três instrumentos diferentes.** Nenhum deles substitui os outros — e por 40 rodadas
+eu usei **só o primeiro**.
+
+### O que resta por olhar
+
+**12 das 20 capturas** — os temas escuros de `crm`, `compras`, `vendas`, `estoque`, `financeiro`,
+`projetos`, `sofia`, `empresa`, `home`, e os claros de `home`.
+
+**A taxa caiu** (25 % e concentrada nas duas telas que eu já sabia `PARCIAL`), então a expectativa é de
+poucos achados novos — mas **é olhar, não medir**, e é a única forma de descobrir.
