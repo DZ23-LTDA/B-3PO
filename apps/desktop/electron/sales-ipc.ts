@@ -118,6 +118,45 @@ export function stockShortage(sale: Sale, balances: Record<string, number>): nul
   return null
 }
 
+/**
+ * r292 — a recusa de faturar, com o diagnóstico certo.
+ *
+ * Saiu de `faturar` porque a distinção levou a função a **CC 22** (alvo 20) — o gate de saúde
+ * barrou, corretamente. Aqui a lógica é uma coisa só: dado o saldo, dizer se o problema é o
+ * **cadastro** do produto ou o **estoque** dele.
+ *
+ * - `balances` só tem chave para SKU que já se movimentou; sem o catálogo, um SKU errado e um SKU
+ *   novo sem estoque davam a mesma resposta (`saldo_insuficiente`), e quem digitou o código errado
+ *   ia conferir o saldo de um produto que não existe.
+ * - Quando o produto existe, a recusa **nomeia o livre e o necessário** — como `reservation.ts` já
+ *   fazia e a venda não: `saldo_insuficiente` sozinho obriga quem lê a fazer a conta que o backend
+ *   já fez.
+ */
+async function recusaPorEstoque(
+  sale: Omit<Sale, 'number'>,
+  deps: SalesDeps
+): Promise<null | { error: string; livre_milli?: number; message?: string; necessario_milli?: number }> {
+  const saldos = await deps.inventory.balances(sale.tenant_id)
+  const falta = stockShortage({ ...sale, number: 0 }, saldos)
+
+  if (!falta) {
+    return null
+  }
+
+  // Sem catálogo (teste, uso programático) mantém o comportamento anterior em vez de quebrar.
+  const cadastrado = deps.catalog ? await deps.catalog.has(falta, sale.tenant_id) : true
+
+  if (!cadastrado) {
+    return { error: 'produto_nao_encontrado', message: falta }
+  }
+
+  const necessario = stockMovementsFor({ ...sale, number: 0 })
+    .filter(movement => movement.product_sku === falta)
+    .reduce((soma, movement) => soma + movement.quantity_milli, 0)
+
+  return { error: 'saldo_insuficiente', livre_milli: saldos[falta] ?? 0, message: falta, necessario_milli: necessario }
+}
+
 export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
   ipcMain.handle(
     'hermes:sales:list',
@@ -170,32 +209,10 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
 
     // Verifica contra o saldo ATUAL antes de gravar a venda: recusar depois seria deixar uma venda
     // faturada que nunca saiu do depósito.
-    const saldos = await deps.inventory.balances(normalized.sale.tenant_id)
-    const falta = stockShortage({ ...normalized.sale, number: 0 }, saldos)
+    const recusa = await recusaPorEstoque(normalized.sale, deps)
 
-    if (falta) {
-      /*
-       * r292 — a recusa diz QUAL dos dois problemas é.
-       *
-       * `balances` só tem chave para SKU que já se movimentou. Até aqui, SKU errado e SKU novo sem
-       * estoque davam a mesma resposta: `saldo_insuficiente`. Quem digitou o código errado ia
-       * conferir um saldo de um produto que não existe.
-       *
-       * A distinção exige o catálogo; sem ele (teste, uso programático) mantemos o comportamento
-       * anterior. E quando o produto EXISTE, a recusa nomeia o livre — como `reservation.ts` já
-       * fazia e a venda não: `saldo_insuficiente` sozinho obriga quem lê a calcular quanto sobra.
-       */
-      const cadastrado = deps.catalog ? await deps.catalog.has(falta, normalized.sale.tenant_id) : true
-
-      if (!cadastrado) {
-        return { error: 'produto_nao_encontrado', message: falta }
-      }
-
-      const necessario = stockMovementsFor({ ...normalized.sale, number: 0 })
-        .filter(movement => movement.product_sku === falta)
-        .reduce((soma, movement) => soma + movement.quantity_milli, 0)
-
-      return { error: 'saldo_insuficiente', message: falta, livre_milli: saldos[falta] ?? 0, necessario_milli: necessario }
+    if (recusa) {
+      return recusa
     }
 
     const criada = await deps.sales.create({ ...(payload as object), status: 'faturado' })
