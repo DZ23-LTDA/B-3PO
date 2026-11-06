@@ -340,3 +340,8 @@ apps/desktop/.dist-build*
 *.jks
 *.keystore
 !.keystore/README.md
+
+# Restos do build atomico do desktop (.dist-build-*, .dist-previous-*): o build troca
+# dist/ por rename e deixa o anterior ao lado. Sao artefatos, nao codigo.
+apps/desktop/.dist-build-*/
+apps/desktop/.dist-previous-*/

@@ -600,6 +600,12 @@
   }
 
   :root.dark {
+    /* O Chromium desenha a LISTA de um <select> com o tema do SISTEMA, nao com o do
+       app. Sem esta linha, um app de tema escuro sobre um SO claro produz opcoes
+       brancas com texto claro - ilegiveis. O color-scheme e o que o navegador
+       consulta para escolher as cores nativas dos controles. */
+    color-scheme: dark;
+
     /* Per-mode mix knobs — overridden inline by `applyTheme()` per skin. */
     --theme-mix-chrome: 74%;
     --theme-mix-card: 38%;
@@ -806,6 +812,28 @@
 
   html {
     font-size: var(--dt-base-size, 0.875rem);
+  }
+
+  /*
+   * r264: a LISTA de um <select> nao e estilizada pelo app.
+   *
+   * O Chromium desenha as <option> com as cores nativas do sistema operacional, e o
+   * texto delas herda o color do <select> - que no tema escuro e claro. Num SO claro,
+   * o resultado e texto claro sobre fundo branco: ilegivel.
+   *
+   * Sao 311 <select> no produto e NENHUM tinha <option> com estilo, entao a correcao
+   * mora aqui, na raiz, e vale para todos - inclusive os que vierem depois.
+   */
+  select option,
+  select optgroup {
+    background-color: var(--dt-popover, #ffffff);
+    color: var(--dt-popover-foreground, #17171a);
+  }
+
+  /* A option selecionada usa o realce do tema em vez do azul fixo do sistema. */
+  select option:checked {
+    background-color: color-mix(in srgb, var(--theme-primary, #0053fd) 18%, var(--dt-popover, #ffffff));
+    color: var(--dt-popover-foreground, #17171a);
   }
 
   body {
