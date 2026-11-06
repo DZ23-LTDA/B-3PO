@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ActorRow } from '@/api/admin'
 
-import { contextoDaSofia, descreverContexto, PROJETO_TODOS } from './contexto-da-sofia'
+import { CAMPO_DO_CONTEXTO, contextoDaSofia, descreverContexto, paramsComContexto, PROJETO_TODOS } from './contexto-da-sofia'
 
 const ATOR: ActorRow = {
   active: true,
@@ -80,5 +80,40 @@ describe('contexto da Sofia', () => {
     expect(descreverContexto(contextoDaSofia({ ambiente: 'empresa', ator: null, projeto: null }))).toContain(
       'ainda não resolvida'
     )
+  })
+})
+
+describe('o envio ao backend (r272)', () => {
+  it('acrescenta o contexto sem tocar no resto dos params', () => {
+    const params = { session_id: 's1', text: 'qual o faturamento?', submission_id: 'x' }
+    const comContexto = paramsComContexto(params, contextoDaSofia({ ambiente: 'empresa', ator: ATOR, projeto: null }))
+
+    // O resto fica IDENTICO — o enriquecimento não é uma reescrita.
+    expect(comContexto.session_id).toBe('s1')
+    expect(comContexto.text).toBe('qual o faturamento?')
+    expect(comContexto.submission_id).toBe('x')
+    expect(comContexto[CAMPO_DO_CONTEXTO]).toBe('Empresa · 3 escopos')
+  })
+
+  it('NÃO manda campo quando a identidade ainda não foi resolvida', () => {
+    // "não sei" e "não tem" são diferentes: um campo vazio faria o modelo concluir o segundo.
+    const semAtor = paramsComContexto({ text: 'oi' }, contextoDaSofia({ ambiente: 'empresa', ator: null, projeto: null }))
+
+    expect(semAtor).toEqual({ text: 'oi' })
+    expect(CAMPO_DO_CONTEXTO in semAtor).toBe(false)
+  })
+
+  it('manda o impedimento quando o ator não pode ler', () => {
+    const negado = paramsComContexto(
+      { text: 'oi' },
+      contextoDaSofia({ ambiente: 'empresa', ator: SEM_LEITURA, projeto: null })
+    )
+
+    // O backend precisa saber que o recorte é vazio — e por quê.
+    expect(negado[CAMPO_DO_CONTEXTO]).toContain('sem permissão de leitura')
+  })
+
+  it('o campo NÃO é voice_context — são coisas diferentes', () => {
+    expect(CAMPO_DO_CONTEXTO).not.toBe('voice_context')
   })
 })

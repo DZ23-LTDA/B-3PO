@@ -103,3 +103,42 @@ export function descreverContexto(contexto: ContextoDaSofia): string {
     ? `${onde} · ${contexto.escopos.length} escopos`
     : `${onde} · nenhum escopo liberado`
 }
+
+/**
+ * O campo do `prompt.submit` que leva o contexto ao backend.
+ *
+ * **`produto_contexto`, e não `voice_context`**: aquele já existe e é de OUTRA coisa (a
+ * transcrição de voz). Reusar um campo alheio porque "aceita string" é como dois donos passam a
+ * brigar pelo mesmo valor.
+ */
+export const CAMPO_DO_CONTEXTO = 'produto_contexto'
+
+/**
+ * Enriquece os parâmetros de um `prompt.submit` com o contexto do produto (r272).
+ *
+ * **POR QUE ESTA FUNÇÃO EXISTE SEPARADA DO ENVIO**
+ *
+ * O `prompt.submit` sai de cinco lugares no renderer — composer, editar, regenerar, Quick Entry
+ * e os bots — e o único ponto comum entre eles (`session-rpc-dispatcher`) é **roteamento de
+ * sessão**, não enriquecimento de parâmetro. **Misturar as duas responsabilidades ali faria todo
+ * RPC herdar um conceito de produto.**
+ *
+ * Então a peça é a função pura: ela recebe os params que já existem, devolve os params com o
+ * contexto, e **não muda nada além de acrescentar uma chave**. Quando o backend consumir o campo,
+ * o encaixe é uma chamada em cada um dos cinco pontos (ou um middleware do cliente) — e o teste
+ * de hoje continua valendo, porque ele afirma **o formato do que sai**, não quem chama.
+ *
+ * **Sem contexto não há campo.** Um `produto_contexto: ''` seria pior que ausente: o backend não
+ * distingue "o cliente não sabe" de "o cliente sabe que não há nada".
+ */
+export function paramsComContexto<T extends Record<string, unknown>>(
+  params: T,
+  contexto: ContextoDaSofia
+): T & { produto_contexto?: string } {
+  // Só enriquece o que o backend pode usar. `desconhecido` significa que a identidade não veio:
+  // mandar um contexto nesse estado diria ao modelo que o ator não tem escopo, o que é diferente
+  // de ainda não saber.
+  if (contexto.acesso === 'desconhecido') return params
+
+  return { ...params, [CAMPO_DO_CONTEXTO]: descreverContexto(contexto) }
+}

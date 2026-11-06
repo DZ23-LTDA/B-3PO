@@ -453,3 +453,63 @@ setAmbiente($ambiente.get() === 'empresa' ? 'engenharia' : 'empresa')
 | **G8** | ⚠️ **medido e com números; 30 falhas pré-existentes documentadas** |
 
 > **O produto NÃO está declarado UX_READY.** **Dois gates estão parciais**, e a razão está escrita acima. **Declarar pronto com gate parcial é a única coisa que a missão proíbe em toda a sua extensão.**
+---
+
+## FASE 8 — A PEÇA DO ENVIO (r272) — **G5, segunda metade**
+
+### O que faltava, e o que descobri ao procurar o encaixe
+
+**O contexto é montado e mostrado** (r270). **Para chegar ao modelo, ele precisa entrar no `prompt.submit`.**
+
+**Medi os dois lados antes de tocar em qualquer um:**
+
+| Lado | O que encontrei |
+|---|---|
+| **Backend** | `methods_prompt.py:821` — `def _(rid, params: dict)`. **Lê `params.get(...)`**, então **aceita campo extra sem quebrar contrato** |
+| **Contrato** | `CanonicalSubmitParams` já tem `voice_context: str \| None` — **que é de OUTRA coisa** (transcrição de voz) |
+| **Renderer** | o `prompt.submit` sai de **cinco lugares**: composer, editar, regenerar, Quick Entry e bots |
+| **O único ponto comum** | `session-rpc-dispatcher` — **e ele é de ROTEAMENTO de sessão**, não de enriquecimento de parâmetro |
+
+> **Misturar contexto de produto no dispatcher faria TODO RPC herdar um conceito que não é dele.** O arquivo diz, na primeira linha, que ele existe para rotear cada RPC pela sessão que ela mira. **Um `session.list` não tem contexto de ambiente.**
+
+### A decisão: entregar a peça pura, com o encaixe nomeado
+
+**`lib/contexto-da-sofia.ts` ganhou:**
+
+```ts
+export const CAMPO_DO_CONTEXTO = 'produto_contexto'
+
+export function paramsComContexto<T extends Record<string, unknown>>(
+  params: T,
+  contexto: ContextoDaSofia
+): T & { produto_contexto?: string }
+```
+
+**Três decisões dentro de uma função de cinco linhas:**
+
+1. **`produto_contexto`, e não `voice_context`** — aquele já tem dono. **Reusar um campo alheio porque "aceita string" é como dois donos passam a brigar pelo mesmo valor.**
+2. **Sem contexto não há campo.** Um `produto_contexto: ''` seria **pior que ausente**: o backend não distingue "o cliente não sabe" de "o cliente sabe que não há nada".
+3. **`acesso: 'desconhecido'` não enriquece.** Mandar um contexto nesse estado diria ao modelo que o ator **não tem escopo** — o que é diferente de **ainda não saber**.
+
+### O que o teste guarda (4 casos novos)
+
+```
+✓ acrescenta o contexto sem tocar no resto dos params   (session_id, text, submission_id intactos)
+✓ NÃO manda campo quando a identidade não foi resolvida (o objeto volta IGUAL)
+✓ manda o impedimento quando o ator não pode ler        ("sem permissão de leitura")
+✓ o campo NÃO é voice_context                           (são coisas diferentes)
+```
+
+> **O teste afirma o FORMATO do que sai, não quem chama** — então ele continua valendo quando o encaixe for feito nos cinco pontos (ou num middleware do cliente).
+
+### O que falta — e é backend, não React
+
+**O `prompt.submit` com `produto_contexto` chega ao `methods_prompt.py`, que hoje O IGNORA.** Consumir exige uma decisão que **não é do renderer**: **onde o contexto entra no turno sem quebrar o cache de prompt** (a invariante mais cara do projeto). As opções são o `ui_meta` da sessão (persistir e deixar o agente ler) ou o system prompt **no início da sessão** — não no meio do turno.
+
+> **O G5 continua PARCIAL, e agora com a fronteira exata**: a peça do renderer está pronta e provada; o consumo é uma mudança de backend que precisa de uma decisão de arquitetura registrada, não de um remendo.
+
+| Gate | Estado |
+|---|---|
+| **G5** | ⚠️ **contexto montado, limitado por RBAC, mostrado, e a peça do envio pronta e testada; o consumo é backend** |
+| os outros 8 | ✅ |
+| **G8** | ⚠️ **medido; 30 falhas pré-existentes documentadas** |
