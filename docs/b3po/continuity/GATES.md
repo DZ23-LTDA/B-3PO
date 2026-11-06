@@ -941,3 +941,72 @@ e **cegaria** o leitor de tela para o fechar — recusei.
 | rotas **sem nenhuma violação WCAG A/AA** | **27** |
 | violações restantes | **2**, ambas a mesma causa estrutural |
 | regras que passam | 26–30 por tela |
+
+---
+
+## G3 · ADENDO — Vendas: a recusa passou a dizer QUAL dos dois problemas é
+
+**Rodada 23.** O achado do B5 virou correção, e o gate de saúde do próprio repositório barrou a
+primeira tentativa — o que vale registrar.
+
+### O problema
+
+`faturar` consultava o saldo e, se faltasse, respondia **sempre** `saldo_insuficiente`. Mas
+`balances` só tem chave para SKU que **já se movimentou**:
+
+| Situação | Resposta antes | Resposta agora |
+|---|---|---|
+| SKU **não cadastrado** (código errado) | `saldo_insuficiente` | **`produto_nao_encontrado`** |
+| SKU cadastrado, **sem estoque** | `saldo_insuficiente` | `saldo_insuficiente` + `livre_milli: 0` |
+| SKU cadastrado, **estoque parcial** | `saldo_insuficiente` | `saldo_insuficiente` + `livre_milli` + `necessario_milli` |
+
+**Quem digitava o código errado ia conferir o estoque de um produto que não existe.**
+
+### A segunda correção: nomear o livre
+
+`reservation.ts:98` já documentava a regra — *"a recusa **nomeia o livre**: `saldo_insuficiente`
+sozinho obrigaria quem lê a calcular quanto sobra — e o cálculo é justamente o que esta função
+existe para fazer"* — e **a venda não fazia isso**.
+
+Agora faz: `{ error, message: sku, livre_milli, necessario_milli }`.
+
+### Como a distinção é feita
+
+`SalesDeps.catalog?` é **opcional**: `{ has: (sku, tenantId) => Promise<boolean> }`. O wiring em
+`erp-ipc.ts` extraiu o `CatalogStore` para uma variável e o passa aos dois leitores (o canal do
+catálogo e o `faturar`).
+
+**Sem catálogo** (teste, uso programático) mantém o comportamento anterior em vez de quebrar — a
+mesma escolha que `reservations?` já usava.
+
+### O gate me barrou — e estava certo
+
+A primeira versão **inline** levou `faturar` a **CC 22** (alvo 20) e o `scripts/check` reprovou:
+
+```
+=== health (failed) ===
+apps/desktop/electron/sales-ipc.ts:164  CC  registerSalesIpc.faturar
+    CC 22 > target 20 (new code must meet the target)
+```
+
+**Commitei antes de ver o gate** — erro meu, corrigido no commit seguinte. A saída foi a que o
+próprio gate sugere: extrair para `recusaPorEstoque`, uma função com uma responsabilidade só. Com
+isso `faturar` voltou a **CC ≤ 20** e os dois passam.
+
+### Verificação
+
+| Item | Resultado |
+|---|---|
+| `scripts/check` | **14 checks ok** |
+| typecheck | **0 erros** |
+| `sales-ipc.test.ts` | **10 de 10** |
+| testes de vendas (3 arquivos) | **13 de 13** |
+| **teste novo** | `r292: SKU fora do catalogo e "produto nao encontrado", nao "sem saldo"` — cadastra o produto no meio do teste e prova as **duas** respostas para o **mesmo** SKU |
+
+### O que continua valendo do B5
+
+| Item | Estado |
+|---|---|
+| baixa de estoque + conta a receber | **READY** (medido) |
+| SKU inexistente culpa o saldo | **corrigido** |
+| preço zero vende sem lançar financeiro | **aberto** — decisão de negócio: cortesia ou bloqueio? |
