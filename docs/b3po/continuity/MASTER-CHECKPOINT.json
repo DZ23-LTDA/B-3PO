@@ -1,8 +1,8 @@
 {
-  "head": "d2eaae756b7eddaf6b9052648be815c404d06215",
+  "head": "d86382f0421bec8674b46a5ab5dda496fb3b0df7",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 35,
+  "round": 38,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -43,7 +43,10 @@
       "delete_handler": "SIM - 24/24 no vitest, keydown chega no app",
       "aria_keyshortcuts": "SIM - no DOM",
       "remocao_por_delete": "NAO OBSERVADA - workspace nao remove por design; terminal inalcancavel por Tab"
-    }
+    },
+    "build_desktop": "READY - exit 0, 16374 modulos, dist 1231 arquivos 53.7 MB",
+    "build_web": "READY - exit 0, web_dist 60 arquivos 3.1 MB",
+    "frontends": "INDEPENDENTES - desktop/web/mobile nao compartilham componentes de UI"
   },
   "blockers": [
     {
@@ -80,5 +83,11 @@
     }
   ],
   "next_action": "destravar EXT-2 e remedir a regressao; ou autorizar EXT-5 e zerar as 2 violacoes a11y restantes",
-  "docs": "docs/b3po/continuity/"
+  "docs": "docs/b3po/continuity/",
+  "coverage_gaps": [
+    "a11y do WEB nao medida (axe so rodou no desktop)",
+    "a11y do MOBILE nao medida",
+    "remocao de aba por Delete nao observada",
+    "regressao BLOCKED (EXT-2)"
+  ]
 }
