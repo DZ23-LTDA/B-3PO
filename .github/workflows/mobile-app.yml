@@ -1,0 +1,156 @@
+# B-3PO — os dois apps móveis, construídos onde é possível construir.
+#
+# Até a r258, NENHUM workflow tocava mobile/: o app nunca foi compilado no CI, e a
+# única evidência de que ele builda era um APK local de 44 MB assinado com a chave de
+# DEBUG do Android.
+#
+# O iOS exige macOS + Xcode, e esta máquina de desenvolvimento é Windows. Um runner
+# macos-latest do GitHub Actions resolve a METADE da plataforma: prova que o projeto
+# compila e que os testes passam. O que ele não resolve é a ASSINATURA — um IPA
+# instalável precisa do certificado com a chave privada (.p12) e do provisioning
+# profile, e nenhum dos dois vive no repositório (nem deve viver).
+#
+# O Android compila em qualquer runner Linux. A assinatura de release também precisa
+# de um keystore, que é segredo — então este workflow entrega um APK de debug, e diz
+# isso no nome do artefato.
+#
+# Actions fixadas por SHA (política do repo).
+name: b3po mobile
+
+on:
+  push:
+    branches: [b3po-brand]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-app.yml'
+  pull_request:
+    branches: [b3po-brand, main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: mobile/b3po-app
+
+jobs:
+  # Os contratos do app não dependem de plataforma: testes e tipos rodam uma vez.
+  contracts:
+    name: domain contracts (tests + types)
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+
+      - name: setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: ../../.nvmrc
+
+      - name: install
+        run: npm install --no-audit --no-fund
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: tests
+        run: npm run test
+
+  android:
+    name: android apk (debug)
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+
+      - name: setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: ../../.nvmrc
+
+      - name: setup java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: setup android sdk
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204a1ea7cf6c355093e # v3.2.2
+
+      - name: install
+        run: npm install --no-audit --no-fund
+
+      - name: build apk
+        # assembleDebug, e o nome do artefato diz isso: um APK de release precisa de
+        # um keystore que não está aqui, e chamá-lo de release sem assinar seria mentir.
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        working-directory: mobile/b3po-app/android
+
+      - name: upload apk
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: b3po-app-android-debug
+          path: mobile/b3po-app/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  ios:
+    name: ios build (simulator, unsigned)
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+
+      - name: setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: ../../.nvmrc
+
+      - name: install
+        run: npm install --no-audit --no-fund
+
+      - name: pod install
+        run: pod install --repo-update
+        working-directory: mobile/b3po-app/ios
+
+      - name: build for simulator
+        # Sem signing: o objetivo é provar que o projeto COMPILA. Um IPA assinável
+        # precisa de .p12 + profile, que são segredo e não estão no repositório.
+        run: |
+          set -o pipefail
+          # Sem xcpretty: ele nao vem no runner, e um pipe para um binario ausente
+          # faz o step falhar com "command not found" em vez de mostrar o erro do build.
+          xcodebuild \
+            -workspace B3PO.xcworkspace \
+            -scheme B3PO \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            -quiet \
+            build
+        working-directory: mobile/b3po-app/ios
+
+      - name: report the app bundle
+        run: |
+          APP="$(find build/Build/Products -name '*.app' -maxdepth 3 | head -n 1)"
+          test -n "$APP" || { echo "no .app produced"; exit 1; }
+          echo "app: $APP"
+          du -sh "$APP"
+        working-directory: mobile/b3po-app/ios
+
+      - name: upload simulator app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: b3po-app-ios-simulator-unsigned
+          path: mobile/b3po-app/ios/build/Build/Products/**/*.app
+          if-no-files-found: error

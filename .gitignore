@@ -332,3 +332,11 @@ native/fts5_cjk/*.so
 /pm/.lock.json.lock
 
 apps/desktop/.dist-build*
+
+# Keystore de release do Android: NUNCA vai para o Git.
+# A chave privada e o que a Play Store usa para confiar no app; vazada, ela permite
+# publicar uma atualizacao maliciosa em nome do DZ23.
+.keystore/
+*.jks
+*.keystore
+!.keystore/README.md
