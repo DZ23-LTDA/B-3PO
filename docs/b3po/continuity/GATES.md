@@ -2205,3 +2205,51 @@ eu **medi**.
 
 > **Medir não substitui olhar.** O `GATES.md` registrava `nav: 1 · main: 1` — verdade — e o produto
 > estava **visualmente errado**. É a definição de cobertura que não cobre.
+
+---
+
+## G8 · ADENDO 16 — a lição aplicada: 30 rotas medidas contra o PAI, e capturas de referência
+
+**Rodada 42.** A rodada anterior ensinou que medir o elemento não basta — **precisa do termo de
+comparação**. Fui aplicar isso em todo o app, em vez de só nas 6 rotas que eu tinha testado.
+
+### 30 de 30 rotas: `main == pai`
+
+| Verificação | Resultado |
+|---|---|
+| rotas medidas | **30** |
+| com **`main.height == pai.height`** | **30** |
+| divergências | **0** |
+| overflow horizontal | **0** |
+
+**O `h-full` corrigiu todas** — não era um caso isolado da home. **Todas as 30 rotas tinham o mesmo
+encolhimento de 182 px antes do fix** e agora estão alinhadas.
+
+### Capturas de referência criadas
+
+`docs/b3po/evidence/baseline-layout/` — **20 capturas** (10 telas × 2 temas):
+
+```
+home · crm · compras · vendas · estoque
+financeiro · projetos · settings · sofia · empresa
+```
+
+**Isso é o que faltava na rodada 41**: eu não tinha nenhuma referência visual, então não podia
+notar que o layout estava errado. **Agora qualquer mudança futura tem um "antes" para comparar.**
+
+### O que a inspeção visual confirmou
+
+**CRM (claro)**: o conteúdo ocupa a altura toda, os cards de métrica estão no topo, os formulários
+fluem sem vazio morto, o composer no rodapé. **Nada deslocado.**
+
+### O que mudou no método
+
+| Antes | Depois |
+|---|---|
+| medir `main.getBoundingClientRect()` | **comparar com o pai** |
+| confiar que `axe` verde = correto | `axe` verde **+ captura de tela** |
+| testar 6 rotas | **30 rotas** quando o risco é transversal |
+
+**Uma correção que eu faço no shell se aplica a TODAS as rotas** — então **verificar em 6 é
+amostragem, não cobertura**. A rodada 41 provou isso: as 6 que eu testei passaram, e as outras 24
+tinham o mesmo defeito que eu não tinha visto em nenhuma.
