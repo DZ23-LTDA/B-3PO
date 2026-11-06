@@ -589,3 +589,66 @@ def _produto_note(committed):
 | **G5** | ⚠️ **backend completo e testado; falta o fio no renderer** |
 | os outros 8 | ✅ |
 | **G8** | ⚠️ **medido; 30 falhas pré-existentes documentadas** |
+---
+
+## FASE 10 — O FIO (r274) — **G5 FECHADO**
+
+### Onde ele passou, e por que ali
+
+**O `client.ts` já tinha o padrão**: no `request()`, o `prompt.submit` é enriquecido condicionalmente com `clarify_batch` — *"an older owner refuses the unknown key, so it rides only where `client.capabilities` advertised it"*.
+
+**Era o seam certo, e não o `session-rpc-dispatcher`:**
+
+> **Aquele decide PARA ONDE o RPC vai; este decide O QUE o RPC carrega.** São duas perguntas, e misturá-las faria **todo** RPC herdar um conceito de produto que não é dele (`session.list` não tem ambiente).
+
+### As quatro peças que se encontraram
+
+```
+lib/contexto-da-sofia.ts        monta (puro, 10 testes)
+api/contexto-do-produto.ts      o ponto de encontro (instalável, 6 testes)
+api/client.ts                   envia no prompt.submit (4 testes)
+main.tsx                        instala uma vez, no shell
+```
+
+> **O `api/` não conhece o produto**: ele chama um provider que o app instala. **Assim o mesmo cliente serve o Desktop, a TUI e o web** sem carregar `$ambiente` em nenhum deles.
+
+### Por que variável de módulo, e não propriedade por cliente
+
+**O Desktop cria um `HermesGateway` por perfil secundário** (`store/gateway.ts::createSecondary`), além do principal. Instalar o provider em cada criação significaria **lembrar dele em cada ponto que constrói um gateway** — e **o que precisa ser lembrado em N lugares é esquecido em N-1**.
+
+> **O ambiente é uma preferência da janela, não do socket.** A variável é do processo.
+
+### O que os testes guardam
+
+```
+✓ sem provider instalado não há contexto          (TUI, web, teste)
+✓ o provider é lido A CADA chamada               (a troca de ambiente aparece no próximo envio)
+✓ desinstalar devolve o estado "sem contexto"
+✓ desinstalar é idempotente                      (não derruba um provider mais novo)
+✓ provider que devolve null não vira "null"
+✓ acrescenta o campo sem tocar no resto          (e o original não é mutado)
+✓ NENHUM outro método é enriquecido              (session.list, session.resume, clarify.respond…)
+✓ sem contexto, nenhuma chave viaja              (campo vazio diria "sabe que não há nada")
+```
+
+### O bug que o gate pegou no caminho
+
+**A primeira versão punha o `if` inline no `request()`** — e a guarda a mais levou a função de **CC 19 para 21**, acima do teto de 20.
+
+**A correção foi a que o próprio gate recomenda**: extrair. `comContextoDoProduto(method, params)` é uma função de quatro linhas, **testável sozinha** — e os testes acima existem porque ela saiu de dentro do transporte.
+
+> **É a terceira vez nesta entrega que o gate de saúde aponta a direção certa** — e a terceira em que obedecer produziu código melhor do que o atalho.
+
+### **G5 — FECHADO**
+
+| Peça | Estado |
+|---|---|
+| contexto montado, das autoridades certas | ✅ r270 |
+| limitado pelo RBAC (nunca descreve mais do que o ator lê) | ✅ r270 |
+| mostrado na tela | ✅ r270 |
+| peça do envio (formato provado) | ✅ r272 |
+| **backend recebe, commita e vira NOTA no turno** | ✅ r273 |
+| **contratos declarados + TS regenerado** | ✅ r273 |
+| **o fio: envia em todo `prompt.submit`** | ✅ **r274** |
+
+> **E a nota diz, no texto que o modelo lê**, que ela **não é uma permissão de acesso**. Essa linha é o que separa "contexto" de "autorização" — e é o que o G5 exigia quando pediu *"sem contornar RBAC"*.

@@ -1,5 +1,7 @@
 // Loaded by src/entry.ts once the machine's shared UI preferences hydrated.
 import './styles.css'
+
+import { ContextoDoProdutoNoEnvio } from './api/contexto-do-produto-no-envio'
 // Install the loopback browser host before any store/App modules evaluate.
 // Electron preload remains authoritative when its bridge already exists.
 import './lib/browser-desktop-bridge-install'
@@ -116,6 +118,10 @@ if (winParam === 'overlay') {
                     both freeze for seconds despite the main thread being free.
                     Disabling transitions makes navigate() commit at default priority. */}
                   <HashRouter useTransitions={false}>
+                    {/* r274: instala o contexto do produto no envio de `prompt.submit`. Uma vez,
+                        no shell, porque ele lê o ambiente/projeto/ator VIVOS a cada envio —
+                        capturar o valor no boot envelheceria no primeiro clique do seletor. */}
+                    <ContextoDoProdutoNoEnvio />
                     <App />
                   </HashRouter>
                 </RootTooltipProvider>
