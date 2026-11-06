@@ -813,3 +813,40 @@ outline_color:  rgb(0, 83, 253)     <- azul da marca
 **E a regra está no CSS compilado**: `[data-b3po-foco]:focus-visible{outline:2px solid var(--theme-primary);outline-offset:2px}`.
 
 > **O que fica declarado**: o foco visível **não** é global neste produto — é uma exceção deliberada nas superfícies desta entrega. **Reverter a regra do upstream seria uma decisão de produto inteira, e não é minha.**
+---
+
+## FASE 14 — O E2E DA PERSISTÊNCIA (r278) — **G4 provado de ponta a ponta**
+
+### O teste, no app real
+
+**Playwright sobre o Electron, com a CDP em `9333`:**
+
+```
+ANTES        seletor=administracao   storage=administracao   itens na barra=14
+TROCADO      seletor=engenharia      storage=engenharia      itens na barra=12
+APOS RELOAD  seletor=engenharia      storage=engenharia      itens na barra=12
+PERSISTIU    true
+```
+
+**Três coisas provadas de uma vez:**
+
+1. **A troca muda a BARRA, não só o rótulo** — 14 itens → 12. `Administração` tem 3 seções (Visão geral, Trabalho, Configuração); `Engenharia` tem outras, com contagem diferente.
+2. **A escolha vai para o armazenamento** — `hermes.desktop.b3po-ambiente.v1`.
+3. **Ela sobrevive ao reload** — o `seletor` **e** a barra voltam no mesmo estado.
+
+> **O G4 pedia "troca de contexto persistente e sem perda de dados".** **A barra prova o contexto; o reload prova a persistência.**
+
+### O que isso fecha
+
+| Gate | Como está provado |
+|---|---|
+| **G1** seletor | 6 opções no `<select>`, medido |
+| **G2** sidebar contextual | 7 seções em Empresa, 3 em Administração, medido |
+| **G3** RBAC | `menuDoAtor` filtra por `read`, depois do ambiente |
+| **G4** persistência | **este teste: troca → reload → mesmo estado** |
+| **G5** Sofia com contexto | monta, limita por RBAC, mostra, envia no `prompt.submit`, vira nota no turno |
+| **G6** home | 6 cartões, 1 aceso, medido |
+| **G7** pt-BR | 5 rotas, zero inglês |
+| **G8** testes | 543 verdes nas áreas; 7 flaky + 1 corrigido + 12 reais de infraestrutura, separados |
+| **G9** resoluções | 7 combinações, 0 cortados |
+| **G10** pacote | ícones, versão 1.0.0, ENTREGA-FINAL |
