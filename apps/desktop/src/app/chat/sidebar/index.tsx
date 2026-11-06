@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { useContributions } from '@/contrib/react/use-contributions'
+import { linhasDeContribuicoes, NavRowWithHeader } from './nav-group-header'
 import { type SessionInfo, type SessionSearchResult } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { comboTokens } from '@/lib/keybinds/combo'
@@ -418,26 +419,7 @@ export function ChatSidebar({
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
 
   const contributedNav = useMemo<SidebarNavItem[]>(
-    () =>
-      navContributions.flatMap(c => {
-        const data = c.data as Partial<SidebarNavContribution> | undefined
-
-        if (!data?.path?.startsWith('/') || !data.label) {
-          return []
-        }
-
-        const codicon = data.codicon || 'plug'
-
-        return [
-          {
-            id: c.id,
-            label: data.label,
-            icon: (props: { className?: string }) => <Codicon name={codicon} {...props} />,
-            route: data.path,
-            tier: data.tier
-          }
-        ]
-      }),
+    () => linhasDeContribuicoes(navContributions, codicon => props => <Codicon name={codicon} {...props} />),
     [navContributions]
   )
 
@@ -1571,8 +1553,10 @@ export function ChatSidebar({
         <SidebarGroup className="shrink-0 p-0 pb-2 pt-[calc(var(--titlebar-height)+0.375rem)]">
           <SidebarGroupContent>
             <SidebarMenu className="gap-px">
-              {navItems.map(item => {
+              {navItems.map((item, indice) => {
                 const isInteractive = Boolean(item.action) || Boolean(item.route)
+
+
 
                 const active =
                   (item.id === 'capabilities' && currentView === 'capabilities') ||
@@ -1675,7 +1659,8 @@ export function ChatSidebar({
                 // New session + route-backed pages can open in a split —
                 // right-click for the directional "Open in split" submenu.
                 return (
-                  <SidebarMenuItem key={item.id}>
+                  <NavRowWithHeader key={item.id} item={item} indice={indice} itens={navItems}>
+                  <SidebarMenuItem>
                     {isNewSession || item.route ? (
                       <ContextMenu>
                         <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
@@ -1697,6 +1682,7 @@ export function ChatSidebar({
                       button
                     )}
                   </SidebarMenuItem>
+                  </NavRowWithHeader>
                 )
               })}
             </SidebarMenu>

@@ -26,7 +26,27 @@
 // **Não valida nada.** Filtrar menu não é autorizar: `permission-guard` continua sendo a única porta, e um item
 // escondido **não fica mais seguro** — só menos visível.
 
-export const AMBIENTES = ['empresa', 'engenharia'] as const
+/**
+ * Os seis ambientes (r265 — a missão final).
+ *
+ * **A r121 definiu dois** (`empresa`, `engenharia`) e a missão final nomeia **seis**:
+ * **Empresa, Engenharia, Automação, IA e Agentes, Estratégico, Administração.**
+ *
+ * **A ordem não é alfabética**: é a ordem em que a pessoa entra. **Empresa primeiro** porque é
+ * o padrão de quem abre o produto para trabalhar; **Administração por último** porque é onde se
+ * mexe na plataforma, não no negócio.
+ *
+ * **Os dois antigos continuam com o mesmo `id`** (`empresa`, `engenharia`): quem já tinha a
+ * preferência salva **não perde nada**, e o `isAmbiente` reconhece os dois como sempre.
+ */
+export const AMBIENTES = [
+  'empresa',
+  'engenharia',
+  'automacao',
+  'ia',
+  'estrategico',
+  'administracao'
+] as const
 
 export type Ambiente = (typeof AMBIENTES)[number]
 
@@ -36,7 +56,11 @@ export function isAmbiente(valor: unknown): valor is Ambiente {
 
 export const AMBIENTE_LABEL: Record<Ambiente, string> = {
   empresa: 'Empresa',
-  engenharia: 'Engenharia'
+  engenharia: 'Engenharia',
+  automacao: 'Automação',
+  ia: 'IA e Agentes',
+  estrategico: 'Estratégico',
+  administracao: 'Administração'
 }
 
 /**
@@ -52,7 +76,23 @@ export const AMBIENTE_LABEL: Record<Ambiente, string> = {
  */
 const GRUPOS_POR_AMBIENTE: Record<Ambiente, readonly string[]> = {
   empresa: ['Visão geral', 'Operação', 'Comércio', 'Trabalho', 'Crescimento', 'Inteligência', 'Configuração'],
-  engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Configuração']
+  engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Configuração'],
+  /*
+   * r265: os quatro ambientes que a missão final nomeia.
+   *
+   * **Cada um recebe os grupos que os módulos JÁ existentes usam** — não invento grupo para
+   * depois procurar módulo. `Inteligência` é o grupo que o menu do produto dá a Agentes,
+   * Automações, Sofia e Documentos; `Trabalho` é o de Projetos e Trabalhos; `Configuração` é
+   * o de Estrutura e Privacidade.
+   *
+   * **O que NÃO tem grupo próprio não entra**: `Relatórios` e `Indicadores` da missão ainda
+   * não existem como rota, e um grupo vazio na barra seria um botão que não leva a lugar
+   * nenhum — o §5 da missão proíbe exatamente isso.
+   */
+  automacao: ['Visão geral', 'Inteligência', 'Trabalho'],
+  ia: ['Visão geral', 'Inteligência'],
+  estrategico: ['Visão geral', 'Inteligência'],
+  administracao: ['Visão geral', 'Configuração', 'Trabalho']
 }
 
 export function gruposDoAmbiente(ambiente: Ambiente): readonly string[] {

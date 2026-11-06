@@ -137,6 +137,17 @@ export interface SidebarNavItem extends Tiered {
   action?: 'new-session'
   /** Keybind action id — when set, the tooltip shows the keybind hint. */
   keybindActionId?: string
+  /**
+   * The section header this row renders under (r265), or undefined for a loose row.
+   *
+   * **A seção não é um item**: não é clicável, não recebe foco, não entra na navegação por
+   * teclado. É um cabeçalho — e por isso vive aqui, no dado, e não como uma linha falsa na
+   * lista, que roubaria um `Tab` de quem navega pelo teclado.
+   *
+   * **A ordem das seções sai da ordem dos itens**: o render desenha o cabeçalho quando o
+   * grupo muda, então `order` continua sendo a única fonte de verdade da sequência.
+   */
+  group?: string
 }
 
 export interface PersistedDisplayTranscriptProvenance {

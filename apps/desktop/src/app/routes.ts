@@ -249,6 +249,19 @@ export interface SidebarNavContribution {
   path: string
   /** `'advanced'` keeps the row out of Simple mode; unset shows it everywhere. */
   tier?: InterfaceTier
+  /**
+   * The section this row belongs to, as a human label (r265).
+   *
+   * **Por que é string e não um enum**: as seções são vocabulário de PRODUTO, não do host.
+   * O B-3PO agrupa por fluxo de trabalho ("Comércio", "Operação"); outro consumidor pode
+   * não querer seção nenhuma. **Uma contribuição sem `group` continua uma linha solta**, que
+   * é como todas eram antes desta rodada.
+   *
+   * **A ordem das seções é a ordem em que elas aparecem pela primeira vez na lista** —
+   * o `order` da contribuição decide, e o render só desenha o cabeçalho quando o grupo muda.
+   * Isso mantém uma fonte de verdade só (`order`) em vez de duas.
+   */
+  group?: string
 }
 
 // ── Contributed profile-group header — the `sidebar.profileGroup.header` area ─

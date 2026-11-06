@@ -47,7 +47,19 @@ export function AmbienteScreen() {
   const porAmbiente = useMemo<Record<Ambiente, ItemVisivel[]>>(
     () => ({
       empresa: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('empresa').includes(m.grupo)),
-      engenharia: [...MODULOS_DE_ENGENHARIA]
+      engenharia: [...MODULOS_DE_ENGENHARIA],
+      /*
+       * r265: os quatro ambientes novos.
+       *
+       * **Todos vêm do MENU do produto filtrado por grupo** — nenhum inventa rota. É a mesma
+       * regra do `empresa`: um ambiente é um recorte do que já existe, não um segundo produto.
+       * `engenharia` continua sendo o único com mapa próprio, porque metade das telas dele são
+       * do Hermes e o menu do produto não as conhece.
+       */
+      automacao: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('automacao').includes(m.grupo)),
+      ia: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('ia').includes(m.grupo)),
+      estrategico: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('estrategico').includes(m.grupo)),
+      administracao: MODULOS_DO_PRODUTO.filter(m => gruposDoAmbiente('administracao').includes(m.grupo))
     }),
     []
   )

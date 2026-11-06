@@ -163,7 +163,14 @@ const b3poNavPlugin: HermesPlugin = {
       ctx.registerMany(
         itens.map((item, indice) => ({
           area: SIDEBAR_NAV_AREA,
-          data: { codicon: item.codicon, label: item.label, path: item.path } satisfies SidebarNavContribution,
+          // r265: o grupo vai junto. O contrato do SDK ganhou group? (routes.ts), entao o
+          // agrupamento que existia so em comentario agora chega a barra lateral.
+          data: {
+            codicon: item.codicon,
+            label: item.label,
+            path: item.path,
+            ...(item.grupo ? { group: item.grupo } : {})
+          } satisfies SidebarNavContribution,
           id: `nav-${item.path.replace('/', '')}`,
           order: 100 + indice
         }))

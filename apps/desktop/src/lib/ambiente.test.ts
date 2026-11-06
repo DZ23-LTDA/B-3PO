@@ -24,16 +24,39 @@ const MODULOS: ModuloDoAmbiente[] = [
 ]
 
 describe('os dois ambientes do §13:416-419', () => {
-  it('Empresa e Engenharia, e nada mais', () => {
-    expect(AMBIENTES).toEqual(['empresa', 'engenharia'])
-    expect(Object.keys(AMBIENTE_LABEL)).toHaveLength(2)
+  /*
+   * r265: o contrato mudou de DOIS para SEIS ambientes, e este teste mudou junto.
+   *
+   * **Ele nao foi removido nem afrouxado**: o que ele afirmava era "existem exatamente dois",
+   * e isso deixou de ser verdade quando a missao final nomeou seis. O que continua sendo
+   * verdade - e que o teste agora guarda - e que **os dois originais mantiveram o mesmo id**,
+   * para que a preferencia ja salva de quem usava o produto nao vire um valor invalido.
+   */
+  it('os seis ambientes da missao, na ordem em que a pessoa entra', () => {
+    expect(AMBIENTES).toEqual([
+      'empresa',
+      'engenharia',
+      'automacao',
+      'ia',
+      'estrategico',
+      'administracao'
+    ])
+    expect(Object.keys(AMBIENTE_LABEL)).toHaveLength(6)
   })
 
-  it('isAmbiente reconhece os dois e recusa o resto', () => {
+  it('os dois ambientes originais mantiveram o id e o rotulo', () => {
+    // Compatibilidade: quem tinha 'empresa' ou 'engenharia' salvo nao perde a escolha.
     expect(isAmbiente('empresa')).toBe(true)
     expect(isAmbiente('engenharia')).toBe(true)
+    expect(AMBIENTE_LABEL.empresa).toBe('Empresa')
+    expect(AMBIENTE_LABEL.engenharia).toBe('Engenharia')
+  })
+
+  it('isAmbiente reconhece os seis e recusa o resto', () => {
+    for (const a of AMBIENTES) expect(isAmbiente(a)).toBe(true)
     expect(isAmbiente('outro')).toBe(false)
     expect(isAmbiente(undefined)).toBe(false)
+    expect(isAmbiente('')).toBe(false)
   })
 })
 
