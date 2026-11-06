@@ -26,7 +26,7 @@ import { atom } from 'nanostores'
 
 import { persistString, storedString } from '@/lib/storage'
 
-import { type Ambiente, isAmbiente } from '@/lib/ambiente'
+import { type Ambiente, AMBIENTES, isAmbiente } from '@/lib/ambiente'
 
 /** Versionado: uma mudança de forma não lê o valor antigo como se fosse novo. */
 const KEY = 'hermes.desktop.b3po-ambiente.v1'
@@ -52,9 +52,24 @@ export function setAmbiente(valor: unknown): void {
   persistString(KEY, ambiente)
 }
 
-/** Alterna — o que o botão do seletor faz. */
+/**
+ * Avança para o próximo ambiente, em ciclo (r271).
+ *
+ * **A r123 escreveu esta função para DOIS ambientes**: `empresa ? engenharia : empresa`. Com
+ * seis, ela virava um interruptor que só conhecia duas posições — quem estivesse em `ia` apertava
+ * e caía em `empresa`, e `automacao`, `estrategico` e `administracao` eram **inalcançáveis por
+ * aqui**.
+ *
+ * **Ciclar é a semântica que o nome promete**: alternar entre as opções que EXISTEM, não entre as
+ * que existiam quando a função foi escrita. A ordem é a de `AMBIENTES`, que é a ordem em que a
+ * pessoa entra.
+ */
 export function alternarAmbiente(): void {
-  setAmbiente($ambiente.get() === 'empresa' ? 'engenharia' : 'empresa')
+  const indice = AMBIENTES.indexOf($ambiente.get())
+
+  // `indexOf` de um valor fora da lista devolve -1, e `(-1 + 1) % 6` é 0 — o primeiro, que é o
+  // destino certo para um estado que não deveria existir.
+  setAmbiente(AMBIENTES[(indice + 1) % AMBIENTES.length])
 }
 
 /**

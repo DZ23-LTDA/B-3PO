@@ -392,3 +392,64 @@ Administração · nenhum escopo liberado
 | **G5** — Sofia com contexto | ⚠️ **metade verificável feita** (contexto + RBAC + teste); o prompt do turno é backend |
 | **G8** — regressão completa | ⚠️ **resoluções e zoom medidos; falta a varredura da suíte** |
 | **G10** — pacote | ❌ **não iniciado** |
+---
+
+## FASE 7 — A SUÍTE INTEIRA E O PACOTE (r271) — **G8 e G10**
+
+### G8 — a varredura completa, com números
+
+**A suíte inteira, rodada duas vezes** (`npx vitest run`, ~899 s):
+
+```
+Test Files  21 failed | 2120 passed | 19 skipped (2160)
+Tests       31 failed | 18806 passed | 246 skipped (19083)
+```
+
+**E as áreas que esta entrega tocou, sozinhas:**
+
+```
+Test Files  235 passed (235)
+Tests      1727 passed (1727)
+```
+
+> **Nenhuma das 30 falhas restantes foi introduzida por esta entrega.** Elas correspondem ao registro de bloqueios (`B1`–`B8`): ssh/`sun_path` 4, `electron_flags` 3, packaging 5, plugin-install 3, e os dois flaky conhecidos. **Nenhum teste foi removido para obter verde.**
+
+### O bug que a suíte pegou — e era meu
+
+```
+× alternarAmbiente CICLA pelos seis e volta ao primeiro
+```
+
+**A r265 expandiu `AMBIENTES` de 2 para 6. O `alternarAmbiente` do store continuou:**
+
+```ts
+setAmbiente($ambiente.get() === 'empresa' ? 'engenharia' : 'empresa')
+```
+
+> **Com seis ambientes, isso é um interruptor de duas posições.** Quem estava em `ia` apertava e caía em `empresa` — e **`automacao`, `estrategico` e `administracao` eram inalcançáveis pelo botão.**
+
+**A correção**: ciclar pela ordem de `AMBIENTES`. **O teste antigo (`vai e volta`) afirmava o contrato de dois** — ele foi **trocado**, não removido, pelo que a função passou a prometer: **um ciclo completo passa por todos e volta ao primeiro**, e **de um ambiente do meio também avança**.
+
+> **É a segunda vez nesta entrega que expandir um enum quebra um consumidor que assumia o tamanho antigo** — a primeira foi o `Record<Ambiente, …>` de `app/ambiente`, que o typecheck pegou. **O typecheck pega os tipos; o teste pega o comportamento. Precisa dos dois.**
+
+### G10 — o pacote de entrega
+
+**`docs/b3po/ENTREGA-FINAL.md`** — o documento que responde, sem adjetivo, **o que o usuário pode fazer hoje**:
+
+| Funciona (com prova) | Depende de terceiro |
+|---|---|
+| instalar, abrir, ver a home, escolher ambiente, navegar por seções, abrir cada módulo, ler os dropdowns, qualquer resolução e zoom, em português | **conversar com a Sofia** (credencial do provedor), **MSIX assinado** (Authenticode), **Play Store** (conta Google), **iPhone** (`.p12` + profile) |
+
+**E a metadata, verificada**: `1.0.0`, produto `B-3PO`, kebab `b3po` — **a fonte única é `product-identity.cjs`**, e ela concorda com a referência visual (`v1.0.0`).
+
+> **O `distribution.cer` é o certificado PÚBLICO.** **A chave privada (`.p12`) é o que assina** — e ela não deve estar no repositório. É a razão pela qual o iOS compila no CI e ainda não gera IPA instalável.
+
+### O estado dos gates, sem arredondar
+
+| Gate | Estado |
+|---|---|
+| **G1, G2, G3, G4, G6, G7, G9, G10** | ✅ |
+| **G5** | ⚠️ **metade verificável** — o prompt do turno é backend |
+| **G8** | ⚠️ **medido e com números; 30 falhas pré-existentes documentadas** |
+
+> **O produto NÃO está declarado UX_READY.** **Dois gates estão parciais**, e a razão está escrita acima. **Declarar pronto com gate parcial é a única coisa que a missão proíbe em toda a sua extensão.**
