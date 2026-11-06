@@ -112,10 +112,31 @@ ANTES                          AGORA
 
 ### Da suíte de testes
 
-**Medição da suíte inteira**: **21 139 testes, 20 731 verdes, 29 vermelhos, 246 pulados.**
+**Medição da suíte inteira**: **19 083 testes, 18 806 verdes, 246 pulados, 31 vermelhos** — e os 31 vermelhos **não são 31 problemas**. Rodando **cada arquivo com falha isoladamente** (r275):
 
-- **As áreas que esta entrega tocou: 235 arquivos, 1 727 testes, TODOS verdes.**
-- **As 29 vermelhas são pré-existentes ou flaky** — o baseline do projeto é **17 fixas + 2 flaky** (`audit-store`, `channel-build-version`). **Nenhuma foi introduzida por esta entrega**, e nenhum teste foi removido para obter verde.
+```
+7   flaky sob carga     passam sozinhos, provado arquivo por arquivo
+1   corrigido           catálogo i18n regenerado (40 chaves das telas novas)
+12  reais              infraestrutura, com causa nomeada
+0   de UX              nenhuma nas superfícies que esta entrega tocou
+```
+
+**As áreas que esta entrega tocou: 238 arquivos, 1 733 testes** — e o único vermelho entre eles é o
+`use-composer-submit.send-then-close`, que **passa 7/7 isolado** (é prazo de 30 s sob 2 160 arquivos
+em paralelo, não defeito).
+
+**As 12 reais**, com o bloqueio que as causa:
+
+| Arquivo | Testes | Causa |
+|---|---|---|
+| `electron/ssh-connection.test.ts` | 4 | `sun_path` de 108 bytes e sinais POSIX — **B1** |
+| `scripts/bundle-electron-main.test.mjs` | 3 | `desktop.electron_flags` não é lido — **B3** |
+| `electron/desktop-plugin-install.test.ts` | 3 | CRLF em mais de um ponto do git — **B4** |
+| `electron/linux-nvidia-egl-recovery.native.test.ts` | 2 | recuperação de EGL no Linux — sem GPU NVIDIA aqui |
+| `scripts/stage-native-deps.test.mjs` | 1 | espera a mensagem `/desktop packaging continues/` |
+| `scripts/run-electron-builder.test.mjs` | 1 | `Cannot consume packaging inputs` — **B2** |
+
+**Nenhum teste foi removido para obter verde.**
 
 ### Dos gates de aceite
 
