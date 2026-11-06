@@ -18,6 +18,14 @@ export interface StockRow {
   name: string
   sku: string
   unit: string
+  /**
+   * r48 — o SKU tem saldo mas NAO esta no catalogo.
+   *
+   * Descoberto olhando a tela: ela dizia "0 produtos" e listava 6 movimentacoes. A causa estava
+   * aqui — `stockRows` so iterava `products`, entao um SKU que so existe em `balances` era
+   * INVISIVEL. O estoque nao pode esconder o que tem.
+   */
+  orfao?: boolean
 }
 
 export function emptyStockDraft(sku = ''): StockDraft {
@@ -32,15 +40,32 @@ export function emptyStockDraft(sku = ''): StockDraft {
  * existe no estoque.
  */
 export function stockRows(products: readonly ProductRow[], balances: Record<string, number>): StockRow[] {
-  return products
-    .filter(product => product.active)
-    .map(product => ({
-      balanceMilli: balances[product.sku] ?? 0,
-      name: product.name,
-      sku: product.sku,
-      unit: product.unit || 'un'
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+  const doCatalogo = products.filter(product => product.active)
+
+  const catalogo: StockRow[] = doCatalogo.map(product => ({
+    balanceMilli: balances[product.sku] ?? 0,
+    name: product.name,
+    sku: product.sku,
+    unit: product.unit || 'un'
+  }))
+
+  /*
+   * r48 — SKU com saldo e SEM cadastro entra na lista, marcado.
+   *
+   * Antes, `stockRows` so percorria `products`: um movimento de SKU nao cadastrado sumia da tabela
+   * de estoque e a tela dizia "0 produtos" com 6 movimentacoes no historico. **O estoque nao pode
+   * esconder o que tem.**
+   *
+   * Listar o orfao NAO decide a modelagem (exigir catalogo? criar na compra?) — so para de mentir.
+   * O nome vem do proprio SKU, e `orfao: true` deixa a UI marcá-lo como "não cadastrado".
+   */
+  const conhecidos = new Set(catalogo.map(row => row.sku))
+
+  const orfaos: StockRow[] = Object.keys(balances)
+    .filter(sku => !conhecidos.has(sku) && balances[sku] !== 0)
+    .map(sku => ({ balanceMilli: balances[sku] ?? 0, name: sku, sku, unit: 'un', orfao: true }))
+
+  return [...catalogo, ...orfaos].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
 }
 
 /** Valida antes de enviar. Devolve a chave do problema, ou null. */

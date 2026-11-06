@@ -219,7 +219,13 @@ export function StockView() {
               <tbody>
                 {rows.map(row => (
                   <tr key={row.sku}>
-                    <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">{row.name}</td>
+                    <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">
+                      {row.name}
+                      {/* r48: saldo sem cadastro — antes a linha nem existia e a tela dizia "0 produtos". */}
+                      {row.orfao ? (
+                        <span className="ml-2 text-(--ui-danger)">não cadastrado — só tem movimentação</span>
+                      ) : null}
+                    </td>
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">{row.sku}</td>
                     <td className="border-b border-(--ui-border) py-1 pr-2">
                       <span className={isLowStock(row.balanceMilli) ? 'text-(--ui-danger)' : 'text-foreground'}>

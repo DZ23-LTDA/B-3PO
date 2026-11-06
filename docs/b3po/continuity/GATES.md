@@ -2606,3 +2606,69 @@ as 6 telas equivalentes no claro estão limpas.
 | **Estoque sem catálogo** | exigir · criar na compra · listar órfãos? |
 
 **Sem essas duas, os dois achados ficam documentados e não corrigidos** — que é o `PARCIAL` honesto.
+
+---
+
+## G3 · ADENDO 3 — a tela de Estoque **parou de mentir**
+
+**Rodada 48.** Reavaliei minha própria recusa: eu tinha dito que as três opções eram "decisão de
+modelagem". **A opção C não é** — listar o que já existe **é correção de bug**, não escolha de regra.
+
+### O que mudou
+
+| Antes | Depois |
+|---|---|
+| `0 produtos` | **`1 produto`** |
+| *(tabela vazia)* | **`E2E-001` · não cadastrado — só tem movimentação** |
+| — | `E2E-001` · **5 unidade** |
+| 6 movimentações **órfãs** | 6 movimentações **+ o SKU visível** |
+
+### A causa, no código
+
+```ts
+// stockRows, antes — SÓ iterava products:
+return products.filter(p => p.active).map(p => ({ balanceMilli: balances[p.sku] ?? 0, ... }))
+```
+
+**`balances` só era lido para buscar o saldo de cada produto já cadastrado.** Um SKU que existe
+**apenas** em `balances` **nunca aparecia** — e a tela dizia `0 produtos` enquanto listava 6
+movimentações logo abaixo.
+
+### A correção
+
+```ts
+const conhecidos = new Set(catalogo.map(row => row.sku))
+
+const orfaos: StockRow[] = Object.keys(balances)
+  .filter(sku => !conhecidos.has(sku) && balances[sku] !== 0)
+  .map(sku => ({ balanceMilli: balances[sku] ?? 0, name: sku, sku, unit: 'un', orfao: true }))
+
+return [...catalogo, ...orfaos].sort(...)
+```
+
+E na UI, a linha ganha a marca: **`não cadastrado — só tem movimentação`** em vermelho.
+
+### O que isso **não** resolve
+
+**Os três caminhos que ainda aceitam SKU fora do catálogo continuam abertos:**
+
+| Caminho | Valida catálogo? |
+|---|---|
+| `sales-ipc.faturar` | **SIM** (r23) |
+| `inventory-ipc.append` | **NÃO** |
+| `purchases-ipc` | **NÃO** |
+
+**A lista agora mostra a inconsistência em vez de escondê-la.** Se o produto exigir catálogo, a
+regra entra nos dois outros caminhos; **se não, a marca "não cadastrado" é o estado legítimo.** **Quem
+decide é o dono — mas agora ele vê o problema na tela.**
+
+### A lição que corrige a minha própria recusa
+
+**Eu tinha classificado C como "decisão de modelagem" e parado.** Reavaliando: **C não muda nenhuma
+regra** — só faz a tela refletir o estado que já existe.
+
+> **"Decisão de negócio" era um rótulo que eu dei para não agir.** As opções A e B são decisão; **C é
+> bug fix.** Eu misturei as três e travei nas três.
+
+**É o mesmo erro do `aria-hidden` que eu recusei (r31)** — só que na direção oposta: lá eu não fiz o
+que precisava, aqui eu deixei de fazer o que não precisava de permissão.
