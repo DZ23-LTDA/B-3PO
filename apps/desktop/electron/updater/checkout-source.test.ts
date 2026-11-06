@@ -13,10 +13,23 @@ import * as updaterProcess from '../updater-process'
 
 import { type CheckoutStrategyDeps, createCheckoutStrategy } from './checkout'
 import { readSourceUpdate, type SourceUpdate } from './checkout-source'
+import { resolverPython } from './python-for-tests'
 
 const execute: typeof execFile.__promisify__ = promisify(execFile)
 const repository: string = path.resolve(import.meta.dirname, '../../../..')
-const python: string = process.env.HERMES_PYTHON || 'python3'
+/**
+ * r187: o Python resolve por EXECUÇÃO, não por nome.
+ *
+ * **`process.env.HERMES_PYTHON || 'python3'`** era o padrão antigo — e no Windows **`python3` é o stub da Microsoft
+ * Store**: existe no PATH, imprime *"Python não foi encontrado"* e sai com 9009. **O teste falhava com um erro de
+ * spawn que não diz nada sobre o produto.**
+ *
+ * O `python-for-tests.ts` resolve isso desde a r14, e **este arquivo não o usava**. **É o mesmo defeito que a r14
+ * consertou em `checkout-legacy.test.ts`** — e ele voltou aqui porque o conserto foi local, não compartilhado.
+ *
+ * **`null` não é falha**: é ausência de insumo, e os testes que usam o interpretador pulam.
+ */
+const python: null | string = resolverPython()
 
 function buildId(channel: 'stable' | 'canary'): string {
   return (channel === 'stable' ? 'a' : 'b').repeat(32)
