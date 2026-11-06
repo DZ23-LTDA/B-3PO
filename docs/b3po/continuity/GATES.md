@@ -2134,3 +2134,74 @@ e enganoso ao mesmo tempo — o mobile não passou por `axe` nem por leitor de t
 
 **Isso é `BLOCKED_BY_EXTERNAL_DEPENDENCY` para o teste real** (emulador + dispositivo), e
 **`NOT_APPLICABLE`** para o `axe`. **Nenhum dos dois é "passou".**
+
+---
+
+## CORREÇÃO CRÍTICA — o `<main>` que eu adicionei em r19 **subiu o layout** e eu não vi
+
+**Rodada 41, apontado pelo proprietário** com uma captura de tela: *"cuidado com o desgner voce
+subiu demais"*.
+
+### O erro
+
+Na **rodada 19** eu adicionei `<main className="flex min-h-0 min-w-0 flex-1 flex-col">` em volta do
+`WiredPane` para corrigir os landmarks ARIA. **O `flex-1` não define altura num pai `block`** — e o
+pai é `absolute inset-0 overflow-auto`.
+
+```
+DIV absolute inset-0 overflow-auto      h = 965
+  MAIN flex ... flex-1 flex-col         h = 783   ← 182 px MENOR
+    conteúdo                            h = 783
+```
+
+**O conteúdo da home passou a se distribuir em 783 px dentro de um espaço de 965** — e "subiu" ~100
+px, deixando um vazio morto embaixo.
+
+### Por que meus próprios testes NÃO pegaram
+
+**Eu medi o `<main>` na rodada 19** e registrei: *"main: 312x1092 / 367x1001 / 500x977 / 756x908 /
+1180x783"*.
+
+**As alturas VARIAVAM com o viewport** e eu tratei isso como normal. **O sinal estava na minha
+própria tabela**: o main tinha a altura do **conteúdo**, não do **espaço**. Se eu tivesse comparado
+**main × pai**, o 783 vs 965 teria aparecido em 5 segundos.
+
+> **Eu medi o elemento, não a relação entre o elemento e o pai.** Um número sozinho não diz se está
+> certo — precisa de um termo de comparação.
+
+### A correção
+
+```diff
+- <main className="flex min-h-0 min-w-0 flex-1 flex-col">
++ <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+```
+
+### Verificação
+
+| Viewport | Rota | main | pai | |
+|---|---|---|---|---|
+| 1707×1019 | `/` | **965** | 965 | OK |
+| 1707×1019 | `/crm` `/compras` `/sales` `/stock` | **965** | 965 | OK |
+| 375×667 | todas | 585–613 | 585–613 | OK |
+
+`h1.y`: **327 → 426** (+99 px, o conteúdo voltou ao centro).
+`axe`: **inalterado** (1 violação conhecida no `/`, 0 no resto).
+Gate **14 ok** · typecheck **0 erros**.
+
+### A lição, e é a mais séria desta auditoria
+
+**Eu introduzi um defeito visual corrigindo um defeito de acessibilidade — e o escondi de mim mesmo
+com uma medição que parecia suficiente.**
+
+Os outros erros desta sessão foram **de leitura** (o `jest`, o `aria-label`, o tema escuro). **Este
+passou por 22 rodadas sem ser notado** porque:
+
+1. o `axe` ficou **verde** (o `<main>` existe, o landmark está lá);
+2. o layout **não quebrou** (nada transbordou, nada sumiu);
+3. **eu não tinha uma captura de tela de referência** para comparar.
+
+**O proprietário viu em 2 segundos o que 22 rodadas de medição não viram** — porque ele **olhou** e
+eu **medi**.
+
+> **Medir não substitui olhar.** O `GATES.md` registrava `nav: 1 · main: 1` — verdade — e o produto
+> estava **visualmente errado**. É a definição de cobertura que não cobre.
