@@ -282,8 +282,22 @@ export const ptOverrides: TranslationOverrides = {
     // inglês quando não há provedor nenhum; esta tradução existe para que a pessoa leia o que
     // falta E onde resolver, no idioma do produto.
     gatewayMenu: {
+      gateway: 'Gateway',
+      connected: 'Conectado',
+      connecting: 'Conectando',
+      offline: 'Fora do ar',
+      inferenceReady: 'Inferência pronta',
+      inferenceNotReady: 'Inferência indisponível',
+      checkingInference: 'Verificando a inferência',
+      disconnected: 'Desconectado',
+      reconnectGateway: 'Reconectar',
+      openSystem: 'Abrir painel do sistema',
+      connection: label => `Conexão: ${label}`,
+      recentActivity: 'Atividade recente',
+      viewAllLogs: 'Ver todos os logs →',
+      messagingPlatforms: 'Plataformas de mensagem',
       gatewayNeedsProvider:
-        'Nenhum provedor de IA configurado. Abra Configurações → Provedores e adicione uma chave, ou escolha um modelo local.',
+        'Nenhum provedor de IA configurado. Abra Configurações → Provedores e adicione uma chave, ou escolha um modelo local.'
     },
     modelMenu: ptModelMenu,
     approvalMode: {
@@ -296,6 +310,12 @@ export const ptOverrides: TranslationOverrides = {
       offDescription: 'Executar sem pedir aprovação'
     },
     statusbar: {
+      commitsBehind: (count, branch) => `${count} commit${count === 1 ? '' : 's'} atrás de ${branch}`,
+      connectionCloudTooltip: host => `B-3PO Cloud · ${host}`,
+      connectionSshTooltip: host => `SSH · ${host}`,
+      connectionRemoteTooltip: host => `Remoto · ${host}`,
+      commit: sha => `commit ${sha}`,
+      branch: branch => `branch ${branch}`,
       unknown: 'desconhecido',
       restart: 'reiniciar',
       update: 'atualizar',
