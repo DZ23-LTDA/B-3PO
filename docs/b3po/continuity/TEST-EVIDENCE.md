@@ -120,3 +120,62 @@ faturadas (1000 + 1000) e a cancelada (500) intocada. **É o comportamento corre
 **Nenhuma dessas duas falhas foi corrigida nesta rodada** — a primeira exige saber o vocabulário de
 erro que o backend usa para "produto não encontrado"; a segunda é decisão de negócio. Ficam
 registradas como dívida com nome, não como "tudo certo".
+
+---
+
+## E2E · Sofia — plano persistido e execução verificável (B6) — **PASSOU**
+
+**O critério mais difícil da lista**: provar que o plano **executou**, não que foi escrito.
+
+### O contrato que existe
+
+`api/sofia.ts` declara um modelo completo, com `SofiaTarefaRow` carregando `depende_de`,
+`execucao_id`, `resultado` e seis estados (`bloqueada · concluida · executando · falhou · pendente ·
+pronta`), e `PlanoComGrafo` com `grafo.valido`, `ciclos`, `dependencias_orfas` e `prontas`.
+
+### O que foi medido
+
+| # | Operação | Resultado |
+|---|---|---|
+| 1 | `sofia.criar({objetivo, escopo, tarefas:[t1, t2(depende_de:["t1"])]})` | `plano-mw5fr310-6ibo` · `status: rascunho` |
+| 2 | `sofia.planos()` | o plano aparece — **persistiu** |
+| 3 | **`sofia.aprovar`** | **`{"error":"autoaprovacao"}`** — o criador não aprova o próprio plano |
+| 4 | `sofia.tarefa({plano_id, tarefa_id:'t1', patch:{status:'concluida', execucao_id:'exec-e2e-001', resultado:{feito:true, prova:'r282'}}})` | `t1` concluída · **`execucao_id` e `resultado` gravados** |
+| 5 | ler de novo | **`prontas: ["t2"]`** — o grafo **recalculou** a dependência |
+| 6 | concluir `t2` | `exec-e2e-002` |
+| 7 | `sofia.status({status:'concluido'})` | plano `concluido` |
+| 8 | **reload da janela** | **idêntico**: mesmo `plano_id`, mesmo status, mesmas execuções, visível na tela |
+
+```
+ANTES:  plano-mw5fr310-6ibo · concluido · t1:concluida:exec-e2e-001 · t2:concluida:exec-e2e-002
+DEPOIS: plano-mw5fr310-6ibo · concluido · t1:concluida:exec-e2e-001 · t2:concluida:exec-e2e-002
+```
+
+**A execução é verificável de fora**: cada tarefa carrega o `execucao_id` que a executou e o
+`resultado` que produziu. Não é um log de intenção — é o registro do que aconteceu.
+
+### A governança que não é decorativa
+
+`sofia-ipc.ts:131` diz, no código:
+
+> *"o ator vem do resolvedor, nunca do payload. Se este canal deixasse o renderer mandar o nome do
+> aprovador, a recusa seria decorativa: bastaria escrever o nome de outra pessoa."*
+
+**Medido**: `aprovar` devolveu `autoaprovacao`. **A regra vale de fato.**
+
+### Por que a primeira tentativa não funcionou
+
+Chamei `sofia.tarefa({..., status, resultado})` e **nada mudou**. O contrato real é
+`{ plano_id, tarefa_id, patch }` — o status vai dentro de `patch` (`sofia-ipc.ts:114`). **O canal
+aceitou a chamada e ignorou os campos**: não houve erro, o plano ficou intacto. Isso é silencioso
+por design (patch é opaco), e vale registrar como armadilha para quem for integrar.
+
+### O que NÃO foi testado
+
+| Item | Por quê |
+|---|---|
+| **Execução automática** por um agente | o `execucao_id` foi **fornecido por mim**, não por um executor real. A Sofia registra a execução; ela não a dispara neste teste |
+| Plano com **ciclo** (`grafo.ciclos`) | precisaria de tarefas que se dependem mutuamente |
+| **Dependência órfã** (`dependencias_orfas`) | precisaria de `depende_de` apontando para id inexistente |
+| `escopo: 'projeto'` e `'trabalho_pontual'` | testei só `organizacao` |
+| Aprovação por **outro ator** | o HOME tem um ator só; `autoaprovacao` é justamente o que impede o único ator de aprovar |
