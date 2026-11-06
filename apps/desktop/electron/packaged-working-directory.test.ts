@@ -107,7 +107,11 @@ test.skipIf(process.platform !== 'win32')(
                 builder.onLoad({ filter: /.*/, namespace: 'fixture' }, ({ path: name }) => ({
                   contents:
                     name === 'electron'
-                      ? `export const app = { isPackaged: ${packaged} }`
+                      ? // r186: `session` entrou. O `system-proxy-env` (alcançado pelo entry) importa
+                        // `{ session } from 'electron'`, e um fixture que só exporta `app` **quebra o bundle** — o
+                        // teste falhava em `No matching export in "fixture:electron" for import "session"`, que é
+                        // um erro de FIXTURE e não do produto. Era o bug #2 da r181, e ele nunca foi flaky.
+                        `export const app = { isPackaged: ${packaged} }\nexport const session = { defaultSession: { resolveProxy: async () => 'DIRECT' } }`
                       : [
                           `import { spawn } from 'node:child_process'`,
                           `spawn(process.env.FIXTURE_NODE, ['-e', ${JSON.stringify(HELPER)}], { detached: true, stdio: ['ignore', 'inherit', 'ignore'] })`,
