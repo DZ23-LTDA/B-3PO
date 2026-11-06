@@ -1010,3 +1010,59 @@ isso `faturar` voltou a **CC ≤ 20** e os dois passam.
 | baixa de estoque + conta a receber | **READY** (medido) |
 | SKU inexistente culpa o saldo | **corrigido** |
 | preço zero vende sem lançar financeiro | **aberto** — decisão de negócio: cortesia ou bloqueio? |
+
+---
+
+## G8 · ADENDO 5 — formulários e foco: o produto NÃO usa modal onde eu supus
+
+**Rodada 24.** Auditei os formulários CRUD que as rotas não cobrem (o `axe` numa rota não abre o
+formulário). O resultado **corrigiu uma suposição minha** e é, no conjunto, boa notícia.
+
+### As 6 telas + formulário: **todas livres**
+
+| Tela | Ação aberta | Violações |
+|---|---|---|
+| `/crm` | Adicionar contato | **0** |
+| `/crm` | Adicionar oportunidade | **0** |
+| `/compras` | Cadastrar fornecedor | **0** |
+| `/compras` | Pedir | **0** |
+| `/sales` | Adicionar item | **0** |
+| `/stock` | Registrar movimentação | **0** |
+
+### A suposição errada que a medição corrigiu
+
+Eu esperava **modais** e fui medir *"foco inicial, contenção, retorno do foco"* — os critérios que o
+`references/quality-gates.md` exige para modal.
+
+**Medido**: ao clicar em "Adicionar contato", **não existe `role="dialog"` nenhum**. O foco
+permanece no botão porque **não há modal** — o formulário é **inline, na própria página**.
+
+**Isso não é um defeito: é uma escolha melhor.** Formulário inline **não tem armadilha de foco**,
+não esconde o contexto e não exige que o leitor de tela anuncie "diálogo". A primeira medição
+registrou `dialogo:sim` por um overlay residual de outro elemento — **e eu quase anotei "foco não
+entra no modal" como bug**, quando o modal simplesmente não existe.
+
+### O que foi testado de teclado (com resultado)
+
+| Comportamento | Resultado nas 4 telas |
+|---|---|
+| `Escape` fecha/fecha o painel | **sim** |
+| foco retorna ao gatilho | **sim** |
+
+**O `Esc` e o retorno de foco funcionam** — o que é a parte do critério de modal que **se aplica**
+aos painéis inline.
+
+### O que continua `NOT_TESTED`
+
+| Item | Por quê |
+|---|---|
+| **contenção de foco** (Tab não escapa) | não há modal nesses fluxos; não se aplica |
+| **modal de bot** (Bot Mode) | não consegui abrir pela automação — o seletor da aba BOTS não é `button`/`tab` |
+| **Tab** percorrendo o formulário inteiro | não percorrido, só o `Esc` e o retorno |
+| leitor de tela real (NVDA) | nenhum teste com AT de verdade |
+
+### Veredito
+
+**A a11y do produto está melhor do que a auditoria supunha**: 27 de 29 rotas limpas, **6 formulários
+CRUD limpos**, `Esc` e retorno de foco funcionando. O que sobra é **a mesma** violação estrutural do
+`PaneTab` (2 telas) e os itens de teclado acima, **nomeados**.
