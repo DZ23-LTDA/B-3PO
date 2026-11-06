@@ -182,3 +182,71 @@ pior lugar para economizar**.
 **Não corrigi** porque `status.py` é superfície compartilhada com o dashboard e a CLI: mudar o
 `overall` para incluir inferência mudaria o veredito de saúde em todas as telas, e isso pede decisão
 de produto sobre o que "saudável" significa.
+
+---
+
+## G3 · Domínio canônico CRM / Compras / Estoque / Vendas — **PARCIAL**
+
+**Três dos quatro domínios passaram em E2E; Vendas passa com duas falhas de regra.**
+
+| Domínio | Estado | Evidência |
+|---|---|---|
+| **Compras** | **READY** | 7 etapas medidas (B4): solicitação → cotação → aprovação → pedido → recebimento → estoque 3000 → financeiro R$ 150 |
+| **Estoque** | **READY** | entrada +5000 → 6000 · saída −2000 → 4000 · inventário ajusta para 5000 (`ajustes: 1`) |
+| **CRM** | **READY** | contato criado e listado (`Contato E2E r288`, `tenant_id: local`); pipeline e conversas têm `list/upsert/remove` |
+| **Vendas** | **PARCIAL** | baixa no estoque + conta a receber funcionam; **SKU inexistente culpa o saldo** e **preço zero passa sem registro** |
+
+### Estoque — o ciclo medido
+
+```
+antes:            {"E2E-001": 1000}
+entrada +5000  →  {"E2E-001": 6000}   balance: 6000
+saída   −2000  →  {"E2E-001": 4000}   balance: 4000
+inventário      →  {"ajustes": 1, "ignoradas": [], "sem_diferenca": []}
+final:            {"E2E-001": 5000}
+```
+
+**`kind` é obrigatório** (`entrada · saida · ajuste`) e **`saida` subtrai** (`inventory-store.ts:95`).
+Sem ele: `kind_invalid`. **A validação está no lugar certo.**
+
+### A divergência de campo no estoque
+
+Chamei `append({ product_sku, kind, quantity_milli, motivo, referencia })` e o movimento gravou:
+
+```json
+{ "kind": "entrada", "product_sku": "E2E-001", "quantity_milli": 5000,
+  "reason": "", "ref": "" }        ← motivo e referencia vazios
+```
+
+**O store lê `reason`/`ref`; eu mandei `motivo`/`referencia`.** O `api/inventory.ts` repassa o payload
+**cru** (`api.append(payload)`), então **quem chama precisa saber os nomes em inglês** — e a tela de
+estoque pode estar mandando os certos. **Não verifiquei qual a tela usa**, então não afirmo que é bug
+de produto; afirmo que **é uma armadilha de contrato**.
+
+### CRM — o que existe
+
+| Bridge | Métodos |
+|---|---|
+| `crmContacts` | `list · upsert · remove` |
+| `crmPipeline` | `list · upsert · remove` |
+| `crmTasks` | `list · upsert · remove` |
+| `crmConversations` | `list · upsert · remove` |
+
+**CRUD completo nos quatro.** Contato criado carrega `tenant_id: local` e os campos de histórico
+(`last_purchase_at`, `last_ticket_at`) — **o modelo antecipa o que ainda não aconteceu**, o que é
+bom sinal de desenho.
+
+### O que NÃO foi testado no G3
+
+| Item | Por quê |
+|---|---|
+| CRM: `upsert` de **oportunidade** no pipeline | só listei; não criei estágio/oportunidade |
+| CRM: `remove` em qualquer entidade | não apaguei (o ato destrutivo pede sua palavra) |
+| Estoque: `kind: 'ajuste'` isolado | usei entrada/saída e o inventário, que já ajusta |
+| Estoque: recusa de saída **sem saldo** | testei na venda (`saldo_insuficiente`), não no `append` direto |
+| Vendas: ver item por item | já feito no B5 |
+
+### Correção do veredito
+
+**G3 = PARCIAL** por causa de **Vendas** (as duas falhas do B5). Os outros três domínios estão
+`READY` com evidência de execução, não de leitura.
