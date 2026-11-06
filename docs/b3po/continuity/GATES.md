@@ -1066,3 +1066,55 @@ aos painéis inline.
 **A a11y do produto está melhor do que a auditoria supunha**: 27 de 29 rotas limpas, **6 formulários
 CRUD limpos**, `Esc` e retorno de foco funcionando. O que sobra é **a mesma** violação estrutural do
 `PaneTab` (2 telas) e os itens de teclado acima, **nomeados**.
+
+---
+
+## G8 · ADENDO 6 — teclado medido, e por que o `PaneTab` continua aberto
+
+**Rodada 25.** Dois resultados: um `NOT_TESTED` fechado e uma recusa **fundamentada**.
+
+### Tab: a ordem do CRM está correta
+
+Percorri 10 paradas de `Tab` a partir do primeiro campo do formulário de contato:
+
+```
+ 1. INPUT  Nome              6. BUTTON Registrar recusa
+ 2. INPUT  Telefone          7. BUTTON Remover
+ 3. INPUT  Empresa           8. INPUT  Oportunidade
+ 4. BUTTON Adicionar contato 9. INPUT  Valor (centavos)
+ 5. BUTTON Registrar autor. 10. SELECT Contato
+
+saiu do conteúdo principal? NÃO
+```
+
+**A ordem segue o formulário e não escapa para a sidebar.** Para quem navega por teclado, o caminho
+é previsível — nenhum salto para fora do `main`.
+
+### Por que o `nested-interactive` NÃO foi corrigido
+
+Eu tinha proposto `aria-hidden` + `tabIndex={-1}` no botão de fechar do `PaneTab`. **Fui verificar
+antes de aplicar** e a resposta é que **isso quebraria a função**:
+
+```
+grep 'onKeyDown|Delete|Backspace' apps/desktop/src/components/ui/pane-tab.tsx
+→ (nenhum handler de teclado)
+```
+
+**O `PaneTab` não tem caminho de teclado para fechar a aba.** Se o botão X sair da árvore de
+acessibilidade, o usuário de leitor de tela **perde a única forma de fechar** — trocaria uma
+violação de conformidade por um **controle inoperável**.
+
+**A correção correta** é estrutural: tirar o `<button>` de dentro do elemento com `role="tab"`,
+deixando-os irmãos sob um wrapper neutro que preserva o `.group/tab` do hover. Isso **toca o
+componente que renderiza toda aba do app** (workspace, preview, browser, terminal) e os testes que
+dependem de `[data-tree-tab]` + `role="tab"` no mesmo nó.
+
+**Não faço sem a sua palavra.** Registrado como `ABERTO`, com a proposta e o custo.
+
+### O que continua `NOT_TESTED`
+
+| Item | Estado |
+|---|---|
+| modal do Bot Mode | a aba BOTS não é `button`/`tab`; a automação não a abriu |
+| leitor de tela real (NVDA/VoiceOver) | nenhum teste com AT de verdade |
+| Tab nas outras 28 rotas | só o CRM foi percorrido, como amostra |
