@@ -194,9 +194,14 @@ Ligar o webhook do adapter oficial ao store de conversas:
 6. chave nova em catalogo grande: localizar o bloco **contando chaves**, nunca por proximidade de texto.
 
 
-## PONTO DE RETOMADA — fim da rodada 199 (leia isto primeiro)
+## PONTO DE RETOMADA — fim da rodada 210 (leia isto primeiro)
 
-- **branch** `b3po-brand` · **HEAD** `c89404caf9` · **261 commits** · arvore limpa
+> **r210: o B3PO-MASTER-CHECKPOINT.json (r207) e o B3PO-MASTER-STATE.md (r208) foram reconciliados —
+> estavam em r132, com 74 e 76 rodadas de atraso. O BLOCKERS e o TEST-RESULTS tambem (r209).**
+> **A licao esta la: os quatro arquivos que envelheceram afirmam NUMEROS; os dois que nao envelheceram
+> (DECISIONS, CHANGELOG) afirmam DECISOES e FATOS.**
+
+- **branch** `b3po-brand` · **HEAD** `a7ebf51c21` · **62203 commits** · arvore limpa
 - **gate** `python scripts/check` -> **14 checks, ok**
 - **MSIX** reconstruido a cada rodada, **nao assinado**
 - **PR #1** draft, aberto, NOT READY
