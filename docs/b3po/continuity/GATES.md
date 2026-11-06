@@ -2320,3 +2320,98 @@ tinha medido por API e **nunca tinha visto na tela**.
 
 > **A captura transforma "eu medi" em "eu vi".** E o que eu vi na primeira tentativa foi o que 30
 > rotas de `axe` e 20 testes de bridge não mostraram.
+
+---
+
+## G3 · ADENDO 2 — ESTOQUE: o catálogo vazio com 6 movimentações (achado da revisão visual)
+
+**Rodada 44.** Encontrado **olhando a captura** de `/stock`, não medindo.
+
+### O que a tela mostra
+
+```
+Estoque
+  Produto: [Selecione um produto]
+  0 produtos
+  Cadastre um produto antes — o estoque precisa do catálogo.
+
+  Movimentações recentes
+    Entrada · E2E-001 · 1 · inventario
+    Saída   · E2E-001 · 2
+    Entrada · E2E-001 · 5
+    Saída   · E2E-001 · 1 · venda 2
+    Saída   · E2E-001 · 1 · venda 1
+    Entrada · E2E-001 · 3 · compra 2
+```
+
+**A mesma tela diz "0 produtos" e lista 6 movimentações de um produto.**
+
+### O que o bridge confirma
+
+```json
+catalogo:  {"products": []}                        ← VAZIO
+saldos:    {"balances": {"E2E-001": 5000}}         ← 5 unidades
+movimentos: 6 registros de E2E-001
+```
+
+**O estoque tem saldo e histórico de um SKU que o catálogo não conhece.**
+
+### A causa — e é o R-10 INCOMPLETO
+
+Na rodada 23 eu corrigi a **venda** para distinguir `produto_nao_encontrado` de `saldo_insuficiente`.
+**Corrigi um caminho e deixei os outros dois abertos:**
+
+| Caminho | Valida o catálogo? |
+|---|---|
+| `sales-ipc.faturar` | **SIM** (r23) |
+| **`inventory-ipc.append`** | **NÃO** — `store.append(payload)` direto |
+| **`purchases-ipc:263`** | **NÃO** — recebe a compra e lança o movimento sem cadastrar o produto |
+| **UI de Estoque** | depende do catálogo → mostra "0 produtos" |
+
+**Meu próprio E2E do G3 criou isso**: usei `inventory.append` com `product_sku: 'E2E-001'` **sem
+cadastrar**. O sistema aceitou. **A inconsistência que eu estou vendo é a minha, mas o buraco que a
+permitiu é do produto.**
+
+### Por que isso é um achado de CLASSE, não de caso
+
+**Três caminhos escrevem no estoque, e cada um decide por si se o produto precisa existir:**
+
+```
+inventory.append  ─┐
+purchases.receive ─┼→  movimentos    (nenhum exige catálogo)
+sales.faturar     ─┘   (este exige, desde a r23)
+```
+
+**É a mesma forma do erro do `Tip` (r22) e dos landmarks (r19)**: eu corrijo **onde vi** e a classe
+continua aberta nos lugares que não olhei.
+
+### As opções — e por que eu NÃO escolho
+
+**A · Exigir catálogo em `inventory.append`**
+- **A favor**: consistência; a UI para de mentir.
+- **Contra**: quebra ajuste de inventário de produto removido, importação legada, e o
+  `agent-tools-catalog` que expõe `inventory.append` para os bots.
+
+**B · A compra CRIA o produto ao receber**
+- **A favor**: o fluxo real de uma distribuidora (comprou um produto novo → ele entra no catálogo).
+- **Contra**: cadastro automático sem nome/unidade/preço vira catálogo-lixo.
+
+**C · A UI de Estoque passa a LISTAR os SKUs órfãos**
+- **A favor**: para de dizer "0 produtos" quando há 6 movimentos; mínima mudança.
+- **Contra**: **maquia a inconsistência** em vez de resolvê-la.
+
+**Eu me inclino à B + validação suave na A** (avisar, não bloquear). **Mas isso é modelagem de
+domínio, não correção de bug** — e o `TASK-QUEUE` já tem T-08 esperando o mesmo tipo de decisão
+(preço zero).
+
+**Registrado como `ABERTO`, com as três opções e o custo de cada uma.**
+
+### O dado órfão
+
+**Não vou limpar.** As 6 movimentações e o saldo de `E2E-001` são **dados meus de teste** num HOME
+temporário (`%TEMP%\b3po-menu-view6`), mas **limpar sem autorização** seria exatamente o tipo de
+ação destrutiva que o `AGENTS.md` manda perguntar antes.
+
+**O que isso significa para a entrega**: **a tela de Estoque está visualmente correta e logicamente
+inconsistente** — e a inconsistência é **reproduzível** por qualquer pessoa que cadastre um movimento
+sem cadastrar o produto.
