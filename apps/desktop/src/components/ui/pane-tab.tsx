@@ -202,6 +202,18 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
        * Vem DEPOIS de `{...props}` de propósito: os dois atributos são deste componente, e o
        * spread os sobrescreveria se viesse depois.
        */
+      /*
+       * r294 — `role="tab"` PRECISA de `tabIndex`, e não tinha nenhum.
+       *
+       * Descoberto ao testar o Delete em runtime: `tab.focus()` NÃO focava, e o atalho que eu
+       * acabara de implementar nunca disparava. A causa: um `<div>` sem `tabindex` não é focável —
+       * então quem navega por teclado **não chegava às abas**, que é WCAG 2.1.1 (Keyboard).
+       *
+       * `0` para todas (não roving): são no máximo 4 abas por zona, e `0` é o caminho mais curto
+       * para tornar cada uma alcançável sem inventar navegação por setas que ninguém testou.
+       * O `tabIndex` de quem chamou vence, porque `{...props}` já rodou acima.
+       */
+      tabIndex={props.tabIndex ?? 0}
       aria-keyshortcuts={atalhoFechar(onClose, vertical)}
       // Sem `if`: `fecharPorTeclado` responde com o evento ja consumido (`preventDefault` +
       // `stopPropagation`), entao repassar o handler externo depois e inofensivo — e a ausencia

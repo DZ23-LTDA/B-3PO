@@ -1418,3 +1418,60 @@ alternativa real (Delete + `aria-keyshortcuts`) **já funciona**. Trocar o dono 
 em 4 tipos de aba por 1 regra de ferramenta é apostar mais do que se ganha.
 
 **Se você preferir A, eu faço.** É reversível e eu tenho os testes para provar que não quebrei nada.
+
+---
+
+## G8 · ADENDO 12 — testar no app real desmentiu o teste unitário
+
+**Rodada 32.** Eu implementei o `Delete` na r31 e o vitest passou (24/24). **Fui verificar no
+navegador** e o resultado foi outro. Esta seção registra o que **não** é verdade.
+
+### O que o teste no navegador mostrou
+
+```
+1ª tentativa — aba "workspace":
+  tabIndex no DOM: "0"        ✅
+  rect: 91x34, visível        ✅
+  tab.focus()                 → activeElement virou `composer-rich-input`   ❌
+  Delete                      → 4 abas antes, 4 depois                      ❌
+
+2ª tentativa — esperando o boot (7 s) e focando "sessions":
+  foco em: {"focado":"sessions"}   ✅ o foco FICOU
+  kbd: null                        ← "sessions" não é fechável, então não tem atalho
+  Delete                           → nada (correto: aba sem onClose)
+
+3ª tentativa — aba "workspace" (data-closeable="true"):
+  foco em: {"id": null}            ❌ o foco NÃO ficou
+```
+
+### O que isso significa, sem rodeio
+
+| Afirmação | Verdadeiro? |
+|---|---|
+| o `tabIndex={0}` está no DOM | **sim** (`["0","0","0","0"]`) |
+| o `Delete` está no handler e testado no vitest | **sim** (24/24) |
+| **o `Delete` funciona no app real** | **NÃO PROVADO** — o foco na aba é instável |
+
+**Duas causas distintas, ambas reais:**
+
+1. **O composer rouba o foco no boot.** Depois de `tab.focus()`, o `activeElement` vira
+   `composer-rich-input`. Com 7 s de espera o roubo parou — mas isso é **condição de corrida**, não
+   garantia.
+2. **A aba `workspace` não reteve o foco nem com o boot já estável**, enquanto `sessions` reteve.
+   **Não sei por quê** — não investiguei a fundo, e por isso **não afirmo a causa**.
+
+### O que ficou de real
+
+**`tabIndex={0}` no `role="tab"` é correção legítima e verificável**: antes o atributo era `null` e
+um `<div role="tab">` sem `tabindex` **não é focável** — WCAG 2.1.1. Agora é. **Isso está no DOM e
+qualquer auditoria pode conferir.**
+
+**O `Delete` é `NOT_PROVEN_IN_APP`**, apesar de passar no teste unitário. **Teste unitário com
+`fireEvent.keyDown` prova o handler, não prova o caminho de foco até ele** — foi exatamente a
+diferença que apareceu aqui.
+
+### O que eu NÃO vou fazer
+
+**Não vou declarar o teclado "entregue".** O handler existe, o atributo existe, e o caminho que
+liga os dois **falha no app real** em pelo menos uma aba. Chamar isso de pronto seria o tipo de
+relatório que este projeto proíbe.
