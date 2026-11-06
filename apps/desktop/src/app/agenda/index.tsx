@@ -27,6 +27,18 @@ import { useI18n } from '@/i18n/context'
  * é recusada, a tela mostra **qual** compromisso ocupa o horário — recusar sem dizer o motivo deixa o
  * operador tentando horários no escuro.
  */
+/**
+ * A origem de um agendamento (r166), a partir do `ref`.
+ *
+ * **Mostra o PREFIXO**: `pedido` diz o que a pessoa precisa, e `pedido:tk_1793...` nao. Um `ref` vazio e
+ * agendamento manual — **ausencia declarada**, e nao celula em branco. Mesma regra da r165 no financeiro.
+ */
+function origemDoAgendamento(ref: string): string {
+  const prefixo = (ref ?? '').split(':')[0]?.trim() ?? ''
+
+  return prefixo || 'manual'
+}
+
 export function AgendaView() {
   const { t } = useI18n()
   const copy = t.settings.agenda
@@ -214,6 +226,8 @@ export function AgendaView() {
                     <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.resource}</th>
                     <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.service}</th>
                     <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.status}</th>
+                    {/* r166: de onde o agendamento veio — o `ref` carrega `pedido:<id>` desde a r103. */}
+                    <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">origem</th>
                     <th className="border-b border-(--ui-border) py-1 font-medium" />
                   </tr>
                 </thead>
@@ -234,6 +248,11 @@ export function AgendaView() {
                       </td>
                       <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">
                         {copy.statuses[appointment.status] ?? appointment.status}
+                      </td>
+                      {/* r166: a origem. O `ref` (`pedido:<id>`) diz de onde o agendamento veio, e a tabela nao
+                          mostrava — a agenda e o lugar onde se descobre POR QUE aquele horario esta ocupado. */}
+                      <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-tertiary)">
+                        {origemDoAgendamento(appointment.ref)}
                       </td>
                       <td className="border-b border-(--ui-border) py-1">
                         <div className="flex justify-end gap-1">
