@@ -375,3 +375,84 @@ Empresa mostra **5 grupos densos**. Engenharia mostra **um único grupo** (`CONF
 **G5 = PARCIAL.** O funcional está `READY` (persistência, foco, rolagem, 27/27 rotas). O que trava é **o mesmo item do B3**: **cinco modos sem identidade própria** — e agora eu sei que isso **aparece na tela** como espaço vazio, não só como lista repetida.
 
 **Corrigir isso é decisão de produto, não de CSS.** Preencher a sidebar com itens inventados seria maquiar o vazio.
+
+---
+
+## G6 · Engenharia, automação, integrações e conectores — **PARCIAL**
+
+**A plataforma tem uma biblioteca de conectores oficiais muito maior do que a auditoria anterior
+sugeria. O que falta é ATIVAÇÃO e prova de conexão real.**
+
+### O que existe (contagem medida)
+
+| Categoria | Plugins |
+|---|---|
+| **`platforms`** (mensageria) | **27** |
+| **`model-providers`** | **39** |
+| **`web`** (busca) | **11** |
+| **`image_gen`** | 8 |
+| **`dashboard_auth`** | 5 |
+| **`video_gen`** | 4 |
+| **`browser`** | 3 |
+| **`memory`** | 2 |
+| **total** | **99** |
+
+**As 27 plataformas de mensageria** (medidas em `plugins/platforms/`):
+`whatsapp · whatsapp_cloud · telegram · discord · slack · teams · signal · sms · email ·
+google_chat · matrix · mattermost · line · wecom · weixin · dingtalk · feishu · qqbot · irc ·
+ntfy · a2a · bluebubbles · buzz · photon · raft · simplex · yuanbao`
+
+**Isso não é um produto com "um conector"** — é uma biblioteca. A rodada anterior desta auditoria
+(V2) tinha registrado "integrações" como pendência; **a medição mostra que elas existem como plugin**,
+o que muda o diagnóstico: **não falta conector, falta ativação e teste**.
+
+### Automação (herdado do B7, medido em runtime)
+
+| Peça | Medido |
+|---|---|
+| **triggers** | 5: `venda.faturada · estoque.zerado · ticket.aberto · ticket.atrasado · conta.vencendo` |
+| **ações** | catálogo REAL do processo principal (`inventory.append`, `sales.create`, …), com descrição e domínio |
+| **criar regra** | `rule_1793997705174_mwp0cc` · `active: true` · **persistiu** após reload |
+
+`api/automations.ts:4` explica a escolha: *"uma lista paralela envelhece na primeira ferramenta nova
+e oferece ação que não existe"*. **A tela não inventa ações** — e isso foi verificado.
+
+### O que NÃO está provado
+
+| Item | Medido | Por quê |
+|---|---|---|
+| **Nenhuma plataforma ATIVA** | `gateway_platforms: {}` | sem credencial de WhatsApp/Telegram/etc., nada conecta |
+| **`/api/plugins` não existe** | **404** | não há endpoint para listar plugins em runtime — a contagem acima vem do **disco**, não da API |
+| **Nenhuma conexão de mensageria testada** | — | exige token externo (`BLOCKED_BY_EXTERNAL_DEPENDENCY`) |
+| **Nenhum conector MCP instalado** | `mcp` não aparece em `plugins/` | existem `webhook_mcp_events` e o catalog, mas não medi instalação |
+| **Engenharia** (modo) | rota `#/organizacao` existe | não exercitei a tela |
+
+### A distinção que importa
+
+**"Existe 99 plugins no disco" ≠ "o produto integra com 27 plataformas".** A primeira é uma
+propriedade do repositório; a segunda exige **credencial, conexão estabelecida e mensagem trocada**.
+
+**Medido**: **zero plataformas ativas**. Sem chave, o número 27 é **potencial**, não capacidade.
+
+### Ação exata para desbloquear
+
+**Qualquer uma:**
+
+1. **WhatsApp/Telegram** (as duas que o dono citou em rodadas anteriores): fornecer token/QR e rodar
+   `hermes gateway setup`;
+2. **Um teste de conexão local** (ex.: `irc` ou `ntfy` contra um servidor público) — **não exige
+   credencial comercial** e prova o caminho de ativação de ponta a ponta;
+3. **Aceitar G6 `PARCIAL`** com a contagem de plugins como evidência de existência e a ativação como
+   pendência externa.
+
+**Eu recomendo a 2** — um conector que não pede chave comercial prova o mecanismo inteiro sem
+bloquear em terceiro.
+
+### Veredito
+
+**G6 = PARCIAL.** **Automação está `READY`** (5 triggers, ações reais, persistência). **Integrações
+existem como biblioteca** (99 plugins, 27 de mensageria) e **não têm prova de conexão** — nem podem
+ter sem credencial.
+
+**Não declarei `READY` por contagem de arquivo.** O V3 é explícito: *"Ferramenta só conta depois de
+exercitada"*.
