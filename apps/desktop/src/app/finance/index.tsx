@@ -28,6 +28,18 @@ import { useI18n } from '@/i18n/context'
  * "Vencido" é calculado contra o relógio agora, não é uma marca gravada: um lançamento que venceu
  * ontem precisa aparecer vencido hoje sem ninguém tocar nele.
  */
+/**
+ * A origem de um lancamento (r165), a partir do `ref`.
+ *
+ * **Mostra o PREFIXO, nao o id**: `venda` diz o que a pessoa precisa, e `venda:tk_1793...` nao. Um `ref` vazio e
+ * lancamento manual — **ausencia declarada**, e nao celula em branco.
+ */
+function origemDoLancamento(ref: string): string {
+  const prefixo = (ref ?? '').split(':')[0]?.trim() ?? ''
+
+  return prefixo || 'manual'
+}
+
 export function FinanceView() {
   const { t } = useI18n()
   const copy = t.settings.finance
@@ -222,6 +234,8 @@ export function FinanceView() {
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.due}</th>
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.amount}</th>
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.status}</th>
+                  {/* r165: a origem — de onde o lancamento veio. */}
+                  <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">origem</th>
                   <th className="border-b border-(--ui-border) py-1 font-medium" />
                 </tr>
               </thead>
@@ -240,6 +254,11 @@ export function FinanceView() {
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">{priceLabel(entry.amount_cents)}</td>
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">
                       {copy.statuses[entry.status] ?? entry.status}
+                    </td>
+                    {/* r165: a origem. O `ref` carrega `venda:<id>` desde sempre e a tabela nao mostrava —
+                        o financeiro e o setor que menos sabe o que aconteceu nos outros, e o `ref` e a ponte. */}
+                    <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-tertiary)">
+                      {origemDoLancamento(entry.ref)}
                     </td>
                     <td className="border-b border-(--ui-border) py-1">
                       <div className="flex justify-end">
