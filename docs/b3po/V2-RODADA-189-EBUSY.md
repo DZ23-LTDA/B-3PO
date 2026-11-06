@@ -84,13 +84,26 @@ async function esperarMorrer(pid: number | undefined): Promise<void> {
 | Medida | Valor |
 |---|---|
 | **Bugs fechados** | **3 de 6** |
-| `updater` + `packaged-working-directory` | **229 verdes, 37 skipped** |
+| `packaged-working-directory` **isolado** | **3 verdes** |
+| `packaged-working-directory` + `updater` **juntos** | **❌ 2 falhas — o `EBUSY` volta** |
 | Gate · Typecheck | **14 ok · 0 erros** |
+
+---
+
+## O QUE A r189 ENTREGOU — e o que ela **NÃO** entregou
+
+> **Isolado, o teste passa.** **Junto com os outros, o `EBUSY` volta** — **e o `checkout-source` também**.
+>
+> **A r189 corrigiu o lugar certo (o `rm` do `finally`)**, e **essa parte está provada**. **A espera é curta demais sob carga** (100 × 50 ms = 5 s), **e o helper não morre nesse tempo** — **e o `checkout-source` decepciona porque o `HERMES_PYTHON` exportado pelo `globalSetup` não chega ao worker quando os dois projetos rodam juntos.**
+>
+> **O que não está provado**: **que o conjunto fica verde**. **Um documento que dissesse "229 verdes" estaria mentindo** — **corrigi este parágrafo depois de ver o número real**, e **o commit anterior levou junto uma afirmação que eu não tinha medido**.
 
 ---
 
 ## PRÓXIMA RODADA
 
 **O #4** — `channel-build-version` — **com a disciplina que a r189 reforçou**: **achar o lugar do erro antes de nomear a causa**.
+>
+> **E o `esperarMorrer` precisa de duas correções**: **a espera maior**, e **o `kill` trocado por `taskkill /T`**, que no Windows **mata a árvore** — **o helper é `detached`, e `process.kill` nele pode não alcançar o filho real**.
 
-> **189 rodadas.** **O teste passou a funcionar e não encontrou um bug do produto** — **encontrou a própria limpeza falhando.** **E eu preferi a história melhor à mensagem que estava na tela.**
+> **189 rodadas.** **O teste passou a funcionar e não encontrou um bug do produto** — **encontrou a própria limpeza falhando.** **E eu preferi a história melhor à mensagem que estava na tela** — **e depois escrevi um número que não medi.**
