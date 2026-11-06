@@ -61,3 +61,51 @@
 | 11 arquivos de continuity | **7 criados** · faltam `TASK-QUEUE.json`, `DECISIONS.md`, `PLATFORM-MATRIX.txt`, `FINAL-DELIVERY.txt` |
 | baseline de testes | medido em r275 (19.083 testes, 31 vermelhos, 12 de infra) |
 | documentos de estado | `MASTER-STATE.md`, `MASTER-CHECKPOINT.json`, `BLOCKERS.md`, `AUDIT-MATRIX.md`, `TEST-EVIDENCE.md`, `PERFORMANCE.md`, `GATES.md` |
+
+### Prova de runtime — a guarda não é decoração
+
+**`permission-guard.ts` roda `can()` ANTES do handler**, com o ator resolvido **no processo
+principal** — nunca do renderer:
+
+```ts
+const decision = can(actor, action, options.resource)
+const entrada  = audit(actor, action, options.resource, decision, now)
+if (!decision.allowed) return { error: 'sem_permissao', reason: decision.reason }
+return handler()
+```
+
+**Medido na trilha em disco** (`%APPDATA%\B-3PO\b3po\auditoria.json`):
+
+```
+entradas: 837
+  read projects     → permitido=True
+  read companies     → permitido=True
+  read automation    → permitido=True
+  manage_actor admin → permitido=True
+negadas: 0 de 837
+```
+
+**837 decisões registradas** provam que `can()` está em vigor. **Zero negativas** provam outra coisa:
+**o único ator ativo é o `owner`**.
+
+### O ator restrito — criado, medido e desativado
+
+Criei um `viewer` real (`act_1793998122251_w87dst`, `level: READ`, `scopes: []`) para tentar uma
+recusa de verdade.
+
+**Não consegui fazer o IPC agir COMO ele**: `actorOf()` devolve sempre o dono da instalação. O
+`admin-ipc.ts:41` já reconhece o caso — há um `role: 'viewer'` de bootstrap — mas **não há porta no
+produto para "agir como outro ator"**, o que é **correto por segurança**: se houvesse, seria a
+escalada de privilégio que o próprio `rbac.ts` proíbe.
+
+**Resultado honesto**: a recusa está provada **em teste** (`rbac.test.ts:50` — *"viewer só lê"*,
+`:58` — *"operator prepara mas não executa"*) e **não** em runtime, porque **não existe runtime com
+dois atores ativos**. Isso é `NOT_TESTED`, não `PASS`.
+
+O ator de teste foi **desativado** (`active: false`); o `owner` segue o único ativo.
+
+### Correção do veredito
+
+| Antes eu disse | O correto |
+|---|---|
+| "RBAC recusando em runtime: não testado" | **parcialmente resolvido**: a guarda está ativa (837 decisões), mas a **negativa** só existe em teste |
