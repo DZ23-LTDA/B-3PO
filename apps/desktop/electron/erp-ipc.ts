@@ -308,7 +308,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   registerSchedulingIpc(ipcMain, scheduling, { actorOf: () => actorOf() })
   // Caminho novo: agendar exige servico do catalogo e deriva o fim do horario da duracao real.
-  registerSchedulingCatalogIpc(ipcMain, { scheduling, services })
+  // r176: o canal do catalogo passou a exigir ator - agendar e EXECUTE, e este era o unico canal do produto sem
+  // guarda. O compositor ja tem ctorOf (L340), entao a chamada fica igual as outras.
+  registerSchedulingCatalogIpc(ipcMain, { actorOf: () => actorOf(), scheduling, services })
   // r27 do GOAL V2: o limite de compra vem do STORE, nao de injecao de codigo. Medido na r25:
   // limiteDeCompra nunca era passado e o controle de valor estava INERTE desde a r182.
   const purchases = new PurchasesStore(purchasesStorePath(userDataDir))

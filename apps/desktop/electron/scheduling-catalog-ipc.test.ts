@@ -46,6 +46,8 @@ async function withChannel<T>(
   const gravados: Record<string, unknown>[] = []
 
   registerSchedulingCatalogIpc(ipc, {
+    // r176: o ctorOf e obrigatorio - o canal passou a exigir xecute em scheduling. O dono tem tudo.
+    actorOf: async () => ({ id: 'dono', kind: 'human', level: 'EXECUTE_ALLOWED', role: 'owner' }) as never,
     scheduling: {
       book: async (input: unknown) => {
         gravados.push(input as Record<string, unknown>)
