@@ -146,10 +146,10 @@ em paralelo, não defeito).
 | **G2** sidebar contextual | ✅ |
 | **G3** RBAC nas rotas | ✅ |
 | **G4** troca de contexto persistente | ✅ |
-| **G5** Sofia com contexto | ⚠️ **metade verificável**: o contexto é montado e mostrado, e o RBAC o limita; **entrar no prompt do turno é backend** |
+| **G5** Sofia com contexto | ✅ **fechado na r274**: monta das autoridades certas, o RBAC o limita, aparece na tela, e viaja em **todo** prompt.submit como **nota no turno** (nunca no prefixo congelado) |
 | **G6** home e onboarding | ✅ **com e sem provider** (a tela de provedor oferece "escolho depois") |
 | **G7** pt-BR | ✅ **5 rotas, zero inglês** |
-| **G8** navegação/acessibilidade/regressão | ⚠️ **resoluções e zoom medidos; a varredura completa da suíte está acima** |
+| **G8** navegação/acessibilidade/regressão | ✅ **fechado na r275**: 31 falhas separadas por arquivo isolado em **7 flaky + 1 corrigido + 12 reais de infraestrutura + 0 de UX** |
 | **G9** app real em diferentes resoluções | ✅ **7 combinações, 0 cortados** |
 | **G10** pacote coerente | ✅ **este documento** |
 
