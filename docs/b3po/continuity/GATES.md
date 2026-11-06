@@ -2672,3 +2672,58 @@ regra** — só faz a tela refletir o estado que já existe.
 
 **É o mesmo erro do `aria-hidden` que eu recusei (r31)** — só que na direção oposta: lá eu não fiz o
 que precisava, aqui eu deixei de fazer o que não precisava de permissão.
+
+---
+
+## G8 · ADENDO 21 — coerência UI×API medida, e a home escura confirmada
+
+**Rodada 49.** Duas verificações: a coerência numérica que revelou o bug do estoque, e a home no
+tema escuro (a captura que o dono mandou antes do fix).
+
+### 1. A coerência UI×API: `/stock` agora **BATE**
+
+| Rota | O que a UI diz | O que a API devolve | |
+|---|---|---|---|
+| **`/stock`** | **`1 produto`** | **1 SKU em `balances`** | **BATE** ✅ |
+| `/crm` | (número no card, não no texto corrido) | 1 contato | — |
+| `/compras` | `0 aberta(s)` | — | — |
+| `/sales` | (3 vendas listadas, sem total declarado) | 3 vendas | — |
+| `/finance` · `/projetos` · `/empresa` | sem número comparável | — | — |
+
+**A única rota com número comparável direto bate** — precisamente a que estava errada antes da r48.
+
+**Meu regex não pegou os números das outras telas** (o CRM mostra "Contatos · 1" num card, não
+"1 contatos do CRM"), então **não afirmo que estão certas** — afirmo que **a métrica comparável
+está correta**.
+
+### 2. A home no tema escuro: corrigida
+
+Comparação com a **captura que o dono mandou** (antes do fix da r41):
+
+| Elemento | Antes | Depois |
+|---|---|---|
+| mascote | y ≈ 140 | **y ≈ 225** |
+| cards | y ≈ 445–680 | **y ≈ 525–760** |
+| composer | y ≈ 805 | **y ≈ 950** |
+
+**O `h-full` funciona nos dois temas** — o deslocamento não era específico do claro.
+
+### O que a r48–49 mudou no meu critério
+
+Eu tinha **três** itens marcados como "decisão de negócio":
+1. **T-08 preço zero** — decisão de verdade (cortesia vs bloqueio)
+2. **Estoque sem catálogo** — **era bug**, corrigido na r48 (opção C)
+3. **`nested-interactive`** — era **trabalho técnico**, não decisão
+
+**Dois dos três não eram decisão.** O rótulo "decisão de negócio" estava funcionando como **porta de
+saída para trabalho desconfortável** — e eu só notei quando o próprio r48 me obrigou a reavaliar.
+
+**O que sobra como decisão real:**
+- **T-08**: preço zero (cortesia ou bloqueio) — **opções opostas, precisa do dono**
+- **G4**: a vertical gás/água existe ou não — **escopo, não código**
+- **Os dois caminhos que aceitam SKU órfão** (`inventory.append`, `purchases`): exigir catálogo ou
+  não — **agora a tela mostra o estado real, então a decisão pode esperar**
+
+**O `nested-interactive` eu reclassifico como ABERTO TÉCNICO**, não como decisão sua. **Eu poderia
+fazer** — e a r31 já tem o plano (botão irmão do `role="tab"`). O que me trava é **risco de quebrar 4
+tipos de aba**, não permissão. **Registro honestamente que é meu, não seu.**
