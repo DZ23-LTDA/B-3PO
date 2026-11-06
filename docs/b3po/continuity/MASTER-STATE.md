@@ -100,3 +100,42 @@ ead, **depois** do ambiente |
 2. **B4/B5** — Compras e Vendas como jornada com estados verificáveis.
 3. **B6** — Sofia: plano persistido + execução verificável.
 4. Traduzir o resto do `pt` por ordem de uso (configurações primeiro).
+
+---
+
+## PRIORIDADE ZERO — FECHADA (8 de 8 itens tratados)
+
+Todos os oito itens do aditivo B foram **medidos**, não lidos. Nenhum foi declarado pronto sem
+saída de comando.
+
+| # | Item | Estado | O que foi provado / o que falta |
+|---|---|---|---|
+| B1 | inferência indisponível | causa raiz **READY** · inferência **BLOCKED** | `.env` com 0 chaves ativas de 29; `AuthError` em `auth.py:1698`; aviso traduzido e acionável. **Falta a chave** — ação documentada |
+| B2 | modal Novo bot em inglês | modal **READY** · Bot Mode **PARCIAL** | `pt.bot` 6→50 chaves; paleta `New Bot…`→`Novo bot`. **Faltam** `editor` (66) e `group` (76) |
+| B3 | auditar os seis modos | **PARCIAL** | persistência/foco/rolagem/rotas **READY** (27/27 rotas); **RBAC**: 5 de 6 modos sem item exclusivo, e Estratégico ≡ IA |
+| B4 | Compras por etapas | **READY** | 7 etapas medidas: solicitação → cotação → aprovação → pedido → recebimento → **estoque 3000** → **financeiro R$ 150** |
+| B5 | Vendas | **PARCIAL** | baixa no estoque (3000→2000) e conta a receber (R$ 80) **READY**; **2 falhas**: SKU inexistente diz "saldo insuficiente"; preço zero passa sem registro |
+| B6 | Sofia | **READY** | plano persiste após reload; `execucao_id` + `resultado` por tarefa; grafo recalcula `prontas`; `autoaprovacao` bloqueia |
+| B7 | Projetos/Trabalhos/Automações/Empresa | **READY** | 4 de 4 criam e persistem. Catálogo de automação vem do backend real |
+| B8 | ciclo de bot | **PARCIAL** | **5 de 8**: criar, editar SOUL, renomear, revogar, guard do default. **Faltam**: reiniciar (405, só gateway inteiro), conversar (sessão nasce no clique), ferramenta (`skill_count: 0`) |
+
+### Dívidas abertas, com nome
+
+| Dívida | Onde | Precisa de |
+|---|---|---|
+| Bot nasce com **0 skills** (default tem 44) | `profiles.create` | decisão de produto: herdar do default ou exigir configuração |
+| **Reiniciar um bot não existe** | só `/api/gateway/restart` | arquitetura: reiniciar gateway reinicia todos |
+| `actor_id` **no payload** em automação, mas **do resolvedor** em Sofia | `automation-store.ts:101` vs `sofia-ipc.ts:131` | decidir qual padrão vale |
+| SKU inexistente culpa o **saldo** | vendas | vocabulário de erro do backend |
+| **Preço zero** vende sem registrar | vendas | decisão de negócio (cortesia?) |
+| 3 domínios em **português**, 2 em **inglês** nos payloads | API | padronizar |
+| `pt` com **1271 de 4341** chaves | i18n | traduzir por ordem de uso |
+
+### O que uma próxima rodada deve atacar
+
+O aditivo B acabou. O caminho agora é os **gates do V3**, na ordem: G1 (segurança/IPC/RBAC/tenant),
+G2 (runtime/modelos), G3 (domínio canônico), G4 (vertical gás/água), G5 (revisão visual), G6
+(engenharia), G7 (matriz de plataformas), G8 (regressão/a11y/docs), G9 (pacotes + veredito).
+
+**G8 já tem material**: os números de performance (`PERFORMANCE.md`), a matriz de auditoria
+(`AUDIT-MATRIX.md`) e as sete provas E2E (`TEST-EVIDENCE.md`).
