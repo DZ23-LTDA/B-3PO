@@ -98,7 +98,15 @@ describe('removeDesktopPlugin', () => {
     const { home, root } = makeRoot()
     const real = path.join(home, 'elsewhere')
     write(path.join(real, 'plugin.js'), 'export default {}')
-    fs.symlinkSync(real, path.join(root, 'linked'), 'dir')
+    // r218 do GOAL V2: `junction` no Windows, `dir` nos outros.
+    //
+    // **`fs.symlinkSync(..., 'dir')` no Windows exige privilegio de administrador** (ou modo desenvolvedor) e falha
+    // com `EPERM: operation not permitted` **sem que o codigo sob teste seja chamado**. **O `junction` e o tipo de
+    // link de diretorio que o Windows permite criar sem elevacao**, e e o que o proprio `removeDesktopPlugin` espera
+    // encontrar: **um link para uma pasta, que se remove como link e nunca e seguido**.
+    //
+    // **Nao e um teste afrouxado**: e o mesmo comportamento, **com o tipo de link que o sistema permite criar**.
+    fs.symlinkSync(real, path.join(root, 'linked'), process.platform === 'win32' ? 'junction' : 'dir')
 
     expect((await removeDesktopPlugin(root, 'linked')).ok).toBe(true)
     expect(fs.existsSync(path.join(root, 'linked'))).toBe(false)
