@@ -63,6 +63,8 @@ export function ComprasView() {
   const [products, setProducts] = useState<ProductRow[]>([])
   const [balances, setBalances] = useState<Record<string, number>>({})
   const [failure, setFailure] = useState<null | string>(null)
+  // r163: o aviso do recebimento — some quando o operador emite o proximo pedido.
+  const [avisoRecebimento, setAvisoRecebimento] = useState<null | string>(null)
   const [nome, setNome] = useState('')
   const [cnpj, setCnpj] = useState('')
   const [fornecedor, setFornecedor] = useState('')
@@ -186,6 +188,8 @@ export function ComprasView() {
   }
 
   async function emitir(receber: boolean) {
+    // r163: o aviso e do ULTIMO recebimento. Emitir um novo pedido o limpa, porque ele deixa de ser verdade.
+    setAvisoRecebimento(null)
     if (!fornecedor) {
       setFailure(copy.supplierRequired)
       return
@@ -228,6 +232,12 @@ export function ComprasView() {
         // Receber mexeu no estoque: recarrega para a tela não mostrar saldo velho.
         setBalances(await loadBalances())
         setFailure(null)
+
+        // r163: o recebimento diz o que gerou em OUTRO dominio — `purchases-ipc` cria a conta a pagar
+        // (`payableForPurchase`) e lanca no estoque. Quem recebe via o pedido mudar de status e nao sabia que
+        // havia conta nova no financeiro, que e de outro setor. Texto em portugues fixo: a chave no catalogo
+        // exigiria os 9 idiomas, e esta tela esta na lista das 15 fora (V2-RODADA-106).
+        if (receber) setAvisoRecebimento('Pedido recebido: a mercadoria entrou no estoque e a conta a pagar foi criada no financeiro.')
       }
     } finally {
       setSaving(false)
@@ -642,6 +652,9 @@ export function ComprasView() {
           {failure ? (
             <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-danger)">{failure}</p>
           ) : null}
+
+          {/* r163: o que o recebimento gerou em outro dominio — verde, porque e fato e nao erro. */}
+          {avisoRecebimento ? <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-success, #15803d)">{avisoRecebimento}</p> : null}
 
           {/* Cotacao: compara fornecedores para o volume do pedido. Nao salva e nao cria pedido — compara e
               mostra; transformar proposta em compromisso e a decisao seguinte, com aprovacao propria. */}
