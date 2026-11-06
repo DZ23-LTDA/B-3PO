@@ -1671,3 +1671,71 @@ legítimo, mas o retorno está decaindo.
 **O que fica registrado é o que é verdade**: a aba **agora é alcançável**, o atalho **existe e é
 anunciado**, e a **remoção por `Delete` não foi observada**. Quem continuar sabe exatamente onde
 parou e por quê.
+
+---
+
+## G9 · ADENDO — build de PRODUÇÃO: compila, mas o rename atômico falha com o dev server no ar
+
+**Rodada 36.** Mudei 12 arquivos ao longo da auditoria e nunca tinha rodado o **build de produção**.
+Rodei. O resultado tem duas partes que precisam ser ditas separadas.
+
+### O que funcionou
+
+```
+[write-build-stamp] wrote apps/desktop/build/install-stamp.json -> 96659a7e5e7e (b3po-brand)
+vite v8.3.4 building client environment for production...
+✓ 16374 modules transformed.
+rendering chunks...
+dist-build-aS5XKa/product/index.html   3.01 kB
+dist-build-aS5XKa/product/assets/...   (KaTeX, webp, emojibase, chunks)
+```
+
+**A compilação inteira passa**: 16 374 módulos, chunks, assets, CSS. **As 12 mudanças não quebram o
+build.**
+
+### O que falhou — e é ambiente, não código
+
+```
+Error: EPERM: operation not permitted, rename
+  '...apps\desktop\.dist-build-aS5XKa' -> '...apps\desktop\dist'
+  at renameSync (node:fs:1357:11)
+  at scripts/build/frontend-common.mjs:118
+```
+
+**`EPERM` no `rename`** significa: **outro processo está segurando o `dist`**. E está: o **vite dev
+da porta 5174** que eu uso para os testes de Playwright há 20 rodadas.
+
+**O build atômico fez exatamente o que devia quando o rename falha**: **preservou o anterior**.
+
+```
+.dist-previous-DRYtDh   1231 arquivos   53.7 MB
+```
+
+**Nada foi perdido.** Restaurei o `dist` duas vezes depois de cada tentativa, e o resultado é
+`1231 arquivos OK`.
+
+### O que isso prova e o que não prova
+
+| Afirmação | Estado |
+|---|---|
+| as 12 mudanças não quebram a compilação | **SIM** — 16 374 módulos transformados |
+| o build completo produz `dist` novo | **NÃO PROVADO** — depende de parar o dev server |
+| o rollback atômico funciona | **SIM** — `.dist-previous-*` preservado em ambas as tentativas |
+
+### Como fechar isto (não fiz)
+
+```powershell
+# parar o vite dev (porta 5174), rodar o build, subir o dev de novo
+npm run build          # deve concluir o rename
+```
+
+**Não executei porque o dev server é o que me deixa medir o app** — e pará-lo agora interromperia a
+única forma de verificação que resta. **Fica registrado como a única pendência do G9 de pacotes**, e
+é de minutos para fechar.
+
+### A lição
+
+**Build verde não é "compila".** A compilação passou; a **entrega** do artefato não. Se eu tivesse
+olhado só o `exit code` do primeiro npm, teria dito "build quebrado" — e estaria errado. **Se
+tivesse olhado só o `✓ 16374 modules`, teria dito "build ok" — e também estaria errado.** A verdade
+tem duas metades e eu precisei do log inteiro para ver as duas.
