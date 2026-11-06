@@ -1911,3 +1911,92 @@ a UI são **três frontends independentes** — Electron/React, SPA, React Nativ
 | **Android/iOS** | **NÃO** — nenhuma medição de a11y |
 
 **Isso é um buraco de cobertura que eu não tinha nomeado até agora.** O `axe` rodou só no desktop.
+
+---
+
+## G7 · ADENDO 3 — a a11y do **WEB**, que nunca tinha sido medida: **4 → 0**
+
+**Rodada 39.** O adendo anterior nomeou o buraco: *"o `axe` só rodou no desktop"*. Fui fechar.
+
+### Como medi
+
+`web_dist` (build de produção) servido por `python -m http.server 8088`, aberto no Playwright
+headless em **1440×900**, nos **dois temas**.
+
+### O resultado
+
+| Momento | Claro | Escuro |
+|---|---|---|
+| **Antes** | `label-content-name-mismatch: **4**` | idem |
+| **Depois** | **LIVRE** | **LIVRE** |
+
+**O web tem o mesmo tipo de defeito que o desktop tinha** — e a correção é o mesmo raciocínio.
+
+### Os 4 botões
+
+| Botão | `aria-label` antes | Texto visível |
+|---|---|---|
+| tema | `Switch theme` | **`Hermes Teal`** |
+| idioma | `Switch language` | **`EN`** |
+| filtro de fonte | `Session source` | **`Any chat source`** |
+| importar | `Import exported sessions` | **`Import sessions`** |
+
+**Nenhum continha o texto visível.** O quarto é o caso mais sutil: `Import sessions` **não é
+subsequência** de `Import exported sessions` — a palavra "exported" no meio quebra a contenção.
+
+### As correções
+
+```tsx
+// ThemeSwitcher.tsx
+aria-label={`${t.theme?.switchTheme ?? "Switch theme"}: ${label}`}
+
+// LanguageSwitcher.tsx
+aria-label={`${t.language.switchTo}: ${locale === "en" ? "EN" : current.name}`}
+
+// SessionsPage.tsx (filtro)
+aria-label={`${t.sessions.sourceFilter}: ${sourceFilterLabel}`}
+
+// SessionsPage.tsx (importar)
+aria-label="Import sessions"
+```
+
+**Padrão aplicado nos três primeiros**: `rótulo : valor_visível` — o texto que o usuário lê entra no
+nome, na ordem em que ele lê.
+
+### Os builds, com o mesmo tropeço do desktop
+
+```
+npm run build (web, com o servidor 8088 no ar)
+  ✓ built in 4.84s   → exit 1
+  Error: EBUSY: resource busy or locked, rename '...web_dist'
+
+parando o servidor 8088 e rodando de novo
+  exit: 0 · ✓ built in 4.80s · web_dist 60 arquivos, 3.1 MB, 20:14
+```
+
+**É exatamente o mesmo padrão da rodada 36 com o `dist`**: o build atômico precisa renomear o
+diretório, e **qualquer processo com o diretório aberto bloqueia**. **Agora está documentado duas
+vezes** — desktop (`EPERM`) e web (`EBUSY`) — e a regra é uma só:
+
+> **antes de `npm run build`, pare quem estiver servindo o diretório de saída.**
+
+### A cobertura de a11y agora
+
+| Plataforma | Claro | Escuro | Estado |
+|---|---|---|---|
+| **Desktop** (30 rotas) | 27/30 | 27/30 | **medida** · 1 causa estrutural |
+| **Web** (home) | **0 violações** | **0 violações** | **medida** |
+| **Android / iOS** | — | — | **não medido** |
+
+**O desktop e o web estão medidos.** O mobile continua sem medição de a11y — e agora está escrito no
+`MASTER-CHECKPOINT.json` como `coverage_gap`, não escondido.
+
+### O que a rodada 39 confirma
+
+**Os dois frontends têm os MESMOS vícios de a11y** — porque são escritos pelo mesmo time com as
+mesmas ideias, não porque compartilham código. **`aria-label` que resume em vez de nomear** apareceu
+nos dois.
+
+**Uma auditoria num frontend não valida o outro — mas o diagnóstico de um acelera o outro**: eu
+sabia o que procurar no web porque tinha achado no desktop, e a correção levou **uma rodada em vez de
+cinco**.

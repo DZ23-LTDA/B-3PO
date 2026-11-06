@@ -1786,7 +1786,8 @@ export default function SessionsPage() {
                   />
                 }
                 className="h-8 min-w-[10rem] max-w-[14rem] justify-between text-xs"
-                aria-label={t.sessions.sourceFilter}
+                // WCAG 2.5.3: o botao mostra o rotulo atual ("Any chat source"), entao ele entra no nome.
+                aria-label={`${t.sessions.sourceFilter}: ${sourceFilterLabel}`}
                 aria-expanded={sourceMenuOpen}
                 onClick={() => setSourceMenuOpen((open) => !open)}
               >
@@ -1923,7 +1924,9 @@ export default function SessionsPage() {
                 className="shrink-0"
                 disabled={importingSessions}
                 onClick={() => importInputRef.current?.click()}
-                aria-label="Import exported sessions"
+                // WCAG 2.5.3: o texto visivel e "Import sessions"; "Import exported sessions"
+                // tem "exported" no meio e o texto deixa de ser sequencia contida.
+                aria-label="Import sessions"
                 title="Import exported session JSON or JSONL"
                 prefix={importingSessions ? <Spinner /> : <Upload />}
               >
