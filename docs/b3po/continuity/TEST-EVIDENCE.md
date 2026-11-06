@@ -179,3 +179,72 @@ por design (patch é opaco), e vale registrar como armadilha para quem for integ
 | **Dependência órfã** (`dependencias_orfas`) | precisaria de `depende_de` apontando para id inexistente |
 | `escopo: 'projeto'` e `'trabalho_pontual'` | testei só `organizacao` |
 | Aprovação por **outro ator** | o HOME tem um ator só; `autoaprovacao` é justamente o que impede o único ator de aprovar |
+
+---
+
+## E2E · Projetos / Trabalhos / Automações / Empresa (B7) — **PASSOU, 4 de 4**
+
+**Os quatro domínios existem, criam e persistem.** Medido pelo bridge de cada um no Electron real,
+com reload de janela entre criar e conferir.
+
+| Domínio | bridge | criar | persistiu após reload |
+|---|---|---|---|
+| **Projetos** | `projetos` | `proj-1-1793997644973` · `rascunho` · 2 critérios | **1** — "Projeto E2E r283" |
+| **Trabalhos** | `trabalhos` | `tp-2c36bddb-…` · `pedido` · expira em 2026 | **1** — "Pesquisa E2E r283" |
+| **Empresa** | `companies` | `emp_1793997645002_a4oz66` · `America/Sao_Paulo` | **1** — "Empresa E2E r283" |
+| **Automações** | `automations` | `rule_1793997705174_mwp0cc` · `venda.faturada` | **1** — "Regra E2E r283" |
+
+### O catálogo de automação é real, não uma lista escrita à mão
+
+`automations.triggers()` devolveu **cinco eventos**:
+`venda.faturada · estoque.zerado · ticket.aberto · ticket.atrasado · conta.vencendo`
+
+`automations.tools()` devolveu as ações do catálogo REAL do processo principal, com descrição e
+domínio: `inventory.append` ("Registra entrada, saída ou ajuste de estoque. Exige motivo e
+referência única"), `sales.create` ("O total é derivado dos itens, nunca informado"), …
+
+`api/automations.ts:4` explica o porquê: *"uma lista paralela envelhece na primeira ferramenta nova
+e oferece ação que não existe."* **A tela não inventa ações.**
+
+### A inconsistência que encontrei
+
+`automation-store.ts:101` **exige `actor_id` no payload**:
+
+> *"Sem ator não há escopo: a ação rodaria como ninguém, o que é o mesmo que rodar como todos."*
+
+**A intenção é certa, o mecanismo é inconsistente com o resto do produto.** Em Sofia, o
+`sofia-ipc.ts:131` diz o oposto e é mais seguro:
+
+> *"o ator vem do resolvedor, nunca do payload. Se este canal deixasse o renderer mandar o nome do
+> aprovador, a recusa seria decorativa."*
+
+**Em automação, o renderer pode escrever qualquer `actor_id`.** O comentário protege contra "rodar
+como ninguém", mas não contra "rodar como outra pessoa". **Não corrigi** — mudar esse contrato agora
+mexeria em canal com teste de permissão próprio, e a decisão de qual dos dois padrões vale é de
+arquitetura, não de rodada.
+
+**Registrado como dívida de segurança, não como bug de UI.**
+
+### Armadilhas de integração (todas custaram uma tentativa)
+
+| Chamada | Campo que eu usei | Campo real |
+|---|---|---|
+| `projetos.criar` | `para_que_existe` | **`objetivo`** |
+| `trabalhos.criar` | `descricao` | **`pedido`** |
+| `companies.saveCompany` | `nome` | **`name`** |
+| `automations.create` | `nome` | **`name`** + **`actor_id`** |
+
+**Três domínios usam português e um usa inglês** (`companies` e `automations` em inglês;
+`projetos` e `trabalhos` em português). Não é erro — mas é o tipo de coisa que faz quem integra
+errar quatro vezes seguidas, como eu errei.
+
+### O que NÃO foi testado
+
+| Item | Por quê |
+|---|---|
+| **Execução real de uma automação** | criei a regra; não disparei `venda.faturada` para ver a ação rodar |
+| `projetos.mudar` (status) e `podeIniciar` | só criei e listei |
+| `trabalhos.mudar` (pedido→entregue) e `descartarVencidos` | idem |
+| `companies.saveBranch` (filiais) | a tela tem "Adicionar filial"; não exercitei |
+| `automations.setActive` e `sweep` | não exercitados |
+| Projeto com **critério vazio** | a tela avisa *"Sem critério, ele não poderá ser concluído depois"* — não testei a recusa |
