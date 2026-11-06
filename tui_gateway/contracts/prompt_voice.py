@@ -36,6 +36,9 @@ class PromptSubmitParams(SessionParams):
     surface: str | None = None  # a ClientSurface value; unknown values clear the surface
     voice_context: str | None = None  # recent spoken transcript, model input only (voice-live)
     voice_turn: bool | None = None  # a spoken voice-conversation turn: runs on auxiliary.voice_chat
+    # B-3PO (r273): o ambiente/projeto/ator em que a pessoa esta trabalhando. Descritivo,
+    # entra como NOTA na mensagem do usuario (nunca no prefixo congelado), e NAO autoriza nada.
+    produto_contexto: str | None = None
     # Desktop-generated large-paste preview (first ~1000 chars); TITLE input only, never the model turn.
     title_preview: str | None = None
     truncate_before_user_ordinal: int | None = None

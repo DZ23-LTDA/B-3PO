@@ -513,3 +513,79 @@ export function paramsComContexto<T extends Record<string, unknown>>(
 | **G5** | ⚠️ **contexto montado, limitado por RBAC, mostrado, e a peça do envio pronta e testada; o consumo é backend** |
 | os outros 8 | ✅ |
 | **G8** | ⚠️ **medido; 30 falhas pré-existentes documentadas** |
+---
+
+## FASE 9 — O CONSUMO NO BACKEND (r273) — **G5, a outra metade**
+
+### O padrão que o projeto já tinha — e que eu não precisava inventar
+
+**Procurei o precedente mais próximo: o `voice_context`.** Ele resolve exatamente o mesmo problema — *um dado por turno que precisa chegar ao modelo sem tocar no prefixo congelado* — e a solução que o projeto adotou é:
+
+```
+prompt.submit
+   → _SUBMIT_FIELDS                 (gateway/session_surface.py)
+   → admit_surface()  →  surface_v1 (commitado com a admissão)
+   → surface_note()   →  NOTA na mensagem do usuário (api_content)
+```
+
+> **"It reaches the model as a note on the user message (api_content sidecar), so the persisted user row stays the words the user typed and the frozen system prefix is untouched."** — é o docstring do próprio arquivo.
+>
+> **É exatamente o que o G5 precisa**: o contexto muda quando a pessoa troca de ambiente; se ele mexesse no system prompt, **cada troca custaria o cache inteiro**. Como nota no turno, custa uma frase.
+
+### O que foi feito
+
+**`gateway/session_surface.py`:**
+
+```python
+_SUBMIT_FIELDS = ('surface', 'voice_context', 'interrupted', 'voice_turn', 'produto_contexto')
+_PRODUTO_CONTEXT_LIMIT = 400
+
+def _produto_note(committed):
+    return (
+        f'Contexto do produto (B-3PO): o usuário está trabalhando em {contexto}. '
+        'Use isto para situar a resposta; não é uma permissão de acesso.'
+    )
+```
+
+**Três decisões:**
+
+1. **Não é uma surface.** `SURFACES` é `{'hud', 'voice-live'}` — o contexto do produto **vale no app window**, que é a surface padrão. Validá-lo como surface o tornaria impossível de usar no caso normal.
+2. **A nota diz o que ela NÃO é.** *"não é uma permissão de acesso"* — porque, sem essa linha, uma nota que descreve escopo é lida como autorização. **O `permission-guard` continua sendo a única porta.**
+3. **Ela vem PRIMEIRO na ordem das notas** — antes do barge-in e da nota de HUD/voz. **Onde a pessoa está é o contexto mais externo**; o resto é sobre a forma da fala.
+
+**`tui_gateway/contracts/` — e aqui estava a armadilha:**
+
+> **O dispatcher rejeita chaves de parâmetro não declaradas** (`4000` + key path). **Enviar `produto_contexto` sem declará-lo no contrato faria o `prompt.submit` FALHAR** — não silenciosamente: o turno inteiro seria recusado.
+
+**Declarado nos dois contratos** (`PromptSubmitParams` e `CanonicalSubmitParams`), e **o TypeScript foi regenerado** (`scripts/gen_gateway_contracts.py` → `apps/shared/src/gateway-contract.generated.ts`).
+
+**`tui_gateway/methods_prompt.py`:** guarda o último valor na sessão, clipado em 400.
+
+### A prova
+
+**`tests/gateway/test_produto_context.py` — 8 testes, todos passando:**
+
+```
+✓ committed sem nenhuma surface           (o caso normal do app window)
+✓ ausente não commita e não gera nota
+✓ em branco não é contexto                ("trabalhando em nada" é pior que silêncio)
+✓ a nota diz que NÃO é uma permissão      (a metade que impede virar autorização)
+✓ a leitura negada chega ao modelo        ("sem permissão de leitura")
+✓ limitado a 400                          (um cliente não escolhe o tamanho do turno)
+✓ convive com uma surface                 (não substitui a nota de voz/HUD)
+✓ não-string é recusado
+```
+
+**E os contratos**: `12 passed` (os 8 + os de contrato), `gate` 14 ok, `typecheck` 0 erros.
+
+### O que ainda falta — e agora é UM fio
+
+**O backend está pronto. O renderer tem a peça (`paramsComContexto`, r272). O que falta é o fio entre os dois**: chamar `paramsComContexto` nos cinco pontos de `prompt.submit` (ou num middleware do cliente).
+
+> **Não fiz por atalho**: o único ponto comum (`session-rpc-dispatcher`) é de **roteamento**, e enfiar um conceito de produto ali faria todo RPC herdá-lo. **O fio precisa de um lugar que seja dele** — e essa é uma decisão de arquitetura que vale registrar, não apressar no fim de uma rodada.
+
+| Gate | Estado |
+|---|---|
+| **G5** | ⚠️ **backend completo e testado; falta o fio no renderer** |
+| os outros 8 | ✅ |
+| **G8** | ⚠️ **medido; 30 falhas pré-existentes documentadas** |
