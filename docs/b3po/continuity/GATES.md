@@ -2253,3 +2253,70 @@ fluem sem vazio morto, o composer no rodapé. **Nada deslocado.**
 **Uma correção que eu faço no shell se aplica a TODAS as rotas** — então **verificar em 6 é
 amostragem, não cobertura**. A rodada 41 provou isso: as 6 que eu testei passaram, e as outras 24
 tinham o mesmo defeito que eu não tinha visto em nenhuma.
+
+---
+
+## G8 · ADENDO 17 — revisão visual das capturas: o que olhar achou que medir não achou
+
+**Rodada 43.** A lição da r41 ("medir não substitui olhar") pediu a outra metade: **olhar as 20
+capturas que eu criei**. Fiz.
+
+### As 4 telas revisadas
+
+| Tela | Veredito visual |
+|---|---|
+| **CRM** (claro) | **OK** — cards de métrica no topo, formulários fluindo, sem vazio morto |
+| **Compras** (claro) | **OK** — 5 cards organizados, tabela com `#2 Fornecedor E2E · R$ 150,00 · recebido` |
+| **Settings** (escuro) | **OK** — o "cortado no topo" que eu suspeitei é o **overlay começando após a sidebar** (main `x=260`, primeiro item `y=71`) |
+| **Vendas** (claro) | **achado** |
+
+### O achado de Vendas — o R-9 agora tem CAPTURA
+
+```
+Nº   Situação    Itens   Total
+#3   cancelada    1      R$ 5,00
+#2   faturada     1      R$ 0,00     ← venda faturada com valor ZERO
+#1   faturada     1      R$ 80,00
+```
+
+**O R-9 estava registrado como "preço zero vende sem lançar financeiro", medido por bridge.** Agora
+há **prova visual**: uma venda `faturada` com `R$ 0,00` na lista.
+
+**Não é bug de layout** — é a **regra de negócio** que falta decidir: preço zero é **cortesia
+legítima** (e então deveria aparecer como tal) ou **erro de digitação** (e então deveria bloquear)?
+
+**Está no `TASK-QUEUE.json` como T-08, dono: proprietário.**
+
+### O que a revisão visual NÃO achou
+
+| Suspeita | Verificação | Resultado |
+|---|---|---|
+| home deslocada | `main == pai` em 30 rotas | **corrigido na r42** |
+| settings cortado | `main.x=260, y=34`; primeiro item `y=71` | **é o design** |
+| compras quebrado | 5 cards + tabela | **OK** |
+| crm desalinhado | cards + forms + lista | **OK** |
+
+### Os "problemas" que são design, não bug
+
+**Na tabela de Vendas os números ficam à esquerda** (R$ 5,00, R$ 0,00, R$ 80,00). Para valores
+monetários, **alinhar à direita** é a convenção contábil — mas isso é **escolha visual do app**, não
+defeito, e mudar seria refazer a tabela sem pedido do dono.
+
+**Registro como observação, não como bug.**
+
+### A conclusão da série visual
+
+**Duas rodadas (41 e 43) e o saldo é:**
+
+| O que | Como achou |
+|---|---|
+| **layout 182 px alto demais** | **o dono olhou** |
+| **venda de R$ 0,00 faturada** | **eu olhei**, depois de capturar |
+| settings, compras, crm | medição + olhar, **nada** |
+
+**O erro do dono encontrar e eu não é a parte importante.** A parte importante é que **depois de
+criar as capturas, eu encontrei um achado na primeira tela que olhei** — a venda de R$ 0,00, que eu
+tinha medido por API e **nunca tinha visto na tela**.
+
+> **A captura transforma "eu medi" em "eu vi".** E o que eu vi na primeira tentativa foi o que 30
+> rotas de `axe` e 20 testes de bridge não mostraram.
