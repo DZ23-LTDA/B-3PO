@@ -1,45 +1,53 @@
 {
-  "schema_version": 1,
-  "timestamp_utc": "2026-11-06T18:54:58Z",
-  "head": "05034dd5c99ec09882c99d83e654ec2bcc955f58",
+  "head": "c79aa251c9e0e6d9cad9a824cff2ef34683d260f",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "main_intact": true,
-  "dirty": false,
-  "stage": "G0",
-  "stage_name": "Inventario, baseline reproduzivel, continuity",
-  "tasks_done": [
-    "G0.1 inventario git: branch/HEAD/remotes/branches/worktrees/tags/submodules",
-    "G0.3 continuity docs criados"
-  ],
-  "tasks_pending": [
-    "G0.2 baseline de testes (rodando)",
-    "G0.4 inspecao do app aberto (Servidor inferencia indisponivel)",
-    "G1 seguranca/IPC/RBAC/tenant",
-    "G2 runtime/modelos/inferencia",
-    "G3 dominio canonico",
-    "G4 vertical gas/agua E2E",
-    "G5 auditoria dos seis modos",
-    "G6 engenharia/automacao",
-    "G7 plataformas",
-    "G8 regressao/seguranca/perf/a11y",
-    "G9 pacotes+veredito"
-  ],
-  "evidence": {
-    "git": {
-      "head_local": "05034dd5c99ec09882c99d83e654ec2bcc955f58",
-      "head_remote": "05034dd5c99ec09882c99d83e654ec2bcc955f58",
-      "ahead": 0,
-      "behind": 0,
-      "untracked": 0,
-      "remotes": ["origin=https://github.com/DZ23-LTDA/B-3PO.git", "upstream=https://github.com/NousResearch/hermes-agent.git"]
-    }
+  "stage": "G8",
+  "round": 18,
+  "gates": {
+    "G0": "READY",
+    "G1": "PARCIAL",
+    "G2": "PARCIAL",
+    "G3": "PARCIAL",
+    "G4": "NOT_IMPLEMENTED",
+    "G5": "PARCIAL",
+    "G6": "PARCIAL",
+    "G7": "PARCIAL",
+    "G8": "PARCIAL",
+    "G9": "PENDENTE"
   },
-  "blockers": [],
-  "next_commands": [
-    "cd apps/desktop && npx vitest run  (baseline)",
-    "python scripts/check",
-    "python scripts/check-b3po-types"
+  "blockers": [
+    {
+      "id": "EXT-1",
+      "what": "chave de provedor de IA",
+      "blocks": "B1 inferencia ponta a ponta",
+      "unlock": "Configuracoes -> Provedores, ou hermes auth add <provider>, ou preencher .env"
+    },
+    {
+      "id": "EXT-2",
+      "what": "Developer Mode do Windows (symlink)",
+      "blocks": "regressao inteira (110+ falhas WinError 1314)",
+      "unlock": "ms-settings:developers -> Modo de desenvolvedor = Ativado"
+    },
+    {
+      "id": "EXT-3",
+      "what": "macOS + Xcode + conta Apple Developer",
+      "blocks": "build iOS",
+      "unlock": "runner macOS ou Mac fisico"
+    },
+    {
+      "id": "EXT-4",
+      "what": "decisao do dono sobre a vertical gas/agua",
+      "blocks": "G4",
+      "unlock": "escolher: construir / fora de escopo / redefinir G4"
+    }
   ],
-  "tests": { "state": "baseline em execucao", "last_full": null }
+  "next_action": "G9 (pacotes, rollback, riscos, veredito) OU desbloquear EXT-2 e remedir a regressao",
+  "evidence": {
+    "performance": "docs/b3po/continuity/PERFORMANCE.md",
+    "e2e": "docs/b3po/continuity/TEST-EVIDENCE.md",
+    "gates": "docs/b3po/continuity/GATES.md",
+    "platforms": "docs/b3po/continuity/PLATFORM-MATRIX.txt",
+    "audit": "docs/b3po/continuity/AUDIT-MATRIX.md"
+  }
 }
