@@ -1118,3 +1118,63 @@ dependem de `[data-tree-tab]` + `role="tab"` no mesmo nó.
 | modal do Bot Mode | a aba BOTS não é `button`/`tab`; a automação não a abriu |
 | leitor de tela real (NVDA/VoiceOver) | nenhum teste com AT de verdade |
 | Tab nas outras 28 rotas | só o CRM foi percorrido, como amostra |
+
+---
+
+## G8 · ADENDO 7 — tema escuro: **0 de 10 → 8 de 10**, e o bug era meu
+
+**Rodada 27.** O `axe` sempre rodou no tema **claro**. `color-contrast` depende do fundo — então
+**metade da medição estava faltando**. Fui medir o escuro com `emulateMedia({ colorScheme: 'dark' })`.
+
+### O resultado
+
+| Tema | Telas livres | Contraste |
+|---|---|---|
+| Claro | 27 de 29 | **0 violações** |
+| **Escuro (antes)** | **0 de 10** | **10 violações** |
+| **Escuro (depois)** | **8 de 10** | **0 violações** |
+
+### A violação era um bug que EU introduzi na rodada 22
+
+```
+Element has insufficient color contrast of 3.78
+  (foreground color: #bb4d00, background color: #0d1015)
+```
+
+`#bb4d00` é o **`amber-700` que eu escolhi** para corrigir o tema claro. Ele deu **4.98:1 sobre
+branco** — e **3.78:1 sobre `#0d1015`**.
+
+**A cor que corrige um tema é a que estraga o outro.** Eu validei o claro e **não** validei o escuro:
+a correção funcionou onde eu olhei.
+
+### A correção
+
+O padrão já existia **no mesmo arquivo**, duas linhas de distância:
+
+```tsx
+// linha 757, `statusBarGatewayHealth`:
+? 'text-amber-600 dark:text-amber-400'
+```
+
+Aplicado ao meu uso:
+
+```tsx
+? 'text-amber-700 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-400'
+```
+
+**Uma cor por tema.** É o que `preview-file.tsx` já fazia (`text-amber-700 dark:text-amber-300`) e
+o que eu deveria ter copiado desde o começo.
+
+### O que continua aberto
+
+As 2 telas restantes no escuro (`/` e `/settings`) são o **mesmo `nested-interactive`** do
+`PaneTab` — não uma violação nova.
+
+### A lição
+
+**Auditar num só tema é auditar metade.** O `axe` não reclama do que não vê, e eu tinha 27 de 29
+limpas no claro — um número que **parecia** cobertura completa. **Não era.**
+
+**Se eu tivesse parado na rodada 26, teria entregado um relatório dizendo "contraste zerado" com
+um `amber` ilegível no tema escuro** — introduzido por mim. A varredura que faltava encontrou em
+cinco minutos o que 26 rodadas de medição no claro não encontraram.
