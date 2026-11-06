@@ -1,9 +1,9 @@
 {
-  "head": "c79aa251c9e0e6d9cad9a824cff2ef34683d260f",
+  "head": "2e8856eca4d435cb34e04c3a067887282e0a37c2",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "stage": "G8",
-  "round": 18,
+  "round": 26,
+  "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
     "G1": "PARCIAL",
@@ -14,40 +14,62 @@
     "G6": "PARCIAL",
     "G7": "PARCIAL",
     "G8": "PARCIAL",
-    "G9": "PENDENTE"
+    "G9": "PARCIAL"
+  },
+  "measured": {
+    "axe_rotas": {
+      "auditadas": 29,
+      "limpas": 27
+    },
+    "axe_formularios": {
+      "auditados": 6,
+      "limpos": 6
+    },
+    "contraste_violacoes": 0,
+    "long_tasks_settings": {
+      "antes": 55,
+      "depois": 4
+    },
+    "testes_mobile": {
+      "arquivos": "19 passed / 1 skipped",
+      "testes": "169 passed / 8 skipped"
+    },
+    "regressao": "BLOCKED - 110 falhas WinError 1314 (symlink sem privilegio, reproduzido)"
   },
   "blockers": [
     {
       "id": "EXT-1",
       "what": "chave de provedor de IA",
-      "blocks": "B1 inferencia ponta a ponta",
-      "unlock": "Configuracoes -> Provedores, ou hermes auth add <provider>, ou preencher .env"
+      "unlock": "Configuracoes > Provedores | hermes auth add"
     },
     {
       "id": "EXT-2",
-      "what": "Developer Mode do Windows (symlink)",
-      "blocks": "regressao inteira (110+ falhas WinError 1314)",
-      "unlock": "ms-settings:developers -> Modo de desenvolvedor = Ativado"
+      "what": "Developer Mode do Windows",
+      "unlock": "ms-settings:developers",
+      "blocks": "a regressao inteira"
     },
     {
       "id": "EXT-3",
-      "what": "macOS + Xcode + conta Apple Developer",
-      "blocks": "build iOS",
-      "unlock": "runner macOS ou Mac fisico"
+      "what": "macOS + Xcode + conta Apple",
+      "unlock": "runner macOS",
+      "blocks": "build iOS"
     },
     {
       "id": "EXT-4",
-      "what": "decisao do dono sobre a vertical gas/agua",
-      "blocks": "G4",
-      "unlock": "escolher: construir / fora de escopo / redefinir G4"
+      "what": "decisao sobre a vertical gas/agua",
+      "unlock": "construir / fora de escopo / redefinir"
+    },
+    {
+      "id": "EXT-5",
+      "what": "autorizar reestruturar o PaneTab",
+      "unlock": "mover o botao Fechar para irmao do role=tab"
+    },
+    {
+      "id": "EXT-6",
+      "what": "decidir preco zero em Vendas",
+      "unlock": "cortesia ou bloqueio"
     }
   ],
-  "next_action": "G9 (pacotes, rollback, riscos, veredito) OU desbloquear EXT-2 e remedir a regressao",
-  "evidence": {
-    "performance": "docs/b3po/continuity/PERFORMANCE.md",
-    "e2e": "docs/b3po/continuity/TEST-EVIDENCE.md",
-    "gates": "docs/b3po/continuity/GATES.md",
-    "platforms": "docs/b3po/continuity/PLATFORM-MATRIX.txt",
-    "audit": "docs/b3po/continuity/AUDIT-MATRIX.md"
-  }
+  "next_action": "destravar EXT-2 e remedir a regressao; ou autorizar EXT-5 e zerar as 2 violacoes a11y restantes",
+  "docs": "docs/b3po/continuity/"
 }
