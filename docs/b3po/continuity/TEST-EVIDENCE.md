@@ -248,3 +248,48 @@ errar quatro vezes seguidas, como eu errei.
 | `companies.saveBranch` (filiais) | a tela tem "Adicionar filial"; não exercitei |
 | `automations.setActive` e `sweep` | não exercitados |
 | Projeto com **critério vazio** | a tela avisa *"Sem critério, ele não poderá ser concluído depois"* — não testei a recusa |
+
+---
+
+## E2E · Ciclo de Bot (B8) — **PARCIAL**: 5 de 8 etapas provadas
+
+**Um bot é um PROFILE Hermes.** O ciclo vive em `/api/profiles` (REST, via `hermesDesktop.api`).
+
+### O que foi provado, com saída
+
+| # | Etapa do aditivo V3 | Chamada | Resultado |
+|---|---|---|---|
+| 1 | **criar** | `POST /api/profiles` | `{"ok":true,"name":"bot-e2e-283","soul_set":true,"path":"…\profiles\bot-e2e-283"}` |
+| 2 | **editar** (SOUL) | `GET` + `PUT /api/profiles/:n/soul` | lê `"Bot de validacao E2E da r284"` · grava `{"ok":true}` |
+| 3 | **editar** (nome) | `PATCH /api/profiles/:n` | `bot-e2e-283` → `bot-e2e-283b` · **SOUL sobreviveu à renomeação** |
+| 4 | **revogar** | `DELETE /api/profiles/:n` | `{"ok":true}` · lista final `["default"]` |
+| 5 | **guard** | `DELETE /api/profiles/default` | **recusou**: *"Profile 'default' is being deleted"* |
+
+### As três etapas que **não** consegui provar
+
+| # | Etapa | O que aconteceu |
+|---|---|---|
+| 6 | **reiniciar** | `/api/profiles/:n/restart` → **405**; `/api/profiles/:n/gateway/restart` → **405**. Só `/api/gateway/restart` existe, e **reinicia o gateway inteiro** (`{"ok":true,"pid":64744}`) — não um bot |
+| 7 | **conversar** | `profiles.list` não trouxe `canonical_session` para o bot novo. A sessão "Bot Chat" nasce no **primeiro clique** na linha do bot, não na criação — e eu não cliquei |
+| 8 | **ferramenta** | o bot nasceu com **`skill_count: 0`** enquanto o `default` tem **44** |
+
+### O achado que mais importa
+
+**`skill_count: 0`.** Um bot recém-criado **não herda ferramenta nenhuma** do profile padrão. O
+aditivo V3 pede "ferramenta" como etapa do ciclo; **do jeito que está, um bot novo nasce sem
+nenhuma** — e a tela de edição existe para preencher isso, mas **não foi ela que criou**.
+
+**Não é bug de código; é decisão de produto**: `profiles.create` recebe `skills_disabled` e
+`hub_installs` como parâmetros (o retorno trouxe os dois zerados), então a intenção de configurar
+existe — o que falta é **o caminho que o usuário percorre para chegar lá**.
+
+### Registrado, não corrigido
+
+**Reiniciar um bot específico não existe como operação.** Só o gateway inteiro. Num produto onde o
+bot é o conceito central, "reiniciar este bot" é uma ação que o usuário vai procurar — e ela não
+tem porta. **Precisa de decisão de arquitetura** (reiniciar o gateway reinicia todos os bots juntos).
+
+### Estado do HOME após os testes
+
+`profiles.list` = `["default"]`. Os bots de teste (`bot-e2e-283`, `bot-e2e-283b`, `bot-e2e-284`)
+foram criados e **revogados** — o HOME temporário voltou ao estado anterior neste quesito.
