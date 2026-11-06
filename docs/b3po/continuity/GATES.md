@@ -1349,3 +1349,72 @@ correto, não o contrário.
 
 **O `prefers-reduced-transparency` eu deixo nomeado como não medido** em vez de inferir do
 `reduced-motion`: são media queries diferentes e o efeito é outro.
+
+---
+
+## G8 · ADENDO 11 — `nested-interactive`: tentei consertar, o axe recusou, e eu não forcei
+
+**Rodada 31.** Reavaliei meu próprio critério de "pedir autorização": o `AGENTS.md` exige perguntar
+para ação **destrutiva, custo externo ou produção**. Refatorar um componente com testes, reversível
+por git, **não é nenhum dos três** — eu estava sendo cauteloso além do necessário. Então tentei.
+
+### O que eu implementei (e ficou)
+
+| Item | Estado |
+|---|---|
+| `Delete` / `Backspace` fecham a aba | **entregue** |
+| `aria-keyshortcuts="Delete"` anuncia o atalho | **entregue** (verificado no DOM) |
+| testes | **24 de 24** (2 novos: teclado e o ✕ nomeado) |
+| gate · tipos | **14 ok · 0 erros** |
+
+**Isso é ganho real e independente**: quem usa teclado agora fecha aba — o componente **não tinha**
+esse caminho antes.
+
+### O que eu tentei e NÃO funcionou
+
+Aplicar `aria-hidden="true"` no `<button>` de fechar, para ele sair da árvore ARIA sem mudar o
+layout. **O `axe-core` recusou**, com a mensagem:
+
+> *"Using a negative tabindex on an element inside an interactive control does not prevent
+> assistive technologies from focusing the element (**even with aria-hidden**)"*
+
+**A mensagem é sobre o mecanismo, não sobre o meu uso**: o `nested-interactive` não se resolve
+tirando o nome do nó — o botão **continua focável no DOM**.
+
+### O gate me barrou duas vezes no caminho — e estava certo
+
+```
+PaneTab  CC 21 > target 20 (was 19)
+```
+
+1. Primeira tentativa: `onKeyDown` inline com 2 branches → **CC 21**.
+2. Extraí para `fecharPorTeclado` → **ainda 21**: o `if (!fecharPorTeclado(...))` somava 1.
+3. Tirei o `if` (repassar o handler externo depois é inofensivo) → **ainda 21**: o
+   `onClose && !vertical ? ... : ...` do `aria-keyshortcuts` somava 2.
+4. Extraí `atalhoFechar` → **CC 20, gate verde**.
+
+**Quatro medições para uma coisa que eu teria jurado ser uma linha.** O gate de saúde é
+desconfortável e é por isso que serve.
+
+### O que continua ABERTO — e por que não forcei
+
+**`nested-interactive`** (2 telas, `/` e `/settings`): o `<button>` precisa ser **irmão** do
+elemento com `role="tab"`, não filho. Isso muda:
+
+- quem é o dono do `.group/tab` (o hover do ✕ depende dele);
+- onde ficam `ref`, `onPointerDown`, `onClickCapture` e o `data-tree-tab`;
+- os testes que dependem de `[data-tree-tab]` e `role="tab"` **no mesmo nó**.
+
+**É refatoração de um componente que renderiza toda aba do app** (workspace, preview, browser,
+terminal). **Eu tentaria**, mas o certo é você saber que essa é a decisão:
+
+| Opção | Custo | Ganho |
+|---|---|---|
+| A · refatoração estrutural | toca 4 tipos de aba + ~24 testes | **2 violações a menos** (30/30) |
+| B · aceitar e declarar | zero | 30/30 nunca fecha, mas nada quebra |
+
+**Estou inclinado à B** — e não por preguiça: `nested-interactive` é `serious`, não `critical`, e a
+alternativa real (Delete + `aria-keyshortcuts`) **já funciona**. Trocar o dono dos handlers de foco
+em 4 tipos de aba por 1 regra de ferramenta é apostar mais do que se ganha.
+
+**Se você preferir A, eu faço.** É reversível e eu tenho os testes para provar que não quebrei nada.
