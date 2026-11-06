@@ -807,3 +807,73 @@ nas três variantes da sidebar (desktop, mobile, `collapsible='none'`) e um `<ma
 
 **A declaração que o V3 exige**: **não há defeito conhecido nos cenários verificados**. Os
 `BLOCKED` não são "tudo certo" — são "não foi possível medir", e estão nomeados um a um.
+
+---
+
+## G8 · ADENDO 3 — a11y medida com axe-core: **4 violações → 1**
+
+**Método novo**: instalei `axe-core` (637 KB, `--no-save`, sem tocar `package.json`) e rodei
+`axe.run` na home contra as tags `wcag2a · wcag2aa · wcag21a · wcag21aa`.
+
+### Antes → depois
+
+| # | Regra | Impacto | Antes | Depois |
+|---|---|---|---|---|
+| 1 | `color-contrast` | serious | **5 nós** | **0** ✅ |
+| 2 | `aria-required-children` | **critical** | 1 nó | **0** ✅ |
+| 3 | `label-content-name-mismatch` | serious | 1 nó | **0** ✅ |
+| 4 | `nested-interactive` | serious | 1 nó | **1** — aberto, ver abaixo |
+
+**Violações: 4 → 1.** Passes: **29**.
+
+### O que corrigi, e por quê
+
+**1. Contraste — 5 textos pequenos abaixo de 4.5:1**
+
+| Elemento | Razão antes | Depois |
+|---|---|---|
+| `Organizações, usuários…` | **3.37** | passou |
+| `Servidor` (aviso) | **3.17** | passou |
+| **`inferência indisponível`** | **2.62** ⚠️ | passou |
+| `Inteligente` | 3.52 | passou |
+| `cliente dev` | 3.52 | passou |
+
+Três causas distintas, três correções:
+
+- `--ui-text-tertiary` 54 % → **66 %** (`styles.css`) — o cálculo sobre `#fefefe` mostra 54 % → 3.76
+  e 66 % → 5.53; 66 % também cobre o card azulado `#e3edff` (5.21).
+- `text-amber-600` → **`text-amber-700`** no statusbar: `#e17100` dava 3.17, `#b45309` dá **4.98**.
+- **`muted-foreground/80` → `muted-foreground`** em **36 ocorrências / 29 arquivos**: o `/80`
+  empilhava 80 % de opacidade sobre um token que já é o terciário — 0.66 × 0.8 = ~53 %, reprovado
+  por construção. O `/80` era puramente estético e custava a legibilidade.
+
+**2. `aria-required-children` (critical) — o botão "+" estava dentro do `tablist`**
+
+`tree-group.tsx` punha o "+" (nova aba) em `children` do `<div role="tablist">`. O `tablist` só
+admite `role="tab"`; um botão de comando ali **infla a contagem de abas** para o leitor de tela
+("aba 3 de 5") e não é anunciado como ação. **Movi para `trailing`**, que o `PaneTabStrip` já
+renderiza **fora** do tablist — sem mudar o visual, porque o "+" continua à direita dos tabs.
+
+**3. `label-content-name-mismatch` — `rotuloAcessivel` ignorava o texto visível**
+
+```tsx
+if (item.title) return item.title   // ← antes: só o tooltip
+```
+
+O chip de versão anunciava *"B-3PO Desktop vdev · …"* enquanto a tela dizia *"cliente dev"*.
+Quem usa comando de voz não consegue dizer o que vê (WCAG 2.5.3). Agora o nome acessível **começa
+pelo texto visível** e só completa com o tooltip quando ele não o contém.
+
+### A que ficou aberta — e por que NÃO a "consertei"
+
+**`nested-interactive`** (`div[data-tree-tab="workspace"]`): o `<div role="tab">` **contém** o
+`<button aria-label="Fechar">` do `PaneTab`.
+
+**A correção de 1 linha** (`aria-hidden` + `tabIndex={-1}` no botão) faria o `axe` ficar verde e
+**pioraria a acessibilidade de verdade**: o leitor de tela deixaria de descobrir que a aba fecha.
+
+**A correção correta** é estrutural: o botão precisa ser **irmão** do elemento com `role="tab"`,
+não filho. Isso toca o `.group/tab` do CSS, o hover, o fade e o layout de **toda** aba do app —
+é mudança de arquitetura de componente, não de rodada de auditoria.
+
+**Registro como aberto, com a proposta.** Preferi um placar honesto de 1 violação a um verde falso.

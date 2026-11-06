@@ -424,10 +424,16 @@ export function useStatusbarItems({
   const inferenceReady = gatewayOpen && inferenceStatus?.ready === true && !gatewayHealth.degraded
   const gatewayDegraded = gatewayOpen || gatewayConnecting || gatewayHealth.degraded
 
+  /*
+   * r290 — amber-700, não 600. O `axe-core` mediu o aviso "Servidor" a 3.17:1 em fundo claro
+   * (`amber-600` = `#e17100`); `amber-700` (= `#b45309`) dá 4.98:1 e passa AA para 11 px.
+   * O aviso de degradação não pode ser o texto menos legível da tela — ele existe justamente
+   * para quem precisa vê-lo.
+   */
   const gatewayClassName = inferenceReady
     ? undefined
     : gatewayDegraded
-      ? 'text-amber-600 hover:text-amber-600'
+      ? 'text-amber-700 hover:text-amber-700'
       : 'text-destructive hover:text-destructive'
 
   const rollbackBody = t.settings.about.channel.rollbackBody

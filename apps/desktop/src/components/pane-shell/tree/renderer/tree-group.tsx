@@ -741,6 +741,29 @@ export function TreeGroup({
                 titlebar={tabsInTitlebar}
                 trailing={
                   <>
+                    {/* r290 — o "+" mora AQUI, não entre os filhos do `<div role="tablist">`.
+                     *  O `axe-core` reprovou o strip como `aria-required-children` (critical):
+                     *  o `tablist` só admite `role="tab"`, e este botão é um comando, não uma
+                     *  aba. Para um leitor de tela ele inflava a contagem ("aba 3 de 5") e não
+                     *  era anunciado como ação. Como `trailing` é renderizado FORA do
+                     *  `role="tablist"` (ver `PaneTabStrip`), a semântica fica correta sem
+                     *  mexer no visual: o "+" continua à direita dos tabs.
+                     *
+                     *  O `onPointerDownCapture` precisa vir antes do clique para o "+" abrir
+                     *  a nova aba no zone FOCADO — um strip de fundo tem que virar foco
+                     *  primeiro, senão a aba cai na zona errada. */}
+                    {newTab && !node.minimized && (
+                      <span
+                        className="flex shrink-0 items-center [-webkit-app-region:no-drag]"
+                        onPointerDownCapture={() => noteActiveTreeGroup(node.id)}
+                      >
+                        <PaneStripGlyph
+                          icon={<Codicon name="add" size="0.8125rem" />}
+                          label={newTab.label}
+                          onSelect={newTab.onSelect}
+                        />
+                      </span>
+                    )}
                     {minimizable && (
                       <button
                         aria-label={node.minimized ? t.zones.restore : minimizeLabel}
@@ -870,29 +893,6 @@ export function TreeGroup({
                   return <Fragment key={paneId}>{chrome.tabWrap ? chrome.tabWrap(tab) : tab}</Fragment>
                 })}
 
-                {/* Plain "+" after the last tab — it mints another tab of the kind
-                you are LOOKING AT, so a Browser strip makes another Browser
-                and a chat strip makes another session (mirrors ⌘T, via the
-                app-registered action). The pointerdown focuses this zone
-                first, so the tab lands in THIS strip. Hidden when the active
-                pane is one of a kind and the zone holds no session tabs. */}
-                {newTab && !node.minimized && (
-                  <span
-                    className="flex shrink-0 items-center [-webkit-app-region:no-drag]"
-                    // The action docks into the FOCUSED chat zone; clicking a
-                    // background strip's "+" must make THAT zone the focused one
-                    // first, or the tab opens in whichever zone was last clicked.
-                    // (pointerdown's own focus tracking would land after the click
-                    // handler reads the anchor.)
-                    onPointerDownCapture={() => noteActiveTreeGroup(node.id)}
-                  >
-                    <PaneStripGlyph
-                      icon={<Codicon name="add" size="0.8125rem" />}
-                      label={newTab.label}
-                      onSelect={newTab.onSelect}
-                    />
-                  </span>
-                )}
               </PaneTabStrip>
             </ZoneMenu>
           ) : null}

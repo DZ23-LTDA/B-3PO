@@ -117,7 +117,7 @@ export function MarketplaceThemePage({ search, onPickTheme }: MarketplaceThemePa
             <Palette className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
             <span className="flex min-w-0 flex-col">
               <span className="truncate font-medium">{item.displayName}</span>
-              <span className="truncate text-[0.6875rem] text-muted-foreground/80">
+              <span className="truncate text-[0.6875rem] text-muted-foreground">
                 {item.publisher}
                 {item.installs > 0 ? ` · ${copy.installs(compactNumber.format(item.installs))}` : ''}
               </span>

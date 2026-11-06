@@ -808,7 +808,7 @@ function ModelPrice({ price, isCurrent }: { price?: ModelPricing; isCurrent: boo
         <span
           className={cn(
             'line-through decoration-from-font opacity-70',
-            isCurrent ? 'text-primary-foreground/60' : 'text-muted-foreground/80'
+            isCurrent ? 'text-primary-foreground/60' : 'text-muted-foreground'
           )}
         >
           {copy.wasPrice} {price.was_input || '?'} / {price.was_output || '?'}

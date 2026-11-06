@@ -133,7 +133,7 @@ export function PetPalettePage({ search, onGenerate }: PetPalettePageProps) {
                     </span>
                   )}
                 </span>
-                <span className="truncate text-[0.6875rem] text-muted-foreground/80">
+                <span className="truncate text-[0.6875rem] text-muted-foreground">
                   {pet.slug}
                   {pet.installed ? ` · ${copy.installed}` : ''}
                 </span>

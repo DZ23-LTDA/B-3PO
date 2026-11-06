@@ -82,7 +82,7 @@ export function TreeEditBar() {
       >
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-foreground">{t.zones.editTitle}</h2>
-          <p className="text-xs text-muted-foreground/80">
+          <p className="text-xs text-muted-foreground">
             {t.zones.editHint}{' '}
             {toggleCombo && (
               <kbd className="rounded border border-(--ui-stroke-secondary) bg-foreground/5 px-1 font-mono text-[10px]">

@@ -33,13 +33,27 @@ const STATUSBAR_ACTION_CLASS =
 /**
  * Nome acessivel de um item de status (r229).
  *
- * Fica fora do componente de proposito: \`StatusbarItemView\` estava exatamente no teto de complexidade
- * (CC 20) e o \`||\` + \`typeof\` inline levava a 22. O gate barrou, corretamente.
+ * Fora do componente de proposito: `StatusbarItemView` estava no teto de complexidade (CC 20) e
+ * as comparacoes inline levavam a 22 — o gate barrou, corretamente.
+ *
+ * r290 — WCAG 2.5.3 (`label-content-name-mismatch`): com tooltip E texto visivel, o `aria-label`
+ * NAO pode ser so o tooltip. O `axe-core` reprovou o chip de versao porque o leitor anunciava
+ * "B-3PO Desktop vdev - ..." enquanto a tela dizia "cliente dev": quem usa comando de voz nao
+ * consegue dizer o que ve. O nome acessivel agora COMECA pelo texto visivel; se o tooltip ja o
+ * contem, o tooltip basta.
  */
 function rotuloAcessivel(item: StatusbarItem): string | undefined {
-  if (item.title) return item.title
+  const visivel = typeof item.label === 'string' ? item.label : undefined
 
-  return typeof item.label === 'string' ? item.label : undefined
+  if (!item.title) {
+    return visivel
+  }
+
+  if (!visivel) {
+    return item.title
+  }
+
+  return item.title.includes(visivel) ? item.title : `${visivel} - ${item.title}`
 }
 
 export interface StatusbarMenuItem {
@@ -249,7 +263,7 @@ const StatusbarItemView = memo(function StatusbarItemView({
     <>
       {item.icon}
       {item.label && <span className="truncate">{item.label}</span>}
-      {item.detail && <span className="truncate text-muted-foreground/80">{item.detail}</span>}
+      {item.detail && <span className="truncate text-muted-foreground">{item.detail}</span>}
     </>
   )
 

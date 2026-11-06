@@ -56,7 +56,7 @@ function leadingGlyph(item: ComposerStatusItem, s: Translations['statusStack'], 
     return (
       <GlyphSpinner
         ariaLabel={s.running}
-        className="text-[0.85rem] leading-none text-muted-foreground/80"
+        className="text-[0.85rem] leading-none text-muted-foreground"
         spinner="braille"
       />
     )
