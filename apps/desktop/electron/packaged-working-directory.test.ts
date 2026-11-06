@@ -31,6 +31,33 @@ function killPid(pid: number | undefined): void {
   }
 }
 
+/**
+ * r189 do GOAL V2: espera o processo sumir antes de remover a árvore.
+ *
+ * **O `rm` do `finally` falhava com `EBUSY`** porque o helper órfão ainda segurava o `workspace` como CWD: **no
+ * Windows, `process.kill()` retorna antes do processo morrer**, e o `rmdir` de um diretório que é o CWD de alguém é
+ * recusado.
+ *
+ * **Não é o bug do produto.** A r188 leu o `EBUSY` como "o CWD não é liberado" — **e o `EBUSY` de que o teste fala
+ * está na L149, dentro do `if (!packaged)`, e é ESPERADO**. **O que quebrava era a limpeza do diretório temporário.**
+ *
+ * A espera é limitada e não esconde um vazamento: **se o processo não morrer em 5 s, o teste falha no próprio
+ * `rm`**, que é o comportamento certo para um helper que não morre.
+ */
+async function esperarMorrer(pid: number | undefined): Promise<void> {
+  if (!pid) return
+
+  for (let tentativa = 0; tentativa < 100; tentativa += 1) {
+    try {
+      process.kill(pid, 0)
+    } catch {
+      return // sumiu
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+}
+
 // The decision itself, on every CI host (the host is data); the live EBUSY proof below needs Windows.
 test('a packaged Windows app leaves a CWD inside its install folder and keeps one outside it', () => {
   const app = { platform: 'win32', isPackaged: true, execPath: 'C:\\Hermes\\win-unpacked\\Hermes.exe' } as const
