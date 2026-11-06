@@ -55,7 +55,7 @@ test('launches the unpacked helper without prompting and delivers only validated
   assert.equal(child.kill.mock.calls[0]?.[0], 'SIGTERM')
   assert.equal(child.stdout.listenerCount('data'), 0)
   assert.deepEqual(statuses.at(-1), { type: 'stopped' })
-  assert.equal(resolveCommandScreenshotMonitorPath('/tmp/dev'), '/tmp/dev/dist/native/command-screenshot-monitor')
+  assert.equal(resolveCommandScreenshotMonitorPath('/tmp/dev', 'darwin'), '/tmp/dev/dist/native/command-screenshot-monitor')
 })
 
 test('bounds startup and termination, preserves permission failures, and isolates restarts', () => {
