@@ -69,3 +69,54 @@ E resolve: o custo unitário é obrigatório na passagem para recebido. **É por
 | **Estorno** de compra recebida | não existe caminho exercitado | verificar se há e testar |
 | Jornada **pela UI** (clique a clique) | exercitei o bridge, que é o que a UI chama | teste de clique completo |
 | Financeiro em **tela própria** | `hermesDesktop.finance.payables` não existe como bridge | o dado VIVE no `receive`; conferir a tela |
+
+---
+
+## E2E · Vendas (B5 do aditivo V3) — **PASSOU com ressalvas**
+
+**Mesmo método**: bridge `hermesDesktop.sales` no Electron real. Estoque herdado do E2E de compras
+(3.000 unidades de `E2E-001`).
+
+### A promessa da tela, verificada
+
+A UI diz: *"Faturar dá baixa no estoque e lança a conta a receber."* **É verdade:**
+
+```
+estoqueAntes:  {"E2E-001": 3000}
+faturar:       finance { amount_cents: 8000, kind: "receber", currency: "BRL",
+                         id: "fin_1793997336388_oemw5w", status: "aberto" }
+estoqueDepois: {"E2E-001": 2000}          ← baixou 1000
+```
+
+### Máquina de estados
+
+| Operação | Status resultante |
+|---|---|
+| `sales.create(payload)` | **`orcamento`** |
+| `sales.faturar(payload)` | **`faturado`** |
+| `sales.cancel(id, motivo)` | **`cancelado`** |
+
+**A venda cancelada NÃO baixou o estoque** — o saldo final foi 1000, compatível com as duas vendas
+faturadas (1000 + 1000) e a cancelada (500) intocada. **É o comportamento correto.**
+
+### Casos de borda — o que passou e o que NÃO passou
+
+| Caso | Chamada | Resultado | Veredito |
+|---|---|---|---|
+| **Estoque insuficiente** | 9.999 unidades com 2.000 em saldo | `{"error":"saldo_insuficiente","message":"E2E-001"}` · **estoque permaneceu 2000** | **PASSOU** — rejeita e não corrompe |
+| **SKU inexistente** | `product_sku: "NAO-EXISTE-999"` | `{"error":"saldo_insuficiente","message":"NAO-EXISTE-999"}` | **FALHOU** — o produto não existe, mas a mensagem culpa o saldo |
+| **Preço zero** | `unit_price_cents: 0` | venda criada com `total_cents: 0`, **`finance: null`** | **FALHOU** — vende de graça e não lança nada no financeiro |
+
+### O que isso significa, sem maquiar
+
+- **O controle crítico está certo**: sem saldo, não fatura, e o estoque não é tocado. É o erro que
+  mais dói num sistema de venda, e ele está coberto.
+- **A mensagem do SKU inexistente é enganosa.** Quem lê "saldo insuficiente" para um produto que
+  não existe vai procurar estoque em vez de cadastro. **É um bug de mensagem, não de controle.**
+- **Preço zero é aceito.** Pode ser intencional (brinde, bonificação), mas **não há nada que diga
+  isso ao operador** — e o financeiro fica sem registro. Precisa de decisão de produto: bloquear,
+  ou marcar explicitamente como cortesia.
+
+**Nenhuma dessas duas falhas foi corrigida nesta rodada** — a primeira exige saber o vocabulário de
+erro que o backend usa para "produto não encontrado"; a segunda é decisão de negócio. Ficam
+registradas como dívida com nome, não como "tudo certo".
