@@ -30,6 +30,23 @@ import { useI18n } from '@/i18n/context'
  *    backend recusa de qualquer forma e um botão que sempre falha ensina o usuário a desconfiar da tela.
  */
 export function AtendimentoView() {
+
+/**
+ * O canal do ticket em portugues (r161).
+ *
+ * **Canal desconhecido aparece como veio**, e nao some: um ticket criado por outro modulo (a logistica
+ * na r142) precisa ser identificavel mesmo que esta tela ainda nao conheca o nome dele.
+ */
+const CANAL_LABEL: Record<string, string> = {
+  email: 'e-mail',
+  logistica: 'logística',
+  telefone: 'telefone',
+  whatsapp: 'WhatsApp'
+}
+
+function canalLabel(canal: string): string {
+  return CANAL_LABEL[canal] ?? canal
+}
   const { t } = useI18n()
   const copy = t.settings.atendimento
 
@@ -222,6 +239,18 @@ export function AtendimentoView() {
                         #{ticket.number} · {ticket.subject}
                       </span>
                       <span className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
+                        {/*
+                          r161 do GOAL V2: o CANAL aparece.
+
+                          A r142 ligou a entrega recusada ao atendimento com `channel: 'logistica'` — e a fila
+                          mostrava o ticket igual a qualquer outro. **O atendente nao sabia que aquele chamado veio
+                          de uma entrega que o cliente recusou na porta**, e essa e a informacao que muda a ligacao
+                          antes de qualquer pergunta.
+
+                          `canalLabel` traduz o codigo para o que a pessoa le, e um canal desconhecido aparece como
+                          ele veio em vez de sumir — mesma regra do status e da prioridade nesta linha.
+                        */}
+                        {canalLabel(ticket.channel)} ·{' '}
                         {TICKET_PRIORITY_LABELS[ticket.priority] ?? ticket.priority} ·{' '}
                         {TICKET_STATUS_LABELS[ticket.status] ?? ticket.status} ·{' '}
                         {slaLabel(ticket.sla_minutos, copy.remaining, copy.overdue)}
