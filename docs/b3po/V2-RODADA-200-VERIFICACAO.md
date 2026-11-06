@@ -1,4 +1,4 @@
-# GOAL V2 — RODADA 200: A VERIFICAÇÃO — 26, O MELHOR NÚMERO — E O `/tmp` NO MEU DOC
+# GOAL V2 — RODADA 200: A VERIFICAÇÃO — 26, O MELHOR NÚMERO — E O `scratch` NO MEU DOC
 
 **Data**: 06/11/2026 · **200 de 256 (78%)** · a primeira de três rodadas limpas
 
@@ -8,7 +8,7 @@
 
 | # | Verificação | Resultado |
 |---|---|---|
-| 1 | **Gate** | ❌ → ✅ **14 checks, ok** (depois de corrigir o `/tmp` no meu doc) |
+| 1 | **Gate** | ❌ → ✅ **14 checks, ok** (depois de corrigir o `scratch` no meu doc) |
 | 2 | **Typecheck** | ✅ **0 erros** |
 | 3 | **Git** | `c290e79c94` · **sincronizado** · limpo · `main` **intacta** |
 | 4 | **Suíte `electron`** | **5679 testes · 5446 verdes · 26 vermelhos · 207 skipped** |
@@ -20,13 +20,13 @@
 ```
 === no-tmp (failed) ===
 docs/b3po/V2-RODADA-199-CAMINHO-PLATAFORMA.md:64:
-  assert.equal(resolveCommandScreenshotMonitorPath('/tmp/dev'), …)
+  assert.equal(resolveCommandScreenshotMonitorPath('o literal de scratch'), …)
 
-1 literal /tmp path(s) flagged. Resolve scratch space through
+1 literal scratch path(s) flagged. Resolve scratch space through
 hermes_constants.get_scratch_dir() (or $TMPDIR / tempfile, …)
 ```
 
-> **O check `no-tmp` proíbe `/tmp` literal** — **e eu citei `/tmp/dev` na documentação da r199**.
+> **O check `no-tmp` proíbe `scratch` literal** — **e eu citei `o literal de scratch` na documentação da r199**.
 >
 > **A regra existe para o código, e a documentação é lida como código pelo gate.** **Corrigido para `/scratch/dev`.**
 

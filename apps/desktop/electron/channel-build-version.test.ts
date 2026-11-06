@@ -8,6 +8,8 @@ import path from 'node:path'
 import type { Configuration } from 'app-builder-lib'
 import { afterEach, test } from 'vitest'
 
+import { resolverPython } from './updater/python-for-tests'
+
 import type { ChannelBuildRequest, InstallStamp } from './install-stamp'
 import { applyDesktopIdentity, type ProductIdentity } from './product-identity'
 
@@ -328,7 +330,8 @@ test('channel stamps verify the real checkout and retain source version and nati
       verifyBundleStamp(built, { commit: receiver.commit, platform: 'darwin', channelRequest: receiver })
     })
     execFileSync(
-      process.env.HERMES_PYTHON || 'python3',
+      // r200: o mesmo — o interpretador por execução, e o `stdio` contido.
+      resolverPython() ?? 'python',
       [
         '-c',
         `
@@ -515,10 +518,17 @@ else:
 print(out.read_text(encoding='utf-8'))
 `
 
+      // r200 do GOAL V2: o MESMO tratamento do `execFileSync` acima — e o INTERPRETADOR resolvido por execução.
+      //
+      // **A r196 pôs `stdio` e `timeout` no execFileSync do MANIFESTO e o teste passou.** **Este arquivo tem DOIS
+      // que rodam o interpretador** — este, que chama o `record`, ficou sem — **e o teste voltou a falhar na suíte
+      // completa**: **`python3` é o stub da Store, e sem `pipe` o stderr dele vaza.**
+      //
+      // **`stdio` não é do arquivo, é de cada chamada** — a lição da r196 aplicada onde ela faltou.
       const recorded: string = execFileSync(
-        process.env.HERMES_PYTHON || 'python3',
+        resolverPython() ?? 'python',
         ['-c', recordScript, repo, root, JSON.stringify(build)],
-        { encoding: 'utf8' }
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 120_000 }
       )
 
       const metadata: RecordedMetadata = JSON.parse(recorded)

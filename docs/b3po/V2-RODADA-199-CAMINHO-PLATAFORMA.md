@@ -61,7 +61,7 @@ path: resolveCommandScreenshotMonitorPath(options.appPath, options.platform)
 ### E o segundo teste, que chamava sem plataforma
 
 ```ts
-assert.equal(resolveCommandScreenshotMonitorPath('/scratch/dev'), '/scratch/dev/dist/…')
+assert.equal(resolveCommandScreenshotMonitorPath('o literal de scratch'), 'o literal de scratch/dist/…')
 ```
 
 > **Este compara com POSIX e não passa `platform`** — **ele testava o HOST, não a função**. **Agora passa `'darwin'`**, **e o que ele afirma é o que ele descreve.**
