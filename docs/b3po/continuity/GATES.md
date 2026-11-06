@@ -1787,3 +1787,73 @@ o dev" soava prudente e era apenas **inércia com boa redação**.
 | rollback atômico | **READY** — `.dist-previous-*` provado em 2 falhas |
 | assinatura Authenticode | **BLOCKED** — certificado (EXT-3) |
 | iOS | **BLOCKED** — macOS (EXT-4) |
+
+---
+
+## G7 · ADENDO — o app não iniciava: `ELECTRON_RUN_AS_NODE` herdada do harness
+
+**Rodada 37.** Depois do build, o app não voltou. A causa é ambiente **e vale documentar**: ela
+custou 4 tentativas e não está em nenhum log do produto.
+
+### O sintoma
+
+```
+SyntaxError: The requested module 'electron' does not provide an export named 'BrowserWindow'
+  at electron-main.mjs:5810
+Node.js v24.22.0                       ← Node puro, não Electron
+```
+
+**O `electron-main.mjs` estava sendo executado pelo Node**, e `import { BrowserWindow } from
+'electron'` falha — porque o módulo `electron` como dependência npm **não tem `BrowserWindow`**, só
+o runtime do Electron tem.
+
+### A causa
+
+```
+ELECTRON_RUN_AS_NODE = 1
+  processo: [1]      ← HERDADA do pai
+  usuário:  []
+  máquina:  []
+```
+
+**O DeepSeek Harness roda com `ELECTRON_RUN_AS_NODE=1`** (é um app Electron que usa o próprio node
+embutido), e **todo `pwsh` que ele abre herda a variável**. Com ela setada, `electron.exe` se
+comporta como `node.exe` puro — e o main do B-3PO não sobe.
+
+**Não é configuração da máquina nem do projeto**: `[Environment]::GetEnvironmentVariable(..., 'User')`
+e `(..., 'Machine')` retornam **vazio**. É o **ambiente do processo pai**.
+
+### A correção (uma linha)
+
+```powershell
+Remove-Item Env:ELECTRON_RUN_AS_NODE
+npm run dev:fake-boot
+```
+
+**Resultado**: `CDP 9333: OK`, app sobe, home renderiza (`Bem-vindo ao B-3PO`, 795 chars, `nav:1`,
+`main:1`, 4 abas).
+
+### A prova de que nada quebrou
+
+| Item | Estado |
+|---|---|
+| home | **renderiza**, `nav:1`, `main:1` |
+| abas | `sessions · hermes-bots:pane · workspace · terminal` |
+| `axe` | **1 violação** (`nested-interactive` — a mesma de sempre) |
+| **build de produção** | **`exit 0`**, 16 374 módulos, dist 1231 arquivos |
+
+**As mudanças da auditoria não quebraram o app.** A falha de inicialização era **ortogonal**: uma
+variável de ambiente do harness de onde eu rodo.
+
+### A lição
+
+**"Não inicia" tinha três causas diferentes nesta rodada, e eu quase chamei todas de "código
+quebrado":**
+
+1. `dist` travado → **rename atômico** → dev server (r36)
+2. `tsc --build` com corrida → **`--clean` do renderer** brigando (r37)
+3. `BrowserWindow` não exportado → **`ELECTRON_RUN_AS_NODE` do harness** (r37)
+
+**Nenhuma era código.** E as três só apareceram porque eu li a mensagem até o fim — a terceira
+estava numa linha que parece um erro de *meu* código (`electron-main.mjs:5810`) e era do **ambiente
+de onde eu executo**.
