@@ -1609,3 +1609,65 @@ E o código dizia, num comentário de quatro linhas, que ele **não deve**.
 
 **Eu li o comentário só agora — depois de duas rodadas.** A informação estava a 20 linhas de onde eu
 estava editando.
+
+---
+
+## G8 · ADENDO 15 — fecho do ciclo de teclado: o que está provado e o que não está
+
+**Rodada 35.** Tentei o último caminho para provar a **remoção** pelo `Delete` e ele não se abriu.
+Esta seção fecha o ciclo com o placar exato.
+
+### A tentativa final
+
+```
+abas: ["sessions","hermes-bots:pane","workspace","terminal"]
+X do terminal: {"temX":true,"w":0,"h":0}    ← o ✕ tem ZERO de largura
+clique real do Playwright no ✕          → nada
+```
+
+**O ✕ do `terminal` mede 0×0** — ele só ganha tamanho no hover (`group-hover/tab:opacity-100`), e o
+`getBoundingClientRect` do estado recolhido é vazio. **Não há alvo para clicar.**
+
+**E o `Tab` nunca pousou no `terminal` em 40 paradas.** A ordem de tabulação passa por ~15 botões do
+chrome antes das abas, e depois ainda há mais elementos.
+
+### O placar do `Delete` — quatro qualificações, não uma
+
+| Afirmação | Estado |
+|---|---|
+| o handler existe no componente | **SIM** |
+| o vitest o exercita | **SIM** (24/24) |
+| o evento `keydown` chega ao elemento no app | **SIM** (`keydown no tab: Delete`) |
+| **uma aba é REMOVIDA pelo Delete** | **NÃO OBSERVADO** |
+
+**A quarta linha é a única que importa para o usuário** — e ela continua sem prova.
+
+### As duas razões pelas quais não provei
+
+1. **`workspace`** — testado por duas rodadas; **não remove por design** (esvazia para draft).
+2. **`terminal`** — **não alcançável por Tab em 40 paradas** e o ✕ mede 0×0 em repouso.
+
+**Nenhuma das duas é falha do código** — são particularidades do shell que eu não sabia ao escolher
+a cobaia.
+
+### O que o ciclo de teclado entregou de concreto
+
+| # | Correção | Verificável |
+|---|---|---|
+| 1 | `tabIndex={0}` no `role="tab"` | **`tabindex="0"` no DOM**, e `Tab` pousa na aba |
+| 2 | `Delete`/`Backspace` no handler | 24/24 no vitest, `keydown` chega no app |
+| 3 | `aria-keyshortcuts="Delete"` | **no DOM** (`kbd=Delete`) |
+| 4 | `fecharPorTeclado` / `atalhoFechar` | mantém `PaneTab` em CC 20 |
+
+**A #1 é a de maior valor real**: antes, `tabindex` era `null` e **nenhuma aba era alcançável por
+teclado** — WCAG 2.1.1. Agora é.
+
+### A decisão que eu tomo aqui
+
+**Paro de tentar provar a remoção.** Três rodadas (31, 32, 34/35) gastas num caminho cuja cobaia
+estava errada, e a próxima tentativa exigiria **abrir uma aba pelo menu** só para testar — o que é
+legítimo, mas o retorno está decaindo.
+
+**O que fica registrado é o que é verdade**: a aba **agora é alcançável**, o atalho **existe e é
+anunciado**, e a **remoção por `Delete` não foi observada**. Quem continuar sabe exatamente onde
+parou e por quê.

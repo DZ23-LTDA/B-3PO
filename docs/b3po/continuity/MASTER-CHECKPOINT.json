@@ -1,8 +1,8 @@
 {
-  "head": "608299e5f22d9eb6c230eabedb61867d5b56985a",
+  "head": "d2eaae756b7eddaf6b9052648be815c404d06215",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 27,
+  "round": 35,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -37,7 +37,13 @@
     },
     "regressao": "BLOCKED - 110 falhas WinError 1314 (symlink sem privilegio, reproduzido)",
     "contraste": "0 violacoes em AMBOS os temas (claro e escuro)",
-    "a11y_restante": "3 telas x nested-interactive = 1 causa (PaneTab), estrutural"
+    "a11y_restante": "3 telas x nested-interactive = 1 causa (PaneTab), estrutural",
+    "teclado_abas": {
+      "tabIndex": "SIM - tabindex=0 no DOM, Tab pousa na aba (WCAG 2.1.1 corrigido)",
+      "delete_handler": "SIM - 24/24 no vitest, keydown chega no app",
+      "aria_keyshortcuts": "SIM - no DOM",
+      "remocao_por_delete": "NAO OBSERVADA - workspace nao remove por design; terminal inalcancavel por Tab"
+    }
   },
   "blockers": [
     {
