@@ -120,8 +120,14 @@ describe('faturamento: os tres dominios juntos', () => {
 
       const r = (await ipc.invoke('hermes:sales:faturar', venda({ items: [item({ quantity: 5 })] }))) as FaturarResult
 
-      expect(r).toEqual({ error: 'saldo_insuficiente', message: 'CAF-500' })
-      // Nada foi criado: nem venda, nem receita, e o saldo continua intacto.
+      // r292: a recusa NOMEIA o livre e o necessario. `saldo_insuficiente` sozinho obrigava quem
+      // le a calcular quanto sobra — o calculo e justamente o que o backend ja fez.
+      expect(r).toEqual({
+        error: 'saldo_insuficiente',
+        livre_milli: 1000,
+        message: 'CAF-500',
+        necessario_milli: 5000
+      })
       expect(await sales.list()).toHaveLength(0)
       expect(await finance.list()).toHaveLength(0)
       expect(await inventory.balances()).toEqual({ 'CAF-500': 1000 })
@@ -163,7 +169,12 @@ describe('faturamento: os tres dominios juntos', () => {
     await withErp(async ({ ipc }) => {
       const r = (await ipc.invoke('hermes:sales:faturar', venda())) as FaturarResult
 
-      expect(r).toEqual({ error: 'saldo_insuficiente', message: 'CAF-500' })
+      expect(r).toEqual({
+        error: 'saldo_insuficiente',
+        livre_milli: 0,
+        message: 'CAF-500',
+        necessario_milli: 3000
+      })
     })
   })
 })

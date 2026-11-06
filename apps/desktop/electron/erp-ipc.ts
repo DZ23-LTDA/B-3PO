@@ -109,8 +109,12 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   const inventory = new InventoryStore(inventoryStorePath(userDataDir))
   const finance = new FinanceStore(financeStorePath(userDataDir))
+  // r292 — o catálogo vira uma variável porque o `sales-ipc` passou a consultá-lo: uma venda com
+  // SKU inexistente respondia `saldo_insuficiente` e mandava o usuário conferir um saldo que nunca
+  // existiu. Um store, dois leitores.
+  const catalog = new CatalogStore(catalogStorePath(userDataDir))
 
-  registerCatalogIpc(ipcMain, new CatalogStore(catalogStorePath(userDataDir)), { actorOf: () => actorOf() })
+  registerCatalogIpc(ipcMain, catalog, { actorOf: () => actorOf() })
 
   // Registro de documentos. NAO guarda o binario - ver documents-store.ts para o porque.
   registerDocumentsIpc(ipcMain, new DocumentsStore(documentsStorePath(userDataDir)), { actorOf: () => actorOf() })
@@ -410,6 +414,12 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   registerSalesIpc(ipcMain, {
     actorOf,
+    // r292: o catálogo entra aqui para o `faturar` distinguir "produto não cadastrado" de "sem
+    // saldo" — ver o comentário de `SalesDeps.catalog`.
+    catalog: {
+      has: async (sku: string, tenantId: string) =>
+        (await catalog.list(tenantId)).some(produto => produto.sku === sku)
+    },
     // r64 do GOAL V2: a venda consome a reserva. Sem isto, a reserva vencia sozinha e a
     // venda nunca sabia que havia uma promessa.
     reservations: new ReservationStore(reservationStorePath(userDataDir)),

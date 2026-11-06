@@ -59,6 +59,17 @@ export interface SalesDeps {
   reservations?: { confirmarDaVenda: (saleId: string) => Promise<unknown> }
   inventory: InventoryLike
   /**
+   * r292 — opcional: quando presente, faturar distingue "produto nao cadastrado" de "sem saldo".
+   *
+   * O `balances` so tem chave para SKU que JA se movimentou. Um SKU errado e um SKU novo sem
+   * estoque davam a MESMA resposta (`saldo_insuficiente`), entao quem digitou o codigo errado lia
+   * "sem saldo" e ia conferir o estoque de um produto que nao existe.
+   *
+   * Opcional de proposito: quem monta sem catalogo (teste, uso programatico) mantem o
+   * comportamento anterior em vez de quebrar.
+   */
+  catalog?: { has: (sku: string, tenantId: string) => Promise<boolean> }
+  /**
    * Opcional: quando presente, faturar anuncia o evento para as automacoes.
    *
    * Recebe um resumo do que aconteceu, nao o payload cru: a automacao nao deve depender da forma do
@@ -82,7 +93,7 @@ export interface SalesDeps {
 }
 
 export type FaturarResult =
-  | { error: string; message?: string }
+  | { error: string; livre_milli?: number; message?: string; necessario_milli?: number }
   | { finance: FinanceEntry | null; sale: Sale; sales: Sale[]; stock: InventoryMovement[] }
 
 /**
@@ -159,10 +170,32 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
 
     // Verifica contra o saldo ATUAL antes de gravar a venda: recusar depois seria deixar uma venda
     // faturada que nunca saiu do depósito.
-    const falta = stockShortage({ ...normalized.sale, number: 0 }, await deps.inventory.balances(normalized.sale.tenant_id))
+    const saldos = await deps.inventory.balances(normalized.sale.tenant_id)
+    const falta = stockShortage({ ...normalized.sale, number: 0 }, saldos)
 
     if (falta) {
-      return { error: 'saldo_insuficiente', message: falta }
+      /*
+       * r292 — a recusa diz QUAL dos dois problemas é.
+       *
+       * `balances` só tem chave para SKU que já se movimentou. Até aqui, SKU errado e SKU novo sem
+       * estoque davam a mesma resposta: `saldo_insuficiente`. Quem digitou o código errado ia
+       * conferir um saldo de um produto que não existe.
+       *
+       * A distinção exige o catálogo; sem ele (teste, uso programático) mantemos o comportamento
+       * anterior. E quando o produto EXISTE, a recusa nomeia o livre — como `reservation.ts` já
+       * fazia e a venda não: `saldo_insuficiente` sozinho obriga quem lê a calcular quanto sobra.
+       */
+      const cadastrado = deps.catalog ? await deps.catalog.has(falta, normalized.sale.tenant_id) : true
+
+      if (!cadastrado) {
+        return { error: 'produto_nao_encontrado', message: falta }
+      }
+
+      const necessario = stockMovementsFor({ ...normalized.sale, number: 0 })
+        .filter(movement => movement.product_sku === falta)
+        .reduce((soma, movement) => soma + movement.quantity_milli, 0)
+
+      return { error: 'saldo_insuficiente', message: falta, livre_milli: saldos[falta] ?? 0, necessario_milli: necessario }
     }
 
     const criada = await deps.sales.create({ ...(payload as object), status: 'faturado' })
