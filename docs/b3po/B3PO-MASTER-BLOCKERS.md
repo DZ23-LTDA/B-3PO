@@ -30,7 +30,7 @@
 | `ssh-connection` | **4 de 89** | **`sun_path`** de 108 bytes e **sinais POSIX** | plataforma |
 | `run-electron-builder` | **1 de 5** | **`prepared-packaging`** recusa os inputs | hospedeiro |
 | `bundle-electron-main` | **3 de 5** | **`desktop.electron_flags`** não lido | hospedeiro |
-| `desktop-plugin-install` | **5 de 54** | **CRLF do git** e **symlink sem elevação** | ambiente |
+| `desktop-plugin-install` | **3 de 54** | **CRLF do git em mais de um ponto** (`add`, `checkout`, `archive`) - o symlink saiu com `skipIf` na r233 | ambiente |
 
 > **Cinco são diferenças de plataforma; uma é uma garantia do app hospedeiro que não está sendo cumprida.**
 > **Nenhuma é do B-3PO, e nenhuma é um defeito de funcionalidade do produto.**
