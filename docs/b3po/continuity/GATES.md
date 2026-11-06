@@ -2051,3 +2051,86 @@ header — e o resto do app (17 telas) passa limpo.
 | `nested-interactive` (desktop) | 2 telas, estrutural |
 
 **O buraco agora é um só, e está nomeado**: o app mobile.
+
+---
+
+## G7 · ADENDO 5 — a11y do **MOBILE**: auditoria estática, e o resultado é bom
+
+**Rodada 41.** O adendo anterior nomeou o buraco: *"o mobile não tem a11y medida"*. `axe` não roda
+em React Native, então fiz a **auditoria estática** que é possível: os atributos de acessibilidade
+que o RN exige.
+
+### O app mobile, medido
+
+| Item | Valor |
+|---|---|
+| `.tsx` (UI) | **5** + `App.tsx` (516 linhas) = **6** |
+| `.ts` (lógica) | 38 |
+| **testes** | **20 arquivos** (169 testes, medidos no G7) |
+| elementos interativos em `src/` | **6** |
+| **com `accessibilityLabel`** | **6** |
+| **com `accessibilityRole`** | **6** |
+| `<Image>` sem label | **0** (não há `<Image>`) |
+
+**100 % dos interativos de `src/` têm label E role.**
+
+### O `App.tsx`, onde está o resto da UI
+
+| Elemento | Qtde |
+|---|---|
+| `TouchableOpacity` | 4 |
+| `TextInput` | 1 |
+| `ScrollView` | 1 |
+| `accessibilityLabel` | **5** |
+| `accessibilityRole` | **4** |
+
+**Um `TouchableOpacity` não tem `accessibilityLabel` explícito** — e **não é violação**:
+
+```tsx
+<TouchableOpacity accessibilityHint="Abre a conversa com este bot" accessibilityRole="button">
+  <Text>{item.title}</Text>
+  <Text>{item.description}</Text>
+</TouchableOpacity>
+```
+
+**Em React Native, o label é derivado dos filhos `Text`** — o leitor anuncia título + descrição.
+O `accessibilityHint` acrescenta a ação. **Escrever um `accessibilityLabel` aqui seria redundante** e
+risco de divergir do texto.
+
+### O que isso é e o que não é
+
+**É uma auditoria ESTÁTICA**, não de runtime. Ela verifica que **os atributos existem**, não que o
+leitor de tela anuncia bem.
+
+| Verificado | Não verificado |
+|---|---|
+| todo interativo tem `accessibilityRole` | a **ordem** de foco |
+| todo interativo tem label **ou** texto filho | o anúncio real (TalkBack/VoiceOver) |
+| nenhuma imagem sem descrição | alvo de toque (mínimo de 44×44 no mobile) |
+| | contraste (RN não expõe tokens ao `axe`) |
+
+**A auditoria estática é o que dá para fazer sem emulador.** Ela **não substitui** o teste em
+dispositivo — e é importante dizer que **a cobertura do mobile é a mais fraca das três**.
+
+### A cobertura de a11y, com a honestidade de cada nível
+
+| Plataforma | Método | Profundidade | Estado |
+|---|---|---|---|
+| **Desktop** | `axe` em runtime | 30 rotas × 3 viewports × 2 temas | **forte** · 27/30 |
+| **Web** | `axe` em runtime | 17 rotas × 2 temas | **forte** · 17/17 |
+| **Mobile** | **estático** | 6 arquivos, atributos | **fraco** · 6/6 atributos |
+
+**A coluna "profundidade" é a que importa.** Dizer "a11y medida nas três plataformas" seria verdade
+e enganoso ao mesmo tempo — o mobile não passou por `axe` nem por leitor de tela.
+
+### O que continua aberto no mobile
+
+| Item | Por quê |
+|---|---|
+| **`axe` em runtime** | não existe para React Native nativo |
+| **leitor de tela** (TalkBack/VoiceOver) | exigiria emulador + dispositivo real |
+| **alvo de toque 44×44** | medível só em runtime |
+| **contraste** | RN não expõe os tokens ao `axe` |
+
+**Isso é `BLOCKED_BY_EXTERNAL_DEPENDENCY` para o teste real** (emulador + dispositivo), e
+**`NOT_APPLICABLE`** para o `axe`. **Nenhum dos dois é "passou".**
