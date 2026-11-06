@@ -2415,3 +2415,68 @@ ação destrutiva que o `AGENTS.md` manda perguntar antes.
 **O que isso significa para a entrega**: **a tela de Estoque está visualmente correta e logicamente
 inconsistente** — e a inconsistência é **reproduzível** por qualquer pessoa que cadastre um movimento
 sem cadastrar o produto.
+
+---
+
+## G8 · ADENDO 18 — revisão visual consolidada: 6 telas, 2 achados reais, 4 sem defeito
+
+**Rodadas 43–45.** Olhei 6 das 20 capturas de `baseline-layout/`.
+
+### O placar
+
+| Tela | Resultado |
+|---|---|
+| **Vendas** | **achado** — venda `faturada` com **R$ 0,00** (R-9, agora com captura) |
+| **Estoque** | **achado GRAVE** — `"0 produtos"` com **6 movimentações** e saldo 5000 |
+| **CRM** | **sem defeito** |
+| **Compras** | **sem defeito** |
+| **Financeiro** | **sem defeito** — o card "Vencido R$ 230,00" está **certo** |
+| **Projetos** | **sem defeito** — `"0 em andamento"` com 1 projeto *a começar* é consistente |
+
+**Taxa: 2 achados em 6 telas (33 %).**
+
+### O que eu investiguei e NÃO era bug
+
+**"Vencido R$ 230,00"** parecia somar tudo. O código:
+
+```ts
+if (entry.due_at > 0 && entry.due_at < now) {
+  out.overdueCents += entry.amount_cents
+}
+```
+
+Os lançamentos vencem **06/11/2026 00:00** e a medição foi às **20:30** → **`due_at < now` é TRUE** →
+**vencidos de fato**. `230 = 80 + 150` é a soma correta de **dois lançamentos que venceram hoje**.
+
+**Observação registrada (não bug)**: um lançamento que vence **hoje** conta como vencido a partir das
+**00:00**, não do fim do dia. É escolha de negócio — **não vou mexer sem pedido**.
+
+### O que **Projetos** confirmou de graça
+
+O placeholder do campo "Para que existe":
+
+```
+"vender os botijões sem depender de telefone"
+```
+
+**É texto de exemplo, não campo preenchido** — e é o **único vestígio da vertical gás/água** em todo
+o produto, confirmando o `G4 = NOT_IMPLEMENTED` da rodada 13.
+
+### O padrão que a revisão visual está revelando
+
+**O `axe` não vê coerência — ele vê acessibilidade.** Duas telas com `axe: 0` (Vendas, Estoque) e
+**as duas têm problemas de conteúdo**:
+
+| Tela | `axe` | O que a tela diz de errado |
+|---|---|---|
+| Vendas | 0 violações | venda faturada de R$ 0,00 |
+| Estoque | 0 violações | "0 produtos" com 6 movimentos |
+
+**Um app pode ser perfeitamente acessível e mentir na tela.**
+
+### O que continua por olhar
+
+**14 das 20 capturas** — `home` (2 temas), `crm`/`compras`/`vendas`/`estoque`/`financeiro`/`projetos`/`sofia`/`empresa` (escuro).
+
+**A taxa de 33 % sugere que vale continuar** — mas as duas melhores já foram (Vendas e Estoque eram
+as que eu tinha marcado como `PARCIAL` no B5 e no G3).
