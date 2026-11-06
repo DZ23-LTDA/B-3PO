@@ -53,7 +53,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: ../../.nvmrc
+          node-version: '26'
 
       - name: install
         run: npm install --no-audit --no-fund
@@ -74,7 +74,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: ../../.nvmrc
+          node-version: '26'
 
       - name: setup java
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
@@ -82,8 +82,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: setup android sdk
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204a1ea7cf6c355093e # v3.2.2
 
       - name: install
         run: npm install --no-audit --no-fund
@@ -111,7 +109,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: ../../.nvmrc
+          node-version: '26'
 
       - name: install
         run: npm install --no-audit --no-fund
