@@ -70,3 +70,33 @@ ead, **depois** do ambiente |
 | **G9** pacotes+veredito | **NÃO INICIADO** |
 
 > **Nada aqui é READY global.** Cada linha tem seu próprio status, como o aditivo A exige.
+
+---
+
+## PRIORIDADE ZERO — estado por item (medido, não narrado)
+
+| # | Item do aditivo B | Estado | Evidência |
+|---|---|---|---|
+| B1 | "Servidor inferência indisponível" — causa raiz | **PARCIAL** — causa raiz `READY`, inferência `BLOCKED_BY_EXTERNAL_DEPENDENCY` | `.env` com 0 chaves ativas / 29 comentadas; `AuthError` em `hermes_cli/auth.py:1698`; aviso traduzido (`547008842a`) |
+| B2 | Modal "Novo bot" com inglês | **READY** (modal) / **PARCIAL** (Bot Mode inteiro) | `pt.bot` 6→50 chaves; paleta `New Bot…`→`Novo bot`; prova `{novoBotPt:true, novoBotEn:false}` (`458f678e2c`) |
+| — | Chrome do app (painel do gateway) | **READY** | PT: Conectado/Inferência indisponível/Nenhum provedor · EN: `[]` (`a59d70a7f7`) |
+| B3 | Auditar os seis modos | **PENDENTE** | — |
+| B4 | Compras como jornada por etapas | **PENDENTE** | — |
+| B5 | Vendas com precificação/estoque/estados | **PENDENTE** | — |
+| B6 | Sofia com plano persistido e execução verificável | **PENDENTE** | — |
+| B7 | Projetos/Trabalhos/Automações/Empresa | **PENDENTE** | — |
+| B8 | Bots criar/editar/reiniciar/conversar/ferramenta/revogar | **PARCIAL** — criar/editar traduzidos; ciclo completo não exercitado | — |
+
+### O que foi medido nesta rodada e NÃO estava em documento nenhum
+
+- **A máquina não é o gargalo**: 47,7 GB RAM, 24 núcleos, 22,7 GB livres; app usa 449 MB.
+- **A navegação não era o gargalo**: média 207 ms por rota, pior caso 441 ms.
+- **O gargalo era a tela de Configurações**: 55 long tasks, 20 acima de 100 ms — corrigido para **4 long tasks / 281 ms** (`e782845382`).
+- **O i18n principal tem 4341 chaves em `en` e 1271 em `pt`**: 75 % do app cai no inglês. Chrome coberto; telas internas não.
+
+### Próximo passo concreto
+
+1. **B3** — auditar os seis modos (persistência, RBAC, foco, rolagem, rotas) com medição, não por leitura.
+2. **B4/B5** — Compras e Vendas como jornada com estados verificáveis.
+3. **B6** — Sofia: plano persistido + execução verificável.
+4. Traduzir o resto do `pt` por ordem de uso (configurações primeiro).
