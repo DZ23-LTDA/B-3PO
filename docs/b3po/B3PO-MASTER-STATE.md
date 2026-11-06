@@ -1,6 +1,6 @@
 # B-3PO — MASTER STATE
 
-**Checkpoint do §23** · atualizado em 2026-11-05T16:03:07-03:00 · commit `8fccca34afcc`
+**Checkpoint do §23** · atualizado em 2026-11-06T05:30:00-03:00 · commit `1ee6446294`
 
 ---
 
@@ -19,14 +19,14 @@
 | Item | Valor |
 |---|---|
 | **Branch** | `b3po-brand` |
-| **HEAD** | `8fccca34afcc` |
+| **HEAD** | `1ee6446294` |
 | **`main`** | **espelho pristine do upstream** |
 | **Gate** | **14 checks, ok** |
 | **Typecheck** | **0 erros** (2 projetos) |
 | **Status do produto** | **NOT_READY** |
-| **Rodada** | **132 de 256** |
+| **Rodada** | **208 de 256** |
 | **Fases VERIFIED (P0–P8)** | **4 de 9** |
-| **Fluxos ponta a ponta provados** | **4** |
+| **Fluxos ponta a ponta provados** | **8 ligacoes + o ciclo de 7 stores** |
 
 ---
 
@@ -41,7 +41,7 @@
 | **resultados de teste** | `B3PO-MASTER-TEST-RESULTS.md` |
 | **histórico desta sessão** | `B3PO-MASTER-CHANGELOG.md` |
 | **checkpoint legível por máquina** | `B3PO-MASTER-CHECKPOINT.json` |
-| **o que cada rodada fez** | `V2-RODADA-1..120-*.md` — **mais de 100** |
+| **o que cada rodada fez** | `V2-RODADA-1..207-*.md` — **mais de 200** |
 | **arquitetura de informação** | `B3PO-INFORMATION-ARCHITECTURE.md` |
 | **spec de navegação** | `B3PO-NAVIGATION-AND-UX-SPEC.md` |
 | **Sofia** | `SOFIA-ORCHESTRATION-SPEC.md` + `adr/ADR-001-SOFIA.md` |
@@ -58,7 +58,7 @@
 
 ## A PRÓXIMA AÇÃO EXATA (§23: "indicar próxima ação")
 
-**Rodada 133** — **expansão do vertical** com o que **não depende de credencial**.
+**Rodada 209** — **nada de ordem pendente**. As sete ordens do owner estão fechadas (seis com prova, a sétima montada), e o que resta depende do dono: **B1** (certificado), **B2–B4** (credenciais) e **B5** (instalar o MSIX no Windows). O que a sessão ainda pode fazer é **aprofundar o uso** — medir onde o operador sente falta, como a r161 fez.
 
 > O §17 foi medido na **r102** (9 de 9 domínios) e provado em **4 fluxos** (compras, venda, orquestração, atendimento). O que sobra é **ligar o quinto** ou **aprofundar um dos quatro** — e o critério é o do §17: *"somente com necessidade comprovada"*.
 >
