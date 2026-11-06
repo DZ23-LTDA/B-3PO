@@ -2000,3 +2000,54 @@ nos dois.
 **Uma auditoria num frontend não valida o outro — mas o diagnóstico de um acelera o outro**: eu
 sabia o que procurar no web porque tinha achado no desktop, e a correção levou **uma rodada em vez de
 cinco**.
+
+---
+
+## G7 · ADENDO 4 — o **WEB completo**: 17 de 17 rotas sem violação
+
+**Rodada 40.** A rodada 39 tinha medido só a home do web. Fui ver as outras.
+
+### As 17 rotas
+
+```
+/chat /sessions /files /models /logs /cron /skills /plugins /mcp
+/channels /webhooks /pairing /profiles /config /env /system /docs
+```
+
+**Todas livres** — `axe` com as tags `wcag2a · wcag2aa · wcag21a · wcag21aa`.
+
+| Métrica | Valor |
+|---|---|
+| rotas descobertas pelos links do menu | **17** |
+| rotas com **0 violações** | **17** |
+| taxa | **100 %** |
+
+### A cobertura de a11y, completa
+
+| Plataforma | Escopo | Claro | Escuro | Estado |
+|---|---|---|---|---|
+| **Desktop** | 30 rotas × 3 viewports | 27/30 | 27/30 | **medida** · 1 causa estrutural |
+| **Web** | 17 rotas | **17/17** | **17/17** | **medida** |
+| **Android / iOS** | — | — | — | **não medido** |
+
+**O web está 100 % limpo.** As 4 violações da rodada 39 eram **todas na home** (o cabeçalho, que
+renderiza em todas as rotas) — e as rotas internas **não acrescentaram nenhuma**.
+
+### O que isso diz sobre o web
+
+**O web foi escrito com mais cuidado de a11y que o desktop.** As únicas violações eram 4 botões do
+header — e o resto do app (17 telas) passa limpo.
+
+**Não é sorte**: o web usa `<Button>` e `<nav>`/`<main>` corretos desde o início (medido: `nav:1`,
+`main:1` na home), enquanto o desktop tinha **zero landmarks** até a rodada 19.
+
+### O que continua fora
+
+| Item | Estado |
+|---|---|
+| **mobile (Android/iOS)** | **a11y não medida** — o único buraco de cobertura que resta |
+| teclado no web | não percorrido (só o `axe`, que não testa ordem de foco) |
+| leitor de tela real | nenhum, em nenhuma plataforma |
+| `nested-interactive` (desktop) | 2 telas, estrutural |
+
+**O buraco agora é um só, e está nomeado**: o app mobile.
