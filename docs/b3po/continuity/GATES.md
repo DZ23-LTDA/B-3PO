@@ -250,3 +250,65 @@ bom sinal de desenho.
 
 **G3 = PARCIAL** por causa de **Vendas** (as duas falhas do B5). Os outros três domínios estão
 `READY` com evidência de execução, não de leitura.
+
+---
+
+## G4 · Vertical gás/água E2E — **NOT_IMPLEMENTED**
+
+**O V3 pede**: *"Vertical gás/água E2E com persistência, concorrência e auditoria."*
+
+### A medição
+
+| Busca | Resultado |
+|---|---|
+| `botijão`, `GLP`, `recarga`, `revenda`, `hidrômetro` em `src/app/**/*.tsx` | **1 ocorrência**, e é um `placeholder` |
+| `vertical`, `segmento`, `nicho` em código | só `marketing-segments` e `segmented-control`, que são **de UI**, não de vertical |
+| 754 ocorrências de `gas`/`agua` no repositório | **todas falsos positivos** — `watermark`, `minimax`, `m3` |
+
+**A única ocorrência real** (`app/projetos/index.tsx:139`):
+
+```tsx
+placeholder="vender os botijões sem depender de telefone"
+```
+
+**É texto de exemplo num campo de projeto.** Não há tabela, rota, tela, bridge, store ou teste de
+gás/água. **Alguém pensou no caso ao escrever o placeholder e nada além disso foi construído.**
+
+### Por que isso importa
+
+O B-3PO tem domínio de **CRM, Compras, Estoque, Vendas, Financeiro, Serviços, RH, Marketing,
+Pós-venda, Documentos, Fiscal**. Uma revenda de gás/água **caberia inteira nesses domínios**:
+
+| Necessidade da vertical | Já existe? |
+|---|---|
+| cliente que compra todo mês | **CRM** + `last_purchase_at` (o campo está lá) |
+| botijão como produto com saldo | **Estoque** com `product_sku` |
+| entrega no endereço | **Serviços** / `scheduled` |
+| recarga (produto→serviço→produto) | **não há** conceito de vasilhame |
+| comodato de botijão | **não há** |
+| leitura de hidrômetro / m³ | **não há** unidade fracionada por leitura |
+
+**A vertical não é "faltar uma tela"** — é **faltar o modelo**: vasilhame em comodato, recarga como
+troca, e leitura periódica. **Nada disso se resolve com configuração.**
+
+### Ação exata para desbloquear
+
+**Não é bloqueio externo — é escopo não construído.** Precisa de decisão sua:
+
+1. **Construir a vertical** — o que exige modelar vasilhame/comodato/leitura (não é uma rodada);
+2. **Declarar fora de escopo neste ciclo** — e o G4 fica `NOT_IMPLEMENTED` no veredito final;
+3. **Redefinir o G4** — se "vertical" significar "um caso de uso ponta a ponta dentro dos domínios
+   existentes" (cliente → pedido → entrega → financeiro), **isso é testável hoje** e eu posso fazer
+   na próxima rodada.
+
+### O que eu recomendo
+
+**A opção 3.** O produto **já tem** a espinha dorsal para atender uma revenda de gás: CRM com
+histórico de compra, estoque com saldo por SKU, vendas com baixa automática, compras com
+recebimento, financeiro com contas a pagar/receber, serviços e pós-venda.
+
+**O que falta para o caso ser real** é o **vasilhame** — e isso é uma decisão de modelagem, não uma
+tela. **Testar o fluxo de uma revenda com os domínios que existem** prova (ou reprova) a arquitetura
+em uma rodada. **Modelar comodato de botijão** é um projeto.
+
+**Não inventei a vertical para "passar o gate".** Isso seria exatamente o mock que o V3 proíbe.
