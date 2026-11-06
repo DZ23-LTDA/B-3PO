@@ -62,6 +62,7 @@ import { registerWorkItemIpc } from './work-items-ipc'
 import { registerDeliveryIpc } from './delivery-ipc'
 import { intencaoDeAtendimento } from './delivery-service-link'
 import { intencaoParaContato, patchDoContatoPorAtendimento } from './service-crm-link'
+import { intencaoDePosVenda, notaDoFollowUp } from './service-aftersales-link'
 import { registerSofiaIpc } from './sofia-ipc'
 
 import { openSofiaStore } from './sofia-store'
@@ -157,6 +158,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   registerServicesIpc(ipcMain, services, { actorOf: () => actorOf() })
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
+  // r152 do GOAL V2: o `afterSales` e criado AQUI, antes do `desk`, porque o `onRated` do atendimento o usa.
+  // Criado depois (como estava), ele seria `undefined` na hora da avaliacao - o mesmo cuidado da r141 com o desk.
+  const afterSales = new AfterSalesStore(afterSalesStorePath(userDataDir))
   const desk = new ServiceDeskStore(serviceDeskStorePath(userDataDir))
 
   // r141 do GOAL V2: a entrega recusada ABRE TICKET no atendimento.
@@ -206,6 +210,34 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
     desk,
     { actorOf: () => actorOf() },
     {
+      // r152 do GOAL V2: a nota BAIXA (<= 2) do atendimento cria follow-up de satisfacao no pos-venda.
+      //
+      // O `service-desk-store` escrevia o ciclo em comentario ("venda -> entrega -> atendimento -> pos-venda") e a
+      // ultima seta nunca existiu: o cliente dava nota 1, o ticket fechava, e ninguem o procurava. A decisao esta
+      // em `service-aftersales-link` (r151), provada em 11 testes.
+      //
+      // **O `ref` e o TICKET** (`ticket:<id>`), nao a venda: a r146 mostrou que `ref` e a chave de idempotencia, e
+      // usar a venda faria uma reclamacao COLIDIR com o follow-up de recompra da mesma venda - e nao criar nada.
+      //
+      // **`catch` silencioso**: o pos-venda falhar NAO pode desfazer uma avaliacao.
+      onRated: async ticket => {
+        const intencao = intencaoDePosVenda(ticket)
+
+        if (intencao.tipo !== 'criar') return
+
+        try {
+          await afterSales.create({
+            contact_phone: intencao.contact_phone,
+            kind: intencao.kind,
+            notes: notaDoFollowUp(intencao),
+            ref: intencao.ref,
+            sale_at: intencao.baseEm,
+            tenant_id: ticket.tenant_id
+          })
+        } catch {
+          // Silencioso: a nota e o fato, o follow-up e a consequencia.
+        }
+      },
       ticketOpened: async ticket => {
         await dispatchQuietly(dispatch, { detail: ticket, tenant_id: ticket.tenant_id, type: 'ticket.aberto' })
 
@@ -338,7 +370,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   })
 
   const sales = new SalesStore(salesStorePath(userDataDir))
-  const afterSales = new AfterSalesStore(afterSalesStorePath(userDataDir))
+  // r152 do GOAL V2: o afterSales subiu para o `desk` (acima), porque o `onRated` do atendimento o usa.
 
   // O pós-venda entra no faturamento: sem isto `deps.afterSales` fica undefined em produção e nenhum
   // acompanhamento é criado — o domínio existe no disco e ninguém o alimenta.

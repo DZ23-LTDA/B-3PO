@@ -46,6 +46,20 @@ export function toView(ticket: Ticket, now: number): TicketView {
 /** Opcional: o dominio anuncia o fato para as automacoes depois de concluir a acao. */
 export interface ServiceDeskEventSink {
   /**
+   * r152 do GOAL V2: a nota de satisfação avisa o pós-venda.
+   *
+   * **Recebe o ticket, não um resumo** — porque o consumidor precisa de `closed_at` (a base do prazo de 2 dias),
+   * `satisfaction` (o corte) e `contact_phone` (a chave). **Três campos que um resumo menor deixaria de fora**, e
+   * a r135 e a r147 já custaram por resumo curto demais.
+   */
+  onRated?: (ticket: {
+    contact_phone?: null | string
+    closed_at?: null | number
+    satisfaction?: null | number
+    tenant_id: string
+    ticket_id: string
+  }) => Promise<void>
+  /**
    * r147 do GOAL V2: o resumo ganhou contact_phone e opened_at.
    *
    * **O ticket JÁ TINHA os dois** — o resumo não os levava, e por isso o consumidor não podia ligar o
@@ -120,8 +134,37 @@ export function registerServiceDeskIpc(
   ipcMain.handle(
     'hermes:desk:rate',
     async (_event: IpcMainInvokeEvent, id: unknown, satisfaction: unknown): Promise<unknown> =>
-      exigirAtor(deps.actorOf, 'execute', 'service-desk', async () =>
-        store.rate(typeof id === 'string' ? id : '', typeof satisfaction === 'number' ? satisfaction : 0)
-      )
+      exigirAtor(deps.actorOf, 'execute', 'service-desk', async () => {
+        const resultado = await store.rate(
+          typeof id === 'string' ? id : '',
+          typeof satisfaction === 'number' ? satisfaction : 0
+        )
+
+        // r152 do GOAL V2: a nota BAIXA avisa o pos-venda.
+        //
+        // **Depois do store gravar**: o aviso descreve um fato consumado. Se o `rate` recusar (ticket aberto,
+        // nota fora de 1-5), nao houve avaliacao a avisar - e o `'review' in resultado` diz exatamente isso.
+        //
+        // **`catch` silencioso**: o pos-venda falhar NAO pode desfazer uma avaliacao.
+        if (onEvent?.onRated && 'review' in resultado) {
+          const ticket = resultado.tickets.find(t => t.id === id)
+
+          if (ticket) {
+            try {
+              await onEvent.onRated({
+                closed_at: ticket.closed_at,
+                contact_phone: ticket.contact_phone,
+                satisfaction: ticket.satisfaction,
+                tenant_id: ticket.tenant_id,
+                ticket_id: ticket.id
+              })
+            } catch {
+              // Silencioso: a nota e o fato, o follow-up e a consequencia.
+            }
+          }
+        }
+
+        return resultado
+      })
   )
 }
