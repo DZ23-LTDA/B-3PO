@@ -1178,3 +1178,63 @@ limpas no claro — um número que **parecia** cobertura completa. **Não era.**
 **Se eu tivesse parado na rodada 26, teria entregado um relatório dizendo "contraste zerado" com
 um `amber` ilegível no tema escuro** — introduzido por mim. A varredura que faltava encontrou em
 cinco minutos o que 26 rodadas de medição no claro não encontraram.
+
+---
+
+## G8 · ADENDO 8 — a11y nas 6 condições: nenhuma violação nova por viewport ou tema
+
+**Rodada 28.** A lição do tema escuro ("auditar numa condição é auditar metade") pedia a outra
+metade: **viewport**. Em 375 px a sidebar vira `Sheet` e a geometria muda — condições onde o `axe`
+no desktop não via nada.
+
+### A matriz completa
+
+| Viewport | Tema | Telas livres |
+|---|---|---|
+| 1440 × 900 | claro | **27 / 30** |
+| 1440 × 900 | escuro | **27 / 30** |
+| 768 × 1024 | claro | **8 / 10** |
+| 768 × 1024 | escuro | **8 / 10** |
+| **375 × 667** | claro | **8 / 10** |
+| **375 × 667** | escuro | **8 / 10** |
+
+**As amostras menores (8/10) usam 10 rotas; as maiores (27/30) usam 30.** A proporção é a mesma.
+
+### O achado é a AUSÊNCIA de achado
+
+**Em todas as 6 combinações, as únicas violações são as MESMAS 2 telas** (`/` e `/settings`) com
+`nested-interactive` — o `PaneTab`.
+
+| O que poderia ter aparecido e não apareceu | Por que era esperado |
+|---|---|
+| contraste diferente no mobile | a paleta não muda com a largura |
+| botão sem nome no Sheet da sidebar | o Sheet herda o `aria-label` do `Tip` corrigido em r22 |
+| alvo pequeno demais no toque | **`axe` não mede isso** — só WCAG A/AA de a11y, não ergonomia de toque |
+| foco preso no Sheet | não testado nesta rodada (só `Esc`/retorno, em r25) |
+
+### Cobertura consolidada de a11y
+
+| Dimensão | Medido |
+|---|---|
+| rotas | **30** |
+| viewports | **3** (375, 768, 1440) |
+| temas | **2** (claro, escuro) |
+| combinações | **6** |
+| violações de contraste | **0** em todas |
+| violações estruturais | **1 causa** (o `PaneTab`), em 2 telas |
+| formulários CRUD | **6 de 6 limpos** |
+| Tab | ordem contida (amostra CRM) |
+| Esc + retorno de foco | 4 de 4 |
+
+### O que ainda NÃO foi medido
+
+| Item | Por quê |
+|---|---|
+| **alvo de toque ≥ 44 px** | `axe` não cobre; precisaria de medição de `getBoundingClientRect` |
+| **leitor de tela real** | nenhum teste com NVDA/VoiceOver |
+| **Tab nas outras 29 rotas** | só o CRM, como amostra |
+| **`prefers-contrast: more`** | o CSS tem `reduced-transparency`, não medi esse |
+| **zoom 150 %** | medido antes em outra rodada, não repetido com o código atual |
+
+**A lista acima é o que separa "medi" de "medi tudo".** Ela existe para que ninguém leia a matriz
+como cobertura total.
