@@ -253,6 +253,72 @@ que resta, com o número que o justifica: **uma tela, zero headings**.
 
 ---
 
+## A-07 · O T-12 **nunca funcionou**: a montagem do IPC estava faltando, e eu declarei entregue
+
+**Descoberto na r28** por uma varredura que eu nunca tinha feito: **erros de console** nas rotas.
+O `axe` não pega isso, e os testes de componente mockam a API.
+
+```
+/medidores (2):
+  pageerror: Error invoking remote method 'hermes:tarifas:list':
+             No handler registered for 'hermes:tarifas:list'
+```
+
+**Causa raiz**, em `electron/erp-ipc.ts`:
+
+```ts
+// L36-37: os imports existiam
+import { TariffStore, tariffStorePath } from './tariff-store'
+import { registerTariffIpc } from './tariff-ipc'
+
+// …e a CHAMADA nunca foi escrita.
+```
+
+`registerTariffIpc` estava **importado e nunca chamado**. A ponte do preload existia (o renderer via
+`window.hermesDesktop.tarifas`), então a tela renderizava — e **toda** chamada caía em
+`No handler registered`.
+
+### Por que passou por quatro verificações
+
+| Verificação | Por que não pegou |
+|---|---|
+| `scripts/check` (gate) | import não usado não é erro de lint aqui |
+| `check-b3po-types` | o import é **usado no tipo** da chamada que não existe; o TS não reclama |
+| `tariff-store.test.ts` (32 testes) | testa o **store puro**, não a montagem |
+| `home-b3po.test.tsx` / testes de componente | **mockam** a API |
+| r101 "verifiquei a tela" | a tela mostrou *"Nenhuma política de tarifas configurada"* — **eu li como estado vazio; era o caminho de erro** |
+
+**As quatro barreiras passaram e o recurso nunca funcionou.** A única que pegou foi olhar o console
+do app vivo.
+
+### A correção
+
+```ts
+registerTariffIpc(ipcMain, new TariffStore(tariffStorePath(userDataDir)), {
+  actorOf: () => actorOf(),
+  tenantOf: () => serverTenant()
+})
+```
+
+### Medido depois
+
+```
+/medidores — erros de console: 0        (era 2)
+ponte tarifas: {"ponte":"ok","chaves":["politicas"],"politicas":0}
+censo de console: 0 erros em 27 rotas
+axe: 0
+```
+
+### A lição, e é a mais dura da sessão
+
+> **Teste com API mockada prova o componente, não o produto.** Uma importação sem chamada atravessa
+> typecheck, lint e suíte verde — e a tela continua desenhando o estado vazio.
+
+**A varredura de console devia ser rotina desde a r1.** Ela custa 90 segundos e encontrou em uma
+passada o que quatro camadas de teste não encontraram.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |

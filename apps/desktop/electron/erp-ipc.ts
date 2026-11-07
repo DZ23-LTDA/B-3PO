@@ -33,6 +33,7 @@ import { GasStore, gasStorePath } from './gas-store'
 import { registerGasIpc } from './gas-ipc'
 import { MeterStore, meterStorePath } from './meter-store'
 import { registerMeterIpc } from './meter-ipc'
+import { serverTenant } from './server-tenant'
 import { TariffStore, tariffStorePath } from './tariff-store'
 import { registerTariffIpc } from './tariff-ipc'
 import { registerBackupIpc } from './backup-ipc'
@@ -177,6 +178,21 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // r79 (T-11): leitura periodica de medidor. O comodato (r78) conta o CASCO; agua encanada se cobra
   // pela DIFERENCA entre duas leituras - um segundo modelo, com a serie por medidor.
   registerMeterIpc(ipcMain, new MeterStore(meterStorePath(userDataDir)), { actorOf: () => actorOf() })
+  /*
+   * r100 do GOAL V2 criou o store, o IPC e a tela de tarifas. A r28 do V4 descobriu que a
+   * MONTAGEM nunca aconteceu: `registerTariffIpc` estava importado aqui e **nao era chamado**.
+   *
+   * Consequencia medida: `/medidores` disparava `No handler registered for 'hermes:tarifas:list'`
+   * no console — e a tela mostrava "Nenhuma politica configurada", que eu tinha lido como estado
+   * vazio na r101. Era o caminho de ERRO.
+   *
+   * Uma importacao sem chamada passa por typecheck (o `noUnusedLocals` nao cobre imports usados em
+   * tipo) e por teste de componente (que mocka a API). So o app vivo denunciou.
+   */
+  registerTariffIpc(ipcMain, new TariffStore(tariffStorePath(userDataDir)), {
+    actorOf: () => actorOf(),
+    tenantOf: () => serverTenant()
+  })
   // r88: backup e RESTORE. A r75 fez o backup e deixou o restore de fora com a desculpa certa (nao deve
   // ser efeito colateral) e a conclusao errada (entao nao existe). Um .bak que ninguem aplica e um
   // backup que so serve para conferir a mao.

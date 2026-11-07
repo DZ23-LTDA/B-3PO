@@ -39,6 +39,8 @@ data: 2026-11-07
 | Guarda do terminal | `electron/terminal-guarda-maquina.test.ts` (5) — recusa sem ator, **sem spawnar** |
 | Guarda do fs | `electron/fs-guarda-maquina.test.ts` (6) — recusa **antes do disco** |
 | Seis modos distintos | r15: 6 combinações de menu medidas alternando o seletor real |
+| **Console sem erro** | r28: **0 erros em 27 rotas** (varredura de `console`/`pageerror`) — pegou o T-12 quebrado |
+| Ponte de tarifas funciona | r28: `hermesDesktop.tarifas.list()` → `{"politicas":[]}` |
 
 ## Provas que **não** existem (e por isso não são afirmações)
 

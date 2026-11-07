@@ -78,3 +78,12 @@ falhar toda tarefa real; o inverso também é verdade.
 
 Este arquivo é a garantia de que ninguém, em nenhum handoff futuro, encontre silêncio e preencha com
 uma opinião. **A ausência está escrita.**
+
+---
+
+## Adendo r28 — a varredura que devia ser rotina
+
+`console`/`pageerror` em **27 rotas: 0 erros**. Antes da correção: **2**, os dois em `/medidores`.
+
+Custa ~90 segundos e **encontrou sozinha** o que quatro camadas de teste não encontraram: um IPC
+importado e nunca registrado. Passa a ser parte do censo.
