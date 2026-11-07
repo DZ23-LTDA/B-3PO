@@ -13,6 +13,31 @@ fase: G4
 > conector: não configurado, configurado, testando, pronto, erro, bloqueado; **sem afirmar conexão
 > ativa quando faltam credenciais**"*.
 
+## Os estados: 5 implementados dos 6 que o G4 nomeia
+
+O goal pede: *"não configurado, configurado, testando, pronto, erro, degradado"*. O contrato em
+`gateway/connector_readiness.py` declara **cinco**:
+
+| Goal pede | Implementado | Semântica real |
+|---|---|---|
+| não configurado | `not_configured` | plataforma registrada, nada configurado |
+| **configurado** | `ready` | **tem credencial e dependência, não verificado** |
+| **testando** | **AUSENTE** | transitório; exigiria sonda ativa |
+| **pronto** (verificado) | **AUSENTE** | exigiria conexão real |
+| erro | `missing_credential` / `deps_missing` | falta algo nomeado |
+| **degradado** | **AUSENTE** | parcial; exigiria sonda |
+
+**Três dos seis não existem, e a razão é a mesma**: `ready`, `testing` e `degraded` pressupõem uma
+**sonda ativa** — abrir conexão, esperar resposta, medir. O contrato atual é explicitamente
+*"nunca toca a rede"* (garantia 3 no docstring), e por isso ele para em **configurado**.
+
+**Consequência honesta**: a tela diz **"Pronto para conectar"**, não "pronto" e não "conectado". O
+rótulo está correto para o que o módulo sabe; ele **não** afirma o que o goal chama de `pronto`.
+
+**O que faria os três existirem**: uma sonda de conexão que exija credencial (`EXT-3`) e introduza
+`testing` como estado transitório. É trabalho do G4 passo 4, não feito.
+
+
 ## 1. O contrato existe e é honesto
 
 `gateway/connector_readiness.py` · 5 estados:
