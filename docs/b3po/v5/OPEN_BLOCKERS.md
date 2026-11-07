@@ -40,6 +40,7 @@ fase: G7
 | **SSRF / egress allowlist** | **NÃO EXISTE** | confirmado na r28: os allowlists do repo são de **entrada**, não de destino |
 | Path traversal | **`TESTADO`** — 7 testes verdes | `electron/hardening-traversal.test.ts` + `docs/b3po/audit/PATH-TRAVERSAL-R156.md`. **Não confina a uma raiz por decisão escrita**: o comentário no handler diz que confinar é decisão de produto, não check faltando (r29) |
 | Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
+| Migrações (banco/arquivo) | **`TESTADO` — 56 testes verdes** | desktop: `profile-migration` (565 linhas de teste), `tenant-migrate` + `tenant-migration`. Python: `gateway_migrate.py` (1097), `left_core_migration.py` (1021), `config_migrations.py` (826). **Limite medido**: `tenant-migrate` cobre **6 stores de negócio** e **não** inclui `agent-executions.json` |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
 | SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** |
@@ -97,3 +98,15 @@ Antes de escrever `NOT_TESTED`:
 
 **Quatro itens.** Os outros quinze que eu tinha marcado estavam errados.
 
+## Migracoes de tenant — o que existe, e o limite que a r23 encontrou (r34)
+
+**Existe e esta testado**: `tenant-migrate.ts` executa backup → reescrita → verificacao → rollback, nessa
+ordem, e explica no cabecalho por que a ordem nao e negociavel. `tenant-migration.ts` troca `tenant_id`
+inclusive em registros aninhados, nao toca em registro de outro tenant e preserva numeros, strings e nulos.
+
+**O limite, medido**: `tenantFiles()` cobre **6 stores de negocio** (`catalog`, `finance`, `inventory`,
+`purchases`, `sales`, `scheduling`). **Nao inclui `agent-executions.json`** — e `visiveis()` desse store
+filtra por `tenant_id`. Um registro de execucao sem o campo seria invisivel, e nao ha backfill para ele.
+
+**Nao afirmo que existem registros assim** — nao sei quando `tenant_id` entrou nesse store. O que afirmo:
+**se existirem, a migracao nao os alcanca**. Registrado na r23; confirmado o limite na r34.
