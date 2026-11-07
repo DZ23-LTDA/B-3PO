@@ -6503,3 +6503,69 @@ explicitamente *"hooks with no concrete consumer"*. **O produtor é a peça que 
 
 **Registrado como `PARTIAL` com o próximo passo nomeado**: declarar `dirty` no painel que
 realmente tem edição não salva, e então ligar `closeTab` ao `confirm()`.
+
+---
+
+## G4 · ADENDO — T-12: a **política de tarifas é configurável e o código não tem preço nenhum**
+
+**Rodada 100.** Decisão do dono #7: *"Implemente T-12 com política de tarifas configurável, **sem
+inventar preços ou regras comerciais**."*
+
+### Como a decisão virou código
+
+Duas consequências concretas, e as duas são verificáveis por grep:
+
+1. **Nenhum valor padrão.** Não existe `DEFAULT_PRECO`, não existe faixa de exemplo. Uma instalação
+   nova **não sabe cobrar** — ela sabe que **não há política**:
+   ```ts
+   async calcular(tenantId, consumoMilli, quando): Promise<Conta | null> {
+     const politica = politicaVigente(await this.list(tenantId), quando)
+     return politica ? calcularConta(politica, consumoMilli) : null
+   }
+   ```
+   O `null` atravessa o IPC e chega à tela, que é obrigada a dizer "não configurada". **Um default
+   aqui seria uma cobrança errada com aparência de correta.**
+
+2. **A forma é livre, o conteúdo não.** Faixas (com teto em milésimos de m³), consumo mínimo, taxa
+   fixa, esgoto percentual e **moeda** são campos; os números entram pelo dono, por vigência. A moeda
+   é campo porque inferir "BRL" seria inventar uma regra.
+
+### A validação existe porque um buraco na faixa cobra errado em silêncio
+
+`validarPolitica` roda **antes de gravar** e recusa: faixa sem teto final (`politica_sem_faixa_aberta`),
+faixa aberta que não é a última, faixas fora de ordem, preço negativo ou fracionado, esgoto fora de
+0-100, moeda vazia e vigência invertida.
+
+**As faixas são fechadas por teto, não por diferença**: o cálculo anda do piso ao teto de cada faixa, e
+o consumo que sobra cai na última (aberta). Um consumo de 15 m³ com faixas `[0-10] 5,00` e `[10-∞] 9,00`
+cobra `10×5,00 + 5×9,00` — **e a conta devolve as duas linhas**, não só o total.
+
+### Unidades: inteiros nos dois lados
+
+Consumo em **milésimos de m³** (a mesma unidade do `meter-store`) e dinheiro em **centavos**. Ponto
+flutuante em dinheiro é bug esperando para acontecer; a conversão para exibição acontece na borda, com
+`Intl.NumberFormat` usando a moeda **configurada** (e caindo para `"1234.00 XYZ"` se a moeda for
+desconhecida, em vez de chutar um símbolo).
+
+### Superfície
+
+| Peça | Onde |
+|---|---|
+| modelo + cálculo puro | `electron/tariff-store.ts` |
+| **32 testes** | `electron/tariff-store.test.ts` |
+| IPC (4 canais) | `electron/tariff-ipc.ts` — `list`/`calcular` são `read`; `salvar`/`remover` são `execute` |
+| montagem | `erp-ipc.ts` (57º register) |
+| bridge | `preload.ts` → `hermesDesktop.tarifas` |
+| API do renderer | `src/api/tarifas.ts` |
+
+**Recurso `'tarifas'` separado de `'medidores'` de propósito**: medir consumo e precificar consumo são
+domínios com donos diferentes (operação × financeiro). Juntar os dois daria a quem lança leitura o poder
+de mexer na tabela de preço.
+
+### O que **não** está pronto
+
+**A tela de configuração da política.** O mecanismo está completo e testado, e pode ser operado pelo IPC;
+falta a superfície onde o dono digita as faixas. É `PARTIAL`, e o próximo passo é nomeado: uma seção em
+`/medidores` com a lista de faixas, o formulário e o estado "não configurada".
+
+**Nenhum preço foi inventado em nenhum ponto do caminho** — nem no modelo, nem no teste, nem na API.

@@ -106,11 +106,11 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-it('a divida medida hoje e 16 de 49', () => {
+it('a divida medida hoje e 16 de 50', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
     expect(SEM_GUARDA).toHaveLength(16)
     // r36 do GOAL V2: audit-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
     // r58: delivery-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
-    expect(canais()).toHaveLength(49)
+    expect(canais()).toHaveLength(50)
   })
 })

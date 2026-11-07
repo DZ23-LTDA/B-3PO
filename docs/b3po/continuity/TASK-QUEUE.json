@@ -1,5 +1,5 @@
 {
-  "round": 99,
+  "round": 100,
   "queue": [
     {
       "id": "T-01",
@@ -219,5 +219,11 @@
     "testado": "web/src/components/vendor-select-patch.test.tsx (3 testes)",
     "aditivo": true,
     "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes"
+  },
+  "t12": {
+    "status": "PARTIAL",
+    "pronto": "modelo + calculo puro + validacao + persistencia + IPC(4) + preload + api + 32 testes",
+    "falta": "tela de configuracao da politica (lista de faixas, formulario, estado 'nao configurada')",
+    "regra": "nenhum preco padrao no codigo: sem politica vigente, calcular devolve null"
   }
 }

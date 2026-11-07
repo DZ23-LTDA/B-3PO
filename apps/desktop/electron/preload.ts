@@ -186,6 +186,14 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     leitura: payload => ipcRenderer.invoke('hermes:medidores:leitura', payload),
     list: () => ipcRenderer.invoke('hermes:medidores:list')
   },
+  // r100 (T-12): tabela de tarifas. `calcular` devolve `null` quando nao ha politica vigente — o
+  // renderer mostra "nao configurada" em vez de um valor que o codigo teria inventado.
+  tarifas: {
+    calcular: payload => ipcRenderer.invoke('hermes:tarifas:calcular', payload),
+    list: () => ipcRenderer.invoke('hermes:tarifas:list'),
+    remover: payload => ipcRenderer.invoke('hermes:tarifas:remover', payload),
+    salvar: payload => ipcRenderer.invoke('hermes:tarifas:salvar', payload)
+  },
   // r88: backup e restore dos dados de negocio. O restore SOBRESCREVE — e antes de sobrescrever ele
   // guarda o estado atual como mais uma versao, entao ele proprio e reversivel.
   backup: {
