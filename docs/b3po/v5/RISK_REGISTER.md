@@ -32,6 +32,37 @@ Isso é G5. Sem ele, a explorabilidade é **"requer injeção no renderer"**, n�
 
 ## CRITICAL
 
+### R-12 · `terminal:write` alcançava o terminal de **outra janela**
+
+| | |
+|---|---|
+| Arquivo | `apps/desktop/electron/terminal-ipc.ts` |
+| Canais | `terminal:write`, `terminal:resize`, `terminal:cwd` |
+| Impacto | escrever **no shell privilegiado aberto por outra janela** — execução por procuração |
+| Explorabilidade | qualquer renderer de app (plugin, webview) que alcance o IPC |
+| Severidade | **CRITICAL** |
+
+**Estado**: ✅ **FECHADO na r10** (`352a5a0c92`)
+
+`attach` já exigia posse:
+
+```ts
+if (!sessionInfo || sessionInfo.webContentsId !== event.sender.id) return false
+```
+
+`write`, `resize` e `cwd` **só verificavam se a sessão existia**. Um renderer escrevia num terminal
+que não abriu — sem spawn nenhum, então a guarda de `terminal:start` não era acionada.
+
+**Agora**: os três exigem `webContentsId === event.sender.id`. Dois testes provam: a janela A escreve
+no próprio terminal; a janela B **não** escreve, **não** redimensiona e **não** lê o cwd.
+
+**Por que a guarda de ator não bastava**: a sessão não pertence ao *ator*, pertence à **janela**. O
+modelo de capacidade responde "esta pessoa pode operar a máquina"; a pergunta aqui é "esta janela
+abriu esta sessão". São eixos diferentes, e só a posse responde o segundo.
+
+---
+
+
 ### R-11 · Identidade do aprovador vinha do renderer — **a correção da V4 tinha pegado metade**
 
 | | |

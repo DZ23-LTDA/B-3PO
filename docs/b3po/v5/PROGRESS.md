@@ -237,6 +237,32 @@ solicitação continua `pendente`.
 Dos **329 handlers**, **2** leem campo de identidade do renderer — e um é falso positivo. Depois da
 correção, **nenhum canal usa identidade do renderer para decidir autorização**.
 
+### r10 — o terminal tinha guarda de ator e **nenhuma de posse**
+
+Medi guarda **por canal** nos quatro domínios de máquina. `git-ipc` mostrou 13 canais sem guarda, mas
+são leituras; `fs` e `plugin-files` usam helpers próprios que o meu scan não reconheceu (erro de
+instrumento, corrigido ao ler o código).
+
+**O achado real estava em `terminal-ipc`:**
+
+| Canal | Verificação |
+|---|---|
+| `start` | ✅ ator + capacidade (r8 do V4) |
+| `attach` | ✅ `webContentsId === sender.id` |
+| **`write`** | ❌ **só se a sessão existe** |
+| **`resize`** | ❌ idem |
+| **`cwd`** | ❌ idem |
+| `dispose` | ❌ sem checagem |
+
+Um renderer escrevia no terminal de **outra janela** — inclusive num shell privilegiado. Sem spawn,
+então a guarda de `start` nunca era acionada.
+
+**A lição**: a guarda de ator responde *"esta pessoa pode operar a máquina"*. A pergunta do terminal
+é *"esta janela abriu esta sessão"*. **São eixos diferentes**, e a capacidade não substitui a posse.
+
+**Correção**: `write`/`resize`/`cwd` exigem `webContentsId === event.sender.id`. 2 testes provam a
+recusa da janela B e o caminho legítimo da janela A.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
