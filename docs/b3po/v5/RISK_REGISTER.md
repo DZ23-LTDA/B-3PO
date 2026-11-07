@@ -32,6 +32,28 @@ Isso é G5. Sem ele, a explorabilidade é **"requer injeção no renderer"**, n�
 
 ## CRITICAL
 
+### R-11 · Identidade do aprovador vinha do renderer — **a correção da V4 tinha pegado metade**
+
+| | |
+|---|---|
+| Arquivo | `apps/desktop/electron/agent-ipc.ts` |
+| Canal | `hermes:agent:approvals:decide` |
+| Impacto | aprovar/recusar ação de negócio **em nome de qualquer pessoa** |
+| Explorabilidade | qualquer JS no renderer que alcance o IPC |
+| Severidade | **CRITICAL** |
+
+**Estado**: ✅ **FECHADO na r9** (`10813d2fed`)
+
+A r17 do V4 corrigiu `executions:cancel` e **não** `approvals:decide` — a substituição por texto não
+casou, o script não conferiu o arquivo, e o commit registrou como feito. A varredura do critério A
+nesta rodada encontrou o `input.quem` de volta.
+
+**Agora**: `ator.id` do processo principal, `withPermission(ator, 'execute', { resource: 'agents' })`,
+e `input.quem` ignorado. Três testes de ponta a ponta com `userData` real.
+
+---
+
+
 ### R-01 · ~~`secret-storage` devolve segredos~~ — **RETRATADO na r2**
 
 **O que eu escrevi na r1**: *"leitura e escrita de segredos — chaves de API, tokens — CRITICAL"*.

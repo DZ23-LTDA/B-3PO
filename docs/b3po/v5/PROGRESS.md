@@ -198,6 +198,45 @@ test('todo domínio de máquina é concedível pela interface', () => {
 tentativa de importar de lá quebrou o typecheck (TS6307). O invariante atravessa a fronteira, então
 ele mora do lado que consegue ver os dois.
 
+### r9 — uma correção da V4 tinha pegado metade, e ficou registrada como feita
+
+Medi o critério A do goal (*"nenhuma rota privilegiada depende de identidade do renderer"*) com uma
+varredura dos 329 handlers. Dois canais apareceram. Um era falso positivo (`notify` — `level` de
+notificação). **O outro era real**:
+
+```ts
+// agent-ipc.ts, ANTES desta rodada:
+ipcMain.handle('hermes:agent:approvals:decide',
+  (_evento, input: { …; quem: string }) => {
+    if (!input?.quem?.trim()) return { error: 'quem_obrigatorio' }
+    return input.decidir === 'recusar'
+      ? aprovacoes.recusar(input.id, input.quem)   // ← identidade do RENDERER
+      : aprovacoes.aprovar(input.id, input.quem)
+  })
+```
+
+**A r17 do V4 tentou corrigir isto e só metade pegou**: `executions:cancel` ganhou a guarda,
+`approvals:decide` ficou intocado — a substituição por texto não casou e o script não conferiu o
+resultado. Foi commitado como feito.
+
+**A lição**: o script de então trocava por **texto-âncora** e não verificava o arquivo depois. Nesta
+rodada a troca foi por **linhas**, e a verificação foi explícita:
+
+```
+input.quem usado como identidade? False
+ator.id usado?                   True
+```
+
+**3 testes de ponta a ponta** (`agent-aprovador-identidade.test.ts`): registram o IPC num `userData`
+real, criam a solicitação pelo store, decidem mandando um `quem` falso e leem o registro gravado.
+`decidido_por` é `act_owner` — o nome do renderer não aparece na trilha. Sem ator: recusa e a
+solicitação continua `pendente`.
+
+### A varredura que encontrou isto, e o que ela diz do produto
+
+Dos **329 handlers**, **2** leem campo de identidade do renderer — e um é falso positivo. Depois da
+correção, **nenhum canal usa identidade do renderer para decidir autorização**.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
