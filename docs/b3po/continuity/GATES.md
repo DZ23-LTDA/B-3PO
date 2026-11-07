@@ -5489,3 +5489,111 @@ verificasse "existe uma confirmação" deixaria passar um `"Tem certeza?"` gené
 **Cada linha é uma tela ou um canal que passou a ter: modelo testado, permissão exercitada, acessibilidade
 medida em 4+ viewports, texto em dois idiomas e uma captura.** Não é o mesmo que "pronto" — é **o que eu
 consigo provar**, e o que não consigo está na fila com nome e dono.
+
+---
+
+## G2 · ADENDO — `overall: ok` com inferência fora do payload: **corrigido**, 77 rodadas depois
+
+**Rodada 90.** Eu tinha escrito na r13:
+
+> *"**Não corrigi** porque `status.py` é superfície compartilhada com o dashboard e a CLI: mudar o
+> `overall` para incluir inferência mudaria o veredito de saúde em todas as telas, e isso pede decisão de
+> produto sobre o que 'saudável' significa."*
+
+**A cautela estava certa. A conclusão — não fazer nada — não.**
+
+### A medição
+
+```
+/api/status -> { overall: "ok",
+                 components: gateway, dashboard, storage, platforms }
+                 ^ a palavra "infer" nao existe no payload
+statusbar   -> "Servidor · inferência indisponível"
+```
+
+**O endpoint de saúde não sabia do sintoma nº 1 do produto.** Um consumidor lendo `overall: ok` não
+tinha **como** descobrir que a inferência não estava coberta.
+
+**E o sinal já existia**: `gateway/readiness.py` tem `"model": _check("ok" if configured_model else
+"degraded")`. Só não chegava ao payload.
+
+### O que eu NÃO fiz, e por que
+
+**Não joguei `inference` dentro de `overall`.** Isso mudaria o veredito de todo dashboard e de toda
+varredura de disponibilidade numa máquina que **deliberadamente** não tem provedor — a objeção que eu
+mesmo levantei na r13 continua válida, e o dono não autorizou mudar semântica de monitoramento.
+
+### O que fiz: expor, e tornar a omissão VISÍVEL
+
+```python
+OVERALL_COMPONENTS = ("gateway", "dashboard", "storage", "platforms")
+
+# no payload:
+status["overall_from"] = list(OVERALL_COMPONENTS)
+status["overall"] = "ok" if all(components[n].status == "ok" for n in OVERALL_COMPONENTS) else "degraded"
+
+components["inference"] = {
+    "status": "ok" if tem_modelo else "degraded",
+    "model_configured": tem_modelo,
+    "probe": "model_name",   # NAO e prova de credencial
+}
+```
+
+**Três mudanças, cada uma com um motivo:**
+
+1. **`inference` existe no payload** — o fato não some mais.
+2. **`overall_from` nomeia a lista** — quem lê sabe o que `overall` cobre **sem ler o código**.
+3. **`overall` passa a ser calculado sobre a lista**, não sobre `components.values()` — assim um
+   componente informativo **não derruba veredito por acidente**. Antes, o simples ato de acrescentar
+   `inference` teria mudado a semântica em silêncio; agora a lista é explícita e o próximo a acrescentar
+   precisa **decidir** se entra.
+
+**E o campo é honesto sobre o que mede**: `probe: "model_name"` — há um nome em config.yaml, **não** uma
+prova de que a credencial funciona. A prova completa é o `setup.runtime_check` que a UI já consome.
+Marcar `"ok"` sem essa ressalva seria trocar um campo enganoso por outro.
+
+### A prova em runtime
+
+```json
+{
+  "overall": "ok",
+  "overall_from": ["gateway", "dashboard", "storage", "platforms"],
+  "components": { "gateway": …, "dashboard": …, "storage": …, "platforms": …,
+                  "inference": { "status": "ok", "model_configured": true, "probe": "model_name" } }
+}
+```
+
+### E o erro de ambiente que quase transformou a correção em "não funcionou"
+
+**A primeira tentativa mostrou o payload antigo** — mesmo depois de reiniciar o app. **Duas vezes seguidas.**
+
+Causa: **o backend roda de uma CÓPIA do repo** em
+`%TEMP%\b3po-menu-view6\hermes-agent\hermes_cli\`. Eu editei o repo; o processo lia a cópia.
+
+```
+repo:        D:\…\C-3PO BOT\hermes_cli\web_routers\status.py    <- editado
+backend lê:  %TEMP%\b3po-menu-view6\hermes-agent\hermes_cli\…    <- intocado
+```
+
+**Terceira aparição do mesmo padrão nesta série**:
+
+| Rodada | O código certo estava em | O app lia |
+|---|---|---|
+| r57 | `src/app/stock` | `dist/assets` (bundle antigo) |
+| r75 | `electron/*.ts` | `dist/electron-main.mjs` (não recompilado) |
+| r81 | `styles.css` | cache do vite |
+| **r90** | **`hermes_cli/`** | **cópia do repo no home de dev** |
+
+> **"Editei o arquivo" e "o processo lê esse arquivo" são afirmações diferentes** — e esta série tem
+> **quatro** exemplos. A pergunta que resolve, e que eu deveria fazer **antes** de concluir "não
+> funcionou": *qual caminho absoluto este processo abriu?*
+
+### O veredito do G2
+
+| | r13 | r90 |
+|---|---|---|
+| runtime funciona | PASS | PASS |
+| **diagnóstico conta a verdade** | **FAIL — `overall` ignora inferência** | **PASS — `inference` no payload + `overall_from` explícito** |
+
+**`G2` deixa de ser `PARCIAL` por este motivo.** O que resta dele é o `EXT-1` (chave do provedor), que é
+externo — e agora **o próprio produto sabe e diz** que ela falta.
