@@ -3779,3 +3779,90 @@ O comentário no próprio `styles.css`:
 do upstream) ou **reverter a regra global** (muda o produto).
 
 **Nenhuma das duas é minha para escolher.** Está no `BLOCKERS.md` como risco de conformidade.
+
+---
+
+## G8 · ADENDO 35 — o gate de BANCO: integridade `PASS`, migração `N/A`, e um gap de `schema_version`
+
+**Rodada 68.** Eu tinha marcado o gate de banco como `N/A` **sem ir olhar**. Fui.
+
+### O que o produto tem
+
+**Não há SQLite nem migração de schema no desktop.** A persistência é **JSON versionado**:
+
+```ts
+// after-sales-store.ts
+export function parseAfterSales(raw: string): AfterSalesFile {
+  try {
+    const parsed = JSON.parse(raw) as Partial<AfterSalesFile>
+    if (!parsed || !Array.isArray(parsed.follow_ups)) return empty()
+    return {
+      follow_ups: parsed.follow_ups.filter(
+        f => f && typeof f.id === 'string' && typeof f.ref === 'string'
+      ),
+      schema_version: 1,
+    }
+  } catch { return empty() }
+}
+
+private async write(file: AfterSalesFile): Promise<void> {
+  await mkdir(dirname(this.filePath), { recursive: true })
+  const temp = `${this.filePath}.tmp`
+  await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+  await rename(temp, this.filePath)      // <- atomico
+}
+```
+
+### O veredito por item do gate
+
+| Item exigido | Estado | Evidência |
+|---|---|---|
+| **migração testada** | **`N/A`** | não existe migração; só a versão 1 |
+| **integridade com JSON inválido** | **`PASS`** | `try/catch` → `empty()`; não corrompe nem crasha |
+| **integridade com item inválido** | **`PASS`** | `.filter(...)` descarta o que não tem `id`/`ref` |
+| **escrita sem corrupção** | **`PASS`** | `temp` + `rename` — atômico |
+| rollback | **`N/A`** | não há migração para reverter |
+
+### O GAP real que encontrei
+
+**`schema_version` é escrito em todo store e NUNCA comparado na leitura.**
+
+`parseAfterSales` **devolve `schema_version: 1` sempre** — ignora o valor do arquivo. Busca por
+`schema_version !== ` / `mismatch` / `incompat` nos stores: **zero ocorrências**.
+
+**Consequência, se o schema mudar de v1 para v2:**
+
+- um arquivo **v1** seria lido como se fosse **v2**;
+- o `.filter(...)` **descartaria silenciosamente** os campos que não baterem;
+- **sem erro, sem aviso, sem backup** — o usuário perderia dados e não saberia.
+
+**Hoje isso não acontece** porque **só existe a v1** e o filtro é por tipo, não por versão.
+
+### Por que eu **não** conserto agora
+
+**Não há v2 para migrar.** Escrever um migrador para uma versão que não existe é:
+1. **código sem consumidor** — o que o `AGENTS.md` do repo classifica como *"rejected even when
+   well-built"*;
+2. **inventar requisito** — o `/goal` diz "não amplie o escopo";
+3. **provável de ficar errado** — um migrador escrito antes do schema real quase sempre modela o
+   problema errado.
+
+**O que faço é registrar** o gatilho: **quando o schema mudar, a migração é obrigatória e
+`schema_version` tem que passar a ser lido.** Está no `UPSTREAM-PATCH-REGISTER` como precaução e no
+`BLOCKERS` como risco de manutenção.
+
+### Os 13 gates da matriz, agora
+
+| Gate | Estado |
+|---|---|
+| Git/baseline · lint/typecheck · unit/regression · integration/API · E2E · build/smoke | **PASS** |
+| Auth/security | **PASS** — `serverTenant` é a prova do IDOR fechado (r66) |
+| Multitenancy | **`N/A` justificado** — 1 tenant por instalação (r66) |
+| **Banco** | **`PASS` na integridade · `N/A` na migração** · gap de `schema_version` registrado (r68) |
+| UI (5 viewports × 2 temas) | **PASS** |
+| A11y (`axe` + teclado) | **`axe` PASS · Tab/Esc PASS · foco visível `FAIL` por design do upstream** (r67) |
+| Performance | **PASS** — 55 → 4 long tasks |
+| Operação | **PASS** — rollback atômico provado em 2 falhas reais |
+
+**Nenhum gate fica `NOT_RUN`.** Dois são `N/A` com justificativa escrita, um é `FAIL` **por decisão do
+upstream** (T-09, aguardando o dono).
