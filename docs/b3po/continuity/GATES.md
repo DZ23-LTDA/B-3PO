@@ -6382,3 +6382,55 @@ por completo (`emulator -avd <nome> -wipe-data` ou o AVD Manager), que é opera�
 | — | **1 bloqueio externo nomeado**: emulador com `system_server` instável |
 
 **Nenhuma afirmação sobre o mobile vai além disto**: rodou uma vez, numa tela, num emulador instável.
+
+---
+
+## G0 · ADENDO — auditoria de estado pedida pelo dono: **o número reportado estava errado**
+
+**Rodada 98.** O dono pediu: *"O HEAD, os 14 gates, os 475 testes e os resultados do axe são
+informações reportadas anteriormente, **não pressupostos**. Confirme-os antes de modificar."*
+
+### Confirmado (medido agora, não herdado)
+
+| Item | Reportado | Medido | |
+|---|---|---|---|
+| HEAD | `178bd0a946` | **`b7ac103e6a`** | 6 commits à frente — o citado é ancestral |
+| commits à frente de `origin/main` | 957 | **972** | |
+| `main == origin/main` | intacto | **intacto** | |
+| pendentes | 0 | **0** | |
+| `scripts/check` | 14 | **14 checks, ok** | ✓ |
+| tipos desktop | 0 | **0 erros** | ✓ |
+| testes web | 475 | **475/475** | ✓ |
+| `axe` web | 0 em 15 rotas | **0 em 15 rotas** | ✓ |
+| `axe` desktop | 0 em 27 rotas | **0 em 27 rotas** · `main=1` em todas | ✓ |
+
+### E o erro que a auditoria achou: **"110 falhas de symlink" era falso**
+
+O `HANDOFF` vinha dizendo *"destrava 110 falhas de symlink da regressão"* desde a r61. **Medido agora:**
+
+```
+electron/desktop-plugin-install.test.ts   54 tests · 3 failed · 2 skipped
+electron/desktop-installation.test.ts     13 tests · 13 passed  (NÃO é afetado)
+linhas com EPERM na suíte completa:       0
+```
+
+**São 3 testes, não 110** — o número estava inflado em ~37×, e passou de rodada em rodada porque eu
+copiei o handoff anterior em vez de recontar.
+
+> **Um número que ninguém recontou vira fato.** É a mesma família da r93 (docs 33 rodadas atrasados):
+> o documento é a fonte que eu consulto, e ele não tem como saber que envelheceu.
+
+### A classificação pedida (decisão #4): **limitação de ambiente, não defeito**
+
+```
+$ fs.symlinkSync(...)  ->  EPERM: operation not permitted
+$ Windows              ->  "É necessário privilégio de administrador para essa operação"
+$ AppModelUnlock       ->  chave ausente (Developer Mode DESLIGADO)
+```
+
+- **defeitos do produto encontrados: 0**
+- **testes bloqueados: 3** (o setup não consegue criar o symlink que o teste quer recusar)
+- **não testado aqui: 2** testes que verificam a recusa de árvore com symlink — pulam quando o
+  symlink não existe
+- **ação de desbloqueio**: ligar Developer Mode. **É ação do dono** — a decisão #4 diz
+  explicitamente para não alterar configurações de segurança do Windows, e eu não alterei.
