@@ -1,5 +1,5 @@
 {
-  "round": 67,
+  "round": 70,
   "queue": [
     {
       "id": "T-01",
@@ -64,6 +64,14 @@
       "status": "blocked",
       "blocked_by": "decisao de produto",
       "measured_in": "r67 - outline:none em todo o app; 2 superficies marcadas com [data-b3po-foco]"
+    },
+    {
+      "id": "T-10",
+      "what": "Definir backup dos 14 JSON de negocio (quando, quantas versoes, onde) e um caminho de restore",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "decisao de arquitetura (nao e correcao: define politica de disco do usuario)",
+      "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore"
     }
   ],
   "data": "06/11/2026",

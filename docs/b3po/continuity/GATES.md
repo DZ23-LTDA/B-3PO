@@ -3940,3 +3940,87 @@ no relatório. **O produto não esconde o estado degradado.**
 **Resultado: 10 `PASS`, 2 `N/A` justificados, 1 `PASS` com item `FAIL` por decisão do upstream.**
 
 **Nenhum gate `NOT_RUN`. Nenhum `UNVERIFIED`.** É a primeira vez na auditoria que a matriz fecha assim.
+
+---
+
+## G8 · ADENDO 37 — onde os dados realmente moram, e o risco que não tem backup
+
+**Rodada 70.** O gate de operação ficou `PARCIAL` em "backup/restore". Fui ver o que existe.
+
+### Primeiro: os dados NÃO estão no `HERMES_HOME`
+
+Eu procurei em `%TEMP%\b3po-menu-view6\b3po` e **não existe**. Os stores usam
+`app.getPath('userData')`, que no Electron é `%APPDATA%\B-3PO`:
+
+```
+%APPDATA%\B-3PO\b3po\        14 arquivos · 606 KB
+  auditoria.json     594,6 KB   <- 98% do total (2913 entradas)
+  inventory.json       1,6 KB         sales.json          1,7 KB
+  purchases.json       1,9 KB         finance.json        0,9 KB
+  after-sales.json     1,5 KB         crm-contacts.json   0,5 KB
+  sofia-planos.json    1,1 KB         companies.json      0,3 KB
+  projetos.json        0,5 KB         trabalhos.json      0,3 KB
+  automations.json     0,5 KB         automation-sweep    0,1 KB
+  actors.json          0,6 KB
+```
+
+**Os 14 têm `schema_version: 1`** — o formato é consistente.
+
+### O que está BEM
+
+| Item | Estado |
+|---|---|
+| escrita atômica (`temp` + `rename`) | **`PASS`** — nenhum arquivo meio-escrito |
+| JSON inválido → `empty()` | **`PASS`** — não crasha, não corrompe vizinho |
+| itens inválidos → `.filter(...)` | **`PASS`** — não propaga lixo |
+| **rotação do audit** | **`PASS`** — `AUDIT_MAX_ENTRIES = 5000`, com `descartadas` contabilizado |
+| tamanho atual do audit | **2913 de 5000** — dentro do teto |
+
+**O `audit-store` não cresce sem limite**, e conta o que descartou (`descartadas` é um campo do
+arquivo). É melhor do que eu esperava.
+
+### O que NÃO está
+
+**Nenhum dos 14 arquivos tem backup.**
+
+```
+backups/ em HERMES_HOME  ->  só 'config'
+.bak em %APPDATA%\B-3PO  ->  nenhum
+código de backup nos stores  ->  grep 'backup|\.bak|copy' em audit-store.ts: zero
+```
+
+**Consequência**: se **um** desses arquivos for truncado por um crash de disco, um antivírus ou uma
+edição manual, **o histórico de vendas, estoque, financeiro e auditoria daquela instalação se perde sem
+cópia**.
+
+**Não é hipotético**: `write` é atômico, mas **nada protege o arquivo que já está lá** — a próxima
+escrita sobrescreve o anterior. E o `parse` **descarta o inválido em vez de falhar**, então a perda pode
+passar **silenciosa**.
+
+### O que eu não vou fazer sem autorização
+
+**Criar um mecanismo de backup é mudança de produto**, não correção: define **quando** copiar,
+**quantas** versões guardar, **onde** e **por quanto tempo**. É decisão de arquitetura e de disco do
+usuário.
+
+**O que faço**: registrar como risco e propor o mínimo. Está no `BLOCKERS.md` e no `TASK-QUEUE` como
+**T-10**.
+
+### E o restore
+
+**Não existe caminho de restore** — nem para os 14 JSON, nem para o `backups/config`.
+
+**`PARCIAL` é o veredito correto e não vou inflá-lo**: *"o arquivo é escrito corretamente"* **não é**
+*"o dado é recuperável"*.
+
+### O estado real de "operação"
+
+| Item | Estado |
+|---|---|
+| health · status · logs | **`PASS`** (r69) |
+| rollback de **código** | **`PASS`** — `.dist-previous-*`, `win-unpacked.bak/` |
+| integridade de escrita | **`PASS`** |
+| rotação do audit | **`PASS`** |
+| **backup dos dados de negócio** | **`FAIL`** — não existe |
+| **restore** | **`FAIL`** — não existe |
+| TLS | **`N/A`** — app local |
