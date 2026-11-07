@@ -3484,3 +3484,73 @@ documentação é parte do fechamento**, como o commit e o gate.
 **É a terceira vez que a mesma regra aparece nesta auditoria** (r60, r62, r63), o que significa que a
 regra não é "atualizar documentos": é **nunca ter dois lugares onde o mesmo fato mora sem um deles ser
 derivado do outro**.
+
+---
+
+## CONTINUIDADE — adendo 33: o `TEST-EVIDENCE` só tinha as rodadas 1–19
+
+**Rodada 64.** Fui ao último doc com conteúdo: o `TEST-EVIDENCE.md`. Ele tinha 4 seções de E2E
+(B4–B8) **e nada das rodadas 41–63** — que é onde estava toda a evidência de a11y, visual, layout e
+build.
+
+### O que faltava
+
+| Evidência | Rodadas |
+|---|---|
+| a11y desktop (30 rotas × 3 viewports × 2 temas, `axe`) | 27–29, 41 |
+| a11y web (17 rotas × 2 temas) | 39–40 |
+| visual (14 telas, 2 achados) | 43–46, 56 |
+| layout (30/30 rotas `main == pai`) | 42 |
+| builds (desktop + web, conteúdo verificado) | 37, 57 |
+| suíte desktop (13 falhas provadas no `main`) | 50–54 |
+
+**Tudo isso estava no `GATES.md` (54 seções) e ausente do `TEST-EVIDENCE`** — que é o documento cujo
+nome promete exatamente isso.
+
+### Inserido (1 seção de 70 linhas)
+
+- **a11y desktop**: comando, tags, matriz, a violação remanescente e a causa
+- **a11y web**: 17/17, build de produção servido
+- **visual**: 14 telas, 2 achados (1 corrigido, 1 aberto)
+- **layout**: `main == pai` em 30/30, `h1.y` 327 → 426
+- **builds**: ambos exit 0, **fix verificado dentro do chunk**
+- **testes**: 13 falhas provadas no `origin/main`; a nota de que `git stash` não serve de baseline
+- **NOT_TESTED**: 6 itens, incluindo os que **não** posso testar (leitor de tela, a11y de runtime mobile)
+
+E marquei **um item antigo como exercitado**: *"Financeiro em tela própria"* — estava `NOT_TESTED` por
+falta de bridge, e foi **exercitado na r45** por captura de tela.
+
+### O padrão das 5 rodadas de documentação, fechado
+
+| Rodada | Camada | O que congelou |
+|---|---|---|
+| r59 | `HANDOFF.txt` | **40 rodadas** |
+| r60–61 | cabeçalhos (`HEAD`) | 8–41 rodadas |
+| r62 | `MASTER-STATE` (tabela de gates) | **~55 rodadas** |
+| r63 | `TASK-QUEUE` + registro de patches | **até 40 rodadas, 6 patches** |
+| **r64** | **`TEST-EVIDENCE`** | **44 rodadas** |
+
+**Cinco documentos, cinco congelamentos, o mesmo padrão.** E em todos, **o documento existia, tinha
+formato correto, e mentia por omissão**.
+
+### A regra que fecha a série
+
+> **Um documento que promete um fato precisa ser escrito junto com o fato.** Não "depois" — **na mesma
+> rodada**, como o commit e o gate.
+
+**A razão de eu ter errado 5 vezes**: tratei documentação como **tarefa de encerramento** ("vou varrer
+no fim"), e o fim nunca chegou — porque **a auditoria continuou**. **Documentação de continuidade não
+tem "fim"; ela tem rodadas.**
+
+### O estado real dos 13 documentos
+
+| Documento | Estado |
+|---|---|
+| `GATES.md` (54 seções) | **atualizado a cada rodada** — é o registro vivo |
+| `TEST-EVIDENCE.md` | **atualizado (r64)** |
+| `MASTER-STATE.md` | **10/10 gates reais (r62)** |
+| `TASK-QUEUE.json` | **4 done, 4 blocked, 1 todo (r63)** |
+| `HANDOFF.txt` | **reescrito (r59)** |
+| `FINAL-DELIVERY.txt` | **reescrito (r51)** |
+| `UPSTREAM-PATCH-REGISTER.md` | **13 patches (r63)** |
+| `AUDIT-MATRIX.md` · `DECISIONS.md` · `BLOCKERS.md` · `PERFORMANCE.md` · `PLATFORM-MATRIX.txt` · `MASTER-CHECKPOINT.json` | **cabeçalhos corrigidos (r60–61); conteúdo verificado** |

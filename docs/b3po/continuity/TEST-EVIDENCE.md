@@ -68,9 +68,82 @@ E resolve: o custo unitário é obrigatório na passagem para recebido. **É por
 | Recebimento com **divergência de conferência** | `semConferencia: true` | enviar quantidade diferente da pedida |
 | **Estorno** de compra recebida | não existe caminho exercitado | verificar se há e testar |
 | Jornada **pela UI** (clique a clique) | exercitei o bridge, que é o que a UI chama | teste de clique completo |
-| Financeiro em **tela própria** | `hermesDesktop.finance.payables` não existe como bridge | o dado VIVE no `receive`; conferir a tela |
+| ~~Financeiro em **tela própria**~~ | **EXERCITADO na r45/r55** (captura `atual-escuro-financeiro.png` + claro) | — VIVE no `receive`; conferir a tela |
 
 ---
+
+
+---
+
+## Evidência acumulada das rodadas 41–63 (interface, a11y, build, testes)
+
+**Método**: `axe-core` 4.x injetado no renderer real (Playwright sobre CDP 9333) ou no `web_dist`
+servido por `python -m http.server`; Playwright headless para o web.
+
+### a11y — desktop
+
+```
+runOnly: wcag2a, wcag2aa, wcag21a, wcag21aa
+30 rotas x 3 viewports (1440/768/375) x 2 temas
+claro:  27/30 · escuro: 27/30  <- as MESMAS 3, uma causa
+/crm /compras /sales /stock /capabilities /messaging: 0 violacoes
+contraste: 0 violacoes nos dois temas (medido, nao estimado)
+```
+
+**Violação remanescente**: `nested-interactive` (1 nó por tela, em `/` e `/settings`) — o ✕ do
+`PaneTab` dentro do `role="tab"`. **Tentada e revertida na r50**; solução exige mover o ✕ para fora do
+`tablist`.
+
+### a11y — web
+
+```
+17 rotas x 2 temas: 17/17 LIVRE (0 violacoes)
+servido de hermes_cli/web_dist (build de producao)
+```
+
+### Visual — 14 telas
+
+| Tela | Achado |
+|---|---|
+| Vendas (claro) | venda `faturada` com **R$ 0,00** — T-08, aguarda decisão |
+| Estoque (claro) | **`0 produtos` com 6 movimentações** — **CORRIGIDO na r48**, visível nos 2 temas |
+| CRM · Compras · Financeiro · Projetos · Empresa · Sofia (claro) | limpas |
+| Vendas · Estoque · CRM · Compras · Financeiro (escuro) | limpas |
+
+### Layout
+
+```
+30/30 rotas com main.getBoundingClientRect().height == parent.height
+h1.y: 327 -> 426 apos o fix (r41)
+```
+
+### Builds
+
+```
+desktop: npm run build -> exit 0 · 16374 modulos · dist 1231 arquivos 53.7 MB
+         fix da r48 verificado DENTRO do chunk dist/assets/stock-*.js
+web:     npm run build -> exit 0 · web_dist 60 arquivos 3.1 MB
+rollback atomico: .dist-previous-* preservado em 2 falhas reais
+```
+
+### Testes
+
+```
+desktop: 13 falhas em 7 arquivos — TODAS reproduzidas em origin/main (que tem 18)
+         (worktree + mklink /J do node_modules; `git stash` NAO serve de baseline)
+mobile:  19 arquivos, 169 testes, vitest
+```
+
+### NOT_TESTED (rodadas 41–63)
+
+| Item | Por quê |
+|---|---|
+| a11y de runtime no mobile | `axe` não existe para React Native; só auditoria estática (6/6 atributos) |
+| leitor de tela real (TalkBack/VoiceOver) | exigiria emulador + dispositivo |
+| ordem de foco no frontend WEB | o `axe` não testa ordem de tabulação |
+| nome acessível dos ~107 pontos de `Tip` | o `axe` cobre só as rotas abertas; hover não é testado |
+| remoção de aba por `Delete` no app | handler alcançado por unidade; remoção não observada em tela |
+| 6 das 20 capturas de `baseline-layout` | não revisadas (as escuras foram refeitas na r56) |
 
 ## E2E · Vendas (B5 do aditivo V3) — **PASSOU com ressalvas**
 
