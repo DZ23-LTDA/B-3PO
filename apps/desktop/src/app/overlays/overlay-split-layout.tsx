@@ -89,8 +89,18 @@ export function OverlaySidebar({ children, className }: OverlaySidebarProps) {
 }
 
 export function OverlayMain({ children, className }: OverlayMainProps) {
+  /*
+   * r82 — `<div>`, não `<main>`.
+   *
+   * O overlay abre POR CIMA do shell, e o shell já tem o `<main>` (controller.tsx). Dois `<main>` na
+   * mesma página violam `landmark-no-duplicate-main`: o leitor de tela anuncia dois "main" e o salto por
+   * landmark fica ambíguo — justamente no lugar onde ele mais ajuda, que é pular o overlay inteiro.
+   *
+   * O visual é idêntico (as classes não mudam). O `role="region"` + `aria-label` do diálogo do overlay
+   * continua vindo de quem o abre; aqui é só a área de conteúdo.
+   */
   return (
-    <main
+    <div
       className={cn(
         // Main sits UNDER the floating close button (top-right), so it keeps the
         // taller top pad to clear the X — unlike the sidebar / Panel header,
@@ -105,7 +115,7 @@ export function OverlayMain({ children, className }: OverlayMainProps) {
       )}
     >
       {children}
-    </main>
+    </div>
   )
 }
 

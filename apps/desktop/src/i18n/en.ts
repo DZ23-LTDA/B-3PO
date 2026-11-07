@@ -392,6 +392,7 @@ export const en: Translations = {
     sharedProfileWarning:
       'Another Hermes installation is using this profile. Both installations share its settings and data, so changes can conflict. You can continue, or close the other installation before making changes.',
     region: 'Notifications',
+  regionAmbient: 'Confirmations',
     hide: 'Hide',
     show: 'Show',
     more: count => `${count} more ${count === 1 ? 'notification' : 'notifications'}`,

@@ -2235,6 +2235,7 @@
     "notifications.native.turnDoneTitle",
     "notifications.native.turnErrorTitle",
     "notifications.region",
+    "notifications.regionAmbient",
     "notifications.seeWhatsNew",
     "notifications.sharedProfileWarning",
     "notifications.show",

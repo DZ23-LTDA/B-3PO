@@ -179,7 +179,15 @@ function BottomRightStack({
 
   return createPortal(
     <div
-      aria-label={copy.region}
+      /*
+       * r82 — nome PRÓPRIO para a pilha de baixo.
+       *
+       * As duas pilhas (`TopCenterStack` e esta) usavam `copy.region`, então a página tinha **duas
+       * `role="region"` com o mesmo `aria-label`** — o que viola `landmark-unique`: um leitor de tela
+       * anuncia "Notifications" duas vezes e o salto por landmark fica ambíguo. São regiões diferentes
+       * (avisos no topo, confirmações no canto), então merecem nomes diferentes.
+       */
+      aria-label={copy.regionAmbient}
       className={cn(
         REGION_BASE,
         'right-4 bottom-4 w-[min(24rem,calc(100%-2rem))] flex-col-reverse p-1',

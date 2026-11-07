@@ -4878,3 +4878,92 @@ ausente **não parece errado**, parece "design". **O que revelou foi comparar co
 não olhar de novo a mesma tela.
 
 > **Revisão visual sem comparação é gosto; revisão visual com a vizinha ao lado é medição.**
+
+---
+
+## G8 · ADENDO 44 — T-13: **um `<main>` por página**, e o `landmark-unique` que estava escondido
+
+**Rodada 82.** O T-13 dizia "5 telas aninham `<main>`". **Eram 10** — e no caminho apareceu um segundo
+defeito de landmark que ninguém tinha medido.
+
+### O mapa real
+
+```
+stock · sales · crm · compras · finance · agenda · empresa · products · sofia
+   -> 2 <main>, ANINHADOS  (main dentro de main)
+
+settings (overlay)
+   -> 2 <main>, IRMÃOS      (o overlay por cima do shell)
+
+session-import
+   -> 2 <main>, mas o segundo vem de um shell próprio (não é a mesma página)
+```
+
+**`<main>` dentro de `<main>` é inválido pela especificação.** O `axe` **não pegava** porque a árvore de
+acessibilidade não expõe o aninhamento — as regras `wcag2a/aa` que eu rodava davam **0** nessas telas
+desde a r31.
+
+### A correção
+
+**10 arquivos**: `<main className="...">` → `<div className="...">`, `</main>` → `</div>`. As classes não
+mudam, então **o visual é idêntico** — é correção de estrutura, não de aparência.
+
+O landmark continua existindo: **o shell tem o `<main>`** (`controller.tsx`, o que ganhou `h-full` na r41).
+
+### E o segundo defeito: `landmark-unique`
+
+Ao rodar as regras de landmark (que **não são `wcag`**, são `best-practice` — por isso nunca entraram na
+minha matriz), apareceu:
+
+```
+landmark-unique  (moderate)
+  <div aria-label="Notifications" role="region" class="pointer-events-none fixed ...">
+  "The landmark must have a unique aria-label..."
+```
+
+**Duas `role="region"` com o mesmo `aria-label="Notifications"`**: a pilha de avisos no topo e a de
+confirmações no canto. **Um leitor de tela anuncia "Notifications" duas vezes e o salto por landmark
+fica ambíguo.**
+
+**Correção**: a pilha de baixo passou a usar `copy.regionAmbient` — **"Confirmations"** em inglês,
+"Confirmações" quando o overlay pt-BR cobrir a chave (hoje cai no fallback, como o resto do bloco de
+toasts no pt — gap pré-existente registrado no `overlay-gaps.json`).
+
+### A prova — 16 rotas, 2 temas de regras
+
+```
+/          OK   main=1 h=846/846 lm=0  wcag=1(nested-interactive)
+/stock     OK   main=1 h=846/846 lm=0  wcag=0
+/sales     OK   main=1 h=846/846 lm=0  wcag=0
+/crm       OK   main=1 h=846/846 lm=0  wcag=0
+/compras   OK   main=1 h=846/846 lm=0  wcag=0
+/finance   OK   main=1 h=846/846 lm=0  wcag=0
+/agenda    OK   main=1 h=846/846 lm=0  wcag=0
+/empresa   OK   main=1 h=846/846 lm=0  wcag=0
+/products  OK   main=1 h=846/846 lm=0  wcag=0
+/sofia     OK   main=1 h=846/846 lm=0  wcag=0
+/gas       OK   main=1 h=846/846 lm=0  wcag=0
+/medidores OK   main=1 h=846/846 lm=0  wcag=0
+/settings  OK   main=1 h=846/846 lm=0  wcag=1(nested-interactive)
+/painel    OK   main=1 h=846/846 lm=0  wcag=0
+/marketing OK   main=1 h=846/846 lm=0  wcag=0
+/automacoes OK  main=1 h=846/846 lm=0  wcag=0
+
+falhas: 0 de 16
+```
+
+**O único `wcag` que sobra são as duas `nested-interactive` conhecidas** (`/` e `/settings`), o conflito
+de `tablist` documentado na r50.
+
+### A lição: eu medi **um terço** das regras do `axe`
+
+**Todas as minhas medições de a11y desde a r31 usaram `runOnly: { tags: ['wcag2a','wcag2aa','wcag21a','wcag21aa'] }`.**
+Isso exclui **todas as regras `best-practice`** — inclusive as de landmark, que são exatamente as que
+pegam `<main>` duplicado e `aria-label` repetido.
+
+> **Um filtro de medição é uma afirmação sobre o que importa.** Eu escolhi "só WCAG" porque parecia o
+> critério sério, e com isso **deixei de fora a família inteira de regras que governa a estrutura da
+> página** — a mesma estrutura que eu tinha acabado de reconstruir em 10 arquivos.
+
+**`/` e `/settings` passavam "0 violações" desde a r31 com dois `<main>` cada.** O número estava certo
+para o que eu perguntei, e a pergunta estava incompleta.

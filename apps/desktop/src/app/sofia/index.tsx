@@ -196,7 +196,7 @@ export function SofiaView(): React.ReactElement {
   }, [])
 
   return (
-    <main className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4">
       <header>
         <h1 className="text-lg font-medium text-foreground">Sofia</h1>
         <p className="text-sm text-(--ui-text-tertiary)">
@@ -230,6 +230,6 @@ export function SofiaView(): React.ReactElement {
           ))}
         </div>
       )}
-    </main>
+    </div>
   )
 }

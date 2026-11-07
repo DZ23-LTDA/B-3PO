@@ -953,6 +953,7 @@
   "notifications.errors.storageFailure": ["ar","ja","ru","zh","zh-hant"],
   "notifications.installMethodUnsupportedTitle": ["ar"],
   "notifications.native.creditsTitle": ["ar"],
+  "notifications.regionAmbient": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "notifications.sharedProfileWarning": ["de","es","fr"],
   "notifications.updateReadyMessageAppInstaller": ["ar","de","es","fr","ja","ru","zh-hant"],
   "notifications.voice.liveDelegationFailed": ["ar","ja","ru","zh-hant"],

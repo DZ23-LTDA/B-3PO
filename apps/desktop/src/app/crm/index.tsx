@@ -19,7 +19,7 @@ import { CrmOverview } from './crm-overview'
  */
 export function CrmView() {
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
       <h1 className="text-lg font-semibold text-foreground">CRM</h1>
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         Contatos, funil e conversas ficam neste computador. Nada sobe para a nuvem sem você conectar um
@@ -31,6 +31,6 @@ export function CrmView() {
 
       <CrmContactsSection showOpenLink={false} />
         <CrmConversationsSection />
-    </main>
+    </div>
   )
 }

@@ -427,6 +427,8 @@ export interface Translations extends NoticeTranslations {
   notifications: {
     sharedProfileWarning: string
     region: string
+    /** r82: a pilha de confirmacoes do canto. Duas `role=region` com o mesmo nome violam `landmark-unique`. */
+    regionAmbient: string
     hide: string
     show: string
     more: (count: number) => string
