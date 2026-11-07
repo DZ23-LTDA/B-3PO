@@ -166,6 +166,38 @@ spawnar terminal. *"Tem escopo" não é "tem este escopo".*
 **Migração**: automação existente com escopo só de negócio perde acesso à máquina. **Não há migração
 automática** — conceder capacidade de máquina é decisão auditável.
 
+### r8 — a correção da r7 tinha destruído o acesso que protegia
+
+**Encontrado ao verificar a própria mudança**, não por um teste que falhou.
+
+A r7 fez `podeOperarMaquina` exigir escopo de domínio para um bot. A regra está certa. Mas
+`SCOPE_OPTIONS` — a lista que a tela de Agentes oferece em *"Domínios que ele pode operar"* — tinha
+só domínios de negócio:
+
+```ts
+export const SCOPE_OPTIONS = ['catalog','desk','finance','hr','inventory','sales','scheduling','services']
+```
+
+**Nenhum `terminal`, `git`, `fs`, `plugin-files`.** A capacidade ficou **impossível de conceder pela
+interface**: a regra protegia o recurso tornando-o inalcançável.
+
+Isso é exatamente o que o rubric do repositório rejeita: *"fixes that destroy the feature they
+secure"*.
+
+**Correção**: os quatro domínios de máquina entram em `SCOPE_OPTIONS`, e `machine-access` exporta
+`DOMINIOS_DE_MAQUINA` — os dois conjuntos ficam presos por um teste:
+
+```ts
+test('todo domínio de máquina é concedível pela interface', () => {
+  const semConcessao = DOMINIOS_DE_MAQUINA.filter(d => !new Set(SCOPE_OPTIONS).has(d))
+  expect(semConcessao).toEqual([])
+})
+```
+
+**O teste vive em `src/api/`, não em `electron/`**: `tsconfig.electron.json` não inclui `src/`, e a
+tentativa de importar de lá quebrou o typecheck (TS6307). O invariante atravessa a fronteira, então
+ele mora do lado que consegue ver os dois.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

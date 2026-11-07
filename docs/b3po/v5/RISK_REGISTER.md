@@ -230,6 +230,15 @@ Dois testes provam os dois lados:
 E `machine-access-administrar.test.ts` prova que o `kind` barra **além** da capacidade: um bot com
 `scopes: ['terminal']` passa em `podeOperarMaquina` e **não** administra a instalação.
 
+### A correção da r8: a capacidade voltou a ser concedível
+
+A r7 protegeu o recurso **destruindo o acesso a ele** — `SCOPE_OPTIONS` não oferecia `terminal`,
+`git`, `fs` nem `plugin-files`, então nenhum bot podia ser autorizado pela interface. Os quatro
+entraram na lista, e um teste compara `DOMINIOS_DE_MAQUINA` com `SCOPE_OPTIONS`.
+
+**Conceder capacidade de máquina é um clique explícito na tela de Agentes** — que é o que o G1 §36
+quer dizer com "capacidade explicitamente concedida".
+
 ### Migração a observar
 
 Um bot que hoje opera a máquina **com escopo só de negócio** passa a ser recusado. É a mudança
