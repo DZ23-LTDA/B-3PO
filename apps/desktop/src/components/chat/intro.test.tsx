@@ -122,8 +122,15 @@ it('chat genérico mostra a marca (imagem) e a home do produto, não o lettering
 
   // r268: no chat genérico a tela é a HOME — marca, posicionamento e os seis ambientes.
   const texto = container.textContent ?? ''
-  expect(texto).toContain('Bem-vindo ao')
-  expect(texto).toContain('Sua plataforma de gestão')
+  /*
+   * r33 do V4 — as asserções passaram a ser em INGLÊS, que é o locale do fixture.
+   *
+   * Elas estavam em português e **só passavam porque o `en.ts` tinha 13 chaves em português** (o
+   * A-09 da r30). Quando a r30 traduziu o inglês de verdade, este teste quebrou — e estava
+   * codificando o bug: pedia português a um locale que se declarava inglês.
+   */
+  expect(texto).toContain('Welcome to')
+  expect(texto).toContain('Your platform for business management')
 
   // Os seis cartões de ambiente, como botões de escolha (um já aceso).
   const cartoes = container.querySelectorAll('[role="group"] button')
