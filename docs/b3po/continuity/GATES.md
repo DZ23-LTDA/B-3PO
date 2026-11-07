@@ -3357,3 +3357,68 @@ chamando isso de "atualizado".**
 | **r61** | **HEAD como identidade** | **HEAD não é identidade de documento** |
 
 **E o mesmo remédio em todas**: **perguntar o que o número está comparando com quê.**
+
+---
+
+## CONTINUIDADE — adendo 31: o `MASTER-STATE.md` dizia **"NÃO INICIADO"** em 6 gates que eu auditei
+
+**Rodada 62.** A r61 consertou os cabeçalhos (HEAD → Rodada/Data). Fui ver o **conteúdo** — e era pior.
+
+### O que a tabela de gates dizia
+
+```
+G1 segurança/IPC/RBAC      NÃO INICIADO
+G2 runtime/modelos          NÃO INICIADO
+G3 domínio canônico         NÃO INICIADO
+G4 vertical gás/água        NÃO INICIADO
+G6 engenharia/automação     NÃO INICIADO
+G7 plataformas              NÃO INICIADO
+G9 pacotes+veredito         NÃO INICIADO
+```
+
+**Sete gates "não iniciados" que eu passei 55 rodadas auditando.**
+
+### Por que isso é pior que um HEAD errado
+
+| Erro | Gravidade |
+|---|---|
+| HEAD desatualizado | **metadado** — o leitor sabe que pode estar velho |
+| **"NÃO INICIADO" quando foi auditado** | **conteúdo** — o leitor conclui que **o trabalho não existe** |
+
+**Um HEAD errado diz "isto pode estar velho". Um `NÃO INICIADO` errado diz "isto não foi feito".**
+O segundo **apaga 55 rodadas** aos olhos de quem lê.
+
+### A causa
+
+**A tabela foi escrita no lote G0** (quando só o G0 tinha começado, e de fato os outros não tinham). **Cada gate foi auditado depois, e a tabela nunca foi reescrita** — o `GATES.md` acumulava as seções e o
+resumo ficava parado.
+
+**É a mesma assimetria das últimas 12 rodadas**: o **registro detalhado** (GATES.md, 52 seções)
+avançava; o **resumo** (MASTER-STATE, tabela de 10 linhas) **congelava**. Quem lê o resumo — que é
+exatamente quem precisa dele — recebia o estado mais velho.
+
+### Corrigido: 10 de 10 linhas
+
+| Gate | Antes | Agora |
+|---|---|---|
+| G0 | EM ANDAMENTO (este lote) | **READY** |
+| G1 | NÃO INICIADO | **PARCIAL** — 40 testes, 837 decisões |
+| G2 | NÃO INICIADO | **PARCIAL** — causa raiz provada; inferência BLOCKED |
+| G3 | NÃO INICIADO | **PARCIAL** — B4-B8; estoque aceita SKU órfão |
+| G4 | NÃO INICIADO | **NOT_IMPLEMENTED** — só o placeholder; aguarda decisão |
+| G5 | PARCIAL (modelo pronto) | **PARCIAL** — 27/27 rotas, 14 telas |
+| G6 | NÃO INICIADO | **PARCIAL** — 99 plugins, 0 ativos |
+| G7 | NÃO INICIADO | **PARCIAL** — a11y web 17/17; iOS BLOCKED |
+| G8 | PARCIAL (V2) | **PARCIAL** — perf -93%, a11y medida, regressão BLOCKED |
+| G9 | NÃO INICIADO | **PARCIAL** — builds exit 0, exe NotSigned |
+
+### A lição: o resumo tem que ser escrito **do** detalhe, não **antes** dele
+
+**Eu escrevi a tabela de gates no começo do trabalho, quando ela era verdadeira.** Depois produzi 52
+seções de evidência **e nunca voltei à tabela**. O detalhe cresceu; o resumo virou ficção.
+
+> **Um resumo escrito uma vez e nunca reescrito não é um resumo do trabalho — é um resumo da intenção
+> original.** E ele **mente com mais eficiência** que um documento vazio, porque tem formato de verdade.
+
+**O que previne**: cada gate, ao fechar, **reescreve a sua linha no resumo**. Não "atualizar o doc no
+fim" — **fechar o gate é editar o resumo**.

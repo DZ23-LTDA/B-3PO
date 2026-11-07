@@ -58,16 +58,16 @@ ead, **depois** do ambiente |
 
 | Gate | Status |
 |---|---|
-| **G0** inventário+baseline+continuity | **EM ANDAMENTO** (este lote) |
-| **G1** segurança/IPC/RBAC/tenant | **NÃO INICIADO** |
-| **G2** runtime/modelos/inferência | **NÃO INICIADO** |
-| **G3** domínio canônico | **NÃO INICIADO** |
-| **G4** vertical gás/água E2E | **NÃO INICIADO** |
-| **G5** seis modos + revisão visual | **PARCIAL** (modelo pronto; falta auditoria por modo) |
-| **G6** engenharia/automação | **NÃO INICIADO** |
-| **G7** plataformas | **NÃO INICIADO** |
-| **G8** regressão/segurança/perf/a11y | **PARCIAL** (V2 fechou a separação flaky/real) |
-| **G9** pacotes+veredito | **NÃO INICIADO** |
+| **G0** inventário+baseline+continuity | **READY** — 13 docs de continuidade, baseline e inventário fechados |
+| **G1** segurança/IPC/RBAC/tenant | **PARCIAL** — 40 testes de permissão, 837 decisões auditadas, 16/46 canais sem guarda |
+| **G2** runtime/modelos/inferência | **PARCIAL** — causa raiz do aviso provada (.env 0 de 29 chaves); inferência BLOCKED (EXT-1) |
+| **G3** domínio canônico | **PARCIAL** — B4-B8 medidos; estoque aceita SKU fora do catálogo (2 caminhos abertos) |
+| **G4** vertical gás/água E2E | **NOT_IMPLEMENTED** — só o placeholder em projetos/index.tsx:139; aguarda decisão |
+| **G5** seis modos + revisão visual | **PARCIAL** — 27/27 rotas, 6 modos com captura, 14 telas olhadas |
+| **G6** engenharia/automação | **PARCIAL** — 99 plugins oficiais, 27 de mensageria, ZERO ativos |
+| **G7** plataformas | **PARCIAL** — desktop/web/android OK; iOS BLOCKED (EXT-4); a11y web 17/17 |
+| **G8** regressão/segurança/perf/a11y | **PARCIAL** — perf -93%, a11y 27/30 + web 17/17, regressão BLOCKED (EXT-2), 13 falhas provadas no main |
+| **G9** pacotes+veredito | **PARCIAL** — builds desktop/web exit 0, rollback atômico provado, exe NotSigned |
 
 > **Nada aqui é READY global.** Cada linha tem seu próprio status, como o aditivo A exige.
 
