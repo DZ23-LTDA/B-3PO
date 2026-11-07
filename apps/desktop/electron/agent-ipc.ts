@@ -21,7 +21,24 @@ import { openApprovalStore } from './agent-approval-store'
 import { openExecutionStore } from './agent-execution-store'
 import { AGENTES, LIMITES_POR_AGENTE } from './agent-roster-view'
 
-export function registerAgentIpc(ipcMain: IpcRegistrar, userData: string): void {
+import { withPermission } from './permission-guard'
+import type { Actor } from './rbac'
+
+/**
+ * `actorOf` entra na assinatura na r17 do V4.
+ *
+ * O canal `approvals:decide` recebia `quem` **do renderer** — o comentário antigo dizia "o produto
+ * ainda não tem login próprio". Não é mais verdade: `atorDeMaquina` lê `ActorsStore` e devolve o
+ * dono da instalação com `id`, `role` e `level`.
+ *
+ * Confiar no `quem` do renderer significa que quem alcança o IPC aprova em nome de qualquer um. A
+ * identidade passa a ser resolvida **aqui**, e o campo do renderer é ignorado.
+ */
+export function registerAgentIpc(
+  ipcMain: IpcRegistrar,
+  userData: string,
+  actorOf: () => Promise<Actor | null>
+): void {
   const execucoes = openExecutionStore(userData)
   const aprovacoes = openApprovalStore(userData)
 
@@ -41,7 +58,13 @@ export function registerAgentIpc(ipcMain: IpcRegistrar, userData: string): void 
     execucoes.listar(filtro)
   )
 
-  ipcMain.handle('hermes:agent:executions:cancel', (_evento, id: string) => execucoes.cancelar(id))
+  ipcMain.handle('hermes:agent:executions:cancel', async (_evento, id: string) => {
+    const ator = await actorOf()
+
+    if (!ator) return { error: 'sem_permissao', reason: 'sem_ator' }
+
+    return execucoes.cancelar(id)
+  })
 
   ipcMain.handle('hermes:agent:approvals', (_evento, status?: string) => aprovacoes.listar(status))
 

@@ -144,7 +144,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // Agentes: roster, execucoes e fila de aprovacao. Montado aqui, nao em main.ts, pelo mesmo motivo da r125:
   // main.ts esta no teto de linhas e a montagem de dominio mora neste arquivo.
-  registerAgentIpc(ipcMain, userDataDir)
+  // `() => actorOf()` adia a leitura: `actorOf` e declarado mais abaixo (TDZ).
+  registerAgentIpc(ipcMain, userDataDir, () => actorOf())
 
   // r11 do GOAL V2: conversas passaram a morar em b3po/, como os outros 24 stores. A migracao roda
   // ANTES de qualquer store abrir, e e sincrona: uma janela aqui faria o CRM abrir vazio.
