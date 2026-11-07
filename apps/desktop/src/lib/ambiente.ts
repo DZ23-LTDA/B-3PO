@@ -76,26 +76,7 @@ export const AMBIENTE_LABEL: Record<Ambiente, string> = {
  */
 const GRUPOS_POR_AMBIENTE: Record<Ambiente, readonly string[]> = {
   empresa: ['Visão geral', 'Operação', 'Comércio', 'Trabalho', 'Crescimento', 'Inteligência', 'Configuração'],
-    /*
-     * r14 do V4 — a declaração passa a refletir o que RENDERIZA.
-     *
-     * Antes: `['Visão geral', 'Construção', 'Qualidade', 'Configuração']`. Os dois grupos do meio
-     * nunca tiveram módulo na barra — `Construção` e `Qualidade` só existem como conceito em
-     * `lib/engenharia.ts`, que o mapa de `/ambiente` mostra. Resultado medido: escolher Engenharia
-     * mostrava **VISÃO GERAL + CONFIGURAÇÃO** e nada de engenharia.
-     *
-     * A correção SOMA, não troca:
-     *
-     *   - `Construção` e `Qualidade` ficam: são o destino dos módulos de engenharia de verdade
-     *     (`/repos`, builds, testes) — hoje nenhum existe na barra, e um grupo sem módulo é
-     *     filtrado, então não vira botão morto;
-     *   - `Trabalho` e `Inteligência` entram: os módulos que JÁ existem e servem Engenharia
-     *     (`Projetos`, `Trabalhos`, `Agentes`, `Automações`) moram nesses grupos, e agora também
-     *     pertencem a Engenharia via `tambemEm` no plugin.
-     *
-     * Antes, sem a segunda metade, escolher Engenharia mostrava VISÃO GERAL + CONFIGURAÇÃO. Medido.
-     */
-    engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Trabalho', 'Inteligência', 'Configuração'],
+    engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Configuração'],
   /*
    * r265: os quatro ambientes que a missão final nomeia.
    *
@@ -184,8 +165,19 @@ export function modulosDoAmbiente<T extends { grupo: string; tambemEm?: readonly
    * com dois pertencimentos é a verdade do produto: `Projetos` serve o fluxo `Trabalho` **e** o
    * fluxo `Construção`.
    */
+  /*
+   * r19 do V4 — `tambemEm` carrega **nomes de ambiente**, não nomes de grupo.
+   *
+   * A r14 tentou usar grupo, e quebrou um invariante real (`engenharia.test.ts`): `gruposDoAmbiente`
+   * e `MODULOS_DE_ENGENHARIA` têm de casar nos DOIS sentidos, porque o mapa de `/ambiente` usa a
+   * mesma lista. Somar `Trabalho`/`Inteligência` lá quebrava o mapa; tirar `Construção`/`Qualidade`
+   * quebrava o outro sentido.
+   *
+   * Separando as responsabilidades: a lista continua sendo os grupos do **mapa**, e a **navegação**
+   * ganha módulos por ambiente — que é o que `tambemEm` significa agora.
+   */
   const pertence = (m: T): boolean =>
-    grupos.has(m.grupo) || (m.tambemEm ?? []).some(g => grupos.has(g))
+    grupos.has(m.grupo) || (m.tambemEm ?? []).some(alvo => alvo === ambiente)
 
   return { dentro: modulos.filter(pertence), fora: modulos.filter(m => !pertence(m)) }
 }

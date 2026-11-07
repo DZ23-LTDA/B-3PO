@@ -1,6 +1,7 @@
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import { MemoryRouter } from 'react-router'
 import { I18nProvider, useI18n } from '@/i18n'
 import type { I18nContextValue } from '@/i18n'
 
@@ -18,11 +19,15 @@ function Controls() {
 }
 
 function Fixture({ personality, seed = 0 }: { personality?: string; seed?: number }) {
+  // r19 do V4: a home usa `useNavigate()`. Em producao ela esta dentro do HashRouter; o fixture
+  // precisa do mesmo contrato, senao o componente estoura antes de qualquer assercao.
   return (
-    <I18nProvider configClient={null} initialLocale="en">
-      <Controls />
-      <Intro personality={personality} seed={seed} />
-    </I18nProvider>
+    <MemoryRouter>
+      <I18nProvider configClient={null} initialLocale="en">
+        <Controls />
+        <Intro personality={personality} seed={seed} />
+      </I18nProvider>
+    </MemoryRouter>
   )
 }
 

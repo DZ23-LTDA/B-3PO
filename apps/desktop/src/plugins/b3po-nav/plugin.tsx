@@ -72,11 +72,14 @@ interface ItemDeMenu {
    */
   grupo: string
   /**
-   * r14 do V4 — outros grupos a que este módulo também pertence.
+   * r19 do V4 — **outros ambientes** em que este módulo aparece.
    *
-   * `Projetos` serve `Trabalho` e `Construção`; `Agentes` serve `Inteligência` e `Construção`. Sem
-   * isso, o modo Engenharia não tem o que mostrar — e duplicar a entrada seria o "módulo
-   * duplicado" que a diretriz proíbe.
+   * `grupo` é onde ele mora na barra (o cabeçalho). `tambemEm` é em que **modos de trabalho** ele
+   * aparece além do modo do seu grupo. `Projetos` mora em `Trabalho` e também serve `engenharia`;
+   * `Agentes` mora em `Inteligência` e idem.
+   *
+   * Sem isso, escolher Engenharia mostrava só VISÃO GERAL + CONFIGURAÇÃO — e duplicar a entrada
+   * seria o "módulo duplicado" que a diretriz proíbe.
    */
   tambemEm?: readonly string[]
 }
@@ -136,16 +139,16 @@ const MODULOS: readonly ItemDeMenu[] = [
     // O §13 foi escrito antes do §12, entao nao tem grupo para projeto e trabalho pontual. Eles nao
     // sao 'comercio' nem 'configuracao': sao o trabalho que atravessa os dois. A secao existe, e a
     // ausencia dela no texto do GOAL esta dita aqui em vez de escondida.
-    { codicon: 'checklist', label: 'Projetos', path: '/projetos' , grupo: 'Trabalho', tambemEm: ['Construção'] },
-    { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' , grupo: 'Trabalho', tambemEm: ['Construção'] },
+    { codicon: 'checklist', label: 'Projetos', path: '/projetos' , grupo: 'Trabalho', tambemEm: ['engenharia'] },
+    { codicon: 'checklist', label: 'Trabalhos', path: '/trabalhos' , grupo: 'Trabalho', tambemEm: ['engenharia'] },
 
     // 5. CRESCIMENTO - como eu apareco e como o cliente fica
     { codicon: 'megaphone', label: 'Marketing', path: '/marketing' , grupo: 'Crescimento' },
     { codicon: 'shield', label: 'Pós-venda', path: '/posvenda' , grupo: 'Crescimento' },
 
     // 6. INTELIGENCIA E AUTOMACAO
-    { codicon: 'robot', label: 'Agentes', path: '/agentes' , grupo: 'Inteligência', tambemEm: ['Construção'] },
-    { codicon: 'zap', label: 'Automações', path: '/automacoes' , grupo: 'Inteligência', tambemEm: ['Construção'] },
+    { codicon: 'robot', label: 'Agentes', path: '/agentes' , grupo: 'Inteligência', tambemEm: ['engenharia'] },
+    { codicon: 'zap', label: 'Automações', path: '/automacoes' , grupo: 'Inteligência', tambemEm: ['engenharia'] },
     { codicon: 'lightbulb', label: 'Sofia', path: '/sofia' , grupo: 'Inteligência' },
     { codicon: 'file', label: 'Documentos', path: '/documentos' , grupo: 'Inteligência' },
 

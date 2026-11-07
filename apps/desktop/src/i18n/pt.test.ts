@@ -67,6 +67,7 @@ describe('pt-BR', () => {
       'cron',
       'errors',
       'firstRun',
+  'homeB3po',
       'install',
       'keepAwakeOffer',
       'keybinds',

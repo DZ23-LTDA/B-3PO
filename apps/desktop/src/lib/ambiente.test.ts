@@ -18,7 +18,7 @@ const MODULOS: ModuloDoAmbiente[] = [
   { grupo: 'Visão geral', label: 'Painel', path: '/painel' },
   { grupo: 'Visão geral', label: 'Empresa', path: '/empresa' },
   { grupo: 'Comércio', label: 'Vendas', path: '/sales' },
-  { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['Construção'] },
+  { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['engenharia'] },
   { grupo: 'Inteligência', label: 'Sofia', path: '/sofia' },
   { grupo: 'Construção', label: 'Repositórios', path: '/repos' },
   { grupo: 'Qualidade', label: 'Testes', path: '/testes' }
@@ -79,15 +79,18 @@ describe('os grupos', () => {
    * "oito telas em oito grupos seria um menu de oito itens"), e a Construção entra pelo outro lado:
    * os módulos de engenharia ganharam `tambemEm` no plugin — provado no teste de filtro abaixo.
    */
-  it('ENGENHARIA soma os grupos conceituais e os reais', () => {
-    // Conceituais: destino dos módulos de engenharia que ainda não existem na barra.
-    expect(gruposDoAmbiente('engenharia')).toContain('Construção')
-    expect(gruposDoAmbiente('engenharia')).toContain('Qualidade')
-    // Reais: onde os módulos que JÁ servem Engenharia moram (r14 do V4).
-    expect(gruposDoAmbiente('engenharia')).toContain('Trabalho')
-    expect(gruposDoAmbiente('engenharia')).toContain('Inteligência')
-    // Continua sendo um menu curto — não vira o de oito itens que o comentário evita.
-    expect(gruposDoAmbiente('engenharia').length).toBeLessThan(8)
+  it('ENGENHARIA declara os grupos do MAPA de /ambiente', () => {
+    /*
+     * r19 do V4 — `gruposDoAmbiente` serve o mapa de `/ambiente`, e `engenharia.test.ts` exige
+     * casamento nos DOIS sentidos com `MODULOS_DE_ENGENHARIA`. A navegação não entra aqui: ela usa
+     * `tambemEm`, que agora carrega **nome de ambiente**, não nome de grupo.
+     */
+    expect(gruposDoAmbiente('engenharia')).toEqual([
+      'Visão geral',
+      'Construção',
+      'Qualidade',
+      'Configuração'
+    ])
   })
 })
 
@@ -100,19 +103,18 @@ describe('o filtro', () => {
     expect(fora.some(m => m.path === '/repos')).toBe(true)
   })
 
-  it('em Engenharia, os módulos de construção ficam e o Comércio não', () => {
+  it('em Engenharia, o que tem tambemEm aparece e o Comércio não', () => {
     /*
-     * r14 do V4 — este teste passou a provar COMPORTAMENTO em vez de rótulo.
-     *
-     * Antes ele checava `/repos` dentro e `/sales` fora — e passava mesmo com Engenharia vazia,
-     * porque `MODULOS` no teste tem um item de grupo `Construção` que a barra real não tem.
-     *
-     * Agora ele prova o que o usuário vê: com `tambemEm`, `Projetos` e `Agentes` (que moram em
-     * `Trabalho` e `Inteligência`) aparecem no modo Engenharia — e `Vendas` não.
+     * r19 do V4 — o filtro de NAVEGAÇÃO: um módulo entra no modo se o grupo dele está no ambiente
+     * OU se `tambemEm` lista o **nome do ambiente**.
      */
-    const { dentro, fora } = modulosDoAmbiente(MODULOS, 'engenharia')
+    const modulos = [
+      { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['engenharia'] },
+      { grupo: 'Comércio', label: 'Vendas', path: '/sales' },
+      { grupo: 'Inteligência', label: 'Busca', path: '/busca' }
+    ]
+    const { dentro, fora } = modulosDoAmbiente(modulos, 'engenharia')
 
-    expect(dentro.some(m => m.path === '/repos')).toBe(true)
     expect(dentro.some(m => m.path === '/projetos')).toBe(true)
     expect(dentro.some(m => m.path === '/sales')).toBe(false)
     expect(fora.some(m => m.path === '/sales')).toBe(true)
