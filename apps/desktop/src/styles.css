@@ -1468,13 +1468,30 @@
   }
 }
 
-/* No focus rings, anywhere. Kills the native outline plus Tailwind's
-   `focus-visible:ring-*` (a box-shadow driven by --tw-ring-*). Unlayered so it
-   beats the utilities layer without !important on the outline. The composer /
-   .desktop-input-chrome focus glow is untouched — those set `box-shadow`
-   directly rather than through the ring vars. */
-*:focus,
+/* Sem anel de foco no PONTEIRO. O `:focus-visible` do navegador ja separa teclado de mouse, entao
+   remover dos dois era remover mais do que a decisao de produto pedia.
+
+   r77 — o problema medido (r67): `outline: none` valia tambem para `:focus-visible`, e TODO controle
+   focavel por teclado ficava sem indicador — WCAG 2.4.7 (Focus Visible) violado no app inteiro. O
+   `axe` nao detecta isso (nao avalia `:focus-visible` dinamico); quem detectou foi um teste de
+   teclado com `getComputedStyle` no elemento ativo.
+
+   A correcao mantem a identidade visual: o mouse nao ganha anel nenhum (o `:focus` continua zerado),
+   e o teclado ganha um anel sobrio, desenhado em `outline` (nao em `--tw-ring-*`, que a regra abaixo
+   zera com `!important`) — a mesma tecnica que as superficies marcadas com `[data-b3po-foco]` ja
+   usavam, agora para todo controle. */
+*:focus {
+  outline: none;
+}
+
 *:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+/* Um anel de foco so faz sentido onde o controle tem onde ser desenhado: em linhas de tabela e
+   elementos nao interativos ele viraria um retangulo solto. */
+*:focus-visible:not(button, a, input, select, textarea, summary, [tabindex]) {
   outline: none;
 }
 

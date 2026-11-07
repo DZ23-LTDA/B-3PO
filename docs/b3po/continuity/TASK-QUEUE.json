@@ -1,5 +1,5 @@
 {
-  "round": 76,
+  "round": 77,
   "queue": [
     {
       "id": "T-01",
@@ -63,9 +63,10 @@
       "id": "T-09",
       "what": "Decidir foco visivel (WCAG 2.4.7): manter a regra global do upstream, reverter, ou marcar superficie por superficie",
       "owner": "proprietario",
-      "status": "blocked",
+      "status": "done",
       "blocked_by": "decisao de produto",
-      "measured_in": "r67 - outline:none em todo o app; 2 superficies marcadas com [data-b3po-foco]"
+      "measured_in": "r67 - outline:none em todo o app; 2 superficies marcadas com [data-b3po-foco]",
+      "done_in": "r77: *:focus-visible ganha outline 2px; mouse continua sem anel; provado 30/30 via Tab em 6 rotas"
     },
     {
       "id": "T-10",

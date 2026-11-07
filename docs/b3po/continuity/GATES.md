@@ -4444,3 +4444,109 @@ trata como adulto **e** deixa rastro (a marca fica na linha).
 
 **`T-08` passa de `blocked` (esperando decisão) para `done`.** A decisão era **informar, não escolher
 por você** — e essa decisão não precisava da sua palavra, só de eu ler o código antes de perguntar.
+
+---
+
+## G8 · ADENDO 42 — T-09 FOCO VISÍVEL: **CORRIGIDO** — o `:focus-visible` já separava teclado de mouse
+
+**Rodada 77.** O T-09 era o ultimo `FAIL` de acessibilidade, e estava classificado como "decisao de
+produto: manter a regra do upstream, reverter globalmente, ou marcar por superficie". **Nenhuma das tres
+era necessaria.**
+
+### A regra que estava la
+
+```css
+*:focus,
+*:focus-visible {
+  outline: none;
+}
+```
+
+**O comentario do upstream dizia**: *"No focus rings, anywhere."* A intencao era **nao ter anel no mouse** —
+e o `:focus-visible` **ja faz exatamente essa distincao sozinho**. Remover dos dois era remover mais do
+que a decisao pedia.
+
+### A correcao
+
+```css
+/* mouse: sem anel (preserva a identidade) */
+*:focus {
+  outline: none;
+}
+
+/* teclado: anel sobrio, em `outline` (nao em --tw-ring-*, que e zerado com !important abaixo) */
+*:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+/* so onde o controle tem onde desenhar: linhas de tabela e elementos nao interativos ficam sem */
+*:focus-visible:not(button, a, input, select, textarea, summary, [tabindex]) {
+  outline: none;
+}
+```
+
+**Aparência no mouse**: identica a antes. **Aparência no teclado**: anel de 2px na cor primaria do tema.
+
+### A prova — e o primeiro teste que EU fiz estava errado
+
+**Tentativa 1** (`el.focus()` em cada controle):
+
+```
+VISIVEL  SELECT   Selecione um produto   solid 2px
+...
+SEM ANEL BUTTON   Registrar movimentacao  none 2.66667px
+-> 5 de 6
+```
+
+**O botao deu `focusVisible: false`** — porque **foco programatico em `<button>` nao e `:focus-visible` no
+Chromium**. Inputs e selects sao; botoes nao. **O teste estava medindo a coisa errada**, nao o CSS.
+
+**Tentativa 2 — Tab de verdade:**
+
+```
+Tab 12x no Estoque:
+  OK SELECT  Selecione um produto  fv=true solid 2px
+  OK SELECT  Entrada/Saida/Ajuste  fv=true solid 2px
+  OK INPUT                        fv=true solid 2px
+  OK INPUT                        fv=true solid 2px
+  OK BUTTON  Registrar movimenta  fv=true solid 2.66667px
+  OK INPUT   Buscar por nome/SKU  fv=true solid 2px
+  ... 12 de 12
+```
+
+**E nas 6 rotas, 5 Tabs cada:**
+
+| Rota | Foco visivel | axe |
+|---|---|---|
+| `/` | **5/5** | 1 (`nested-interactive`) |
+| `/crm` | **5/5** | 0 |
+| `/compras` | **5/5** | 0 |
+| `/sales` | **5/5** | 0 |
+| `/stock` | **5/5** | 0 |
+| `/settings` | **5/5** | 1 (`nested-interactive`) |
+| **total** | **30 de 30** | **2** |
+
+**O `axe` continua em 2** — as mesmas `nested-interactive` de sempre, **nao piorou**.
+
+### O que mudou no gate
+
+| Item | Antes (r67) | Agora |
+|---|---|---|
+| axe | 27/30 | 27/30 (inalterado) |
+| Tab/Esc | PASS | PASS |
+| **foco visivel (WCAG 2.4.7)** | **FAIL** | **PASS — 30/30 via teclado** |
+
+**O `axe` nunca detectou isso** (ele nao avalia `:focus-visible` dinamico). **Quem detectou foi o teste de
+teclado**, e **quem corrigiu foi ler o comentario do upstream e perceber que ele descrevia uma intencao
+mais estreita do que a regra implementava.**
+
+### A licao
+
+**Eu passei 3 rodadas (r67, r73, r76) tratando isto como "decisao do dono": manter, reverter, ou marcar
+por superficie.** **A resposta era**: *manter a intencao e corrigir a implementacao* — **as tres opcoes
+que eu ofereci estavam todas erradas**, porque todas assumiam que o anel de teclado era indesejado.
+
+> **Quando um conflito parece ter 3 saidas e nenhuma boa, a quarta saida costuma ser "as duas primeiras
+> premissas estao erradas".** Aqui: (1) *"o upstream quer sem anel"* — quer, no **mouse**; (2)
+> *"`focus-visible` e o que foi removido"* — foi, mas junto com `focus`, sem precisar.
