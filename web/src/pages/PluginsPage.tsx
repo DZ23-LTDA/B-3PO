@@ -811,7 +811,7 @@ export default function PluginsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.pluginsPage.installHeading}</CardTitle>
+            <CardTitle aria-level={2}>{t.pluginsPage.installHeading}</CardTitle>
             <p className="text-xs tracking-[0.08em] text-text-tertiary">
               {t.pluginsPage.installHint}
             </p>

@@ -209,7 +209,7 @@ export default function LogsPage() {
 
       <Card className="min-w-0 max-w-full overflow-hidden">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-sm flex items-center gap-2">
+          <CardTitle className="text-sm flex items-center gap-2" aria-level={2}>
             <FileText className="h-4 w-4" />
             {file}.log
           </CardTitle>

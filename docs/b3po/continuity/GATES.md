@@ -6117,3 +6117,75 @@ comentário JSX.** Removido, o conhecimento veio para cá:
 
 `AutoField.tsx` recebeu o mesmo tratamento (o `<Label>` ali também é irmão, sem `htmlFor`).
 
+---
+
+## G7 · ADENDO 10 — web: `heading-order` 4→0 e `label-content-name-mismatch` 2→0; o contraste **não** se resolve pelo token
+
+**Rodada 97.** Fechando o que era nosso na lista da r96.
+
+| Regra | r96 | r97 |
+|---|---|---|
+| `heading-order` | 4 | **0** |
+| `label-content-name-mismatch` | 2 | **0** |
+| `button-name` | 4 | **2** (upstream) |
+| `color-contrast` | 6 em 13 rotas | **8 em 15 rotas** (mesma densidade, +2 rotas medidas) |
+
+### `heading-order`: `aria-level={2}` no `CardTitle`
+
+O `CardTitle` do `@nous-research/ui` renderiza **sempre `<h3>`**, e as páginas vão de `<h1>` direto para
+ele — `h1 → h3` pula o nível 2. O componente aceita `React.HTMLAttributes<HTMLHeadingElement>`, então
+`aria-level={2}` **sobrescreve o nível calculado**: o DOM continua `<h3>` (o kit é upstream, não se faz
+patch de pacote) e o leitor de tela navega `h1 → h2`.
+
+**Custo em linhas: zero** — necessário porque `PluginsPage` está em **359** com ratchet que só desce.
+
+### `label-content-name-mismatch`: dois casos, duas causas
+
+| Rota | Nome acessível | Texto visível |
+|---|---|---|
+| `/chat` | `"Copy last assistant response"` | `"copy last response"` |
+| `/files` | `"Upload files"` | `"DROP FILES HERE / Loading / CHOOSE FILES"` |
+
+**`/chat`**: o nome não **contém** o visível (a palavra "assistant" não está na tela). Nome passou a ser
+o próprio texto visível.
+
+**`/files`**: o botão tem **três linhas** visíveis. **Nenhum `aria-label` curto pode conter todas** — a
+regra 2.5.3 falharia para qualquer escolha. A correção foi **remover o `aria-label`**: o nome vem do
+conteúdo, que é exatamente o que a pessoa lê.
+
+> **Às vezes a correção de 2.5.3 é apagar o rótulo, não reescrevê-lo.**
+
+### O contraste: tentei o token e **medi que não funciona**
+
+`--color-destructive: #fb2c36` dá **3,81:1** sobre branco (AA exige 4,5:1). Troquei para `#dc2626`
+(4,83:1 no branco) e depois `#b91c1c` (6,47:1). **Nos dois casos o `axe` continuou acusando — e então
+entendi por quê:**
+
+```css
+.text-destructive { color: var(--color-destructive) }
+.bg-destructive\/10 { background: color-mix(in oklab, var(--color-destructive) 10%, transparent) }
+```
+
+**O texto e a tinta de fundo são o MESMO token**, um sólido e outro a 10 %. **Mover o token move os dois
+lados e a razão entre eles quase não muda.** Não existe valor de `--color-destructive` que conserte
+`text-destructive` sobre `bg-destructive/10`.
+
+**Revertido** para `#fb2c36`. E registrei o erro de medição que quase me fez "consertar" duas vezes:
+
+```
+r96: 8 nós de color-contrast em 13 rotas
+r97: 13 nós em 15 rotas   <- eu comparei 15 rotas com 13 e chamei de regressao
+```
+
+**Rotas diferentes não comparam.** Depois de reverter, medido nas **mesmas 15 rotas**: **8 nós** — a
+densidade era a mesma desde o início.
+
+### O que o contraste exige de verdade (e é decisão de produto)
+
+Duas saídas, e as duas mudam a aparência de todo erro no web:
+
+1. **Um token separado para texto de erro sobre tinta** (ex.: `--color-destructive-text` mais escuro),
+   mantendo `--color-destructive` para fundo e borda.
+2. **Fundo neutro** nos blocos de erro em vez de `bg-destructive/10`.
+
+**Nenhuma das duas é correção de bug — são mudanças de sistema visual.** Ficam com o dono.

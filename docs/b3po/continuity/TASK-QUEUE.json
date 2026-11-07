@@ -1,5 +1,5 @@
 {
-  "round": 96,
+  "round": 97,
   "queue": [
     {
       "id": "T-01",
@@ -149,11 +149,11 @@
     "axe_so_home": "0 violacoes em / (unica rota medida na r95)"
   },
   "web_spa_axe_r96": {
-    "rotas": 13,
-    "nos": 14,
-    "button_name": "2 (upstream: Select do @nous-research/ui nao aceita aria-label)",
-    "color_contrast": "6 (token text-destructive + toast)",
-    "heading_order": "4 (h3 sob h1)",
-    "label_content_name_mismatch": "2 (nosso)"
+    "rotas": 15,
+    "nos": 10,
+    "button_name": "2 (upstream: Select nao aceita aria-label)",
+    "color_contrast": "8 (text-destructive sobre bg-destructive/10 - MESMO token, nao ha valor que conserte; precisa de token separado ou fundo neutro)",
+    "heading_order": "0 (r97: aria-level=2 no CardTitle)",
+    "label_content_name_mismatch": "0 (r97)"
   }
 }
