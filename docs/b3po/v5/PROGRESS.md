@@ -263,6 +263,35 @@ então a guarda de `start` nunca era acionada.
 **Correção**: `write`/`resize`/`cwd` exigem `webContentsId === event.sender.id`. 2 testes provam a
 recusa da janela B e o caminho legítimo da janela A.
 
+### r11 — a ponte deixou de ser código morto, e o renderer não forja mais o vínculo
+
+**Duas entregas no mesmo slice vertical.**
+
+**1. `hermes:sofia:delegar` existe.** `sofia-ponte.ts` tinha 6 KB de código + 9 KB de testes e **zero
+chamadores em produção**. O canal dá porta à ponte: `exigirAtor(..., 'execute', 'sofia')` → valida
+plano/tarefa → `delegarTarefa` → cria execução **`pendente`** (a honestidade da r5) → grava
+`execucao_id` na tarefa.
+
+**4 testes**: sem ator recusa e não cria execução · delega cria `pendente` e grava o vínculo · plano
+ou tarefa inexistente recusa com motivo · **o renderer não forja o vínculo**.
+
+**2. O vínculo era forjável.** `normalizarTarefa` copia `execucao_id` do patch, e o canal
+`hermes:sofia:tarefa` passava `raw['patch']` **direto ao store**:
+
+```ts
+return deps.store.atualizarTarefa(planoId, tarefaId, raw['patch'])   // ANTES
+```
+
+Um renderer marcava uma tarefa como delegada **sem execução nenhuma existir** — a "alucinação de ação
+concluída" que o G5 nomeia. **Agora** o handler remove `execucao_id` do patch; quem escreve esse campo
+é a ponte, que cria a execução antes.
+
+### O que **continua** faltando no G2
+
+A execução nasce `pendente` e **ninguém a executa**. O slice para ligar o executor está em
+`SOFIA_INTEGRATION.md` §4: falta decidir onde o cliente canônico do gateway vive (ele é RPC, não
+REST) e criar a sessão de fato.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

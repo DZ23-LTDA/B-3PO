@@ -53,10 +53,11 @@ statusDerivadoDaExecucao(…) // 0 chamadores em produção
 
 | # | Peça | Estado |
 |---|---|---|
-| 1 | Canal `sofia:delegar` com `exigirAtor` | **AUSENTE** |
+| 1 | Canal `sofia:delegar` com `exigirAtor` | ✅ **FEITO na r11** (`4b00249450`) — 4 testes |
 | 2 | `delegarTarefa` receber um **iniciador de sessão** | **AUSENTE** — a dep `SofiaPonteDeps` não tem |
 | 3 | Criar sessão no gateway com a tarefa como prompt | **AUSENTE** no caminho de Sofia |
 | 4 | Gravar `session_id` na execução | **AUSENTE** — `Execucao` não tem o campo |
+| 4b | `execucao_id` forjável pelo renderer | ✅ **FECHADO na r11** — o handler remove o campo do patch |
 | 5 | Transição `pendente → executando` dirigida por evento do runtime | **AUSENTE** |
 | 6 | `finalizar` chamado quando o turno termina | **AUSENTE** — só teste chama |
 | 7 | Retomada após reinício sem repetir efeito | **AUSENTE** |
