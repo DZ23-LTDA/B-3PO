@@ -148,6 +148,44 @@ Duas leituras são defensáveis, e eu **não escolho por conta própria** numa r
 O teste trava o comportamento **atual** (`terminal-guarda-maquina.test.ts`) para que mudá-lo seja
 decisão consciente. **Pergunta para o dono**: um agente pode abrir um shell na máquina pela interface?
 
+### r16 do V4 — `fs` (13 canais) entra na fronteira de máquina
+
+`hermes:fs:*` lê e escreve **arquivo arbitrário neste computador** — mesma natureza de `git` e
+`terminal`. Nenhum dos 13 canais consultava ator.
+
+```ts
+if (!podeOperarMaquina(await actorOf(), 'escrita')) return RECUSA_MAQUINA
+```
+
+Distribuição por capacidade:
+
+| Capacidade | Canais |
+|---|---|
+| `leitura` | `readDir`, `gitRoot`, `desktopPluginsRoot`, `logsRoot`, `plugin:probe` |
+| `escrita` | `reveal`, `openDir`, `rename`, `writeText`, `trash`, `reconcileDesktopPlugins`, `plugin:installDesktop`, `plugin:removeDesktop` |
+
+**6 testes provam**, e o primeiro é o que importa:
+
+| Caso | O que a prova mostra |
+|---|---|
+| `writeText` sem ator | recusa **e o arquivo não é criado** — a guarda vem antes do disco |
+| `level: null` | recusa — `null` é "sem acesso" |
+| dono | escreve; o fluxo normal não quebra |
+| `readDir` sem ator | recusa — leitura também é guardada |
+| os **13** canais | **nenhum** responde sem ator |
+
+**Dívida: 34 canais** (era 47; `git` 21 e `terminal` 6 já estavam, `fs` 13 saiu). Ratchet: **11 de 48**.
+
+### Restam 11 arquivos — e nenhum é capacidade de máquina
+
+`agent` (5) · `plugin-files` (4) · `clipboard` (2) · `hud` (4) · `lookup` (2) · `notification` (1) ·
+`pet-overlay` (2) · `spellcheck-dictionary` (3) · `startup-latency` (1) · `challenge-window` (1) ·
+`mcp-oauth-callback` (3).
+
+**Nove deles são UI/preferência**, sem recurso de negócio para guardar, e o
+`mcp-oauth-callback` é **unguarded por desenho** (o callback externo chega sem ator).
+Os que **merecem decisão** são `agent` (orquestração) e `plugin-files` (arquivos de plugin).
+
 ### Ponto cego declarado
 
 Os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que **não** é `*-ipc.ts` e não é

@@ -362,5 +362,27 @@
       "administracao": 100
     },
     "axe": 0
+  },
+  "permissao_ipc_v4": {
+    "r7": "git ja tinha guarda (podeOperarMaquina nao era reconhecido)",
+    "r8": "terminal:start guardado",
+    "r16": "fs 13 canais guardados (leitura+escrita)",
+    "divida_canais": "68 -> 34",
+    "ratchet": "11 de 48 arquivos",
+    "restam_com_recurso": [
+      "agent (5)",
+      "plugin-files (4)"
+    ],
+    "restam_ui_sem_recurso": [
+      "clipboard",
+      "hud",
+      "lookup",
+      "notification",
+      "pet-overlay",
+      "spellcheck-dictionary",
+      "startup-latency",
+      "challenge-window"
+    ],
+    "unguarded_por_desenho": "mcp-oauth-callback"
   }
 }

@@ -185,7 +185,8 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 | ~~B-02e~~ | ~~Guardar `terminal:start`~~ | **FECHADO r8** | guarda antes do spawn; 5 testes; dívida 47 → 41 |
 | **B-02g** | **DECISÃO DO DONO**: `kind: 'bot'` pode spawnar shell pela interface? | **HIGH** | `podeOperarMaquina` não olha `kind`; comportamento atual travado por teste |
 | **B-02f** | Avaliar guarda em `fs`(13), `agent`(5), `plugin-files`(4) | **MEDIUM** | exige decidir se são capacidade de máquina ou recurso de negócio |
-| **B-02c** | Ligar `exigirAtor` em git(21), fs(13), terminal(6), agent(5), plugin-files(4) | **HIGH** | só depois de B-02b, com cada fluxo exercido |
+| **B-02c** | Ligar a guarda em git, terminal e fs | **FECHADO r8/r16** | git 21 (já estava) · terminal 6 · fs 13 · dívida 68 → 34 |
+| **B-02h** | Guardar `agent` (5) e `plugin-files` (4) | **MEDIUM** | os únicos dois restantes que têm recurso para proteger |
 | **B-02d** | Varrer o grafo de delegação no ratchet (canais de `ui-preferences`) | **MEDIUM** | ponto cego declarado |
 | **B-03** | Testar o gateway num env com `aiohttp` (R6) | **HIGH** | `pytest tests/gateway/` coleta e passa no env do projeto |
 | **B-04** | Corrigir `sofia.status()` (R5) | **MEDIUM** | responde estado real; teste no backend |
