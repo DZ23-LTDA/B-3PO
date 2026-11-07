@@ -267,15 +267,31 @@ inteiro está parado"*. **Provado vermelho.**
 E `expirarPendentes` (r39) ganhou o **chamador** que faltava: o `sofia:delegar` limpa pendentes vencidas
 antes de delegar — exatamente quando o acúmulo atrapalha.
 
-### O que **não** foi verificado
+### ✅ Verificado ponta a ponta na r45
 
-| Item | Por quê |
+```
+1. delegar ............ "Delegar c1" → exec-plano-mw70gu77-l1gy-c1, bloco "aguardando sessão"
+2. criar sessão ....... mensagem enviada no composer → sessão local-e2e76a5ad261a5465d474489…
+3. voltar a Sofia ..... botão "Vincular à conversa aberta" — **HABILITADO**
+4. clicar ............. bloco sumiu, sem erro
+5. estado no store .... status = "executando" · session_id = "local-e2e76a5ad261a5465d474489…"
+```
+
+**O `session_id` gravado é o da sessão real que existia**, não um id que eu digitei — o main consultou
+`GET /api/sessions/<id>` antes de gravar (r38) e a sessão respondeu.
+
+### O que continua **manual**
+
+| Passo | Manual? |
 |---|---|
-| botão **habilitado** | exige `$activeSessionId` não-nulo |
-| o vínculo **gravado** pela UI | exige uma sessão real, criada pelo primeiro envio de uma conversa |
-| o ciclo completo delegar → conversa → vincular | idem |
+| delegar | automático |
+| criar a conversa | **manual** — a pessoa abre uma conversa |
+| levar o pedido | **manual** — o bloco mostra o prompt para colar |
+| vincular | **manual** — um clique, que é o desenho (r43: automático afirmaria que a sessão recebeu o pedido) |
 
-**O contrato do vínculo está testado** (3 casos, r38). **A UI dele não foi exercitada ponta a ponta.**
+**Nao e' uma simulacao enganosa**: a tela mostra o pedido, nomeia a execucao e so afirma `executando`
+depois que a sessao foi verificada. O que falta e' automatizar o transporte do texto — nao a verdade do
+estado.
 
 ## 5. O que este documento **não** afirma
 
