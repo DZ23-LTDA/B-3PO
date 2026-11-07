@@ -71,6 +71,8 @@ describe('os seis canais existem', () => {
       'hermes:sofia:criar',
     // r11 do V5: a ponte plano -> execucao deixou de ser codigo morto.
     'hermes:sofia:delegar',
+    // r24 do V5: o caminho de volta — o renderer informa a sessao que nasceu.
+    'hermes:sofia:execucao:vinculada',
       'hermes:sofia:plano',
       'hermes:sofia:planos',
       'hermes:sofia:status',

@@ -207,4 +207,34 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
         )
       })
   )
+
+  /**
+   * r24 do V5 — registra a sessão do Hermes que executa uma tarefa já delegada.
+   *
+   * POR QUE ESTE CANAL EXISTE
+   *
+   * A delegação cria a execução em `pendente` e devolve o `prompt`. Quem cria a sessão é o renderer,
+   * que já tem o cliente canônico (`session.create` é RPC) — reescrever esse cliente no main seria
+   * duplicar o que o goal manda reutilizar. Este canal é o caminho de volta: o renderer informa qual
+   * sessão nasceu, e o main grava o vínculo.
+   *
+   * O QUE O MAIN **NÃO** ACEITA
+   *
+   * `vincularSessao` recusa trocar a sessão de uma execução já vinculada. Sem isso, uma segunda
+   * chamada reescreveria **onde o trabalho rodou** e a trilha de auditoria passaria a mentir.
+   */
+  ipcMain.handle(
+    'hermes:sofia:execucao:vinculada',
+    async (_event: unknown, payload: unknown): Promise<unknown> =>
+      exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+        const raw = (payload ?? {}) as Record<string, unknown>
+        const execucaoId = typeof raw['execucao_id'] === 'string' ? raw['execucao_id'] : ''
+        const sessionId = typeof raw['session_id'] === 'string' ? raw['session_id'] : ''
+
+        if (!execucaoId) return { error: 'execucao_obrigatoria' }
+        if (!sessionId.trim()) return { error: 'sessao_obrigatoria' }
+
+        return deps.execucoes.vincularSessao(execucaoId, sessionId)
+      })
+  )
 }

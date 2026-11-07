@@ -26,6 +26,8 @@ import type { ExecucaoStore, IniciarInput } from './agent-execution-store'
 
 /** O que a ponte precisa do plano. Estrutural, para não acoplar ao store inteiro. */
 export interface PlanoParaDelegar {
+  /** O objetivo do plano, quando o store o tem. Entra no prompt da sessão. */
+  objetivo?: string
   plano_id: string
   tarefas: {
     agente_id: null | string
@@ -33,6 +35,8 @@ export interface PlanoParaDelegar {
     execucao_id: null | string
     status: string
     tarefa_id: string
+    /** O título da tarefa, quando o store o tem. É o que a sessão recebe como pedido. */
+    titulo?: string
   }[]
 }
 
@@ -42,9 +46,38 @@ export interface SofiaPonteDeps {
   gravarExecucao: (tarefaId: string, execucaoId: string) => Promise<unknown>
 }
 
+/**
+ * O que a sessão do Hermes recebe como pedido.
+ *
+ * r24 do V5: a delegação **não** cria a sessão — o cliente canônico (`session.create`, RPC) é do
+ * renderer, e reescrevê-lo no main duplicaria o que o goal manda reutilizar. O que a ponte faz é
+ * devolver o pedido, para que quem cria a sessão não invente um texto próprio.
+ *
+ * `null` quando o plano não trouxe título: inventar um seria alucinar o pedido, e o G5 nomeia
+ * exatamente isso.
+ */
+function promptDaTarefa(
+  plano: PlanoParaDelegar,
+  tarefa: { tarefa_id: string; titulo?: string }
+): null | string {
+  const titulo = (tarefa.titulo ?? '').trim()
+
+  if (!titulo) return null
+
+  const objetivo = (plano.objetivo ?? '').trim()
+
+  return objetivo ? `${titulo}\n\nObjetivo do plano: ${objetivo}` : titulo
+}
+
 export type Delegacao =
   | { error: string }
-  | { execucao_id: string; parent_execution_id: null | string; tarefa_id: string }
+  | {
+      execucao_id: string
+      parent_execution_id: null | string
+      /** O pedido para a sessão. `null` quando o plano não trouxe título. */
+      prompt: null | string
+      tarefa_id: string
+    }
 
 /**
  * O `parent_execution_id` de uma tarefa: a execução da **primeira** dependência concluída.
@@ -128,7 +161,12 @@ export async function delegarTarefa(
 
   await deps.gravarExecucao(tarefaId, executionId)
 
-  return { execucao_id: executionId, parent_execution_id: parent, tarefa_id: tarefaId }
+  return {
+    execucao_id: executionId,
+    parent_execution_id: parent,
+    prompt: promptDaTarefa(plano, tarefa),
+    tarefa_id: tarefaId
+  }
 }
 
 /** O estado real de uma execução, lido agora. `null` quando não existe (ou já foi podada). */
