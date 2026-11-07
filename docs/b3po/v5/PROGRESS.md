@@ -150,6 +150,22 @@ transporte em §3.
 **Não implementado**: implementar exige decidir onde o cliente canônico vive (hoje em `src/api/`), o
 que muda o passo 5. Documentado em vez de chutado.
 
+### r7 — bot não recebe capacidade universal (critério B)
+
+`podeOperarMaquina` ignorava `Actor.scopes`, que documenta *"Só para bot: domínios em que ele pode
+agir. Vazio = nenhum"*. A regra era honrada por `agent-tools.ts` e `hr-policy.ts` — e **não** pela
+fronteira de máquina.
+
+**Antes**: bot com `EXECUTE_ALLOWED` escrevia arquivo, dava `git push` e spawnava shell.
+
+**Depois**: exige escopo **do domínio** (`git`/`terminal`/`fs`/`plugin-files`); sem domínio, nega.
+
+**O teste corrigiu a minha primeira versão**: exigir "escopo não-vazio" deixava `scopes: ['sales']`
+spawnar terminal. *"Tem escopo" não é "tem este escopo".*
+
+**Migração**: automação existente com escopo só de negócio perde acesso à máquina. **Não há migração
+automática** — conceder capacidade de máquina é decisão auditável.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

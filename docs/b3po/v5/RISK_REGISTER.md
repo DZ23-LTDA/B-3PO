@@ -195,9 +195,47 @@ O goal G1 §36 é explícito: *"não presumir que `kind='bot'` seja sempre proib
 capacidade explicitamente concedida, validada pelo servidor, com limites, sandbox, auditoria e
 política de aprovação. `EXECUTE_ALLOWED` isolado não concede permissão universal."*
 
-**Estado atual**: `EXECUTE_ALLOWED` isolado **concede**. É **HIGH** pelo texto do goal, `MEDIUM` pelo
-modelo de ameaça acima (o bot precisa existir e ser autônomo). Registrado como **HIGH** por
-prudência. `OPEN`.
+**Estado**: ✅ **FECHADO na r7** (`b8400c79d0`)
+
+```ts
+if (ator.kind === 'bot') {
+  const escopos = ator.scopes ?? []
+
+  if (!dominio || !escopos.includes(dominio)) return false
+}
+```
+
+`podeOperarMaquina` ganhou um terceiro parâmetro — o **domínio** — e os quatro call sites passam o
+seu: `git` · `terminal` · `fs` · `plugin-files`.
+
+### O teste achou que a primeira versão era frouxa
+
+A primeira guarda só exigia **escopo não-vazio**. Mas o fixture do `terminal-guarda-maquina.test.ts`
+tinha `scopes: ['sales']` — um domínio de **negócio** — e continuava spawnando shell. **"Tem escopo"
+não é "tem este escopo".**
+
+`Actor.scopes` documenta *"domínios em que ele pode agir"*; a maquina também é um domínio. Um bot com
+`['sales']` executa trabalho de vendas; não abre shell.
+
+### O caminho legítimo continua
+
+Dois testes provam os dois lados:
+
+| Ator | `terminal:start` |
+|---|---|
+| bot `EXECUTE_ALLOWED` + `scopes: ['sales']` | **recusa, 0 spawn** |
+| bot `EXECUTE_ALLOWED` + `scopes: ['terminal']` | **executa** |
+| bot sem escopo algum | **recusa** |
+
+E `machine-access-administrar.test.ts` prova que o `kind` barra **além** da capacidade: um bot com
+`scopes: ['terminal']` passa em `podeOperarMaquina` e **não** administra a instalação.
+
+### Migração a observar
+
+Um bot que hoje opera a máquina **com escopo só de negócio** passa a ser recusado. É a mudança
+desejada — mas quem tiver automação rodando com `scopes: ['sales']` e terminal precisa conceder o
+escopo `terminal` explicitamente. **Não há migração automática**: conceder capacidade de máquina é
+decisão auditável, não deve ser inferida.
 
 ### R-10 · Métrica de cobertura de autorização mede 14% da superfície
 
