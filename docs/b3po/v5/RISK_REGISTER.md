@@ -8,8 +8,12 @@ fase: G0
 
 # RISK_REGISTER — V5
 
-> Severidade por **impacto × explorabilidade**, não por quantidade. Um canal sem guarda que só muda
-> zoom é LOW; um que escreve segredo é CRITICAL. Toda linha tem o arquivo e o canal.
+> Severidade por **impacto × explorabilidade**, não por quantidade. Toda linha tem o arquivo e o canal.
+>
+> **CORREÇÃO DE PREMISSA (r4)**: a r1 classificou riscos pelo **nome** do canal. Quatro foram
+> inspecionados e **três estavam errados** (R-01, R-04, R-07) e um era **seguro** (R-03) — ver
+> `IPC_EFFECT_MATRIX.md`. A partir da r4, nenhum risco entra aqui sem que o **corpo do handler**
+> tenha sido lido: "sem guarda" e "explorável" são perguntas diferentes.
 
 ## Modelo de ameaça assumido
 
@@ -93,15 +97,29 @@ bot com `EXECUTE_ALLOWED` · dono (o único que passa). Em todos os quatro prime
 
 ## HIGH
 
-### R-03 · `ssh-config:resolve` exposto
+### R-03 · ~~`ssh-config:resolve` exposto~~ — **RETRATADO na r4: SEGURO**
 
-`main.ts` · `ssh-config:hosts`, `ssh-config:resolve` · sem guarda.
-Resolve hosts SSH — reconhecimento de rede e alvo de conexão. Severidade **HIGH**. `OPEN`.
+```ts
+const child = spawn(ssh, ['-G', '--', value], hiddenWindowsChildOptions({ stdio: [...] }))
+```
 
-### R-04 · `desktop-profile:connections:import` e `:remember`
+**Array de argumentos** (sem shell) **e `--` antes do valor**: um host não vira comando e não é lido
+como opção (`-oProxyCommand=…`). É a defesa que a maioria das implementações esquece. Timeout de 10 s.
 
-`desktop-profile.ts` · 4 canais (`default:get/set`, `connections:remember`, `connections:import`).
-**Importa conexões** — pode injetar uma conexão apontando para host do atacante. Severidade **HIGH**. `OPEN`.
+**Residual**: `ssh -G` lê `~/.ssh/config` — reconhecimento de topologia, sem execução arbitrária.
+**LOW**. Não é HIGH.
+
+### R-04 · ~~`connections:import` injeta conexão~~ — **RETRATADO na r4: LOW**
+
+```ts
+ipc.handle('hermes:profile:connections:import', async (_event, record) =>
+  preferences.importConnectionProfiles(record, isKnownConnection))
+```
+
+Importa **"qual perfil esta conexão usou por último"** — uma migração do localStorage para o main. Não
+cria conexão, não carrega credencial, e passa por `isKnownConnection`.
+
+**Residual**: um renderer comprometido altera o último perfil de uma conexão existente. **LOW**.
 
 ### R-05 · `connection-config:oauth-login` / `oauth-logout` / `cloud:agent-sign-in`
 
@@ -113,10 +131,14 @@ tem efeito sobre **quem** o produto representa. Severidade **HIGH**. `OPEN`.
 `main.ts` · aplica atualização. Se o canal de update for comprometido a jusante, o renderer pode
 antecipar a aplicação. Severidade **HIGH**. `OPEN`.
 
-### R-07 · `prepared-submissions:update` / `compare-and-set`
+### R-07 · ~~`prepared-submissions` é confused deputy~~ — **RETRATADO na r4: MEDIUM**
 
-`prepared-submissions.ts` · 3 canais. Submissões preparadas de agente — alterar antes da aprovação
-humana é **confused deputy** clássico. Severidade **HIGH**. `OPEN`.
+**Não é fila de aprovação.** É o diário do **rascunho do compositor**:
+`app/session/hooks/use-prompt-actions/prepared-submissions.ts` persiste o prompt não enviado para não
+se perder num crash (*"prepared"* = prompt preparado para envio).
+
+**Residual**: um renderer comprometido lê/reescreve rascunhos de outras sessões do mesmo origin —
+**vazamento de dados (MEDIUM)**, não bypass de aprovação.
 
 ---
 
