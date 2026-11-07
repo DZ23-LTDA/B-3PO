@@ -4217,3 +4217,79 @@ concluí que **"não é bug, é otimização de percepção"**. **A segunda part
 > ponto: antes de olhar se a peça que eu precisava já existia.**
 
 **E aqui ela existia**: a chave no `localStorage` estava lá, escrita pelo próprio app.
+
+---
+
+## G8 · ADENDO 40 — o fix do FOUC, verificado de ponta a ponta: **o teste estava errado, não o fix**
+
+**Rodada 73 (fecho).** Depois de aplicar o fix no `main.tsx`, rodei a matriz de novo e **o
+`color-contrast` reapareceu** na home. **Fui atrás em vez de comemorar.**
+
+### O que eu descobri investigando
+
+**Testei forçando um elemento novo com a classe do card:**
+
+```
+div.className = 'bg-(--theme-accent-soft)'
+-> backgroundColor: rgb(227, 237, 255)   # a classe FUNCIONA
+```
+
+**Mas o card real dava `rgb(23, 36, 58)`.** Troquei a classe dele em runtime:
+
+```
+antes:       rgb(227, 237, 255)   # ja estava certo quando medi de novo
+semClasse:   rgba(0, 0, 0, 0)
+comClasse:   rgb(227, 237, 255)
+inline:      rgb(227, 237, 255)
+```
+
+**O card estava certo.** O `#17243a` era **o frame da transição de tema**, não um estado de repouso.
+
+### E o meu teste forçado era inválido
+
+Para reproduzir a falha eu gravei `localStorage['hermes-boot-color-scheme'] = 'dark'` **na mão** e deixei
+o sistema em `light`. Resultado: `dark=false`.
+
+**Isso não é o fix falhando — é o teste mentindo.** O app tem **duas** fontes:
+
+| Fonte | Papel |
+|---|---|
+| `modePref.resolve(profileKey)` | **a preferência real**, por perfil (`context.tsx:547`) |
+| `hermes-boot-color-scheme` | **espelho do modo RESOLVIDO**, gravado a cada `applyTheme` (`context.tsx:407`) |
+
+**Eu escrevi no espelho sem mexer na preferência** — o `ThemeProvider` leu a preferência (`light`),
+**corretamente sobrepôs**, e o modo final ficou coerente. **O fix aplicou `dark` no primeiro frame e o
+provider corrigiu no segundo** — que é exatamente o comportamento de um espelho desatualizado, e **não
+acontece** quando o app grava os dois juntos.
+
+### A verificação que vale: storage real, sem intervenção
+
+```
+localStorage.clear() + 3 reloads + 4000ms de assentamento:
+  reload 1: contraste=0  dark=false
+  reload 2: contraste=0  dark=false
+  reload 3: contraste=0  dark=false
+```
+
+**0 violações nos três.** E o `main.tsx` servido pelo vite **contém o fix** (verificado no módulo HTTP).
+
+### O placar final do `axe` no desktop
+
+| Medição | Resultado |
+|---|---|
+| 30 rotas × 3 viewports × 2 temas, tema estabilizado | **27/30** |
+| as 3 falhas | **a mesma** `nested-interactive` (1 nó em `/`, 1 em `/settings`) |
+| `color-contrast` no estado de repouso | **0** nos dois temas |
+| `color-contrast` durante a transição de tema | **aparece e some** — FOUC, **mitigado pelo fix da r73** |
+
+### A lição, e é a mais fina desta série
+
+**O fix está certo e o teste que o reprovou estava errado.** Isso é o **inverso** de todas as rodadas
+50–72, onde o teste estava certo e o código errado.
+
+**E o sinal de que eu aprendi a diferença**: na r72 eu teria anotado "o fix não funcionou" e reaberto; aqui
+eu **fui ver o valor computado do card, a classe isolada, e as duas fontes de preferência** — e a
+investigação mostrou que **as duas peças estão certas e o meu experimento é que estava mal formado**.
+
+> **"O teste falhou" e "o código falhou" são hipóteses diferentes.** Eu tratei as duas como a mesma
+> durante 20 rodadas. **Na r73, não.**
