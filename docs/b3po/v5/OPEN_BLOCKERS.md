@@ -42,7 +42,8 @@ fase: G7
 | Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
-| SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — todas DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** no ambiente de teste |
+| SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** |
+| **Secrets scan** | **MEDIDO na r31: LIMPO** | `git grep` de 6 padrões (`sk-`, `ghp_`, `xox[baprs]-`, `AKIA`, `BEGIN PRIVATE KEY`, `AIza`) — **0 em código de produção**; todos os achados são fixtures de teste e exemplos de doc; **0 `.env` versionados** |
 | Atualização / rollback do desktop | `NOT_TESTED` | não exercitado |
 | iOS · Android nesta rodada | `NOT_TESTED` | a inspeção de aparelho é de 07/11 (r18 do V4) |
 
