@@ -89,6 +89,14 @@ export interface IniciarInput {
   owner: string
   parent_execution_id?: string | null
   task_id: string
+  /**
+   * r40 do V5 — quantas tentativas desta tarefa já falharam.
+   *
+   * Antes era sempre 0 (hardcoded), e `bloqueioParaIniciar` checava
+   * `tentativas > limites.retries` — uma comparação que **nunca** era verdadeira. O limite
+   * `max_retries: 2` existia no config, era lido e nunca disparava.
+   */
+  tentativas?: number
 }
 
 export interface ExecucaoStore {
@@ -116,6 +124,20 @@ export interface ExecucaoStore {
    *
    * Devolve os ids expirados — quem chamou precisa saber o que mudou.
    */
+  /**
+   * r40 do V5 — retoma uma execução que **falhou**, criando a próxima tentativa.
+   *
+   * Só `falhou` é retomável. `cancelada` é decisão de alguém, e `concluida` já terminou: recriar
+   * qualquer das duas seria desfazer uma intenção, não repetir uma falha.
+   *
+   * A nova execução passa pelo `iniciar` — então limites de concorrência, profundidade e o próprio
+   * `retries` valem para ela. `tentativas` é herdado + 1.
+   */
+  retomar(
+    id: string,
+    novoExecutionId: string,
+    opcoes: { agora?: number; credencial: boolean; execution_id?: string; limites?: LimitesAgente }
+  ): { error?: MotivoBloqueio | string; execucao?: ExecucaoGravada }
   expirarPendentes(agora: number, limiteMs: number): string[]
   finalizar(id: string, status: 'concluida' | 'falhou', resultado?: string): { error?: string; ok?: boolean }
   cancelar(id: string): { error?: string; ok?: boolean }
@@ -188,6 +210,25 @@ export function openExecutionStore(userData: string): ExecucaoStore {
       return { ok: true }
     },
 
+    retomar(id, novoExecutionId, opcoes) {
+      const anterior = visiveis().find(e => e.execution_id === id)
+
+      if (!anterior) return { error: 'execucao_nao_encontrada' }
+
+      // Só falha se repete. Cancelar e concluir são fins, não tropeços.
+      if (anterior.status !== 'falhou') return { error: 'nao_retomavel' }
+
+      return this.iniciar(
+        {
+          execution_id: novoExecutionId,
+          owner: anterior.owner,
+          parent_execution_id: anterior.parent_execution_id,
+          task_id: anterior.task_id,
+          tentativas: anterior.tentativas + 1
+        },
+        { agora: opcoes.agora, credencial: opcoes.credencial, limites: opcoes.limites }
+      )
+    },
     expirarPendentes(agora, limiteMs) {
       if (!Number.isFinite(limiteMs) || limiteMs <= 0) return []
 
@@ -238,7 +279,7 @@ export function openExecutionStore(userData: string): ExecucaoStore {
          */
         status: 'pendente',
         task_id: input.task_id,
-        tentativas: 0
+        tentativas: Math.max(0, Math.trunc(input.tentativas ?? 0))
       }
 
       const motivo = bloqueioParaIniciar({

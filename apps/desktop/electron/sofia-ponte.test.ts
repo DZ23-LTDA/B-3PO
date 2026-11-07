@@ -36,6 +36,7 @@ function execucoesFalsas(): { iniciadas: IniciarInput[]; store: ExecucaoStore; m
     cancelar: () => ({ ok: true }),
     vincularSessao: () => ({ ok: true }),
         expirarPendentes: () => [],
+        retomar: () => ({ error: 'nao_retomavel' }),
     finalizar: () => ({}),
     iniciar: (input, _opcoes) => {
       iniciadas.push(input)
@@ -183,6 +184,7 @@ describe('delegar', () => {
       cancelar: () => ({}),
       vincularSessao: () => ({ ok: true }),
         expirarPendentes: () => [],
+        retomar: () => ({ error: 'nao_retomavel' }),
       finalizar: () => ({}),
       iniciar: () => ({ error: 'sem_credencial' }),
       listar: () => []
