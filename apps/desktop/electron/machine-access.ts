@@ -41,6 +41,15 @@ export type MachineCapability = 'externo' | 'leitura' | 'escrita'
  *
  * `null` de nível é "sem acesso" — não é "acesso padrão".
  */
+/**
+ * Os domínios que a fronteira de máquina governa.
+ *
+ * Exportado porque precisa ser **o mesmo conjunto** que a interface oferece em `SCOPE_OPTIONS`
+ * (`src/api/admin.ts`). A r7 impôs a regra e não estendeu a lista: a capacidade ficou impossível de
+ * conceder. O teste `machine-access-dominios-concediveis.test.ts` prende os dois conjuntos juntos.
+ */
+export const DOMINIOS_DE_MAQUINA = ['git', 'terminal', 'fs', 'plugin-files'] as const
+
 export function podeOperarMaquina(
   ator: Actor | null,
   capacidade: MachineCapability,

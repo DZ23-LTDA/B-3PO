@@ -26,7 +26,23 @@ export const SCOPE_OPTIONS = [
   'inventory',
   'sales',
   'scheduling',
-  'services'
+  'services',
+  /*
+   * r8 do V5 — as capacidades de MÁQUINA entram na lista.
+   *
+   * A r7 fez `podeOperarMaquina` exigir escopo do domínio para um bot. A regra está certa, mas a
+   * lista acima só tinha domínios de negócio: **a capacidade ficou impossível de conceder pela
+   * interface**. Repositório que protege o recurso destruindo o acesso a ele é o que o próprio
+   * rubric chama de "fix que destrói o que protege".
+   *
+   * Estes quatro são os mesmos nomes que os call sites passam a `podeOperarMaquina` (`git-ipc` →
+   * 'git', `terminal-ipc` → 'terminal', `fs-ipc` → 'fs', `plugin-files-ipc` → 'plugin-files').
+   * Conceder um deles é a decisão auditável que o G1 §36 exige — por isso é explícito, não inferido.
+   */
+  'terminal',
+  'git',
+  'fs',
+  'plugin-files'
 ] as const
 
 interface AdminBridge {
