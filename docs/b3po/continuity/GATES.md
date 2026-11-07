@@ -3026,3 +3026,71 @@ medição), para a investigação, e **estava errado em 7 de 9 casos**.
 
 **O que o substitui**: *worktree do `origin/main`, rodar o teste lá, comparar.* **Dois minutos.** Eu
 gastei **quatro rodadas** para fazer isso.
+
+---
+
+## G8 · ADENDO 26 — a comparação fechada: **as falhas restantes são TODAS pré-existentes**, e a branch está MELHOR que a base
+
+**Rodada 54.** Rodei os 9 arquivos vermelhos restantes **nos dois lados** — worktree do `origin/main` e a
+minha branch.
+
+### O placar lado a lado
+
+| Arquivo | `origin/main` | minha branch |
+|---|---|---|
+| `ssh-connection` | 4 failed | **4 failed** |
+| `desktop-plugin-install` | 5 failed | **3 failed** |
+| `channel-build-version` | **2 failed** | **PASSA** |
+| `desktop-installation` | **1 failed** | **PASSA** |
+| `run-electron-builder` | 1 failed | **1 failed** |
+| `payload-sign-cache` | 2 failed | **2 failed** |
+| `after-pack-digests` | 2 failed | **2 failed** |
+| `commit-bundles.windows` | 1 failed | **1 failed** |
+| `side-by-side.windows` | 0 test (sem arquivo) | **0 test** |
+| **total** | **9 arquivos · 18 testes** | **7 arquivos · 13 testes** |
+
+**A branch tem MENOS falhas que o `main`.** Eu não só não introduzi regressão nessas 9 — **duas delas
+passaram a passar**.
+
+### O quadro completo da suíte, em quatro medições
+
+| Momento | arquivos | testes |
+|---|---|---|
+| r53 início | **26** | **64** |
+| após `Tip` + `plugin.mentions` + `overlay-gaps` | 18 | 28 |
+| após `i18n:keys` + os 5 `ui/` | 18 | 28 |
+| **r54: o que resta, provado pré-existente** | **7** | **13** |
+| **`origin/main` (base)** | **9** | **18** |
+
+### O que as 13 falhas restantes são
+
+**Todas em `electron/` ou `scripts/`, todas relacionadas a empacotamento/assinatura/SSH** — nenhuma toca
+o produto que o usuário vê:
+
+- `ssh-connection` (4): conexão SSH
+- `desktop-plugin-install` (3): instalação de plugin
+- `run-electron-builder` (1) · `payload-sign-cache` (2) · `after-pack-digests` (2) ·
+  `commit-bundles.windows` (1): pipeline de build/assinatura
+- `side-by-side.windows` (0 test): **o arquivo não existe** — a suíte o lista como "0 test", não como
+  falha de teste
+
+**Nenhuma é do domínio de negócio, da UI, do i18n ou da a11y.**
+
+### O veredito honesto
+
+| Afirmação | Sustentada por |
+|---|---|
+| "as 9 falhas restantes existem no `origin/main`" | **worktree, mesmos arquivos, 18 falhas** |
+| "minha branch não introduziu regressão nelas" | **13 < 18 na mesma rodada** |
+| "12 regressões minhas foram corrigidas nas r52–53" | **cada uma verificada no `main` antes e depois** |
+
+**O que NÃO afirmo**: que essas 13 sejam problemas conhecidos do upstream. **Elas falham no `main`
+deste repositório** — o que pode ser um `main` já mexido, um ambiente (Windows sem certificado, sem
+Developer Mode), ou bug real do upstream. **Não investiguei a causa de cada uma**, e portanto não digo
+que são "do upstream".
+
+### A lição em uma linha
+
+**Levei 4 rodadas (r50–r53) para aprender que "pré-existente" exigia rodar no `main`.** Na r54, rodar
+nos dois lados **levou 3 minutos** e fechou o quadro com número — **e o número diz que estou melhor que
+a base**, não apenas "não pior".
