@@ -41,8 +41,37 @@ export type MachineCapability = 'externo' | 'leitura' | 'escrita'
  *
  * `null` de nível é "sem acesso" — não é "acesso padrão".
  */
-export function podeOperarMaquina(ator: Actor | null, capacidade: MachineCapability): boolean {
+export function podeOperarMaquina(
+  ator: Actor | null,
+  capacidade: MachineCapability,
+  dominio?: string
+): boolean {
   if (!ator || ator.level === null) return false
+
+  /*
+   * r7 do V5 (G1 §36 / critério B) — **bot só opera a máquina com escopo explícito**.
+   *
+   * `Actor.scopes` documenta: "Só para bot: domínios em que ele pode agir. Vazio = nenhum." Essa
+   * regra era honrada por `agent-tools.ts` e `hr-policy.ts` — e **não** por esta função. Resultado:
+   * um bot com `EXECUTE_ALLOWED` e **zero escopos** escrevia arquivo, dava `git push` e spawnava
+   * shell. O `terminal-guarda-maquina.test.ts` até documentava o comportamento ("o kind nao e
+   * considerado"), para que mudá-lo fosse decisão consciente.
+   *
+   * É a decisão: `EXECUTE_ALLOWED` isolado não concede permissão universal. Um bot que precisa
+   * operar a máquina recebe um escopo, e o escopo é auditável — sem ele, nega.
+   */
+  if (ator.kind === 'bot') {
+    const escopos = ator.scopes ?? []
+
+    /*
+     * O escopo tem de ser **deste domínio**. Um bot com `scopes: ['sales']` executa trabalho de
+     * vendas — não abre shell. Foi o teste que mostrou: a primeira versão desta guarda só exigia
+     * escopo não-vazio, e o fixture `scopes: ['sales']` continuava spawnando terminal.
+     *
+     * Sem domínio declarado, nega: um bot que não disse onde age não opera a máquina.
+     */
+    if (!dominio || !escopos.includes(dominio)) return false
+  }
 
   // `leitura` de máquina é o que a tela de revisão já mostra: status, diff, lista de branches. Não
   // publica, não altera. Qualquer nível efetivo basta — inclusive `READ`.

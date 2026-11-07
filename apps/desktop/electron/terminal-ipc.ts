@@ -385,7 +385,7 @@ export function registerTerminalIpc({
      * `terminal:start` spawna um processo. Sem ator com poder de execução, recusa — e a recusa não
      * carrega dado nenhum. É a mesma fronteira que `git-ipc` usa para `escrita`.
      */
-    if (!podeOperarMaquina(await actorOf(), 'escrita')) return RECUSA_MAQUINA
+    if (!podeOperarMaquina(await actorOf(), 'escrita', 'terminal')) return RECUSA_MAQUINA
 
     ensureNodePtySpawnHelper()
 

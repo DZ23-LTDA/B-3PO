@@ -59,7 +59,7 @@ export function registerGitIpc({ actorOf, resolveGitBinary, resolveGhBinary }: G
   ): Promise<T | typeof RECUSA_MAQUINA> {
     const ator = await actorOf()
 
-    if (!podeOperarMaquina(ator, capacidade)) return RECUSA_MAQUINA
+    if (!podeOperarMaquina(ator, capacidade, 'git')) return RECUSA_MAQUINA
 
     return run()
   }

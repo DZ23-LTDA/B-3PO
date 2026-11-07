@@ -27,14 +27,17 @@ test('nivel READ nao administra: ler nao e administrar', () => {
 test('operador com execucao escreve arquivo, mas NAO administra a instalacao', () => {
   const operador: Actor = { ...dono, role: 'operator' }
   // A distincao e o ponto: as duas coisas sao diferentes de proposito.
-  expect(podeOperarMaquina(operador, 'escrita')).toBe(true)
+  expect(podeOperarMaquina(operador, 'escrita', 'terminal')).toBe(true)
   expect(podeAdministrarInstalacao(operador)).toBe(false)
 })
 
 test('bot nao administra a instalacao, mesmo com EXECUTE_ALLOWED e role owner', () => {
   // G1 §36: `EXECUTE_ALLOWED` isolado nao concede permissao universal. Foi este caso que o teste
   // de guarda da desinstalacao revelou na r2 — e que motivou o helper.
-  const bot: Actor = { id: 'b1', kind: 'bot', level: 'EXECUTE_ALLOWED', role: 'owner' }
-  expect(podeOperarMaquina(bot, 'escrita')).toBe(true)
+  // O bot recebe escopo de proposito: assim `podeOperarMaquina` e **true**, e o que barra a
+  // administracao e exclusivamente o `kind`. Sem o escopo, ele seria barrado por dois motivos e o
+  // teste nao provaria nada sobre o `kind`.
+  const bot: Actor = { id: 'b1', kind: 'bot', level: 'EXECUTE_ALLOWED', role: 'owner', scopes: ['terminal'] }
+  expect(podeOperarMaquina(bot, 'escrita', 'terminal')).toBe(true)
   expect(podeAdministrarInstalacao(bot)).toBe(false)
 })

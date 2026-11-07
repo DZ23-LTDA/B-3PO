@@ -45,7 +45,7 @@ export function registerPluginFilesIpc(deps: PluginFilesIpcDeps): PluginFiles {
   const files = createPluginFiles({ ...deps, protectedRoots: deps.hermesHomes })
 
   /** A recusa, ou `null` quando pode seguir. Toda escrita num folder concedido passa por aqui. */
-  const recusa = async () => (podeOperarMaquina(await deps.actorOf(), 'escrita') ? null : RECUSA_MAQUINA)
+  const recusa = async () => (podeOperarMaquina(await deps.actorOf(), 'escrita', 'plugin-files') ? null : RECUSA_MAQUINA)
 
   deps.ipcMain.handle(
     'hermes:pluginFiles:request',

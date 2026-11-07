@@ -102,11 +102,23 @@ test('sem ator: RECUSA e nao spawna nada', async () => {
  * Enquanto for ambíguo, o teste trava o comportamento **atual** para que uma mudança seja uma
  * decisão consciente, e não um efeito colateral. (r8 do V4)
  */
-test('DOCUMENTA: bot com EXECUTE_ALLOWED passa — o kind nao e considerado', async () => {
+test('bot com EXECUTE_ALLOWED e ZERO escopos: RECUSA — e nao spawna', async () => {
+  // r7 do V5 (G1 §36, criterio B). Este teste antes DOCUMENTAVA o buraco: o bot passava porque o
+  // `kind` nao era considerado. A decisao foi tomada — `EXECUTE_ALLOWED` isolado nao concede
+  // permissao universal, e `Actor.scopes` ("vazio = nenhum") passou a valer para a maquina.
   const start = montar(BOT)
   const r = (await start(evento() as never, {} as never)) as { error?: string }
 
-  assert.equal(r.error, undefined, 'o comportamento mudou — se foi intencional, atualize este teste e o RISKS.md')
+  assert.deepEqual(r, RECUSA_MAQUINA)
+  assert.equal(spawnMock.fn.mock.calls.length, 0, 'a recusa tem de vir ANTES do spawn')
+})
+
+test('bot COM escopo explicito opera a maquina — o caminho legitimo continua', async () => {
+  const comEscopo: Actor = { ...BOT, scopes: ['terminal'] }
+  const start = montar(comEscopo)
+  const r = (await start(evento() as never, {} as never)) as { error?: string }
+
+  assert.equal(r.error, undefined, 'um bot autorizado nao pode ser barrado')
   assert.equal(spawnMock.fn.mock.calls.length, 1)
 })
 

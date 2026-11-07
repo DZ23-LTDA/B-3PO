@@ -58,7 +58,7 @@ export function registerFsIpc({
    * `escrita` — criar, renomear, apagar, instalar plugin: muda o disco.
    */
   const recusaSeNaoPuder = async (capacidade: 'escrita' | 'leitura') =>
-    podeOperarMaquina(await actorOf(), capacidade) ? null : RECUSA_MAQUINA
+    podeOperarMaquina(await actorOf(), capacidade, 'fs') ? null : RECUSA_MAQUINA
 
   ipcMain.handle('hermes:fs:readDir', async (_event, dirPath) => {
     const recusa = await recusaSeNaoPuder('leitura')
