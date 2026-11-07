@@ -26,6 +26,14 @@ um futuro rebase saiba o que preservar.
 | **Vendas** | `apps/desktop/electron/sales-ipc.ts` | `recusaPorEstoque` separa `produto_nao_encontrado` de `saldo_insuficiente` (r23) | SKU fora do catálogo dava mensagem de saldo, que é outra coisa |
 | **a11y web** | `web/src/components/{ThemeSwitcher,LanguageSwitcher}.tsx`, `web/src/pages/SessionsPage.tsx` | `aria-label` passa a conter o texto visível (r39) | 4 `label-content-name-mismatch`; o web não compartilha código com o desktop |
 
+| **Tema** | `apps/desktop/src/main.tsx` | aplica `class="dark"` + `color-scheme` antes do React montar, lendo `hermes-boot-color-scheme` (r73) | o `ThemeProvider` so aplica no mount; entre a pintura do `styles.css` e o mount o app piscava o tema claro (FOUC). Medido com `axe`: 4 nos de `color-contrast` na home como primeira rota |
+| **A11y** | `apps/desktop/src/components/ui/tooltip.tsx` | `filhoSoIcone` desce a árvore (`temTexto`) em vez de só olhar string (r53) | injetava `aria-label` sobre botão com texto → `label-content-name-mismatch` |
+| **Estoque** | `apps/desktop/src/app/stock/stock-form.ts` | `StockRow.orfao` + `stockRows` inclui SKU de `balances` fora do catálogo (r48) | a tela dizia "0 produtos" com 6 movimentações |
+| **Estoque** | `apps/desktop/src/app/stock/index.tsx` | linha do órfão marcada "não cadastrado — só tem movimentação" (r48) | mesma causa |
+| **Layout** | `apps/desktop/src/app/contrib/controller.tsx` | `<main>` ganhou `h-full` (r41) | `flex-1` não define altura em pai `block`; 182 px errado em 30 rotas |
+| **Vendas** | `apps/desktop/electron/sales-ipc.ts` | `recusaPorEstoque` separa `produto_nao_encontrado` de `saldo_insuficiente` (r23) | SKU fora do catálogo dava mensagem de saldo |
+| **a11y web** | `web/src/components/{ThemeSwitcher,LanguageSwitcher}.tsx`, `web/src/pages/SessionsPage.tsx` | `aria-label` contém o texto visível (r39) | 4 `label-content-name-mismatch`; o web não compartilha o tooltip do desktop |
+
 ## O que NÃO toca upstream
 
 - `docs/b3po/**` — documentação de auditoria, só nossa.
