@@ -40,49 +40,65 @@ Comércio/Operação/Trabalho/Crescimento/Inteligência — escolher quais vão 
 
 ---
 
-## A-02 · O modo **Engenharia** não revela nada de engenharia
+## A-02 · O modo **Engenharia** não revelava nada de engenharia — **CORRIGIDO na r14**
 
-**Medido (r13):** escolhendo Engenharia, a barra mostra **VISÃO GERAL + CONFIGURAÇÃO**.
-`lib/ambiente.ts` pede quatro grupos: `['Visão geral', 'Construção', 'Qualidade', 'Configuração']`.
+**Medido antes (r13):** escolhendo Engenharia, a barra mostrava **VISÃO GERAL + CONFIGURAÇÃO** (66
+itens). `lib/ambiente.ts` pedia `Construção` e `Qualidade`, e os dois grupos nunca tinham módulo.
 
-**Construção e Qualidade renderizam vazios e são filtrados.**
+### Causa raiz: um módulo, um grupo — e o modo precisava do segundo pertencimento
 
-### Causa raiz: **dois registros de módulos**, e a barra lê só um
+Os módulos **já existiam na barra**, mas sob outros grupos:
 
-| Registro | Módulos | Grupos | Consumido por |
-|---|---:|---|---|
-| **`lib/b3po-modulos.ts`** | **25** | Comércio 8 · Inteligência 4 · Operação 4 · Visão geral 3 · Configuração 2 · Crescimento 2 · Trabalho 2 | **a barra lateral** (`/busca` também) |
-| **`lib/engenharia.ts`** | 8 | **Construção 4** · **Qualidade 2** · Visão geral 2 | **só `app/ambiente/index.tsx`** |
+| Módulo | Path | Grupo de casa | Grupo que Engenharia pedia |
+|---|---|---|---|
+| Projetos | `/projetos` | **Trabalho** | Construção |
+| Trabalhos | `/trabalhos` | **Trabalho** | Construção |
+| Agentes | `/agentes` | **Inteligência** | Construção |
+| Automações | `/automacoes` | **Inteligência** | Construção |
 
-**Nenhum módulo do registro da barra está em `Construção` ou `Qualidade`** — os dois grupos existem
-só no registro que a barra não lê.
+**Duplicar a entrada** resolveria — e seria exatamente o *"módulo duplicado"* que a diretriz proíbe.
+O que faltava era o conceito de **pertencimento múltiplo**.
+
+### A correção: `tambemEm`
 
 ```ts
-// lib/engenharia.ts:68+ — módulos reais, com rotas reais
-{ grupo: 'Construção', label: 'Projetos',    path: '/projetos' }
-{ grupo: 'Construção', label: 'Trabalhos',   path: '/trabalhos' }
-{ grupo: 'Construção', label: 'Agentes',     path: '/agents' }
-{ grupo: 'Construção', label: 'Automações',  path: '/automacoes' }
-{ grupo: 'Qualidade',  label: 'Artefatos',   path: '/artifacts' }
-{ grupo: 'Qualidade',  label: 'Capacidades', path: '/capabilities' }
+// plugins/b3po-nav/plugin.tsx
+interface ItemDeMenu {
+  grupo: string
+  /** Outros grupos a que este módulo também pertence. */
+  tambemEm?: readonly string[]
+}
+
+// lib/ambiente.ts — o filtro passa a considerar os dois
+const pertence = (m) => grupos.has(m.grupo) || (m.tambemEm ?? []).some(g => grupos.has(g))
 ```
 
-**Todos esses paths JÁ são rotas que funcionam.** O problema não é rota — é a barra não conhecer
-esses registros.
+E `engenharia` **soma** os grupos reais aos conceituais:
 
-**Precedente do próprio repo**: o comentário de `lib/ambiente.ts` diz *"não invento grupo para depois
-procurar módulo"*. Aqui aconteceu o inverso — o grupo foi declarado e o módulo ficou num segundo
-registro.
+```ts
+engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Trabalho', 'Inteligência', 'Configuração']
+```
 
-**Por que não corrigi na r13**: unificar os dois registros toca a barra, `/ambiente`, `/busca` e os
-testes de contagem (`b3po-modulos.test.ts` espera 25). É refactor com contrato próprio. **E** duplicar
-as 6 entradas em `b3po-modulos.ts` seria exatamente o *"módulos duplicados"* que o objetivo proíbe.
+`Construção` e `Qualidade` **ficam** (são o destino dos módulos de engenharia que ainda não existem
+— `/repos`, builds, testes); `Trabalho` e `Inteligência` entram (onde os que existem moram). Um grupo
+sem módulo é filtrado, então os conceituais não viram botão morto.
 
-**O caminho certo** é um dos dois:
-- **A**: `b3po-modulos.ts` vira a fonte única e ganha os 6 módulos com seu grupo real; `engenharia.ts`
-  passa a derivar dele.
-- **B**: um módulo pode pertencer a **vários grupos** (`grupos: string[]`), e os dois registros viram
-  visões do mesmo dado.
+### Medido depois
+
+| Modo | Grupos | Itens |
+|---|---|---:|
+| Engenharia **antes** | VISÃO GERAL · CONFIGURAÇÃO | 66 |
+| **Engenharia depois** | VISÃO GERAL · **TRABALHO** · **INTELIGÊNCIA** · CONFIGURAÇÃO | **105** |
+
+`axe` 0 · 52 testes da área passam.
+
+### O teste que travava a declaração antiga
+
+`ambiente.test.ts` exigia `Construção` **na lista** — e passava mesmo com Engenharia vazia, porque o
+fixture tinha um `/repos` de grupo `Construção` que a barra real não tem.
+
+**Reescrito**: agora prova `Construção` **e** `Qualidade` **e** `Trabalho` **e** `Inteligência`
+presentes, e que o menu continua com menos de 8 grupos. **Cobre a declaração e o comportamento.**
 
 ---
 

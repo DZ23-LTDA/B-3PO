@@ -76,7 +76,26 @@ export const AMBIENTE_LABEL: Record<Ambiente, string> = {
  */
 const GRUPOS_POR_AMBIENTE: Record<Ambiente, readonly string[]> = {
   empresa: ['Visão geral', 'Operação', 'Comércio', 'Trabalho', 'Crescimento', 'Inteligência', 'Configuração'],
-  engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Configuração'],
+    /*
+     * r14 do V4 — a declaração passa a refletir o que RENDERIZA.
+     *
+     * Antes: `['Visão geral', 'Construção', 'Qualidade', 'Configuração']`. Os dois grupos do meio
+     * nunca tiveram módulo na barra — `Construção` e `Qualidade` só existem como conceito em
+     * `lib/engenharia.ts`, que o mapa de `/ambiente` mostra. Resultado medido: escolher Engenharia
+     * mostrava **VISÃO GERAL + CONFIGURAÇÃO** e nada de engenharia.
+     *
+     * A correção SOMA, não troca:
+     *
+     *   - `Construção` e `Qualidade` ficam: são o destino dos módulos de engenharia de verdade
+     *     (`/repos`, builds, testes) — hoje nenhum existe na barra, e um grupo sem módulo é
+     *     filtrado, então não vira botão morto;
+     *   - `Trabalho` e `Inteligência` entram: os módulos que JÁ existem e servem Engenharia
+     *     (`Projetos`, `Trabalhos`, `Agentes`, `Automações`) moram nesses grupos, e agora também
+     *     pertencem a Engenharia via `tambemEm` no plugin.
+     *
+     * Antes, sem a segunda metade, escolher Engenharia mostrava VISÃO GERAL + CONFIGURAÇÃO. Medido.
+     */
+    engenharia: ['Visão geral', 'Construção', 'Qualidade', 'Trabalho', 'Inteligência', 'Configuração'],
   /*
    * r265: os quatro ambientes que a missão final nomeia.
    *
@@ -119,7 +138,7 @@ export interface ModuloDoAmbiente {
  * de retorno preserva o do argumento. Antes ela exigia `ModuloDoAmbiente` e o plugin não
  * conseguia passar o seu próprio tipo sem um cast.
  */
-export function modulosDoAmbiente<T extends { grupo: string }>(
+export function modulosDoAmbiente<T extends { grupo: string; tambemEm?: readonly string[] }>(
   modulos: readonly T[],
   ambiente: Ambiente
 ): { dentro: T[]; fora: T[] } {
@@ -128,9 +147,21 @@ export function modulosDoAmbiente<T extends { grupo: string }>(
   // "Visão geral" é sempre visível: é onde a pessoa se localiza.
   grupos.add('Visão geral')
 
-  const dentro = modulos.filter(m => grupos.has(m.grupo))
+  /*
+   * r14 do V4 — um módulo pode pertencer a MAIS DE UM grupo.
+   *
+   * O problema que isto resolve: o modo Engenharia declara `Construção` e `Qualidade`, mas
+   * `Projetos` estava só em `Trabalho` e `Agentes` só em `Inteligência`. Escolher Engenharia
+   * mostrava VISÃO GERAL + CONFIGURAÇÃO e nada de engenharia.
+   *
+   * **A alternativa seria duplicar a entrada** — e o objetivo proíbe módulos duplicados. Um módulo
+   * com dois pertencimentos é a verdade do produto: `Projetos` serve o fluxo `Trabalho` **e** o
+   * fluxo `Construção`.
+   */
+  const pertence = (m: T): boolean =>
+    grupos.has(m.grupo) || (m.tambemEm ?? []).some(g => grupos.has(g))
 
-  return { dentro, fora: modulos.filter(m => !grupos.has(m.grupo)) }
+  return { dentro: modulos.filter(pertence), fora: modulos.filter(m => !pertence(m)) }
 }
 
 /**

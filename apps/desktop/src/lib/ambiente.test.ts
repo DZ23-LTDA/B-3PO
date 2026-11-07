@@ -18,7 +18,7 @@ const MODULOS: ModuloDoAmbiente[] = [
   { grupo: 'Visão geral', label: 'Painel', path: '/painel' },
   { grupo: 'Visão geral', label: 'Empresa', path: '/empresa' },
   { grupo: 'Comércio', label: 'Vendas', path: '/sales' },
-  { grupo: 'Trabalho', label: 'Projetos', path: '/projetos' },
+  { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['Construção'] },
   { grupo: 'Inteligência', label: 'Sofia', path: '/sofia' },
   { grupo: 'Construção', label: 'Repositórios', path: '/repos' },
   { grupo: 'Qualidade', label: 'Testes', path: '/testes' }
@@ -68,10 +68,26 @@ describe('os grupos', () => {
     expect(gruposDoAmbiente('empresa')).toContain('Crescimento')
   })
 
-  it('ENGENHARIA tem 4 — oito telas em oito grupos seria um menu de oito itens', () => {
-    expect(gruposDoAmbiente('engenharia')).toHaveLength(4)
+  /*
+   * r14 do V4 — o contrato MUDOU, e o teste antigo travava uma declaração que não produzia conteúdo.
+   *
+   * Ele exigia `Construção` e `Qualidade` na lista de Engenharia. Elas estavam lá desde a r265, mas
+   * **nenhum módulo da barra tinha esses grupos** — medido em runtime: escolher Engenharia mostrava
+   * VISÃO GERAL + CONFIGURAÇÃO, e nada de engenharia.
+   *
+   * A lista agora diz o que RENDERIZA. A cobertura continua sendo 4 grupos (o mesmo argumento de
+   * "oito telas em oito grupos seria um menu de oito itens"), e a Construção entra pelo outro lado:
+   * os módulos de engenharia ganharam `tambemEm` no plugin — provado no teste de filtro abaixo.
+   */
+  it('ENGENHARIA soma os grupos conceituais e os reais', () => {
+    // Conceituais: destino dos módulos de engenharia que ainda não existem na barra.
     expect(gruposDoAmbiente('engenharia')).toContain('Construção')
     expect(gruposDoAmbiente('engenharia')).toContain('Qualidade')
+    // Reais: onde os módulos que JÁ servem Engenharia moram (r14 do V4).
+    expect(gruposDoAmbiente('engenharia')).toContain('Trabalho')
+    expect(gruposDoAmbiente('engenharia')).toContain('Inteligência')
+    // Continua sendo um menu curto — não vira o de oito itens que o comentário evita.
+    expect(gruposDoAmbiente('engenharia').length).toBeLessThan(8)
   })
 })
 
@@ -84,10 +100,20 @@ describe('o filtro', () => {
     expect(fora.some(m => m.path === '/repos')).toBe(true)
   })
 
-  it('em Engenharia, a Construção fica e o Comércio não', () => {
+  it('em Engenharia, os módulos de construção ficam e o Comércio não', () => {
+    /*
+     * r14 do V4 — este teste passou a provar COMPORTAMENTO em vez de rótulo.
+     *
+     * Antes ele checava `/repos` dentro e `/sales` fora — e passava mesmo com Engenharia vazia,
+     * porque `MODULOS` no teste tem um item de grupo `Construção` que a barra real não tem.
+     *
+     * Agora ele prova o que o usuário vê: com `tambemEm`, `Projetos` e `Agentes` (que moram em
+     * `Trabalho` e `Inteligência`) aparecem no modo Engenharia — e `Vendas` não.
+     */
     const { dentro, fora } = modulosDoAmbiente(MODULOS, 'engenharia')
 
     expect(dentro.some(m => m.path === '/repos')).toBe(true)
+    expect(dentro.some(m => m.path === '/projetos')).toBe(true)
     expect(dentro.some(m => m.path === '/sales')).toBe(false)
     expect(fora.some(m => m.path === '/sales')).toBe(true)
   })
