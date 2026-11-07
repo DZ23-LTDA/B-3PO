@@ -70,14 +70,30 @@ export function registerAgentIpc(
 
   ipcMain.handle(
     'hermes:agent:approvals:decide',
-    (_evento, input: { decidir: 'aprovar' | 'recusar'; id: string; quem: string }) => {
-      // `quem` vem do renderer porque o produto ainda nao tem login proprio. Quando tiver, este e o campo que
-      // passa a vir da sessao - e a checagem de "ninguem aprova o proprio pedido" continua no store.
-      if (!input?.quem?.trim()) return { error: 'quem_obrigatorio' }
+    async (_evento, input: { decidir: 'aprovar' | 'recusar'; id: string; quem: string }) => {
+      /*
+       * A identidade do aprovador vem do PROCESSO PRINCIPAL, não do renderer.
+       *
+       * O comentário anterior dizia "o produto ainda não tem login próprio" — não é mais verdade:
+       * `atorDeMaquina` lê `ActorsStore` e devolve o dono com `id`, `role` e `level`.
+       *
+       * A r17 do V4 tentou corrigir isto e **só metade pegou**: `executions:cancel` ganhou a guarda,
+       * e esta substituição falhou em silêncio (o texto-âncora não casou). Ficou registrado como
+       * feito. A r9 do V5 mediu o código e encontrou o `input.quem` de volta.
+       *
+       * `input.quem` continua no tipo para não quebrar o chamador, mas é **ignorado**.
+       */
+      const ator = await actorOf()
+
+      if (!ator) return { error: 'sem_permissao', reason: 'sem_ator' }
+
+      const permitido = await withPermission(ator, 'execute', { resource: 'agents' }, async () => true)
+
+      if (permitido !== true) return { error: 'sem_permissao' }
 
       return input.decidir === 'recusar'
-        ? aprovacoes.recusar(input.id, input.quem)
-        : aprovacoes.aprovar(input.id, input.quem)
+        ? aprovacoes.recusar(input.id, ator.id)
+        : aprovacoes.aprovar(input.id, ator.id)
     }
   )
 }
