@@ -120,6 +120,14 @@ export function gruposDoAmbiente(ambiente: Ambiente): readonly string[] {
 
 export interface ModuloDoAmbiente {
   grupo: string
+  /**
+   * r14 do V4 — outros grupos a que este módulo também pertence.
+   *
+   * `Projetos` mora em `Trabalho` e também serve `Engenharia`. Um módulo continua tendo **um**
+   * grupo de casa (`grupo`); este campo só amplia em quais modos ele aparece. É o que evita o
+   * "módulo duplicado" que a diretriz proíbe.
+   */
+  tambemEm?: readonly string[]
   label: string
   path: string
 }
