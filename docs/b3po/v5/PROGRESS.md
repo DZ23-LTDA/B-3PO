@@ -350,6 +350,35 @@ a2a → Pronto para conectar · discord → Falta credencial (DISCORD_BOT_TOKEN)
 `connector_readiness.py` → componente não montado. O app deploya o backend em
 `%TEMP%\<home>\hermes-agent\`; o repo não chega lá sozinho.
 
+### r17 — o teste que teria pego a r15
+
+A r15 falhou por uma razão que **nenhuma verificação existente pega**: o componente existia, tipava,
+passava em 736 testes de i18n/settings — e **nunca aparecia na tela**, porque a linha que o monta não
+foi escrita.
+
+**Typecheck não sabe se um componente está montado. Lint também não. Teste de unidade do componente
+também não** — ele testa o componente isolado, não a tela que deveria contê-lo.
+
+**O teste novo** (`gateway-settings.test.tsx`):
+
+```tsx
+it('monta a secao de prontidao de conectores na tela de gateway', async () => {
+  render(<GatewaySettings />)
+  expect(await screen.findByText('secao-de-conectores-montada')).toBeTruthy()
+})
+```
+
+**Provado vermelho**, como o repositório exige:
+
+| Estado | Resultado |
+|---|---|
+| montagem presente | **26 passed** |
+| montagem removida (`{null}`) | **o teste falha** |
+| restaurado | 26 passed |
+
+O mock do componente **não esconde a montagem** — ele substitui o conteúdo por um texto fixo, e o
+teste procura esse texto na tela renderizada. Se a linha de montagem sumir, o texto não existe.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
