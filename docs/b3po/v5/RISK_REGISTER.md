@@ -54,7 +54,10 @@ passa por **`sanitizeDesktopConnectionConfig(...)`** antes de responder.
 produto, medida.
 
 **O risco real do `set`**: desligar a criptografia **decripta todos os segredos para plaintext em
-disco**. Severidade **HIGH** (enfraquece a proteção), não CRITICAL (não exfiltra). `OPEN`.
+disco**. Severidade **HIGH** (enfraquece a proteção), não CRITICAL (não exfiltra).
+
+**Estado**: ✅ **FECHADO na r3** (`cc3e3b7399`) — o `set` passou a exigir `podeAdministrarInstalacao`
+(dono humano), pela mesma política central que governa a desinstalação.
 
 ### R-02 · `uninstall:run` sem autorização
 
@@ -114,6 +117,35 @@ antecipar a aplicação. Severidade **HIGH**. `OPEN`.
 
 `prepared-submissions.ts` · 3 canais. Submissões preparadas de agente — alterar antes da aprovação
 humana é **confused deputy** clássico. Severidade **HIGH**. `OPEN`.
+
+---
+
+## A política central de instalação (r3)
+
+`machine-access.ts` ganhou `podeAdministrarInstalacao(ator)`:
+
+```ts
+export function podeAdministrarInstalacao(ator: Actor | null): boolean {
+  return podeOperarMaquina(ator, 'escrita') && ator?.role === 'owner' && ator?.kind === 'human'
+}
+```
+
+**Capacidade de `escrita` não basta.** As três condições respondem perguntas diferentes:
+
+| Condição | Pergunta | O que um operador de vendas responderia |
+|---|---|---|
+| `podeOperarMaquina(ator, 'escrita')` | "pode escrever arquivo aqui?" | ✅ sim |
+| `role === 'owner'` | "responde pela instalação?" | ❌ não |
+| `kind === 'human'` | "é uma pessoa?" | ✅ sim |
+
+Um operador **escreve arquivo** e **não administra a instalação** — de propósito. E um bot nunca
+administra, mesmo com `EXECUTE_ALLOWED` e `role: 'owner'`: foi exatamente esse par que o teste de
+guarda da r2 revelou passar quando o `kind` não era checado.
+
+**6 testes** (`machine-access-administrar.test.ts`) provam as bordas: dono ✅ · sem ator ❌ ·
+`level: null` ❌ · `READ` ❌ · operador com escrita ❌ · bot com `EXECUTE_ALLOWED`+`owner` ❌.
+
+**Canais governados hoje**: `uninstall:run` · `secret-storage:set`.
 
 ---
 
