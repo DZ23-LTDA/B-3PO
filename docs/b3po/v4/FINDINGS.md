@@ -483,6 +483,38 @@ invariante e os dados são reais — não que o botão grava.
 
 ---
 
+## A-11 · Os seis modos conferidos um a um — **6/6 trocam e o Engenharia está corrigido**
+
+**r32.** Clicando o cartão de cada modo na home e lendo `data-ambiente` + os grupos da barra:
+
+| Modo | `data-ambiente` | Grupos visíveis |
+|---|---|---|
+| Empresa | `empresa` | **COMÉRCIO** · Projetos, Trabalhos |
+| Engenharia | `engenharia` | **sem COMÉRCIO** · Projetos, Trabalhos, Inteligência |
+| Automação | `automacao` | Projetos, Trabalhos, Inteligência |
+| IA e Agentes | `ia` | **INTELIGÊNCIA** · Agentes |
+| Estratégico | `estrategico` | **COMÉRCIO · CRESCIMENTO** |
+| Administração | `administracao` | Projetos, Trabalhos, E… |
+
+**6 de 6 trocam o atributo e mudam os grupos.** E o **A-02 está corrigido**: Engenharia mostra
+Projetos, Trabalhos e Inteligência — não só VISÃO GERAL + CONFIGURAÇÃO, como na r14.
+
+### E eu medi errado **duas vezes** antes de acertar
+
+| Tentativa | O que fiz | Por que deu 0/errado |
+|---|---|---|
+| 1 | `document.querySelector('select')` | o seletor da barra é `<label>` + radios, não `<select>` |
+| 2 | `[role="group"] button` com texto "Empresa" | **casou o item "Empresa" da barra lateral**, que não tem `aria-pressed` — cliquei navegação, não o modo |
+| 3 | `button[aria-pressed]` escopado | **correto** — 6/6 |
+
+**"Empresa" aparece duas vezes na tela**: como item de VISÃO GERAL e como cartão de modo. Um seletor
+por texto pega o primeiro e não reclama.
+
+**Regra que fica**: quando o rótulo existe em dois lugares, **selecione pela propriedade** (`aria-pressed`),
+não pelo texto.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |
