@@ -5108,3 +5108,66 @@ mas eu comparei **só o que estava olhando** (a caixa), não o que a vizinha faz
 **Nada visível.** O que resta sem tradução são **formatos** (`metrosCubicos` devolve `12,345 m³` com
 vírgula decimal, e `litros` usa `toLocaleString('pt-BR')`) — o separador decimal é locale, e isso segue
 o padrão do repo (`priceLabel` faz o mesmo). Registrado como observação, não como gap.
+
+---
+
+## G5 · ADENDO 3 — provar o inglês: **não dá em runtime**, e a razão é uma decisão do produto
+
+**Rodada 85.** A r84 traduziu as duas telas. Faltava provar. Fui trocar o idioma em runtime e descobri
+duas coisas.
+
+### O que o runtime mostrou
+
+```
+/api/config  ->  display.language: "en"
+DOM          ->  <html lang="pt">  ... "Na revenda", "a cobrar de volta", "Com o cliente"
+```
+
+**Config diz inglês, tela mostra português.** Investiguei em vez de anotar bug — e a regra está escrita
+em `languages.ts`:
+
+```ts
+/**
+ * B-3PO: o default do backend para `display.language` é `en`, então "salvo" quase sempre significa
+ * "nunca escolhido". Com a UI em pt-BR como idioma de produto, o default não pode ganhar do idioma da
+ * máquina: só uma escolha EXPLÍCITA e diferente do default tem precedência sobre o OS.
+ *
+ * Consequência conhecida: quem escolher inglês de propósito numa máquina pt-BR volta ao pt no
+ * próximo boot enquanto a escolha for igual ao default.
+ */
+```
+
+**`display.language: 'en'` = "nunca escolhido"** → cai para o idioma da máquina (pt-BR). **Decisão do
+produto, documentada, com a consequência assumida por escrito.**
+
+**Não é bug, e não corrigi.** Tentei o PATCH para forçar outro valor: **`405 Method Not Allowed`** — o
+canal de escrita de config não é `PATCH /api/config`.
+
+### Então a prova foi por teste, não por captura
+
+**`src/app/gas/i18n.test.tsx`** — 8 testes, e eles cobrem o que o TypeScript **não** cobre:
+
+| Teste | O que pega |
+|---|---|
+| título/intro/saldos em inglês | texto que voltou a ser hardcoded em pt |
+| **todas** as colunas das duas telas | coluna nova sem tradução |
+| **todo** valor de `tipos` e `status` do modelo | enum novo sem rótulo |
+| **todo** erro do store tem frase | `ja_esta_em_comodato` aparecendo cru na tela |
+| os mesmos textos em pt-BR | overlay pt quebrado |
+| **`translateNow` devolve o valor do idioma ativo** | é o **mesmo resolvedor** que o `useI18n` usa por baixo |
+| o título chega ao DOM | o caminho `translateNow` → JSX funciona |
+
+**Os primeiros 4 testes falharam na primeira escrita** — porque eu chamei `translateNow()` sem path e
+depois usei um matcher (`toHaveTextContent`) que este projeto não tem. **A correção foi no teste, não no
+código** — e é a segunda vez nesta série (r73, r85) em que **o teste estava errado e o código certo**.
+
+### A lição
+
+**"Provar em runtime" e "provar" não são a mesma coisa.** Para um comportamento **determinado por uma
+decisão de produto documentada**, o teste é a prova possível — e é uma prova **melhor** que a captura,
+porque roda em CI e cobre **todos** os valores do enum, não só os que apareceram na tela.
+
+> **O runtime prova o caso do usuário; o teste prova a classe.** Quando o caso do usuário está bloqueado
+> por uma decisão, o teste ainda cobra a classe inteira — e **foi isso que achou que eu tinha deixado
+> `tipo_invalido` e `comodato_exige_cliente` sem frase em inglês** (eu tinha escrito, mas não tinha
+> verificado um a um).
