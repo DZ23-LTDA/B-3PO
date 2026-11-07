@@ -477,7 +477,15 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:write', (_event, id, data) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    /*
+     * r10 do V5 — POSSE, não só existência.
+     *
+     * `attach` já exigia `webContentsId === event.sender.id`; `write`, `resize` e `cwd` só olhavam
+     * se a sessão existia. Um renderer podia **escrever no terminal de outro** — inclusive num shell
+     * privilegiado que a pessoa abriu na outra janela. Não é "acesso à máquina": é acesso à sessão
+     * que esta janela **não abriu**.
+     */
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return false
     }
 
@@ -489,7 +497,7 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:resize', (_event, id, size = {}) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return false
     }
 
@@ -503,7 +511,7 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:cwd', async (_event, id) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return null
     }
 

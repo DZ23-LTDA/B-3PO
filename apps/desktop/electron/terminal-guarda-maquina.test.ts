@@ -68,7 +68,7 @@ function montar(ator: Actor | null) {
     sshBinary: () => 'ssh'
   })
 
-  const start = handles.map.get('hermes:terminal:start')
+  const start = canal('hermes:terminal:start')
 
   assert.ok(start, 'terminal:start nao registrado')
 
@@ -146,4 +146,86 @@ test('a recusa NAO carrega dado nenhum', async () => {
   assert.equal('id' in r, false)
   assert.equal('shell' in r, false)
   assert.deepEqual(Object.keys(r).sort(), ['error', 'reason'])
+})
+
+
+/*
+ * r10 do V5 — o terminal pertence a JANELA que o abriu.
+ *
+ * `attach` ja exigia `webContentsId === event.sender.id`, mas `write`, `resize` e `cwd` só olhavam
+ * se a sessão existia. Um renderer escrevia no terminal de outro — inclusive num shell privilegiado
+ * aberto na outra janela. Não é "acesso à máquina": é acesso a uma sessão que esta janela não abriu.
+ */
+const janelaDe = (id: number) => ({
+  sender: { id, isDestroyed: () => false, once: () => undefined, send: () => undefined }
+})
+
+/** O handler e tipado `(...args: never[])`; chamar com argumento real exige cast. */
+type Chamavel = (event: unknown, ...args: unknown[]) => unknown
+
+const canal = (nome: string): Chamavel | undefined => {
+  const h = handles.map.get(nome)
+
+  return h as unknown as Chamavel | undefined
+}
+
+function abrirTerminal(janela: ReturnType<typeof janelaDe>): string {
+  const start = canal('hermes:terminal:start')
+
+  assert.ok(start, 'terminal:start nao registrado')
+
+  // `montar` ja registrou; o retorno e sincrono o bastante no mock.
+  const r = start(janela as never, {} as never) as unknown as Promise<{ id?: string }> | { id?: string }
+
+  return String((r as { id?: string })?.id ?? '')
+}
+
+test('a janela A escreve no proprio terminal; a janela B NAO escreve nele', async () => {
+  montar(DONO)
+  const A = janelaDe(71)
+  const B = janelaDe(72)
+
+  const start = canal('hermes:terminal:start')
+
+  assert.ok(start)
+
+  const aberta = (await start(A as never, {} as never)) as { id?: string }
+
+  assert.ok(aberta?.id, 'terminal nao abriu: ' + JSON.stringify(aberta))
+
+  const write = canal('hermes:terminal:write')
+
+  assert.ok(write)
+
+  spawnMock.fn.mock.calls.length
+
+  const daDona = write(A as never, aberta.id, 'ls\n')
+
+  assert.equal(daDona, true, 'a janela que abriu tem de poder escrever')
+
+  const deOutra = write(B as never, aberta.id, 'rm -rf /\n')
+
+  assert.equal(deOutra, false, 'outra janela NAO escreve no terminal alheio')
+})
+
+test('a janela B NAO redimensiona nem le o cwd do terminal da janela A', async () => {
+  montar(DONO)
+  const A = janelaDe(81)
+  const B = janelaDe(82)
+
+  const start = canal('hermes:terminal:start')
+
+  assert.ok(start)
+
+  const aberta = (await start(A as never, {} as never)) as { id?: string }
+
+  assert.ok(aberta?.id)
+
+  const resize = canal('hermes:terminal:resize')
+  const cwd = canal('hermes:terminal:cwd')
+
+  assert.ok(resize)
+  assert.ok(cwd)
+  assert.equal(resize(B as never, aberta.id, { cols: 10, rows: 10 }), false)
+  assert.equal(await (cwd(B as never, aberta.id) as Promise<null>), null)
 })
