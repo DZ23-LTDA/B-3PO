@@ -445,6 +445,29 @@ está READY, a execução de plano da Sofia está PARTIAL (nada executa), a iden
 escrito antes: **o build não é reproduzível** porque o backend em uso é uma cópia deployada que não é
 reconstruída — e isso já produziu um 404 real (r15).
 
+### r32 — a matriz de autorização (medida, não escrita à mão) e uma falha real
+
+O G1 pede a matriz *canal × capacidade × ator × recurso × autorização × **teste***. Eu tinha a de
+**efeito**; esta é a de **guarda**. Gerada de `apps/desktop/electron/*.ts`, dados brutos em
+`evidence/ipc-matriz-2026-11-07.json`.
+
+**281 canais · 130 com guarda · 151 sem · 141 com menção em teste.**
+
+**E ela achou uma falha de verdade**: `sales-ipc.ts` guardava **um** canal (`faturar`) e deixava **três**
+chamarem o store direto — `create`, `cancel` e `devolver` (que mexe em **estoque e financeiro**).
+
+**Provado vermelho** contra o código anterior:
+
+```
+× sem ator, criar venda → expected { sale: {} } to match { error: 'sem_permissao' }
+× sem ator, cancelar    → expected { sales: [] } to match { error: 'sem_permissao' }
+```
+
+A venda **era criada e cancelada sem ator**. Corrigido em `9a0cf7104e`, 4 testes.
+
+**Limite do instrumento, declarado**: `terminal` aparece com 5 canais sem guarda de ator porque a defesa
+ali é **posse de janela** (r10), não ator. O coletor procura guarda de ator e não vê a de posse.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
