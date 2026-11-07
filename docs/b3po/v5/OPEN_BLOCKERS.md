@@ -39,7 +39,7 @@ fase: G7
 | IDOR / isolamento multi-tenant | `EXISTE` — **não roda no Windows** | `tests/e2e/core/tenancy/test_two_tenant_gateway.py`: 3 perfis, turnos intercalados, `check_isolation`. Falha na coleta aqui: `signal.SIGKILL` não existe no Windows (r29) |
 | **SSRF / egress allowlist** | **NÃO EXISTE** | confirmado na r28: os allowlists do repo são de **entrada**, não de destino |
 | Path traversal | **`TESTADO`** — 7 testes verdes | `electron/hardening-traversal.test.ts` + `docs/b3po/audit/PATH-TRAVERSAL-R156.md`. **Não confina a uma raiz por decisão escrita**: o comentário no handler diz que confinar é decisão de produto, não check faltando (r29) |
-| **Replay de webhook** | `NOT_TESTED` | assinatura + janela de 10 min existem; replay não exercitado |
+| Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
 | SBOM / dependency audit | `NOT_TESTED` | `npm audit` / `pip-audit` não rodados |
@@ -62,16 +62,37 @@ fase: G7
 outra porta de loopback. **64 testes** (`test_web_server_host_header.py`). Não é bloqueio: é controle
 existente e exercitado.
 
-## O padrao `NOT_TESTED` — tres correcoes em duas rodadas (r28, r29)
+## O padrao `NOT_TESTED` — cinco correcoes em tres rodadas (r28–r30)
 
-| Rodada | Item | Eu disse | Era |
+| Rodada | Item | Eu escrevi | O repositorio tinha |
 |---|---|---|---|
-| r28 | validacao de origem do WebSocket | `NOT_TESTED` | **existe**, 64 testes |
-| r29 | IDOR / multi-tenant | `NOT_TESTED` | **existe** (`test_two_tenant_gateway.py`), nao roda no Windows |
-| r29 | path traversal | `NOT_TESTED` | **testado** (7 verdes) e **documentado** como decisao |
+| r28 | origem do WebSocket | `NOT_TESTED` | **64 testes verdes** |
+| r29 | IDOR / multi-tenant | `NOT_TESTED` | **teste de 3 tenants** (nao coleta no Windows: `SIGKILL`) |
+| r29 | path traversal | `NOT_TESTED` | **7 testes verdes** + documento de decisao |
+| r30 | replay de webhook | `NOT_TESTED` | **8 testes verdes** |
+| r30 | prompt / tool-output injection | `NOT_TESTED` | **72 testes verdes** |
 
-**`NOT_TESTED` e uma afirmacao, nao um espaco em branco.** Nos tres casos eu escrevi "nao testei" sem
-procurar; nos tres o repositorio tinha a resposta.
+**Cinco em cinco.** Em todos eu escrevi "nao testei" **sem procurar** — e em todos o repositorio tinha a
+resposta, a maioria com testes verdes.
 
-**Regra que fica**: antes de escrever `NOT_TESTED`, procure o termo em `tests/` e no codigo. Se existir
-e nao rodar aqui, o rotulo correto e **`EXISTE, NAO RODA NESTE HOST`** com o motivo — nao "nao testado".
+### A regra que fica
+
+Antes de escrever `NOT_TESTED`:
+
+1. procure o termo em `tests/` **e** no codigo;
+2. se existir, **rode**;
+3. se existir e nao rodar aqui, o rotulo e **`EXISTE, NAO RODA NESTE HOST`** — com o motivo
+   (`SIGKILL`, GPU, SSH, certificado);
+4. `NOT_TESTED` fica reservado para o que eu procurei e **nao existe**.
+
+### O que sobra de `NOT_TESTED`, agora com fundamento
+
+| Item | Evidencia de que procurar nao adianta |
+|---|---|
+| Suite completa do gateway | 1.685 arquivos coletam; executar exige bash (`EXT-4`) |
+| Benchmark de tarefas | `BENCHMARKS.md` §4: nenhum harness, nenhum `results/*.json` |
+| Performance (LCP/INP/CLS) | nenhum teste de metrica web no repositorio |
+| SSRF / egress allowlist | os allowlists do repo sao **de entrada**; nenhum de destino |
+
+**Quatro itens.** Os outros quinze que eu tinha marcado estavam errados.
+
