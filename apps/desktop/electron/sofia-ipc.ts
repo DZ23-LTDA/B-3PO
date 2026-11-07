@@ -21,6 +21,8 @@ import { exigirAtor } from './permission-guard'
 import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
 import { diagnosticarGrafo, profundidadeDoPlano, tarefasProntas } from './sofia-grafo'
+import { delegarTarefa } from './sofia-ponte'
+import type { ExecucaoStore } from './agent-execution-store'
 import type { SofiaStore } from './sofia-store'
 
 export interface SofiaIpcDeps {
@@ -30,6 +32,14 @@ export interface SofiaIpcDeps {
    * Obrigatório: um plano de coordenação executado sem responsável é a definição de automação sem dono.
    */
   actorOf: () => Promise<Actor | null>
+  /**
+   * r11 do V5 — a ponte entre plano e execução ganha porta.
+   *
+   * `sofia-ponte.ts` existia com 9 KB de testes e **zero chamadores em produção**: o plano não
+   * alcançava execução nenhuma. Este canal é a porta; o executor de verdade continua sendo o
+   * Hermes (a execução nasce `pendente`, honesta).
+   */
+  execucoes: ExecucaoStore
   store: SofiaStore
 }
 
@@ -111,7 +121,22 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
         if (!planoId) return { error: 'plano_obrigatorio' }
         if (!tarefaId) return { error: 'tarefa_obrigatoria' }
 
-        return deps.store.atualizarTarefa(planoId, tarefaId, raw['patch'])
+        /*
+         * r11 do V5 — o vínculo com execução NÃO vem do renderer.
+         *
+         * `normalizarTarefa` copia `execucao_id` do patch. Passar o patch direto deixava o renderer
+         * **forjar** o vínculo plano → execução: a tarefa aparecia como delegada sem execução
+         * nenhuma existir. É a "alucinação de ação concluída" que o goal nomeia no G5.
+         *
+         * Quem escreve `execucao_id` é a ponte (`hermes:sofia:delegar`), que cria a execução antes.
+         */
+        const patch = raw['patch']
+
+        if (patch && typeof patch === 'object' && !Array.isArray(patch)) {
+          delete (patch as Record<string, unknown>)['execucao_id']
+        }
+
+        return deps.store.atualizarTarefa(planoId, tarefaId, patch)
       })
   )
 
@@ -143,5 +168,43 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
 
       return deps.store.aprovar(planoId, ator?.id ?? '')
     })
+  )
+
+  /**
+   * Delega uma tarefa pronta do plano — `execute`, não `read`.
+   *
+   * Regras que o handler NÃO decide (estão na ponte, que é testada):
+   *   - a tarefa tem de existir no plano;
+   *   - as dependências dela têm de estar satisfeitas;
+   *   - a credencial tem de existir.
+   *
+   * O que o handler decide: **quem** pode pedir. `execute` em `sofia`.
+   */
+  ipcMain.handle(
+    'hermes:sofia:delegar',
+    async (_event: unknown, payload: unknown): Promise<unknown> =>
+      exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+        const raw = (payload ?? {}) as Record<string, unknown>
+        const planoId = typeof raw['plano_id'] === 'string' ? raw['plano_id'] : ''
+        const tarefaId = typeof raw['tarefa_id'] === 'string' ? raw['tarefa_id'] : ''
+
+        if (!planoId || !tarefaId) return { error: 'plano_e_tarefa_obrigatorios' }
+
+        const plano = await deps.store.obter(planoId)
+
+        if (!plano) return { error: 'plano_inexistente' }
+
+        return delegarTarefa(
+          {
+            execucoes: deps.execucoes,
+            gravarExecucao: async (tarefa, execucao) => {
+              await deps.store.atualizarTarefa(planoId, tarefa, { execucao_id: execucao })
+            }
+          },
+          plano,
+          tarefaId,
+          { credencial: true }
+        )
+      })
   )
 }

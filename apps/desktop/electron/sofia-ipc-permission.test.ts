@@ -50,8 +50,13 @@ function montar(ator: Actor | null): { handlers: Map<string, Handler>; store: So
   const store = new SofiaStore(sofiaStorePath(dir))
 
   registerSofiaIpc(
-    { handle: (canal: string, handler: Handler) => void handlers.set(canal, handler) } as never,
-    { actorOf: async () => ator, store }
+    { handle: (canal: string, h: Handler) => void handlers.set(canal, h) } as never,
+    {
+      actorOf: async () => ator,
+      // r11 do V5: a ponte plano -> execucao precisa do store de execucoes.
+      execucoes: { iniciar: () => ({ error: 'nao_usado_neste_teste' }), listar: () => [] } as never,
+      store
+    }
   )
 
   return { handlers, store }
@@ -64,6 +69,8 @@ describe('os seis canais existem', () => {
     expect([...handlers.keys()].sort()).toEqual([
       'hermes:sofia:aprovar',
       'hermes:sofia:criar',
+    // r11 do V5: a ponte plano -> execucao deixou de ser codigo morto.
+    'hermes:sofia:delegar',
       'hermes:sofia:plano',
       'hermes:sofia:planos',
       'hermes:sofia:status',

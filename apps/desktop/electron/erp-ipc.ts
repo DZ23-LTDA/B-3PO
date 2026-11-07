@@ -21,6 +21,7 @@ import { CrmPipelineStore, pipelineStorePath } from './crm-pipeline-store'
 import { CrmTaskStore, tasksStorePath } from './crm-tasks-store'
 import { registerFiscalIpc } from './fiscal-ipc'
 import { registerSchedulingBlockIpc } from './scheduling-block-ipc'
+import { openExecutionStore } from './agent-execution-store'
 import { registerAgentIpc } from './agent-ipc'
 import { FiscalStore, fiscalStorePath } from './fiscal-store'
 import { resolverProvedor } from './fiscal-provider'
@@ -508,7 +509,7 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // r19 do GOAL V2: os seis canais de Sofia nascem com guarda. openSofiaStore e sincrono no nome mas
   // devolve uma Promise — a montagem nao espera: os canais so leem quando o renderer chamar.
-  void openSofiaStore(userDataDir).then(store => registerSofiaIpc(ipcMain, { actorOf: () => actorOf(), store }))
+  void openSofiaStore(userDataDir).then(store => registerSofiaIpc(ipcMain, { actorOf: () => actorOf(), store , execucoes: openExecutionStore(userDataDir) }))
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools: AgentTool[] = buildDomainTools({
