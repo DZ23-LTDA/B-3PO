@@ -5171,3 +5171,70 @@ porque roda em CI e cobre **todos** os valores do enum, não só os que aparecer
 > por uma decisão, o teste ainda cobra a classe inteira — e **foi isso que achou que eu tinha deixado
 > `tipo_invalido` e `comodato_exige_cliente` sem frase em inglês** (eu tinha escrito, mas não tinha
 > verificado um a um).
+
+---
+
+## G5 · ADENDO 4 — as telas **montadas** em inglês: a prova que faltava, e o teste que mentiu primeiro
+
+**Rodada 86.** A r85 provou o **resolvedor** (`translateNow`) e a **forma dos dados** — mas não que
+`GasView` **usa** aquela chave. Se alguém trocar `{copy.title}` por `Vasilhames` fixo, os 8 testes
+anteriores continuam verdes.
+
+### Agora o componente é montado
+
+`src/app/gas/view-i18n.test.tsx` — **7 testes**, com `I18nProvider` em `en`/`pt` e o bridge do Electron
+mockado com **a forma exata do contrato** (`GAS_LIST`, `MED_LIST`).
+
+| Rota | Verifica |
+|---|---|
+| `/gas` em `en` | `h1` = **Cylinders** · intro · `At the dealer` / `With the customer` / `Lost` · **nenhum** texto pt na árvore |
+| `/gas` em `en` | cabeçalhos **Type · Serial · State · Customer · Actions** |
+| `/gas` em `en` | ações **Hand over · Collect · Write off** |
+| `/gas` em `en` | `45 kg` e `with the customer` vindos de `copy.tipos`/`copy.status` |
+| `/gas` em `pt` | **Vasilhames** · `Na revenda` · `Entrada de vasilhame` |
+| `/medidores` em `en` | **Meters** · `New meter` · `Record reading` · `2,100 m³` |
+| `/medidores` em `pt` | **Medidores** · `Novo medidor` |
+
+### E o teste mentiu primeiro — de um jeito que eu não teria adivinhado
+
+**A primeira versão falhou em 3 casos: os de `pt-BR` mostravam "Cylinders" e "Meters".**
+
+Causa: eu importava `I18nProvider` **no topo do arquivo** e a view com `await import()` **depois** de
+`vi.resetModules()`. O reset limpa o registro de módulos, então:
+
+```
+I18nProvider (import estático)  ->  instância A de @/i18n/context  ->  React Context A
+GasView       (import dinâmico) ->  instância B de @/i18n/context  ->  React Context B
+                                                                    ^ a view lê B, o provider provê A
+```
+
+**Dois contextos React diferentes não se enxergam** — a view caía no default (inglês) **com o provider
+dizendo `pt`**. O teste acusava o produto; o defeito era a mecânica do teste.
+
+**A correção**: importar provider **e** view do mesmo grafo, depois do reset:
+
+```ts
+const [{ I18nProvider }, mod] = await Promise.all([import('@/i18n'), view()])
+```
+
+### O placar da série
+
+| Rodada | Quem estava errado |
+|---|---|
+| r73 | **o teste** (media `el.focus()` achando que era `:focus-visible`) |
+| r75 | **o app** (rodava bundle antigo) |
+| r81 | **o teste** (media antes do vite recompilar) |
+| r85 | **o teste** (usava matcher que o projeto não tem) |
+| **r86** | **o teste** (dois grafos de módulo) |
+
+**Quatro de cinco: o instrumento.** Isso não é coincidência — é o efeito de medir coisa nova (componente
+montado, CSS em dev, foco por teclado) com ferramenta que eu ainda não tinha exercitado **naquele modo**.
+
+> **Um teste que falha pede duas hipóteses, não uma:** *o código está errado* **ou** *o teste está
+> medindo outro universo*. A segunda é mais comum do que parece quando a medição é nova — e é a única
+> que **produz um teste melhor** quando resolvida.
+
+### Totais das telas novas
+
+**64 testes**: 17 store de vasilhame · 19 store de medidor · 13 RBAC dos 6 canais · 8 i18n de dados ·
+7 view montada.
