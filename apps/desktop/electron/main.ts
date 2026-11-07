@@ -17046,7 +17046,7 @@ ipcMain.on('hermes:logs:renderer-line', (_event, line) => {
 
 // Local filesystem + plugin-root IPC (readDir/reveal/rename/trash/…) — see fs-ipc.ts.
 registerFsIpc({
-  hermesHome: HERMES_HOME,
+  actorOf: () => atorDeMaquina(app.getPath('userData')), hermesHome: HERMES_HOME,
   readActiveDesktopProfile,
   expandUserPath,
   resolveRequestedPathForIpc,

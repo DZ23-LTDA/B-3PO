@@ -41,6 +41,8 @@ import { registerFsIpc } from './fs-ipc'
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-fs-ipc-'))
 
 registerFsIpc({
+  // r16 do V4: o dono da instalacao — mesmo nivel que `ensureOwner` cria.
+  actorOf: async () => ({ id: 'act_owner_test', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
   hermesHome: scratch,
   readActiveDesktopProfile: () => 'launch-profile',
   // `~/` resolves under the scratch dir so tilde paths can be exercised.

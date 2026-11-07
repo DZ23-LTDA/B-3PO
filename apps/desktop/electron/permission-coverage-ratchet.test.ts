@@ -34,7 +34,6 @@ const SEM_GUARDA: readonly string[] = [
   'agent-ipc.ts',
   'challenge-window-ipc.ts',
   'clipboard-ipc.ts',
-  'fs-ipc.ts',
   'hud-ipc.ts',
   'lookup-ipc.ts',
   'mcp-oauth-callback-ipc.ts',
@@ -139,7 +138,7 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-it('a divida medida hoje e 12 de 48 — git e terminal usam podeOperarMaquina', () => {
+it('a divida medida hoje e 10 de 48 — git, terminal e fs usam podeOperarMaquina', () => {
     /*
      * r6 do V4 — o numero encolheu de 16/50 para 14/48, e NAO por correcao de canal nenhum.
      *
@@ -153,7 +152,7 @@ it('a divida medida hoje e 12 de 48 — git e terminal usam podeOperarMaquina', 
      *
      * Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
      */
-    expect(SEM_GUARDA).toHaveLength(12)
+    expect(SEM_GUARDA).toHaveLength(10)
 
     // r36: audit-ipc.ts nasceu COM guarda. r58: delivery-ipc.ts idem. O total sobe, a divida nao.
     expect(canais()).toHaveLength(48)
