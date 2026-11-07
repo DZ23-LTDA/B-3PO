@@ -71,6 +71,7 @@ export function registerFsIpc({
   // `ctx.files`: a plugin's own data folder plus folders the user grants it.
   // The legacy `~/.hermes` stays protected beside the resolved and default homes.
   registerPluginFilesIpc({
+    actorOf,
     ipcMain,
     dialog,
     windowFor: event => BrowserWindow.fromWebContents(event.sender),
