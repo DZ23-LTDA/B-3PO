@@ -6037,3 +6037,83 @@ ambiente, não defeito. Registrado para que ninguém leia os 16 como falha numa 
 
 > **Um gate que cita uma medição antiga não é um gate medido — é um gate herdado.** A diferença entre
 > os dois é exatamente a rodada em que alguém voltou a rodar o comando.
+
+---
+
+## G7 · ADENDO 9 — o SPA web tem **14 violações** nas rotas internas; `/` estava limpo e isso bastou por 56 rodadas
+
+**Rodada 96.** A verificação da r95 mediu **só `/`** e declarou `axe: 0 violações`. Rodei as 13 rotas ×
+5 viewports:
+
+```
+/            LIVRE          <- o unico que a r95 mediu
+/chat        button-name(1) critical · label-content-name-mismatch(1)
+/sessions    LIVRE
+/models      heading-order(1)
+/config      LIVRE
+/logs        color-contrast(1) · heading-order(1)
+/plugins     button-name(2) critical · color-contrast(1) · heading-order(1)
+/files       color-contrast(1) · label-content-name-mismatch(1)
+/cron        button-name(1) critical
+/skills      heading-order(1)
+/mcp         color-contrast(1)
+/channels    color-contrast(1)
+/profiles    color-contrast(1)
+```
+
+**A rota que eu medi era a única limpa.** `axios: 0` na home não diz nada sobre as 12 telas internas —
+é a **sétima** vez nesta auditoria que uma amostra de um virou afirmação sobre o todo (r80, r89, r90,
+r93, r94, r95, **r96**).
+
+### Corrigido nesta rodada (2 nós `critical`)
+
+| Arquivo | Antes | Depois |
+|---|---|---|
+| `PluginsPage.tsx:842,851` | `<Switch checked={installForce} …>` — rótulo num `<span>` **irmão**, sem nome acessível | `aria-label={t.pluginsPage.forceReinstall}` |
+| `AutoField.tsx:111` | idem, no formulário de configuração de plugin | `aria-label={String(label)}` |
+
+**Resultado: `button-name` 4 → 2.**
+
+### O que resta, com a causa de cada um
+
+| Regra | Nós | Causa | Dono |
+|---|---|---|---|
+| `button-name` | **2** | `Select` do `@nous-research/ui`: o `id` vai no `<div>` e o `<button role="combobox">` **não aceita `aria-label` nem `aria-labelledby`** | **upstream** |
+| `color-contrast` | 6 | `text-destructive` e o toast `aria-live` abaixo de 4,5:1 | token — decisão de marca |
+| `heading-order` | 4 | `<h3>` de seção direto sob `<h1>` (falta o nível 2) | nosso |
+| `label-content-name-mismatch` | 2 | `aria-label` não contém o texto visível (`/chat`, `/files`) | nosso |
+
+**O `Select` é o caso interessante**: o componente está em `node_modules/@nous-research/ui`, é do
+**upstream**, e a interface dele **não expõe** `aria-label`. Corrigir exigiria patch de pacote — que é
+exatamente o tipo de mudança que precisa ir para o `UPSTREAM-PATCH-REGISTER` com justificativa, não
+para um `sed` em `node_modules`.
+
+### O que a rodada entrega
+
+**2 violações `critical` fechadas** com 3 linhas de JSX, e **a lista exata das 14 restantes com causa e
+dono**. Antes a afirmação era "web OK" sem número; agora é "14 nós, 2 upstream, 6 de token, 4 de nível de
+título, 2 de rótulo" — **que é uma afirmação que se pode conferir.**
+
+### E o gate de CC/linhas me pegou no meio da correção
+
+O primeiro patch em `PluginsPage.tsx` levou a função de **359 para 372 linhas**, e o `scripts/check`
+recusou:
+
+```
+web/src/pages/PluginsPage.tsx:269  FUNC_LINES  PluginsPage
+    FUNC_LINES 372 > 359, its value on main (over target 300: it may only go down)
+```
+
+**Compacting para uma linha por switch** deixou em **360** — ainda 1 acima. **A última linha era o meu
+comentário JSX.** Removido, o conhecimento veio para cá:
+
+> Em `PluginsPage.tsx` os dois `<Switch>` do "instalar do GitHub" tinham o rótulo num `<span>` **irmão**,
+> que não os nomeia. O `axe` classificava ambos como `button-name` **critical**. `aria-label` com o mesmo
+> texto visível resolve — e mantém nome falado e lido iguais (WCAG 2.5.3).
+>
+> O comentário **não** fica no arquivo porque `PluginsPage` está 59 linhas acima do alvo de 300 e o
+> ratchet só permite descer. **Num arquivo com ratchet, conhecimento vai para o log, não para o fonte** —
+> senão a explicação de uma correção impede a próxima.
+
+`AutoField.tsx` recebeu o mesmo tratamento (o `<Label>` ali também é irmão, sem `htmlFor`).
+

@@ -1,5 +1,5 @@
 {
-  "round": 95,
+  "round": 96,
   "queue": [
     {
       "id": "T-01",
@@ -145,6 +145,15 @@
     "testes": "475 pass / 70 arquivos",
     "axe": "0 violacoes",
     "main": 1,
-    "h1": 1
+    "h1": 1,
+    "axe_so_home": "0 violacoes em / (unica rota medida na r95)"
+  },
+  "web_spa_axe_r96": {
+    "rotas": 13,
+    "nos": 14,
+    "button_name": "2 (upstream: Select do @nous-research/ui nao aceita aria-label)",
+    "color_contrast": "6 (token text-destructive + toast)",
+    "heading_order": "4 (h3 sob h1)",
+    "label_content_name_mismatch": "2 (nosso)"
   }
 }
