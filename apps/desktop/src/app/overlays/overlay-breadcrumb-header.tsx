@@ -17,6 +17,21 @@ interface OverlayBreadcrumbHeaderProps {
   trailing?: ReactNode
 }
 
+/**
+ * r22 do V4 — o título da página é `<h1>`, não `<span>`.
+ *
+ * O DEFEITO QUE ISTO CORRIGE
+ *
+ * Medido: a tela de **configurações** (`app/settings/index.tsx`, 584 linhas, doze painéis) tinha
+ * **zero** elementos `h1/h2/h3`. Todos os títulos eram `<div>`/`<span>` estilizados.
+ *
+ * Consequência para quem usa leitor de tela: **não há navegação por heading** — o atalho mais usado
+ * para percorrer uma página. O `axe` acusava `page-has-heading-one` em `/settings` e estava certo.
+ *
+ * Este cabeçalho é comum às telas de sobreposição, e o elemento com `aria-current="page"` **já é o
+ * título da página** — estava só com a tag errada. `h1` aqui dá a âncora que faltava, **sem mudar um
+ * pixel**: mesmas classes, mesmo lugar.
+ */
 export function OverlayBreadcrumbHeader({
   child,
   grandchild,
@@ -41,20 +56,20 @@ export function OverlayBreadcrumbHeader({
                   {child.label}
                 </Button>
                 <ChevronRight aria-hidden className="size-3 shrink-0" />
-                <span aria-current="page" className="truncate text-foreground">
+                <h1 aria-current="page" className="m-0 truncate text-foreground">
                   {grandchild.label}
-                </span>
+                </h1>
               </>
             ) : (
-              <span aria-current="page" className="truncate text-foreground">
+              <h1 aria-current="page" className="m-0 truncate text-foreground">
                 {child.label}
-              </span>
+              </h1>
             )}
           </>
         ) : (
-          <span aria-current="page" className="truncate text-foreground">
+          <h1 aria-current="page" className="m-0 truncate text-foreground">
             {group.label}
-          </span>
+          </h1>
         )}
       </nav>
       {trailing && <div className="flex shrink-0 items-center">{trailing}</div>}

@@ -342,7 +342,7 @@
     "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
     "A-04": "sofia.status() responde { error }",
     "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)",
-    "A-06": "CORRIGIDO o diagnostico r21: /settings RENDERIZA (modelo, provedor, raciocinio, janela de contexto). O defeito real e que a tela tem ZERO h1/h2/h3 em 584 linhas - page-has-heading-one dispara com razao. Eu errei 2x: na r19 um filtro de texto removeu o conteudo; na r21 confundi 'sem heading' com 'sem pagina'."
+    "A-06": "FECHADO r22: o titulo da pagina (aria-current=page do breadcrumb) era <span>; virou <h1> com as mesmas classes. /settings agora tem h1 'Modelo principal'. Censo: 0 em 27 rotas, 0 rotas sem h1. Resta B-12b: h2 por painel interno."
   },
   "registros_de_modulos": {
     "b3po-modulos.ts": "25 modulos - barra lateral e /busca",

@@ -185,6 +185,37 @@ conexões, voz, atalhos — e **todos** os "títulos" são `<div>`/`<span>` esti
 heading — que é o atalho mais usado — não encontra nada. É a regra `page-has-heading-one` do axe
 disparando com razão: o censo de 27 rotas mediu **1 nó**, e ele é legítimo.
 
+### CORRIGIDO na r22 — o título da página virou `<h1>`
+
+O elemento que já era **o título da página** (o `aria-current="page"` do breadcrumb) era um `<span>`.
+Trocado por `<h1>`, **com as mesmas classes** — mesmo pixel, semântica nova:
+
+```diff
+- <span aria-current="page" className="truncate text-foreground">
++ <h1   aria-current="page" className="m-0 truncate text-foreground">
+```
+
+O cabeçalho é comum às telas de sobreposição, então a correção alcança **configurações, command
+center e o resto** de uma vez, sem tocar em 584 linhas de painel.
+
+**Medido depois:**
+
+```
+/settings?page=appearance   h1=["Modelo principal"]   axe=0
+/command-center             h1=["Sessions"]           axe=0
+/                           h1=["Bem-vindo ao B-3PO"] axe=0
+
+censo: 0 violações em 27 rotas · 0 rotas sem h1
+```
+
+**Antes**: 1 nó (`page-has-heading-one`) em `/settings`. **Depois**: zero em todas as 27.
+
+### O que continua faltando, e é menor
+
+Os **painéis internos** de configurações (modelo, aparência, plugins…) continuam usando `div`/`span`
+como títulos de seção — não há `h2` por painel. A navegação por heading agora **pousa na página**,
+mas não desce às seções. É o próximo nível, e não foi feito.
+
 ### O que não corrigi, e por quê
 
 Adicionar heading a **cada painel** de uma tela de 584 linhas é mudança de superfície inteira, com
