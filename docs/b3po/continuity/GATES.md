@@ -3142,3 +3142,44 @@ rotas que eu abri**, e o `axe` não testa nome acessível de tudo que só existe
 **Um fix de acessibilidade pode criar outra violação de acessibilidade** — foi o que o r22 fez (injetar
 nome em botão com texto) e o que o r53 corrigiu. **A única forma de saber é rodar o `axe` de novo
 depois.** Foi o que fiz.
+
+---
+
+## G8 · ADENDO 28 — tema escuro revisado de novo, agora com o fix do Estoque: **as 4 telas limpas**
+
+**Rodada 56.** Refiz as capturas escuras **depois** de todos os fixes da r42–r55, para ver se algo
+regrediu visualmente.
+
+### As 4 telas
+
+| Tela | O que vi |
+|---|---|
+| **Estoque** | `1 produto` · `E2E-001 · não cadastrado — só tem movimentação · 5 unidade` — **o fix aparece nos dois temas** |
+| **CRM** | cards + formulários + `Contato E2E r288` + funil vazio — **igual ao claro** |
+| **Compras** | 5 cards + tabela `#2 Fornecedor E2E · R$ 150,00 · recebido` |
+| **Financeiro** | cards + lançamentos + por centro de custo |
+
+**Nenhum defeito visual. Contraste OK em todas** (o `axe` já tinha dado 0 violações de contraste nos
+três painéis do G8).
+
+### O que isso fecha
+
+| Verificação | Estado |
+|---|---|
+| a11y claro (30 rotas) | 27/30 · 1 causa |
+| a11y escuro (30 rotas) | 27/30 · **a mesma** |
+| a11y web (17 rotas × 2 temas) | **0 violações** |
+| **visual claro** (9 telas) | **2 achados, ambos tratados** |
+| **visual escuro** (5 telas: Vendas + estas 4) | **0 achados** |
+
+**O tema escuro não introduziu nenhum defeito** — em 5 telas olhadas, com o `axe` dizendo o mesmo.
+
+### O placar final de revisão visual
+
+**14 telas olhadas** (9 claras + 5 escuras), **2 achados reais**:
+
+1. **R$ 0,00 faturado** (Vendas, claro) — T-08, **decisão do dono**
+2. **"0 produtos" com 6 movimentos** (Estoque, claro) — **CORRIGIDO na r48**, e agora visível nos dois temas
+
+**As duas apareceram na primeira metade da revisão.** As 12 seguintes não acrescentaram nada — o que
+é consistente com os achados estarem concentrados onde o `B5` e o `G3` já eram `PARCIAL`.
