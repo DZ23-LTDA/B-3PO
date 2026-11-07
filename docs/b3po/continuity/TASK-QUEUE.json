@@ -1,5 +1,5 @@
 {
-  "round": 90,
+  "round": 91,
   "queue": [
     {
       "id": "T-01",
@@ -118,5 +118,14 @@
     "minhas": 0,
     "pre_existentes_ou_ambiente": 27,
     "baseline_r80": 36
+  },
+  "invariantes": [
+    "Recusa escrita ('nao vou fazer porque...') exige, na frase seguinte, o id do item na fila. Recusa sem item de fila e recusa que se perde."
+  ],
+  "retratacoes": {
+    "total_afirmacoes_nao_vou_fazer": 10,
+    "superadas": 9,
+    "aberta": 1,
+    "aberta_id": "T-15"
   }
 }

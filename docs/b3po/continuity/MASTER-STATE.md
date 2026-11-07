@@ -1,5 +1,15 @@
 # B-3PO — MASTER STATE (V3)
 
+## Como ler este estado
+
+**Duas coisas antes de acreditar em qualquer linha abaixo:**
+
+1. **O `GATES.md` tem um ÍNDICE DE RETRATAÇÕES no topo.** Nove das dez afirmações que eu escrevi como
+   *"não vou fazer porque…"* foram **desfeitas depois**. Quem lê a recusa primeiro a toma por estado
+   atual — o índice existe para isso.
+2. **`PASS` aqui é por escopo, nunca global.** Cada item diz o que foi medido e onde.
+
+
 **Atualizado**: 2026-11-06T18:54:45Z UTC
 **Branch**: `b3po-brand` · **Rodada**: 61 · **Data**: 06/11/2026
 **main**: `f4cf411f28` = `origin/main` — **espelho do upstream, intacto**
