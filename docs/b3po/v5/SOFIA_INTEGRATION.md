@@ -59,7 +59,7 @@ statusDerivadoDaExecucao(…) // 0 chamadores em produção
 | 4 | Gravar `session_id` na execução | ✅ **FEITO na r23** (`fb9f9162ca`) — campo opcional + `vincularSessao` |
 | 4b | `execucao_id` forjável pelo renderer | ✅ **FECHADO na r11** — o handler remove o campo do patch |
 | 4c | `vincularSessao` | ✅ **r23** — move `pendente`→`executando`; recusa trocar de sessão; idempotente
-| 5 | Transição `pendente → executando` dirigida por evento do runtime | **AUSENTE** |
+| 5 | Transição `pendente → executando` | 🟡 **POR COMANDO na r24** — o canal `execucao:vinculada` move o status quando a sessão é informada. Dirigida por evento do runtime: **AUSENTE** |
 | 6 | `finalizar` chamado quando o turno termina | **AUSENTE** — só teste chama |
 | 7 | Retomada após reinício sem repetir efeito | **AUSENTE** |
 
@@ -135,6 +135,29 @@ com efeito sobre a contabilidade de concorrência. Registrado como item aberto.
 
 **No teste**, o registro "antigo" recebeu `tenant_id` explícito — o que ele prova é a ausência de
 `session_id`, não a de `tenant_id`.
+
+## 4c. O que a r24 acrescentou — o ciclo fecha no contrato
+
+| Peça | O que faz |
+|---|---|
+| `delegarTarefa` devolve `prompt` | o pedido para a sessão, montado de `titulo` + `objetivo`. **`null` quando o plano não traz título** — inventar um seria alucinar o pedido |
+| `hermes:sofia:execucao:vinculada` | grava a sessão que nasceu e move `pendente → executando`; `exigirAtor('execute','sofia')` |
+
+**Decisão de arquitetura, tomada e não perguntada**: o cliente canônico (`session.create`, RPC)
+**permanece no renderer**. O goal manda *integrar, não reescrever*; reimplementar o cliente no main
+seria exatamente reescrever. A autorização continua no main — só o **transporte** é do renderer.
+
+**O que o main recusa** (4 testes em `sofia-execucao-vinculo.test.ts`):
+
+| Tentativa | Resposta |
+|---|---|
+| sem `execucao_id` | `execucao_obrigatoria` — antes de tocar no store |
+| `session_id` vazio | `sessao_obrigatoria` |
+| trocar sessão já vinculada | `ja_vinculada` — reescrever onde o trabalho rodou apaga a trilha |
+
+**Falta**: o **chamador**. Sem um botão na tela de Sofia, ninguém chama `sofia:delegar` nem
+`execucao:vinculada` — o contrato está pronto e **não é exercitado por usuário**. E a transição para
+`executando` é **por comando**, não por evento do runtime.
 
 ## 5. O que este documento **não** afirma
 
