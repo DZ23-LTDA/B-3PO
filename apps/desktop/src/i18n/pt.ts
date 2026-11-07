@@ -1338,6 +1338,12 @@ export const ptOverrides: TranslationOverrides = {
       insufficientStock: 'Estoque insuficiente',
       invalidQuantity: 'Informe uma quantidade.',
       issue: 'Faturar venda',
+  // r76 — venda de R$ 0,00: o processo principal NAO lanca conta a receber (`receivableForSale`
+  // devolve null quando `total_cents <= 0`), porque conta a receber de zero e lixo. Isso e uma
+  // decisao certa; o que faltava era a tela DIZER isso antes e depois.
+  courtesy: 'cortesia',
+  courtesyNotice:
+    'Esta venda tem total R$ 0,00. Ela sera registrada como CORTESIA e NAO vai gerar conta a receber. Confirmar?',
       items: 'Itens',
       itemsRequired: 'Adicione pelo menos um item.',
       loadFailed: 'Não foi possível carregar as vendas.',

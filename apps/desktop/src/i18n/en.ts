@@ -1101,6 +1101,9 @@ export const en: Translations = {
       insufficientStock: 'Not enough stock',
       invalidQuantity: 'Enter a quantity.',
       issue: 'Issue sale',
+  courtesy: 'courtesy',
+  courtesyNotice:
+    'This sale totals R$ 0.00. It will be recorded as a COURTESY and will NOT create a receivable. Continue?',
       items: 'Items',
       itemsRequired: 'Add at least one item.',
       loadFailed: 'Could not load sales.',

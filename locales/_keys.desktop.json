@@ -4590,6 +4590,8 @@
     "settings.sales.alreadyIssued",
     "settings.sales.cancel",
     "settings.sales.cancelInvoice",
+    "settings.sales.courtesy",
+    "settings.sales.courtesyNotice",
     "settings.sales.emitInvoice",
     "settings.sales.emitting",
     "settings.sales.empty",

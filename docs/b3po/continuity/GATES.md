@@ -4380,3 +4380,67 @@ mexido no **fonte**. Precisei de `tsc --build` + `bundle-electron-main.mjs` + re
 **O mesmo padrão da r57**: *"o código está certo"* e *"o app roda o código certo"* são afirmações
 diferentes. **Aqui eu quase anotei "o backup não funciona"** — e o backup estava no fonte desde o
 começo.
+
+---
+
+## G3 · ADENDO 5 — T-08 PREÇO ZERO: **RESOLVIDO** — o financeiro estava certo, a tela mentia por omissão
+
+**Rodada 76.** O T-08 pedia uma decisão: preço zero é cortesia ou bloqueio?
+
+### A resposta já estava no código, e está certa
+
+```ts
+// finance-store.ts
+export function receivableForSale(sale, now = Date.now()) {
+  if (sale.status !== 'faturado' || sale.total_cents <= 0) {
+    return null      // <- nao cria conta a receber de R$ 0,00
+  }
+  ...
+}
+```
+
+**Conta a receber de R$ 0,00 é lixo contábil.** Não criar é a decisão correta — e ela **já existia**.
+
+**O defeito não era a decisão: era a OMISSÃO.** A venda saia sem aviso, e o usuário descobria depois que
+**nada tinha entrado em "A receber"** — sem nada na tela explicando por quê.
+
+### O que foi corrigido
+
+| Onde | O que |
+|---|---|
+| **antes de faturar** | se o total é R$ 0,00, um `confirm` diz: *"Esta venda tem total R$ 0,00. Ela será registrada como CORTESIA e NÃO vai gerar conta a receber. Confirmar?"* |
+| **na tabela** | a linha faturada de R$ 0,00 ganha a marca **`(cortesia)`** |
+| **i18n** | `courtesy` e `courtesyNotice` em pt-BR e en; `types.ts` atualizado; `overlay-gaps.json` e `_keys.desktop.json` regenerados pelo mecanismo oficial |
+
+### A prova em runtime
+
+```
+tabela de vendas:
+  #3  cancelada  1  R$ 5,00
+  #2  faturada   1  R$ 0,00(cortesia)     <- A MARCA
+  #1  faturada   1  R$ 80,00
+```
+
+**Antes**: `#2 faturada R$ 0,00` sem explicação nenhuma.
+**Depois**: a mesma venda, dizendo **o que ela é**.
+
+### Por que a decisão certa era NÃO bloquear
+
+**Cortesia existe** (brinde, amostra, reposição em garantia). **Bloquear preço zero proibiria um caso de
+uso legítimo** para evitar um erro de digitação. **O que resolve os dois é informar**: quem quis cortesia
+confirma; quem errou o preço vê o aviso e volta.
+
+**E isso é a diferença entre os dois caminhos**: **bloquear** trata o usuário como suspeito; **avisar**
+trata como adulto **e** deixa rastro (a marca fica na linha).
+
+### O estado do T-08
+
+| Item | Antes | Agora |
+|---|---|---|
+| venda de R$ 0,00 fatura | sim, sem aviso | **sim, com confirm explícito** |
+| conta a receber de R$ 0,00 | não cria (correto) | **não cria, e a tela diz** |
+| rastro na listagem | nenhum | **`(cortesia)`** |
+| i18n | — | **pt + en, com os mecanismos oficiais rodados** |
+
+**`T-08` passa de `blocked` (esperando decisão) para `done`.** A decisão era **informar, não escolher
+por você** — e essa decisão não precisava da sua palavra, só de eu ler o código antes de perguntar.

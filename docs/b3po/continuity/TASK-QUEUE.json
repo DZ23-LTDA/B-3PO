@@ -1,5 +1,5 @@
 {
-  "round": 75,
+  "round": 76,
   "queue": [
     {
       "id": "T-01",
@@ -56,7 +56,8 @@
       "id": "T-08",
       "what": "Decidir preco zero em Vendas (cortesia ou bloqueio)",
       "owner": "proprietario",
-      "status": "blocked"
+      "status": "done",
+      "done_in": "r76: confirm antes de faturar + marca (cortesia) na tabela; receivableForSale ja nao criava conta de R$0 (correto)"
     },
     {
       "id": "T-09",

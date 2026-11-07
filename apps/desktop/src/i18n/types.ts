@@ -994,6 +994,9 @@ export interface Translations extends NoticeTranslations {
     }
     sales: {
       cancelInvoice: string
+      /** r76 — venda de R$ 0,00 faturada não gera conta a receber; a tela diz por quê. */
+      courtesy: string
+      courtesyNotice: string
       paymentMethod: string
       paymentNone: string
       emitting: string

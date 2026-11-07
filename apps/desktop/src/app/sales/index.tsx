@@ -160,6 +160,18 @@ export function SalesView() {
       return
     }
 
+    /*
+     * r76 — faturamento de R$ 0,00.
+     *
+     * O processo principal NAO lanca conta a receber quando `total_cents <= 0`
+     * (`receivableForSale` devolve null), e isso esta certo: conta a receber de zero e lixo. O que
+     * faltava era a tela DIZER isso — a venda saia sem aviso, e o usuario descobria depois que nao
+     * havia nada em "A receber". O aviso e explicito sobre a consequencia, nao sobre o numero.
+     */
+    if (faturar && estimativa === 0 && !window.confirm(copy.courtesyNotice)) {
+      return
+    }
+
     setSaving(true)
 
     try {
@@ -325,7 +337,13 @@ export function SalesView() {
                       {copy.statuses[sale.status] ?? SALE_STATUS_LABEL[sale.status] ?? sale.status}
                     </td>
                     <td className="border-b border-(--ui-border) py-1 pr-2 text-(--ui-text-secondary)">{sale.items.length}</td>
-                    <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">{priceLabel(sale.total_cents)}</td>
+                    <td className="border-b border-(--ui-border) py-1 pr-2 text-foreground">
+                  {priceLabel(sale.total_cents)}
+                  {/* r76: faturada com total zero nao gera conta a receber — a linha diz o porque. */}
+                  {sale.status === 'faturado' && sale.total_cents === 0 ? (
+                    <span className="ml-2 text-(--ui-text-tertiary)">({copy.courtesy})</span>
+                  ) : null}
+                </td>
                     <td className="border-b border-(--ui-border) py-1">
                       <div className="flex justify-end gap-1">
                         {sale.status === 'orcamento' || sale.status === 'pedido' ? (
