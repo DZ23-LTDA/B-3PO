@@ -1,57 +1,102 @@
-B-3PO — HANDOFF
+B-3PO - HANDOFF
 
-HEAD: 9f662fc67c · branch: b3po-brand · main intacto (f4cf411f28)
-Data: 06/11/2026 · Rodada: 19
+HEAD: 3d9b8dc311 - branch: b3po-brand - main intacto (f4cf411f28)
+Data: 06/11/2026 - Rodada: 59 - 914 commits na branch
 
 ONDE ESTAMOS
 ------------
-Prioridade zero do V3 (8 itens) FECHADA. Gates G0-G8 auditados, G9 pendente.
+Prioridade zero do V3 (8 itens) FECHADA. Gates G0-G9 auditados.
 
-  G0 READY           inventario + continuity docs
-  G1 PARCIAL         40 testes de permissao, 837 decisoes auditadas, 16/46 canais sem guarda
-  G2 PARCIAL         overall "ok" ignora inferencia; has_env nao significa chave
-  G3 PARCIAL         Compras READY, Estoque READY, CRM READY, Vendas com 2 falhas
-  G4 NOT_IMPLEMENTED vertical gas/agua nao existe; espera decisao do dono
-  G5 PARCIAL         27/27 rotas, foco/rolagem/persistencia OK; 5 modos sem identidade propria
-  G6 PARCIAL         99 plugins oficiais, 27 de mensageria, ZERO ativos
-  G7 PARCIAL         desktop/web/android READY, iOS BLOCKED (precisa macOS), 169 testes mobile
-  G8 PARCIAL         perf PASS (55->4 long tasks), UI PASS (5 viewports), a11y CORRIGIDA,
-                     regressao BLOCKED (symlink), docs 8/13
-  G9 PENDENTE        pacotes, rollback, riscos, veredito
+  G0 READY            inventario + continuity docs
+  G1 PARCIAL          seguranca/IPC/RBAC/tenant
+  G2 PARCIAL          runtime/modelos/diagnostico
+  G3 PARCIAL          dominio canonico (estoque: SKU orfao agora VISIVEL)
+  G4 NOT_IMPLEMENTED  vertical gas/agua - espera decisao do dono
+  G5 PARCIAL          seis modos + revisao visual (14 telas olhadas)
+  G6 PARCIAL          99 plugins oficiais, ZERO ativos
+  G7 PARCIAL          desktop/web/android OK, iOS BLOCKED (macOS)
+  G8 PARCIAL          perf PASS, a11y MEDIDA (27/30 + web 17/17), regressao BLOCKED
+  G9 PARCIAL          builds exit 0, rollback provado, exe nao assinado
 
 O QUE ESTA PROVADO (nao repetir)
 --------------------------------
-- Compras: 7 etapas E2E, estoque 3000, financeiro R$ 150   (TEST-EVIDENCE.md)
+Dominio (TEST-EVIDENCE.md):
+- Compras: 7 etapas E2E, estoque 3000, financeiro R$ 150
 - Vendas: baixa no estoque 3000->2000, conta a receber R$ 80
-- Estoque: entrada/saida/inventario, 1000->6000->4000->5000
+- Estoque: entrada/saida/inventario; SKU orfao visivel desde a r48
 - Sofia: plano persiste, execucao_id por tarefa, autoaprovacao bloqueia
 - Projetos/Trabalhos/Automacoes/Empresa: 4 de 4 criam e persistem
 - Bots: criar/editar SOUL/renomear/revogar; default protegido
-- Performance: 55 -> 4 long tasks na tela de Configuracoes
-- UI: zero overflow em 320/375/768/1024/1440
-- a11y: nav+main existem agora (era 0)
 
-BLOQUEIOS (acao do proprietario)
---------------------------------
-EXT-1 chave de provedor de IA      -> Configuracoes > Provedores, ou hermes auth add
-EXT-2 Developer Mode do Windows    -> ms-settings:developers (destrava a regressao)
-EXT-3 macOS + Xcode + Apple acct   -> build iOS
-EXT-4 decisao sobre a vertical     -> construir / fora de escopo / redefinir G4
+Interface:
+- Performance: 55 -> 4 long tasks em Configuracoes (-93%), 5,7s -> 281ms
+- UI: zero overflow em 320/375/768/1024/1440
+- a11y desktop: 27/30 rotas x 3 viewports x 2 temas (axe-core, tags WCAG 2.1 AA)
+- a11y web: 17/17 rotas LIVRES nos 2 temas (0 violacoes)
+- Contraste: 0 violacoes nos dois temas (medido, nao estimado)
+- Layout: 30/30 rotas com main == pai (estava 182px errado em TODAS ate a r41)
+- Visual: 14 telas olhadas; 2 achados, 1 corrigido (estoque), 1 aberto (T-08)
+
+Build:
+- desktop: exit 0, 16374 modulos, dist 1231 arquivos; fix r48 verificado no chunk
+- web: exit 0, web_dist 60 arquivos
+- rollback atomico: .dist-previous-* provado em 2 falhas reais
+
+Testes:
+- desktop: 13 falhas em 7 arquivos - TODAS provadas no origin/main (que tem 18)
+- mobile: 19 arquivos, 169 testes (vitest, nao jest)
+- o baseline com git stash NAO serve: use git worktree add <tmp> origin/main
+
+ABERTO (acao do proprietario)
+-----------------------------
+EXT-1 chave de provedor de IA        -> Configuracoes > Provedores, ou hermes auth add
+EXT-2 Developer Mode do Windows      -> ms-settings:developers (destrava a regressao)
+EXT-3 macOS + Xcode + Apple account  -> build iOS
+EXT-4 vertical gas/agua              -> construir / fora de escopo / redefinir G4
+EXT-5 certificado Authenticode       -> exe hoje NotSigned
+EXT-6 um conector sem credencial     -> ntfy/irc para provar integracao real
+EXT-7 VENDA COM PRECO ZERO (T-08)    -> cortesia (lancar financeiro R$ 0) ou erro (bloquear)?
+     hoje: fatura R$ 0,00 e NAO lanca financeiro. Ha captura em evidence/
+
+ABERTO TECNICO (meu, nao do dono)
+---------------------------------
+nested-interactive (2 telas): o X do PaneTab esta dentro do role="tab".
+  - medido: axe reprova em / e /settings (1 no cada)
+  - tentado e revertido (r50): mover role=tab para o filho troca por aria-required-children
+  - causa: tablist so aceita tab como filho, e o X nao pode sair do tab sem sair do tablist
+  - solucao: X fora do tablist (refatoracao de shell) OU tirar o X (VS Code fecha por
+    middle-click/Ctrl+W/menu). O caminho de teclado JA existe: Delete + aria-keyshortcuts.
 
 PROXIMO PASSO
 -------------
-1. Desbloquear EXT-2 e remedir a regressao (hoje BLOCKED por WinError 1314)
-2. G9: pacotes de entrega, rollback, matriz de riscos, veredito final
-3. Completar continuity: TASK-QUEUE.json, UPSTREAM-PATCH-REGISTER.md, FINAL-DELIVERY.txt
+1. Decidir EXT-7 (T-08) e EXT-4 (G4) - ambos bloqueiam veredito, nenhum e trabalho de codigo
+2. Se quiser fechar o nested-interactive: mover o X do PaneTab para fora do tablist
+3. Desbloquear EXT-2 e remedir a regressao (hoje BLOCKED por WinError 1314)
 
 ARMADILHAS APRENDIDAS (nao repetir)
 -----------------------------------
-- `bash scripts/run_tests.sh` NAO roda nesta maquina (WSL quebrado). Use
-  `python scripts/run_tests_parallel.py`.
-- Testes do mobile sao VITEST, nao jest. `npx vitest run`.
-- `errors` != `failures` no pytest: errors sao de setup, nao de assercao.
-- Medir contraste por script falhou 3x (fundo transparente). Sem axe-core, nao medir.
+- ash scripts/run_tests.sh NAO roda nesta maquina (WSL quebrado). Use
+  python scripts/run_tests_parallel.py.
+- Testes do mobile sao VITEST, nao jest. 
+px vitest run.
+- ELECTRON_RUN_AS_NODE=1 vem do harness e herdada por todo pwsh: lectron.exe
+  se comporta como node puro e o main nao sobe. Remove-Item Env:ELECTRON_RUN_AS_NODE.
+- 
+pm run build falha (EPERM/EBUSY) se o dev server ou um http.server estiver
+  servindo o diretorio de saida. Pare antes.
+- Baseline de teste: git stash NAO testa o codigo sem voce (so o que nao foi commitado).
+  Use git worktree add <tmp> origin/main + mklink /J do node_modules.
+- "Pre-existente" foi o rotulo que mais custou: estava errado em 7 de 9 casos na r53.
+- i18n: quando o teste busca texto, a UI pode estar em pt OU en. Use /^(Editar|Edit)\b/,
+  e lembre que o Tip injeta o atalho no aria-label ("Edit (e)").
+- Tip + filho que nao e string: ilhoSoIcone precisa DESCER a arvore (fix da r53);
+  senao sobrescreve o nome de botoes que ja tem texto e cria label-content-name-mismatch.
+- Ajustar o texto do en.ts exige 
+pm run i18n:keys e OVERLAY_GAPS_UPDATE=1 npx vitest run
+  src/i18n/overlay-completeness.test.ts.
 - Payloads de dominio: projetos/trabalhos usam portugues (objetivo/pedido);
   companies/automations usam ingles (name/action_name).
-- `sofia.tarefa` espera `{plano_id, tarefa_id, patch}`, nao status solto.
-- `inventory.append` exige `kind` (entrada/saida/ajuste).
+- sofia.tarefa espera {plano_id, tarefa_id, patch}, nao status solto.
+- inventory.append exige kind (entrada/saida/ajuste).
+- Medir elemento sem comparar com o pai foi o erro da r41: 182px errado em 30 rotas por
+  22 rodadas, achado pelo dono olhando, nao por mim medindo.
