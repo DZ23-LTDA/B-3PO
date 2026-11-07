@@ -1,5 +1,5 @@
 {
-  "round": 103,
+  "round": 104,
   "queue": [
     {
       "id": "T-01",
@@ -252,5 +252,14 @@
     },
     "corrigido": "outroAmbiente/foraDoAmbiente assumiam 2 ambientes; agora percorrem os 6",
     "nao_e_rbac": true
+  },
+  "fechar_aba": {
+    "status": "done",
+    "nomeado": true,
+    "fora_do_tab": true,
+    "teclado": true,
+    "guarda_alteracao": "fecharComGuarda: consulta $dirtyPreviewUrls e usa o confirm() do app",
+    "defeito_achado": "$dirtyPreviewUrls era registro MORTO - escrito pelo editor e lido por ninguem (o 'ponto de modificado' nunca foi ligado)",
+    "conservadora_por_escolha": "pergunta se QUALQUER preview esta sujo; errar para o lado de perguntar"
   }
 }

@@ -9,6 +9,8 @@
  * contextual zone menu (tab close verbs + header/minimize toggles).
  */
 
+import { $dirtyPreviewUrls } from '@/store/preview-edit'
+import { confirm } from '@/store/confirm'
 import { useStore } from '@nanostores/react'
 import {
   type ComponentProps,
@@ -367,6 +369,39 @@ function CompactZoneTabs({ activeId, belowControls, closeable, newTab, node, tab
   )
 }
 
+
+/**
+ * r104 — fechar uma aba NÃO descarta edição não salva em silêncio (decisão do dono #8).
+ *
+ * O estado já existia (`$dirtyPreviewUrls`, escrito pelo editor do preview) e **não tinha leitor
+ * nenhum**: o comentário do store prometia um "ponto de modificado" nas abas que nunca foi ligado,
+ * e o fechamento ignorava o registro por completo.
+ *
+ * A guarda é conservadora de propósito: se ALGUM preview tem edição pendente, fechar uma aba pede
+ * confirmação. É mais largo que o mínimo (poderia casar aba↔url) e é o lado certo para errar —
+ * no pior caso pergunta uma vez a mais; no errado, apagaria o que a pessoa digitou.
+ *
+ * Vive FORA do `TreeGroup` porque aquele componente está no teto do ratchet de linhas: a guarda não
+ * pode custar 11 linhas dentro dele.
+ */
+async function fecharComGuarda(
+  paneId: string,
+  copy: { title: string; body: string; confirm: string }
+): Promise<void> {
+  if (Object.keys($dirtyPreviewUrls.get()).length > 0) {
+    const ok = await confirm({
+      confirmLabel: copy.confirm,
+      description: copy.body,
+      destructive: true,
+      title: copy.title
+    })
+
+    if (!ok) return
+  }
+
+  closeTabPane(paneId)
+}
+
 export function TreeGroup({
   node,
   parentAxis,
@@ -582,7 +617,7 @@ export function TreeGroup({
 
   // Middle-click / ⌘-click on a tab: one routing for every tab kind, the same
   // one the zone menu's Close and ⌘W use.
-  const closeTab = (paneId: string) => closeTabPane(paneId)
+  const closeTab = (paneId: string) => fecharComGuarda(paneId, t.shell.fecharComAlteracoes)
 
   // A pane whose store owns Close keeps the gesture even when the pane itself
   // is uncloseable — the workspace tab empties to a fresh draft rather than

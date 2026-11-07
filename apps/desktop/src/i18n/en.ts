@@ -4748,6 +4748,11 @@ export const en: Translations = {
     paneControls: 'Pane controls',
     appControls: 'App controls',
     paneTools: 'Pane tools',
+    fecharComAlteracoes: {
+      title: 'Discard unsaved changes?',
+      body: 'This tab has edits that were not saved. Closing it discards them.',
+      confirm: 'Discard and close'
+    },
     overlayContent: 'Panel content',
     modelMenu: enModelMenu,
     modelOptions: {

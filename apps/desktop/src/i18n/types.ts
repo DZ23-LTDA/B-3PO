@@ -4166,6 +4166,7 @@ export interface Translations extends NoticeTranslations {
     paneTools: string
     /** r97: landmark do overlay (portal, fora do <main> da arvore). */
     overlayContent: string
+    fecharComAlteracoes: { title: string; body: string; confirm: string }
   minimizeWindow: string
   closeWindow: string
     paneControls: string

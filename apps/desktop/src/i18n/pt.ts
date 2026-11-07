@@ -279,6 +279,11 @@ export const ptOverrides: TranslationOverrides = {
     closeWindow: 'Fechar janela',
     windowControls: 'Controles da janela',
     paneTools: 'Ferramentas do painel',
+    fecharComAlteracoes: {
+      title: 'Descartar alterações não salvas?',
+      body: 'Esta aba tem edições que não foram salvas. Fechar descarta o que foi digitado.',
+      confirm: 'Descartar e fechar'
+    },
     overlayContent: 'Conteúdo do painel',
     // r280: o painel do gateway renderiza `t.shell.gatewayMenu`. O runtime devolve a frase em
     // inglês quando não há provedor nenhum; esta tradução existe para que a pessoa leia o que

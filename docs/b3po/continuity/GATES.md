@@ -6735,3 +6735,66 @@ primeiro.
 **Cor é orientação ("onde eu estou"), não autorização.** `permission-guard` continua sendo a única
 porta, e trocar de ambiente continua trocando **o que a barra mostra**. Nenhuma linha deste trabalho
 toca RBAC — e o teste da API garante que a função só sabe pintar.
+
+---
+
+## G5 · ADENDO 2 — decisão #8 completa: fechar uma aba **não descarta edição não salva em silêncio**
+
+**Rodada 104.** A r98 entregou o ✕ nomeado e a r103 fechou os seis modos. Faltava a terceira parte da
+decisão #8: *"proteção contra perda de alterações não salvas"*.
+
+### O que a auditoria achou: dois defeitos, não um
+
+O estado de edição **já existia** — `store/preview-edit.ts` mantém `$dirtyPreviewUrls`, escrito pelo
+editor do preview. E o comentário do próprio arquivo diz:
+
+> *"so the rail can render a VS Code-style 'modified' dot on the tab"*
+
+**A busca por leitor encontrou zero.** `$dirtyPreviewUrls` era um registro **morto**: escrito pelo
+editor, lido por ninguém. O "ponto de modificado" nunca apareceu numa aba, e o fechamento ignorava o
+registro por completo.
+
+**Dois defeitos com uma causa**: a ponte entre o editor e a aba nunca foi construída.
+
+### O que foi feito — decisão do dono aplicada
+
+`fecharComGuarda(paneId, copy)` em `tree-group.tsx`:
+
+```ts
+const closeTab = (paneId: string) => fecharComGuarda(paneId, t.shell.fecharComAlteracoes)
+```
+
+Se **algum** preview tem edição pendente, fechar uma aba abre o `confirm()` do app
+(`store/confirm.ts`, o mesmo que o resto do produto usa — nenhum diálogo novo):
+
+> **Descartar alterações não salvas?**
+> Esta aba tem edições que não foram salvas. Fechar descarta o que foi digitado.
+> [Descartar e fechar]
+
+### A guarda é conservadora de propósito — e isso é uma escolha declarada
+
+Ela pergunta se **qualquer** preview está sujo, e não casa aba↔URL exatamente. É mais largo que o
+mínimo. **O lado do erro está certo**: no pior caso pergunta uma vez a mais; no errado, apagaria o
+que a pessoa digitou.
+
+### O ratchet pegou o primeiro jeito
+
+A guarda inline dentro de `TreeGroup` levou a função de **412 para 423 linhas**, e o `scripts/check`
+recusou (`FUNC_LINES 423 > 412`). Extraída para uma função de módulo, o componente volta ao tamanho de
+antes e a guarda continua igual para quem chama.
+
+> **Num arquivo ratcheado, a correção mora onde não empurra o teto** — e isso não a torna pior: a
+> guarda é uma decisão com nome próprio, e ler `fecharComGuarda(...)` diz mais que 11 linhas no meio
+> de um render.
+
+### Estado da decisão #8
+
+| Parte | Estado |
+|---|---|
+| ✕ mantido, com nome acessível | **READY** (r98 — overlay irmão do `tablist`, portal por aba) |
+| suporte a teclado | **READY** (`Tab` alcança, `Enter`/`Espaço` fecham; `Delete` na aba) |
+| proteção contra perda de alteração não salva | **READY** (r104 — `fecharComGuarda` + `confirm`) |
+| `axe` | **0** (27 rotas) |
+
+**A decisão #8 fecha inteira.** E o `$dirtyPreviewUrls` deixou de ser registro morto: agora tem
+consumidor.
