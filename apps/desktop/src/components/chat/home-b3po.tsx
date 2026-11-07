@@ -346,7 +346,7 @@ export function HomeB3po() {
   const recentes = useMemo(() => (projetos.estado === 'ok' ? projetosPorRecencia(projetos.itens, 3) : []), [projetos])
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 pb-10 text-left">
+    <div className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-6 px-6 pb-10 text-left">
       <div className="flex flex-col items-center pt-2 text-center">
         <BrandHero alt={BRAND_HERO_ALT} className="mb-2" />
 
@@ -370,10 +370,14 @@ export function HomeB3po() {
          * `role="group"` e não `list`: são SEIS botões de escolha, não seis itens de uma lista que se
          * percorre. O rótulo nomeia o grupo para o leitor de tela.
          *
-         * Duas colunas por padrão e a terceira só em `xl` — a r269 mediu que a 125% e 150% de zoom o
-         * `min-width` do viewport mente e três colunas cortavam os cartões.
+         * Uma coluna no celular, duas a partir de `sm` e três só em `xl`.
+         *
+         * A r269 mediu que a 125% e 150% de zoom o `min-width` do viewport mente e três colunas
+         * cortavam os cartões — daí a terceira ficar em `xl`. A r3 do V4 mediu 375px: **duas colunas
+         * de 211px somam 434px num viewport de 375** e os cartões saíam **cortados**, sem scroll (o
+         * container clipa). Uma coluna abaixo de `sm` é o que faz o texto caber.
          */}
-        <div aria-label={copy.escolherModo} className="grid w-full grid-cols-2 gap-3 xl:grid-cols-3" role="group">
+        <div aria-label={copy.escolherModo} className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" role="group">
           {AMBIENTES.map(ambiente => {
             const selecionado = ambiente === ativo
             const identidade = AMBIENTE_IDENTIDADE[ambiente]
