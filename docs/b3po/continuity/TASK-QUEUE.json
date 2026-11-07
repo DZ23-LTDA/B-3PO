@@ -367,7 +367,8 @@
     "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)",
     "A-06": "FECHADO r22+r25: h1 no titulo da pagina (breadcrumb) e h2 nas secoes (SectionHeading, 19 arquivos). Nas paginas de topo o h2 fica dormente porque o design suprime titulo duplicado quando ha breadcrumb - isso e correto. axe 0 em 27 rotas, 0 rotas sem h1, 613 testes de settings verdes.",
     "A-07": "CORRIGIDO r28: registerTariffIpc estava IMPORTADO e NUNCA CHAMADO em erp-ipc.ts. O T-12 nunca funcionou; a tela mostrava o caminho de ERRO e eu li como estado vazio na r101. Passou por gate, typecheck, 32 testes de store e testes de componente com API mockada. So a varredura de console do app vivo pegou. Depois: 0 erros em 27 rotas.",
-    "A-08": "Varredura estatica de canais IPC nao serve: registro em laco (ipcMain.handle com template literal) e invisivel para busca literal. 3 falsos positivos (hud-modifier:permission, screenshot:capture/permission). O instrumento valido e a varredura de console no app vivo, que mediu 0 erros em 27 rotas."
+    "A-08": "Varredura estatica de canais IPC nao serve: registro em laco (ipcMain.handle com template literal) e invisivel para busca literal. 3 falsos positivos (hud-modifier:permission, screenshot:capture/permission). O instrumento valido e a varredura de console no app vivo, que mediu 0 erros em 27 rotas.",
+    "A-09": "Titulo 'Projetos em Andamento' contradizia o KPI 'Projetos ativos 0': a secao ordena por recencia sem filtrar status. Renomeada para 'Projetos recentes'. E o en.ts tinha 13 de 31 chaves da home em portugues - traduzidas. es.ts sem a secao: cai no ingles por design (defineLocale faz merge)."
   },
   "registros_de_modulos": {
     "b3po-modulos.ts": "25 modulos - barra lateral e /busca",
@@ -443,5 +444,10 @@
     "custo": "~90s",
     "rotina": true
   },
-  "instrumento_valido_canais": "console/pageerror no app vivo - nao varredura de texto"
+  "instrumento_valido_canais": "console/pageerror no app vivo - nao varredura de texto",
+  "i18n_home": {
+    "pt": "31 chaves",
+    "en": "31 chaves, 0 em portugues (eram 13)",
+    "es": "sem secao - fallback para ingles"
+  }
 }

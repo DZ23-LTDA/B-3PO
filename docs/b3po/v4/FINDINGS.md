@@ -380,6 +380,52 @@ Nenhum é defeito por si: um handler sem chamador é código morto, não bug. Fi
 
 ---
 
+## A-09 · O título da seção de projetos contradizia o KPI — e o inglês tinha português
+
+**Medido (r30)** na home renderizada, com os dados reais:
+
+```
+Seção:  "Projetos em Andamento"   → Projeto E2E r283  [a começar]
+KPI:    "Projetos ativos"  0
+```
+
+**Os dois estão certos e se contradizem na tela**:
+
+| | Fonte | Regra |
+|---|---|---|
+| KPI `projetosAtivos` | `home-dados.ts:95` | `filter(p => p.status === 'ativo').length` → **0** |
+| Seção | `projetosPorRecencia` | ordena por `updated_at`, **sem filtro de status** → **1** |
+
+O projeto está `a começar`, não `ativo`. O KPI conta certo; **a seção não filtra e o título promete
+filtro**.
+
+**Correção**: `projetosTitulo` → **"Projetos recentes"**, que é o que a seção faz. O KPI fica como
+está — a legenda dele já explica `—` vs `0`.
+
+### E o `en.ts` tinha 13 de 31 chaves em português
+
+```
+subtitulo:      'Sua plataforma de gestão, automação e inteligência empresarial.'
+modosTitulo:    'Modos de Trabalho'
+agentesTitulo:  'Seus Agentes'
+agentesVazio:   'Nenhum agente cadastrado ainda. Crie um para delegar trabalho.'
+projetosTitulo: 'Projetos em Andamento'
+```
+
+**Quem usa o app em inglês via português na home.** Corrigido: **31 chaves, 0 palavras portuguesas**.
+
+### O `es.ts` não tem a seção — e isso é o fallback funcionando
+
+`defineLocale` faz **merge sobre o inglês**. Sem `homeB3po` no espanhol, a home cai no inglês —
+que agora está correto. **Não é bug**; é a cobertura crescer por seção, como o próprio `pt.ts`
+documenta.
+
+**Tentei adicionar e a inserção aninhou no lugar errado** (o tipo é `TranslationOverride<Translations>`
+e eu coloquei fora do objeto). **Revertido** em vez de forçar: um `es.ts` corrompido é pior que um
+`es.ts` que cai no inglês.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |
