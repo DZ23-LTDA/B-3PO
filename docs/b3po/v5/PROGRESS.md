@@ -305,6 +305,33 @@ leitura em threadpool, e **atrás do middleware de autenticação** — medido: 
 **A lição menor da rodada**: o primeiro `import` falhou por um `hmac.py` perdido em `%TEMP%` — dos
 meus próprios scripts — sombreando a stdlib. Instrumento, não produto.
 
+### HAZARD do ambiente — segunda ocorrência
+
+No fim da r14, `scripts/check-b3po-types` falhou com:
+
+```
+error TS2305: Module './crm-whatsapp-signature' has no exported member 'JANELA_REPLAY_MS'
+error TS2305: … 'checarFrescor'
+```
+
+**Não foi o meu commit.** `git status` mostrou `M apps/desktop/electron/crm-whatsapp-signature.ts` —
+modificado na *working tree* **depois** do commit, por processo de terceiro.
+
+| | |
+|---|---|
+| `HEAD:apps/.../crm-whatsapp-signature.ts` | **82 linhas**, `JANELA_REPLAY_MS` e `checarFrescor` presentes |
+| working tree | **43 linhas a menos** — as mesmas 43 que a r107 do ciclo anterior restaurou |
+
+**É a segunda vez.** Na primeira o `git add -A` varreu o arquivo; agora ele reapareceu truncado sem
+que eu tocasse nele. Algum processo do ambiente escreve esse arquivo sem as duas funções.
+
+**Ação**: `git checkout -- <arquivo>` (o `HEAD` é o estado correto e o truncamento quebra o build).
+**O arquivo NÃO foi commitado** — a restauração é da working tree, não do histórico.
+
+**Regra que fica**: antes de commitar, `git status` **depois** do commit também. Um arquivo que eu não
+toquei pode aparecer modificado, e commitar por caminho explícito é o que impede isso de virar
+regressão.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
