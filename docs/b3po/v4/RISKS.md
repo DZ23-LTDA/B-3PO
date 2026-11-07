@@ -57,52 +57,59 @@ que exercitam escrita real em `mkdtemp` e um deles testa *"arquivo corrompido vi
 **Impacto**: um domínio pode estar correto numa superfície e desatualizado na outra, e **nenhum gate
 compara as duas**.
 
-### R3 — **68 canais** IPC sem guarda, dos quais **49 em 5 arquivos sensíveis**
+### R3 — **47 canais** sem guarda em 13 arquivos · **28 são sensíveis e estão em 4 arquivos**
 
-**Número corrigido na r6 do V4.** A versão anterior dizia "16 de 50 canais". Os dois números estavam
-errados em unidades diferentes — e a diferença importa.
+**Terceira medição, e a terceira vez que o instrumento estava errado.** A contagem foi:
 
-**Régua errada (arquivo ≠ canal).** O ratchet contava todo `*-ipc.ts` como uma unidade de dívida.
-Dois deles **não registram canal nenhum**:
+| Rodada | Número | O erro |
+|---|---|---|
+| r4 | "16 de 50 canais" | contava **arquivo**, e um arquivo tem até 21 canais |
+| r6 | "68 canais, 16 arquivos" | `erp-ipc` e `ui-preferences-ipc` **não registram canal** |
+| **r7** | **47 canais, 13 arquivos** | `git-ipc` **está** protegido — por `podeOperarMaquina`, que o detector não reconhecia |
 
-| Arquivo | Canais | O que faz |
+**O `git-ipc` tem 21 canais e usa a fronteira de acesso à máquina** (`machine-access.ts`), que é uma
+política **diferente e correta** para o que protege: *"esta pessoa pode operar o computador onde o
+B-3PO está instalado?"*, não *"pode lançar no financeiro?"*. Ela nega por padrão, exige poder de
+execução para `escrita` e exige papel `owner` para `externo` (push, PR).
+
+### O quadro real
+
+| Arquivo | Canais | Guarda |
 |---|---:|---|
-| `erp-ipc.ts` | **0** | fia stores; nenhum `ipcMain.handle` |
-| `ui-preferences-ipc.ts` | **0** | delega a `registerUiPreferencesIpc` em outro módulo |
+| `git-ipc.ts` | 21 | **SIM** — `podeOperarMaquina` |
+| `fs-ipc.ts` | **13** | **não** |
+| `terminal-ipc.ts` | **6** | **não** |
+| `agent-ipc.ts` | **5** | **não** |
+| `plugin-files-ipc.ts` | **4** | **não** |
+| 8 de UI/preferência + callback OAuth | 19 | não — e **não precisam** (ver abaixo) |
+| **Dívida real** | **47** | **28 sensíveis em 4 arquivos** |
 
-Contá-los produzia *"16 arquivos"* e o denominador errado de 50. Corrigido: **14 de 48**.
+Os 19 de UI/preferência (clipboard, HUD, notificações, dicionário, overlay, latência de boot,
+challenge de janela, lookup) **não têm recurso de negócio** para guardar, e o
+`mcp-oauth-callback` é **unguarded por desenho** — o callback externo chega sem ator.
 
-**O que a correção revela é maior que o que ela conserta.** Medindo **canais**:
+### Por que `terminal` não foi protegido nesta rodada — com todos os fatos levantados
 
-| Arquivo | Canais | Sensibilidade |
-|---|---:|---|
-| `git-ipc.ts` | **21** | **GIT** — opera repositório |
-| `fs-ipc.ts` | **13** | **ARQUIVOS** — leitura, escrita, revelar |
-| `terminal-ipc.ts` | **6** | **SHELL** — executa processo |
-| `agent-ipc.ts` | **5** | **ORQUESTRAÇÃO** — roster e execuções |
-| `plugin-files-ipc.ts` | **4** | **ARQUIVOS** de plugin |
-| `mcp-oauth-callback-ipc.ts` | 3 | callback externo — **unguardado por desenho** |
-| 8 arquivos de UI/preferência | 16 | clipboard, HUD, notificações, dicionário, overlay |
-| **Total** | **68** | **49 em 5 arquivos sensíveis** |
+A fronteira já existe e o caminho está mapeado:
 
-**Por que eu NÃO liguei a guarda nos 49 nesta rodada:** o próprio ratchet documenta o motivo, e ele
-está certo —
+1. `atorDeMaquina(userData)` é **real**: lê `ActorsStore` e devolve `primaryOwner()`.
+2. O dono nasce (`ensureOwner`) com **`level: 'SUPERVISED_AUTONOMY'`** e **`role: 'owner'`** — ou
+   seja, `podeOperarMaquina(owner, 'escrita')` e `…, 'externo'` **já passam**. Proteger não quebraria
+   o fluxo normal; só negaria bot e ator com `level: null`.
+3. `registerTerminalIpc` é construído em **3 lugares** (`main.ts:17064` + 2 testes).
+4. O canal crítico é **`hermes:terminal:start`** (spawn de shell).
 
-> *"hoje o produto não tem login — `actorOf()` devolve o dono da instalação. **Uma guarda que sempre
-> permite é pior que guarda nenhuma, porque parece proteção.**"*
+**Não foi feito porque exigiria mudar autorização e reexercer 21 testes de terminal** com o
+orçamento da rodada esgotado. Ligar isso às pressas é exatamente o risco que o ratchet descreve.
 
-Ligar `exigirAtor` em `terminal`/`fs`/`git` exige obter um `actorOf` real nesses caminhos, e eu **não
-consigo exercer esses fluxos aqui** (terminal precisa de shell viva, git precisa de operação real).
-Uma guarda que recusa por falta de ator **quebraria** essas superfícies — e eu não teria como provar
-que não quebrei.
+**Próximo passo concreto**: `TerminalIpcDeps.actorOf` + guarda em `terminal:start` com
+`podeOperarMaquina(ator, 'escrita')`, e um teste provando que sem ator **recusa** e com o dono
+**permite**.
 
-**O que fica aberto, com precisão**: 49 canais sensíveis sem verificação de ator, em 5 arquivos, com
-o caminho e a contagem acima. **O próximo passo não é "adicionar guarda"** — é criar um `actorOf` que
-tenha identidade de verdade, e só então ligar.
+### Ponto cego declarado
 
-**Ponto cego declarado**: os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que
-**não** é `*-ipc.ts` e **não é varrido pelo ratchet**. Fechar exige varrer o grafo de delegação; não
-foi feito, e omitir seria pior.
+Os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que **não** é `*-ipc.ts` e não é
+varrido pelo ratchet.
 
 ## MEDIUM
 

@@ -35,7 +35,6 @@ const SEM_GUARDA: readonly string[] = [
   'challenge-window-ipc.ts',
   'clipboard-ipc.ts',
   'fs-ipc.ts',
-  'git-ipc.ts',
   'hud-ipc.ts',
   'lookup-ipc.ts',
   'mcp-oauth-callback-ipc.ts',
@@ -76,7 +75,23 @@ function temGuarda(nome: string): boolean {
   const fonte = readFileSync(join(DIR, nome), 'utf8')
 
   // `exigirAtor` e o helper dos canais de dominio (r216). Nao reconhece-lo faria o ratchet mentir.
-  return fonte.includes('withPermission') || fonte.includes('guardedHandler') || fonte.includes('exigirAtor')
+  /*
+   * r7 do V4 — `podeOperarMaquina` entra na lista.
+   *
+   * `git-ipc.ts` NAO usa `exigirAtor`/`withPermission`: ele usa a **fronteira de acesso a maquina**
+   * (`machine-access.ts`), que e uma politica diferente e correta para o que protege — "esta pessoa
+   * pode operar o computador onde o B-3PO esta instalado?", nao "pode lancar no financeiro?".
+   *
+   * Ela nega por padrao (sem ator, sem decisao), exige poder de execucao para `escrita` e exige
+   * papel `owner` para `externo` (push, PR). Sao **21 canais** que o ratchet contava como divida
+   * sem estarem desprotegidos.
+   */
+  return (
+    fonte.includes('withPermission') ||
+    fonte.includes('guardedHandler') ||
+    fonte.includes('exigirAtor') ||
+    fonte.includes('podeOperarMaquina')
+  )
 }
 
 describe('cobertura de permissao', () => {
@@ -125,7 +140,7 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-it('a divida medida hoje e 14 de 48 — os 2 que sairam nao registram canal', () => {
+it('a divida medida hoje e 13 de 48 — sem contar git, que usa podeOperarMaquina', () => {
     /*
      * r6 do V4 — o numero encolheu de 16/50 para 14/48, e NAO por correcao de canal nenhum.
      *
@@ -139,7 +154,7 @@ it('a divida medida hoje e 14 de 48 — os 2 que sairam nao registram canal', ()
      *
      * Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
      */
-    expect(SEM_GUARDA).toHaveLength(14)
+    expect(SEM_GUARDA).toHaveLength(13)
 
     // r36: audit-ipc.ts nasceu COM guarda. r58: delivery-ipc.ts idem. O total sobe, a divida nao.
     expect(canais()).toHaveLength(48)
