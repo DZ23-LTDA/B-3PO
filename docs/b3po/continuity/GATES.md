@@ -3554,3 +3554,65 @@ tem "fim"; ela tem rodadas.**
 | `FINAL-DELIVERY.txt` | **reescrito (r51)** |
 | `UPSTREAM-PATCH-REGISTER.md` | **13 patches (r63)** |
 | `AUDIT-MATRIX.md` · `DECISIONS.md` · `BLOCKERS.md` · `PERFORMANCE.md` · `PLATFORM-MATRIX.txt` · `MASTER-CHECKPOINT.json` | **cabeçalhos corrigidos (r60–61); conteúdo verificado** |
+
+---
+
+## G3 · ADENDO 4 — coerência UI×API medida em 5 telas: **4 batem, 1 era erro de MEDIÇÃO**
+
+**Rodada 65.** A r49 tentou medir coerência e o regex falhou. Refiz com extração de todos os números da
+tela comparados contra o bridge.
+
+### O resultado
+
+| Rota | API | Tela | |
+|---|---|---|---|
+| `/crm` | contatos **1** | card **1** | **BATE** |
+| `/sales` | vendas **3** | `#1` `#2` `#3` | **BATE** |
+| `/stock` | SKUs **1** | **`1 produto`** + `5 unidade` | **BATE** |
+| `/products` | produtos **0** | **`0 produtos`** | **BATE** |
+| `/projetos` | `{}` (vazio) | *nenhum número* | **parecia divergir** |
+
+### E o `/projetos` não estava vazio
+
+```json
+texto: "Projetos | Novo projeto | 0 em andamento | ... | Projeto E2E r28..."
+bridges: ["trabalhos"]
+projectsList: "ERRO: Cannot read properties of undefined (reading 'slice')"
+```
+
+**A bridge se chama `trabalhos`, não `projects`.** Meu código chamou `d.projects?.list?.()` → `undefined`
+→ e eu concluí "tela vazia".
+
+**A tela tinha o projeto.** `0 em andamento` + 1 projeto *a começar* é **consistente** (já verificado na
+r45).
+
+### A MESMA falha da r57, duas rodadas depois de eu documentá-la
+
+| Rodada | O caminho errado | O negativo que pareceu resultado |
+|---|---|---|
+| r57 | `dist/product/assets` em vez de `dist/assets` | "o fix não está no bundle" |
+| **r65** | **`projects.list` em vez de `trabalhos.list`** | **"a tela está vazia"** |
+
+**Duas vezes em oito rodadas.** E das duas vezes eu **só descobri porque fui olhar a tela**.
+
+> **Um `undefined` é a resposta mais fácil de confundir com "não existe".** `d.projects?.list?.()` **sem
+> erro** — optional chaining devolve `undefined` silenciosamente, e eu tratei isso como "vazio".
+
+**O que previne**: quando uma medição dá "não há nada", **listar as chaves antes de concluir**. `Object.keys(d)`
+teria mostrado `trabalhos` em 1 segundo.
+
+### O que a rodada 65 entrega
+
+**Nenhum bug novo.** As 5 telas são coerentes com os dados, **incluindo a que estava errada antes da r48**
+(`/stock`, agora `1 produto` = 1 SKU).
+
+**E a r65 não achou nada porque as 4 telas com número comparável batem** — o que é o resultado esperado
+depois de 5 rodadas consertando a documentação e a suíte.
+
+### O saldo da coerência
+
+| Medição | Rodada | Resultado |
+|---|---|---|
+| 1ª tentativa (regex) | r49 | falhou em extrair |
+| **2ª (extração completa)** | **r65** | **4/4 batem · 1 erro de medição corrigido** |
+| bugs de coerência encontrados | **1** | estoque (r48, **corrigido**) |
