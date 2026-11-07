@@ -5914,3 +5914,63 @@ rotas. **Quatro telas usavam outra ordem de atributos e ficaram invisíveis ao m
 
 **As duas recusas dele produziram trabalho real.** É a terceira vez que ele me barra e a terceira em que
 o que ele barrou era um problema meu que eu tinha rotulado com uma frase.
+
+---
+
+## G8 · ADENDO 52 — o censo de 27 rotas achou **contraste** que 60 rodadas de `axe` não viram
+
+**Rodada 94 (4ª checagem).** Com o T-13 completo, rodei o `axe` **sem `runOnly`** nas 27 rotas de uma vez.
+Placar:
+
+```
+rotas com != 1 main ..... 0
+color-contrast .......... 1   <- /session-import
+nested-interactive ...... 3   <- a MESMA causa da r50 (o X do PaneTab, agora visivel em 3 rotas)
+region .................. 89  <- T-15
+```
+
+### O `color-contrast`
+
+```tsx
+// app/overlays/panel.tsx — PanelEmpty
+<p className="max-w-sm text-xs leading-relaxed text-muted-foreground/70">{description}</p>
+```
+
+**12 px a 70 % de opacidade.** O blend com o fundo come parte do contraste, e para texto pequeno o
+mínimo é 4,5:1 — reprovou.
+
+**E estava num componente compartilhado**: `PanelEmpty` é usado em `/session-import`, `/agents` e outros
+painéis. **A rota `/session-import` nunca tinha sido medida** em 60 rodadas de `axe`, porque eu media as
+telas de negócio (stock, sales, crm…) e as três que construí. **Três rotas ficaram fora do censo por 60
+rodadas.**
+
+**Correção**: `text-muted-foreground` **cheio**. Os ícones em `/50` e `/70` continuam — são decorativos e
+não carregam texto.
+
+### O `nested-interactive` triplicou — e não é regressão
+
+Era 2 (`/` e `/settings`), virou **3**. A terceira é `/session-import` — e o nó é
+`div[data-tree-tab="workspace"][role="tab"]`: **o ✕ do `PaneTab` dentro do `role="tab"`, exatamente o
+conflito documentado na r50.** Mesma causa, mais uma rota visível.
+
+**Não é defeito novo**: é o mesmo item, agora com o inventário correto de onde aparece.
+
+### O contraste voltou a zero em todas as 27 rotas
+
+```
+color-contrast: 0
+```
+
+**Isso fecha o que a r42 tinha declarado** — na época eu disse "0 violações de contraste nos DOIS temas",
+medi em **12 rotas**, e chamei de "todas". **O número estava certo para a amostra e errado para o
+produto.**
+
+### A regra que fecha a série
+
+**Toda vez que eu disse "0 violações" nesta auditoria, era 0 na amostra.** As quatro descobertas desta
+rodada — 7 `<main>`, 1 contraste, 1 `nested-interactive` novo, 1 chave i18n órfã — **estavam todas fora
+das rotas que eu medía**.
+
+> **"Verificado" sem o tamanho da amostra é uma afirmação sem conteúdo.** A diferença entre
+> `axe: 0 violações` e `axe: 0 violações em 12 de 27 rotas` é a diferença entre um relatório e um número
+> que não sabe o que não cobriu.

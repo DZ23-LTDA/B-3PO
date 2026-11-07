@@ -128,5 +128,14 @@
     "superadas": 9,
     "aberta": 1,
     "aberta_id": "T-15"
+  },
+  "a11y_censo": {
+    "rotas": 27,
+    "main_errado": 0,
+    "color_contrast": 0,
+    "nested_interactive": 3,
+    "nested_interactive_causa": "X do PaneTab dentro de role=tab (r50)",
+    "region": 89,
+    "region_causa": "T-15: <main> dentro da zona da arvore"
   }
 }
