@@ -6955,3 +6955,50 @@ $ npm test
 **O risco deixou de existir**: não há caminho que produza ou valide o artefato sem reaplicar o patch.
 O `vendor-select-patch.test.tsx` continua existindo como segunda barreira — se alguém remover os
 hooks, ele quebra.
+
+---
+
+## G0 · ADENDO 2 — `git add -A` commitou a deleção de 43 linhas que **não eram minhas**
+
+**Rodada 107.** O `wrapup_check` pediu o typecheck, e ele pegou isto:
+
+```
+electron/crm-meta-webhook-map.ts(15,10): error TS2305:
+  Module './crm-whatsapp-signature' has no exported member 'JANELA_REPLAY_MS'
+electron/crm-whatsapp-signature-frescor.test.ts(7,10): error TS2305:
+  Module './crm-whatsapp-signature' has no exported member 'checarFrescor'
+```
+
+**O commit era meu** (`58058b2acc`) e o `--stat` dele é inequívoco:
+
+```
+apps/desktop/electron/crm-whatsapp-signature.ts | 43 -------------------------
+```
+
+### O que aconteceu
+
+O working tree **já tinha** essa deleção antes da minha rodada — provavelmente resto de trabalho de
+outra sessão/agente. Eu rodei `git add -A` para commitar meus 2 arquivos e **varri junto** um arquivo
+que não revisei.
+
+**Não foi a normalização de CRLF** (o aviso do git era um sintoma, não a causa). Foi a varredura cega.
+
+### O que isso custou — e o que impediu que passasse
+
+Se o `wrapup_check` não exigisse typecheck, a entrega teria:
+
+- **perdido** a prova de frescor do webhook (a defesa contra replay de uma entrega legítima capturada);
+- deixado **2 testes quebrados** no repo;
+- comitado com mensagem sobre tarifas e conectores um assunto que não tem nada a ver.
+
+**Restaurado** do commit pai (`git checkout 58058b2acc~1 -- …`), e verificado:
+`checarFrescor` e `JANELA_REPLAY_MS` voltaram; **typecheck PASS**; `crm-whatsapp-signature*` **17/17**.
+
+### A regra que fica
+
+> **`git add -A` é uma afirmação sobre o working tree inteiro** — e eu só revisei 2 dos 3 arquivos.
+> Num repo compartilhado com outros agentes, `-A` é o mesmo erro que "confiar no pré-existente":
+> assume que o que está lá é o que deveria estar.
+
+**O commit certo lista os arquivos.** A partir daqui, `git add <caminho>` explícito para o que eu
+toquei, e nada mais.

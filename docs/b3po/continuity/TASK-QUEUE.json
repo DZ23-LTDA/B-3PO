@@ -123,7 +123,8 @@
   },
   "invariantes": [
     "Recusa escrita ('nao vou fazer porque...') exige, na frase seguinte, o id do item na fila. Recusa sem item de fila e recusa que se perde.",
-    "Doc de estado tem de concordar com os vizinhos e nao conter afirmacao superada - VERIFICADO POR apps/desktop/electron/docs-continuity.test.ts (6 testes, provado por mutacao na r94)"
+    "Doc de estado tem de concordar com os vizinhos e nao conter afirmacao superada - VERIFICADO POR apps/desktop/electron/docs-continuity.test.ts (6 testes, provado por mutacao na r94)",
+    "Commit lista os arquivos (git add <caminho>), nunca -A: num repo com outros agentes, -A varre alteracao de terceiro nao revisada. Provado na r107, que comitou a delecao de 43 linhas de crm-whatsapp-signature.ts."
   ],
   "retratacoes": {
     "total_afirmacoes_nao_vou_fazer": 10,
@@ -282,5 +283,12 @@
       "build": "exit 0",
       "testes": "478/478"
     }
+  },
+  "commit_add_a_incidente": {
+    "arquivo": "apps/desktop/electron/crm-whatsapp-signature.ts",
+    "linhas_deletadas": 43,
+    "detectado_por": "wrapup_check exigindo typecheck",
+    "restaurado": "git checkout 58058b2acc~1 -- <arquivo>",
+    "verificado": "typecheck PASS, 17/17 testes"
   }
 }
