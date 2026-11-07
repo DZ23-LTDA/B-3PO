@@ -196,6 +196,43 @@ agente dono da execução. A UI mostra o motivo — não finge sucesso.
 **A tela nunca diz "executando".** Quando a delegação funciona, ela mostra
 `Execução … criada · aguardando sessão` e o pedido que a sessão deve receber.
 
+## 4e. r37 — o ciclo completo rodou no app real
+
+Ate aqui eu vinha dizendo que o caminho feliz dependia de credencial (`EXT-3`). **Nao depende** — a
+delegacao precisa de um **agente**, e o roster tem um.
+
+**Medido no app em execucao** (`#/sofia`, via CDP):
+
+```
+roster ....... business_manager (analytics READ/RECOMMEND, documents PREPARE, ...)
+criar plano .. plano-mw6y4nr5-2pc0
+delegar ...... { execucao_id: "exec-plano-mw6y4nr5-2pc0-a1",
+                 prompt: "Conferir que a delegacao aceita um agente do roster
+
+                          Objetivo do plano: Verificar delegacao com agente real (r37)" }
+vincular ..... { ok: true }
+estado ....... status = "executando" · session_id = "sess-r37-probe"
+```
+
+**O prompt saiu exatamente como projetado** (titulo + objetivo do plano). O `execucao_id` foi gravado na
+tarefa, e o vinculo moveu `pendente` -> `executando` com a sessao registrada.
+
+### O que isso prova, e o que NAO prova
+
+| Provado no app real | Nao provado |
+|---|---|
+| plano criado por API | que a sessao **exista** |
+| execucao criada com dono (`business_manager`) | que um turno **execute** |
+| prompt montado do plano | que o trabalho **termine** |
+| `pendente` -> `executando` com `session_id` | retomada e falha (passo 6) |
+
+**`sess-r37-probe` e um id inventado por mim.** O vinculo aceita qualquer string como sessao — ele nao
+verifica que a sessao exista no runtime. **Isso e uma lacuna do contrato**: o main acredita no que o
+renderer informa, e nada confirma que a sessao e real.
+
+**Correcao possivel, nao feita**: `vincularSessao` poderia perguntar ao gateway se a sessao existe antes
+de gravar. Sem isso, um `session_id` inventado deixa a execucao "executando" para sempre.
+
 ## 5. O que este documento **não** afirma
 
 - Não afirma que o slice acima resolve retomada, idempotência e compensação do G2 — são itens 5–7.
