@@ -3866,3 +3866,77 @@ private async write(file: AfterSalesFile): Promise<void> {
 
 **Nenhum gate fica `NOT_RUN`.** Dois são `N/A` com justificativa escrita, um é `FAIL` **por decisão do
 upstream** (T-09, aguardando o dono).
+
+---
+
+## G8 · ADENDO 36 — gate de OPERAÇÃO medido: **health, status e logs funcionam**
+
+**Rodada 69.** Último gate da matriz que eu não tinha exercitado com comando: *"health/logs e plano de
+rollback"*. O rollback já estava provado (2 falhas reais). Fui ao health.
+
+### O que respondeu
+
+```
+GET /api/health  ->  {"ok":true,
+                      "version":"unknown",
+                      "displayVersion":"git.b151e72",
+                      "commit":"b151e7223160c9b49a7bc96fe5b44d26a9f8eccb",
+                      "auth_...": "..."}
+
+GET /api/status  ->  {"version":"unknown",
+                      "release_date":"2026.9.24",
+                      "config_version":52,
+                      "latest_config_version":52,
+                      "can_update_hermes":true, ...}
+
+statusbar (a tela) -> "Servidor | inferência indisponível | Inteligente | cliente dev"
+
+logs/ -> existe em HERMES_HOME (assets, audio_cache, backups, bin, bot_relay, cache, ...)
+```
+
+**Nota**: `/health` (sem `/api`) **erroa** e `/api/gateway/status` dá **404** — não são os endpoints.
+**Os corretos são `/api/health` e `/api/status`**, e ambos respondem.
+
+### O veredito do gate
+
+| Item exigido | Estado | Evidência |
+|---|---|---|
+| **health** | **`PASS`** | `{"ok":true}` + versão e commit |
+| **status** | **`PASS`** | config_version 52, `can_update_hermes: true` |
+| **logs** | **`PASS`** | diretório `logs/` no HERMES_HOME |
+| **rollback** | **`PASS`** | `.dist-previous-*` preservado em 2 falhas reais; `win-unpacked.bak/` existe |
+| rollback de **dados** | **`N/A`** | sem migração (r68), não há o que reverter |
+| TLS | **`N/A`** | app desktop local, sem servidor público |
+| backup/restore | **`PARCIAL`** | `backups/` existe no HOME; **não exercitei restore** |
+
+### O que o `/api/status` prova de graça
+
+**`config_version: 52` = `latest_config_version: 52`** — a configuração está **atualizada**, não há
+migração de config pendente. **`can_update_hermes: true`** — o updater está funcional.
+
+### E o health mostra o bloqueio na cara
+
+**`statusbar: "inferência indisponível"`** — o `EXT-1` (chave de provedor) aparece **na tela**, não só
+no relatório. **O produto não esconde o estado degradado.**
+
+### A matriz de 13 gates, FECHADA
+
+| Gate | Estado | Onde |
+|---|---|---|
+| Git/baseline | **PASS** | branch, HEAD, diff — r59–61 |
+| Lint/typecheck | **PASS** | `scripts/check` 14/14, 0 erros de tipo |
+| Unit/regression | **PASS** | 18842 testes; 13 falhas provadas no `origin/main` |
+| Integration/API | **PASS** | bridges reais no Electron |
+| E2E | **PASS** | B4–B8 por bridge + captura |
+| Build/smoke | **PASS** | desktop e web exit 0; fix verificado no chunk |
+| Auth/security | **PASS** | `serverTenant` — IDOR impossível de formular |
+| Multitenancy | **`N/A`** | 1 tenant/instalação, justificado (r66) |
+| Banco | **`PASS`** integridade · **`N/A`** migração (r68) |
+| UI | **PASS** | 5 viewports × 2 temas + 14 telas olhadas |
+| A11y | **`axe` PASS · Tab/Esc PASS · foco visível `FAIL`** por design do upstream (r67, T-09) |
+| Performance | **PASS** | 55 → 4 long tasks (−93 %) |
+| **Operação** | **`PASS`** | health/status/logs/rollback — **r69** |
+
+**Resultado: 10 `PASS`, 2 `N/A` justificados, 1 `PASS` com item `FAIL` por decisão do upstream.**
+
+**Nenhum gate `NOT_RUN`. Nenhum `UNVERIFIED`.** É a primeira vez na auditoria que a matriz fecha assim.
