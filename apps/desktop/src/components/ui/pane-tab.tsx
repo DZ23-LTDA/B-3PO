@@ -246,22 +246,21 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
         // Geometry stays fixed; the same fade works on solid and glass surfaces.
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-stretch opacity-0 transition-opacity group-hover/tab:pointer-events-auto group-hover/tab:opacity-100">
           {/*
-           * r293 — o ✕ continua nomeado. RODEI `aria-hidden` e o `axe-core` RECUSOU: a mensagem
-           * é literalmente *"does not prevent assistive technologies from focusing the element
-           * (even with aria-hidden)"* — o `nested-interactive` não se resolve tirando o nome do
-           * nó de acessibilidade, porque o botão segue focável no DOM.
+           * r97 — o ✕ é uma AFORDÂNCIA DE MOUSE, não um segundo controle.
            *
-           * Só a correção estrutural resolve: o `<button>` precisa ser IRMÃO do elemento com
-           * `role="tab"`, não filho. Isso muda o dono do `.group/tab`, do hover, do `ref` e dos
-           * handlers de foco — em toda aba do app (workspace, preview, browser, terminal). Fica
-           * como `ABERTO` com a proposta registrada, em vez de meio-feito.
+           * O `nested-interactive` existia porque isto era `<button tabIndex={-1}>` DENTRO de
+           * `role="tab"`: focável no DOM, logo "interativo dentro de interativo" — e o r293 já
+           * provou que `aria-hidden` não resolve enquanto o elemento continuar focável.
            *
-           * O que FICOU desta rodada é ganho real e independente: `Delete`/`Backspace` fecham a
-           * aba e `aria-keyshortcuts` anuncia o atalho (ver `onKeyDown` acima).
+           * A saída é tirar a INTERATIVIDADE, não o nome. Um `<span>` sem `tabindex` e sem role
+           * não é controle para a ARIA nem para o `axe`, e continua clicável pelo mouse. O caminho
+           * de teclado e de leitor de tela é o `Delete`/`Backspace` da própria aba, anunciado por
+           * `aria-keyshortcuts` (ver `onKeyDown` acima), e há também "Fechar" no menu de contexto
+           * do strip. **Ninguém perde caminho**: o mouse mantém o ✕, o teclado já tinha o Delete.
            */}
-          <button
-            aria-label={translateNow('common.close')}
-            className="grid w-(--pane-tab-close-width) cursor-pointer place-items-center bg-transparent text-(--ui-text-tertiary) outline-none hover:text-foreground"
+          <span
+            aria-hidden
+            className="grid w-(--pane-tab-close-width) cursor-pointer place-items-center bg-transparent text-(--ui-text-tertiary) hover:text-foreground"
             data-slot="pane-tab-close"
             onClick={event => {
               event.preventDefault()
@@ -276,11 +275,9 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
                 event.stopPropagation()
               }
             }}
-            tabIndex={-1}
-            type="button"
           >
             <Codicon name="close" size="0.6875rem" />
-          </button>
+          </span>
         </span>
       )}
     </div>

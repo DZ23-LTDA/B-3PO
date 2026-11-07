@@ -6255,3 +6255,67 @@ nenhum "piorou" intermediário.
 | `axe` no desktop (27 rotas) | 89 `region` (T-15) + 3 `nested-interactive` (r50) |
 | testes web | 475/475 |
 | build web | exit 0 |
+
+---
+
+## G8 · ADENDO 53 — **desktop: zero violações de `axe` em 27 rotas** (era 92)
+
+**Rodada 97.** Placar final das duas superfícies:
+
+```
+antes:  desktop 92 nós (89 region + 3 nested-interactive)   web 14 nós
+depois: desktop  0 nós                                       web  0 nós
+```
+
+### `nested-interactive` 3 → 0: o ✕ deixou de ser um controle
+
+O ✕ da aba era `<button tabIndex={-1}>` **dentro** de `role="tab"`. A r293 já provou que
+`aria-hidden` não resolve — o elemento continuava focável, e o `axe` diz isso literalmente.
+
+**A saída foi tirar a interatividade, não o nome**: virou `<span aria-hidden>` sem `tabindex` e sem
+role — não é controle para a ARIA nem para o `axe`, e **continua clicável pelo mouse**. Quem usa
+teclado/leitor de tela tinha e continua tendo **dois** caminhos: `Delete`/`Backspace` na aba
+(anunciado por `aria-keyshortcuts`) e **"Fechar" no menu de contexto** do strip.
+
+> **Ninguém perdeu caminho.** O mouse manteve o ✕; o teclado já tinha o Delete. A diferença é que
+> agora o ✕ é declarado como o que sempre foi: **afordância de mouse**.
+
+### `region` 89 → 0: o `<main>` mudou de lugar, e a relação se inverteu
+
+**A causa**, medida na r92: a árvore de painéis é **irmã** do `<main>`, não filha — então tab strips e
+corpos de zona ficavam fora de qualquer landmark (`landmarkAcima: null`, 9-11 níveis acima).
+
+**Tentativa descartada (r92)**: `role="region"` no root da árvore → resolveu `region` e criou
+`landmark-main-is-top-level` em 11 rotas, porque o `<main>` ficava **dentro** dela.
+
+**A correção**: **a árvore inteira É o `main`**, e o `<main>` interno do pane de chat sai.
+
+```
+antes:  DIV(arvore) > zona > MAIN(pane)        ->  tab strips fora de landmark
+depois: MAIN(arvore) > zona > div(pane)        ->  tudo dentro do main
+```
+
+**Resultado**: `main=1` nas 27 rotas, `region` zero, `landmark-main-is-top-level` zero,
+`landmark-no-duplicate-main` zero.
+
+**O custo, declarado**: o `main` agora inclui os painéis laterais. A r289 recusou isso ("o `<main>`
+não engole a navegação"), e ela estava certa **para o layout antigo**, onde o sidebar era irmão do
+conteúdo. **Neste app o sidebar é um pane da mesma árvore** — num workspace de painéis, o conteúdo
+principal é o workspace, não um dos painéis.
+
+### O que ainda faltava: 5 nós no overlay de `/settings`
+
+O overlay abre num **portal**, fora da árvore. A r82 trocou seu `<main>` por `<div>` para não duplicar
+o `main` — e com isso removeu o landmark. Correção: `OverlayMain` ganhou `role="region"` +
+`aria-label` (continua `<div>`, pelo motivo da r82).
+
+### E o "layout regrediu" que não era regressão
+
+Depois de mover o `<main>`, minha checagem `main == pai` falhou em 30 de 30 combinações por **20 px**.
+Diagnóstico: `main` (824) + `<footer>` status bar (20) = pai (844). **A soma fecha exatamente.**
+
+O layout está certo; **o invariante é que era do layout antigo**, quando `main` era o pane interno e
+o status bar não era seu irmão. `scrollH=0` em todos os 30 casos.
+
+> **Um invariante antigo aplicado a uma estrutura nova acusa o certo como errado.** A pergunta certa
+> não era "`main == pai`", era "`main` + irmãos preenchem o pai sem sobra e sem scroll".

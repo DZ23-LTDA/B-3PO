@@ -106,9 +106,10 @@
       "id": "T-15",
       "what": "Decidir T-15 com a causa estrutural nomeada: <main> esta DENTRO de uma zona da arvore de paineis",
       "owner": "proprietario",
-      "status": "blocked",
+      "status": "done",
       "blocked_by": "decisao de produto: aceitar region(55) OU autorizar o refactor que tira <main> de dentro da zona (ai as duas regras passam)",
-      "measured_in": "r92 - a terceira via (1 region no root) foi tentada: 57->13 nos, mas criou landmark-main-is-top-level em 11 rotas; revertida e registrada no codigo"
+      "measured_in": "r92 - a terceira via (1 region no root) foi tentada: 57->13 nos, mas criou landmark-main-is-top-level em 11 rotas; revertida e registrada no codigo",
+      "done_in": "r97: o <main> virou o root da arvore de paineis; 89 nos de region -> 0"
     }
   ],
   "data": "06/11/2026",
@@ -163,5 +164,20 @@
     "color_contrast": "0 (o web e DARK-ONLY: --color-destructive-text #f87171; escurecer piorava)",
     "heading_order": "0 (aria-level=2 no CardTitle)",
     "label_content_name_mismatch": "0"
+  },
+  "axe": {
+    "desktop": {
+      "rotas": 27,
+      "nos": 0
+    },
+    "web": {
+      "rotas": 15,
+      "nos": 0
+    },
+    "region": "0 (<main> agora E o root da arvore de paineis)",
+    "nested_interactive": "0 (o X da aba virou <span aria-hidden>; Delete + menu de contexto fecham)",
+    "color_contrast": "0 (web dark-only: token de texto claro #f87171)",
+    "button_name": "0 (NamedSelect aplica aria-label; o kit descarta props)",
+    "heading_order": "0 (aria-level=2 no CardTitle)"
   }
 }

@@ -5184,6 +5184,7 @@
     "shell.modelOptions.updateFailed",
     "shell.modelOptions.useStandardSpeed",
     "shell.modelOptions.xhigh",
+    "shell.overlayContent",
     "shell.paneControls",
     "shell.paneTools",
     "shell.statusbar.agents",

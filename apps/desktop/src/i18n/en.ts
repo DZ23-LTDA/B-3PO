@@ -4718,6 +4718,7 @@ export const en: Translations = {
     paneControls: 'Pane controls',
     appControls: 'App controls',
     paneTools: 'Pane tools',
+    overlayContent: 'Panel content',
     modelMenu: enModelMenu,
     modelOptions: {
       noOptions: 'No options for this model',

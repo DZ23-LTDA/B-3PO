@@ -164,9 +164,9 @@ const renderWorkspacePane = () => (
      * `flex min-h-0 min-w-0 flex-1 flex-col` repete o contrato de layout que o `WiredPane` já
      * esperava do pai: sem isso, o pane perderia a altura e a rolagem do shell.
      */}
-    <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
       <WiredPane part="chatRoutes" />
-    </main>
+    </div>
   </WorkspacePageHeaderHostContext.Provider>
 )
 

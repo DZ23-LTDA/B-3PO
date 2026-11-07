@@ -3,7 +3,7 @@ import { Fragment, memo, type ReactNode, useEffect, useId, useState } from 'reac
 import { Button } from '@/components/ui/button'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { TabDropdown } from '@/components/ui/tab-dropdown'
-import { useI18n } from '@/i18n'
+import { translateNow, useI18n } from '@/i18n'
 import type { IconComponent } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +52,17 @@ interface OverlayNavItemProps {
 
 export function OverlaySplitLayout({ children, className }: OverlaySplitLayoutProps) {
   return (
+    /*
+     * r97 — `role="region"` no conteúdo do overlay.
+     *
+     * O overlay abre num PORTAL, fora da árvore de painéis que agora é o `<main>` do app. Sem um
+     * landmark próprio, tudo o que ele renderiza fica fora de qualquer landmark e o `axe` acusa
+     * `region` (5 nós em /settings). Continua `<div>` — não `<main>` — para não duplicar o `main`
+     * da árvore, que é a razão da r82.
+     */
     <div
+      aria-label={translateNow('shell.overlayContent')}
+      role="region"
       className={cn(
         // Narrow: one column, and pin rows to [nav-bar auto | main 1fr] — without
         // an explicit template the grid's default align-content:stretch splits the

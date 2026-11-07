@@ -66,7 +66,21 @@ export function LayoutTreeRoot({ children, titlebar = false }: { children?: Reac
      * continua no fluxo), enquanto `main` não-top-level pode quebrar o landmark MAIS importante
      * para leitores de tela. Revertido, e a causa estrutural ficou registrada no T-15.
      */
-    <div className="relative flex min-h-0 min-w-0 flex-1">
+    /*
+     * r97 — o root da árvore é o `<main>` do app.
+     *
+     * O `axe` acusava `region` em ~89 nós porque nada dentro da árvore de painéis estava em
+     * landmark: o `<main>` ficava DENTRO de uma zona, e a árvore é irmã dele. Marcar a árvore como
+     * `region` (r92) resolvia o `region` e criava `landmark-main-is-top-level` — troca ruim.
+     *
+     * Aqui a relação se inverte: a árvore inteira É o conteúdo principal do app, então ela vira o
+     * `main` e o `<main>` interno sai. `main` passa a ser top-level, único, e todo o conteúdo —
+     * tab strips, corpos de zona, páginas — fica dentro dele.
+     *
+     * Custo aceito: o `main` inclui os painéis laterais, que são PANES desta mesma árvore. Num app
+     * de painéis o conteúdo principal é o workspace inteiro, não um dos painéis.
+     */
+    <main className="relative flex min-h-0 min-w-0 flex-1">
       {/* THE SEAM INVARIANT: boundaries are drawn by the tree (one sash
           hairline per seam) — content mounted in a zone must not paint its
           own edge chrome. App components (asides, the shadcn sidebar) carry
@@ -109,6 +123,6 @@ export function LayoutTreeRoot({ children, titlebar = false }: { children?: Reac
           {children}
         </>
       )}
-    </div>
+    </main>
   )
 }

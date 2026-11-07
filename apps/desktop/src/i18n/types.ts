@@ -4133,6 +4133,8 @@ export interface Translations extends NoticeTranslations {
     windowControls: string
     /** r83: os dois clusters do titlebar precisam de nomes distintos (`landmark-unique`). */
     paneTools: string
+    /** r97: landmark do overlay (portal, fora do <main> da arvore). */
+    overlayContent: string
   minimizeWindow: string
   closeWindow: string
     paneControls: string
