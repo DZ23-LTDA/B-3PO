@@ -370,7 +370,8 @@
     "A-08": "Varredura estatica de canais IPC nao serve: registro em laco (ipcMain.handle com template literal) e invisivel para busca literal. 3 falsos positivos (hud-modifier:permission, screenshot:capture/permission). O instrumento valido e a varredura de console no app vivo, que mediu 0 erros em 27 rotas.",
     "A-09": "Titulo 'Projetos em Andamento' contradizia o KPI 'Projetos ativos 0': a secao ordena por recencia sem filtrar status. Renomeada para 'Projetos recentes'. E o en.ts tinha 13 de 31 chaves da home em portugues - traduzidas. es.ts sem a secao: cai no ingles por design (defineLocale faz merge).",
     "A-10": "/sofia e /projetos conferidas no renderizado: COERENTES. Sofia tem dependencia real (depende de t1) e execucoes (exec-e2e-001/002). /projetos tem formulario real, invariante 'sem criterio nao conclui' e contador 0 em andamento. Confirma que o rename da r30 estava certo. Acoes que MUTAM dados nao foram clicadas.",
-    "A-11": "6/6 modos conferidos clicando o cartao e lendo data-ambiente + grupos: empresa, engenharia, automacao, ia, estrategico, administracao - todos trocam. A-02 CONFIRMADO CORRIGIDO: Engenharia mostra Projetos, Trabalhos, Inteligencia. Medi errado 2x: 'select' nao existe (e label+radios) e o texto 'Empresa' casa o item da barra antes do cartao."
+    "A-11": "6/6 modos conferidos clicando o cartao e lendo data-ambiente + grupos: empresa, engenharia, automacao, ia, estrategico, administracao - todos trocam. A-02 CONFIRMADO CORRIGIDO: Engenharia mostra Projetos, Trabalhos, Inteligencia. Medi errado 2x: 'select' nao existe (e label+radios) e o texto 'Empresa' casa o item da barra antes do cartao.",
+    "A-12": "intro.test.tsx exigia 'Bem-vindo ao' de um fixture com initialLocale='en' - so passava porque o en.ts tinha 13 chaves em portugues. Depois da traducao (A-09) o teste acusou a correcao como falha. Corrigido para 'Welcome to' / 'Your platform for business management'. 325 testes verdes."
   },
   "registros_de_modulos": {
     "b3po-modulos.ts": "25 modulos - barra lateral e /busca",
@@ -461,5 +462,27 @@
     "6_de_6": true,
     "a02_corrigido": true,
     "seletor_correto": "button[aria-pressed] escopado, NAO [role=group] button por texto"
+  },
+  "objetivo_v4_concluido": {
+    "r33": "verificacao final: gate 14/14, tipos 0, 325 testes das areas afetadas",
+    "entregue": [
+      "6 modos com identidade e menus distintos",
+      "home com dados reais",
+      "Sofia/agentes/projetos",
+      "navegacao sem rota morta",
+      "inspecao desktop/web/mobile",
+      "13 documentos",
+      "9 capturas"
+    ],
+    "nao_entregue_por_decisao": [
+      "kind bot no terminal (B-02g)",
+      "matriz de plataformas",
+      "es.ts sem homeB3po (cai no ingles)"
+    ],
+    "nao_entregue_por_externo": [
+      "iOS (EXT-4)",
+      "Authenticode (EXT-3)",
+      "conector (EXT-6)"
+    ]
   }
 }

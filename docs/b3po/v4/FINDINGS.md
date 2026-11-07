@@ -515,6 +515,40 @@ não pelo texto.
 
 ---
 
+## A-12 · O teste pedia **português a um locale inglês** — e codificava o bug do A-09
+
+**Encontrado na r33**, ao rodar a verificação final: `intro.test.tsx` falhou depois da tradução do
+`en.ts` (A-09).
+
+```js
+// o fixture renderiza com initialLocale="en":
+render(<I18nProvider configClient={null} initialLocale="en"> ... </I18nProvider>)
+
+// e o teste exigia:
+expect(texto).toContain('Bem-vindo ao')
+expect(texto).toContain('Sua plataforma de gestão')
+```
+
+**O teste exigia português de um componente declaradamente em inglês.** Ele só passava porque o
+`en.ts` tinha 13 chaves em português.
+
+| | Antes | Depois |
+|---|---|---|
+| `en.ts` | 13 de 31 chaves em português | **0** |
+| `intro.test.tsx` | esperava `'Bem-vindo ao'` | espera `'Welcome to'` |
+
+**O teste não pegava o defeito — ele o preservava.** Quando o defeito foi corrigido, o teste acusou
+a correção como falha.
+
+### A lição
+
+> **Um teste que passa por causa de um bug é cúmplice.** Uma suíte verde não prova que a tradução
+> está certa quando o próprio teste afirma que o produto fala a língua errada.
+
+**Estado final**: `intro.test` **3/3** · suíte das áreas afetadas **325 passed**.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |
