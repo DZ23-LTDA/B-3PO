@@ -37,7 +37,8 @@ fase: G7
 |---|---|---|
 | Suíte completa do gateway | `NOT_TESTED` | `EXT-4` |
 | IDOR / isolamento multi-tenant | `EXISTE` — **não roda no Windows** | `tests/e2e/core/tenancy/test_two_tenant_gateway.py`: 3 perfis, turnos intercalados, `check_isolation`. Falha na coleta aqui: `signal.SIGKILL` não existe no Windows (r29) |
-| **SSRF / egress allowlist** | **NÃO EXISTE** | confirmado na r28: os allowlists do repo são de **entrada**, não de destino |
+| SSRF | **`DEFENDIDO` — 169 testes verdes** | `tools/url_safety.py` (548 linhas): `is_safe_url` de pré-voo, `_BLOCKED_HOSTNAMES` (metadata.*), bloqueio de IP privado/loopback e IPv4-mapped, e `ssrf_redirect_guard` em `gateway/platforms/base.py` que **revalida cada redirect** (fecha o bypass `302 → 169.254.169.254`). Nomes de parâmetro sensíveis em query string |
+| **Allowlist de egress (destino)** | **NÃO EXISTE** | não há whitelist de destinos: o modelo é **blocklist** de endereço privado. Defesa padrão contra SSRF; uma allowlist por conector é feature, não correção |
 | Path traversal | **`TESTADO`** — 7 testes verdes | `electron/hardening-traversal.test.ts` + `docs/b3po/audit/PATH-TRAVERSAL-R156.md`. **Não confina a uma raiz por decisão escrita**: o comentário no handler diz que confinar é decisão de produto, não check faltando (r29) |
 | Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
 | Migrações (banco/arquivo) | **`TESTADO` — 56 testes verdes** | desktop: `profile-migration` (565 linhas de teste), `tenant-migrate` + `tenant-migration`. Python: `gateway_migrate.py` (1097), `left_core_migration.py` (1021), `config_migrations.py` (826). **Limite medido**: `tenant-migrate` cobre **6 stores de negócio** e **não** inclui `agent-executions.json` |
@@ -112,3 +113,24 @@ filtra por `tenant_id`. Um registro de execucao sem o campo seria invisivel, e n
 
 **Nao afirmo que existem registros assim** — nao sei quando `tenant_id` entrou nesse store. O que afirmo:
 **se existirem, a migracao nao os alcanca**. Registrado na r23; confirmado o limite na r34.
+
+## SSRF — retratacao da r36
+
+Eu escrevi, na r28 e repetei nas seguintes: **"SSRF / egress allowlist: NAO EXISTE"**. **Estava errado.**
+
+| Pecа | Onde |
+|---|---|
+| `is_safe_url` (pre-voo) | `tools/url_safety.py` (548 linhas) |
+| `_BLOCKED_HOSTNAMES` (`metadata.google.internal`, …) | idem |
+| IP privado, loopback, IPv4-mapped (`::ffff:127.0.0.1`) | idem |
+| **Revalidacao de redirect** | `gateway/platforms/base.py::ssrf_redirect_guard` |
+| Nomes de parametro sensiveis em query string | `url_safety.py` |
+
+O proprio codigo nomeia o ataque que fecha: *"a public URL 302-ing to `http://169.254.169.254/` would
+bypass the pre-flight `is_safe_url()`"*.
+
+**Medido**: 169 testes verdes em 5 arquivos (`test_url_safety*`, `test_remote_fetch_ssrf_guard`,
+`test_slack_download_ssrf`).
+
+**O que continua verdadeiro**: nao ha **allowlist** de destinos — o modelo e **blocklist** de endereco
+privado. Uma allowlist por conector seria feature nova, nao correcao de falha.
