@@ -209,6 +209,7 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 | **B-09** | **Uma** jornada completa: pedido → aprovação → recebimento → estoque → financeiro | com RBAC e transação, exercitada ponta a ponta |
 | **B-10** | Teclado na home (Tab pelos 6 modos, ações e "Ver todos") | teste de foco |
 | **B-11** | Resolver o piso de ~509px da casca (R7) | sem clip entre 400 e 509 |
+| **B-12a** | **Headings na tela de configurações** (r21: 0 h1/h2/h3 em 584 linhas) | `page-has-heading-one` deixa de disparar; navegação por seção funciona |
 
 ## P3 — depois
 

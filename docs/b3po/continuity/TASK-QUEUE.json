@@ -342,7 +342,7 @@
     "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
     "A-04": "sofia.status() responde { error }",
     "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)",
-    "A-06": "/settings abre em ?page=main e nao renderiza configuracao (0 headings em 8s); rota tem 48 consumidores; NAO corrigido: falta saber se ?page=main e secao valida e se a rota foi substituida por Estrutura/Privacidade"
+    "A-06": "CORRIGIDO o diagnostico r21: /settings RENDERIZA (modelo, provedor, raciocinio, janela de contexto). O defeito real e que a tela tem ZERO h1/h2/h3 em 584 linhas - page-has-heading-one dispara com razao. Eu errei 2x: na r19 um filtro de texto removeu o conteudo; na r21 confundi 'sem heading' com 'sem pagina'."
   },
   "registros_de_modulos": {
     "b3po-modulos.ts": "25 modulos - barra lateral e /busca",

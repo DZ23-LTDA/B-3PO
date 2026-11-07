@@ -147,39 +147,49 @@ por subprocesso.
 
 ---
 
-## A-06 · `/settings` abre em `?page=main` e **não renderiza configuração nenhuma**
+## A-06 · A tela de **configurações não tem um único heading** — e eu errei o diagnóstico duas vezes
 
-**Medido (r19)** no app real, 1440×900, esperando **8 segundos**:
+**O que eu escrevi na r19 (errado):** *"`/settings` abre em `?page=main` e não renderiza configuração
+nenhuma"*.
+
+**O que a r21 mediu:** o conteúdo **está lá**. As últimas linhas da página:
 
 ```
-hash:                      #/settings?page=main
-h1:                        []          ← nenhum
-h2:                        []          ← nenhum
-headings na página:        0
-conteúdo (fora da barra):  Empresa, Engenharia, Automação, IA e Agentes, Estratégico,
-                           Administração, Nova conversa, Capacidades, …
-axe:                       nenhuma violação
+Modelo principal · Provedor · Modelo · Configurar provedor · Padrões · Raciocínio
+Janela de contexto do modelo principal (substituir) · Buscar · Ctrl · K
 ```
 
-**A rota existe e tem 48 consumidores** (`profile-switcher`, `command-palette`, `context-menu`,
-`use-keybinds`, `onboarding-end`, `notifications`…). Todo mundo navega para `/settings` — e o que
-aparece é **o shell do chat**, com a barra lateral e nada da tela de configuração.
+A tela de configurações abre **num painel** (`?page=main` = o painel principal), e o que eu li como
+"página vazia" era **a barra lateral mais o conteúdo que meu próprio filtro de texto removeu**.
 
-### O que eu **não** sei, e por que não corrigi
+### Por que eu errei duas vezes
 
-1. **`?page=main` é uma seção válida?** A URL ganha esse parâmetro sozinha. Se `main` deveria abrir
-   uma seção de configuração, ela não está renderizando. Se `main` significa "volte ao chat", então a
-   rota está fazendo o que promete — e o nome é que engana.
-2. **A rota foi substituída?** A barra lateral tem **Estrutura** e **Privacidade** sob CONFIGURAÇÃO —
-   telas específicas. Pode ser que `/settings` seja a entrada legada e as telas reais sejam outras.
+| Tentativa | O que fiz | O que deu errado |
+|---|---|---|
+| r19 | `document.body.innerText`, filtrando linhas que começam com nomes de grupo | o filtro removeu justamente o conteúdo, e eu li o resto como "shell" |
+| r21 (1) | contei `h1/h2/h3` | **0 headings** — e eu interpretei "sem heading" como "sem página" |
 
-**Corrigir sem responder (1) e (2) seria chutar.** O que este documento faz é registrar que **a
-medição de `axe` nessa rota é instável** — o censo marcou `page-has-heading-one(1)` uma vez, e três
-medições seguintes deram zero. Numa página **sem nenhum heading**, essa regra deveria disparar sempre;
-se não dispara, ou a página não está no estado que eu medi, ou a regra cai em `incomplete`.
+**"Não tem heading" e "não tem conteúdo" são coisas diferentes.** Eu confundi as duas.
 
-**Impacto**: nenhum no fluxo principal — quem usa o app navega pela barra lateral, não digitando a
-URL. O `axe` do censo das 27 rotas fica em **0** fora esta.
+### O defeito que **é** real
+
+```
+headings (h1,h2,h3) na página inteira: 0
+```
+
+**A tela de configurações do produto não tem nenhum elemento de heading.** Nem `<h1>` de título, nem
+`<h2>` por seção. Ela tem 584 linhas de componente, com painéis de modelo, aparência, plugins,
+conexões, voz, atalhos — e **todos** os "títulos" são `<div>`/`<span>` estilizados.
+
+**Consequência para quem usa leitor de tela**: não há como navegar por seções. A navegação por
+heading — que é o atalho mais usado — não encontra nada. É a regra `page-has-heading-one` do axe
+disparando com razão: o censo de 27 rotas mediu **1 nó**, e ele é legítimo.
+
+### O que não corrigi, e por quê
+
+Adicionar heading a **cada painel** de uma tela de 584 linhas é mudança de superfície inteira, com
+risco de quebrar layout (os títulos são estilizados como div). Fica como o item de a11y mais valioso
+que resta, com o número que o justifica: **uma tela, zero headings**.
 
 ---
 
