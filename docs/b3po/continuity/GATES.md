@@ -5433,3 +5433,59 @@ e **o cap de 5 com restore da mais antiga**.
 **O gate de operação deixa de ter `FAIL`.** O que era "uma decisão de arquitetura" era **trabalho que eu
 não queria fazer e chamei de decisão** — e a diferença aparece no nome do item da fila, que dizia `done`
 há 13 rodadas.
+
+---
+
+## G8 · ADENDO 49 — a tela de `/backups` com o mesmo rigor das outras
+
+**Rodada 89.** A tela do restore foi construída na r88. Ela não passou pelo mesmo tratamento que as de
+gás/medidor receberam nas r80–r87 — então passou agora.
+
+### A matriz
+
+| Viewport | Layout | `axe` |
+|---|---|---|
+| 390×844 | `main` 790 = pai 790 · sem scroll horizontal | `region(1)` |
+| 768×1024 | 970 = 970 | `region(3)` |
+| 1024×768 | 714 = 714 | `region(3)` |
+| 1440×900 | 846 = 846 | `region(3)` |
+| 1707×1019 | 965 = 965 | `region(3)` |
+
+**`scrollable-region-focusable`: ausente nos cinco.** A tela não tem tabela larga (a tabela de versões
+só abre por arquivo e tem 4 colunas curtas), então não precisou do wrapper da r87 — e o `axe` confirmou
+em vez de eu supor.
+
+**Foco visível: 8/8** por Tab.
+
+### E a i18n, com 5 testes
+
+| Teste | Por que importa |
+|---|---|
+| título, intro e resumo em inglês | `2 files · 3 versions` — o plural muda de forma por idioma |
+| cabeçalhos **Saved on · Size · Version** e **Restore** | tabela que só aparece ao abrir um arquivo |
+| os mesmos em pt-BR | `2 arquivos · 3 versões` |
+| **a confirmação cita arquivo e data** | `Restore inventory.json to the version from 06/11 18:20?` — **não é um "tem certeza?"** |
+| **o plural nos dois idiomas** | 1 vs 3/5/12 |
+
+**O 4º teste é o que protege o usuário.** A frase do `confirm` é **a única coisa** entre um clique errado
+e a perda do dado: ela precisa dizer *o que* volta e *quando* aquilo foi gravado. Um teste que só
+verificasse "existe uma confirmação" deixaria passar um `"Tem certeza?"` genérico.
+
+### Onde a série chegou
+
+| Rodada | O que construí | O que provei |
+|---|---|---|
+| r78 | vasilhame em comodato | 17 testes · fluxo E2E · captura |
+| r79 | leitura de medidor | 19 testes · fluxo E2E · captura |
+| r80 | — | RBAC dos 6 canais (13 testes) · 6 ratchets |
+| r81 | wrapper e padding | 5 viewports · **comparação com as vizinhas** |
+| r83 | `h1`, `th`, `role=region` | `axe` **sem filtro**: 84 → 57 |
+| r84 | i18n | 62 substituições |
+| r85–r86 | — | 8 + 7 testes de tradução, incluindo **componente montado** |
+| r87 | wrapper focável | `axe` × **4 viewports** |
+| r88 | **restore** | 9 testes · fluxo em runtime |
+| r89 | — | matriz 5 viewports + 5 testes de i18n na tela do restore |
+
+**Cada linha é uma tela ou um canal que passou a ter: modelo testado, permissão exercitada, acessibilidade
+medida em 4+ viewports, texto em dois idiomas e uma captura.** Não é o mesmo que "pronto" — é **o que eu
+consigo provar**, e o que não consigo está na fila com nome e dono.
