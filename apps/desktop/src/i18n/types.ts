@@ -2710,6 +2710,27 @@ export interface Translations extends NoticeTranslations {
     resetToMine: string
   }
   gatewayGroupOpen: GatewayGroupOpenCopy
+  homeB3po: {
+    tituloA: string
+    tituloB: string
+    subtitulo: string
+    modosTitulo: string
+    escolherModo: string
+    agentesTitulo: string
+    agentesVazio: string
+    irParaAgentes: string
+    projetosTitulo: string
+    projetosVazio: string
+    irParaProjetos: string
+    visaoTitulo: string
+    kpiAgentes: string
+    kpiProjetosAtivos: string
+    kpiProjetosConcluidos: string
+    kpiNota: string
+    erroCarregar: string
+    indisponivel: string
+    verTodos: string
+  }
   agents: {
     extendedTranscript: string
     transcriptTruncated: string

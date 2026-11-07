@@ -85,14 +85,42 @@ export function projetosDisponivel(): boolean {
   return bridge() !== null
 }
 
-export async function listarProjetos(): Promise<ProjetoRow[]> {
+/**
+ * A leitura **honesta** de projetos (r1 do V4).
+ *
+ * `listarProjetos()` tinha o mesmo defeito dos agentes: `[]` tanto para "não há projeto" quanto
+ * para "a ponte não respondeu" — e ainda devolvia `[]` quando a resposta trazia `error` em vez de
+ * `projetos`. Na home isso viraria *"nenhum projeto"* para quem tem projetos.
+ *
+ * A resposta com `error` é `estado: 'erro'` **com a mensagem**, não lista vazia.
+ */
+export interface CargaDeProjetos {
+  erro?: string
+  estado: 'erro' | 'indisponivel' | 'ok'
+  projetos: ProjetoRow[]
+}
+
+export async function listarProjetosComEstado(): Promise<CargaDeProjetos> {
   const api = bridge()
 
-  if (!api) return []
+  if (!api) return { estado: 'indisponivel', projetos: [] }
 
-  const r = await api.listar()
+  try {
+    const r = await api.listar()
 
-  return 'projetos' in r ? r.projetos : []
+    if ('projetos' in r) return { estado: 'ok', projetos: r.projetos }
+
+    const erro = (r as { error?: string }).error
+
+    return { erro: erro ?? 'resposta sem projetos', estado: 'erro', projetos: [] }
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : String(e), estado: 'erro', projetos: [] }
+  }
+}
+
+/** O contrato antigo, preservado. */
+export async function listarProjetos(): Promise<ProjetoRow[]> {
+  return (await listarProjetosComEstado()).projetos
 }
 
 export async function projetosAtivos(): Promise<ProjetoRow[]> {

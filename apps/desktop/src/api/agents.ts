@@ -80,12 +80,45 @@ export function agentsAvailable(): boolean {
   return Boolean(p && typeof p.roster === 'function' && typeof p.approvals === 'function')
 }
 
-export async function listarAgentes(): Promise<AgenteDaLista[]> {
+/**
+ * O estado de uma leitura, para a tela não confundir vazio com falha (r1 do V4).
+ *
+ * O DEFEITO QUE ISTO CORRIGE
+ *
+ * `listarAgentes()` devolvia `[]` nos DOIS casos — lista vazia e erro de API. Na home isso viraria
+ * *"nenhum agente"* para quem tem agentes e cuja ponte falhou: um **zero enganoso**, que a decisão
+ * de produto de 07/11 proíbe explicitamente. Estado diferente, tela diferente.
+ */
+export type EstadoDeLeitura = 'erro' | 'indisponivel' | 'ok'
+
+export interface CargaDeAgentes {
+  agentes: AgenteDaLista[]
+  erro?: string
+  estado: EstadoDeLeitura
+}
+
+/**
+ * A leitura **honesta** do roster — distingue indisponível, falha e vazio.
+ *
+ * É a implementação primária: `listarAgentes()` virou um wrapper para não quebrar quem já chamava.
+ */
+export async function listarAgentesComEstado(): Promise<CargaDeAgentes> {
+  const p = ponte()
+
+  if (!p || typeof p.roster !== 'function') return { agentes: [], estado: 'indisponivel' }
+
   try {
-    return (await ponte()?.roster())?.agentes ?? []
-  } catch {
-    return []
+    const r = await p.roster()
+
+    return { agentes: r?.agentes ?? [], estado: 'ok' }
+  } catch (erro) {
+    return { agentes: [], erro: erro instanceof Error ? erro.message : String(erro), estado: 'erro' }
   }
+}
+
+/** O contrato antigo, preservado: quem só quer a lista continua funcionando. */
+export async function listarAgentes(): Promise<AgenteDaLista[]> {
+  return (await listarAgentesComEstado()).agentes
 }
 
 export async function listarExecucoes(filtro?: { owner?: string; task_id?: string }): Promise<ExecucaoListada[]> {
