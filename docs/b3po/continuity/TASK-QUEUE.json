@@ -130,7 +130,16 @@
     "total_afirmacoes_nao_vou_fazer": 10,
     "superadas": 9,
     "aberta": 1,
-    "aberta_id": "T-15"
+    "aberta_id": "T-15",
+    "risco_tecnico_retratado": [
+      {
+        "rodada": "V4-r5",
+        "afirmei": "36 stores sem escrita atomica (risco HIGH)",
+        "real": "35 atomicos (writeFile temp + rename), 0 sem rename, 1 delega ao main.ts por projeto",
+        "causa": "contei so writeFileSync; os stores usam node:fs/promises async",
+        "correcao": "RISKS.md R1 de HIGH para LOW; electron/store-escrita-atomica.test.ts (5 testes)"
+      }
+    ]
   },
   "a11y_censo": {
     "rotas": 27,
@@ -290,5 +299,14 @@
     "detectado_por": "wrapup_check exigindo typecheck",
     "restaurado": "git checkout 58058b2acc~1 -- <arquivo>",
     "verificado": "typecheck PASS, 17/17 testes"
+  },
+  "verificacao_final_r5": {
+    "atomicidade": "PROVADA por comportamento: nao sobra .tmp, substitui, .tmp orfao nao impede, corrompido nao lanca",
+    "censo": {
+      "atomicos": 35,
+      "delega": 1,
+      "sem_rename": 0,
+      "total": 36
+    }
   }
 }
