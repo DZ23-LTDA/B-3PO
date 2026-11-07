@@ -395,6 +395,35 @@ E a instrumentação do `readFileSync` não pegou: o bundle importa a função *
 o `config.yaml` do `HERMES_HOME`?* A resposta exige um `console.error` **dentro de
 `configuredElectronFlags`**, no fonte.
 
+### r20 — a última não classificada fechou, e era o teste
+
+A r19 falhou porque instrumentou o lugar errado (preload, com import estático). A r20 instrumentou
+**dentro de `configuredElectronFlags`**, no fonte que o teste empacota — e a primeira linha já mostrou:
+
+```
+[dbg] FALHOU lendo config em
+  /Users/lmpra/AppData/Local/Temp/…/C:\Users\lmpra\AppData\Local\Temp\…\home-uVUo20
+```
+
+**O `home` chega mutilado**: prefixo POSIX sobre caminho Windows.
+
+**Causa**: o teste faz `Object.defineProperty(process, 'platform', { value: 'linux' })`, e o resolvedor
+escolhe `path.posix`. `path.posix.resolve('C:\\Users\\…')` trata `C:` como segmento relativo e
+prefixa o cwd — provado direto:
+
+```
+posix.resolve('C:\Users\lmpra\…\home-x')
+  → /IA-Workspace/…/C:\Users\lmpra\…\home-x
+```
+
+**É a regra do próprio repositório, violada pelo teste**: *"host-specific behaviour is tested on that
+host, never by faking sys.platform"*.
+
+**Nenhum defeito de produto. As 27 estão classificadas.**
+
+**Correção proposta, não aplicada**: marcar os 3 como Linux-only, ou dar a eles um `home` POSIX quando
+fingem POSIX. Não aplico porque desabilitar teste exige decisão de quem cuida do CI.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

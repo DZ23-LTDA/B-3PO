@@ -114,29 +114,69 @@ npx vitest run \
 Ambiente: Windows 11, Node do ambiente do projeto, sem `HERMES_HOME` especial.
 Resultado medido: **17 failed · 206 passed · 6 skipped**.
 
-## 5. `bundle-electron-main` (3) — `NOT_CLASSIFIED`, e a r19 tentou e falhou
+## 5. `bundle-electron-main` (3) — **CLASSIFICADO na r20: ambiente, não produto**
 
-**A r19 instrumentou o preload do teste para ver por que o entry empacotado não enxerga o config.**
-Dois "achados" apareceram e **os dois eram artefato do meu próprio instrumento**:
+### O sintoma
 
-| "Achado" | O que era |
+```
+expected { relaunched: ['.', '--ozone-platform=x11'] }
+received --ozone-platform=wayland
+```
+
+### Como foi descoberto
+
+A r19 tentou instrumentar o preload e falhou (dois falsos achados por truncamento e por patch em
+import estático). A r20 instrumentou **dentro de `configuredElectronFlags`**, no fonte — que é o que o
+teste empacota. A primeira linha já mostrou tudo:
+
+```
+[dbg] FALHOU lendo config em
+  /Users/lmpra/AppData/Local/Temp/vitest-Okz7t2/hermes-electron-entry-mc7dVx/C:\Users\lmpra\AppData\Local\Temp\vitest-Okz7t2\hermes-electron-entry-mc7dVx\home-uVUo20
+  ENOENT
+```
+
+### A causa
+
+O `home` chega **mutilado**: um prefixo POSIX colado na frente de um caminho **Windows**.
+
+O resolvedor escolhe a biblioteca de caminho pela plataforma:
+
+```js
+const paths = platform === 'win32' ? path.win32 : path.posix
+```
+
+E o teste faz o processo filho **fingir Linux**:
+
+```js
+Object.defineProperty(process, 'platform', { value: 'linux' })
+```
+
+Com `platform='linux'`, `path.posix.resolve('C:\Users\…')` trata `C:` como **segmento relativo** e
+prefixa o cwd (`/Users/lmpra/…`) — em vez de devolver o caminho absoluto do Windows.
+
+**O produto está correto**: numa máquina Linux real, `HOME` é POSIX e `path.posix` resolve certo.
+**O teste mente sobre a plataforma mantendo caminhos do Windows.**
+
+### É a própria regra do repositório, violada pelo teste
+
+> *"host-specific behaviour is tested on that host with `@pytest.mark.platforms(...)`, **never by faking
+> `sys.platform`**"* — AGENTS.md
+
+Estes 3 testes fazem exatamente o que a regra proíbe: fingem `process.platform` para exercitar
+comportamento de Linux sobre um sistema de arquivos Windows.
+
+### O que fica
+
+| Item | Estado |
 |---|---|
-| `HERMES_HOME` no filho é a raiz, não o `home-XXXX` | **truncamento**: a string tem 162 caracteres e eu cortava em 110 — o sufixo `home-` ficava fora da tela |
-| `platform=win32` no filho | o `console.error` foi inserido **antes** do `Object.defineProperty(process, 'platform', { value: 'linux' })` |
+| As funções puras (`wslgLaunchArgs`, parser) | **corretas** — 3 testes isolados provam |
+| O `entry.ts` | **correto** — implementa a precedência |
+| O teste | **não roda em Windows** — falso vermelho permanente |
+| Defeito de produto | **nenhum** |
 
-E a instrumentação do `readFileSync` **não funcionou**: o bundle importa `readFileSync` estaticamente,
-então trocar a propriedade do módulo depois não afeta o import já vinculado.
-
-**Portanto: continua `NOT_CLASSIFIED`.** O que **permanece medido e verdadeiro**:
-
-- as funções puras estão **corretas** (3 testes: parser, precedência, escolha padrão);
-- `entry.ts` implementa a precedência certa (`explicitOzonePlatform(electronFlags)` vence);
-- o resolvedor devolve `env.HERMES_HOME` antes de qualquer checagem;
-- os 3 testes falham de forma determinística (não é flakiness).
-
-**A pergunta que falta** é específica: *o entry empacotado lê `config.yaml` do `HERMES_HOME` que o
-teste cria?* Um `console.error` dentro de `configuredElectronFlags` (no fonte, não em preload)
-responderia — e não foi feito.
+**Correção proposta** (não aplicada — afeta CI): marcar os 3 como Linux-only, como a regra manda. Não
+apliquei porque *desabilitar teste* exige decisão de quem cuida do CI, e porque a alternativa correta
+é o teste usar um `home` **POSIX** quando finge POSIX.
 
 ## 6. O que **foi** confirmado depois da primeira versão deste documento
 
@@ -156,7 +196,7 @@ E, isolado, `desktop-plugin-install` mostra **3 falhas** — as 2 de CRLF **e** 
 | Dependência externa (SSH, certificado, GPU Linux) | 5 | não |
 | Config do git na máquina (`autocrlf`) | 2 | não |
 | Privilégio do Windows (symlink) | 1 | não |
-| **Não classificado** (`bundle-electron-main`) | **3** | **não sei** |
+| Teste que finge Linux sobre caminhos Windows | 3 | não |
 | Só sob carga | 10 | não |
 
 **Nenhuma das 27 é defeito de produto comprovado. Mas 3 não estão classificadas, e eu não as chamo de
