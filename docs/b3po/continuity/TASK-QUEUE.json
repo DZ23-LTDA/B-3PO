@@ -397,7 +397,13 @@
       "intro.test.tsx: useNavigate fora de Router"
     ],
     "corrigidas": 3,
-    "novas_apos_correcao": "audit-store e desktop-installation — FLAKY sob carga, 26/26 isoladas",
+    "novas_apos_correcao": "CONFIRMADO flaky na r20: nao apareceram na re-medida",
     "portao_de_commit": "gate + tipos + testes antes de commitar; recusa com vermelho"
+  },
+  "suite_v4_r20": {
+    "resultado": "27 failed | 19017 passed | 229 skipped (19273)",
+    "igual_ao_baseline": true,
+    "minhas": 0,
+    "as_2_da_r19": "flaky sob carga - nao apareceram nesta rodada"
   }
 }

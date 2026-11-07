@@ -74,14 +74,35 @@ data: 2026-11-07
 commitar** com qualquer vermelho. Na r16 eu commitei duas vezes com verificação falhando; agora não
 passa.
 
-### As 2 novas que sobraram — **flaky sob carga, 26/26 isoladas**
+### r20: re-medida depois das correções — **27, o baseline exato**
 
-| Arquivo | Isolado |
-|---|---|
-| `electron/audit-store.test.ts` | **passa** |
-| `electron/desktop-installation.test.ts` | **passa** |
+```
+$ npx vitest run
+  Tests  27 failed | 19.017 passed | 229 skipped (19.273)
+```
 
-`npx vitest run electron/audit-store.test.ts electron/desktop-installation.test.ts` → **26 passed**.
+**As três regressões sumiram.** E `audit-store` e `desktop-installation` — as duas que eu tinha
+marcado como "novas" na r19 — **não aparecem nesta rodada**: confirmado que eram flaky sob carga
+(26/26 isoladas).
+
+| Rodada | Falhas | Minhas |
+|---|---:|---:|
+| r107 (antes do V4) | 27 | 0 |
+| r19 (depois de 12 rodadas de mudança) | 32 | **3** |
+| **r20 (depois da correção)** | **27** | **0** |
+
+**O número voltou ao baseline sem remover teste, sem desabilitar check e sem esconder componente.**
+
+### As duas "novas" da r19 eram flaky
+
+| Arquivo | Isolado | Na suíte |
+|---|---|---|
+| `electron/audit-store.test.ts` | passa | falhou uma vez |
+| `electron/desktop-installation.test.ts` | passa | falhou uma vez (362 s de duração) |
+
+**Passar isolado e falhar sob carga não é defeito de produto** — é o teste sensível a tempo. Fica
+registrado, e é por isso que o `notes` desta suíte precisa dizer que uma falha de carga não é
+veredito.
 
 ### As 27 de baseline, por natureza
 
