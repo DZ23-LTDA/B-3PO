@@ -594,7 +594,14 @@ const styles = StyleSheet.create({
   },
   rowBody: { color: '#8f9bb3', fontSize: 13, lineHeight: 18, marginTop: 4 },
   rowTitle: { color: '#e8eefc', fontSize: 15, fontWeight: '600' },
-  screen: { backgroundColor: '#0b0d12', flex: 1 },
+  // r97: `SafeAreaView` do react-native é NO-OP no Android — medido no emulador, o wordmark
+  // desenhava por cima do relógio do sistema. O inset vem de `StatusBar.currentHeight` (0 no iOS,
+  // onde o SafeAreaView já resolve).
+  screen: {
+    backgroundColor: '#0b0d12',
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0,
+  },
   tagline: { color: '#8f9bb3', fontSize: 14 },
   wordmark: { color: '#2f6bff', fontSize: 26, fontWeight: '700', letterSpacing: -0.5 }
 })

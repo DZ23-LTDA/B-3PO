@@ -6319,3 +6319,66 @@ o status bar não era seu irmão. `scrollH=0` em todos os 30 casos.
 
 > **Um invariante antigo aplicado a uma estrutura nova acusa o certo como errado.** A pergunta certa
 > não era "`main == pai`", era "`main` + irmãos preenchem o pai sem sobra e sem scroll".
+
+---
+
+## G7 · ADENDO 12 — o app Android **rodou num emulador pela primeira vez** (e mostrava um bug de safe-area)
+
+**Rodada 97.** Havia um emulador conectado (`emulator-5554`). O `mobile/` tinha 169 testes passando e
+**a11y só estática** — nunca tinha sido aberto. Abri.
+
+### O app funciona
+
+```
+$ adb shell dumpsys window
+mCurrentFocus=Window{… com.dz23.b3po/com.dz23.b3po.MainActivity}
+$ adb logcat -d -b crash | grep com.dz23.b3po
+(nenhum)
+```
+
+Captura: `docs/b3po/evidence/mobile-runtime-r97.png` — a tela de entrada renderiza **em português**,
+tema escuro, com o card "Sem conexão com o computador" e o campo de pareamento.
+
+### O bug que só aparece rodando
+
+```
+B3PO
+09:56        <- o wordmark desenha POR CIMA do relógio do sistema
+```
+
+**Causa**: `SafeAreaView` **do `react-native`** — que é **no-op no Android** (só aplica inset no iOS). O
+app nunca teve inset de status bar no Android; isso não aparece em teste unitário nem em typecheck,
+porque o código está sintaticamente correto e tipado.
+
+**Correção**: `paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0` no
+`styles.screen`. `react-native-safe-area-context` não está instalado; se entrar, esta linha sai.
+
+`npm run typecheck` PASS · `gradlew assembleRelease` **BUILD SUCCESSFUL**.
+
+### E a verificação em aparelho ficou **BLOQUEADA pelo emulador**
+
+| Tentativa | Resultado |
+|---|---|
+| 1ª captura (antes do fix) | **funcionou** — é a prova acima |
+| instalar o build novo | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` (assinatura diferente da instalada) |
+| desinstalar + instalar | **`Failure calling service package: Broken pipe`** — o `system_server` do emulador morreu |
+| `adb reboot` | voltou (`boot_completed=1`) |
+| instalar de novo | instalou, mas `mCurrentFocus = Application Not Responding: com.android.systemui` |
+| aguardar 30 s + relançar | **o `systemui` continua em ANR** |
+
+**O emulador está instável, não o app.** Evidência: o crash buffer registra
+`Cmdline: system_server` · `Abort message: 'Caused HeapTaskDaemon failure : SuspendAll timeout'` — é o
+processo **de sistema** do Android abortado, em duas ocasiões.
+
+**Estado honesto**: `BLOCKED_BY_EXTERNAL_DEPENDENCY` — **ação de desbloqueio**: reiniciar o emulador
+por completo (`emulator -avd <nome> -wipe-data` ou o AVD Manager), que é operação de ambiente do dono.
+
+### O que a rodada muda no G7
+
+| Antes | Agora |
+|---|---|
+| "mobile: a11y SÓ estática, sem aparelho conectado" | **app rodou, captura real, 1 bug corrigido** |
+| nenhuma evidência de runtime | `mobile-runtime-r97.png` |
+| — | **1 bloqueio externo nomeado**: emulador com `system_server` instável |
+
+**Nenhuma afirmação sobre o mobile vai além disto**: rodou uma vez, numa tela, num emulador instável.
