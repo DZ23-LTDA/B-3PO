@@ -26,7 +26,7 @@ fase: G7
 
 | ID | Pergunta | Estado atual | Por que não decidi |
 |---|---|---|---|
-| `DEC-1` | **Onde vive o cliente canônico do gateway?** O `session.create` é RPC e está em `src/api/`. O G1 exige que a execução não dependa do renderer | **não iniciado** | mover a fronteira é arquitetura, não ajuste; as duas opções estão em `SOFIA_INTEGRATION.md` §3 |
+| ~~`DEC-1`~~ | **RESOLVIDA na r24** — o cliente canônico **fica no renderer**. O goal manda *integrar, não reescrever*; reimplementar `session.create` no main seria reescrever. A autorização permanece no main; só o transporte é do renderer. Implementada em `daaef95e32`/`3a42476f06` |
 | `DEC-2` | **Identidade do web**: rebrandar o dashboard do Hermes, ou declará-lo o dashboard do runtime? | web = Hermes upstream | decisão de produto; a matriz registra o estado real |
 | `DEC-3` | **Seis modos no mobile**: portar, ou assumir o app como cliente de conversa? | ausentes | idem |
 | `DEC-4` | **Testes que fingem `platform`**: marcar como Linux-only (regra do repo) ou dar a eles um `home` POSIX? | 3 falhas permanentes no Windows | desabilitar teste exige decisão de quem cuida do CI |
@@ -42,7 +42,7 @@ fase: G7
 | Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
-| SBOM / dependency audit | `NOT_TESTED` | `npm audit` / `pip-audit` não rodados |
+| SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — todas DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** no ambiente de teste |
 | Atualização / rollback do desktop | `NOT_TESTED` | não exercitado |
 | iOS · Android nesta rodada | `NOT_TESTED` | a inspeção de aparelho é de 07/11 (r18 do V4) |
 
