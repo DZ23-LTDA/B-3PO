@@ -1,5 +1,5 @@
 {
-  "round": 104,
+  "round": 105,
   "queue": [
     {
       "id": "T-01",
@@ -261,5 +261,25 @@
     "guarda_alteracao": "fecharComGuarda: consulta $dirtyPreviewUrls e usa o confirm() do app",
     "defeito_achado": "$dirtyPreviewUrls era registro MORTO - escrito pelo editor e lido por ninguem (o 'ponto de modificado' nunca foi ligado)",
     "conservadora_por_escolha": "pergunta se QUALQUER preview esta sujo; errar para o lado de perguntar"
+  },
+  "verificacao_final_r105": {
+    "suite": {
+      "total": 19231,
+      "falhas": 36,
+      "preexistentes": 27,
+      "minhas": 1,
+      "corrigidas": 1,
+      "flaky_isoladas_passam": "55/55"
+    },
+    "fix": "ipc-invariants: o detector de metodos casava CHAMADA como declaracao; restringido ao corpo de class",
+    "axe": {
+      "web": "0 em 15 rotas",
+      "desktop": "0 em 27 rotas",
+      "nota": "1 medicao isolada deu 1 no; 3 passagens seguintes deram 0 e nao reproduzi"
+    },
+    "web": {
+      "build": "exit 0",
+      "testes": "478/478"
+    }
   }
 }

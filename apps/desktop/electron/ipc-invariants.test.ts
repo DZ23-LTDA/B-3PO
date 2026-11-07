@@ -155,17 +155,43 @@ describe('invariantes dos stores', () => {
    * (que ficam na coluna 0) nem métodos privados (`private async`), que são internos e podem ter
    * nomes repetidos em classes diferentes.
    */
-  function metodosPublicos(fonte: string): string[] {
-    const nomes: string[] = []
+function metodosPublicos(fonte: string): string[] {
+  /*
+   * r105 — só o que está DENTRO de um corpo de `class`.
+   *
+   * A versão anterior casava `^ {2}nome(` sem olhar contexto e portanto contava **chamada** de
+   * helper de módulo como se fosse método: `tariff-store.ts` chama `inteiroOuNulo(...)` com dois
+   * espaços de recuo dentro de uma função e era acusado de "declarado 2 vezes".
+   *
+   * Restringir ao corpo da classe **fortalece** a regra: continua pegando método público duplicado
+   * de verdade e deixa de acusar chamada de função livre.
+   */
+  const nomes: string[] = []
+  let dentroDeClasse = false
+  let profundidade = 0
 
-    for (const m of fonte.matchAll(/^ {2}(?:async )?([a-zA-Z_]\w*)\s*(?:<[^>]*>)?\(/gm)) {
-      const nome = m[1]
-
-      if (nome && !['catch', 'constructor', 'for', 'if', 'switch', 'while'].includes(nome)) nomes.push(nome)
+  for (const linha of fonte.split('\n')) {
+    if (/^(?:export\s+)?(?:default\s+)?class\s+\w/.test(linha)) {
+      dentroDeClasse = true
+      profundidade = 0
     }
 
-    return nomes
+    if (!dentroDeClasse) continue
+
+    const m = /^ {2}(?:async )?([a-zA-Z_]\w*)\s*(?:<[^>]*>)?\(/.exec(linha)
+
+    if (m && !['catch', 'constructor', 'for', 'if', 'switch', 'while'].includes(m[1])) nomes.push(m[1])
+
+    for (const ch of linha) {
+      if (ch === '{') profundidade += 1
+      else if (ch === '}') profundidade -= 1
+    }
+
+    if (profundidade <= 0 && linha.trim() === '}') dentroDeClasse = false
   }
+
+  return nomes
+}
 
   it('nenhum store declara o mesmo método público duas vezes', () => {
     const problemas: string[] = []

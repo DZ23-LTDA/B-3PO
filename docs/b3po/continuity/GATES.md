@@ -6798,3 +6798,67 @@ antes e a guarda continua igual para quem chama.
 
 **A decisão #8 fecha inteira.** E o `$dirtyPreviewUrls` deixou de ser registro morto: agora tem
 consumidor.
+
+---
+
+## G8 · ADENDO 55 — verificação final: o detector do teste estava errado, não o código
+
+**Rodada 105.** Fechamento com a suíte completa e o censo `axe` dos dois lados.
+
+### O que a suíte completa mediu
+
+```
+36 falhas em 19.231 testes
+  ├─ 27 preexistentes (ssh 4, plugin-install 3, empacotamento 6, GPU Linux 4, flaky sob carga)
+  ├─ 1 MINHA  -> electron/ipc-invariants.test.ts
+  └─ 8 flaky sob carga (passam 55/55 isolados)
+```
+
+**A minha era real** e o diagnóstico importa:
+
+```
+tariff-store.ts: inteiroOuNulo() declarado 2 vezes
+```
+
+**O meu código está correto** — `inteiroOuNulo` é declarada **uma** vez (L85) e **chamada** duas
+(L122, L123). O detector do teste usava:
+
+```ts
+/^ {2}(?:async )?([a-zA-Z_]\w*)\s*(?:<[^>]*>)?\(/gm
+```
+
+…sem olhar contexto. Duas linhas com **dois espaços de recuo** casam, seja um método de classe ou uma
+**chamada de função de módulo dentro de um corpo**. O teste media "quantas linhas parecem método", não
+"quantos métodos duplicados existem".
+
+**Correção no detector, não no código**: restringir ao corpo de `class` (aceitando
+`export class`/`export default class`).
+
+> **Endurecer uma régua não é afrouxar a regra.** Restringir ao corpo da classe **elimina falsos
+> positivos e mantém a verificação real** — método público duplicado dentro de uma classe continua
+> sendo pego.
+
+### E o teste anti-vacuidade fez exatamente o trabalho dele
+
+Depois da primeira correção, este teste caiu:
+
+```
+× o detector de métodos encontra algo (não passa por vacuidade)
+  expected 0 to be greater than 2
+```
+
+**O meu detector tinha ficado cego**: `finance-store.ts` declara `export class`, e o meu regex exigia
+que a linha **começasse** com `class`. Se aquele teste não existisse, a regra acima teria passado
+**sem verificar nada** — verde por vacuidade, que é pior que vermelho.
+
+### Censo `axe` final
+
+```
+WEB     0 violações em 15 rotas   (build exit 0, 478/478 testes)
+DESKTOP 0 violações em 27 rotas   (main=1 em todas)
+```
+
+**Uma nota de honestidade sobre o desktop**: a primeira passagem do censo mediu **1 nó**, e as três
+passagens seguintes deram **0**. Não consegui reproduzir o nó nem identificar a regra — foi transitório,
+provavelmente um estado de render no instante da medição. **Registro o fato em vez de escondê-lo**: o
+número estável é 0, e houve uma medição isolada de 1 que eu não consegui reproduzir em 3 tentativas.
