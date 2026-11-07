@@ -263,7 +263,18 @@ export function GasView() {
                   {grupo.titulo} ({grupo.linhas.length})
                 </h2>
 
-                <div className="overflow-x-auto">
+                {/*
+                  * r87 — `tabIndex={0}` + `role="group"` + `aria-label`.
+                  *
+                  * O `overflow-x-auto` que a r81 pôs aqui deixa a tabela rolável em viewport estreito, e
+                  * uma região rolável **sem foco de teclado** é inalcançável por quem não usa mouse
+                  * (WCAG 2.1.1). O `axe` acusou `scrollable-region-focusable` a 390 px — depois de seis
+                  * rodadas em que eu rodei o `axe` só a 1440 e 1707.
+                  *
+                  * `group` e não `region`: o wrapper é um contentor de tabela, não um destino de
+                  * navegação por landmark — a mesma escolha do `tree-group` na r291.
+                  */}
+                <div aria-label={grupo.titulo} className="overflow-x-auto" role="group" tabIndex={0}>
           <table className="w-full border-collapse text-left text-[length:var(--conversation-caption-font-size)]">
                   <thead>
                     <tr className="text-(--ui-text-tertiary)">

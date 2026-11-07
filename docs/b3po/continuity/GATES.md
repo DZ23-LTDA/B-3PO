@@ -5238,3 +5238,67 @@ montado, CSS em dev, foco por teclado) com ferramenta que eu ainda não tinha ex
 
 **64 testes**: 17 store de vasilhame · 19 store de medidor · 13 RBAC dos 6 canais · 8 i18n de dados ·
 7 view montada.
+
+---
+
+## G8 · ADENDO 46 — `scrollable-region-focusable`: a regressão que eu criei na r81 e só apareceu a 390 px
+
+**Rodada 87.** A r81 pôs `overflow-x-auto` nas tabelas das telas novas para elas não estourarem em
+viewport estreito. **Funcionou** — `scrollPagina=0`, `main==pai` nos 5 viewports.
+
+**E criou uma regressão de acessibilidade que eu não vi**, porque rodei o `axe` a 1440 e 1707 **seis
+vezes** e a 390 **nenhuma**.
+
+```
+390x844  /medidores  LIVRE? nao:  scrollable-region-focusable(1)
+```
+
+### O que é
+
+Uma região com `overflow` rolável **sem foco de teclado** é inalcançável por quem não usa mouse: quem
+navega com Tab nunca chega nela, e portanto nunca rola a tabela. **WCAG 2.1.1 (Keyboard).**
+
+### A correção
+
+```tsx
+<div aria-label={grupo.titulo} className="overflow-x-auto" role="group" tabIndex={0}>
+```
+
+**`group` e não `region`**: o wrapper é contentor de tabela, não destino de navegação por landmark — a
+mesma escolha que o `tree-group` documenta na r291.
+
+### A prova
+
+```
+390x844   /gas  region(1)      /medidores  region(1)      <- scrollable-region-focusable ZERADO
+768x1024  /gas  region(3)      /medidores  region(3)
+1440x900  /gas  region(3)      /medidores  region(3)
+1707x1019 /gas  region(3)      /medidores  region(3)
+```
+
+**E por teclado:**
+
+```
+/gas (390px)        Tab alcanca o wrapper: SIM   (DIV group "TipoSerieSituacao...", com anel)
+/medidores (390px)  Tab alcanca o wrapper: SIM   (DIV group "MedidorClienteCo...", com anel)
+```
+
+**O anel aparece porque a r77 tornou `:focus-visible` global** — as duas correções se compõem.
+
+### A lição: eu medi a acessibilidade numa largura só
+
+**Cinco medições de viewport (r81) e seis de `axe` (r31–r86) — nenhuma cruzou as duas.**
+
+| O que eu media | Onde |
+|---|---|
+| layout (scroll, altura, overflow) | 5 viewports |
+| acessibilidade (`axe`) | **1 viewport (1440/1707)** |
+
+**A regressão vive exatamente na interseção que eu não olhei**: um efeito de CSS responsivo que só
+existe abaixo de um breakpoint, cuja consequência é acessibilidade.
+
+> **Duas matrizes medidas separadamente escondem o produto delas.** Eu tinha os eixos (viewport × regras)
+> e medi cada um numa fatia — o defeito estava no cruzamento.
+
+**Agora as duas telas novas têm `axe` em 4 viewports**, incluindo 390. É o mínimo: `+1` comando, e
+achou o que seis rodadas de `axe` em tela cheia não acharam.

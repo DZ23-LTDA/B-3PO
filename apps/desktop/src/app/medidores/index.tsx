@@ -267,7 +267,7 @@ export function MedidoresView() {
           {copy.vazio}
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div aria-label={copy.title} className="overflow-x-auto" role="group" tabIndex={0}>
           <table className="w-full border-collapse text-left text-[length:var(--conversation-caption-font-size)]">
           <thead>
             <tr className="text-(--ui-text-tertiary)">
