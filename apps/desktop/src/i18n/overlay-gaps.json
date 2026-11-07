@@ -2587,7 +2587,6 @@
   "shell.statusbar.toggleWorkspace": ["ar","ja","zh-hant"],
   "shell.statusbar.tokensPerSecondTitle": ["ar","ja","zh-hant"],
   "shell.statusbar.webhooks": ["ar","ja","zh-hant"],
-  "shell.workspaceRegion": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "sidebar.dateDivider.lastWeek": ["ar"],
   "sidebar.dateDivider.thisMonth": ["ar"],
   "sidebar.dateDivider.thisWeek": ["ar"],

@@ -4718,7 +4718,6 @@ export const en: Translations = {
     paneControls: 'Pane controls',
     appControls: 'App controls',
     paneTools: 'Pane tools',
-    workspaceRegion: 'Workspace panels',
     modelMenu: enModelMenu,
     modelOptions: {
       noOptions: 'No options for this model',

@@ -4131,8 +4131,6 @@ export interface Translations extends NoticeTranslations {
 
   shell: {
     windowControls: string
-    /** r92: o landmark unico da arvore de paineis (T-15). */
-    workspaceRegion: string
     /** r83: os dois clusters do titlebar precisam de nomes distintos (`landmark-unique`). */
     paneTools: string
   minimizeWindow: string
