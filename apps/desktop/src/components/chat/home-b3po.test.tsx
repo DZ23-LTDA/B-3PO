@@ -193,3 +193,41 @@ describe('os seis modos continuam sendo o primeiro ato', () => {
     expect(screen.getByRole('group', { name: /Escolher modo de trabalho/i })).toBeTruthy()
   })
 })
+
+describe('as linhas sao ACAO, nao decoracao (r11 do V4)', () => {
+  beforeEach(() => {
+    agentesMock.fn.mockResolvedValue({ agentes: [agente], estado: 'ok' })
+    projetosMock.fn.mockResolvedValue({ estado: 'ok', projetos: [projeto] })
+    planosMock.fn.mockResolvedValue({ estado: 'ok', planos: [] })
+  })
+
+  /*
+   * r11 do V4 — o contrato MUDOU, e para melhor.
+   *
+   * A primeira versao deste teste exigia que a linha do agente fosse um `<button>`. Descobri que nao
+   * existe tela de detalhe de um agente embutido: o roster sao 11 definicoes do produto
+   * (`agent-roster.ts`) e nenhuma rota os lista. Um botao ali seria **rota morta** — o mesmo defeito
+   * que o "Ver todos" tinha ao apontar para `/agents` (que mostra ATOres, nao o roster).
+   *
+   * O que a linha tem de fazer agora: existir como texto legivel. E o "Ver todos" tem de EXPANDIR.
+   */
+  it('o agente aparece como texto — sem botao que nao leva a lugar nenhum', async () => {
+    await montar()
+
+    await waitFor(() => {
+      expect(screen.getByText('Agente Um')).toBeTruthy()
+    })
+
+    expect(screen.queryByRole('button', { name: /Agente Um/ })).toBeNull()
+  })
+
+  it('o nome do projeto e um botao', async () => {
+    await montar()
+
+    await waitFor(() => {
+      expect(screen.getByText('Projeto Um')).toBeTruthy()
+    })
+
+    expect(screen.getByRole('button', { name: /Projeto Um/ })).toBeTruthy()
+  })
+})

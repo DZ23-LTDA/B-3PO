@@ -71,6 +71,8 @@ export const ptOverrides: TranslationOverrides = {
     erroCarregar: 'Não foi possível carregar agora.',
     indisponivel: 'Indisponível nesta versão.',
     verTodos: 'Ver todos',
+    verMenos: 'Ver menos',
+    maisAgentes: 'mais {n} agentes — o roster é embutido no produto',
     sofiaTitulo: 'Sofia — planos orquestrados',
     sofiaVazio: 'A Sofia ainda não tem plano. Dê um objetivo a ela para começar.',
     carregando: 'Carregando…',

@@ -2995,6 +2995,8 @@ export const en: Translations = {
     erroCarregar: 'Não foi possível carregar agora.',
     indisponivel: 'Indisponível nesta versão.',
     verTodos: 'Ver todos',
+    verMenos: 'Show less',
+    maisAgentes: '{n} more agents — the roster is built in',
     sofiaTitulo: 'Sofia — orchestrated plans',
     sofiaVazio: 'Sofia has no plan yet. Give her an objective to get started.',
     carregando: 'Loading…',

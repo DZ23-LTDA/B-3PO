@@ -27,6 +27,7 @@ import { listarProjetosComEstado, type ProjetoRow, STATUS_LABEL } from '@/api/pr
 import { listarPlanosComEstado, type PlanoResumo } from '@/api/sofia'
 import { BrandHero, BRAND_HERO_ALT } from '@/components/chat/brand-hero'
 import { Button } from '@/components/ui/button'
+import { PROJETOS_ROUTE, SOFIA_ROUTE } from '@/app/routes'
 import { useI18n } from '@/i18n'
 import { AMBIENTE_IDENTIDADE } from '@/lib/ambiente-identidade'
 import { AMBIENTE_LABEL, AMBIENTES, type Ambiente } from '@/lib/ambiente'
@@ -134,13 +135,18 @@ function SecaoComEstado({
 
 function LinhaDeAgente({ agente }: { agente: AgenteDaLista }) {
   return (
-    <li className="flex items-center gap-2 py-1">
+    <li className="flex items-center gap-2 py-0.5">
       <span
         aria-hidden="true"
         className="flex size-7 shrink-0 items-center justify-center rounded-full bg-(--ui-bg-secondary) text-[0.75rem] font-semibold text-(--ui-text-secondary)"
       >
         {inicialDoNome(agente.nome)}
       </span>
+      {/*
+       * Linha SEM clique: não existe tela de detalhe de um agente embutido. Um botão que não leva a
+       * lugar nenhum seria a "rota morta" que a diretriz proíbe — o mesmo motivo pelo qual o
+       * "Ver todos" expande em vez de navegar.
+       */}
       <span className="min-w-0 flex-1 text-left">
         <span className="block truncate text-[0.8125rem] text-(--ui-text-primary)">{agente.nome}</span>
         {agente.missao && (
@@ -151,10 +157,17 @@ function LinhaDeAgente({ agente }: { agente: AgenteDaLista }) {
   )
 }
 
-function LinhaDeProjeto({ projeto, rotulo }: { projeto: ProjetoRow; rotulo: string }) {
+function LinhaDeProjeto({ projeto, rotulo, aoAbrir }: { projeto: ProjetoRow; rotulo: string; aoAbrir: () => void }) {
   return (
-    <li className="flex items-center justify-between gap-2 py-1">
-      <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-(--ui-text-primary)">{projeto.nome}</span>
+    <li className="flex items-center justify-between gap-2 py-0.5">
+      <button
+        className="min-w-0 flex-1 cursor-pointer truncate text-left text-[0.8125rem] text-(--ui-text-primary)"
+        data-b3po-foco
+        onClick={aoAbrir}
+        type="button"
+      >
+        {projeto.nome}
+      </button>
       <span className="shrink-0 rounded-full bg-(--ui-bg-secondary) px-2 py-0.5 text-[0.6875rem] text-(--ui-text-tertiary)">
         {PROJETO_ROTULO[projeto.status] ?? rotulo}
       </span>
@@ -297,6 +310,7 @@ export function HomeB3po() {
   const [projetos, setProjetos] = useState<Secao<ProjetoRow>>(secaoCarregando)
   const [planos, setPlanos] = useState<Secao<PlanoResumo>>(secaoCarregando)
   const [tentativa, setTentativa] = useState(0)
+  const [todosOsAgentes, setTodosOsAgentes] = useState(false)
 
   const recarregar = useCallback(() => setTentativa(n => n + 1), [])
 
@@ -414,34 +428,49 @@ export function HomeB3po() {
 
       <SecaoSofia
         aoTentarDeNovo={recarregar}
-        aoVerTodos={() => void navegar('/sofia')}
+        aoVerTodos={() => void navegar(SOFIA_ROUTE)}
         carregando={planos.estado === 'carregando'}
         planos={planos}
         t={t}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
+        {/*
+         * r11 do V4 — "Ver todos" AQUI EXPANDE, não navega.
+         *
+         * Os 11 agentes do roster são **definições embutidas do produto** (`agent-roster.ts`), não
+         * registros criados pelo usuário. `/agentes` mostra **atores** (pessoas e bots com papel) —
+         * conteúdo diferente. Não existe tela que liste o roster inteiro, então mandar para lá seria
+         * o botão que promete uma coisa e entrega outra.
+         *
+         * Expandir em casa é a ação que o texto promete, e ela tem resultado visível.
+         */}
         <SecaoComEstado
-          acaoVerTodos={() => navegar('/agents')}
+          acaoVerTodos={() => setTodosOsAgentes(v => !v)}
           aoTentarDeNovo={recarregar}
           erro={agentes.erro}
           estado={agentes.estado}
           mensagemErro={copy.erroCarregar}
           mensagemIndisponivel={copy.indisponivel}
           mensagemVazio={copy.agentesVazio}
-          rotuloVerTodos={copy.verTodos}
+          rotuloVerTodos={todosOsAgentes ? copy.verMenos : copy.verTodos}
           rotuloVazio={copy.irParaAgentes}
           titulo={copy.agentesTitulo}
         >
           <ul className="flex flex-col">
-            {agentes.itens.slice(0, 4).map(a => (
+            {(todosOsAgentes ? agentes.itens : agentes.itens.slice(0, 4)).map(a => (
               <LinhaDeAgente agente={a} key={a.id} />
             ))}
           </ul>
+          {!todosOsAgentes && agentes.itens.length > 4 && (
+            <p className="text-[0.6875rem] text-(--ui-text-tertiary)">
+              {copy.maisAgentes.replace('{n}', String(agentes.itens.length - 4))}
+            </p>
+          )}
         </SecaoComEstado>
 
         <SecaoComEstado
-          acaoVerTodos={() => navegar('/projetos')}
+          acaoVerTodos={() => navegar(PROJETOS_ROUTE)}
           aoTentarDeNovo={recarregar}
           erro={projetos.erro}
           estado={projetos.estado}
@@ -454,7 +483,7 @@ export function HomeB3po() {
         >
           <ul className="flex flex-col">
             {recentes.map(p => (
-              <LinhaDeProjeto key={p.id} projeto={p} rotulo={copy.projetosTitulo} />
+              <LinhaDeProjeto aoAbrir={() => navegar(PROJETOS_ROUTE)} key={p.id} projeto={p} rotulo={copy.projetosTitulo} />
             ))}
           </ul>
         </SecaoComEstado>
