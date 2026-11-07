@@ -1,5 +1,5 @@
 {
-  "round": 63,
+  "round": 67,
   "queue": [
     {
       "id": "T-01",
@@ -56,6 +56,14 @@
       "what": "Decidir preco zero em Vendas (cortesia ou bloqueio)",
       "owner": "proprietario",
       "status": "blocked"
+    },
+    {
+      "id": "T-09",
+      "what": "Decidir foco visivel (WCAG 2.4.7): manter a regra global do upstream, reverter, ou marcar superficie por superficie",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "decisao de produto",
+      "measured_in": "r67 - outline:none em todo o app; 2 superficies marcadas com [data-b3po-foco]"
     }
   ],
   "data": "06/11/2026",
