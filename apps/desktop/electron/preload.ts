@@ -207,6 +207,9 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   sales: {
     cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:sales:cancel', id, tenantId, reason),
     create: payload => ipcRenderer.invoke('hermes:sales:create', payload),
+    // r26 do V5: `hermes:sales:devolver` existe no main desde antes, tem DOIS arquivos de teste
+    // (sales-ipc, sales-return) e **nao tinha porta**. Mesmo defeito da r25, outro dominio.
+    devolver: id => ipcRenderer.invoke('hermes:sales:devolver', id),
     faturar: payload => ipcRenderer.invoke('hermes:sales:faturar', payload),
     list: tenantId => ipcRenderer.invoke('hermes:sales:list', tenantId)
   },

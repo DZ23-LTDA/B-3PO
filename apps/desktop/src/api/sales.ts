@@ -44,6 +44,7 @@ export interface DraftItem {
 interface SalesBridge {
   cancel: (id: string, tenantId?: string, reason?: string) => Promise<{ error: string } | { sales: SaleRow[] }>
   create: (payload: Record<string, unknown>) => Promise<{ error: string } | { sale: SaleRow; sales: SaleRow[] }>
+  devolver: (id: string) => Promise<{ error: string } | { finance: unknown; sale: SaleRow; stock: unknown }>
   faturar: (payload: Record<string, unknown>) => Promise<
     { error: string; message?: string } | { sale: SaleRow; sales: SaleRow[] }
   >
