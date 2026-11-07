@@ -1,8 +1,8 @@
 {
-  "head": "ee37b5a11a27537d418fab129e305e3b831c48e5",
+  "head": "843d6253377524ace55fbc1d85a35c7ee035d7fe",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 46,
+  "round": 51,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -115,5 +115,27 @@
     "estoque/compras nao exigem catalogo (2 caminhos abertos)",
     "preco zero em vendas (decisao de negocio)",
     "regressao BLOCKED (EXT-2)"
-  ]
+  ],
+  "product_fixes": [
+    "performance: Configuracoes 55 -> 4 long tasks (-93%)",
+    "i18n pt-BR do chrome do gateway",
+    "Bot Mode: pt.bot 6 -> 50 chaves",
+    "aviso de inferencia em pt-BR",
+    "a11y: landmarks nav/main 0->1",
+    "a11y: contraste 0 violacoes nos 2 temas",
+    "a11y: nome acessivel do Tip (aria-label derivado)",
+    "a11y: botao +N fora do role=tablist",
+    "a11y: web 4 label-content-name-mismatch -> 0 (17/17 rotas)",
+    "vendas: SKU fora do catalogo = produto_nao_encontrado",
+    "layout: main ganhou h-full (182px em 30 rotas)",
+    "estoque: stockRows inclui SKU orfao, marcado na tela"
+  ],
+  "open_decisions": {
+    "EXT-7/T-08": "venda com preco zero: cortesia (lancar financeiro R$0) ou erro (bloquear)?",
+    "EXT-5/G4": "vertical gas/agua: construir, fora de escopo, ou redefinir?",
+    "estoque": "exigir catalogo em inventory.append/purchases, ou orfao e estado legitimo?"
+  },
+  "known_technical_work": {
+    "nested-interactive": "conflito: tablist so aceita tab, e o X do pane-tab nao pode sair do tab sem sair do tablist. Tentado e revertido na r50."
+  }
 }
