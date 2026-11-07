@@ -5024,6 +5024,7 @@
     "shell.gatewayMenu.connection",
     "shell.gatewayMenu.disconnected",
     "shell.gatewayMenu.gateway",
+    "shell.gatewayMenu.gatewayNeedsProvider",
     "shell.gatewayMenu.inferenceNotReady",
     "shell.gatewayMenu.inferenceReady",
     "shell.gatewayMenu.messagingPlatforms",

@@ -2963,3 +2963,66 @@ tinha usado para não investigar o `nested-interactive` (r49) e a opção C do e
 > **"Pré-existente" é o rótulo mais perigoso que eu usei nesta auditoria**, porque ele para a
 > investigação e **parece rigoroso** — tem até medição. A medição estava certa; o experimento é que
 > não testava o que eu dizia.
+
+---
+
+## G8 · ADENDO 25 — os 5 testes `ui/` restantes e o `i18n-keys`: **todos eram meus**, um por causa do `Tip`
+
+**Rodada 53 (continuação).** Depois do fix do `filhoSoIcone`, a suíte caiu de **26 arquivos / 64
+testes** para **18 / 28**. Fui verificar os `ui/` restantes contra o `origin/main` de verdade.
+
+### O placar do baseline REAL
+
+| Arquivo | `origin/main` | minha branch (antes) | agora |
+|---|---|---|---|
+| `legacy-sdk-compat` | 2 passed | 1 failed | **2 passed** ✅ |
+| `gateway-background-reconnect` | 8 passed | 2 failed | **8 passed** ✅ |
+| `terminal-ownership` | 5 passed | 1 failed | **5 passed** ✅ |
+| `use-keybinds-browser` | 6 passed | 2 failed | **6 passed** ✅ |
+| `browser-hints` | 1 passed | 1 failed | **1 passed** ✅ |
+| `i18n-keys` | 2 passed | 1 failed | **2 passed** ✅ |
+| `audit-store` | 13 passed | 1 failed | **passa** ✅ |
+| `stage-native-deps` | **1 failed** | 1 failed | **PRÉ-EXISTENTE** |
+| `bundle-electron-main` | **3 failed** | 3 failed | **PRÉ-EXISTENTE** |
+
+**Sete arquivos eram regressão minha. Dois são genuinamente alheios — e agora eu posso afirmar isso
+porque RODEI os dois no `main`.**
+
+### Os 5 testes `ui/` caíram todos pelo mesmo motivo
+
+**O `filhoSoIcone` do r22 injetava `aria-label` por cima de botões que já tinham texto**, porque
+tratava qualquer `children` que não fosse string como "só ícone". Um chip `<button><Icon/>{label}</button>`
+tem `children` = **array** → `aria-label` injetado → **nome acessível deixa de ser o texto visível**.
+
+**Cinco suítes diferentes dependiam do nome acessível desses botões.** Um erro de 1 linha, cinco
+arquivos vermelhos, e **`label-content-name-mismatch` no app real** — a violação que eu "corrigi" no
+web na r39 **e estava criando no desktop com o meu próprio fix de a11y**.
+
+### `i18n-keys`: o mecanismo oficial, de novo
+
+```
+locales/_keys.desktop.json is out of date with src/i18n/en.ts — run `npm run i18n:keys`
+```
+
+Rodei o comando que a mensagem manda. **Dois mecanismos oficiais nesta rodada** (`OVERLAY_GAPS_UPDATE`
+e `npm run i18n:keys`) — **ambos existiam e ambos estavam na mensagem de erro que eu não tinha lido**.
+
+### O que fecha
+
+| Métrica | Início da r53 | Fim da r53 |
+|---|---|---|
+| arquivos com falha | **26** | **~12** |
+| testes com falha | **64** | **~20** |
+| regressões minhas identificadas | 5 (r52) | **12** |
+| pré-existentes **provados** | 0 | **2** (`stage-native-deps`, `bundle-electron-main`) |
+
+**As falhas restantes ficam concentradas em `electron/` e `scripts/`** — e **só 2 estão provadas como
+alheias**. As outras **eu não rodei no `main`** e portanto **não afirmo nada sobre elas**.
+
+### A lição definitiva desta série
+
+**"Pré-existente" foi o rótulo que mais me custou nesta auditoria.** Ele parece rigoroso (tem
+medição), para a investigação, e **estava errado em 7 de 9 casos**.
+
+**O que o substitui**: *worktree do `origin/main`, rodar o teste lá, comparar.* **Dois minutos.** Eu
+gastei **quatro rodadas** para fazer isso.
