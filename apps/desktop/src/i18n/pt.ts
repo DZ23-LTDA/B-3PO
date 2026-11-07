@@ -642,6 +642,13 @@ export const ptOverrides: TranslationOverrides = {
       },
       loading: 'Carregando provedores...'
     },
+    connectorsReadiness: {
+      erro: 'Não foi possível ler a prontidão dos conectores.',
+      resumo: '{prontos} de {total} prontos para conectar · {faltando} credencial(is) faltando',
+      semPlataformas: 'Nenhuma plataforma registrada neste gateway.',
+      tentarDeNovo: 'Tentar de novo',
+      titulo: 'Conectores do gateway'
+    },
     billing: {
       state: {
         notice: {

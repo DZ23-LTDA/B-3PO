@@ -688,6 +688,13 @@ export const esOverrides = {
     noResults: 'No se encontraron idiomas'
   },
   settings: {
+    connectorsReadiness: {
+      erro: 'No fue posible leer la preparaci\u00f3n de los conectores.',
+      resumo: '{prontos} de {total} listos para conectar \u00b7 {faltando} credencial(es) faltando',
+      semPlataformas: 'Ninguna plataforma registrada en este gateway.',
+      tentarDeNovo: 'Intentar de nuevo',
+      titulo: 'Conectores del gateway'
+    },
     crmPipeline: {
       stageInitial: 'Etapa inicial',
       lostReason: '¿Por qué se perdió?',

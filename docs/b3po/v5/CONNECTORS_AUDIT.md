@@ -114,8 +114,41 @@ cada adapter on demand), então roda em `run_in_threadpool`.
 | `ready` afirma conexão? | **não** — o teste `ready_nao_significa_conectado` verifica que não existe campo `connected`/`conectado` |
 | valor de credencial no payload? | **não** — o teste verifica que `credenciais_faltando` traz nomes, deduplicados e ordenados |
 
-**Os passos 2–4 (cliente no desktop, tela, teste de tela) não foram feitos.** O dado está alcançável
-por API autenticada; a superfície de UI continua sem mostrar.
+### Passos 2–3 — FEITOS na r15, com uma verificação pendente
+
+| Peça | Arquivo | Estado |
+|---|---|---|
+| cliente | `apps/desktop/src/api/conectores.ts` | ✅ tipado; distingue erro de lista vazia |
+| componente | `apps/desktop/src/app/settings/connectors-readiness.tsx` | ✅ monta em Configuração → Gateway |
+| i18n | pt · en · es | ✅ os 7 outros locales caem no inglês, registrado em `overlay-gaps.json` |
+
+**Provas**: `gate` 14/14 · `typecheck` PASS · `i18n + settings` **736 testes** · `test_connectors_route.py` 3 passed.
+
+### 🟡 O que **não** foi possível verificar: o render ao vivo
+
+Tentei abrir Configuração → Gateway no app em execução e a seção não apareceu. A causa **não é o
+código**:
+
+```
+window.hermesDesktop.api({ path: '/api/connectors/readiness' })
+  → Error: 404: {"detail":"No such API endpoint: /api/connectors/readiness"}
+```
+
+**O backend em execução não tem a rota.** Ele não importa `hermes_cli` do repositório: são **três
+processos Python de gateway** rodando (`b3po-f5-home`, `b3po-menu-view6`, e um `b3po_serve.py`), e o
+que o app consulta roda código anterior à r14.
+
+**É a mesma classe da r18 do V4**: o código estava certo e o artefato em execução era velho — lá um
+APK de 04/11 sem o fix; aqui um backend sem a rota.
+
+**Consequência honesta**: o componente está montado, tipado e coberto por 736 testes, mas **não vi a
+seção renderizada**. Marcar isso como verificado seria mentir.
+
+**Para fechar**: reiniciar o backend a partir do repositório (`hermes gateway run` com cwd no repo) e
+repetir a navegação para `#/settings?tab=gateway`.
+
+**O endereço correto da tela é `?tab=gateway`** — o parâmetro é `tab`, não `page` (que é o sub-painel
+interno). Levou três tentativas para descobrir; fica registrado.
 
 ## 6. O que **não** foi verificado
 

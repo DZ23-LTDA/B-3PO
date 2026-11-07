@@ -2097,7 +2097,14 @@ export interface Translations extends NoticeTranslations {
       deleted: (model: string) => string
       deleteFailed: string
     }
-    billing: {
+    connectorsReadiness: {
+    erro: string
+    resumo: string
+    semPlataformas: string
+    tentarDeNovo: string
+    titulo: string
+  }
+  billing: {
       perMonth: (amount: string) => string
       creditsPerMonth: (amount: string) => string
       usageLabel: (label: string) => string

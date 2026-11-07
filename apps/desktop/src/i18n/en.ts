@@ -2262,6 +2262,13 @@ export const en: Translations = {
     },
     model: enModelSettings,
     localModels: enLocalModels,
+    connectorsReadiness: {
+      erro: 'Could not read connector readiness.',
+      resumo: '{prontos} of {total} able to connect \u00b7 {faltando} credential(s) missing',
+      semPlataformas: 'No platform registered on this gateway.',
+      tentarDeNovo: 'Try again',
+      titulo: 'Gateway connectors'
+    },
     billing: {
       perMonth: amount => `${amount}/mo`,
       creditsPerMonth: amount => `${amount} credits/mo`,
