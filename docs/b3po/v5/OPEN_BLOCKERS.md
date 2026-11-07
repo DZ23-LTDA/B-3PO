@@ -41,6 +41,8 @@ fase: G7
 | Path traversal | **`TESTADO`** — 7 testes verdes | `electron/hardening-traversal.test.ts` + `docs/b3po/audit/PATH-TRAVERSAL-R156.md`. **Não confina a uma raiz por decisão escrita**: o comentário no handler diz que confinar é decisão de produto, não check faltando (r29) |
 | Replay de webhook | **`TESTADO`** — 8 testes verdes | `electron/crm-whatsapp-signature-frescor.test.ts`: mensagem de **ontem** recusada, reentrega de 5 min aceita, relógio adiantado aceito (é NTP, não ataque), `entry.time` ausente recusado |
 | Migrações (banco/arquivo) | **`TESTADO` — 56 testes verdes** | desktop: `profile-migration` (565 linhas de teste), `tenant-migrate` + `tenant-migration`. Python: `gateway_migrate.py` (1097), `left_core_migration.py` (1021), `config_migrations.py` (826). **Limite medido**: `tenant-migrate` cobre **6 stores de negócio** e **não** inclui `agent-executions.json` |
+| **XSS** | **`TESTADO`** — 5 verdes | `tests/agent/lsp/test_reporter.py`: `test_format_diagnostic_escapes_html_in_message` e o caso de `code`/`source`; o renderer é React (escape estrutural) |
+| **CSRF** | **`DEFENDIDO`** — 15 verdes | `dashboard_auth/middleware.py`: `_CROSS_ORIGIN_WRITE_DETAIL` + `own_origin_cookie_writes` + `SameSite=lax` medido em `test_dashboard_auth_cookies.py`. O caso **e2e de WebSocket cross-origin** (`test_dashboard_auth.py`) **pula no Windows**: precisa de PTY POSIX |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
 | SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** |
