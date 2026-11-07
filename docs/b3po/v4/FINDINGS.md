@@ -147,6 +147,42 @@ por subprocesso.
 
 ---
 
+## A-06 · `/settings` abre em `?page=main` e **não renderiza configuração nenhuma**
+
+**Medido (r19)** no app real, 1440×900, esperando **8 segundos**:
+
+```
+hash:                      #/settings?page=main
+h1:                        []          ← nenhum
+h2:                        []          ← nenhum
+headings na página:        0
+conteúdo (fora da barra):  Empresa, Engenharia, Automação, IA e Agentes, Estratégico,
+                           Administração, Nova conversa, Capacidades, …
+axe:                       nenhuma violação
+```
+
+**A rota existe e tem 48 consumidores** (`profile-switcher`, `command-palette`, `context-menu`,
+`use-keybinds`, `onboarding-end`, `notifications`…). Todo mundo navega para `/settings` — e o que
+aparece é **o shell do chat**, com a barra lateral e nada da tela de configuração.
+
+### O que eu **não** sei, e por que não corrigi
+
+1. **`?page=main` é uma seção válida?** A URL ganha esse parâmetro sozinha. Se `main` deveria abrir
+   uma seção de configuração, ela não está renderizando. Se `main` significa "volte ao chat", então a
+   rota está fazendo o que promete — e o nome é que engana.
+2. **A rota foi substituída?** A barra lateral tem **Estrutura** e **Privacidade** sob CONFIGURAÇÃO —
+   telas específicas. Pode ser que `/settings` seja a entrada legada e as telas reais sejam outras.
+
+**Corrigir sem responder (1) e (2) seria chutar.** O que este documento faz é registrar que **a
+medição de `axe` nessa rota é instável** — o censo marcou `page-has-heading-one(1)` uma vez, e três
+medições seguintes deram zero. Numa página **sem nenhum heading**, essa regra deveria disparar sempre;
+se não dispara, ou a página não está no estado que eu medi, ou a regra cai em `incomplete`.
+
+**Impacto**: nenhum no fluxo principal — quem usa o app navega pela barra lateral, não digitando a
+URL. O `axe` do censo das 27 rotas fica em **0** fora esta.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |
