@@ -117,14 +117,17 @@ def connector_readiness(platform: str, *, env: Mapping[str, str] | None = None) 
 def all_connectors(*, env: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
     """Prontidão de todas as plataformas registradas, ordenada por nome.
 
-    O registry é **lazy**: `all_entries()` resolve os loaders de plataforma, mas um processo que
-    nunca importou os adapters vê uma lista vazia. Chamar isto ANTES da descoberta de plataformas
-    devolve `[]` — que é honesto (nada descoberto, nada a relatar), não um zero disfarçado de
-    "nenhum conector pronto".
+    r107 — enumera por `registered_names()`, não por `all_entries()`.
+
+    O registry é **lazy** e `all_entries()` resolve TODOS os loaders de uma vez — caro, e vazio num
+    processo que ainda não importou os adapters. `registered_names()` devolve os nomes **sem**
+    carregar nada, e `connector_readiness()` (que chama `get()` por plataforma) resolve só o loader
+    daquela. O resultado é o mesmo quando o registry está quente, e passa a ser **correto** quando
+    está frio — em vez de `[]` silencioso.
     """
     from gateway.platform_registry import platform_registry
 
-    nomes = sorted({entry.name for entry in platform_registry.all_entries()})
+    nomes = sorted(platform_registry.registered_names())
 
     return [connector_readiness(nome, env=env) for nome in nomes]
 

@@ -42,8 +42,14 @@ def registry_fake(monkeypatch):
     def _all():
         return list(entradas.values())
 
+    def _names():
+        return set(entradas.keys())
+
     monkeypatch.setattr(platform_registry, "get", _get)
     monkeypatch.setattr(platform_registry, "all_entries", _all)
+    # r107: `all_connectors` enumera por `registered_names()` (não força carregar tudo).
+    # O stub tem de cobrir a API que o código usa, senão o teste mede o registry real.
+    monkeypatch.setattr(platform_registry, "registered_names", _names)
 
     return entradas
 
