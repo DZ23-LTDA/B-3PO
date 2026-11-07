@@ -129,6 +129,7 @@ provada**.
 | F7-1 | Auditar voz/imagem/PDF/vídeo reais | **NOT_STARTED** | — |
 | F7-2 | UX premium DZ23, pt-BR completo, mascotes oficiais | **PARTIAL** | home V4 com dados reais, 6 modos, `axe` 0 |
 | F7-3 | Desktop/web/mobile com contratos compartilhados | **PARTIAL** | desktop usa ponte + REST; web/mobile usam REST |
+| **F7-3b** | **Os seis modos existem só no desktop** (r12: web = dashboard Hermes, mobile sem modos) | **NOT_STARTED** | ver `PLATFORM_MATRIX.md` — decisão do dono |
 | F7-4 | Android com jornada real e capturas | **BLOCKED** | emulador aborta `system_server`; fix do safe-area provado por 10 testes |
 | F7-5 | iOS | **BLOCKED_BY_EXTERNAL_DEPENDENCY** | exige macOS (`EXT-4`) |
 | F7-6 | Estados loading/empty/error/success/offline | **PARTIAL** | home tem 5 estados com 8 testes; o resto do app não foi auditado |
