@@ -49,11 +49,21 @@ export function ProntidaoDeConectores() {
     }
   }, [tentativa])
 
-  if (!carga) return <SettingsSkeleton />
+  // O título mora AQUI: a função que monta (GatewayConnectionSettings) está no teto do ratchet e
+  // não pode ganhar nem uma linha. Um `<h2>` dentro do componente dá a âncora de acessibilidade sem
+  // tocar no pai.
+  const titulo = (
+    <h2 className="mt-6 mb-2 text-[length:var(--conversation-caption-font-size)] text-muted-foreground uppercase">
+      {copy.titulo}
+    </h2>
+  )
+
+  if (!carga) return titulo
 
   if (carga.estado === 'erro') {
     return (
       <div className="flex flex-col gap-2 py-2">
+        {titulo}
         <p className="text-[length:var(--conversation-body-font-size)] text-muted-foreground">
           {copy.erro}
         </p>
@@ -78,14 +88,18 @@ export function ProntidaoDeConectores() {
   if (connectors.length === 0) {
     // Lista vazia LIDA: o registry não registrou plataforma nenhuma. Não é erro.
     return (
-      <p className="py-2 text-[length:var(--conversation-body-font-size)] text-muted-foreground">
-        {copy.semPlataformas}
-      </p>
+      <div>
+        {titulo}
+        <p className="py-2 text-[length:var(--conversation-body-font-size)] text-muted-foreground">
+          {copy.semPlataformas}
+        </p>
+      </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-1">
+      {titulo}
       <p className="text-[length:var(--conversation-caption-font-size)] text-muted-foreground">
         {copy.resumo
           .replace('{prontos}', String(resumo.prontos))

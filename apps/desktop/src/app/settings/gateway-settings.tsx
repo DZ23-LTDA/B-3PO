@@ -200,7 +200,12 @@ export function GatewaySettings({ embedded = false, subpage }: GatewaySettingsPr
     return <GatewayManagedUpdates />
   }
 
-  return <GatewayConnectionSettings embedded={embedded} standalone={subpage !== undefined} />
+  return (
+    <>
+      <GatewayConnectionSettings embedded={embedded} standalone={subpage !== undefined} />
+      <ProntidaoDeConectores />
+    </>
+  )
 }
 
 function GatewayManagedUpdates() {
@@ -1492,13 +1497,6 @@ function GatewayConnectionSettings({ embedded, standalone }: { embedded: boolean
 
       {/* Plain-text token opt-in: gated when secure storage is unavailable and a
           new token would be persisted. Confirm resumes the remembered save/apply. */}
-        <div className="mt-6">
-          <h2 className="mb-2 text-[length:var(--conversation-caption-font-size)] text-muted-foreground uppercase">
-            {t.settings.connectorsReadiness.titulo}
-          </h2>
-          <ProntidaoDeConectores />
-        </div>
-
       <ConfirmDialog
         confirmLabel={g.plainTextConfirmAction}
         description={g.plainTextConfirmDesc}
