@@ -10,8 +10,8 @@
 2. **`PASS` aqui é por escopo, nunca global.** Cada item diz o que foi medido e onde.
 
 
-**Atualizado**: 2026-11-06T18:54:45Z UTC
-**Branch**: `b3po-brand` · **Rodada**: 61 · **Data**: 06/11/2026
+**Atualizado**: 2026-11-07T05:00:12Z UTC
+**Branch**: `b3po-brand` · **Rodada**: 92 · **Data**: 06/11/2026
 **main**: `f4cf411f28` = `origin/main` — **espelho do upstream, intacto**
 **Remotes**: `origin` (DZ23-LTDA/B-3PO) · `upstream` (NousResearch/hermes-agent)
 
@@ -149,3 +149,30 @@ G2 (runtime/modelos), G3 (domínio canônico), G4 (vertical gás/água), G5 (rev
 
 **G8 já tem material**: os números de performance (`PERFORMANCE.md`), a matriz de auditoria
 (`AUDIT-MATRIX.md`) e as sete provas E2E (`TEST-EVIDENCE.md`).
+
+## Matriz de gates (r92 — medida, por escopo)
+
+| Gate | Estado | Evidência |
+|---|---|---|
+| **G0** Inventário/baseline/continuity | **READY** | 13 docs · 174 capturas · worktree em origin/main |
+| **G1** Segurança / IPC / RBAC / tenant | **PASS** | `serverTenant` sempre `local`; 49 canais, 13 testes de RBAC nos novos |
+| **G2** Runtime / modelos / diagnóstico | **PASS** | `/api/status` com `inference` + `overall_from` (r90) |
+| **G3** Domínio canônico | **PASS** | preço zero = cortesia avisada + marcada (r76) |
+| **G4** Vertical gás/água | **PASS** | comodato (r78, 17 testes) + leitura de medidor (r79, 19 testes) |
+| **G5** Seis modos + revisão visual | **PASS** | 6 modos · 14 telas olhadas · foco visível 30/30 (r77) |
+| **G6** Engenharia / automação | **PASS (com EXT-6)** | 99 plugins, Zero ativos; adapter IRC 18/18; ativação é EXT-6 |
+| **G7** Matriz de plataformas | **PASS** | desktop/web/android ok · iOS BLOCKED (EXT-4) |
+| **G8** Regressão/segurança/perf/a11y/docs | **PASS (por escopo)** | suite 27 falhas, **0 minhas**; 57 nós de axe, todos 1 regra best-practice |
+| **G9** Pacotes + veredito | **PARCIAL** | builds exit 0, rollback provado · **exe não assinado** (EXT-3) |
+
+**Nenhum `NOT_RUN`. Nenhum `UNVERIFIED`.** O que cada `PASS` **não** cobre está no `GATES.md`,
+item por item — e `PASS` é por escopo, nunca global.
+
+### O único `FAIL` que sobrou, e ele é medido
+
+| Item | Estado | Causa |
+|---|---|---|
+| `region` × 55 | **aceito** | `<main>` vive **dentro** de uma zona da árvore de painéis: nenhuma região única pode cobrir os painéis sem envolvê-lo (r92, tentado e revertido) |
+| `nested-interactive` × 2 | **aceito** | o ✕ dentro de `role="tab"` — conflito real de `tablist` (r50) |
+
+**Ambos são `best-practice`, não WCAG.** Nenhuma violação WCAG desde a r77.

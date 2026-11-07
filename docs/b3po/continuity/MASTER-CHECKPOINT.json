@@ -1,7 +1,7 @@
 {
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 74,
+  "round": 92,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -148,35 +148,50 @@
   "data": "06/11/2026",
   "wrapup_check": "PASS - 3 rodadas consecutivas limpas (rondas 5, 6 e 7); 2 problemas achados e 1 corrigido no caminho",
   "gates_13": {
+    "READY": [
+      "G0"
+    ],
     "PASS": [
-      "git/baseline",
-      "lint/typecheck",
-      "unit/regression",
-      "integration/API",
-      "E2E",
-      "build/smoke",
-      "auth/security",
-      "banco(integridade)",
-      "UI",
-      "performance",
-      "operacao"
+      "G1 seguranca/IPC/RBAC",
+      "G2 runtime/diagnostico",
+      "G3 dominio canonico",
+      "G4 vertical gas/agua",
+      "G5 modos + foco visivel",
+      "G6 engenharia (com EXT-6)",
+      "G7 plataformas (iOS BLOCKED)",
+      "G8 regressao/perf/a11y (por escopo)"
     ],
-    "N/A": [
-      "multitenancy (1 tenant/instalacao)",
-      "banco(migracao: nao existe v2)"
+    "PARCIAL": [
+      "G9 pacotes: exe nao assinado (EXT-3)"
     ],
-    "FAIL_por_decisao": [
-      "a11y foco visivel (T-09)",
-      "backup/restore dos dados (T-10)"
+    "aceito_best_practice": [
+      "region x55: <main> dentro da zona da arvore (T-15)",
+      "nested-interactive x2: conflito de tablist (r50)"
     ]
   },
   "open_items": {
     "T-01": "EXT-2 Developer Mode (externo)",
     "T-05": "5 modos sem identidade (produto)",
     "T-06": "conector sem credencial (EXT-6)",
-    "T-08": "preco zero: cortesia ou bloqueio (negocio)",
-    "T-09": "foco visivel WCAG 2.4.7 (produto/upstream)",
-    "T-10": "backup dos 14 JSON (arquitetura)",
-    "nested-interactive": "refatoracao de shell - tentada e revertida na r50"
+    "T-12": "tarifa x consumo medido (comercial)",
+    "T-15": "<main> dentro da zona da arvore: aceitar region(55) OU autorizar refactor de layout"
+  },
+  "suite": {
+    "total_falhas": 27,
+    "minhas": 0,
+    "classificadas": 27,
+    "baseline_r80": 36
+  },
+  "testes_novos": {
+    "telas": 69,
+    "restore": 9,
+    "total": 78
+  },
+  "checkout": {
+    "head": "0a578d9bfe",
+    "commits_branch": 957,
+    "pendentes": 0,
+    "main": "f4cf411f28",
+    "main_intacto": true
   }
 }

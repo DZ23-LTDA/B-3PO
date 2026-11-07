@@ -5,7 +5,7 @@ DATA        06/11/2026
 BRANCH      b3po-brand
 Rodada 61 · 06/11/2026
 MAIN        f4cf411f28 - espelho intacto, sem commit de produto
-RODADAS     71 de auditoria
+RODADAS     92 de auditoria
 
 O QUE FOI MEDIDO E ENTREGUE
 ---------------------------
@@ -84,17 +84,31 @@ ONDE OS DADOS MORAM (medido na r70)
   NAO fica no HERMES_HOME (stores usam app.getPath('userData'))
   ZERO backup, ZERO restore -> T-10
 
-VEREDITO POR ESCOPO (nunca global)
-----------------------------------
-READY       dominios de negocio (B4/B6/B7), performance, a11y do web,
-            builders desktop+web, UI responsiva, ciclo basico de bot
-PARCIAL     seguranca, diagnostico, a11y do desktop (27/30), modos, integracoes,
-            a11y do mobile (SO estatica)
-BLOCKED     regressao (symlink), iOS (macOS), integracoes ativas (credencial)
-NOT_IMPL    vertical gas/agua
-NOT_READY   RELEASE (exe nao assinado + regressao bloqueada + 0 integracoes
-            + foco visivel WCAG 2.4.7 nao atendido (T-09)
-            + backup/restore dos dados inexistente (T-10))
+VEREDITO POR ESCOPO (nunca global) - ATUALIZADO NA R92
+------------------------------------------------------
+READY       dominios de negocio (CRM/Compras/Estoque/Vendas/Financeiro)
+            performance (-93% long tasks) · a11y do web (17/17 livre)
+            builders desktop+web (exit 0) · UI responsiva (5 viewports)
+            ciclo basico de bot · seguranca (IDOR impossivel de formular)
+            diagnostico (/api/status expoe inference + overall_from)
+            modos de navegacao (6) · foco visivel (WCAG 2.4.7, 30/30)
+            BACKUP e RESTORE (19 stores, 5 versoes, reversivel)
+            VERTICAL GAS/AGUA (vasilhame em comodato + leitura de medidor)
+
+PARCIAL     a11y do desktop: 57 nos de axe, TODOS de uma regra `best-practice`
+            (`region`) cuja causa e estrutural - ver T-15. Nenhuma violacao WCAG
+            desde a r77. 2 `nested-interactive` documentados (conflito de tablist).
+            mobile: a11y SO estatica (sem aparelho conectado).
+            empacotamento: 6 scripts falham na assinatura de payload (EXT-3).
+
+BLOCKED     regressao completa: symlink exige Developer Mode (EXT-2 / T-01)
+            iOS: exige macOS (EXT-4)
+            integracoes ativas: exige credencial (EXT-6 / T-06)
+            tarifa x consumo: decisao comercial (T-12)
+            5 modos: decisao de produto (T-05)
+
+NOT_READY   APENAS o release assinado (exe nao assinado, EXT-3)
+            - o unico item que ainda impede declarar "entrega de release".
 
 O QUE O PROPRIETARIO PRECISA FORNECER (acao exata)
 --------------------------------------------------
