@@ -28,7 +28,7 @@
 import path from 'node:path'
 
 import type { InstallStamp } from './install-stamp'
-import { podeOperarMaquina } from './machine-access'
+import { podeAdministrarInstalacao } from './machine-access'
 import type { Actor } from './rbac'
 import { ownAppImage } from './relaunch-target'
 
@@ -131,9 +131,7 @@ export function registerDesktopUninstallIpc({
        *
        * O goal G1 §36 diz o mesmo: `EXECUTE_ALLOWED` isolado não concede permissão universal.
        */
-      const ator = await actorOf()
-
-      if (!podeOperarMaquina(ator, 'escrita') || ator?.role !== 'owner' || ator?.kind !== 'human') {
+      if (!podeAdministrarInstalacao(await actorOf())) {
         return {
           ok: false,
           error: 'sem_permissao',

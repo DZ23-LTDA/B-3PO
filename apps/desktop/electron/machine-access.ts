@@ -58,5 +58,25 @@ export function podeOperarMaquina(ator: Actor | null, capacidade: MachineCapabil
   return podeExecutar && ator.role === 'owner'
 }
 
+/**
+ * r3 do V5 (R-01/R-02) — **administrar a instalação** é mais estreito que operar a máquina.
+ *
+ * Três ações mudam a instalação inteira, não um arquivo:
+ *
+ *   - desinstalar o produto (`uninstall:run`)
+ *   - desligar a criptografia de segredos (`secret-storage:set`), que **decripta tudo para plaintext**
+ *   - qualquer coisa que remova ou exponha o que está guardado
+ *
+ * Capacidade de `escrita` **não basta**: um operador de vendas com nível alto escreve em arquivo, mas
+ * não desinstala o produto. E `kind: 'bot'` **nunca** administra a instalação — não existe cenário
+ * legítimo, e o teste de guarda da rodada anterior mostrou que `EXECUTE_ALLOWED` + `role: 'owner'`
+ * passava quando o `kind` não era checado (goal G1 §36).
+ *
+ * Centralizar aqui é o que o G1 pede: uma política, reutilizável, com a decisão num lugar só.
+ */
+export function podeAdministrarInstalacao(ator: Actor | null): boolean {
+  return podeOperarMaquina(ator, 'escrita') && ator?.role === 'owner' && ator?.kind === 'human'
+}
+
 /** Resposta padrão de recusa. Nomeia o estado real, não "erro". */
 export const RECUSA_MAQUINA = { error: 'sem_permissao', reason: 'capacidade_de_maquina' } as const

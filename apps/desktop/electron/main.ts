@@ -285,7 +285,7 @@ import { resolveGatewayVersion } from './gateway-version'
 import { probeGatewayWebSocket } from './gateway-ws-probe'
 import { windowsGitCandidates } from './git-binary-candidates'
 import { registerGitIpc } from './git-ipc'
-import { atorDeMaquina } from './machine-actor'
+import { atorDeMaquina } from './machine-actor'; import { podeAdministrarInstalacao } from './machine-access'
 import {
   assertExistingPathForOpen,
   ATTACHMENT_UPLOAD_DEFAULT_MAX_BYTES,
@@ -14610,7 +14610,7 @@ ipcMain.handle('hermes:connection-config:test', async (_event, payload) => testD
 // get returns the current policy without touching safeStorage; set flips it
 // and re-encodes every stored secret (see applySecretStorageEncryption).
 ipcMain.handle('hermes:secret-storage:get', async () => ({ on: secretStoragePolicy().on }))
-ipcMain.handle('hermes:secret-storage:set', async (_event: any, on: any) => applySecretStorageEncryption(on === true))
+ipcMain.handle('hermes:secret-storage:set', async (_event: any, on: any) => (podeAdministrarInstalacao(await atorDeMaquina(app.getPath('userData'))) ? applySecretStorageEncryption(on === true) : { error: 'sem_permissao', on: secretStoragePolicy().on }))
 
 // ── v2 connection registry IPC (multi-source) ───────────────────────────────
 // Storage-level CRUD for named agent sources. Routing/pooling consumption of
