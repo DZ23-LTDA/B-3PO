@@ -72,7 +72,7 @@ export function AmbienteScreen() {
   const proporcao = proporcaoDeOrigem()
 
   return (
-    <main aria-label="Ambiente de trabalho" className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-10">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold text-(--ui-text-primary)">Ambiente de trabalho</h1>
         <p className="max-w-2xl text-sm text-(--ui-text-secondary)">
@@ -141,6 +141,6 @@ export function AmbienteScreen() {
           endereco.
         </p>
       </aside>
-    </main>
+    </div>
   )
 }

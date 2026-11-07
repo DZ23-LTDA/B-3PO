@@ -98,14 +98,14 @@ export function TrabalhosView() {
 
   if (!disponivel) {
     return (
-      <main aria-label="Trabalhos pontuais" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-foreground">Trabalhos</h1>
         </header>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
           Trabalhos indisponíveis neste ambiente.
         </p>
-      </main>
+      </div>
     )
   }
 
@@ -113,7 +113,7 @@ export function TrabalhosView() {
   const abertos = trabalhos.filter(t => t.status === 'pedido' && !vencidos.some(v => v.id === t.id))
 
   return (
-    <main aria-label="Trabalhos pontuais" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Trabalhos</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -247,7 +247,7 @@ export function TrabalhosView() {
       <p className="text-xs text-(--ui-text-tertiary)">
         {STATUS_LABEL.pedido} · {STATUS_LABEL.entregue} · {STATUS_LABEL.descartado}
       </p>
-    </main>
+    </div>
   )
 }
 

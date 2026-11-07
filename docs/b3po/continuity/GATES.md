@@ -5852,3 +5852,65 @@ O `TASK-QUEUE` tinha o invariante escrito:
 
 Agora ele **roda em CI**, junto com os outros 18 testes de ratchet. **Invariante que só existe como texto
 é uma intenção; invariante que falha o build é uma regra.**
+
+---
+
+## G8 · ADENDO 51 — T-13 estava **incompleto**: 7 telas que a r82 deixou passar
+
+**Rodada 94 (3ª checagem do `wrapup_check`).** Rodei o `axe` nas **27 rotas** — não só nas que eu
+lembrava de ter tocado — e achei `/entregas` com **dois `<main>`**.
+
+### A causa, e é um erro meu de r82
+
+**O script da r82 fazia:**
+
+```python
+re.sub(r"<main(\s+className=)", r"<div", t)
+```
+
+**Exigia `className` imediatamente depois de `<main`.** Sete telas escrevem **`<main aria-label="…" className="…">`** —
+`aria-label` vem primeiro, então **o regex não casou e elas passaram intactas**. E quatro delas tinham
+**dois** `<main>` cada (o early return de "indisponível" + o return principal).
+
+| Tela | `<main>` antes | Agora |
+|---|---|---|
+| `entregas` · `organizacao` · `projetos` · `trabalhos` | **2 cada** (aria-label antes de className) | 0 |
+| `ambiente` · `busca` | 1 cada, **aninhado** | 0 |
+| `session-import` | 1, irmão do main do shell | 0 |
+
+### A prova
+
+```
+antes:  /entregas  landmark-main-is-top-level(1) landmark-no-duplicate-main(1)
+depois: 27 rotas verificadas · 0 com problema de landmark
+```
+
+**E as 27 rotas foram verificadas de verdade** — não uma amostra:
+
+```
+/  /stock  /sales  /crm  /compras  /finance  /gas  /medidores  /backups  /settings
+/painel  /marketing  /automacoes  /empresa  /products  /agenda  /sofia  /servicos
+/posvenda  /entregas  /atendimento  /organizacao  /projetos  /trabalhos  /ambiente
+/busca  /session-import
+```
+
+### O que isso ensina sobre o T-13
+
+**A r82 fechou o T-13 com "10 telas" e eu escrevi `done`.** O número estava certo para **as telas que eu
+encontrei** — e eu as encontrei **procurando por uma string que eu tinha escolhido**, não varrendo as
+rotas. **Quatro telas usavam outra ordem de atributos e ficaram invisíveis ao meu grep.**
+
+> **Um `grep` que casa é uma amostra; uma varredura de renderização é um censo.** A r82 mediu "quantos
+> arquivos têm `<main className=`" e chamou de "quantos têm dois `<main>`".
+>
+> **É a terceira vez na série que a diferença entre amostra e censo aparece** (r81 padding, r87
+> `axe` × viewports, r94 `axe` × rotas). E as três foram achadas **por rodar a matriz inteira**, nunca
+> por olhar mais uma vez o mesmo ponto.
+
+### E o `wrapup_check` teve razão duas vezes nesta rodada
+
+1. **"a consistência é manual"** → virou `docs-continuity.test.ts` (6 testes, provado por mutação)
+2. **"faça a checagem completa, não só onde você mexeu"** → a 3ª rodada achou os 7 `<main>`
+
+**As duas recusas dele produziram trabalho real.** É a terceira vez que ele me barra e a terceira em que
+o que ele barrou era um problema meu que eu tinha rotulado com uma frase.

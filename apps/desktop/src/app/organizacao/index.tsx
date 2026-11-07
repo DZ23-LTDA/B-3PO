@@ -120,19 +120,19 @@ export function OrganizacaoView() {
 
   if (!disponivel) {
     return (
-      <main aria-label="Estrutura da organização" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
         <header className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-foreground">Organização</h1>
         </header>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
           Organização indisponível neste ambiente.
         </p>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main aria-label="Estrutura da organização" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Organização</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -247,6 +247,6 @@ export function OrganizacaoView() {
           </ul>
         </section>
       ) : null}
-    </main>
+    </div>
   )
 }

@@ -100,7 +100,7 @@
       "owner": "dsh",
       "status": "done",
       "note": "r81: visual identico, entao nao e urgencia; e correcao de estrutura. afeta stock, sales, crm, compras, finance.",
-      "done_in": "r82: 10 telas com <main> -> <div>; + regionAmbient na pilha de confirmacoes; 16/16 rotas com 1 main e 0 landmark"
+      "done_in": "r82 + r94: 10 telas na r82, mais 7 na r94 (aria-label antes de className escapou do regex). 27/27 rotas com 1 <main> e 0 violacao de landmark."
     },
     {
       "id": "T-15",

@@ -65,7 +65,7 @@ export function BuscaView() {
   const grupos = [...new Set(resultados.map(r => r.grupo))]
 
   return (
-    <main aria-label="Busca de módulos" className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-12">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-12">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">Busca</h1>
         <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
@@ -134,6 +134,6 @@ export function BuscaView() {
       )}
 
       <p className="text-xs text-(--ui-text-tertiary)">↑ ↓ para escolher · Enter para abrir</p>
-    </main>
+    </div>
   )
 }
