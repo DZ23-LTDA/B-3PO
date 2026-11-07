@@ -97,6 +97,13 @@ export interface ExecucaoStore {
     input: IniciarInput,
     opcoes: { agora?: number; credencial: boolean; limites?: LimitesAgente }
   ): { error?: MotivoBloqueio; execucao?: ExecucaoGravada }
+  /**
+   * r23 do V5 — registra a sessão do Hermes que executa esta tarefa.
+   *
+   * Só aceita execução que existe e que ainda **não** foi vinculada: trocar a sessão de uma execução
+   * em andamento seria reescrever a história de onde o trabalho rodou.
+   */
+  vincularSessao(id: string, sessionId: string): { error?: string; ok?: boolean }
   finalizar(id: string, status: 'concluida' | 'falhou', resultado?: string): { error?: string; ok?: boolean }
   cancelar(id: string): { error?: string; ok?: boolean }
   listar(filtro?: { owner?: string; task_id?: string }): ExecucaoGravada[]
@@ -120,6 +127,30 @@ export function openExecutionStore(userData: string): ExecucaoStore {
 
       // Não apaga: muda o status. A trilha responde "quem pediu isso" quando algo dá errado.
       alvo.status = 'cancelada'
+      gravar(caminho, dados)
+
+      return { ok: true }
+    },
+
+    vincularSessao(id, sessionId) {
+      const limpo = String(sessionId ?? '').trim()
+
+      if (!limpo) return { error: 'sessao_obrigatoria' }
+
+      const dados = ler(caminho)
+      const alvo = dados.execucoes.find(e => e.execution_id === id)
+
+      if (!alvo) return { error: 'execucao_inexistente' }
+
+      // Trocar a sessão de uma execução já vinculada reescreveria onde o trabalho rodou.
+      if (alvo.session_id) {
+        return alvo.session_id === limpo ? { ok: true } : { error: 'ja_vinculada' }
+      }
+
+      alvo.session_id = limpo
+      // Com sessão, o executor começou: o status deixa de ser `pendente`.
+      if (alvo.status === 'pendente') alvo.status = 'executando'
+
       gravar(caminho, dados)
 
       return { ok: true }
@@ -154,6 +185,8 @@ export function openExecutionStore(userData: string): ExecucaoStore {
         execution_id: input.execution_id,
         owner: input.owner,
         parent_execution_id: input.parent_execution_id ?? null,
+        // r23 do V5: nasce sem sessao. Quem vincula e `vincularSessao`.
+        session_id: null,
         started_at: agora,
         /*
          * r5 do V5 (A-13) — nasce **pendente**, não `executando`.

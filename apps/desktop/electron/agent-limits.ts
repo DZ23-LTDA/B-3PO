@@ -65,6 +65,14 @@ export interface Execucao {
   parent_execution_id: string | null
   /** Quem é o dono: o bot que executa. */
   owner: string
+  /**
+   * r23 do V5 — a sessão do Hermes que executa esta tarefa. `null` enquanto não há executor.
+   *
+   * É o vínculo que faltava para o G2: a execução nasce `pendente` e **nada a executa**. Este campo
+   * é onde a sessão real é registrada quando existir. Opcional para que registros antigos continuem
+   * carregando (a validação em `agent-execution-store` não o exige).
+   */
+  session_id?: string | null
   /** Quando começou. `null` enquanto pendente. */
   started_at: number | null
   status: StatusExecucao

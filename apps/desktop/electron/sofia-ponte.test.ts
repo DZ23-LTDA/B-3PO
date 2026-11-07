@@ -34,6 +34,7 @@ function execucoesFalsas(): { iniciadas: IniciarInput[]; store: ExecucaoStore; m
 
   const store: ExecucaoStore = {
     cancelar: () => ({ ok: true }),
+    vincularSessao: () => ({ ok: true }),
     finalizar: () => ({}),
     iniciar: (input, _opcoes) => {
       iniciadas.push(input)
@@ -179,6 +180,7 @@ describe('delegar', () => {
   it('o erro do runtime sobe como está: sem credencial não é "plano falhou"', async () => {
     const store: ExecucaoStore = {
       cancelar: () => ({}),
+      vincularSessao: () => ({ ok: true }),
       finalizar: () => ({}),
       iniciar: () => ({ error: 'sem_credencial' }),
       listar: () => []
