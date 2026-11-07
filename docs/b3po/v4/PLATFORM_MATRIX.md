@@ -48,17 +48,57 @@ dashboard embute a TUI real do Hermes, e trocaria a identidade de uma superfíci
 **O que já funciona nele**: build verde, `axe` 0, 478/478 testes, e ele é o painel de operação do
 gateway (sessões, modelos, logs, canais, webhooks, MCP).
 
-## 3. Mobile — **APK constrói, mas não tem os seis modos**
+## 3. Mobile — **INSPECIONADO na r18**, e o fix do safe-area está provado
 
-| Item | Estado | Evidência |
+**O bloqueio caiu.** Em oito rodadas o emulador devolvia screenshot preto; na r18 ele voltou a compor.
+
+### Como destravou — e não foi com `-wipe-data`
+
+```bash
+$ adb shell am force-stop com.android.systemui   # reinicia a UI do sistema
+$ adb shell input tap 361 1366                   # "Aguarde" no diálogo de ANR
+$ adb shell dumpsys window | grep mCurrentFocus
+  mCurrentFocus=Window{… com.dz23.b3po/MainActivity}   ← o app ganhou o foco
+```
+
+**Nenhum `-wipe-data`**, nenhuma configuração do sistema alterada. Só o `systemui` do emulador
+reiniciado — operação reversível dentro do emulador.
+
+### O achado que mudou o diagnóstico
+
+O APK instalado era de **04/11 21:31** — **anterior** ao fix do safe-area (r106). O fix existia no
+repositório e **nunca tinha chegado ao aparelho**.
+
+A reinstalação falhou com `INSTALL_FAILED_UPDATE_INCOMPATIBLE` (assinaturas diferentes: debug ×
+release), então desinstalei e instalei. O app não tinha dado a perder — a tela mostrava
+*"Sem conexão com o computador"*.
+
+### A prova visual, lado a lado
+
+| | Wordmark | Relógio |
 |---|---|---|
-| `app-release.apk` | **existe** | 44,2 MB · 07/11 08:39 |
-| Build | **verde** | `BUILD SUCCESSFUL` (r106) |
-| Suíte | **179 passam / 8 skip** | medido |
-| Fix do safe-area | **10 testes** | `src/app/tela-inset.ts` |
-| **Seis modos** | **AUSENTES** | busca por `engenharia`/`estrategico`/`AMBIENTES` não encontra |
-| Inspeção em aparelho | **BLOCKED** | `systemui`/`system_server` em ANR; captura preta |
-| `adb` agora | `systemui` ANR | medido na r12 |
+| **APK 04/11** — sem o fix | `B3PO` em y≈50 | **sobreposto** em y≈50 |
+| **APK 07/11** — com o fix | `B-3PO` em y≈**160** | limpo em y≈50 |
+
+Captura: `docs/b3po/evidence/mobile-r18.png`.
+
+**O `SafeAreaView` do `react-native` é no-op no Android** — o cálculo do inset saiu para
+`src/app/tela-inset.ts` (10 testes) na r106, e agora está **provado em dispositivo**.
+
+### O que o app mostra hoje
+
+| Estado | Texto |
+|---|---|
+| Desconectado | *"Sem conexão com o computador — Verifique se o B-3PO está aberto na mesma rede. Suas ações continuam pendentes até reconectar."* |
+| Pareamento | *"Cole o link de pareamento que o B-3PO mostrou no computador"* + campo `b3po://pair?url=…&token=…` + botão **Conectar** |
+
+**pt-BR integral. Estados reais, não decorativos.**
+
+### O que **continua** não existindo no mobile
+
+**Os seis modos de trabalho.** Busca por `engenharia`/`estrategico`/`AMBIENTES` no `mobile/b3po-app`
+não encontra nada. O app mobile é um **cliente de pareamento e conversa** — não a plataforma com os
+seis modos.
 
 ## 4. A consequência para o goal
 

@@ -332,7 +332,7 @@
   "v4_plataformas": {
     "desktop": "B-3PO de verdade: 6 modos, Sofia, agentes, projetos, axe 0 em 27 rotas",
     "web": "dashboard do Hermes upstream — title 'Hermes Agent - Dashboard', logo HERMES AGENT, Nous Research; axe 0; sem identidade B-3PO",
-    "mobile": "app-release.apk 44,2MB constroi; suite 179; MAS os seis modos NAO existem; emulador com systemui em ANR",
+    "mobile": "INSPECIONADO r18: app renderiza em pt-BR (sem conexao + pareamento). FIX DO SAFE-AREA PROVADO: APK 04/11 sobrepunha o wordmark no relogio; APK 07/11 nao. Desbloqueio: force-stop do systemui + tap em Aguarde, SEM wipe-data. Os 6 modos continuam ausentes no mobile.",
     "consequencia": "os seis modos existem em UMA plataforma; nenhuma promessa de paridade e possivel",
     "decisao_pendente": "A portar p/ mobile | B rebrandar web | C desktop e o produto, web/mobile sao operacionais | D foco em profundidade no desktop"
   },
