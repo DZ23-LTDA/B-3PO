@@ -1,7 +1,7 @@
 {
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 61,
+  "round": 74,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -145,5 +145,38 @@
     "build_web": "exit 0, web_dist 60 arquivos",
     "suite_desktop": "13 falhas em 7 arquivos - TODAS provadas no origin/main (que tem 18)"
   },
-  "data": "06/11/2026"
+  "data": "06/11/2026",
+  "wrapup_check": "PASS - 3 rodadas consecutivas limpas (rondas 5, 6 e 7); 2 problemas achados e 1 corrigido no caminho",
+  "gates_13": {
+    "PASS": [
+      "git/baseline",
+      "lint/typecheck",
+      "unit/regression",
+      "integration/API",
+      "E2E",
+      "build/smoke",
+      "auth/security",
+      "banco(integridade)",
+      "UI",
+      "performance",
+      "operacao"
+    ],
+    "N/A": [
+      "multitenancy (1 tenant/instalacao)",
+      "banco(migracao: nao existe v2)"
+    ],
+    "FAIL_por_decisao": [
+      "a11y foco visivel (T-09)",
+      "backup/restore dos dados (T-10)"
+    ]
+  },
+  "open_items": {
+    "T-01": "EXT-2 Developer Mode (externo)",
+    "T-05": "5 modos sem identidade (produto)",
+    "T-06": "conector sem credencial (EXT-6)",
+    "T-08": "preco zero: cortesia ou bloqueio (negocio)",
+    "T-09": "foco visivel WCAG 2.4.7 (produto/upstream)",
+    "T-10": "backup dos 14 JSON (arquitetura)",
+    "nested-interactive": "refatoracao de shell - tentada e revertida na r50"
+  }
 }
