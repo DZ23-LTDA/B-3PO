@@ -3422,3 +3422,65 @@ seções de evidência **e nunca voltei à tabela**. O detalhe cresceu; o resumo
 
 **O que previne**: cada gate, ao fechar, **reescreve a sua linha no resumo**. Não "atualizar o doc no
 fim" — **fechar o gate é editar o resumo**.
+
+---
+
+## CONTINUIDADE — adendo 32: a fila de tarefas tinha **4 itens feitos marcados como `todo`**
+
+**Rodada 63.** A r62 consertou a tabela de gates. Fui ao `TASK-QUEUE.json` — e o mesmo padrão, na
+forma mais direta possível.
+
+### O que a fila dizia
+
+| # | O que | Status declarado | Realidade |
+|---|---|---|---|
+| T-02 | G9: pacotes, rollback, veredito | **todo** | **feito** — builds exit 0, rollback provado |
+| T-03 | Completar UPSTREAM-PATCH-REGISTER | **todo** | **feito** |
+| T-04 | FINAL-DELIVERY.txt | **todo** | **feito na r51** |
+| T-07 | Corrigir mensagem de SKU em Vendas | **todo** | **feito na r23** |
+
+**Quatro tarefas entregues apareciam como pendentes** — e o `T-07` estava pendente há **40 rodadas**.
+
+### E o registro de patches não tinha os 6 últimos
+
+O `UPSTREAM-PATCH-REGISTER.md` registrava os patches das rodadas iniciais (i18n, Bot Mode, perf,
+landmarks). **Faltavam 6**, todos das rodadas 23–53:
+
+| Área | O que faltava |
+|---|---|
+| **Estoque** | `StockRow.orfao` + `stockRows` inclui SKU fora do catálogo (r48) |
+| **Estoque** | a marca "não cadastrado" na linha (r48) |
+| **A11y** | `filhoSoIcone` desce a árvore (r53) |
+| **Layout** | `<main>` com `h-full` (r41) |
+| **Vendas** | `recusaPorEstoque` separa produto ausente de saldo (r23) |
+| **a11y web** | 3 arquivos do web com `aria-label` contido no texto (r39) |
+
+**Sem isso, um rebase do upstream apagaria as correções e ninguém saberia que existiam.**
+
+### O padrão, agora completo em três camadas
+
+| Camada | O que congelou | Quantas rodadas |
+|---|---|---|
+| **Cabeçalho** (`HEAD`) | o hash | 8–41 |
+| **Tabela de gates** (`MASTER-STATE`) | os vereditos | ~55 |
+| **Fila de tarefas** (`TASK-QUEUE`) | os status | **até 40** |
+| **Registro de patches** | os patches | 6 patches |
+
+**Quatro camadas de documentação, todas escritas uma vez, nenhuma reescrita.**
+
+### Por que a fila de tarefas é a pior das quatro
+
+**O `GATES.md` e o `FINAL-DELIVERY.txt` são registros — quem lê sabe que pode estar velho.**
+**O `TASK-QUEUE.json` é uma instrução — quem lê age sobre ela.**
+
+> **Uma fila que diz `todo` para o que está feito faz alguém refazer. Uma fila que diz `blocked` para
+> o que dependia do dono faz o dono não ver que já foi desbloqueado.**
+
+### O que eu passo a fazer
+
+**Fechar a tarefa é editar a fila, na mesma rodada.** Não "varrer a documentação no fim" — **a
+documentação é parte do fechamento**, como o commit e o gate.
+
+**É a terceira vez que a mesma regra aparece nesta auditoria** (r60, r62, r63), o que significa que a
+regra não é "atualizar documentos": é **nunca ter dois lugares onde o mesmo fato mora sem um deles ser
+derivado do outro**.

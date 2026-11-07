@@ -1,5 +1,5 @@
 {
-  "round": 61,
+  "round": 63,
   "queue": [
     {
       "id": "T-01",
@@ -12,20 +12,23 @@
       "id": "T-02",
       "what": "G9: pacotes de entrega, rollback, matriz de riscos, veredito",
       "owner": "dsh",
-      "status": "todo"
+      "status": "done",
+      "done_in": "builds desktop/web exit 0, rollback atomico provado (2 falhas reais), veredito por escopo"
     },
     {
       "id": "T-03",
       "what": "Completar UPSTREAM-PATCH-REGISTER.md",
       "owner": "dsh",
-      "status": "todo"
+      "status": "done",
+      "done_in": "UPSTREAM-PATCH-REGISTER.md com 13 patches"
     },
     {
       "id": "T-04",
       "what": "FINAL-DELIVERY.txt",
       "owner": "dsh",
-      "status": "todo",
-      "blocked_by": "T-02"
+      "status": "done",
+      "blocked_by": "T-02",
+      "done_in": "FINAL-DELIVERY.txt reescrito na r51 (12 correcoes)"
     },
     {
       "id": "T-05",
@@ -45,7 +48,8 @@
       "id": "T-07",
       "what": "Corrigir mensagem de SKU inexistente em Vendas",
       "owner": "dsh",
-      "status": "todo"
+      "status": "done",
+      "done_in": "corrigido na r23: produto_nao_encontrado vs saldo_insuficiente (+ teste)"
     },
     {
       "id": "T-08",
@@ -54,5 +58,6 @@
       "status": "blocked"
     }
   ],
-  "data": "06/11/2026"
+  "data": "06/11/2026",
+  "updated_note": "r63: T-02/T-03/T-04/T-07 marcados done (estavam 'todo' e ja tinham sido entregues)"
 }

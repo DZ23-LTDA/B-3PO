@@ -18,6 +18,14 @@ um futuro rebase saiba o que preservar.
 | A11y | `apps/desktop/src/components/ui/sidebar.tsx` | `role="navigation"` + `aria-label` nas 3 variantes | landmarks ausentes |
 | A11y | `apps/desktop/src/app/contrib/controller.tsx` | `<main>` em volta do pane do workspace | landmarks ausentes |
 
+
+| **Estoque** | `apps/desktop/src/app/stock/stock-form.ts` | `StockRow.orfao` + `stockRows` inclui SKU de `balances` fora do catálogo (r48) | a tela dizia "0 produtos" com 6 movimentações; escondia o estado real |
+| **Estoque** | `apps/desktop/src/app/stock/index.tsx` | linha do órfão marcada "não cadastrado — só tem movimentação" (r48) | mesma causa; a marca é o que dá nome ao estado |
+| **A11y** | `apps/desktop/src/components/ui/tooltip.tsx` | `filhoSoIcone` desce a árvore (`temTexto`) em vez de só olhar string (r53) | injetava `aria-label` sobre botão com texto → `label-content-name-mismatch` (WCAG 2.5.3) |
+| **Layout** | `apps/desktop/src/app/contrib/controller.tsx` | `<main>` ganhou `h-full` (r41) | `flex-1` não define altura em pai `block`; conteúdo 182 px acima em 30 rotas |
+| **Vendas** | `apps/desktop/electron/sales-ipc.ts` | `recusaPorEstoque` separa `produto_nao_encontrado` de `saldo_insuficiente` (r23) | SKU fora do catálogo dava mensagem de saldo, que é outra coisa |
+| **a11y web** | `web/src/components/{ThemeSwitcher,LanguageSwitcher}.tsx`, `web/src/pages/SessionsPage.tsx` | `aria-label` passa a conter o texto visível (r39) | 4 `label-content-name-mismatch`; o web não compartilha código com o desktop |
+
 ## O que NÃO toca upstream
 
 - `docs/b3po/**` — documentação de auditoria, só nossa.
