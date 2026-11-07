@@ -12,6 +12,29 @@ fase: G1
 > Na r2, r3 e r4, quatro canais classificados como graves foram inspecionados e **três estavam errados
 > ou eram seguros**. Um registro que se baseia em nome produz trabalho que quebra código correto.
 
+## Porta x canal: o invariante da r26/r27
+
+O goal nomeia *"nenhum botão falso"*. O inverso também engana: **canal sem porta** — o main registra,
+o renderer não alcança. Aconteceu **duas vezes**:
+
+| Rodada | Canal | Consequência |
+|---|---|---|
+| r11 → r25 | `hermes:sofia:delegar` | a ponte "deixou de ser código morto" e continuou inalcançável por 14 rodadas |
+| antes → r27 | `hermes:sales:devolver` | **dois** arquivos de teste provando o handler; nenhum caminho de usuário |
+
+**O invariante** (`preload-ipc-alcancavel.test.ts`, 5 casos) compara o que `ipcMain.handle` registra
+com o que `ipcRenderer.invoke` expõe, em **todos os domínios**.
+
+**Medido depois de expor `devolver`**: 310 canais registrados, **1 sem porta** —
+`hermes:sync-status`, que entra na lista como **MORTO** (registrado, sem chamador no repo inteiro,
+sem preload). Não foi apagado: apagar exige decisão do dono do recurso de sync.
+
+**Provado vermelho** duas vezes: removendo `delegar` (r26) e removendo `devolver` (r27) do preload, o
+teste falha **nomeando o canal**.
+
+**O que ele não prova**: que o handler funciona. Só que a porta existe.
+
+
 ## O método
 
 Para cada um dos **329 handlers** com canal `hermes:*`, o corpo foi lido e procurado por **chamadas de
