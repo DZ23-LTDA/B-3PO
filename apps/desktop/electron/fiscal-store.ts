@@ -21,6 +21,7 @@ import { dirname, join } from 'node:path'
 
 import { avaliarMotivo } from './fiscal-cancel'
 import type { FiscalDocumentKind, FiscalProvider, FiscalStatus, PedidoFiscal } from './fiscal-provider'
+import { backupRotativo } from './store-backup'
 
 const DEFAULT_TENANT = 'local'
 
@@ -223,6 +224,7 @@ export class FiscalStore {
     const temp = `${this.filePath}.${process.pid}.tmp`
 
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

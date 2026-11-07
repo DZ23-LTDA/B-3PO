@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Pós-venda: acompanhamento depois que a venda aconteceu.
 //
 // Fecha o ciclo comercial do GOAL: venda → entrega → atendimento → **pós-venda** (recompra,
@@ -237,6 +238,7 @@ export class AfterSalesStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

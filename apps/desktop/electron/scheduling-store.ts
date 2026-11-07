@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Agenda: recursos (profissional, sala, equipamento) e compromissos.
 //
 // A regra que dá sentido ao domínio é o **conflito**: dois compromissos do mesmo recurso não podem
@@ -298,6 +299,7 @@ export class SchedulingStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

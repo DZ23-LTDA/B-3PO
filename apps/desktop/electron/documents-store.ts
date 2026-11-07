@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Registro de documentos da empresa.
 //
 // O QUE ESTE DOMINIO GUARDA, E O QUE ELE NAO GUARDA
@@ -200,6 +201,7 @@ export class DocumentsStore {
     const temp = `${this.filePath}.tmp`
 
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 

@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Financeiro (contas a receber e a pagar) no disco do usuário.
 //
 // Mesma disciplina do estoque, pelo mesmo motivo: **totais não são armazenados**. "Quanto tenho a
@@ -399,6 +400,7 @@ export class FinanceStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

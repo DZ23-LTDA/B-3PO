@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Vendas (orçamento e pedido) no disco do usuário.
 //
 // A decisão central: **o total nunca vem do chamador**. Ele é calculado dos itens, aqui, no processo
@@ -359,6 +360,7 @@ export class SalesStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

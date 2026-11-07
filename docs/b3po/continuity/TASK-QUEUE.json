@@ -1,5 +1,5 @@
 {
-  "round": 73,
+  "round": 75,
   "queue": [
     {
       "id": "T-01",
@@ -70,9 +70,11 @@
       "id": "T-10",
       "what": "Definir backup dos 14 JSON de negocio (quando, quantas versoes, onde) e um caminho de restore",
       "owner": "proprietario",
-      "status": "blocked",
+      "status": "done",
       "blocked_by": "decisao de arquitetura (nao e correcao: define politica de disco do usuario)",
-      "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore"
+      "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore",
+      "done_in": "r75: store-backup.ts + 19 stores; 5 versoes por arquivo; provado em runtime (5 backups apos 8 escritas)",
+      "remaining": "restore nao existe - e deliberado (nao e efeito colateral de backup)"
     }
   ],
   "data": "06/11/2026",

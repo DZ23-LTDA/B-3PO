@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Funil do CRM no disco do usuário, dono do dado: o processo principal do Electron.
 //
 // Mesmo desenho do store de contatos: um JSON sob `userData`, gravação atômica (`write` + `rename`). A
@@ -210,6 +211,7 @@ export class CrmPipelineStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

@@ -4293,3 +4293,90 @@ investigação mostrou que **as duas peças estão certas e o meu experimento é
 
 > **"O teste falhou" e "o código falhou" são hipóteses diferentes.** Eu tratei as duas como a mesma
 > durante 20 rodadas. **Na r73, não.**
+
+---
+
+## G8 · ADENDO 41 — T-10 BACKUP: **IMPLEMENTADO E PROVADO** (era `FAIL`, virou `PASS`)
+
+**Rodada 75.** O gate de operação tinha dois `FAIL`: backup e restore. **Backup está resolvido.**
+
+### O que foi feito
+
+**`apps/desktop/electron/store-backup.ts`** (novo):
+
+```ts
+export const MAX_VERSOES = 5
+
+export async function backupRotativo(filePath: string, maxVersoes = MAX_VERSOES): Promise<void> {
+  // copia o arquivo ATUAL para backups/<nome>.<epoch>.json
+  // mantem as N mais recentes por mtime
+  // falha silenciosa: perder o backup e ruim, perder o dado por causa do backup e pior
+}
+```
+
+**Aplicado em 19 stores** (os que escrevem JSON de negócio), **antes do `rename`**:
+
+```ts
+await writeFile(temp, JSON.stringify(store, null, 2), 'utf8')
+await backupRotativo(this.filePath)      // <- novo
+await rename(temp, this.filePath)
+```
+
+### A prova em runtime (não em teste)
+
+```
+antes da prova:   pasta b3po/backups/ NAO existia
+upsert de contato -> crm-contacts.1794017983664.json  0,9 KB
+mais 7 escritas   -> crm-contacts: 5 versoes  (o limite)
+                     total na pasta: 5
+```
+
+**O arquivo anterior é preservado, a rotação respeita `MAX_VERSOES`, e o nome carrega o timestamp** —
+dá para copiar de volta à mão sem inventar ferramenta.
+
+### A prova em teste (`store-backup.test.ts`, 5 testes)
+
+| Caso | Resultado |
+|---|---|
+| copia o anterior para `backups/` com timestamp | **PASS** |
+| não faz nada na primeira escrita (arquivo ausente) | **PASS** |
+| mantém no máximo `MAX_VERSOES` | **PASS** |
+| **não apaga versões de outro arquivo** | **PASS** |
+| não lança quando copiar falha | **PASS** |
+
+### O que o backup NÃO faz — e por que
+
+**Não restaura.** Um `restore` tem semântica própria (qual versão? sobrescreve o quê? avisa o
+usuário?) e **não deve ser efeito colateral de um backup**. O arquivo está lá, com timestamp, e pode
+ser copiado de volta.
+
+**O gate de operação agora:**
+
+| Item | Antes (r69/r70) | Agora |
+|---|---|---|
+| health · status · logs | PASS | PASS |
+| rollback de código | PASS | PASS |
+| integridade de escrita · rotação | PASS | PASS |
+| **backup dos dados** | **FAIL** | **PASS** (19 stores, 5 versões, provado) |
+| **restore** | **FAIL** | **FAIL — deliberado**, não é efeito colateral |
+
+### O erro de processo que eu cometi no caminho
+
+**Apliquei o import em 19 stores com um script que procurava "o último `import ` nas primeiras 60
+linhas"** — e isso **caiu no meio de um import multi-linha** em 16 arquivos (`purchases-store.ts`,
+etc.). O typecheck pegou: **`error TS1003: Identifier expected`**.
+
+**Corrigi com um segundo script que só insere depois de um `} from '...'`** — e o typecheck voltou a 0.
+
+> **Editar 19 arquivos com um regex é o tipo de mudança em que a verificação não é opcional.** 16 de 19
+> estavam quebrados e **três** passaram por sorte (import de uma linha). **O typecheck é o que separa
+> "apliquei" de "funciona".**
+
+### E o app rodava o bundle ANTIGO
+
+**O `backup` não aparecia em runtime** — porque o Electron carrega `dist/electron-main.mjs`, e eu tinha
+mexido no **fonte**. Precisei de `tsc --build` + `bundle-electron-main.mjs` + reiniciar o app.
+
+**O mesmo padrão da r57**: *"o código está certo"* e *"o app roda o código certo"* são afirmações
+diferentes. **Aqui eu quase anotei "o backup não funciona"** — e o backup estava no fonte desde o
+começo.

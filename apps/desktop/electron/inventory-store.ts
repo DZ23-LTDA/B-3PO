@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Estoque como livro-razão de movimentações, no disco do usuário.
 //
 // A decisão central: **saldo não é armazenado**. Ele é sempre a soma das movimentações do produto.
@@ -276,6 +277,7 @@ export class InventoryStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

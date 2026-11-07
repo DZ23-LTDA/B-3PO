@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Catálogo de serviços.
 //
 // Antes deste arquivo, a agenda guardava `service` como **texto livre**: dois agendamentos podiam
@@ -223,6 +224,7 @@ export class ServicesStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Atendimento e SLA: tickets de suporte.
 //
 // Fecha o ciclo comercial: venda → entrega → suporte → pós-venda. Sem ele, uma reclamação de cliente
@@ -290,6 +291,7 @@ export class ServiceDeskStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

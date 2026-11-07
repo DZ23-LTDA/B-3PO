@@ -13,6 +13,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 import type { Actor, ActorKind, Level, Role } from './rbac'
+import { backupRotativo } from './store-backup'
 
 export interface StoredActor extends Actor {
   active: boolean
@@ -209,6 +210,7 @@ export class ActorsStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

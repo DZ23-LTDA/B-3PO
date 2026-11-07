@@ -23,6 +23,7 @@ import { dirname, join } from 'node:path'
 import { callTool, type AgentTool } from './agent-tools'
 import { DEFAULT_TENANT } from './catalog-store'
 import type { Actor } from './rbac'
+import { backupRotativo } from './store-backup'
 
 export const AUTOMATION_TRIGGERS = [
   'venda.faturada',
@@ -271,6 +272,7 @@ export class AutomationStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

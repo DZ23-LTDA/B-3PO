@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Contatos do CRM no disco do usuário, dono do dado: o processo principal do Electron.
 //
 // O renderer pede e apresenta; quem valida, grava e devolve estado consistente é aqui. Sem banco externo:
@@ -274,6 +275,7 @@ export class CrmContactStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(store, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }

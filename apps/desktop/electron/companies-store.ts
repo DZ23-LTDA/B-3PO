@@ -1,3 +1,4 @@
+import { backupRotativo } from './store-backup'
 // Empresas e filiais — a base do multitenancy.
 //
 // Hoje todos os domínios gravam `tenant_id = 'local'`. Este store cria o registro canônico que vai
@@ -223,6 +224,7 @@ export class CompaniesStore {
     await mkdir(dirname(this.filePath), { recursive: true })
     const temp = `${this.filePath}.tmp`
     await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+    await backupRotativo(this.filePath)
     await rename(temp, this.filePath)
   }
 }
