@@ -35,6 +35,7 @@ function execucoesFalsas(): { iniciadas: IniciarInput[]; store: ExecucaoStore; m
   const store: ExecucaoStore = {
     cancelar: () => ({ ok: true }),
     vincularSessao: () => ({ ok: true }),
+        expirarPendentes: () => [],
     finalizar: () => ({}),
     iniciar: (input, _opcoes) => {
       iniciadas.push(input)
@@ -181,6 +182,7 @@ describe('delegar', () => {
     const store: ExecucaoStore = {
       cancelar: () => ({}),
       vincularSessao: () => ({ ok: true }),
+        expirarPendentes: () => [],
       finalizar: () => ({}),
       iniciar: () => ({ error: 'sem_credencial' }),
       listar: () => []

@@ -104,6 +104,19 @@ export interface ExecucaoStore {
    * em andamento seria reescrever a história de onde o trabalho rodou.
    */
   vincularSessao(id: string, sessionId: string): { error?: string; ok?: boolean }
+  /**
+   * r39 do V5 — falha as execuções `pendente` que passaram do prazo sem sessão.
+   *
+   * Uma execução delegada nasce `pendente` e só vira `executando` quando uma sessão real é
+   * vinculada. Se a sessão nunca chegar (o usuário fechou a tela, a criação falhou), ela ficaria
+   * `pendente` **para sempre** — ocupando vaga de concorrência e aparecendo como trabalho em curso.
+   *
+   * `pendente` tem prazo. `executando` **não**: uma sessão ligada pode levar horas, e matá-la por
+   * tempo transformaria trabalho legítimo em falha.
+   *
+   * Devolve os ids expirados — quem chamou precisa saber o que mudou.
+   */
+  expirarPendentes(agora: number, limiteMs: number): string[]
   finalizar(id: string, status: 'concluida' | 'falhou', resultado?: string): { error?: string; ok?: boolean }
   cancelar(id: string): { error?: string; ok?: boolean }
   listar(filtro?: { owner?: string; task_id?: string }): ExecucaoGravada[]
@@ -175,6 +188,30 @@ export function openExecutionStore(userData: string): ExecucaoStore {
       return { ok: true }
     },
 
+    expirarPendentes(agora, limiteMs) {
+      if (!Number.isFinite(limiteMs) || limiteMs <= 0) return []
+
+      const dados = ler(caminho)
+      const expirados: string[] = []
+
+      for (const e of dados.execucoes) {
+        // So `pendente`: `executando` tem sessao viva e o prazo dela nao e este.
+        if (e.status !== 'pendente') continue
+
+        // Sem `started_at` nao ha como medir idade — nao inventa um tempo.
+        const desde = e.started_at ?? null
+
+        if (desde === null || agora - desde < limiteMs) continue
+
+        e.status = 'falhou'
+        e.resultado = 'sem_sessao_no_prazo'
+        expirados.push(e.execution_id)
+      }
+
+      if (expirados.length > 0) gravar(caminho, dados)
+
+      return expirados
+    },
     iniciar(input, opcoes) {
       const agora = opcoes.agora ?? Date.now()
       const tenant = serverTenant()
