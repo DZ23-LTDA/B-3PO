@@ -61,6 +61,31 @@ fase: G5
 **São números de saúde de código.** Um produto com 19 mil testes pode falhar toda tarefa real; o
 inverso também é verdade.
 
+## 3b. r47 — a razao exata pela qual nada pode ser medido
+
+Nao e' "o harness nao existe". E' que **nenhum turno completa**.
+
+Medido no app em execucao, via `/api/config` e `/api/status`:
+
+```
+model ....... "anthropic/claude-opus-4.6"
+providers ... {}            <-- ZERO credenciais
+platforms ... {}            <-- nenhuma plataforma conectada
+```
+
+E o teste direto: enviei `"teste de vinculo r45"` pelo composer.
+
+| Passo | Resultado |
+|---|---|
+| sessao criada | ✅ `local-e2e76a5ad…` |
+| mensagens persistidas | **0** |
+
+A sessao nasce no envio; o turno **nao produz nada** porque nao ha chave de provedor. Um benchmark aqui
+mediria **zero em toda tarefa** — e zero nao e' uma medicao, e' a ausencia de uma.
+
+**Isto e' `EXT-3`, com o nome certo**: nao falta "credencial de conector", falta **credencial de modelo**
+— sem ela, nenhuma tarefa de agente pode ser avaliada, nem por mim nem por qualquer harness.
+
 ## 4. O que seria preciso para um harness honesto
 
 1. **Conjunto de tarefas** versionado no repo, por categoria: codificação, correção de bug, testes,

@@ -17,7 +17,7 @@ fase: G7
 |---|---|---|---|
 | `EXT-1` | Sem certificado Authenticode | release assinado | obter certificado e assinar o `.exe`; hoje `NOT_READY` |
 | `EXT-2` | Sem macOS | iOS · build macOS | rodar `npm run build` num macOS com Xcode |
-| `EXT-3` | Sem credencial de conector | conector `ready` de verdade; benchmark de tarefas reais | `hermes auth add <provider>` **ou** `<PLATAFORMA>_BOT_TOKEN` no `.env` do perfil + reiniciar o gateway |
+| `EXT-3` | **Sem credencial de MODELO** (`providers: {}`, modelo `anthropic/claude-opus-4.6`) — medido na r47: sessao criada, **0 mensagens**. Sem isso nenhum turno completa, entao nenhuma tarefa de agente pode ser avaliada. Conector e' o mesmo bloqueio em outro nivel | `hermes auth add <provider>` ou `ANTHROPIC_API_KEY` no `.env` do perfil + reiniciar o gateway |
 | `EXT-4` | Sem bash | suíte completa do gateway (**1.685 arquivos ≈ 4,7 h**) | rodar `scripts/run_tests.sh` num ambiente com bash |
 | `EXT-5` | `core.autocrlf=true` nesta máquina | 2 testes de `desktop-plugin-install` (CRLF) | `git config core.autocrlf false` **ou** os testes normalizarem EOL |
 | `EXT-6` | Sem host SSH real | 2 testes de `ssh-connection` | apontar para um host alcançável, ou marcar como integração |
