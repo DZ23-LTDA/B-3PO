@@ -3183,3 +3183,52 @@ três painéis do G8).
 
 **As duas apareceram na primeira metade da revisão.** As 12 seguintes não acrescentaram nada — o que
 é consistente com os achados estarem concentrados onde o `B5` e o `G3` já eram `PARCIAL`.
+
+---
+
+## G9 · ADENDO 3 — `dist` de produção RECONSTRUÍDO com todos os fixes, e o conteúdo verificado
+
+**Rodada 57.** O `dist` era da r37 (20:01). Os fixes da r48 (estoque) e r53 (`Tip`) estavam no código
+mas **não no artefato**.
+
+### O build
+
+```
+parando vite dev (pid 16060) → porta livre
+npm run build → exit: 0 | 10s
+  ✓ 16374 modules transformed.
+  ✓ built in 4.76s
+dist: 1231 arquivos, 53.7 MB, 06/11 21:51   ← HEAD da r56
+```
+
+### A verificação que importa: o fix está DENTRO do bundle?
+
+**Primeira busca: negativa.** Eu procurei em `dist/product/assets` e não achei.
+
+**Segunda busca: positiva.** O caminho real é `dist/assets`, e o chunk `stock-BI49YSwY.js` contém:
+
+```js
+(`span`,{className:`ml-2 text-(--ui-danger)`,
+  children:`não cadastrado — só tem movimentação`}):null
+```
+
+**O texto da correção da r48 está empacotado.** A busca negativa era **meu caminho errado**, não ausência
+do fix.
+
+### O que isso fecha
+
+| Item | Estado |
+|---|---|
+| build desktop | **exit 0** · 16 374 módulos · 1231 arquivos |
+| **fix da r48 no bundle** | **SIM** (verificado no chunk) |
+| **fix da r53 no bundle** | **SIM** (o `Tip` está no `context`/`vendor`) |
+| app reiniciado | **CDP 9333 OK** |
+
+### A lição, e é a mesma de sempre
+
+**"O build passou" e "o build contém a mudança" são afirmações diferentes.** Eu já tinha aprendido
+isso com o `axe` (medir ≠ olhar). Aqui a variante é: **procurar no caminho errado e concluir "não
+está"**.
+
+> **Uma busca negativa só vale depois de confirmar que o caminho existe.** `dist/product/assets` não
+> existe; `dist/assets` sim. **Testar o caminho é parte da busca.**
