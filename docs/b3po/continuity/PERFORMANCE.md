@@ -1,6 +1,6 @@
 # B-3PO — PERFORMANCE (medida, não estimada)
 
-**Atualizado**: 06/11/2026 · **Rodada**: 61 · **Data**: 06/11/2026
+**Rodada**: 61 · **Data**: 06/11/2026
 
 ---
 
