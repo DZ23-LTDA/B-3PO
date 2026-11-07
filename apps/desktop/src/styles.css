@@ -4362,15 +4362,15 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
  * ambiente troca o que a barra mostra; `permission-guard` continua sendo a única porta.
  * ============================================================================ */
 :root {
-  --ambiente-accent: #38bdf8; /* empresa é o padrão do store (PADRAO = 'empresa') */
+  --ambiente-accent: #4ade80; /* empresa é o padrão do store (PADRAO = 'empresa') */
 }
 
-[data-ambiente='empresa']       { --ambiente-accent: #38bdf8; }
-[data-ambiente='engenharia']    { --ambiente-accent: #4ade80; }
-[data-ambiente='automacao']     { --ambiente-accent: #fbbf24; }
-[data-ambiente='ia']            { --ambiente-accent: #22d3ee; }
+[data-ambiente='empresa']       { --ambiente-accent: #4ade80; }
+[data-ambiente='engenharia']    { --ambiente-accent: #38bdf8; }
+[data-ambiente='automacao']     { --ambiente-accent: #fb923c; }
+[data-ambiente='ia']            { --ambiente-accent: #a78bfa; }
 [data-ambiente='estrategico']   { --ambiente-accent: #f472b6; }
-[data-ambiente='administracao'] { --ambiente-accent: #a78bfa; }
+[data-ambiente='administracao'] { --ambiente-accent: #2dd4bf; }
 
 /* A faixa do seletor de ambiente: a identidade fica visível sem gritar. */
 [data-slot='ambiente-seletor'] {

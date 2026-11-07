@@ -39,19 +39,19 @@ export interface IdentidadeDoAmbiente {
  */
 export const AMBIENTE_IDENTIDADE: Record<Ambiente, IdentidadeDoAmbiente> = {
   administracao: {
-    accent: '#a78bfa',
+    accent: '#2dd4bf',
     descricao: 'Onde se mexe na plataforma, não no negócio.'
   },
   automacao: {
-    accent: '#fbbf24',
+    accent: '#fb923c',
     descricao: 'O que roda sozinho: gatilhos, integrações e rotinas.'
   },
   empresa: {
-    accent: '#38bdf8',
+    accent: '#4ade80',
     descricao: 'Criar, administrar e operar o negócio.'
   },
   engenharia: {
-    accent: '#4ade80',
+    accent: '#38bdf8',
     descricao: 'Construir SaaS, sites, apps, APIs e sistemas.'
   },
   estrategico: {
@@ -59,7 +59,7 @@ export const AMBIENTE_IDENTIDADE: Record<Ambiente, IdentidadeDoAmbiente> = {
     descricao: 'Ler o negócio: indicadores, metas e decisões.'
   },
   ia: {
-    accent: '#22d3ee',
+    accent: '#a78bfa',
     descricao: 'Agentes, modelos e o que eles executam.'
   }
 }
