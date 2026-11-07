@@ -25,8 +25,8 @@ import { estornoForDevolucao } from './sales-return'
 import { normalizeSale, stockMovementsFor, type Sale } from './sales-store'
 
 export interface SalesStoreLike {
-  cancel: (id: string, tenantId?: string, reason?: string) => Promise<{ error: string } | { sales: Sale[] }>
-  create: (input: unknown) => Promise<{ error: string } | { sale: Sale; sales: Sale[] }>
+  cancel: (id: string, tenantId?: string, reason?: string) => Promise<{ error: string; reason?: string } | { sales: Sale[] }>
+  create: (input: unknown) => Promise<{ error: string; reason?: string } | { sale: Sale; sales: Sale[] }>
   list: (tenantId?: string) => Promise<Sale[]>
 }
 
@@ -168,20 +168,47 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
   // Orçamento e pedido não movem estoque nem financeiro.
   ipcMain.handle(
     'hermes:sales:create',
-    async (_event: IpcMainInvokeEvent, payload: unknown): Promise<{ error: string } | { sale: Sale; sales: Sale[] }> =>
-      deps.sales.create(payload)
+    async (_event: IpcMainInvokeEvent, payload: unknown): Promise<{ error: string; reason?: string } | { sale: Sale; sales: Sale[] }> => {
+      const ator = await deps.actorOf()
+
+      if (!ator) {
+        return { error: 'sem_permissao', reason: 'sem_ator' }
+      }
+
+      const permitido = await withPermission(ator, 'execute', { resource: 'sales' }, async () => true)
+
+      if (permitido !== true) {
+        return { error: 'sem_permissao', reason: (permitido as { reason: string }).reason }
+      }
+
+      return deps.sales.create(payload)
+    }
   )
 
   ipcMain.handle(
     'hermes:sales:cancel',
     async (_event: IpcMainInvokeEvent, id: unknown, tenantId: unknown, reason: unknown): Promise<
-      { error: string } | { sales: Sale[] }
+      { error: string; reason?: string } | { sales: Sale[] }
     > =>
-      deps.sales.cancel(
+      {
+      const ator = await deps.actorOf()
+
+      if (!ator) {
+        return { error: 'sem_permissao', reason: 'sem_ator' }
+      }
+
+      const permitido = await withPermission(ator, 'execute', { resource: 'sales' }, async () => true)
+
+      if (permitido !== true) {
+        return { error: 'sem_permissao', reason: (permitido as { reason: string }).reason }
+      }
+
+      return deps.sales.cancel(
         typeof id === 'string' ? id : '',
         serverTenant(tenantId),
         typeof reason === 'string' ? reason : ''
       )
+    }
   )
 
   ipcMain.handle('hermes:sales:faturar', async (_event: IpcMainInvokeEvent, payload: unknown): Promise<FaturarResult | { error: 'sem_permissao'; reason: string }> => {
