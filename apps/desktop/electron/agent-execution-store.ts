@@ -155,7 +155,18 @@ export function openExecutionStore(userData: string): ExecucaoStore {
         owner: input.owner,
         parent_execution_id: input.parent_execution_id ?? null,
         started_at: agora,
-        status: 'executando',
+        /*
+         * r5 do V5 (A-13) — nasce **pendente**, não `executando`.
+         *
+         * Medido na r1 do V5: `iniciar()` gravava `executando`, `finalizar()` só é chamado em teste, e
+         * nenhum consumidor executa a tarefa. Resultado: a tela mostrava "executando" para trabalho que
+         * nenhum processo havia começado — e nunca terminava.
+         *
+         * `pendente` é o valor honesto: a vaga está **reservada** (os limites contam, ver
+         * `agent-limits.ts`), mas ninguém começou. A transição para `executando` pertence a quem de
+         * fato executar — quando existir.
+         */
+        status: 'pendente',
         task_id: input.task_id,
         tentativas: 0
       }

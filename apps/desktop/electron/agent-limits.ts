@@ -135,14 +135,28 @@ export function bloqueioParaIniciar(consulta: ConsultaLimite): MotivoBloqueio | 
 
   if (consulta.candidata.tentativas > limites.retries) return 'profundidade_maxima'
 
+  /*
+   * r5 do V5 (A-13) — a vaga é ocupada por **`pendente` ou `executando`**.
+   *
+   * Antes, `iniciar()` gravava `executando` justamente para esta conta fechar. Mas aí o status mentia
+   * na tela. Separando as duas coisas: a reserva (vaga) é imediata; a execução é de quem executa.
+   *
+   * Se só `executando` contasse, uma tarefa criada e ainda não iniciada não ocuparia vaga — e o
+   * limite de concorrência deixaria passar N delegações simultâneas.
+   */
+  const ocupaVaga = (s: string): boolean => s === 'executando' || s === 'pendente'
   const simultaneas = consulta.todas.filter(
-    e => e.status === 'executando' && e.owner === consulta.candidata.owner
+    e => ocupaVaga(e.status) && e.owner === consulta.candidata.owner
   ).length
 
   if (simultaneas >= limites.concorrencia) return 'concorrencia_maxima'
 
   // Execução que passou do tempo máximo continua "executando" até alguém a matar; ela conta como uma vaga
   // ocupada e o motivo mostra isso, em vez de o operador achar que há vaga livre.
+  /*
+   * A **duração** é outra pergunta: só `executando` tem relógio correndo. Uma tarefa `pendente` não
+   * tem executor, então acusar timeout nela seria inventar um problema que não existe.
+   */
   const estourou = consulta.todas.some(
     e =>
       e.status === 'executando' &&

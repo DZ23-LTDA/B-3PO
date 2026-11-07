@@ -38,7 +38,12 @@ describe('iniciar aplica o limite', () => {
     const r = s.iniciar(base(), { agora: AGORA, credencial: true })
 
     expect(r.error).toBeUndefined()
-    expect(r.execucao?.status).toBe('executando')
+    // r5 do V5 (A-13): nasce `pendente`, nao `executando`.
+    //
+    // A assercao anterior (`'executando'`) codificava o defeito: nada executa a tarefa — `finalizar()`
+    // so e chamado em teste — e a tela mostrava "executando" para trabalho que ninguem comecou.
+    // A vaga continua reservada (ver `agent-limits.ts`: `pendente` ocupa vaga).
+    expect(r.execucao?.status).toBe('pendente')
     expect(s.listar()).toHaveLength(1)
   })
 
