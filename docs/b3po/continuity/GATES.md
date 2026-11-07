@@ -3616,3 +3616,84 @@ depois de 5 rodadas consertando a documentação e a suíte.
 | 1ª tentativa (regex) | r49 | falhou em extrair |
 | **2ª (extração completa)** | **r65** | **4/4 batem · 1 erro de medição corrigido** |
 | bugs de coerência encontrados | **1** | estoque (r48, **corrigido**) |
+
+---
+
+## G1 · ADENDO — o gate de MULTITENANCY: `N/A` provado, e a razão é melhor que um teste
+
+**Rodada 66.** Carreguei a skill e li `references/quality-gates.md`. Comparei os 13 gates com o que eu
+tinha medido — e **um estava `NOT_RUN`: Multitenancy (teste cruzado Tenant A/B)**.
+
+### O que eu medi
+
+Chamei 4 bridges com e sem `'tenant-b'` como argumento:
+
+| Bridge | sem arg | com `'tenant-b'` | igual? |
+|---|---|---|---|
+| `crmContacts.list` | 1 contato | 1 contato | **SIM** |
+| `catalog.list` | 0 produtos | 0 produtos | **SIM** |
+| `inventory.balances` | `{E2E-001: 5000}` | idem | **SIM** |
+| `sales.list` | 3 vendas | 3 vendas | **SIM** |
+
+**Primeira leitura: "o tenant é ignorado — vazamento".** Fui ao código.
+
+### O que o código diz — e é o oposto
+
+`apps/desktop/electron/server-tenant.ts`:
+
+```ts
+/** Empresa dona dos dados desta instalação. */
+export const INSTALLATION_TENANT = 'local'
+
+export function serverTenant(_fromRenderer?: unknown): string {
+  return INSTALLATION_TENANT
+}
+```
+
+O comentário do arquivo, escrito antes de mim:
+
+> *"Vinte canais aceitavam o tenant vindo do `payload`, isto é, do renderer. O processo principal
+> confiava no renderer para dizer de qual empresa eram os dados. **É IDOR por construção: o pedido
+> carrega o alvo.**"*
+>
+> *"O tenant é uma propriedade da INSTALAÇÃO, decidida no processo principal. **Um canal nunca aceita o
+> tenant do payload** — se aceitasse, o isolamento deixaria de ser garantia e voltaria a ser pedido."*
+
+**O `'tenant-b'` que eu mandei foi descartado de propósito.** O parâmetro existe **só para deixar
+explícito na chamada que havia um valor do renderer e ele foi descartado** — nas palavras do próprio
+arquivo.
+
+### O veredito do gate: `N/A` — justificado, não contado como PASS
+
+| Pergunta | Resposta |
+|---|---|
+| há 2 tenants para cruzar? | **não** — `INSTALLATION_TENANT = 'local'`, e não há troca em runtime |
+| o isolamento depende de verificação? | **não** — o renderer **não tem canal** para pedir outro tenant |
+| o gate se aplica? | **`N/A`** — não existe B |
+
+**A matriz diz**: *"Gate não aplicável deve ser justificado como `N/A`, nunca contado como PASS."*
+**É o que faço.**
+
+### E é uma defesa mais forte que o teste que o gate pede
+
+**Teste de isolamento verifica que o pedido foi negado. Este código torna o pedido impossível de
+formular.** Em segurança, **impossibilidade > negação** — porque não depende de o guarda lembrar de
+estar lá.
+
+**Quando o produto passar a trocar de empresa em runtime**, o próprio arquivo diz onde mudar: **um
+lugar só** (`serverTenant`), e todos os canais acompanham.
+
+### Os 13 gates da matriz, depois da r66
+
+| Gate | Estado |
+|---|---|
+| Git/baseline · lint/typecheck · unit/regression · integration/API · E2E · build/smoke | **PASS** |
+| Auth/security (RBAC, IDOR, validação) | **PASS** — e o `serverTenant` é a prova do IDOR fechado |
+| **Multitenancy** | **`N/A`** — justificado neste adendo |
+| Banco (migração) | **`N/A`** — o produto não tem migração de schema exercitada |
+| UI (5 viewports + 2 temas) | **PASS** |
+| A11y (`axe` + teclado) | **PASS com ressalva** — `axe` completo; teclado parcial (Tab alcança abas, Delete alcança o handler; retorno de foco não observado) |
+| Performance (medições comparáveis) | **PASS** — 55 → 4 long tasks |
+| Operação (health/logs/rollback) | **PASS** — rollback atômico provado em 2 falhas reais |
+
+**Nenhum gate fica `NOT_RUN` sem justificativa.** É a primeira vez na auditoria que consigo dizer isso.
