@@ -124,31 +124,57 @@ cada adapter on demand), então roda em `run_in_threadpool`.
 
 **Provas**: `gate` 14/14 · `typecheck` PASS · `i18n + settings` **736 testes** · `test_connectors_route.py` 3 passed.
 
-### 🟡 O que **não** foi possível verificar: o render ao vivo
+### ✅ Render VERIFICADO na r16 — e a r15 tinha um erro meu
 
-Tentei abrir Configuração → Gateway no app em execução e a seção não apareceu. A causa **não é o
-código**:
+Na r15 eu escrevi que o componente estava montado. **Não estava.** O script de inserção falhou num
+`assert` do i18n **antes** de chegar à montagem, e eu conferi só o typecheck — que passa sem a
+montagem. É a lição da r9 de novo: **a correção precisa ser verificada no arquivo, não presumida.**
+
+A r16 inseriu e **verificou o texto**:
 
 ```
-window.hermesDesktop.api({ path: '/api/connectors/readiness' })
-  → Error: 404: {"detail":"No such API endpoint: /api/connectors/readiness"}
+import presente:   True
+montagem presente: True
+titulo presente:   True
 ```
 
-**O backend em execução não tem a rota.** Ele não importa `hermes_cli` do repositório: são **três
-processos Python de gateway** rodando (`b3po-f5-home`, `b3po-menu-view6`, e um `b3po_serve.py`), e o
-que o app consulta roda código anterior à r14.
+**E o live mostra:**
 
-**É a mesma classe da r18 do V4**: o código estava certo e o artefato em execução era velho — lá um
-APK de 04/11 sem o fix; aqui um backend sem a rota.
+```
+CONECTORES DO GATEWAY
+1 de 28 prontos para conectar · 51 credencial(is) faltando
 
-**Consequência honesta**: o componente está montado, tipado e coberto por 736 testes, mas **não vi a
-seção renderizada**. Marcar isso como verificado seria mentir.
+a2a          Nada a fazer: o conector está pronto para conectar quando o gateway subir.
+             → Pronto para conectar
 
-**Para fechar**: reiniciar o backend a partir do repositório (`hermes gateway run` com cwd no repo) e
-repetir a navegação para `#/settings?tab=gateway`.
+discord      Defina DISCORD_BOT_TOKEN (config.yaml não guarda segredo: use o .env do
+             perfil) e reinicie o gateway.          → Falta credencial
 
-**O endereço correto da tela é `?tab=gateway`** — o parâmetro é `tab`, não `page` (que é o sub-painel
-interno). Levou três tentativas para descobrir; fica registrado.
+email        Defina EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_SMTP_HOST …  → Falta credencial
+```
+
+**28 conectores, 1 pronto, 51 credenciais faltando** — números do registry real, não inventados.
+Captura: `docs/b3po/evidence/v5-conectores-r16.png`. `axe`: **0**.
+
+**O critério E está atendido**: o estado é verdadeiro, o desbloqueio é nomeado, e a tela **nunca**
+diz "conectado".
+
+### Por que a r15 não via: o backend era uma cópia de outro estado do repo
+
+Três causas, encontradas em sequência:
+
+| # | Sintoma | Causa |
+|---|---|---|
+| 1 | `404` na rota | o gateway em execução subiu **antes** da r14 |
+| 2 | `500 dashboard_unavailable` | a cópia deployada (`%TEMP%\b3po-menu-view6\hermes-agent\`) **não tinha** `gateway/connector_readiness.py` |
+| 3 | seção ausente | **meu** componente não estava montado |
+
+O app **deploya uma cópia** do repo em `%TEMP%\<home>\hermes-agent\`; editar o repo não chega nela.
+Copiar os três arquivos (`web_routers/connectors.py`, `web_server.py`, `gateway/connector_readiness.py`)
+e reiniciar o gateway resolveu.
+
+**É a terceira vez neste goal** que o artefato em execução difere do código: o APK de 04/11 (V4 r18), o
+gateway anterior à rota (r15), e a cópia sem o módulo (r16).
 
 ## 6. O que **não** foi verificado
 

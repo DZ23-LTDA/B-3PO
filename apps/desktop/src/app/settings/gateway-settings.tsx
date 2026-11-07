@@ -51,6 +51,7 @@ import { PairedDevicesSection } from './paired-devices-section'
 import { CONTROL_TEXT } from './constants'
 import { KeychainEncryptionSetting, useKeychainEncryption } from './keychain-encryption-setting'
 import { ManagedUpdatesSection } from './managed-updates-section'
+import { ProntidaoDeConectores } from './connectors-readiness'
 import { EmptyState, ListRow, Pill, SettingsContent, SettingsSkeleton } from './primitives'
 import { SETTING_IDS, settingElementId } from './settings-manifest'
 import { enrichSelectedSshHost, selectSshHost } from './ssh-host-selection'
@@ -1491,6 +1492,13 @@ function GatewayConnectionSettings({ embedded, standalone }: { embedded: boolean
 
       {/* Plain-text token opt-in: gated when secure storage is unavailable and a
           new token would be persisted. Confirm resumes the remembered save/apply. */}
+        <div className="mt-6">
+          <h2 className="mb-2 text-[length:var(--conversation-caption-font-size)] text-muted-foreground uppercase">
+            {t.settings.connectorsReadiness.titulo}
+          </h2>
+          <ProntidaoDeConectores />
+        </div>
+
       <ConfirmDialog
         confirmLabel={g.plainTextConfirmAction}
         description={g.plainTextConfirmDesc}

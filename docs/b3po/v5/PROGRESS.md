@@ -332,6 +332,24 @@ que eu tocasse nele. Algum processo do ambiente escreve esse arquivo sem as duas
 toquei pode aparecer modificado, e commitar por caminho explícito é o que impede isso de virar
 regressão.
 
+### r16 — o render verificado, e o erro da r15 corrigido
+
+**A r15 mentiu por omissão**: disse que o componente estava montado e não estava — o script falhou num
+`assert` antes da montagem e eu conferi só o typecheck.
+
+A r16 montou, **verificou o texto no arquivo** (`import` / `montagem` / `titulo` = True) e viu na tela:
+
+```
+CONECTORES DO GATEWAY · 1 de 28 prontos para conectar · 51 credencial(is) faltando
+a2a → Pronto para conectar · discord → Falta credencial (DISCORD_BOT_TOKEN) · …
+```
+
+**Critério E atendido**: estado verdadeiro, desbloqueio nomeado, nunca "conectado". `axe` 0.
+
+**As três causas do 404/500**, em sequência: gateway anterior à rota → cópia deployada sem
+`connector_readiness.py` → componente não montado. O app deploya o backend em
+`%TEMP%\<home>\hermes-agent\`; o repo não chega lá sozinho.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
