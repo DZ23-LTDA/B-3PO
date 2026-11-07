@@ -193,5 +193,10 @@
     "pendentes": 0,
     "main": "f4cf411f28",
     "main_intacto": true
-  }
+  },
+  "axe": {
+    "desktop_27_rotas": 0,
+    "web_15_rotas": 0
+  },
+  "mobile_runtime": "rodou no emulador; 1 bug de safe-area corrigido; verificacao bloqueada por system_server instavel"
 }
