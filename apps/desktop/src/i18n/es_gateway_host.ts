@@ -4,10 +4,10 @@ import type { GatewayHostTranslations } from './types_gateway_host'
 export const esGatewayHost: GatewayHostTranslations = {
   unavailableTitle: 'Ajustes del gateway no disponibles',
   unavailableDesc:
-    'Los ajustes de conexión solo se pueden cambiar desde la app Hermes Desktop en el equipo que la ejecuta.',
+    'Los ajustes de conexión solo se pueden cambiar desde la app B-3PO Desktop en el equipo que la ejecuta.',
   webappHostTitle: 'Host de Hermes',
   webappHostDesc:
-    'La Webapp siempre usa el host de Hermes que la sirve. Para cambiar de gateway, iniciar sesión en Hermes Cloud o gestionar conexiones guardadas, usa la app Hermes Desktop.',
+    'La Webapp siempre usa el host de Hermes que la sirve. Para cambiar de gateway, iniciar sesión en B-3PO Cloud o gestionar conexiones guardadas, usa la app B-3PO Desktop.',
   webAccess: {
     title: 'Acceso web',
     intro: 'Abre Hermes de este ordenador desde tu teléfono u otro ordenador, con tu cuenta de Nous. Quien inicie sesión puede ejecutar comandos en este ordenador.',

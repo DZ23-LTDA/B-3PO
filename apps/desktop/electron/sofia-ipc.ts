@@ -1,0 +1,147 @@
+// Os canais de Sofia (r19 do GOAL V2).
+//
+// Passo 3 dos cinco da spec. Aqui o plano ganha porta: a tela precisa criar plano, ver o grafo, delegar
+// e aprovar.
+//
+// TODOS OS CANAIS NASCEM COM GUARDA — e isso é deliberado.
+//
+// A r2 do GOAL V2 mediu **219 canais `ipcMain.handle` e 1 com guarda**. Levaram seis rodadas (r3–r8) para
+// fechar os 30 de domínio, e cada uma precisou provar o vermelho com o canal aberto. Este arquivo não
+// repete o erro: `exigirAtor` está em todos os seis desde o primeiro commit, e o `permission-coverage-ratchet`
+// já falharia se algum escapasse.
+//
+// A GUARDA NÃO É DECORATIVA AQUI
+//
+// Sofia **não contorna o Policy Engine** (spec §6, regra 1). Cada canal passa pela guarda **com o ator da
+// chamada**, e o store registra esse ator no plano. Não há ator de sistema para Sofia: se o chamador não
+// tem permissão, o plano não nasce.
+
+import type { IpcRegistrar } from './ipc-types'
+import { exigirAtor } from './permission-guard'
+import type { Actor } from './rbac'
+import { serverTenant } from './server-tenant'
+import { diagnosticarGrafo, profundidadeDoPlano, tarefasProntas } from './sofia-grafo'
+import type { SofiaStore } from './sofia-store'
+
+export interface SofiaIpcDeps {
+  /**
+   * Ator resolvido no processo principal. `null` recusa todos os seis.
+   *
+   * Obrigatório: um plano de coordenação executado sem responsável é a definição de automação sem dono.
+   */
+  actorOf: () => Promise<Actor | null>
+  store: SofiaStore
+}
+
+export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): void {
+  /** Lista os planos do tenant. O grafo vai junto: a tela não recalcula topologia. */
+  ipcMain.handle('hermes:sofia:planos', async (): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'sofia', async () => {
+      const planos = await deps.store.listar({ tenant_id: serverTenant() })
+
+      return {
+        planos: planos.map(p => ({
+          ...p,
+          grafo: diagnosticarGrafo(p.tarefas),
+          prontas: tarefasProntas(p.tarefas),
+          profundidade: profundidadeDoPlano(p.tarefas)
+        }))
+      }
+    })
+  )
+
+  /** Um plano com o diagnóstico completo. `null` quando não existe — 404 não é erro de servidor. */
+  ipcMain.handle('hermes:sofia:plano', async (_event: unknown, planoId: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'read', 'sofia', async () => {
+      const id = typeof planoId === 'string' ? planoId : ''
+      const plano = id ? await deps.store.obter(id) : null
+
+      if (!plano) return { plano: null }
+
+      return {
+        plano: {
+          ...plano,
+          grafo: diagnosticarGrafo(plano.tarefas),
+          prontas: tarefasProntas(plano.tarefas),
+          profundidade: profundidadeDoPlano(plano.tarefas)
+        }
+      }
+    })
+  )
+
+  /**
+   * Cria o plano — `execute`, não `read`.
+   *
+   * Criar um plano é escrever a intenção que o orquestrador vai executar. Quem só pode ler não arma
+   * trabalho.
+   *
+   * O `ator_id` **não vem do renderer**: vem do ator resolvido no processo principal. Deixar o renderer
+   * escolher o dono do plano permitiria criar trabalho em nome de outra pessoa — exatamente a escalada
+   * que a spec §6 proíbe.
+   */
+  ipcMain.handle('hermes:sofia:criar', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+      const ator = await deps.actorOf()
+      const raw = (payload ?? {}) as Record<string, unknown>
+
+      return deps.store.criar(
+        {
+          ...raw,
+          ator_id: ator?.id ?? '',
+          tenant_id: serverTenant(raw['tenant_id'])
+        }
+      )
+    })
+  )
+
+  /**
+   * Atualiza uma tarefa — `execute`.
+   *
+   * É por aqui que a delegação acontece: o passo 4 vai preencher `execucao_id` e
+   * `parent_execution_id`. Enquanto o passo 4 não existe, o canal aceita o campo e o store o grava.
+   */
+  ipcMain.handle(
+    'hermes:sofia:tarefa',
+    async (_event: unknown, payload: unknown): Promise<unknown> =>
+      exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+        const raw = (payload ?? {}) as Record<string, unknown>
+        const planoId = typeof raw['plano_id'] === 'string' ? raw['plano_id'] : ''
+        const tarefaId = typeof raw['tarefa_id'] === 'string' ? raw['tarefa_id'] : ''
+
+        if (!planoId) return { error: 'plano_obrigatorio' }
+        if (!tarefaId) return { error: 'tarefa_obrigatoria' }
+
+        return deps.store.atualizarTarefa(planoId, tarefaId, raw['patch'])
+      })
+  )
+
+  /** Muda o status do plano — `execute`. `concluido` exige todas as tarefas concluídas (store). */
+  ipcMain.handle('hermes:sofia:status', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+      const raw = (payload ?? {}) as Record<string, unknown>
+      const planoId = typeof raw['plano_id'] === 'string' ? raw['plano_id'] : ''
+
+      if (!planoId) return { error: 'plano_obrigatorio' }
+
+      return deps.store.definirStatus(planoId, raw['status'])
+    })
+  )
+
+  /**
+   * Registra a aprovação — `execute`, e o **ator vem do resolvedor**, nunca do payload.
+   *
+   * O store recusa autoaprovação (`plano.ator_id === por`). Se este canal deixasse o renderer mandar o
+   * nome do aprovador, a recusa seria decorativa: bastaria escrever o nome de outra pessoa.
+   */
+  ipcMain.handle('hermes:sofia:aprovar', async (_event: unknown, payload: unknown): Promise<unknown> =>
+    exigirAtor(deps.actorOf, 'execute', 'sofia', async () => {
+      const ator = await deps.actorOf()
+      const raw = (payload ?? {}) as Record<string, unknown>
+      const planoId = typeof raw['plano_id'] === 'string' ? raw['plano_id'] : ''
+
+      if (!planoId) return { error: 'plano_obrigatorio' }
+
+      return deps.store.aprovar(planoId, ator?.id ?? '')
+    })
+  )
+}

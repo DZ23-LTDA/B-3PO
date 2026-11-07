@@ -147,7 +147,7 @@ export const jaOverrides = {
       diskFull: 'ディスク容量不足です — 空きを作ってからもう一度お試しください。',
       gatewayAuthFailed: 'ゲートウェイ認証に失敗しました — API_SERVER_KEY を確認してください。',
       methodNotAllowed:
-        'デスクトップバックエンドがそのリクエストを拒否しました (405 Method Not Allowed)。Hermes Desktop を再起動してください。',
+        'デスクトップバックエンドがそのリクエストを拒否しました (405 Method Not Allowed)。B-3PO Desktop を再起動してください。',
       microphonePermission: 'マイクのアクセス許可が拒否されました。',
       openaiRejectedApiKey: 'OpenAI が API キーを拒否しました。',
       openaiTtsNeedsKey: 'OpenAI TTS には VOICE_TOOLS_OPENAI_KEY または OPENAI_API_KEY が必要です。',
@@ -246,6 +246,44 @@ export const jaOverrides = {
   },
 
   settings: {
+    crmPipeline: {
+      stageInitial: '開始ステージ',
+      lostReason: '失注の理由',
+      stages: {
+        novo: '新規リード',
+        contato: '接触開始',
+        qualificacao: '選定',
+        proposta: '提案',
+        negociacao: '交渉',
+        ganho: '受注',
+        perdido: '失注',
+      },
+      title: '商談パイプライン',
+      intro: 'ここに記録した商談の実数です。',
+      empty: '商談はまだありません。',
+      open: '進行中',
+      won: '受注',
+      opportunity: '商談',
+      value: '金額（セント）',
+      contact: '連絡先',
+      add: '商談を追加',
+      remove: '削除',
+      stage: 'ステージ',
+      unavailable: 'このクライアントにはパイプライン用のローカルディスクがありません。',
+    },
+    crmContacts: {
+      export: 'CSV を書き出す',
+      openCrm: 'CRM ページを開く',
+      title: 'CRM の連絡先',
+      intro: 'ボットが話す相手です。連絡先はこのコンピューターに保存され、第三者には送信されません。',
+      empty: '連絡先はまだありません。下から最初の 1 件を追加してください。',
+      unavailable: 'このクライアントには連絡先を保存するローカルディスクがありません。',
+      name: '名前',
+      phone: '電話',
+      company: '会社',
+      add: '連絡先を追加',
+      remove: '削除',
+    },
     memoryLayers: jaMemoryLayers,
     // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {
@@ -477,7 +515,7 @@ export const jaOverrides = {
       advanced: '詳細'
     },
     searchPlaceholder: {
-      about: 'Hermes Desktop について',
+      about: 'B-3PO Desktop について',
       config: '設定を検索…',
       gateway: 'ゲートウェイ接続…',
       keys: 'API キーを検索…',
@@ -990,12 +1028,22 @@ export const jaOverrides = {
       clear: 'クリア'
     },
     gateway: {
+      pairedDevicesTitle: 'ペアリング済みデバイス',
+      pairedDevicesIntro: 'このコンピューターのボットと通信できるスマートフォンです。それぞれ固有のキーを持ち、取り消すと完全に遮断されます。',
+      pairedDevicesEmpty: 'まだペアリングされたスマートフォンはありません。スマートフォンでペアリングリンクを開いて追加してください。',
+      pairedDevicesError: 'ペアリング済みデバイスを読み取れませんでした。',
+      pairedDevicesRefresh: '更新',
+      pairedDevicesRevoke: '取り消す',
+      pairedDevicesRevoked: '取り消し済み',
+      pairedDevicesCreated: '追加日',
+      pairedDevicesLastSeen: '最終使用',
+      pairedDevicesTickets: 'チケット',
       loading: 'ゲートウェイ設定を読み込み中...',
       ...jaGatewayHost,
       title: 'ゲートウェイ接続',
       envOverride: 'env オーバーライド',
       intro:
-        'Hermes Desktop はデフォルトで独自のローカルゲートウェイを起動します。別のマシンや信頼できるプロキシの背後で既に動作している Hermes バックエンドをこのアプリで制御する場合は、リモートゲートウェイを使用してください。ゲートウェイ接続はマシン単位の設定で、プロファイルは接続したゲートウェイから検出されます。',
+        'B-3PO Desktop はデフォルトで独自のローカルゲートウェイを起動します。別のマシンや信頼できるプロキシの背後で既に動作している Hermes バックエンドをこのアプリで制御する場合は、リモートゲートウェイを使用してください。ゲートウェイ接続はマシン単位の設定で、プロファイルは接続したゲートウェイから検出されます。',
       envOverrideTitle: '環境変数がこのデスクトップセッションを制御しています。',
       envOverrideDesc:
         '保存された設定を使用するには HERMES_DESKTOP_REMOTE_URL と HERMES_DESKTOP_REMOTE_TOKEN の設定を解除してください。',
@@ -1054,7 +1102,7 @@ export const jaOverrides = {
       enterUrlFirst: '最初にリモート URL を入力してください。',
       restartingTitle: 'ゲートウェイ接続を再起動中',
       savedTitle: 'ゲートウェイ設定を保存しました',
-      restartingMessage: 'Hermes Desktop は保存された設定を使用して再接続します。',
+      restartingMessage: 'B-3PO Desktop は保存された設定を使用して再接続します。',
       savedMessage: '次回起動時に保存されます。',
       connectedTo: (baseUrl, version) => `${baseUrl}${version ? ` · Hermes ${version}` : ''} に接続しました`,
       reachableTitle: 'リモートゲートウェイに到達可能',
@@ -1099,7 +1147,7 @@ export const jaOverrides = {
       sshErrNotInstalled:
         'リモートホストに Hermes がインストールされていません。リモートでインストールする（curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh）か、Hermes パスを設定してください。',
       sshErrPlatform:
-        'サポートされていないリモートプラットフォームです。Hermes Desktop の SSH モードは Linux、macOS、Windows のリモートホストに対応しています。',
+        'サポートされていないリモートプラットフォームです。B-3PO Desktop の SSH モードは Linux、macOS、Windows のリモートホストに対応しています。',
       sshErrTimeout: 'SSH 接続がタイムアウトしました。ホストが到達不能、またはスリープ中の可能性があります。',
       sshErrUpdateRequired: 'Desktop SSH で接続する前に、リモートホストの Hermes を更新してください。',
       sshErrInteractiveAuth:
@@ -2383,7 +2431,7 @@ export const jaOverrides = {
       '/subscription': 'Nous のプランを確認し、ブラウザーで変更',
       '/topup': 'Nous の残高を表示し、請求を管理',
       '/platform': '問題のあるゲートウェイプラットフォームを一時停止、再開、一覧表示',
-      '/version': 'Hermes Agent のバージョンを表示',
+      '/version': 'B-3PO のバージョンを表示',
       '/debug': 'デバッグレポートを作成',
       '/model': 'このセッションのモデルを切り替え'
     },
@@ -2776,7 +2824,7 @@ export const jaOverrides = {
       skipped: 'スキップ',
       failed: '失敗'
     },
-    oneTimeTitle: 'Hermes には一度限りのインストールが必要です',
+    oneTimeTitle: 'B-3PO には一度限りのインストールが必要です',
     unsupportedDesc: platform =>
       `${platform} では自動の初回インストールはまだ利用できません。ターミナルを開いて以下のコマンドを実行し、このアプリを再起動してください。以降の起動ではこの手順はスキップされます。`,
     installCommand: 'インストールコマンド',
@@ -2784,25 +2832,25 @@ export const jaOverrides = {
     viewDocs: 'インストールドキュメントを見る',
     installTo: 'インストール先',
     retryAfterRun: '実行しました — 再試行',
-    setupChoiceTitle: 'Hermes Desktop をセットアップ',
+    setupChoiceTitle: 'B-3PO Desktop をセットアップ',
     setupChoiceDesc:
       'すでに実行している Hermes ゲートウェイに接続するか、このコンピューターに Hermes をローカルインストールします。',
-    connectExistingTitle: '既存の Hermes に接続',
+    connectExistingTitle: '既存の B-3PO に接続',
     connectExistingShort: '既存環境に接続',
     connectExistingDesc:
       'セッショントークンまたはブラウザーサインインでリモートバックエンドを使用します。ローカルインストールは開始されません。',
-    installLocalTitle: 'Hermes をローカルにインストール',
-    installLocalDesc: 'Hermes をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
+    installLocalTitle: 'B-3PO をローカルにインストール',
+    installLocalDesc: 'B-3PO をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
     localStartUnavailable:
-      'ローカルインストールを開始できません。Hermes Desktop を再起動して、もう一度お試しください。',
-    remoteSetupTitle: '既存の Hermes に接続',
+      'ローカルインストールを開始できません。B-3PO Desktop を再起動して、もう一度お試しください。',
+    remoteSetupTitle: '既存の B-3PO に接続',
     remoteSetupDesc:
-      'ゲートウェイ URL を入力してください。Hermes Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
+      'ゲートウェイ URL を入力してください。B-3PO Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
     remoteUrlTitle: 'ゲートウェイ URL',
-    remoteUrlDesc: 'Hermes ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
+    remoteUrlDesc: 'B-3PO ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
     remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
     probing: 'ゲートウェイ認証方式を検出中...',
-    probeError: 'その Hermes ゲートウェイに到達できませんでした。',
+    probeError: 'その B-3PO ゲートウェイに到達できませんでした。',
     identityProvider: 'ID プロバイダー',
     authTitle: '認証',
     authNeedsOauth: provider => `このゲートウェイをテストする前に ${provider} でサインインしてください。`,
@@ -2822,7 +2870,7 @@ export const jaOverrides = {
     applyRemote: '適用して再接続',
     backToSetup: '戻る',
     failedTitle: 'インストールに失敗しました',
-    settingUpTitle: 'Hermes Agent を設定中',
+    settingUpTitle: 'B-3PO を設定中',
     finishingTitle: '仕上げ中',
     failedDesc:
       'インストール手順のいずれかが失敗しました。Windows では、別の Hermes CLI またはデスクトップインスタンスが実行中の場合に発生することがあります。実行中の Hermes インスタンスをすべて停止してから再試行してください。詳細は以下またはデスクトップログで確認できます。',
@@ -2942,7 +2990,9 @@ export const jaOverrides = {
       connection: label => `接続: ${label}`,
       recentActivity: '最近のアクティビティ',
       viewAllLogs: 'すべてのログを見る →',
-      messagingPlatforms: 'メッセージングプラットフォーム'
+      messagingPlatforms: 'メッセージングプラットフォーム',
+      gatewayNeedsProvider:
+        'AIプロバイダーが設定されていません。設定 → プロバイダーでキーを追加するか、ローカルモデルを選択してください。',
     },
     approvalMode: {
       title: '承認モード',
@@ -2960,13 +3010,13 @@ export const jaOverrides = {
       update: '更新',
       updateInProgress: '更新中',
       commitsBehind: (count, branch) => `${branch} より ${count} コミット遅れています`,
-      desktopVersion: version => `Hermes Desktop v${version}`,
+      desktopVersion: version => `B-3PO Desktop v${version}`,
       backendVersion: version => `バックエンド v${version}`,
       clientLabel: version => `クライアント v${version}`,
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `リモート: ${host}`,
       connectionCloud: host => `クラウド: ${host}`,
-      connectionCloudTooltip: host => `Hermes Cloud · ${host}`,
+      connectionCloudTooltip: host => `B-3PO Cloud · ${host}`,
       connectionSshTooltip: host => `SSH · ${host}`,
       connectionRemoteTooltip: host => `Remote · ${host}`,
       backendLabel: version => `バックエンド v${version}`,
@@ -2982,7 +3032,6 @@ export const jaOverrides = {
       messagingDegraded: name => `${name} 停止`,
       gatewayReady: '準備完了',
       gatewayNeedsSetup: '設定が必要',
-      gatewayUnavailable: '推論を利用できません',
       gatewayChecking: '確認中',
       gatewayConnecting: '接続中',
       gatewayOffline: 'オフライン',
@@ -3665,8 +3714,8 @@ export const jaOverrides = {
     sessionExportFailed: 'セッションをエクスポートできませんでした',
     imageSaved: '画像を保存しました',
     downloadStarted: 'ダウンロードを開始しました',
-    restartToUseSaveImage: '画像を保存するには Hermes Desktop を再起動してください。',
-    restartToSaveImages: '画像を保存するには Hermes Desktop を再起動してください',
+    restartToUseSaveImage: '画像を保存するには B-3PO Desktop を再起動してください。',
+    restartToSaveImages: '画像を保存するには B-3PO Desktop を再起動してください',
     imageDownloadFailed: '画像のダウンロードに失敗しました',
     openImage: '画像を開く',
     downloadImage: '画像をダウンロード',

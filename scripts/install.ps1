@@ -22,7 +22,8 @@
 #                         `hermes update --set-channel`
 [CmdletBinding(PositionalBinding=$false)]
 param(
-    [string]$Branch = "main",
+    # Produto (b3po-brand) por padrao; -Branch/HERMES_INSTALL_BRANCH escolhem outra.
+    [string]$Branch = $(if ($env:HERMES_INSTALL_BRANCH) { $env:HERMES_INSTALL_BRANCH } else { "b3po-brand" }),
     [string]$Commit = "",
     [string]$Channel = $(if ($env:HERMES_INSTALL_CHANNEL) { $env:HERMES_INSTALL_CHANNEL } else { "" }),
     [string]$HermesHome = $(if ($env:HERMES_HOME) { $env:HERMES_HOME } else { "$env:LOCALAPPDATA\hermes" }),
@@ -46,7 +47,13 @@ param(
     # path doesn't exist" report is which paths it actually resolved --
     # especially on profiles Windows exposes through an 8.3 alias.
     #   powershell -File install.ps1 -ShowResolvedPaths
-    [switch]$ShowResolvedPaths
+    [switch]$ShowResolvedPaths,
+    # Explicit, separate mode for developing against the upstream Hermes tree.
+    # Never implied by anything else: an operator has to ask for it by name.
+    [switch]$Upstream,
+    # Print the resolved source (product, repo, branch, commit) as JSON and
+    # exit without touching anything. The clean-install test asserts on it.
+    [switch]$PrintSource
 )
 
 $ErrorActionPreference = "Stop"
@@ -76,7 +83,30 @@ $script:BoundParams = $PSBoundParameters
 # Under iex, script scope is the caller's session and outlives a run; start
 # each run without the previous run's answer (see Set-LauncherUserPath).
 $script:BinDirOnCallerPath = $null
-$RepoUrl = if ($env:HERMES_REPO_URL) { $env:HERMES_REPO_URL } else { "https://github.com/NousResearch/hermes-agent.git" }
+# --- Product identity (B-3PO) ------------------------------------------------
+# The B-3PO installer installs B-3PO. The upstream Hermes repository is a
+# technical origin, reachable only through the explicit -Upstream switch (or
+# HERMES_INSTALL_UPSTREAM=1); it is never a silent default.
+$ProductName = "B-3PO"
+$ProductRepoUrl = "https://github.com/DZ23-LTDA/B-3PO.git"
+$ProductBranch = "b3po-brand"
+$UpstreamRepoUrl = "https://github.com/NousResearch/hermes-agent.git"
+$UpstreamBranch = "main"
+$UseUpstream = ($env:HERMES_INSTALL_UPSTREAM -eq "1") -or $Upstream.IsPresent
+
+# Upstream mode follows the upstream tree, so it defaults to the upstream branch
+# too -- unless the operator pinned a branch through the parameter or the env.
+if ($UseUpstream -and -not $PSBoundParameters.ContainsKey('Branch') -and -not $env:HERMES_INSTALL_BRANCH) {
+    $Branch = $UpstreamBranch
+}
+
+$RepoUrl = if ($env:HERMES_REPO_URL) {
+    $env:HERMES_REPO_URL
+} elseif ($UseUpstream) {
+    $UpstreamRepoUrl
+} else {
+    $ProductRepoUrl
+}
 
 # --- BEGIN GENERATED: bootstrap pins (scripts/gen-bootstrap-pins.py) ---
 # Derived from pm/lock.json. DO NOT EDIT BY HAND:
@@ -377,8 +407,37 @@ function Initialize-ResolvedPaths {
     }
 }
 
-# Resolve the pm store root (same resolution as pm's store_root()):
-# $env:HERMES_RUNTIME_DIR wins, else <HermesHome>\tools.
+# r257: SHA-256 de um arquivo sem depender de Get-FileHash.
+#
+# Get-FileHash vem do modulo Microsoft.PowerShell.Utility. Em ConstrainedLanguage (o modo em que
+# alguns hospedeiros - e o instalador quando roda sob um sandbox - executam o script) e nos
+# processos filhos em que o modulo nao carrega, o cmdlet simplesmente NAO EXISTE, e o instalador
+# morria em "O termo 'Get-FileHash' nao e reconhecido" antes de baixar qualquer coisa.
+#
+# certutil e um executavel do sistema (C:\Windows\system32\certutil.exe) e responde em qualquer
+# modo de linguagem. O Get-FileHash fica como primeiro caminho porque e mais rapido e nao abre
+# processo.
+function Get-Sha256Hex {
+  param([Parameter(Mandatory = $true)][string]$Path)
+
+  try {
+    $hashed = Get-FileHash -Path $Path -Algorithm SHA256 -ErrorAction Stop
+    if ($hashed -and $hashed.Hash) { return $hashed.Hash.ToLowerInvariant() }
+  } catch {
+    # cai para o certutil
+  }
+
+  $lines = & certutil.exe -hashfile $Path SHA256 2>$null
+  if ($LASTEXITCODE -ne 0 -or -not $lines) {
+    Fail "could not hash $Path with either Get-FileHash or certutil" download_hash_failed
+  }
+  foreach ($line in $lines) {
+    $clean = ($line -replace '[^0-9a-fA-F]', '')
+    if ($clean.Length -eq 64) { return $clean.ToLowerInvariant() }
+  }
+  Fail "certutil returned no SHA-256 digest for $Path" download_hash_failed
+}
+
 function Get-PmStoreRoot {
     if ($env:HERMES_RUNTIME_DIR) { return $env:HERMES_RUNTIME_DIR }
     return (Join-Path $HermesHome "tools")
@@ -423,7 +482,9 @@ function Invoke-VerifiedDownload {
             $httpFailure = $_.Exception.Message
             continue
         }
-        $digest = (Get-FileHash -Path $OutFile -Algorithm SHA256).Hash.ToLowerInvariant()
+        # r257: Get-FileHash pode nao existir no processo filho (ConstrainedLanguage, ou modulo
+        # Utility ausente). certutil e um executavel do sistema e responde em qualquer modo.
+        $digest = Get-Sha256Hex -Path $OutFile
         if ($digest -eq $Sha256.ToLowerInvariant()) { return }
         Remove-Item -Path $OutFile -Force -ErrorAction SilentlyContinue
         # Wrong bytes = tampering or a corrupt mirror, not a routing problem.
@@ -621,9 +682,9 @@ function Write-Err([string]$msg) { Write-Host "[X] $msg" -ForegroundColor Red }
 function Write-Banner {
     Write-Host ""
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
-    Write-Host "|             * Hermes Agent Installer                    |" -ForegroundColor Magenta
+    Write-Host "|             * B-3PO Installer                           |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
-    Write-Host "|  An open source AI agent by Nous Research.              |" -ForegroundColor Magenta
+    Write-Host "|  B-3PO bot platform - built on Hermes Agent (Nous).     |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
     Write-Host ""
 }
@@ -1503,7 +1564,7 @@ function Stage-Complete {
         $marker | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $InstallDir ".hermes-bootstrap-complete") -Encoding UTF8
     }
     if ($Channel) { Invoke-InstalledHermes @('update', '--set-channel', $Channel) }
-    if ($commit) { Write-Ok "Hermes Agent install complete (pinned $commit). Run: hermes" }
+    if ($commit) { Write-Ok "$ProductName install complete (pinned $commit). Run: hermes" }
 }
 
 function New-DesktopShortcuts {
@@ -1617,6 +1678,19 @@ if ($ShowResolvedPaths) {
 
 if ($Manifest) {
     @{ protocol_version = 1; stages = $Stages } | ConvertTo-Json -Depth 4 -Compress | Write-Output
+    exit 0
+}
+
+if ($PrintSource) {
+    # Side-effect-free: reports exactly what the install would clone, so a test
+    # (and an operator) can prove the product source without a network call.
+    @{
+        product = $ProductName
+        repo_url = $RepoUrl
+        branch = $(if ($Commit) { $Branch } else { $Branch })
+        commit = $Commit
+        upstream_mode = [bool]$UseUpstream
+    } | ConvertTo-Json -Compress | Write-Output
     exit 0
 }
 

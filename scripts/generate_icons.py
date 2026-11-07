@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Generate every app icon in the repo from the nous-girl art + platform backgrounds.
+"""Generate every app icon in the repo from the B-3PO art + platform backgrounds.
 
 Usage (from repo root):
     node scripts/generate-icons.mjs           # write
     node scripts/generate-icons.mjs --check   # verify structure
 
 Sources of truth — two axes, composed per target:
-  Girl art (vector):  assets/nous-girl-black.svg  (black positive space)
-                      assets/nous-girl-white.svg  (white positive space)
+  Girl art (vector):  assets/b3po-mark-dark.svg  (black positive space)
+                      assets/b3po-mark-light.svg  (white positive space)
                       straight from the Nous brand kit (Inkscape exports,
                       5487^2 viewBox, one path each).
 
@@ -70,18 +70,18 @@ Outputs (99 files):
   apps/desktop/assets/appx/Square44x44Logo.targetsize-N[_altform-(light)unplated].png
                                                       taskbar/Start bitmaps 16..256; unplated = dark tile
   apps/desktop/public/apple-touch-icon.png            1024x1024 squircle
-  apps/desktop/public/nous-girl.png                   256x256 squircle, black girl (light mark)
-  apps/desktop/public/nous-girl-dark.png              256x256 squircle, white girl (dark mark)
+  apps/desktop/public/b3po-mark-light.png                   256x256 squircle, black girl (light mark)
+  apps/desktop/public/b3po-mark-dark.png              256x256 squircle, white girl (dark mark)
   apps/bootstrap-installer/src-tauri/icons/32x32.png       32x32
   apps/bootstrap-installer/src-tauri/icons/128x128.png     128x128
   apps/bootstrap-installer/src-tauri/icons/128x128@2x.png  256x256
   apps/bootstrap-installer/src-tauri/icons/icon.ico        16,32,64,128,256
   apps/bootstrap-installer/src-tauri/icons/icon.icns       16..1024
-  apps/bootstrap-installer/public/nous-girl.png   256x256 squircle mark (light)
+  apps/bootstrap-installer/public/b3po-mark-light.png   256x256 squircle mark (light)
   website/static/img/logo.png                     1772x1799 girl alone, transparent (light)
   website/static/img/logo-dark.png                1772x1799 girl alone, transparent (dark)
-  website/static/img/nous-logo.png                150x150 on white (opaque)
-  website/static/img/nous-logo-dark.png           150x150 on #0d1117 (opaque)
+  website/static/img/b3po-logo.png                150x150 on white (opaque)
+  website/static/img/b3po-logo-dark.png           150x150 on #0d1117 (opaque)
   website/static/img/favicon-16x16.png            16x16
   website/static/img/favicon-32x32.png            32x32
   website/static/img/apple-touch-icon.png         180x180
@@ -227,16 +227,16 @@ CHECK_SIZES: dict[str, tuple[str, tuple[int, int]]] = {
     "apps/desktop/assets/icon.icon/Assets/art-light.png": ("PNG", (1024, 1024)),
     "apps/desktop/assets/icon.icon/Assets/art-dark.png": ("PNG", (1024, 1024)),
     "apps/desktop/public/apple-touch-icon.png": ("PNG", (1024, 1024)),
-    "apps/desktop/public/nous-girl.png": ("PNG", (256, 256)),
-    "apps/desktop/public/nous-girl-dark.png": ("PNG", (256, 256)),
+    "apps/desktop/public/b3po-mark-light.png": ("PNG", (256, 256)),
+    "apps/desktop/public/b3po-mark-dark.png": ("PNG", (256, 256)),
     "apps/bootstrap-installer/src-tauri/icons/32x32.png": ("PNG", (32, 32)),
     "apps/bootstrap-installer/src-tauri/icons/128x128.png": ("PNG", (128, 128)),
     "apps/bootstrap-installer/src-tauri/icons/128x128@2x.png": ("PNG", (256, 256)),
-    "apps/bootstrap-installer/public/nous-girl.png": ("PNG", (256, 256)),
+    "apps/bootstrap-installer/public/b3po-mark-light.png": ("PNG", (256, 256)),
     "website/static/img/logo.png": ("PNG", (1772, 1799)),
     "website/static/img/logo-dark.png": ("PNG", (1772, 1799)),
-    "website/static/img/nous-logo.png": ("PNG", (150, 150)),
-    "website/static/img/nous-logo-dark.png": ("PNG", (150, 150)),
+    "website/static/img/b3po-logo.png": ("PNG", (150, 150)),
+    "website/static/img/b3po-logo-dark.png": ("PNG", (150, 150)),
     "website/static/img/favicon-16x16.png": ("PNG", (16, 16)),
     "website/static/img/favicon-32x32.png": ("PNG", (32, 32)),
     "website/static/img/apple-touch-icon.png": ("PNG", (180, 180)),
@@ -265,8 +265,8 @@ TARGETS: list[tuple[str, str, object]] = [
     ("apps/desktop/public/apple-touch-icon.png", "png", 1024),
     # The dev-run Dock icon (app.dock.setIcon): same mac grid as the icns.
     ("apps/desktop/assets/icon-mac.png", "png_mac", 1024),
-    ("apps/desktop/public/nous-girl.png", "girl_light", 256),
-    ("apps/desktop/public/nous-girl-dark.png", "girl_dark", 256),
+    ("apps/desktop/public/b3po-mark-light.png", "mark_light", 256),
+    ("apps/desktop/public/b3po-mark-dark.png", "mark_dark", 256),
     ("apps/bootstrap-installer/src-tauri/icons/32x32.png", "png", 32),
     ("apps/bootstrap-installer/src-tauri/icons/128x128.png", "png", 128),
     ("apps/bootstrap-installer/src-tauri/icons/128x128@2x.png", "png", 256),
@@ -278,11 +278,11 @@ TARGETS: list[tuple[str, str, object]] = [
     ("apps/bootstrap-installer/src-tauri/icons/icon.icon/Assets/art-light.png", "icon_art", "black"),
     ("apps/bootstrap-installer/src-tauri/icons/icon.icon/Assets/art-dark.png", "icon_art", "white"),
     ("apps/bootstrap-installer/src-tauri/icons/icon.icon/Assets/mono.png", "icon_mono", None),
-    ("apps/bootstrap-installer/public/nous-girl.png", "girl_light", 256),
+    ("apps/bootstrap-installer/public/b3po-mark-light.png", "mark_light", 256),
     ("website/static/img/logo.png", "logo", None),
     ("website/static/img/logo-dark.png", "logo_dark", None),
-    ("website/static/img/nous-logo.png", "png_white", 150),
-    ("website/static/img/nous-logo-dark.png", "png_dark_white", 150),
+    ("website/static/img/b3po-logo.png", "png_white", 150),
+    ("website/static/img/b3po-logo-dark.png", "png_dark_white", 150),
     ("website/static/img/favicon-16x16.png", "png", 16),
     ("website/static/img/favicon-32x32.png", "png", 32),
     ("website/static/img/apple-touch-icon.png", "png", 180),
@@ -301,7 +301,10 @@ class IconArt:
         self.source = source
         self.colors = colors
         self.commit = commit
-        self.girls = {color: assets / f"nous-girl-{color}.svg" for color in ("black", "white")}
+        self.girls = {
+            "black": assets / "b3po-mark-dark.svg",
+            "white": assets / "b3po-mark-light.svg",
+        }
         self.backgrounds = assets / "backgrounds"
         self.paths: dict[str, str] = {}
         self.bboxes: dict[str, tuple[float, float, float, float]] = {}
@@ -317,12 +320,16 @@ class IconArt:
 
 
 def girl_path(art: IconArt, girl: str) -> str:
-    """The girl `<path>` element with editor metadata stripped (resvg rejects
-    undeclared inkscape/sodipodi prefixes)."""
+    """The art element with editor metadata stripped (resvg rejects undeclared
+    inkscape/sodipodi prefixes).
+
+    Accepts the classic vector artwork (a single ``<path>``) or an embedded raster
+    mark (``<image href="data:…">``, how the B-3PO identity ships). Either way the
+    element is placed through ``girl_layer``, so the geometry stays identical."""
     if girl not in art.paths:
         src = art.girls[girl].read_text(encoding="utf-8-sig")
-        m = re.search(r"<path\b.*?/>", src, re.DOTALL)
-        assert m, f"no <path> found in {art.girls[girl].name}"
+        m = re.search(r"<path\b.*?/>", src, re.DOTALL) or re.search(r"<image\b.*?/>", src, re.DOTALL)
+        assert m, f"no <path> or <image> found in {art.girls[girl].name}"
         path = re.sub(r'\s+(inkscape|sodipodi):[a-zA-Z-]+="[^"]*"', "", m.group(0))
         art.paths[girl] = path
     return art.paths[girl]
@@ -423,7 +430,13 @@ def commit_layer(commit: str, bg: str) -> str:
 
 
 def drag_bottom_nodes(path: ET.Element, *, cutoff: float, band: float, distance: float) -> None:
-    """Drag lower nodes and curve handles, tapering to zero above the bottom band."""
+    """Drag lower nodes and curve handles, tapering to zero above the bottom band.
+
+    A raster mark (an <image> rather than a <path>) has no nodes to drag: it is
+    returned untouched, keeping the same tile and scale.
+    """
+    if "d" not in path.attrib:
+        return
     y_scale, y_offset = 1.0, 0.0
     transform = path.get("transform")
     if transform:
@@ -755,18 +768,30 @@ def paste_centered(canvas: Image.Image, img: Image.Image) -> None:
     canvas.alpha_composite(img, (x, y))
 
 
+# Committed blobs must stay under the repo's 500 KiB limit (scripts/check
+# blob-size). Flat vector art quantizes losslessly; the raster B-3PO mark does
+# not, so past the limit we keep an 8-bit palette (tRNS alpha intact) — visually
+# identical at icon sizes and a fraction of the bytes.
+PNG_BYTE_LIMIT = 460 * 1024
+
+
 def save_png(img: Image.Image, buf: io.BytesIO) -> None:
-    """Save with alpha preserved. Flat art quantizes losslessly to an 8-bit
-    palette (tRNS per-index alpha keeps the AA edges), so use that when the
-    palette round-trips pixel-identically; fall back to RGBA otherwise."""
+    """Save with alpha preserved, staying under PNG_BYTE_LIMIT."""
     if img.mode != "RGBA":
-        img.convert("RGBA").save(buf, "PNG", optimize=True)
-        return
+        img = img.convert("RGBA")
+
     quantized = img.quantize(colors=256, method=Image.FASTOCTREE, dither=Image.NONE)
     if quantized.convert("RGBA").tobytes() == img.tobytes():
         quantized.save(buf, "PNG", optimize=True)
-    else:
-        img.save(buf, "PNG", optimize=True)
+        return
+
+    img.save(buf, "PNG", optimize=True)
+    if buf.tell() <= PNG_BYTE_LIMIT:
+        return
+
+    buf.seek(0)
+    buf.truncate()
+    img.quantize(colors=192, method=Image.FASTOCTREE, dither=Image.NONE).save(buf, "PNG", optimize=True)
 
 
 def girl_mark(art: IconArt, kind: str, size: int) -> Image.Image:
@@ -828,16 +853,22 @@ def target_bytes(art: IconArt, kind: str, arg: object) -> bytes:
     elif kind == "icns":
         img = render(art.master_mac, 1024)
         frames = [img.resize((s, s), Image.LANCZOS) for s in (16, 32, 64, 128, 256, 512, 1024)]
+        # 8-bit frames keep the ICNS under the blob limit; macOS renders them identically.
+        frames = [q.quantize(colors=128, method=Image.FASTOCTREE, dither=Image.NONE) for q in frames]
         img.save(buf, format="ICNS", append_images=frames[1:])
     elif kind == "icns_dark":
         img = render(art.master_mac_dark, 1024)
         frames = [img.resize((s, s), Image.LANCZOS) for s in (16, 32, 64, 128, 256, 512, 1024)]
+        # 8-bit frames keep the ICNS under the blob limit; macOS renders them identically.
+        frames = [q.quantize(colors=128, method=Image.FASTOCTREE, dither=Image.NONE) for q in frames]
         img.save(buf, format="ICNS", append_images=frames[1:])
     elif kind == "icns_from_png":
         # Hand-made artwork (the DMG volume: girl on a drive) shipped as ICNS.
         img = Image.open(art.source / arg).convert("RGBA")
         assert img.size == (1024, 1024), f"{arg} must be 1024x1024"
         frames = [img.resize((s, s), Image.LANCZOS) for s in (16, 32, 64, 128, 256, 512, 1024)]
+        # 8-bit frames keep the ICNS under the blob limit; macOS renders them identically.
+        frames = [q.quantize(colors=128, method=Image.FASTOCTREE, dither=Image.NONE) for q in frames]
         img.save(buf, format="ICNS", append_images=frames[1:])
     elif kind == "wide":
         w, h, tile = arg
@@ -845,9 +876,9 @@ def target_bytes(art: IconArt, kind: str, arg: object) -> bytes:
         paste_centered(canvas, render(art.master, tile))
         canvas.save(buf, "PNG")
     elif kind == "logo":
-        build_logo_image(art, dark=False).save(buf, "PNG")
+        save_png(build_logo_image(art, dark=False).convert("RGBA"), buf)
     elif kind == "logo_dark":
-        build_logo_image(art, dark=True).save(buf, "PNG")
+        save_png(build_logo_image(art, dark=True).convert("RGBA"), buf)
     else:
         raise ValueError(f"unknown kind {kind!r}")
     return buf.getvalue()
@@ -946,8 +977,8 @@ def cmd_check(source: Path, out: Path) -> int:
     for rel in (
         "apps/desktop/assets/icon.png",
         "apps/desktop/assets/icon-dark.png",
-        "apps/desktop/public/nous-girl.png",
-        "apps/desktop/public/nous-girl-dark.png",
+        "apps/desktop/public/b3po-mark-light.png",
+        "apps/desktop/public/b3po-mark-dark.png",
         "apps/desktop/public/apple-touch-icon.png",
     ):
         path = out / rel

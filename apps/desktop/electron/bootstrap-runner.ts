@@ -48,7 +48,10 @@ const IS_WINDOWS = process.platform === 'win32'
 
 const STAMP_COMMIT_RE = /^[0-9a-f]{7,40}$/i
 const FALLBACK_COMMIT_RE = /^0{7,40}$/
-const FALLBACK_BRANCH = 'main'
+// B-3PO is the product this app installs. A stamp with no branch follows the
+// product branch, never upstream `main`: silently installing upstream would
+// ship a different product (and a different UI) to the user.
+const FALLBACK_BRANCH = 'b3po-brand'
 
 function isPinnedCommit(commit) {
   return typeof commit === 'string' && STAMP_COMMIT_RE.test(commit) && !FALLBACK_COMMIT_RE.test(commit)

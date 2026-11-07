@@ -30,19 +30,27 @@ _notice_logged = False
 
 
 def adopt_external_logins_enabled() -> bool:
-    """``auth.adopt_external_logins`` (default True).
+    """``auth.adopt_external_logins`` — **default False**: borrowing is opt-in.
 
     Codex and Claude OAuth refresh tokens are single-use and rotate, so once Hermes borrows a CLI's
     token pair the two programs hold one token family and whichever refreshes first logs the other
-    out. When the user opts out, Hermes never reads or refreshes those files and says so once per
-    process (INFO) the first time it would have."""
+    out. Borrowing another program's credentials therefore requires a literal ``true`` in
+    ``config.yaml``; an invalid value (string, number) does not enable it, and neither does a config
+    that cannot be read. While it is off, Hermes never reads or refreshes those files and says so
+    once per process (INFO) the first time it would have."""
     global _notice_logged
     try:
         from hermes_cli.config import load_config_readonly
         auth_cfg = (load_config_readonly() or {}).get("auth")
     except Exception:
-        return True
-    enabled = not isinstance(auth_cfg, dict) or bool(auth_cfg.get("adopt_external_logins", True))
+        return False
+    raw = auth_cfg.get("adopt_external_logins") if isinstance(auth_cfg, dict) else None
+    if raw is not None and not isinstance(raw, bool):
+        logger.warning(
+            "auth.adopt_external_logins must be true or false, got %r — external CLI logins stay disabled.",
+            raw,
+        )
+    enabled = raw is True
     if not enabled and not _notice_logged:
         _notice_logged = True
         logger.info(EXTERNAL_LOGINS_NOT_ADOPTED_NOTICE)

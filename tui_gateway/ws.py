@@ -20,6 +20,7 @@ from tui_gateway import server
 from agent.message_sanitization import _sanitize_surrogates
 from tui_gateway.event_replay import replay_epoch
 from tui_gateway.transport import serialize_frame
+from tui_gateway import device_scope
 from tui_gateway.ws_legacy_fallback import dispatch_legacy, legacy_fallback_allowed
 
 _log = logging.getLogger(__name__)
@@ -472,6 +473,18 @@ async def handle_ws(ws: Any, *, auth_identity: dict | None = None, subprotocol: 
         nonlocal dispatch_crashes
         req_id = req.get("id") if isinstance(req, dict) else None
         req_method = req.get("method") if isinstance(req, dict) else None
+        # Um ticket de dispositivo vale apenas para os verbos de sessao (docs/b3po/DEVICE-AUTHORIZATION.md).
+        # A checagem fica aqui, no funil unico, para valer nas duas faixas (serial e concorrente) e para
+        # nenhum metodo novo nascer liberado por esquecimento.
+        refusal = device_scope.method_refusal(transport.auth_identity, req_method)
+        if refusal is not None:
+            _log.warning("ws device ticket refused peer=%s id=%s method=%s", peer, req_id, req_method)
+            await _reply(
+                _error(device_scope.DEVICE_METHOD_FORBIDDEN, refusal, req_id),
+                "send_failed_after_device_refusal",
+                "ws device-refusal reply send failed peer=%s id=%s method=%s", peer, req_id, req_method,
+            )
+            return
         # dispatch() may schedule long handlers on the pool; it returns None then and the worker
         # writes the response itself via transport.write (a separate thread, so that is the safe
         # path). Inline handlers return the response dict, written here from the loop.

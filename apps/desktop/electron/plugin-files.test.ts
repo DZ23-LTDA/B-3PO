@@ -55,6 +55,15 @@ async function grantVault(pluginId = 'plexus', folder = vault): Promise<string> 
   return (granted as { folder: { id: string } }).folder.id
 }
 
+// r221 do GOAL V2: it.skipIf - o METODO, nao o export do modulo.
+//
+// **A r220 tentou { skip } na segunda posicao (nao existe: a assinatura e it(nome, fn, timeout)) e skipIf`n// importado do vitest (nao e exportado).** **A forma que sobra e o METODO do it.**
+//
+// **O Windows exige elevacao para criar symlink de diretorio E de arquivo**: sem ela, o symlinkSync falha com
+// EPERM ANTES do codigo sob teste ser chamado, e o teste mede o fixture quebrado em vez da recusa que descreve.
+// O que estes testes cobrem continua coberto em Linux e macOS.
+const semSymlink = process.platform === 'win32'
+
 describe('grants', () => {
   it('persists a user-picked folder per plugin and survives a restart', async () => {
     const id = await grantVault()
@@ -90,7 +99,7 @@ describe('grants', () => {
     expect(await files.addGrant('plexus', ssh)).toMatchObject({ ok: false, error: 'protected' })
   })
 
-  it('refuses to grant a symlink that resolves into the Hermes home', async () => {
+  it.skipIf(semSymlink)('refuses to grant a symlink that resolves into the Hermes home', async () => {
     const link = path.join(scratch, 'innocent')
     fs.symlinkSync(hermesHome, link)
 
@@ -119,7 +128,7 @@ describe('grants', () => {
     })
   })
 
-  it('refuses a grant whose folder was swapped for a link into the Hermes home', async () => {
+  it.skipIf(semSymlink)('refuses a grant whose folder was swapped for a link into the Hermes home', async () => {
     const id = await grantVault()
     fs.rmSync(vault, { recursive: true })
     fs.symlinkSync(hermesHome, vault)
@@ -153,7 +162,7 @@ describe('path containment', () => {
     expect(fs.readFileSync(path.join(hermesHome, 'config.yaml'), 'utf8')).toBe('model: x\n')
   })
 
-  it('refuses to read through a symlinked file that points outside the folder', async () => {
+  it.skipIf(semSymlink)('refuses to read through a symlinked file that points outside the folder', async () => {
     const id = await grantVault()
     fs.symlinkSync(path.join(hermesHome, '.env'), path.join(vault, 'notes', 'leak.md'))
 
@@ -167,7 +176,7 @@ describe('path containment', () => {
     })
   })
 
-  it('refuses to write through a symlinked file or folder that points outside', async () => {
+  it.skipIf(semSymlink)('refuses to write through a symlinked file or folder that points outside', async () => {
     const id = await grantVault()
     fs.symlinkSync(path.join(hermesHome, 'config.yaml'), path.join(vault, 'cfg.md'))
     fs.symlinkSync(hermesHome, path.join(vault, 'home'))
@@ -183,7 +192,7 @@ describe('path containment', () => {
     expect(fs.existsSync(path.join(hermesHome, 'new.md'))).toBe(false)
   })
 
-  it('refuses a dangling symlink instead of creating its target', async () => {
+  it.skipIf(semSymlink)('refuses a dangling symlink instead of creating its target', async () => {
     const id = await grantVault()
     const outside = path.join(scratch, 'created-outside.md')
     fs.symlinkSync(outside, path.join(vault, 'dangling.md'))
@@ -194,7 +203,7 @@ describe('path containment', () => {
     expect(fs.existsSync(outside)).toBe(false)
   })
 
-  it('refuses listing, renaming and trashing through a symlinked folder into the Hermes home', async () => {
+  it.skipIf(semSymlink)('refuses listing, renaming and trashing through a symlinked folder into the Hermes home', async () => {
     const id = await grantVault()
     fs.symlinkSync(hermesHome, path.join(vault, 'home'))
 
@@ -213,7 +222,7 @@ describe('path containment', () => {
     expect(fs.existsSync(path.join(hermesHome, '.env'))).toBe(true)
   })
 
-  it('a listing hides links that leave the folder and keeps links that stay inside', async () => {
+  it.skipIf(semSymlink)('a listing hides links that leave the folder and keeps links that stay inside', async () => {
     const id = await grantVault()
     fs.symlinkSync(hermesHome, path.join(vault, 'escape'))
     fs.symlinkSync(path.join(vault, 'notes'), path.join(vault, 'alias'))
@@ -270,7 +279,7 @@ describe('plugin data folder', () => {
     )
   })
 
-  it("cannot reach another plugin's data folder or the grants record", async () => {
+  it.skipIf(semSymlink)("cannot reach another plugin's data folder or the grants record", async () => {
     await files.run('other', { op: 'writeText', folder: 'data', path: 'secret.json', text: 'theirs' })
     await files.run('plexus', { op: 'writeText', folder: 'data', path: 'mine.json', text: 'mine' })
 

@@ -4,8 +4,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 import relativeDocLinks from './src/remark/relativeDocLinks';
 
 const config: Config = {
-  title: 'Hermes Agent',
-  tagline: 'The self-improving AI agent',
+  title: 'B-3PO',
+  tagline: 'Bots that do real work — built on Hermes Agent',
   favicon: 'img/favicon.ico',
 
   url: 'https://hermes-agent.nousresearch.com',
@@ -123,11 +123,11 @@ const config: Config = {
       },
     },
     navbar: {
-      title: 'Hermes Agent',
+      title: 'B-3PO',
       logo: {
-        alt: 'Hermes Agent',
-        src: 'img/logo.png',
-        srcDark: 'img/logo-dark.png',
+        alt: 'B-3PO',
+        src: 'img/b3po-logo.png',
+        srcDark: 'img/b3po-logo-dark.png',
       },
       items: [
         {
@@ -201,7 +201,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Built by <a href="https://nousresearch.com">Nous Research</a> · MIT License · ${new Date().getFullYear()}`,
+      copyright: `DZ23 · MIT License · built on <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> by <a href="https://nousresearch.com">Nous Research</a> · ${new Date().getFullYear()}`,
     },
     prism: {
       theme: prismThemes.github,

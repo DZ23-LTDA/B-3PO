@@ -18,6 +18,7 @@ import {
   ARTIFACTS_ROUTE,
   CAPABILITIES_ROUTE,
   contributedRoutes,
+  CRM_ROUTE,
   MESSAGING_ROUTE,
   ROUTES_AREA
 } from '../routes'
@@ -27,12 +28,14 @@ import { paneMirror } from './pane-mirror'
 const CapabilitiesView = lazy(async () => ({ default: (await import('../capabilities')).CapabilitiesView }))
 const MessagingView = lazy(async () => ({ default: (await import('../messaging')).MessagingView }))
 const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
+const CrmView = lazy(async () => ({ default: (await import('../crm')).CrmView }))
 
 // Built-in page views + their pane titles, keyed by route.
 const BUILTIN_PAGES: Record<string, { render: () => ReactNode; title: string }> = {
   [ARTIFACTS_ROUTE]: { render: () => <ArtifactsView />, title: 'Artifacts' },
   [MESSAGING_ROUTE]: { render: () => <MessagingView />, title: 'Messaging' },
-  [CAPABILITIES_ROUTE]: { render: () => <CapabilitiesView />, title: 'Capabilities' }
+  [CAPABILITIES_ROUTE]: { render: () => <CapabilitiesView />, title: 'Capabilities' },
+  [CRM_ROUTE]: { render: () => <CrmView />, title: 'CRM' }
 }
 
 /** Humanize a route path into a tab title: `/my-atlas` → `My Atlas`. */

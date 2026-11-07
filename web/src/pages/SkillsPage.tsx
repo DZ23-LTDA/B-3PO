@@ -489,7 +489,7 @@ export default function SkillsPage() {
             <Card className="rounded-none">
               <CardHeader className="py-3 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2">
+                  <CardTitle className="text-sm flex items-center gap-2" aria-level={2}>
                     <Search className="h-4 w-4" />
                     {t.skills.title}
                   </CardTitle>
@@ -529,7 +529,7 @@ export default function SkillsPage() {
             <Card className="rounded-none">
               <CardHeader className="py-3 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2">
+                  <CardTitle className="text-sm flex items-center gap-2" aria-level={2}>
                     <Package className="h-4 w-4" />
                     {activeCategory
                       ? prettyCategory(

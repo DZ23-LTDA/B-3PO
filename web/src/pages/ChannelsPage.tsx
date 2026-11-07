@@ -1005,7 +1005,7 @@ export function WhatsAppOnboardingPanel({
         </div>
 
         {error && (
-          <div className="border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-text">
             {error}
           </div>
         )}
@@ -1219,7 +1219,7 @@ function TelegramOnboardingPanel({
     setDetectedOwnerId(null);
     setNewAllowedId("");
     try {
-      const res = await api.startTelegramOnboarding({ bot_name: "Hermes Agent" });
+      const res = await api.startTelegramOnboarding({ bot_name: "B-3PO" });
       const dataUrl = await QRCode.toDataURL(res.qr_payload, {
         errorCorrectionLevel: "M",
         margin: 1,
@@ -1401,7 +1401,7 @@ function TelegramOnboardingPanel({
       )}
 
       {error && (
-        <div className="mt-3 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="mt-3 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-text">
           {error}
         </div>
       )}

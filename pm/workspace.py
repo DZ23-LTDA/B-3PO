@@ -10,6 +10,8 @@ import hashlib
 import json
 import os
 import shutil
+
+from pm.filesystem import long_root
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
@@ -122,7 +124,7 @@ def _copy_core_inputs(source: Path, destination: Path) -> None:
                 and not entry.name.startswith(".") and entry.resolve() != destination.resolve()
                 and any(fnmatch.fnmatchcase(entry.name, pattern) for pattern in package_roots)):
             target = destination / entry.name
-            shutil.copytree(entry, target, ignore=ignore)
+            shutil.copytree(entry, long_root(target), ignore=ignore)
     for name in files:
         entry = source / name
         if not entry.is_file() or entry.is_symlink():
@@ -301,7 +303,10 @@ def _workspace_member(plugin_dir: Path, root: Path, *, identity: Path) -> Path:
     declaration = read_python_declaration(plugin_dir)
     pyproject = declaration.pyproject
     if pyproject is not None:
-        member = root / "plugin-sources" / key
+        # A PM-owned root goes through long_root: with LongPathsEnabled=0 the
+        # generated path (installs/<id>/environments/<id>/workspace/plugin-sources/…)
+        # passes MAX_PATH and copytree fails on the deepest files.
+        member = long_root(root / "plugin-sources" / key)
         shutil.copytree(plugin_dir, member, symlinks=True,
                         ignore=_member_ignored)
         document = tomllib.loads(pyproject.read_text(encoding="utf-8-sig"))
@@ -432,7 +437,7 @@ def lock_and_sync(
         # Sibling generations keep external relative paths at the same depth;
         # snapshotted members and their exact lock travel with the workspace.
         # Use the snapshot's exclusions: build/ may hold an in-tree backend.
-        shutil.copytree(replay, root, symlinks=True, ignore=_member_ignored)
+        shutil.copytree(replay, long_root(root), symlinks=True, ignore=_member_ignored)
         # A generation recorded before the cutoff left the user's machine still carries it.
         manifest = root / "pyproject.toml"
         manifest.write_text(_without_release_age(manifest.read_text(encoding="utf-8-sig")), encoding="utf-8")

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 
+import { HomeB3po } from '@/components/chat/home-b3po'
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
 import introCopyJsonl from './intro-copy.jsonl?raw'
+import introCopyPtJsonl from './intro-copy.pt.jsonl?raw'
 import { Wordmark } from './wordmark'
 
 type IntroCopy = {
@@ -106,6 +108,12 @@ function parseIntroCopy(raw: string): Record<string, IntroCopy[]> {
 }
 
 const INTRO_COPY_BY_PERSONALITY = parseIntroCopy(introCopyJsonl)
+// Portuguese copy for the personalities it covers; every other personality/dialect keeps English.
+const INTRO_COPY_PT = parseIntroCopy(introCopyPtJsonl)
+
+function copyTable(locale: string): Record<string, IntroCopy[]> {
+  return locale.startsWith('pt') ? { ...INTRO_COPY_BY_PERSONALITY, ...INTRO_COPY_PT } : INTRO_COPY_BY_PERSONALITY
+}
 
 function neutralCopy(): IntroCopy[] {
   return INTRO_COPY_BY_PERSONALITY.none || INTRO_COPY_BY_PERSONALITY.default || FALLBACK_COPY
@@ -146,24 +154,28 @@ function pickCopy(copies: IntroCopy[], seed = 0): IntroCopy {
   return copies[Math.abs(seed) % copies.length] || FALLBACK_COPY[0]
 }
 
-const WORDMARK = 'HERMES AGENT'
+const WORDMARK = 'B-3PO'
 
-function resolveCopy(personality?: string, seed?: number): IntroCopy {
+function resolveCopy(personality: string | undefined, seed: number | undefined, locale: string): IntroCopy {
   const personalityKey = normalizeKey(personality)
+  const table = copyTable(locale)
 
   const copies = NEUTRAL_PERSONALITIES.has(personalityKey)
-    ? INTRO_COPY_BY_PERSONALITY[personalityKey] || neutralCopy()
-    : INTRO_COPY_BY_PERSONALITY[personalityKey] || fallbackCopyForPersonality(personalityKey)
+    ? table[personalityKey] || table.none || table.default || FALLBACK_COPY
+    : table[personalityKey] || INTRO_COPY_BY_PERSONALITY[personalityKey] || fallbackCopyForPersonality(personalityKey)
 
   return pickCopy(copies, seed)
 }
 
 export function Intro({ personality, seed }: IntroProps) {
   const [mountSeed] = useState(() => Math.floor(Math.random() * 100000))
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const rotationSeed = mountSeed + (seed ?? 0)
-  const copy = resolveCopy(personality, rotationSeed)
+  const copy = resolveCopy(personality, rotationSeed, locale)
   const key = normalizeKey(personality)
+  // Chat genérico (ou persona neutra) mostra a marca; o chat de um bot mostra o nome dele.
+  const isBrand = NEUTRAL_PERSONALITIES.has(key)
+  const wordmarkText = isBrand ? WORDMARK : titleize(personality || '')
 
   const bodies =
     t.intro.stock[key] ?? (NEUTRAL_PERSONALITIES.has(key) ? t.intro.stock.none : t.intro.custom(personality || ''))
@@ -172,13 +184,34 @@ export function Intro({ personality, seed }: IntroProps) {
 
   return (
     <div
-      className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8"
+      className={`flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8 ${
+        // r268: a home tem CARTÕES, e o container do intro existe para ser decorativo
+        // (`pointer-events-none`, para o composer e o arraste do fundo funcionarem). No chat
+        // genérico a home precisa de clique; no chat de um bot a tela continua decorativa.
+        isBrand ? 'pointer-events-auto' : 'pointer-events-none'
+      }`}
       data-slot="aui_intro"
     >
-      <div className="w-full min-w-0">
-        <Wordmark className="mb-1" text={WORDMARK} />
-
-        <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
+      <div className="flex w-full min-w-0 flex-col items-center">
+        {isBrand ? (
+          /*
+           * r268: **a home do produto**, no lugar da frase rotativa em inglês.
+           *
+           * A referência visual da missão final pede marca + posicionamento + os seis
+           * ambientes. O `Intro` do Hermes é uma boa tela para um agente de código e a tela
+           * errada para um produto de gestão: ela não diz o que o produto faz nem por onde
+           * começar.
+           *
+           * **Só no chat genérico.** O chat de um bot continua com o `Wordmark` e a fala dele
+           * — trocar aquilo apagaria a identidade do bot.
+           */
+          <HomeB3po />
+        ) : (
+          <>
+            <Wordmark className="mb-1" text={wordmarkText} />
+            <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
+          </>
+        )}
       </div>
     </div>
   )

@@ -216,6 +216,8 @@ class CanonicalSubmitParams(CanonicalSessionParams):
     unattended: bool = False
     surface: str | None = None
     voice_context: str | None = None
+    # B-3PO (r273): ambiente/projeto/ator do produto. Descritivo; vira nota no turno, nao permissao.
+    produto_contexto: str | None = None
     interrupted: bool = False
     voice_turn: bool = False
     # Desktop composer presentation, committed per admission (``display_v1``): a hidden widget

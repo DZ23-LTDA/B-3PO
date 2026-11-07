@@ -19,7 +19,7 @@ interface UseComposerPlaceholderOptions {
  * down, it swaps to a reconnecting / starting message instead.
  */
 export function useComposerPlaceholder({ disabled, reconnecting, sessionId }: UseComposerPlaceholderOptions): string {
-  const { t } = useI18n()
+  const { locale, t } = useI18n()
   const newSessionPlaceholders = t.composer.newSessionPlaceholders
   const followUpPlaceholders = t.composer.followUpPlaceholders
 
@@ -28,6 +28,19 @@ export function useComposerPlaceholder({ disabled, reconnecting, sessionId }: Us
   )
 
   const prevSessionIdRef = useRef(sessionId)
+  // O placeholder é escolhido uma vez, no mount — quando o locale ainda é o default. Sem isto, quem
+  // abre a UI antes de `display.language` resolver fica com o texto do idioma anterior para sempre
+  // (a tela em pt com "Give B-3PO a task" em inglês). Trocar de idioma precisa re-escolher.
+  const prevLocaleRef = useRef(locale)
+
+  useEffect(() => {
+    if (prevLocaleRef.current === locale) {
+      return
+    }
+
+    prevLocaleRef.current = locale
+    setRestingPlaceholder(pickPlaceholder(sessionId ? followUpPlaceholders : newSessionPlaceholders))
+  }, [followUpPlaceholders, locale, newSessionPlaceholders, sessionId])
 
   // eslint-disable-next-line no-restricted-syntax -- legitimate non-atom ref write (see eslint rule comment)
   useEffect(() => {

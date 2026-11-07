@@ -37,7 +37,7 @@ import type { UninstallSectionTranslations } from './types_uninstall_section'
 import type { UpdateChannelCopy } from './types_update_channel'
 
 /** The locales compiled into the app (`TRANSLATIONS`). */
-export type BundledLocale = 'en' | 'zh' | 'zh-hant' | 'ja' | 'ar' | 'ru' | 'fr' | 'de' | 'es'
+export type BundledLocale = 'en' | 'zh' | 'zh-hant' | 'ja' | 'ar' | 'ru' | 'fr' | 'de' | 'es' | 'pt'
 
 /** Any language id the app can render: a bundled locale, or one a plugin /
  *  the backend registered at runtime (`registerAppLocale`). Lowercase
@@ -427,6 +427,8 @@ export interface Translations extends NoticeTranslations {
   notifications: {
     sharedProfileWarning: string
     region: string
+    /** r82: a pilha de confirmacoes do canto. Duas `role=region` com o mesmo nome violam `landmark-unique`. */
+    regionAmbient: string
     hide: string
     show: string
     more: (count: number) => string
@@ -599,7 +601,650 @@ export interface Translations extends NoticeTranslations {
     noResults: string
   }
 
+  /** Faixa de indicadores do CRM (todos derivados do que esta gravado). */
+  crmOverview: {
+    contacts: string
+    lateTasks: string
+    openOpportunities: string
+    openTasks: string
+    openValue: string
+    title: string
+    wonValue: string
+  }
   settings: {
+    /** Copia da janela flutuante do atalho global (renderer sem provider de i18n). */
+    quickEntryWindow: {
+      sendTo: string
+      currentChat: string
+      newSession: string
+      targetSession: string
+    }
+    /** Tarefas do CRM: prazo, prioridade e o vínculo opcional com um contato. */
+    crmConversations: {
+      tags: string
+      tagsPlaceholder: string
+      indicatorsTitle: string
+      newConversations: string
+      waitingReply: string
+      responseTime: string
+      notePlaceholder: string
+      notes: string
+      saveNote: string
+      filter: { aguardando: string; abertas: string; todas: string }
+      noResults: string
+      search: string
+      markRead: string
+      resolve: string
+      empty: string
+      loading: string
+      naoLidasLabel: string
+      noMessages: string
+      pickOne: string
+      status: { aberta: string; aguardando: string; resolvida: string }
+      subtitle: string
+      title: string
+      unavailable: string
+    }
+    products: {
+      cancel: string
+      category: string
+      count: (n: number) => string
+      cost: string
+      duplicateSku: string
+      edit: string
+      empty: string
+      hint: string
+      invalidCost: string
+      invalidName: string
+      invalidPrice: string
+      invalidSku: string
+      loadFailed: string
+      name: string
+      noMatch: string
+      price: string
+      remove: string
+      save: string
+      saveEdit: string
+      search: string
+      sku: string
+      stock: string
+      title: string
+      unit: string
+      units: Record<string, string>
+      unavailable: string
+    }
+    agenda: {
+      book: string
+      cancel: string
+      confirm: string
+      conflict: string
+      date: string
+      duration: string
+      empty: string
+      hint: string
+      invalidPeriod: string
+      loadFailed: string
+      resource: string
+      resourceHint: string
+      catalogUnavailable: string
+      serviceNotFound: string
+      servicePlaceholder: string
+      serviceRequired: string
+      resourceRequired: string
+      service: string
+      status: string
+      statuses: Record<string, string>
+      time: string
+      title: string
+      today: string
+      unavailable: string
+    }
+    compras: {
+      addItem: string
+      addSupplier: string
+      alreadyReceived: string
+      bestOffer: string
+      cnpj: string
+      compare: string
+      duplicateSupplier: string
+      empty: string
+      hint: string
+      invalidQuantity: string
+      items: string
+      itemsRequired: string
+      loadFailed: string
+      number: string
+      pickProduct: string
+      pickSupplier: string
+      product: string
+      quantity: string
+      receive: string
+      removeItem: string
+      saveOrder: string
+      needQuantity: string
+      noValidOffer: string
+      orderQuantity: string
+      prazo: string
+      status: string
+      statuses: Record<string, string>
+      supplier: string
+      supplierName: string
+      supplierNameRequired: string
+      supplierRequired: string
+      title: string
+      total: string
+      unitCost: string
+      unavailable: string
+    }
+    automacoes: {
+      actorNote: string
+      create: string
+      disable: string
+      empty: string
+      enable: string
+      errAction: string
+      errActor: string
+      errDuplicate: string
+      errNotFound: string
+      errState: string
+      errTrigger: string
+      hint: string
+      inactive: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      noActions: string
+      then: string
+      title: string
+      unavailable: string
+      when: string
+    },
+    painel: {
+      activeCampaigns: string
+      balance: string
+      hint: string
+      invoiced: string
+      lateTickets: string
+      loadFailed: string
+      money: string
+      noAfterSales: string
+      noAlerts: string
+      openTickets: string
+      operation: string
+      outOfStock: string
+      payable: string
+      receivable: string
+      revenue: string
+      satisfaction: string
+      staleCampaigns: string
+      invoicedOne: string
+      noAfterSalesOne: string
+      outOfStockOne: string
+      staleCampaignsOne: string
+      title: string
+      unavailable: string
+    },
+    marketing: {
+      active: string
+      approve: string
+      approved: string
+      campaigns: string
+      contentPlaceholder: string
+      contentRequired: string
+      create: string
+      draft: string
+      editorial: string
+      errCampaignMissing: string
+      errChannel: string
+      errContent: string
+      errDateRequired: string
+      errEndBeforeStart: string
+      errName: string
+      errStart: string
+      errStatus: string
+      hint: string
+      leads: string
+      loadFailed: string
+      namePlaceholder: string
+      nameRequired: string
+      noCampaigns: string
+      noPosts: string
+      noPublishNote: string
+      overBudget: string
+      spend: string
+      staleScheduled: string
+      staleScheduledHint: string
+      title: string
+      unavailable: string
+    },
+    posvenda: {
+      done: string
+      empty: string
+      hint: string
+      loadFailed: string
+      noFollowUpOne: string
+      noFollowUp: string
+      noFollowUpHint: string
+      overdue: string
+      overdueTag: string
+      pending: string
+      title: string
+      unavailable: string
+    },
+    agentes: {
+      aboveOwnLevel: string
+      add: string
+      bot: string
+      botAsOwner: string
+      botCannotGrant: string
+      deactivate: string
+      empty: string
+      hint: string
+      human: string
+      humanOnly: string
+      inactive: string
+      insufficientLevel: string
+      lastOwner: string
+      level: string
+      loadFailed: string
+      mcpNote: string
+      name: string
+      nameRequired: string
+      noScopeWarning: string
+      scopes: string
+      title: string
+      unavailable: string
+      youAre: string
+    },
+    atendimento: {
+      close: string
+      closeRequiresResolved: string
+      empty: string
+      hint: string
+      invalidRating: string
+      loadFailed: string
+      notFound: string
+      noRatings: string
+      open: string
+      openCount: string
+      overdue: string
+      overdueBadge: string
+      overdueCount: string
+      phone: string
+      priority: string
+      rate: string
+      rateRequiresResolved: string
+      remaining: string
+      resolve: string
+      reviewBadge: string
+      satisfaction: string
+      start: string
+      subject: string
+      subjectRequired: string
+      title: string
+      unavailable: string
+    },
+    rh: {
+      addDepartment: string
+      addEmployee: string
+      approvalNeeded: string
+      offboardingBlocked: string
+      offboardingCheck: string
+      offboardingDone: string
+      offboardingHint: string
+      offboardingPending: string
+      offboardingTitle: string
+      trainingAdd: string
+      trainingDaysAgo: string
+      trainingEmpty: string
+      trainingHint: string
+      trainingImpeditive: string
+      trainingNone: string
+      trainingRequired: string
+      trainingTitle: string
+      trainingValidity: string
+      decisionAboutPerson: string
+      department: string
+      departmentName: string
+      departmentRequired: string
+      empty: string
+      forbiddenReason: string
+      hideSalary: string
+      hint: string
+      jobTitle: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      pickDepartment: string
+      salaryHidden: string
+      showSalary: string
+      status: string
+      title: string
+      unavailable: string
+      unknownOperation: string
+    }
+    servicos: {
+      add: string
+      duration: string
+      durationRequired: string
+      duplicate: string
+      empty: string
+      free: string
+      hint: string
+      loadFailed: string
+      name: string
+      nameRequired: string
+      notFound: string
+      price: string
+      remove: string
+      title: string
+      unavailable: string
+    }
+    empresa: {
+      addBranch: string
+      addCompany: string
+      searchCnpj: string
+      searching: string
+      address: string
+      branchLabel: string
+      branchName: string
+      cnpj: string
+      company: string
+      companyRequired: string
+      duplicateCnpj: string
+      empty: string
+      hint: string
+      loadFailed: string
+      migrationNote: string
+      name: string
+      nameRequired: string
+      noBranches: string
+      pickCompany: string
+      title: string
+      tradeName: string
+      unavailable: string
+    }
+    finance: {
+      costCenter: string
+      costCenters: string
+      noCostCenter: string
+      open: string
+      paid: string
+      add: string
+      alreadyPaid: string
+      amount: string
+      description: string
+      due: string
+      duplicateRef: string
+      empty: string
+      hint: string
+      invalidAmount: string
+      invalidDue: string
+      kind: string
+      kinds: Record<string, string>
+      loadFailed: string
+      openPayable: string
+      openReceivable: string
+      overdue: string
+      paidPayable: string
+      paidReceivable: string
+      settle: string
+      status: string
+      statuses: Record<string, string>
+      title: string
+      unavailable: string
+    }
+    sales: {
+      cancelInvoice: string
+      /** r76 — venda de R$ 0,00 faturada não gera conta a receber; a tela diz por quê. */
+      courtesy: string
+      courtesyNotice: string
+      paymentMethod: string
+      paymentNone: string
+      emitting: string
+      emitInvoice: string
+      printInvoice: string
+      addItem: string
+      alreadyIssued: string
+      cancel: string
+      empty: string
+      estimate: string
+      hint: string
+      insufficientStock: string
+      invalidQuantity: string
+      issue: string
+      items: string
+      itemsRequired: string
+      loadFailed: string
+      number: string
+      pickProduct: string
+      product: string
+      quantity: string
+      removeItem: string
+      saveDraft: string
+      status: string
+      statuses: Record<string, string>
+      title: string
+      total: string
+      unitPrice: string
+      unavailable: string
+    }
+    backups: {
+      title: string
+      intro: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      indisponivel: string
+      ver: string
+      ocultar: string
+      restaurar: string
+      resumo: (arquivos: number, versoes: number) => string
+      versoes: (n: number) => string
+      confirmar: (arquivo: string, quando: string) => string
+      confirmarDica: string
+      restaurado: (arquivo: string) => string
+      colunas: { quando: string; tamanho: string; arquivo: string; acoes: string }
+    }
+    gas: {
+      title: string
+      intro: string
+      saldoAria: string
+      emEstoque: string
+      emEstoqueNota: string
+      emComodato: string
+      emComodatoNota: string
+      perdidos: string
+      perdidosNota: string
+      entrada: string
+      tipo: string
+      serieOpcional: string
+      serieAria: string
+      clienteParaEntregar: string
+      cadastrar: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      escolhaCliente: string
+      perderMotivo: string
+      perderMotivoPadrao: string
+      colunas: { tipo: string; serie: string; situacao: string; cliente: string; saiu: string; acoes: string }
+      acoes: { entregar: string; devolver: string; perder: string }
+      tipos: { botijao_p13: string; botijao_13: string; botijao_45: string; galao_20: string; outro: string }
+      status: { estoque: string; comodato: string; perdido: string }
+      indisponivel: string
+      erro: Record<string, string>
+    }
+    medidores: {
+      title: string
+      intro: string
+      novo: string
+      tipo: string
+      numero: string
+      cliente: string
+      cadastrar: string
+      lancarLeitura: string
+      medidor: string
+      leitura: string
+      lancar: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      escolhaMedidor: string
+      primeiraLeitura: string
+      colunas: { medidor: string; cliente: string; consumo: string; atual: string; anterior: string; lida: string }
+      tipos: { hidrometro: string; gasometro: string; outro: string }
+      indisponivel: string
+      erro: Record<string, string>
+      tarifas: {
+        titulo: string
+        intro: string
+        naoConfigurada: string
+        explicacao: string
+        faixa: string
+        ate: string
+        semTeto: string
+        preco: string
+        moeda: string
+        minimo: string
+        opcional: string
+        taxaFixa: string
+        esgoto: string
+        vigencia: string
+        adicionarFaixa: string
+        removerFaixa: string
+        salvar: string
+        removida: string
+        salva: string
+        calcular: string
+        contaAgua: string
+        contaEsgoto: string
+        contaTaxa: string
+        contaTotal: string
+        consumoFaturado: string
+        consumoMedido: string
+        minimoAplicado: string
+        salvarFalhou: string
+      }
+    }
+
+    stock: {
+      inventoryApply: string
+      inventoryEmpty: string
+      inventoryHint: string
+      inventoryIgnored: string
+      inventoryNoDifference: string
+      inventoryQuantity: string
+      inventoryResult: string
+      inventorySku: string
+      inventoryTitle: string
+      balance: string
+      count: (n: number) => string
+      duplicateRef: string
+      hint: string
+      insufficientBalance: string
+      invalidNegative: string
+      invalidQuantity: string
+      kind: string
+      kinds: Record<string, string>
+      loadFailed: string
+      low: string
+      name: string
+      noMatch: string
+      noMovements: string
+      noProducts: string
+      pickProduct: string
+      product: string
+      quantity: string
+      reason: string
+      reasonRequired: string
+      recent: string
+      register: string
+      search: string
+      sku: string
+      title: string
+      unitsOf: Record<string, string>
+      unavailable: string
+    }
+    crmTasks: {
+      showDone: (count: number) => string
+      hideDone: string
+      contactRemoved: string
+      add: string
+      contactLabel: string
+      due: (when: string) => string
+      dueLabel: string
+      empty: string
+      late: (when: string) => string
+      loading: string
+      markDone: string
+      markOpen: string
+      noContact: string
+      noDue: string
+      priorities: { alta: string; baixa: string; media: string }
+      priorityLabel: string
+      remove: string
+      saving: string
+      subtitle: string
+      summary: (open: number) => string
+      summaryLate: (open: number, late: number) => string
+      title: string
+      titleLabel: string
+      titlePlaceholder: string
+      unavailable: string
+    }
+    crmPipeline: {
+      contactRemoved: string
+      stageInitial: string
+      lostReason: string
+      stages: {
+        novo: string
+        contato: string
+        qualificacao: string
+        proposta: string
+        negociacao: string
+        ganho: string
+        perdido: string
+      }
+      title: string
+      filterAllStages: string
+      filterClear: string
+      filterPlaceholder: string
+      filterReset: string
+      filterResult: (shown: number, total: number) => string
+      filterStageAria: string
+      filterStage: string
+      intro: string
+      empty: string
+      open: string
+      won: string
+      opportunity: string
+      value: string
+      columnEmpty: string
+      contact: string
+      add: string
+      remove: string
+      stage: string
+      unavailable: string
+    },
+    crmContacts: {
+      consentDenied: string
+      consentDeny: string
+      consentGrant: string
+      consentGranted: string
+      consentUnknown: string
+      export: string
+      openCrm: string
+      title: string
+      intro: string
+      empty: string
+      unavailable: string
+      name: string
+      phone: string
+      company: string
+      add: string
+      remove: string
+    }
     subpages: Record<string, string>
     closeSettings: string
     exportConfig: string
@@ -1141,6 +1786,16 @@ export interface Translations extends NoticeTranslations {
       scopeNotRestored: (profile: string, error: string) => string
     }
     gateway: GatewayHostTranslations & {
+        pairedDevicesTitle: string
+        pairedDevicesIntro: string
+        pairedDevicesEmpty: string
+        pairedDevicesError: string
+        pairedDevicesRefresh: string
+        pairedDevicesRevoke: string
+        pairedDevicesRevoked: string
+        pairedDevicesCreated: string
+        pairedDevicesLastSeen: string
+        pairedDevicesTickets: string
       loading: string
       title: string
       envOverride: string
@@ -2055,6 +2710,39 @@ export interface Translations extends NoticeTranslations {
     resetToMine: string
   }
   gatewayGroupOpen: GatewayGroupOpenCopy
+  homeB3po: {
+    tituloA: string
+    tituloB: string
+    subtitulo: string
+    modosTitulo: string
+    escolherModo: string
+    agentesTitulo: string
+    agentesVazio: string
+    irParaAgentes: string
+    projetosTitulo: string
+    projetosVazio: string
+    irParaProjetos: string
+    visaoTitulo: string
+    kpiAgentes: string
+    kpiProjetosAtivos: string
+    kpiProjetosConcluidos: string
+    kpiNota: string
+    erroCarregar: string
+    indisponivel: string
+    verTodos: string
+    verMenos: string
+    maisAgentes: string
+    sofiaTitulo: string
+    sofiaVazio: string
+    carregando: string
+    tentarDeNovo: string
+    acoesRapidas: string
+    acaoAnalisar: string
+    acaoGerenciarEmpresa: string
+    acaoCriarSistema: string
+    acaoAutomatizar: string
+    acaoPlanejarProjeto: string
+  }
   agents: {
     extendedTranscript: string
     transcriptTruncated: string
@@ -3507,6 +4195,13 @@ export interface Translations extends NoticeTranslations {
 
   shell: {
     windowControls: string
+    /** r83: os dois clusters do titlebar precisam de nomes distintos (`landmark-unique`). */
+    paneTools: string
+    /** r97: landmark do overlay (portal, fora do <main> da arvore). */
+    overlayContent: string
+    fecharComAlteracoes: { title: string; body: string; confirm: string }
+  minimizeWindow: string
+  closeWindow: string
     paneControls: string
     appControls: string
     modelMenu: ModelMenuTranslations
@@ -3546,7 +4241,8 @@ export interface Translations extends NoticeTranslations {
       connection: (label: string) => string
       recentActivity: string
       viewAllLogs: string
-      messagingPlatforms: string
+      messagingPlatforms: string,
+      gatewayNeedsProvider: string
     }
     approvalMode: {
       title: string
@@ -3868,6 +4564,9 @@ export interface Translations extends NoticeTranslations {
 
   assistant: {
     thread: {
+    noEmoji: string
+    moreEmoji: string
+    reactedByHermes: string
       loadingSession: string
       showEarlier: string
       loadingResponse: string

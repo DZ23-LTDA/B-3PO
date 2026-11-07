@@ -1,0 +1,14 @@
+{
+  "passos": [
+    "botao.cadastrar => true",
+    "opcoes.fornecedor => [\"sup_1793832725216_v3bo4m\"]",
+    "opcoes.produto => [\"ACUCAR-1\"]",
+    "botao.adicionar => true",
+    "botoes.apos.item => [\"Salvar pedido\",\"Receber pedido\"]",
+    "botao.receber => true",
+    "ESTOQUE.apos => 8000",
+    "FINANCEIRO.aPagar => 2560",
+    "PEDIDOS => 1",
+    "PEDIDO.status => \"recebido\""
+  ]
+}

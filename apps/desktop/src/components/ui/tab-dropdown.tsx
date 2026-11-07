@@ -36,7 +36,7 @@ export interface TabDropdownItem {
 }
 
 function TabDropdownIcon({ icon: Icon, indent }: { icon: IconComponent; indent?: boolean }) {
-  return <Icon className={cn('shrink-0 text-muted-foreground/80', indent ? 'size-3.5' : 'size-4')} />
+  return <Icon className={cn('shrink-0 text-muted-foreground', indent ? 'size-3.5' : 'size-4')} />
 }
 
 /** The Capabilities tab dropdown: a borderless "Label ⌄" trigger and a menu of

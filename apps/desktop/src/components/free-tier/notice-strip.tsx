@@ -99,7 +99,7 @@ export function FreeTierNoticeStrip() {
     >
       <span className="min-w-0 truncate text-[0.73rem] leading-4 text-foreground/92">
         <span className="font-medium">{copy.stripTitle}</span>
-        <span className="text-muted-foreground/80"> {copy.stripBody}</span>
+        <span className="text-muted-foreground"> {copy.stripBody}</span>
       </span>
     </StatusRow>
   )

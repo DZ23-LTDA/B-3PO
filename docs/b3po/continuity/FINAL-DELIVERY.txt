@@ -1,0 +1,161 @@
+B-3PO - ENTREGA FINAL (V3)
+================================
+
+DATA        06/11/2026
+BRANCH      b3po-brand
+Rodada 107 · 06/11/2026 (fechamento de a11y)
+MAIN        f4cf411f28 - espelho intacto, sem commit de produto
+RODADAS     92 de auditoria
+
+O QUE FOI MEDIDO E ENTREGUE
+---------------------------
+Prioridade zero do V3 (8 itens) - FECHADA
+  B1 causa raiz da inferencia indisponivel : .env com 0 de 29 chaves; aviso traduzido
+  B2 modal "Novo bot" em ingles            : pt.bot 6 -> 50 chaves; paleta traduzida
+  B3 os seis modos                         : persistencia/foco/rolagem/rotas OK; RBAC parcial
+  B4 Compras por etapas                    : 7 etapas E2E, estoque 3000, financeiro R$ 150
+  B5 Vendas                                : baixa 3000->2000 + conta a receber R$ 80
+  B6 Sofia                                 : plano persiste, execucao_id por tarefa
+  B7 Projetos/Trabalhos/Automacoes/Empresa  : 4 de 4 criam e persistem
+  B8 Bots                                  : criar/editar SOUL/renomear/revogar (5 de 8)
+
+Gates do V3
+  G0 READY            inventario, baseline, continuity
+  G1 PARCIAL          seguranca/IPC/RBAC/tenant
+  G2 PARCIAL          runtime/modelos/diagnostico
+  G3 PARCIAL          dominio canonico (estoque: SKU orfao agora VISIVEL)
+  G4 PASS             vertical gas/agua (comodato + leitura de medidor)
+  G5 PARCIAL          seis modos + revisao visual (9 telas olhadas)
+  G6 PARCIAL          engenharia/automacao/integracoes
+  G7 PARCIAL          desktop/web/android/iOS
+  G8 PARCIAL          regressao/seguranca/performance/a11y/docs
+  G9 PARCIAL          pacotes/rollback/riscos/veredito
+
+CORRECOES DE PRODUTO ENTREGUES (11)
+-----------------------------------
+Performance e chrome
+ 1. Performance em Configuracoes : 55 -> 4 long tasks (-93%), soma 5,7s -> 281ms (-95%)
+ 2. i18n pt-BR                   : chrome do gateway 100% em portugues (EN: [])
+ 3. Bot Mode em portugues        : bot 6 -> 50 chaves; "New Bot..." -> "Novo bot"
+ 4. Aviso de inferencia          : texto acionavel em pt-BR no lugar do ingles
+
+Acessibilidade - medida com axe-core (nao estimada)
+ 5. Landmarks                    : nav 0->1, main 0->1; sidebar fora do main
+ 6. Contraste                    : 0 violacoes nos DOIS temas (antes: 3,78 e 2,14)
+ 7. Nome acessivel do Tip        : aria-label derivado quando o filho e so icone
+ 8. "+N" fora do tablist         : o botao de overflow saiu do role=tablist
+ 9. a11y do WEB                  : 4 label-content-name-mismatch -> 0; 17 de 17 rotas LIVRES
+
+Dominio e layout
+10. Vendas x Estoque             : SKU fora do catalogo = "produto nao encontrado", nao "sem saldo"
+11. Layout do shell              : main ganhou h-full (estava 182px acima em TODAS as 30 rotas)
+12. Estoque / SKU orfao          : stockRows inclui saldo sem cadastro, marcado na tela
+
+
+MATRIZ DE 13 QUALITY GATES (medida nas rodadas 66-70)
+-----------------------------------------------------
+  Git/baseline ................. PASS    branch, rodada, diff (r59-61)
+  Lint/typecheck ............... PASS    scripts/check 14/14, 0 erros de tipo
+  Unit/regression .............. PASS    18842 testes; 13 falhas provadas no origin/main (18 la)
+  Integration/API .............. PASS    bridges reais no Electron
+  E2E .......................... PASS    B4-B8 por bridge + captura de tela
+  Build/smoke .................. PASS    desktop e web exit 0; fix verificado no chunk
+  Auth/security ................ PASS    serverTenant: IDOR impossivel de formular
+  Multitenancy ................. N/A     1 tenant/instalacao; renderer nao tem canal (r66)
+  Banco ........................ PASS    escrita atomica, JSON invalido->empty, rotacao 5000 (r68)
+                                 N/A     migracao: nao existe v2
+  UI ........................... PASS    5 viewports x 2 temas + 14 telas olhadas
+  A11y ......................... PASS    web 17/17 LIVRE; desktop 57 nos, todos 1 regra best-practice (T-15); Tab/Esc PASS (r67)
+                                 FAIL    foco VISIVEL: outline:none global (decisao do upstream)
+                                 -> T-09, aguardando decisao
+  Performance .................. PASS    55 -> 4 long tasks (-93%), 5.7s -> 281ms
+  Operacao ..................... PASS    health ok, status config_version 52, logs (r69)
+                                 FAIL    backup dos 14 JSON de negocio: NAO EXISTE (r70)
+                                 FAIL    restore: NAO EXISTE
+                                 -> T-10, aguardando decisao
+
+  Resultado: 10 PASS - 2 N/A justificados - 2 FAIL por decisao de produto (T-09, T-10)
+  Nenhum gate NOT_RUN. Nenhum UNVERIFIED.
+
+ONDE OS DADOS MORAM (medido na r70)
+-----------------------------------
+  %APPDATA%/B-3PO/b3po/  -> 14 arquivos, 606 KB, todos schema_version 1
+  auditoria.json = 594 KB (98%), 2913 de 5000 entradas (capado, com contador de descartadas)
+  NAO fica no HERMES_HOME (stores usam app.getPath('userData'))
+  backup: 19 stores, 5 versoes cada (r75) · restore: listar/validar/aplicar/reverter (r88)
+
+VEREDITO POR ESCOPO (nunca global) - ATUALIZADO NA R92
+------------------------------------------------------
+READY       dominios de negocio (CRM/Compras/Estoque/Vendas/Financeiro)
+            performance (-93% long tasks) · a11y do web (17/17 livre)
+            builders desktop+web (exit 0) · UI responsiva (5 viewports)
+            ciclo basico de bot · seguranca (IDOR impossivel de formular)
+            diagnostico (/api/status expoe inference + overall_from)
+            modos de navegacao (6) · foco visivel (WCAG 2.4.7, 30/30)
+            BACKUP e RESTORE (19 stores, 5 versoes, reversivel)
+            VERTICAL GAS/AGUA (vasilhame em comodato + leitura de medidor)
+
+PARCIAL     a11y do desktop: 57 nos de axe, TODOS de uma regra `best-practice`
+            (`region`) cuja causa e estrutural - ver T-15. Nenhuma violacao WCAG
+            desde a r77. 2 `nested-interactive` documentados (conflito de tablist).
+            mobile: a11y SO estatica (sem aparelho conectado).
+            empacotamento: 6 scripts falham na assinatura de payload (EXT-3).
+
+BLOCKED     regressao completa: symlink exige Developer Mode (EXT-2 / T-01)
+            iOS: exige macOS (EXT-4)
+            integracoes ativas: exige credencial (EXT-6 / T-06)
+            tarifa x consumo: decisao comercial (T-12)
+            5 modos: decisao de produto (T-05)
+
+NOT_READY   APENAS o release assinado (exe nao assinado, EXT-3)
+            - o unico item que ainda impede declarar "entrega de release".
+
+O QUE O PROPRIETARIO PRECISA FORNECER (acao exata)
+--------------------------------------------------
+EXT-1  chave de provedor de IA                  [destrava a inferencia]
+       -> Configuracoes > Provedores | hermes auth add <provider> | preencher .env
+EXT-2  Developer Mode do Windows                [destrava a regressao: 110 falhas de symlink]
+       -> Start-Process "ms-settings:developers"  ;  ativar "Modo de desenvolvedor"
+EXT-3  certificado Authenticode (code signing)  [exe hoje: NotSigned]
+EXT-4  macOS + Xcode + conta Apple Developer    [build iOS]
+EXT-5  decisao sobre a vertical gas/agua        [G4: construir / fora de escopo / redefinir]
+EXT-6  autorizacao para testar UM conector sem credencial comercial (ntfy/irc)
+EXT-7  DECISAO: venda com preco zero            [T-08]
+       -> cortesia legitima (lancar financeiro de R$ 0) OU erro (bloquear o faturamento)?
+       -> hoje: fatura R$ 0,00 e NAO lanca financeiro. Ha captura em evidence/baseline-layout/
+
+ROLLBACK
+--------
+build desktop : apps/desktop/release/win-unpacked.bak/ ja existe ao lado do atual
+build atomico : .dist-previous-* ao lado de dist/
+codigo        : git revert em b3po-brand (nunca force push; main e espelho)
+upstream      : main == origin/main, restauravel
+
+DOCUMENTOS DE CONTINUIDADE
+--------------------------
+MASTER-STATE.md, MASTER-CHECKPOINT.json, TASK-QUEUE.json, AUDIT-MATRIX.md,
+DECISIONS.md, BLOCKERS.md, TEST-EVIDENCE.md, PLATFORM-MATRIX.txt,
+UPSTREAM-PATCH-REGISTER.md, HANDOFF.txt, PERFORMANCE.md, GATES.md (45 secoes)
+EVIDENCIA VISUAL: docs/b3po/evidence/ - 20 capturas de baseline + 6 dos seis modos
+
+O QUE NAO FOI TESTADO (declarado, nao escondido)
+-----------------------------------------------
+- instalacao limpa e atualizacao de versao anterior
+- iOS em dispositivo; APK Android instalado e executado
+- execucao automatica de uma automacao
+- ciclo de bot: reiniciar / conversar / ferramenta
+- cotacao com 2 fornecedores e aprovacao com limite
+- a11y de runtime no mobile (axe nao existe para React Native)
+- leitor de tela real (TalkBack/VoiceOver) em qualquer plataforma
+- ordem de foco de teclado no frontend WEB
+- remocao de aba por Delete observada no app (handler alcancado, removida nao vista)
+- 12 das 20 capturas de baseline ainda nao revisadas visualmente
+
+MEDIDO DESDE A VERSAO ANTERIOR DESTE ARQUIVO
+--------------------------------------------
+- contraste      : MEDIDO (axe-core), 0 violacoes nos dois temas
+- teclado        : parcial (Tab alcanca as abas; Delete alcanca o handler)
+- a11y do web    : MEDIDA, 17/17 rotas livres
+- build desktop  : exit 0, 16374 modulos, dist 1231 arquivos
+- build web      : exit 0, web_dist 60 arquivos
+- layout do shell: 30/30 rotas com main == pai (estava 182px errado em todas)

@@ -1,0 +1,6 @@
+B-3PO
+Seus bots, no seu computador.
+Conectado ao computador
+Servidor: http://127.0.0.1:54686&#10;Compilação: 98695c0cc7e58f85b5ff790482ff434ca722a1da&#10;Token exigido: não&#10;Gateway: rodando&#10;Estado: running
+Nenhum bot ainda
+Os bots são criados no computador. Depois de criar um, ele aparece aqui para conversar.

@@ -11157,6 +11157,18 @@
             "default": null,
             "title": "Voice Context"
           },
+          "produto_contexto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Produto Contexto"
+          },
           "interrupted": {
             "default": false,
             "title": "Interrupted",
@@ -32290,6 +32302,18 @@
             ],
             "default": null,
             "title": "Voice Turn"
+          },
+          "produto_contexto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Produto Contexto"
           },
           "title_preview": {
             "anyOf": [

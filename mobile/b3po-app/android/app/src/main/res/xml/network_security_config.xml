@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  O app conversa com o servidor B-3PO na própria máquina. Por padrão o Android bloqueia HTTP
+  (cleartext) desde o targetSdk 28; aqui a exceção é aberta SÓ para os endereços que são o próprio
+  computador: localhost, 127.0.0.1 e 10.0.2.2 (apelido do host dentro do emulador).
+  Qualquer outro destino continua exigindo TLS — a mesma regra do pareamento.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

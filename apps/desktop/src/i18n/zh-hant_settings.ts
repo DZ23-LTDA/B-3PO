@@ -17,6 +17,44 @@ export const zhHantSettings = {
   },
 
   settings: {
+    crmPipeline: {
+      stageInitial: '起始階段',
+      lostReason: '為什麼丟單？',
+      stages: {
+        novo: '新線索',
+        contato: '已聯繫',
+        qualificacao: '資格確認',
+        proposta: '方案',
+        negociacao: '談判',
+        ganho: '贏單',
+        perdido: '丟單',
+      },
+      title: '銷售漏斗',
+      intro: '此處記錄的機會的真實數字。',
+      empty: '還沒有機會。',
+      open: '進行中',
+      won: '贏單',
+      opportunity: '機會',
+      value: '金額（分）',
+      contact: '聯絡人',
+      add: '新增機會',
+      remove: '移除',
+      stage: '階段',
+      unavailable: '此用戶端沒有用於漏斗的本機磁碟。',
+    },
+    crmContacts: {
+      export: '匯出 CSV',
+      openCrm: '開啟 CRM 頁面',
+      title: 'CRM 聯絡人',
+      intro: '你的機器人對話的對象。聯絡人保存在本機，不會傳送給第三方。',
+      empty: '還沒有聯絡人。在下面新增第一個。',
+      unavailable: '此用戶端沒有可儲存聯絡人的本機磁碟。',
+      name: '姓名',
+      phone: '電話',
+      company: '公司',
+      add: '新增聯絡人',
+      remove: '移除',
+    },
     memoryLayers: zhHantMemoryLayers,
     subpages: {
       appearanceTheme: '主題',
@@ -277,7 +315,7 @@ export const zhHantSettings = {
       advanced: '進階'
     },
     searchPlaceholder: {
-      about: '關於 Hermes Desktop',
+      about: '關於 B-3PO Desktop',
       config: '搜尋設定…',
       gateway: '閘道連線…',
       keys: '搜尋 API 金鑰…',
@@ -887,16 +925,26 @@ export const zhHantSettings = {
       clear: '清除'
     },
     gateway: {
+      pairedDevicesTitle: '已配對的裝置',
+      pairedDevicesIntro: '可以與此電腦上的機器人對話的手機。每台都有獨立金鑰；撤銷後將永久斷開。',
+      pairedDevicesEmpty: '還沒有配對的手機。在手機上開啟配對連結即可新增。',
+      pairedDevicesError: '無法讀取已配對的裝置。',
+      pairedDevicesRefresh: '重新整理',
+      pairedDevicesRevoke: '撤銷',
+      pairedDevicesRevoked: '已撤銷',
+      pairedDevicesCreated: '新增於',
+      pairedDevicesLastSeen: '最後使用',
+      pairedDevicesTickets: '票據',
       loading: '正在載入閘道設定...',
       unavailableTitle: '閘道設定不可用',
       unavailableDesc: '桌面 IPC 橋接器未公開閘道設定。',
       webappHostTitle: 'Hermes 主機',
       webappHostDesc:
-        'Webapp 一律使用提供它的 Hermes 主機。如需切換閘道、登入 Hermes Cloud 或管理已儲存的連線，請使用 Hermes Desktop 應用程式。',
+        'Webapp 一律使用提供它的 Hermes 主機。如需切換閘道、登入 B-3PO Cloud 或管理已儲存的連線，請使用 B-3PO Desktop 應用程式。',
       title: '閘道連線',
       envOverride: '環境變數覆寫',
       intro:
-        'Hermes Desktop 預設會啟動自己的本機閘道。如果您希望此應用程式控制另一台機器或可信代理後面已執行的 Hermes 後端，請使用遠端閘道。閘道連線屬於本機層級設定；設定檔是從已連線的閘道中探索出來的。',
+        'B-3PO Desktop 預設會啟動自己的本機閘道。如果您希望此應用程式控制另一台機器或可信代理後面已執行的 Hermes 後端，請使用遠端閘道。閘道連線屬於本機層級設定；設定檔是從已連線的閘道中探索出來的。',
       envOverrideTitle: '環境變數正在控制此桌面工作階段。',
       envOverrideDesc: '取消設定 HERMES_DESKTOP_REMOTE_URL 和 HERMES_DESKTOP_REMOTE_TOKEN 後才會使用下方儲存的設定。',
       localTitle: '本機閘道',
@@ -947,7 +995,7 @@ export const zhHantSettings = {
       enterUrlFirst: '請先輸入遠端 URL。',
       restartingTitle: '閘道連線正在重新啟動',
       savedTitle: '閘道設定已儲存',
-      restartingMessage: 'Hermes Desktop 將使用已儲存的設定重新連線。',
+      restartingMessage: 'B-3PO Desktop 將使用已儲存的設定重新連線。',
       savedMessage: '已儲存，下次重新啟動後生效。',
       connectedTo: (baseUrl, version) => `已連線至 ${baseUrl}${version ? ` · Hermes ${version}` : ''}`,
       reachableTitle: '遠端閘道可連線',
@@ -990,7 +1038,7 @@ export const zhHantSettings = {
       sshErrHostKey: '自上次連線以來主機金鑰已變更。請確認這是預期的，然後執行 ssh-keygen -R <host> 並重新連線。',
       sshErrNotInstalled:
         '遠端主機上未安裝 Hermes。請在遠端安裝（curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh）或設定 Hermes 路徑。',
-      sshErrPlatform: '不支援的遠端平台。Hermes Desktop 的 SSH 模式支援 Linux、macOS 和 Windows 遠端主機。',
+      sshErrPlatform: '不支援的遠端平台。B-3PO Desktop 的 SSH 模式支援 Linux、macOS 和 Windows 遠端主機。',
       sshErrTimeout: 'SSH 連線逾時。主機可能無法存取或處於睡眠狀態。',
       sshErrUpdateRequired: '使用 Desktop SSH 連線前，請更新遠端主機上的 Hermes。',
       sshErrInteractiveAuth:
@@ -1477,7 +1525,7 @@ export const zhHantSettings = {
         sessionRevoked: { title: '工作階段已登出', message: '你的工作階段已登出。請從「設定 → 閘道」重新登入。' },
         cliBillingDisabled: {
           title: '遠端支出已關閉',
-          message: '此帳戶的遠端支出已關閉，帳單管理員可在入口網站的 Hermes Agent 頁面開啟。'
+          message: '此帳戶的遠端支出已關閉，帳單管理員可在入口網站的 B-3PO 頁面開啟。'
         },
         roleRequired: {
           title: '需要管理員權限',

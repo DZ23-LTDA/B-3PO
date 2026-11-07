@@ -9,6 +9,8 @@
  * contextual zone menu (tab close verbs + header/minimize toggles).
  */
 
+import { $dirtyPreviewUrls } from '@/store/preview-edit'
+import { confirm } from '@/store/confirm'
 import { useStore } from '@nanostores/react'
 import {
   type ComponentProps,
@@ -268,12 +270,23 @@ function ZoneBodyMenu({ children, label, ...menu }: ZoneBodyMenuProps) {
 
   return (
     <ZoneMenu {...menu} allowOpen={() => !touchOwnedByBrowser.current} includeAppActions>
+      {/*
+       * r291 — `role="group"` porque `aria-label` num `div` sem role é PROIBIDO
+       * (`aria-prohibited-attr`, medido pelo `axe-core` em /settings e /cron): o navegador descarta o
+       * rótulo, então o menu da zona se anunciava sem nome para quem usa leitor de tela.
+       *
+       * `group` e não `region`: o corpo é um agrupamento de controles, não uma landmark navegável —
+       * `region` entraria no atalho de landmarks e mudaria a lista de regiões do app inteiro.
+       *
+       * `display: contents` continua: o wrapper não pinta caixa, e role não depende de layout.
+       */}
       <div
         aria-label={label}
         data-zone-body={menu.nodeId}
         onPointerCancel={() => void (touchOwnedByBrowser.current = false)}
         onPointerDown={event => void (touchOwnedByBrowser.current = isBrowserOwnedTouch(event.nativeEvent))}
         onPointerUp={() => void (touchOwnedByBrowser.current = false)}
+        role="group"
         style={{ display: 'contents' }}
       >
         {children}
@@ -354,6 +367,39 @@ function CompactZoneTabs({ activeId, belowControls, closeable, newTab, node, tab
       />
     </div>
   )
+}
+
+
+/**
+ * r104 — fechar uma aba NÃO descarta edição não salva em silêncio (decisão do dono #8).
+ *
+ * O estado já existia (`$dirtyPreviewUrls`, escrito pelo editor do preview) e **não tinha leitor
+ * nenhum**: o comentário do store prometia um "ponto de modificado" nas abas que nunca foi ligado,
+ * e o fechamento ignorava o registro por completo.
+ *
+ * A guarda é conservadora de propósito: se ALGUM preview tem edição pendente, fechar uma aba pede
+ * confirmação. É mais largo que o mínimo (poderia casar aba↔url) e é o lado certo para errar —
+ * no pior caso pergunta uma vez a mais; no errado, apagaria o que a pessoa digitou.
+ *
+ * Vive FORA do `TreeGroup` porque aquele componente está no teto do ratchet de linhas: a guarda não
+ * pode custar 11 linhas dentro dele.
+ */
+async function fecharComGuarda(
+  paneId: string,
+  copy: { title: string; body: string; confirm: string }
+): Promise<void> {
+  if (Object.keys($dirtyPreviewUrls.get()).length > 0) {
+    const ok = await confirm({
+      confirmLabel: copy.confirm,
+      description: copy.body,
+      destructive: true,
+      title: copy.title
+    })
+
+    if (!ok) return
+  }
+
+  closeTabPane(paneId)
 }
 
 export function TreeGroup({
@@ -571,7 +617,7 @@ export function TreeGroup({
 
   // Middle-click / ⌘-click on a tab: one routing for every tab kind, the same
   // one the zone menu's Close and ⌘W use.
-  const closeTab = (paneId: string) => closeTabPane(paneId)
+  const closeTab = (paneId: string) => fecharComGuarda(paneId, t.shell.fecharComAlteracoes)
 
   // A pane whose store owns Close keeps the gesture even when the pane itself
   // is uncloseable — the workspace tab empties to a fresh draft rather than
@@ -741,6 +787,29 @@ export function TreeGroup({
                 titlebar={tabsInTitlebar}
                 trailing={
                   <>
+                    {/* r290 — o "+" mora AQUI, não entre os filhos do `<div role="tablist">`.
+                     *  O `axe-core` reprovou o strip como `aria-required-children` (critical):
+                     *  o `tablist` só admite `role="tab"`, e este botão é um comando, não uma
+                     *  aba. Para um leitor de tela ele inflava a contagem ("aba 3 de 5") e não
+                     *  era anunciado como ação. Como `trailing` é renderizado FORA do
+                     *  `role="tablist"` (ver `PaneTabStrip`), a semântica fica correta sem
+                     *  mexer no visual: o "+" continua à direita dos tabs.
+                     *
+                     *  O `onPointerDownCapture` precisa vir antes do clique para o "+" abrir
+                     *  a nova aba no zone FOCADO — um strip de fundo tem que virar foco
+                     *  primeiro, senão a aba cai na zona errada. */}
+                    {newTab && !node.minimized && (
+                      <span
+                        className="flex shrink-0 items-center [-webkit-app-region:no-drag]"
+                        onPointerDownCapture={() => noteActiveTreeGroup(node.id)}
+                      >
+                        <PaneStripGlyph
+                          icon={<Codicon name="add" size="0.8125rem" />}
+                          label={newTab.label}
+                          onSelect={newTab.onSelect}
+                        />
+                      </span>
+                    )}
                     {minimizable && (
                       <button
                         aria-label={node.minimized ? t.zones.restore : minimizeLabel}
@@ -870,29 +939,6 @@ export function TreeGroup({
                   return <Fragment key={paneId}>{chrome.tabWrap ? chrome.tabWrap(tab) : tab}</Fragment>
                 })}
 
-                {/* Plain "+" after the last tab — it mints another tab of the kind
-                you are LOOKING AT, so a Browser strip makes another Browser
-                and a chat strip makes another session (mirrors ⌘T, via the
-                app-registered action). The pointerdown focuses this zone
-                first, so the tab lands in THIS strip. Hidden when the active
-                pane is one of a kind and the zone holds no session tabs. */}
-                {newTab && !node.minimized && (
-                  <span
-                    className="flex shrink-0 items-center [-webkit-app-region:no-drag]"
-                    // The action docks into the FOCUSED chat zone; clicking a
-                    // background strip's "+" must make THAT zone the focused one
-                    // first, or the tab opens in whichever zone was last clicked.
-                    // (pointerdown's own focus tracking would land after the click
-                    // handler reads the anchor.)
-                    onPointerDownCapture={() => noteActiveTreeGroup(node.id)}
-                  >
-                    <PaneStripGlyph
-                      icon={<Codicon name="add" size="0.8125rem" />}
-                      label={newTab.label}
-                      onSelect={newTab.onSelect}
-                    />
-                  </span>
-                )}
               </PaneTabStrip>
             </ZoneMenu>
           ) : null}

@@ -6,8 +6,14 @@ import { expect, it, vi } from 'vitest'
 
 import { type CheckoutStrategyDeps, createCheckoutStrategy } from './checkout'
 import { readSourceUpdate, type SourceUpdate } from './checkout-source'
+import { resolverPython } from './python-for-tests'
 
-it('moves a checkout without a source probe to main, but surfaces a broken probe', async (): Promise<void> => {
+// r14 do GOAL V2: python3 no Windows e o stub da Microsoft Store (existe no PATH, imprime erro e sai
+// com 9009). O teste assumia esse nome e falhava por ambiente, nao por produto. resolverPython valida
+// cada candidato por execucao e devolve null quando nenhum responde — ai o teste pula, com motivo.
+const PYTHON = resolverPython()
+
+it.skipIf(!PYTHON)('moves a checkout without a source probe to main, but surfaces a broken probe', async (): Promise<void> => {
   const root: string = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-channel-'))
   const home: string = path.join(root, 'profile')
   const modulePath: string = path.join(root, 'hermes_cli', 'source_check.py')
@@ -17,7 +23,7 @@ it('moves a checkout without a source probe to main, but surfaces a broken probe
 
   const probe: () => Promise<SourceUpdate | null> = (): Promise<SourceUpdate | null> =>
     readSourceUpdate({
-      python: process.env.HERMES_PYTHON || 'python3',
+      python: PYTHON as string,
       git: 'git',
       updateRoot: root,
       hermesHome: home

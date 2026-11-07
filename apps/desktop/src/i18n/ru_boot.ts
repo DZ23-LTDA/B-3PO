@@ -3,7 +3,7 @@ import type { TranslationOverrides } from './define-locale'
 // The boot screen's copy, composed by ru.ts.
 export const ruBoot = {
   boot: {
-    ready: 'Hermes Desktop готов',
+    ready: 'B-3PO Desktop готов',
     desktopBootFailedWithMessage: message => `Не удалось запустить приложение: ${message}`,
     steps: {
       connectingGateway: 'Подключение к шлюзу',
@@ -11,7 +11,7 @@ export const ruBoot = {
       loadingSessions: 'Загрузка последних сеансов',
       retryingRemoteBackend: 'Переподключение к удалённому бэкенду Hermes…',
       startingDesktopConnection: 'Запуск подключения приложения',
-      startingHermesDesktop: 'Запуск Hermes Desktop…'
+      startingHermesDesktop: 'Запуск B-3PO Desktop…'
     },
     errors: {
       backgroundExited: 'Фоновый процесс Hermes завершён.',

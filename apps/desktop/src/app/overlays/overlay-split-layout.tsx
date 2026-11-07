@@ -3,7 +3,7 @@ import { Fragment, memo, type ReactNode, useEffect, useId, useState } from 'reac
 import { Button } from '@/components/ui/button'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { TabDropdown } from '@/components/ui/tab-dropdown'
-import { useI18n } from '@/i18n'
+import { translateNow, useI18n } from '@/i18n'
 import type { IconComponent } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +52,17 @@ interface OverlayNavItemProps {
 
 export function OverlaySplitLayout({ children, className }: OverlaySplitLayoutProps) {
   return (
+    /*
+     * r97 — `role="region"` no conteúdo do overlay.
+     *
+     * O overlay abre num PORTAL, fora da árvore de painéis que agora é o `<main>` do app. Sem um
+     * landmark próprio, tudo o que ele renderiza fica fora de qualquer landmark e o `axe` acusa
+     * `region` (5 nós em /settings). Continua `<div>` — não `<main>` — para não duplicar o `main`
+     * da árvore, que é a razão da r82.
+     */
     <div
+      aria-label={translateNow('shell.overlayContent')}
+      role="region"
       className={cn(
         // Narrow: one column, and pin rows to [nav-bar auto | main 1fr] — without
         // an explicit template the grid's default align-content:stretch splits the
@@ -89,8 +99,18 @@ export function OverlaySidebar({ children, className }: OverlaySidebarProps) {
 }
 
 export function OverlayMain({ children, className }: OverlayMainProps) {
+  /*
+   * r82 — `<div>`, não `<main>`.
+   *
+   * O overlay abre POR CIMA do shell, e o shell já tem o `<main>` (controller.tsx). Dois `<main>` na
+   * mesma página violam `landmark-no-duplicate-main`: o leitor de tela anuncia dois "main" e o salto por
+   * landmark fica ambíguo — justamente no lugar onde ele mais ajuda, que é pular o overlay inteiro.
+   *
+   * O visual é idêntico (as classes não mudam). O `role="region"` + `aria-label` do diálogo do overlay
+   * continua vindo de quem o abre; aqui é só a área de conteúdo.
+   */
   return (
-    <main
+    <div
       className={cn(
         // Main sits UNDER the floating close button (top-right), so it keeps the
         // taller top pad to clear the X — unlike the sidebar / Panel header,
@@ -105,7 +125,7 @@ export function OverlayMain({ children, className }: OverlayMainProps) {
       )}
     >
       {children}
-    </main>
+    </div>
   )
 }
 
@@ -151,7 +171,7 @@ export const OverlayNavItem = memo(function OverlayNavItem({
           className={cn(
             'shrink-0',
             nested ? 'size-3.5' : 'size-4',
-            active ? 'text-foreground/80' : 'text-muted-foreground/80'
+            active ? 'text-foreground/80' : 'text-muted-foreground'
           )}
         />
       )}

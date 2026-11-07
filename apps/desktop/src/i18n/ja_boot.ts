@@ -3,7 +3,7 @@ import type { TranslationOverrides } from './define-locale'
 // The boot screen's copy, composed by ja.ts.
 export const jaBoot = {
   boot: {
-    ready: 'Hermes Desktop の準備ができました',
+    ready: 'B-3PO Desktop の準備ができました',
     desktopBootFailedWithMessage: message => `デスクトップの起動に失敗しました: ${message}`,
     steps: {
       connectingGateway: 'ライブデスクトップゲートウェイに接続中',
@@ -11,7 +11,7 @@ export const jaBoot = {
       loadingSessions: '最近のセッションを読み込み中',
       retryingRemoteBackend: 'リモート Hermes バックエンドに再接続中…',
       startingDesktopConnection: 'デスクトップ接続を開始中',
-      startingHermesDesktop: 'Hermes Desktop を起動中…'
+      startingHermesDesktop: 'B-3PO Desktop を起動中…'
     },
     errors: {
       backgroundExited: 'Hermes バックグラウンドプロセスが終了しました。',

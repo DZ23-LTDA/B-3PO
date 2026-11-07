@@ -363,8 +363,25 @@
     );
     --ui-text-primary: color-mix(in srgb, var(--ui-base) 94%, transparent);
     --ui-text-secondary: color-mix(in srgb, var(--ui-base) 74%, transparent);
-    --ui-text-tertiary: color-mix(in srgb, var(--ui-base) 54%, transparent);
-    --ui-text-quaternary: color-mix(in srgb, var(--ui-base) 36%, transparent);
+    /*
+     * r290 — CONTRASTE MEDIDO COM axe-core, não estimado.
+     *
+     * A auditoria de acessibilidade (G8) rodou `axe-core` na home e reprovou cinco textos
+     * pequenos (11–12 px) por contraste abaixo de 4.5:1 — o pior com **2.62:1**
+     * ("inferência indisponível"). A causa estava aqui: 54 % de opacidade sobre o fundo claro
+     * produz cinzas que passam a impressão de elegância e falham o mínimo legível.
+     *
+     * Cálculo sobre `#fefefe` com `--ui-base` escuro:
+     *
+     *   36 % → 2.25    45 % → 2.90    54 % → 3.76   (todos reprovados)
+     *   58 % → 4.26    62 % → 4.84 ✅  66 % → 5.53
+     *
+     * 62 % é o primeiro degrau que passa AA com margem; 46 % leva o quaternary acima de 3:1,
+     * que é o mínimo para texto grande e para elementos não textuais.
+     */
+    --ui-text-tertiary: color-mix(in srgb, var(--ui-base) 66%, transparent);
+    /* 66 % porque o card azul (`#e3edff`) aperta o cinza: 62 % dava 4.24 e 66 % dá 5.21. */
+    --ui-text-quaternary: color-mix(in srgb, var(--ui-base) 46%, transparent);
     /* Transcript scaffolding — thinking headers, settled tool runs, the live
        activity ticker. One colour for all of them (see `ScaffoldRow`), pitched
        between the secondary and tertiary greys those lines used to pick
@@ -387,6 +404,19 @@
       var(--ui-accent) var(--theme-stroke-tertiary-accent-mix),
       color-mix(in srgb, var(--ui-base) 5%, transparent)
     );
+    /*
+     * r276: o `--ui-border` que o produto usa em DEZENAS de componentes nunca foi definido.
+     *
+     * Medido: `border-(--ui-border)` aparece em `agenda/blocks.tsx`, `agenda/index.tsx`,
+     * `trabalhos/livres.tsx`, `compras/index.tsx` e mais — e NENHUM arquivo CSS declarava a
+     * variável. O `border-(...)` do Tailwind com uma variável inexistente **não falha o build**:
+     * ele deixa a cor de borda sem valor, e o componente perde a borda que o autor pediu.
+     *
+     * **A correção é aqui, na raiz, e vale para os que já existiam** — não em cada tela. O alias
+     * aponta para `--ui-stroke-tertiary`, o nível de contraste que uma borda de card usa no resto
+     * do sistema (`SidebarMenuButton`, `SidebarGroup`).
+     */
+    --ui-border: var(--ui-stroke-tertiary);
     --ui-stroke-quaternary: color-mix(
       in srgb,
       var(--ui-accent) var(--theme-stroke-quaternary-accent-mix),
@@ -600,6 +630,12 @@
   }
 
   :root.dark {
+    /* O Chromium desenha a LISTA de um <select> com o tema do SISTEMA, nao com o do
+       app. Sem esta linha, um app de tema escuro sobre um SO claro produz opcoes
+       brancas com texto claro - ilegiveis. O color-scheme e o que o navegador
+       consulta para escolher as cores nativas dos controles. */
+    color-scheme: dark;
+
     /* Per-mode mix knobs — overridden inline by `applyTheme()` per skin. */
     --theme-mix-chrome: 74%;
     --theme-mix-card: 38%;
@@ -806,6 +842,28 @@
 
   html {
     font-size: var(--dt-base-size, 0.875rem);
+  }
+
+  /*
+   * r264: a LISTA de um <select> nao e estilizada pelo app.
+   *
+   * O Chromium desenha as <option> com as cores nativas do sistema operacional, e o
+   * texto delas herda o color do <select> - que no tema escuro e claro. Num SO claro,
+   * o resultado e texto claro sobre fundo branco: ilegivel.
+   *
+   * Sao 311 <select> no produto e NENHUM tinha <option> com estilo, entao a correcao
+   * mora aqui, na raiz, e vale para todos - inclusive os que vierem depois.
+   */
+  select option,
+  select optgroup {
+    background-color: var(--dt-popover, #ffffff);
+    color: var(--dt-popover-foreground, #17171a);
+  }
+
+  /* A option selecionada usa o realce do tema em vez do azul fixo do sistema. */
+  select option:checked {
+    background-color: color-mix(in srgb, var(--theme-primary, #0053fd) 18%, var(--dt-popover, #ffffff));
+    color: var(--dt-popover-foreground, #17171a);
   }
 
   body {
@@ -1410,13 +1468,30 @@
   }
 }
 
-/* No focus rings, anywhere. Kills the native outline plus Tailwind's
-   `focus-visible:ring-*` (a box-shadow driven by --tw-ring-*). Unlayered so it
-   beats the utilities layer without !important on the outline. The composer /
-   .desktop-input-chrome focus glow is untouched — those set `box-shadow`
-   directly rather than through the ring vars. */
-*:focus,
+/* Sem anel de foco no PONTEIRO. O `:focus-visible` do navegador ja separa teclado de mouse, entao
+   remover dos dois era remover mais do que a decisao de produto pedia.
+
+   r77 — o problema medido (r67): `outline: none` valia tambem para `:focus-visible`, e TODO controle
+   focavel por teclado ficava sem indicador — WCAG 2.4.7 (Focus Visible) violado no app inteiro. O
+   `axe` nao detecta isso (nao avalia `:focus-visible` dinamico); quem detectou foi um teste de
+   teclado com `getComputedStyle` no elemento ativo.
+
+   A correcao mantem a identidade visual: o mouse nao ganha anel nenhum (o `:focus` continua zerado),
+   e o teclado ganha um anel sobrio, desenhado em `outline` (nao em `--tw-ring-*`, que a regra abaixo
+   zera com `!important`) — a mesma tecnica que as superficies marcadas com `[data-b3po-foco]` ja
+   usavam, agora para todo controle. */
+*:focus {
+  outline: none;
+}
+
 *:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+/* Um anel de foco so faz sentido onde o controle tem onde ser desenhado: em linhas de tabela e
+   elementos nao interativos ele viraria um retangulo solto. */
+*:focus-visible:not(button, a, input, select, textarea, summary, [tabindex]) {
   outline: none;
 }
 
@@ -1427,6 +1502,26 @@
 
 button {
   -webkit-app-region: no-drag;
+}
+
+/*
+ * r277: foco visível para as superfícies do B-3PO.
+ *
+ * A regra acima (`*:focus-visible { outline: none }`) é uma **decisão de produto**: nenhum anel de
+ * foco em lugar nenhum. Ela é unlayered de propósito, para vencer o `utilities` do Tailwind — e
+ * por isso `focus-visible:ring-2` numa classe **não funciona**: a regra global ganha.
+ *
+ * **A missão final pede "navegação por teclado, foco visível"**, e as duas coisas se contradizem.
+ * A saída não é reverter a decisão global (mudaria o produto inteiro, e é do upstream): é **marcar
+ * as superfícies onde o foco é necessário para operar** — os cartões de ambiente da home e o
+ * seletor de modo de trabalho, que são os controles desta entrega.
+ *
+ * `outline` e não `ring`: a regra global zera `--tw-ring-*` com `!important`, e o `outline` não
+ * depende dela. Unlayered pelo mesmo motivo do original — é assim que se vence o `utilities`.
+ */
+[data-b3po-foco]:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
 }
 
 /* Button variant styling lives entirely in the cva in components/ui/button.tsx
@@ -4247,4 +4342,38 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
 .aui-error-details .aui-error-details-link:hover {
   background: none;
   color: var(--err-ink);
+}
+
+/* ============================================================================
+ * r103-ambiente-identidade — a cor de cada MODO DE TRABALHO.
+ *
+ * Decisão do dono #5: os seis ambientes precisam de identidade visual DISTINTA dentro de UM
+ * design system. Isso aqui é a parte "um design system": **nada é duplicado**. O componente não
+ * muda, a paleta não muda — um TOKEN muda de valor conforme o `data-ambiente` que o store põe no
+ * `<html>` (ver `lib/ambiente-identidade.ts`).
+ *
+ * POR QUE `--ambiente-accent` E NÃO `--ui-accent`:
+ * sobrescrever `--ui-accent` pintaria TODO botão primário do app com a cor do ambiente, e um
+ * matiz por ambiente multiplicaria por seis o risco de contraste que já custou uma violação na
+ * r101. Este token pinta só o que IDENTIFICA o ambiente: a faixa do seletor e o marcador do item
+ * ativo na barra.
+ *
+ * POR QUE ISSO NÃO É PERMISSÃO: cor é orientação ("onde eu estou"), não autorização. Trocar de
+ * ambiente troca o que a barra mostra; `permission-guard` continua sendo a única porta.
+ * ============================================================================ */
+:root {
+  --ambiente-accent: #4ade80; /* empresa é o padrão do store (PADRAO = 'empresa') */
+}
+
+[data-ambiente='empresa']       { --ambiente-accent: #4ade80; }
+[data-ambiente='engenharia']    { --ambiente-accent: #38bdf8; }
+[data-ambiente='automacao']     { --ambiente-accent: #fb923c; }
+[data-ambiente='ia']            { --ambiente-accent: #a78bfa; }
+[data-ambiente='estrategico']   { --ambiente-accent: #f472b6; }
+[data-ambiente='administracao'] { --ambiente-accent: #2dd4bf; }
+
+/* A faixa do seletor de ambiente: a identidade fica visível sem gritar. */
+[data-slot='ambiente-seletor'] {
+  border-left: 2px solid var(--ambiente-accent, var(--ui-accent));
+  padding-left: 0.5rem;
 }

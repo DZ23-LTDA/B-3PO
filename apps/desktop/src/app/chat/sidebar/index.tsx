@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/sidebar'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { useContributions } from '@/contrib/react/use-contributions'
+import { linhasDeContribuicoes, NavRowWithHeader } from './nav-group-header'
+import { SeletorDeAmbiente } from './seletor-de-ambiente'
 import { type SessionInfo, type SessionSearchResult } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { comboTokens } from '@/lib/keybinds/combo'
@@ -144,6 +146,7 @@ import {
   ARTIFACTS_ROUTE,
   CAPABILITIES_ROUTE,
   CRON_ROUTE,
+  CRM_ROUTE,
   MESSAGING_ROUTE,
   SIDEBAR_NAV_AREA,
   type SidebarNavContribution
@@ -217,20 +220,18 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
     action: 'new-session',
     keybindActionId: 'session.new'
   },
-  {
-    id: 'capabilities',
+  { id: 'capabilities',
     label: '',
     icon: props => <Codicon name="symbol-misc" {...props} />,
     route: CAPABILITIES_ROUTE,
-    keybindActionId: 'nav.capabilities'
-  },
-  {
-    id: 'messaging',
+    keybindActionId: 'nav.capabilities' },
+  { id: 'messaging',
     label: '',
     icon: props => <Codicon name="comment" {...props} />,
     route: MESSAGING_ROUTE,
-    keybindActionId: 'nav.messaging'
-  },
+    keybindActionId: 'nav.messaging' },
+  { id: 'crm', label: '', icon: props => <Codicon name="organization" {...props} />,
+    route: CRM_ROUTE, keybindActionId: 'nav.crm' },
   // Artifacts and Scheduled jobs are outputs of running Hermes the developer
   // way; Capabilities and Messaging are how anyone sets it up.
   {
@@ -414,31 +415,11 @@ export function ChatSidebar({
   const { t } = useI18n()
   const s = t.sidebar
   const { pathname } = useLocation()
-  // Contributed nav rows (plugins pairing a page with a sidebar entry) render
-  // below the built-ins with the same chrome; active = at their route.
+  // Contributed nav rows render below the built-ins with the same chrome; active = at their route.
   const navContributions = useContributions(SIDEBAR_NAV_AREA)
 
   const contributedNav = useMemo<SidebarNavItem[]>(
-    () =>
-      navContributions.flatMap(c => {
-        const data = c.data as Partial<SidebarNavContribution> | undefined
-
-        if (!data?.path?.startsWith('/') || !data.label) {
-          return []
-        }
-
-        const codicon = data.codicon || 'plug'
-
-        return [
-          {
-            id: c.id,
-            label: data.label,
-            icon: (props: { className?: string }) => <Codicon name={codicon} {...props} />,
-            route: data.path,
-            tier: data.tier
-          }
-        ]
-      }),
+    () => linhasDeContribuicoes(navContributions, codicon => props => <Codicon name={codicon} {...props} />),
     [navContributions]
   )
 
@@ -1568,12 +1549,15 @@ export function ChatSidebar({
       data-tip-region=""
       data-tour="sessions-sidebar"
     >
-      <SidebarContent className="gap-0 overflow-hidden bg-transparent px-2.5">
+      <SidebarContent className={`gap-0 bg-transparent px-2.5 ${SCROLL_Y}`}>
         <SidebarGroup className="shrink-0 p-0 pb-2 pt-[calc(var(--titlebar-height)+0.375rem)]">
           <SidebarGroupContent>
+            <SeletorDeAmbiente />
             <SidebarMenu className="gap-px">
-              {navItems.map(item => {
+              {navItems.map((item, indice) => {
                 const isInteractive = Boolean(item.action) || Boolean(item.route)
+
+
 
                 const active =
                   (item.id === 'capabilities' && currentView === 'capabilities') ||
@@ -1676,7 +1660,8 @@ export function ChatSidebar({
                 // New session + route-backed pages can open in a split —
                 // right-click for the directional "Open in split" submenu.
                 return (
-                  <SidebarMenuItem key={item.id}>
+                  <NavRowWithHeader key={item.id} item={item} indice={indice} itens={navItems}>
+                  <SidebarMenuItem>
                     {isNewSession || item.route ? (
                       <ContextMenu>
                         <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
@@ -1698,6 +1683,7 @@ export function ChatSidebar({
                       button
                     )}
                   </SidebarMenuItem>
+                  </NavRowWithHeader>
                 )
               })}
             </SidebarMenu>

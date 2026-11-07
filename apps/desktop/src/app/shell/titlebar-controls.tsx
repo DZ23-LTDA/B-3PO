@@ -366,7 +366,17 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
 
   return (
     <>
-      <div aria-label={t.shell.windowControls} className={leftClusterClass} data-titlebar-cluster="left">
+      {/* r83 — `role="region"` nos três clusters do titlebar. Eles tinham `aria-label` mas nenhum role,
+          então `<div aria-label>` era só um div com um nome que ninguém anuncia: o `axe` reprovava
+          `region` em toda rota porque o conteúdo do titlebar ficava fora de qualquer landmark, e o salto
+          de landmark não alcançava os controles da janela. Os dois clusters de "App controls" ganharam
+          nomes diferentes (painel × sistema) para não violar `landmark-unique`. */}
+      <div
+        aria-label={t.shell.windowControls}
+        className={leftClusterClass}
+        data-titlebar-cluster="left"
+        role="region"
+      >
         {visibleLeftTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
         ))}
@@ -376,11 +386,12 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
 
       {visiblePaneTools.length > 0 && (
         <div
-          aria-label={t.shell.appControls}
+          aria-label={t.shell.paneTools}
           className={cn(
             titlebarToolClusterClass,
             'top-[calc(var(--titlebar-controls-top)+var(--right-rail-top-inset,0px))] right-[calc(var(--titlebar-tools-right)+var(--shell-preview-toolbar-gap,0))]'
           )}
+          role="region"
         >
           {visiblePaneTools.map(tool => (
             <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />
@@ -392,6 +403,7 @@ export function TitlebarControls({ leftTools = [], tools = [], onOpenSettings }:
         aria-label={t.shell.appControls}
         className={cn(titlebarToolClusterClass, 'right-(--titlebar-tools-right) top-(--titlebar-controls-top)')}
         data-titlebar-cluster="right"
+        role="region"
       >
         {visibleSystemTools.map(tool => (
           <TitlebarToolButton key={tool.id} navigate={navigate} tool={tool} />

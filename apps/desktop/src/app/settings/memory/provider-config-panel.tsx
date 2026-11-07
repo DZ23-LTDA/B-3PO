@@ -7,6 +7,7 @@ import { getMemoryProviderConfig, saveMemoryProviderConfig } from '@/hermes'
 import { SlidersHorizontal } from '@/lib/icons'
 import { refreshMemoryStatus } from '@/store/memory-status'
 import { notifyError } from '@/store/notifications'
+import { useI18n } from '@/i18n'
 import type { MemoryProviderConfig, MemoryProviderField } from '@/types/hermes'
 
 import { ListRow, Pill } from '../primitives'
@@ -22,6 +23,7 @@ function seedValues(config: MemoryProviderConfig): Record<string, string> {
 }
 
 export function ProviderConfigPanel({ profile, provider }: { profile?: string; provider: string }) {
+  const { t } = useI18n()
   const [config, setConfig] = useState<MemoryProviderConfig | null>(null)
   const [loadError, setLoadError] = useState<null | string>(null)
   const [values, setValues] = useState<Record<string, string>>({})
@@ -94,10 +96,10 @@ export function ProviderConfigPanel({ profile, provider }: { profile?: string; p
       return (
         <div className="flex items-center justify-between gap-3 py-2">
           <span className="text-[length:var(--conversation-caption-font-size)] text-muted-foreground">
-            Memory provider settings failed to load: {loadError}
+            {t.settings.memoryLayers.statusUnavailable}: {loadError}
           </span>
           <Button onClick={() => void refresh()} size="sm" type="button" variant="secondary">
-            Retry
+            {t.common.retry}
           </Button>
         </div>
       )

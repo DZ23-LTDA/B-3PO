@@ -32,9 +32,9 @@ export function LoadErrorNotice({ what, detail, onRetry, className }: LoadErrorN
         className,
       )}
     >
-      <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
+      <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive-text" />
       <div className="min-w-0 flex-1">
-        <div className="text-destructive">{copy.title}</div>
+        <div className="text-destructive-text">{copy.title}</div>
         {copy.details && <div className="mt-0.5 text-muted-foreground">{copy.details}</div>}
         <Button
           size="sm"

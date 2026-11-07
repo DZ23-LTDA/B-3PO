@@ -39,7 +39,7 @@ import { Slot } from '@/contrib/react/slot'
 import { registry } from '@/contrib/registry'
 import { discoverRuntimePlugins } from '@/contrib/runtime-loader'
 import { LocalizedTabTitle, translateNow } from '@/i18n'
-import { NEW_SESSION_TITLE, sessionTitle as storedSessionTitle } from '@/lib/chat-runtime'
+import { newSessionTitle, sessionTitle as storedSessionTitle } from '@/lib/chat-runtime'
 import {
   Download,
   FileText,
@@ -151,7 +151,22 @@ import { WorkspacePageHeaderHostContext } from './workspace-page-header'
 // WORKSPACE_PAGE_HEADER_AREA; route tiles and the HUD render outside it.
 const renderWorkspacePane = () => (
   <WorkspacePageHeaderHostContext.Provider value={true}>
-    <WiredPane part="chatRoutes" />
+    {/*
+     * r289 — LANDMARK: o conteúdo de trabalho vira `<main>`.
+     *
+     * Medido na auditoria (G8): a home não tinha `<main>`, `<nav>` nem `<aside>` — zero
+     * landmarks. Um leitor de tela não tinha como pular para "conteúdo principal"; tudo era um
+     * bloco só.
+     *
+     * Este é o pane do workspace (`part="chatRoutes"`), o irmão do `part="sidebar"` — então o
+     * `<main>` NÃO engole a navegação, que é o erro clássico de quem marca o shell inteiro.
+     *
+     * `flex min-h-0 min-w-0 flex-1 flex-col` repete o contrato de layout que o `WiredPane` já
+     * esperava do pai: sem isso, o pane perderia a altura e a rolagem do shell.
+     */}
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+      <WiredPane part="chatRoutes" />
+    </div>
   </WorkspacePageHeaderHostContext.Provider>
 )
 
@@ -221,7 +236,7 @@ registry.registerMany([
     id: 'workspace',
     area: 'panes',
     // Live-retitled to the loaded session by syncWorkspaceTitle below.
-    title: NEW_SESSION_TITLE,
+    title: newSessionTitle(),
     data: {
       placement: 'main',
       minWidth: '22vw',
@@ -503,7 +518,7 @@ const syncWorkspaceTitle = () => {
     // A bot chat reads as its BOT: every canonical Bot Chat is stored under
     // the same name, which told two open bots apart by nothing (#99152).
     title: workspaceOwnerTitle(
-      stored ? storedSessionTitle(stored) : NEW_SESSION_TITLE,
+      stored ? storedSessionTitle(stored) : newSessionTitle(),
       selected ? $botChatScopes.get()[selected] : undefined
     ),
     data: {

@@ -20,7 +20,7 @@ export function CopyLastButton({
       ghost
       onClick={onClick}
       title="Copy last assistant response as raw markdown"
-      aria-label="Copy last assistant response"
+      aria-label="Copy last response"
       className={cn(
         "absolute z-10",
         "normal-case tracking-normal font-normal",

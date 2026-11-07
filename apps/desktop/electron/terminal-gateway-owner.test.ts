@@ -82,7 +82,9 @@ function register(windowTarget: unknown) {
     findOnPath: () => null,
     gatewayTarget: owner => terminalGatewayTarget(owner, registry, pool),
     getSshConnectionState: scope => pool.get(scope),
-    isWindows: false,
+    // r8 do V4: o dono da instalacao — mesmo nivel que `ensureOwner` cria.
+  actorOf: async () => ({ id: 'act_owner_test', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
+  isWindows: false,
     rememberLog: () => {},
     sshBinary: () => '/usr/bin/ssh'
   })

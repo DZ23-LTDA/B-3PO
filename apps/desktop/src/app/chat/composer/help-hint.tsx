@@ -37,7 +37,7 @@ export function HelpHint() {
         ))}
       </Section>
 
-      <p className="px-2.5 py-1 text-xs text-muted-foreground/80">
+      <p className="px-2.5 py-1 text-xs text-muted-foreground">
         <span className="font-mono text-foreground/80">/help</span> {c.helpFooter}
       </p>
     </div>
@@ -65,7 +65,7 @@ function Row({ description, keyLabel, mono = false }: { description: string; key
       >
         {keyLabel}
       </span>
-      <span className="min-w-0 truncate text-muted-foreground/80">{description}</span>
+      <span className="min-w-0 truncate text-muted-foreground">{description}</span>
     </div>
   )
 }
@@ -78,7 +78,7 @@ function HotkeyRow({ combos, description }: { combos: string[]; description: str
           <KbdCombo combo={combo} key={combo} size="sm" />
         ))}
       </span>
-      <span className="min-w-0 truncate text-muted-foreground/80">{description}</span>
+      <span className="min-w-0 truncate text-muted-foreground">{description}</span>
     </div>
   )
 }

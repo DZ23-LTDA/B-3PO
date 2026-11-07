@@ -1,0 +1,17 @@
+{
+  "passos": [
+    "select.produto.encontrado => true",
+    "opcoes => [\"CAFE-500\"]",
+    "escolhido => \"CAFE-500\"",
+    "qtd.encontrado => true",
+    "preco.encontrado => true",
+    "botao.adicionar => true",
+    "botao.faturar => true",
+    "ESTOQUE.apos => 17000",
+    "FINANCEIRO.aReceber => 7470",
+    "VENDAS.total => 1",
+    "VENDA.status => \"faturado\"",
+    "texto.depois => \"CONVERSAS\\nBOTS\\nNova conversa\\nCtrl\\nN\\nCapacidades\\nMensageria\\nCRM\\nArtefatos\\nTarefas agendadas\\nPainel\\nAtendimento\\nAgenda\\nProdutos\\nEstoque\\nCompras\\nVendas\\nFinanceiro\\nServiços\\nRH\\nMarketing\\nPós-venda\\nAgentes\\nAutomações\\nDocumentos\\nPrivacidade\\nEmpresa\\nFIXADAS\\nShift+clique em uma conversa para fixar\\nCONVERSAS\\nEnviar após correções da revisão\\n1d\\nTesting after device allowlist\\n1d\\nProcessamento de envio de arquivo\\n1d\\nTestar celular\\n1d\\nDo celular\\n1d\\nONTEM\\nHistória do teclado de quinhentas palavras\\n1d\\nEscrever \"",
+    "linhasNaTabela => 1"
+  ]
+}

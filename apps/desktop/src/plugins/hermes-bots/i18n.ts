@@ -34,12 +34,15 @@ import { useMemo } from 'react'
 
 import { CANONICAL_GROUP_LOCALES } from './canonical-group-locales'
 import { bind, type Bound } from './i18n-bind'
+import { ptCron } from './i18n-cron-pt'
+import { ptScreen } from './i18n-screen-pt'
 import { type BotsMessages } from './i18n-messages'
 import { getPluginCtx } from './shared'
 
 const en: BotsMessages = {
   canonical: CANONICAL_GROUP_LOCALES.en,
   editor: {
+    startFromTemplate: 'Start from a template',
     fullConfigHint: 'Full configuration needs a newer gateway (restart it after updating Hermes).',
     liveCapabilities: 'Capabilities (applies immediately — skills, tools, MCP)',
     editSoul: 'SOUL.md (persona + agent-messaging protocol)',
@@ -174,6 +177,8 @@ const en: BotsMessages = {
     undo: 'Undo'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: 'New bot',
     editTitle: 'Edit profile',
     editMenu: 'Edit…',
@@ -247,6 +252,9 @@ const en: BotsMessages = {
     generating: 'Generating…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: 'New group chat',
     manageDesc: 'A bot can join multiple group chats. Memberships sync to every machine.',
     manageTitle: 'Manage groups',
@@ -617,6 +625,8 @@ const ja: BotsMessages = {
     undo: '元に戻す'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新しいボット',
     editTitle: 'プロファイルを編集',
     editMenu: '編集…',
@@ -690,6 +700,9 @@ const ja: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新しいグループチャット',
     manageDesc: 'ボットは複数のグループチャットに参加できます。メンバーシップはすべてのマシンに同期されます。',
     manageTitle: 'グループを管理',
@@ -1053,6 +1066,8 @@ const zh: BotsMessages = {
     undo: '撤销'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新建机器人',
     editTitle: '编辑配置档案',
     editMenu: '编辑…',
@@ -1126,6 +1141,9 @@ const zh: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新建群聊',
     manageDesc: '一个机器人可以加入多个群聊。成员关系会同步到每台设备。',
     manageTitle: '管理群组',
@@ -1482,6 +1500,8 @@ const zhHant: BotsMessages = {
     undo: '復原'
   },
   bot: {
+    openRecentSession: 'Open recent session',
+    openGroupChat: 'Open Group Chat',
     newTitle: '新增機器人',
     editTitle: '編輯設定檔',
     editMenu: '編輯…',
@@ -1555,6 +1575,9 @@ const zhHant: BotsMessages = {
     generating: '生成中…'
   },
   group: {
+    startGatewayGroup: 'Start gateway group',
+    manageMembersAria: 'Manage group members',
+    saveMembers: 'Save members',
     newTitle: '新增群組聊天',
     manageDesc: '一個機器人可以加入多個群組聊天。成員關係會同步到每台裝置。',
     manageTitle: '管理群組',
@@ -1793,6 +1816,147 @@ export const BOTS_LOCALES: PluginLocaleBundles = {
   ru: { canonical: CANONICAL_GROUP_LOCALES.ru },
   fr: { canonical: CANONICAL_GROUP_LOCALES.fr },
   de: { canonical: CANONICAL_GROUP_LOCALES.de },
+  pt: {
+    canonical: CANONICAL_GROUP_LOCALES.pt,
+    capabilities: 'Capacidades',
+    hide: 'Ocultar',
+    unhide: 'Mostrar',
+    editor: { startFromTemplate: 'Começar de um modelo' },
+    roster: {
+      search: 'Buscar bots e conversas em grupo',
+      searchPlaceholder: 'Buscar bots e conversas em grupo…',
+      newBotOrGroup: 'Novo bot ou conversa em grupo',
+      groupChats: 'Conversas em grupo',
+      emptyTitle: 'Nenhum bot ainda',
+      emptyDesc: 'Crie seu primeiro bot.',
+      clearFilters: 'Limpar filtros',
+      allHidden: 'Todos os bots estão ocultos',
+      allHiddenDesc: 'Eles continuam trabalhando e mantêm o histórico.',
+      showHidden: 'Mostrar bots ocultos',
+      hiddenFromRoster: 'Oculto na lista',
+      pinned: 'Fixado',
+      needsAttention: 'precisa de atenção',
+      needsInput: 'Aguardando você',
+      botsAndGroups: 'Bots e grupos',
+      botsOnly: 'Somente bots',
+      groupsOnly: 'Somente grupos',
+      anyActivity: 'Qualquer atividade',
+      activeNow: 'Ativo agora',
+      recentlyActive: 'Ativo recentemente',
+      older: 'Mais antigos',
+      gatewayRemoved: 'Conexão removida',
+      onDemand: 'Sob demanda',
+      ready: 'Pronto',
+      statusUnknown: 'Status desconhecido',
+      unavailable: 'Indisponível',
+      retryNow: 'Tentar agora'
+    },
+    sections: {
+      newSection: 'Nova seção',
+      newTitle: 'Nova seção',
+      renameTitle: 'Renomear seção',
+      nameLabel: 'Nome da seção',
+      namePlaceholder: 'ex.: Clientes',
+      create: 'Criar',
+      rename: 'Renomear…',
+      moveUp: 'Mover para cima',
+      moveDown: 'Mover para baixo',
+      unassigned: 'Sem seção',
+      headingTip: 'Solte bots aqui · clique duplo para renomear',
+      emptyHint: 'Arraste bots para aqui',
+      moveTo: 'Mover para seção',
+      newSectionEllipsis: 'Nova seção…',
+      removeFromSection: 'Tirar da seção',
+      undo: 'Desfazer'
+    },
+    bot: {
+      openRecentSession: 'Abrir conversa recente',
+      openGroupChat: 'Abrir conversa em grupo',
+      newTitle: 'Novo bot',
+      editTitle: 'Editar perfil',
+      editMenu: 'Editar…',
+      helpPromptPlaceholder: 'Com o que este bot deve ajudar?',
+      descriptionHint: 'Deixe em branco para gerar a partir do nome e da descrição do bot.',
+      newChatWith: 'Nova conversa com este bot',
+      openBotChat: 'Abrir conversa do bot',
+      openBotChatInNewTab: 'Abrir conversa do bot em nova aba',
+      openingChat: 'Abrindo conversa…',
+      pinToTop: 'Fixar no topo',
+      unpin: 'Desafixar',
+      pinnedToast: name => `${name} fixado no topo`,
+      unpinnedToast: name => `${name} desafixado`,
+      hide: 'Ocultar',
+      unhide: 'Mostrar',
+      hiddenToast: name => `${name} oculto — use o botão de olho no cabeçalho de Bots para ver os ocultos`,
+      unhiddenToast: name => `${name} voltou para a lista`,
+      groupsMenu: groups => `Grupos: ${groups}…`,
+      manageGroups: 'Gerenciar grupos…',
+      metadataLoadFailed: 'Não foi possível carregar os metadados do bot',
+      loadFailed: 'Não foi possível carregar o bot',
+      groupsLoadFailed: 'Não foi possível carregar os grupos de bots',
+      thisDevice: 'Este dispositivo',
+      attentionFallback: 'Precisa de atenção',
+      attentionProviderAuth: 'Entre novamente para este perfil',
+      attentionQuota: 'Cota ou saldo esgotado',
+      attentionMissingConfig: 'Provedor não configurado — abra Configurações → Provedores',
+      attentionBlocked: 'Bot bloqueado — veja a última mensagem dele',
+      duplicate: 'Duplicar',
+      duplicateFailed: 'Falha ao duplicar',
+      deleteTitle: 'Excluir o bot e o perfil?',
+      removeFromAllGroups: 'Remover de todos os grupos',
+      createFirstHint: 'Abra o painel de Bots e clique em “Novo bot”.',
+      createFailed: 'Ainda não foi possível criar o perfil',
+      advanced: 'Avançado',
+      advancedHint: 'Avançado — modelo, habilidades, ferramentas, SOUL.md',
+      advancedFailed: 'Falha na configuração avançada',
+      openAnotherChatUnsupported: 'Atualize o B-3PO Desktop para abrir outra conversa de bot.',
+      remoteConnectionsUnsupported: 'Atualize o B-3PO Desktop para conversar com bots em outras conexões.',
+      openNeedsUpdateTitle: 'Este bot está numa versão mais antiga do B-3PO',
+      openNeedsUpdateMessage: connectionLabel => `Atualize ${connectionLabel} e tente de novo.`,
+      openUnreachableTitle: 'O B-3PO não conseguiu alcançar o computador onde este bot roda',
+      openUnreachableMessage: 'Verifique se ele está ligado e tente de novo.',
+      openChatFailedTitle: botName => `Não foi possível abrir a conversa de ${botName}`,
+      openChatFailedMessage: 'Tente de novo.',
+      openGateways: 'Abrir conexões',
+      chatEmpty: 'Diga algo para começar.',
+      kickoff: 'Oi, fale sobre você!'
+    },
+    screen: ptScreen,
+    cron: ptCron,
+    tools: {
+      installHint: name => `Instale "${name}" e adicione à lista acima`,
+      installed: name => `Skill "${name}" instalada`,
+      installFailed: name => `A instalação de "${name}" falhou`,
+      searchHint: 'Buscando na comunidade e em fontes conhecidas — pode levar ~10s…',
+      resizeHint: 'Arraste o canto para redimensionar.',
+      addServerFailed: 'Não foi possível adicionar o servidor',
+      noTarget: 'Nenhum perfil de destino',
+      setKeyFailed: key => `Não foi possível definir ${key}`,
+      configured: name => `${name} configurado`,
+      authenticated: name => `${name} autenticado`,
+      testFailed: 'O teste do servidor falhou depois da configuração',
+      completeSignIn: 'Conclua o login no seu navegador...',
+      needsSetup: keys => `precisa configurar (${keys}) — reinicie o gateway para habilitar a configuração aqui`,
+      setUpDone: 'configurado ✓',
+      saveTest: 'Salvar e testar',
+      authorizing: 'Autorizando…',
+      working: 'Trabalhando…',
+      setupFailed: 'A configuração falhou',
+      signIn: 'Entrar…',
+      setUp: 'Configurar…',
+      skillsHub: 'Central de skills do Hermes',
+      filterSkills: 'Filtrar skills…',
+      searchHub: 'Buscar na central (comunidade e fontes conhecidas)…',
+      noMcpServers: 'Nenhum servidor MCP configurado ou no catálogo.'
+    },
+    avatar: { classicShapes: 'Formas clássicas' },
+    group: {
+      newTitle: 'Nova conversa em grupo',
+      startGatewayGroup: 'Iniciar conversa em grupo',
+      manageMembersAria: 'Gerenciar membros do grupo',
+      saveMembers: 'Salvar membros'
+    }
+  },
   es: { canonical: CANONICAL_GROUP_LOCALES.es }
 }
 

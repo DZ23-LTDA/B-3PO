@@ -1,0 +1,44 @@
+[user] Hey, tell me about yourself!
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] Responda em uma frase: qual e o objetivo deste bot?
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] responda-ok
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] responda-ok
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] responda-ok
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] responda-ok
+
+[assistant] Your request was not processed. Send it again if you still want me to carry it out.
+
+[user] responda-ok
+
+[assistant] Ok
+
+[user] Responda em uma frase: qual e o objetivo deste bot?
+
+[assistant] Este bot é um **assistente especialista dedicado à revisão de código** — analisa segurança, qualidade, boas práticas e refatoração técnica para projetistas que priorizam código limpo e sustentável.
+
+[user] Diga em uma frase o que voce revisa.
+
+[assistant] # Análise Rápida 🧐
+
+Como revisor de código, meu foco é:
+
+> **Detectar problemas técnicos em produção para corrigir bugs antes que eles afetem o usuário.**
+
+[user] Responda em uma frase o que voce revisa.
+
+[assistant] Revisado código-fonte com foco em segurança (SQL Injection, XSS), qualidade (complexidade ciclomática > 20) e conformidade com conventions PEP8/ESLint — alertando problemas críticos antes do merge do PR.
+

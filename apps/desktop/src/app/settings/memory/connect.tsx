@@ -5,6 +5,7 @@ import { getMemoryProviderOAuthStatus, startMemoryProviderOAuth } from '@/hermes
 import { Check, ExternalLink, Loader2 } from '@/lib/icons'
 import { refreshMemoryStatus } from '@/store/memory-status'
 import { notifyError } from '@/store/notifications'
+import { useI18n } from '@/i18n'
 import type { MemoryProviderOAuthStatus } from '@/types/hermes'
 
 const POLL_MS = 1500
@@ -14,6 +15,7 @@ const POLL_TIMEOUT_MS = 120_000
 // backend-driven: the status route 404s for providers without an oauth_flow
 // module, so non-OAuth providers render nothing.
 export function MemoryConnect({ profile, provider }: { profile?: string; provider: string }) {
+  const { t } = useI18n()
   const [capable, setCapable] = useState<'no' | 'unknown' | 'yes'>('unknown')
   const [connected, setConnected] = useState(false)
   const [auth, setAuth] = useState<MemoryProviderOAuthStatus['auth']>(null)
@@ -140,10 +142,10 @@ export function MemoryConnect({ profile, provider }: { profile?: string; provide
         <>
           <span className="inline-flex items-center gap-1.5 text-muted-foreground">
             <Loader2 className="size-3 animate-spin" />
-            Waiting for browser consent…
+            {t.connectors.waiting}
           </span>
           <Button className="h-auto p-0 text-xs" onClick={cancel} size="sm" type="button" variant="link">
-            Cancel
+            {t.common.cancel}
           </Button>
         </>
       ) : (

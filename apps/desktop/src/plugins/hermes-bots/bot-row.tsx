@@ -33,6 +33,7 @@ import {
 
 import { avatarColor, botAppearance, BotFace } from './avatar'
 import { isBackfilledFacePng } from './avatar-image'
+import { rosterFaceFor } from './mascots'
 import {
   $botChatFocused,
   $focusedBotOwner,
@@ -145,6 +146,9 @@ export function BotRow({ bot, onDelete, onEdit, onGroup, onNewSection, showHandl
   const { shape, color, image } = botAppearance(bot.name, meta)
   // Keep user photos/pets. Drop the 160px SVG backfill so the math face can move.
   const photo = Boolean(image && !isBackfilledFacePng(image))
+  // O mascote escolhido no seletor É a identidade visual do bot: sem foto propria, ele substitui
+  // o sigilo gerado. Antes, `mascot_id` era persistido mas nunca renderizado.
+  const mascotImage = rosterFaceFor(meta?.mascot_id)
   const turnBusy = useTurnBusy()
   // Preview identity must match click identity (#88200): when the backend
   // resolved the pinned canonical chat, preview THAT session — not the
@@ -267,7 +271,7 @@ export function BotRow({ bot, onDelete, onEdit, onGroup, onNewSection, showHandl
       <div className={cn('shrink-0', !sourceStatus.available && 'grayscale opacity-60')}>
         <BotFace
           color={avatarColor(color, bot.name)}
-          image={photo ? image : null}
+          image={photo ? image : mascotImage}
           mood={botMood}
           name={bot.name}
           shape={shape}
@@ -627,7 +631,7 @@ export function GroupRow({ active, group, members, needsYou, onOpen, onDisband, 
     <ContextMenu>
       <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onSelect={() => onOpen(group)}>Open Group Chat</ContextMenuItem>
+        <ContextMenuItem onSelect={() => onOpen(group)}>{b.bot.openGroupChat}</ContextMenuItem>
         <ContextMenuSeparator />
         {/* Same affordance as a bot row's pin; pinned rooms lead the roster
             band, and the flag lives on the room record. */}

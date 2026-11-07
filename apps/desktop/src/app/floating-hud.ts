@@ -48,6 +48,6 @@ export const HUD_NOTE = '-ml-1'
 // offset to 2px keeps it inside the box; dropping truncate costs nothing
 // because these notes are one word.
 export const HUD_NOTE_VARIANT = {
-  muted: 'truncate text-muted-foreground/80',
+  muted: 'truncate text-muted-foreground',
   state: 'shrink-0 underline decoration-current/50 underline-offset-2'
 } as const

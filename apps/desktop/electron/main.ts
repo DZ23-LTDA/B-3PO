@@ -66,12 +66,7 @@ import {
 import { runAppInstallerChecker } from './appinstaller-checker'
 import { installApplicationMenuAfterFirstWindow } from './application-menu-startup'
 import { stopBackendChild as stopBackendChildImpl, waitForBackendExit } from './backend-child'
-import {
-  execText,
-  isPidOnlyStartMarker,
-  processStartMarker,
-  REAP_PROBE_TIMEOUT_MS
-} from './backend-claim'
+import { execText, isPidOnlyStartMarker, processStartMarker, REAP_PROBE_TIMEOUT_MS } from './backend-claim'
 import { createBackendConnectionState } from './backend-connection-state'
 import { assertDescriptorStillOwned, forgetFailedDescriptor } from './backend-descriptor-cache'
 import { BackendDialClaims } from './backend-dial-claim'
@@ -243,6 +238,8 @@ import {
   uninstallArgsForMode,
   type UninstallSummaryDetails
 } from './desktop-uninstall'
+import { mountCrmContacts } from './crm-contacts-ipc'
+import { mountErpIpc } from './erp-ipc'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -288,6 +285,7 @@ import { resolveGatewayVersion } from './gateway-version'
 import { probeGatewayWebSocket } from './gateway-ws-probe'
 import { windowsGitCandidates } from './git-binary-candidates'
 import { registerGitIpc } from './git-ipc'
+import { atorDeMaquina } from './machine-actor'
 import {
   assertExistingPathForOpen,
   ATTACHMENT_UPLOAD_DEFAULT_MAX_BYTES,
@@ -1800,7 +1798,7 @@ Menu.setApplicationMenu(null)
 // need this, so gate it on Windows. (Fixes: desktop approval/turn notifications
 // never firing on Windows.)
 if (IS_WINDOWS) {
-  app.setAppUserModelId(IDENTITY_APP_NAME ? PRODUCT_IDENTITY.appId : 'com.nousresearch.hermes')
+  app.setAppUserModelId(IDENTITY_APP_NAME ? PRODUCT_IDENTITY.appId : 'com.dz23.b3po')
 }
 
 // Seed the native About panel with the best-known Hermes version. This is
@@ -12267,7 +12265,7 @@ function spawnSecondaryWindow({
     height: SESSION_WINDOW_MIN_HEIGHT,
     minWidth: SESSION_WINDOW_MIN_WIDTH,
     minHeight: SESSION_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'B-3PO',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12372,7 +12370,7 @@ function spawnBrowserWindow(tabId) {
     height: BROWSER_WINDOW_HEIGHT,
     minWidth: BROWSER_WINDOW_MIN_WIDTH,
     minHeight: BROWSER_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'B-3PO',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12484,7 +12482,7 @@ function createInstanceWindow(
     ...nextInstanceBounds(source),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'B-3PO',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -13569,7 +13567,7 @@ function createWindow() {
     ),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'B-3PO',
     // Frameless title bar on every platform so the renderer can paint the
     // "hide sidebar" button (and other left-side titlebar tools) flush with
     // the top edge — matching the macOS layout where the traffic lights sit
@@ -17056,8 +17054,7 @@ registerFsIpc({
   resolveGitBinary
 })
 
-// Git-driven features (worktrees, review pane, repo scan) — see git-ipc.ts.
-registerGitIpc({ resolveGitBinary, resolveGhBinary })
+registerGitIpc({ actorOf: () => atorDeMaquina(app.getPath('userData')), resolveGhBinary, resolveGitBinary })  // ver git-ipc.ts e machine-actor.ts (fronteira de MAQUINA)
 
 // Client-side loopback callback for MCP OAuth against remote backends — see
 // mcp-oauth-callback-ipc.ts.
@@ -17065,7 +17062,7 @@ registerMcpOauthCallbackIpc()
 
 // Embedded terminal PTY host (hermes:terminal:*) — see terminal-ipc.ts.
 const terminalIpc = registerTerminalIpc({
-  isWindows: IS_WINDOWS,
+  actorOf: () => atorDeMaquina(app.getPath('userData')), isWindows: IS_WINDOWS,
   findOnPath,
   rememberLog,
   activeSshTerminalTarget,
@@ -17504,6 +17501,9 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 
   return { ok: true, mode, willRemoveAppBundle: Boolean(removeBundle), scriptPath }
 }
+
+mountCrmContacts(ipcMain, app.getPath('userData'))
+  mountErpIpc(ipcMain, app.getPath('userData'))
 
 registerDesktopUninstallIpc({
   ipcMain,

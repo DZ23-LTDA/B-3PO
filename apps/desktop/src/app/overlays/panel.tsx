@@ -74,7 +74,7 @@ export function PanelHeader({ actions, subtitle, title }: PanelHeaderProps) {
     <header className={cn('mb-3 flex shrink-0 items-start justify-between gap-3', actions ? 'pr-8' : undefined)}>
       <div className="min-w-0">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        {subtitle ? <p className="truncate text-xs text-muted-foreground/80">{subtitle}</p> : null}
+        {subtitle ? <p className="truncate text-xs text-muted-foreground">{subtitle}</p> : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-1.5">{actions}</div> : null}
     </header>
@@ -292,6 +292,14 @@ interface PanelEmptyProps {
   title?: ReactNode
 }
 
+/*
+ * r94 — a descrição usa `text-muted-foreground` CHEIO, não `/70`.
+ *
+ * A 70% de opacidade este parágrafo de 12 px reprovava `color-contrast` — o `axe` pegou em
+ * `/session-import`, rota que nenhuma rodada anterior havia medido. Texto pequeno é onde a
+ * transparência cobra mais caro: o mínimo é 4,5:1 e o blend com o fundo come parte dele.
+ * Os ícones em `/50` e `/70` continuam: são decorativos e não carregam texto.
+ */
 export function PanelEmpty({ action, description, icon = 'inbox', title }: PanelEmptyProps) {
   return (
     <div className="grid flex-1 place-items-center px-6 py-10 text-center">
@@ -299,7 +307,7 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
         <Codicon className="text-muted-foreground/50" name={icon} size="1.25rem" />
         {title ? <p className="text-sm font-medium text-foreground/90">{title}</p> : null}
         {description ? (
-          <p className="max-w-sm text-xs leading-relaxed text-muted-foreground/70">{description}</p>
+          <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
         {action ? <div className="mt-2">{action}</div> : null}
       </div>

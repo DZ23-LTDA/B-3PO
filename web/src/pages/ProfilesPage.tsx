@@ -241,7 +241,7 @@ function ProfileActionsMenu({
             <button
               type="button"
               role="menuitem"
-              className={cn(itemClass, "text-destructive hover:bg-destructive/10")}
+              className={cn(itemClass, "text-destructive-text hover:bg-destructive/10")}
               onClick={run(onDelete)}
             >
               <Trash2 className="h-4 w-4" />

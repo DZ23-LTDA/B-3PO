@@ -72,7 +72,9 @@ export function ThemeSwitcher({ collapsed = false, dropUp = false }: ThemeSwitch
             : "px-2 py-1 normal-case tracking-normal font-normal text-xs text-text-secondary hover:text-foreground",
         )}
         title={`${t.theme?.switchTheme ?? "Switch theme"}: ${label}`}
-        aria-label={t.theme?.switchTheme ?? "Switch theme"}
+        // WCAG 2.5.3: o texto visivel e o nome do tema ("Hermes Teal"), entao o nome
+        // acessivel precisa CONTE-LO — antes dizia so "Switch theme" e o axe reprovava.
+        aria-label={`${t.theme?.switchTheme ?? "Switch theme"}: ${label}`}
         aria-expanded={open}
         aria-haspopup="listbox"
       >

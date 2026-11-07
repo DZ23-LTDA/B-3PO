@@ -1,0 +1,46 @@
+import type { Translations } from './types'
+
+/** pt-BR do cartão de conectores (conectar apps dentro da conversa). */
+export const ptConnectorCard: Translations['connectors'] = {
+  title: 'Conecte seus aplicativos',
+  connect: 'Conectar',
+  skip: 'Agora não',
+  cancel: 'Parar de esperar',
+  retry: 'Tentar de novo',
+  grant: 'Reconectar',
+  connected: 'Conectado',
+  checking: 'Verificando seus aplicativos…',
+  notConnected: 'Não conectado',
+  skipped: 'Pulado',
+  disabled: 'Indisponível',
+  failed: 'Não foi possível conectar',
+  needsAuth: 'Acesso expirado',
+  opening: 'Abrindo o login…',
+  waiting: 'Esperando seu navegador…',
+  timeout: 'Ainda esperando a autorização.',
+  refresh: 'Atualizar status',
+  connectError: 'Não foi possível iniciar a autorização. Tente de novo.',
+  connectErrorFor: (app: string) => `Não foi possível iniciar a autorização de ${app}.`,
+  unavailable: 'Conectores não estão disponíveis nesta sessão.',
+  ownerMissing: 'Reabra esta conversa para gerenciar as conexões dela.',
+  search: 'Encontrar um aplicativo',
+  empty: 'Nenhum aplicativo corresponde',
+  disclaimer: 'Conectar é opcional. Autorize apenas os aplicativos que você quer que o B-3PO use.',
+  execution: 'Ferramentas do conector',
+  setup: server => `Configurar ${server}`,
+  openInBrowser: 'Abrir no navegador',
+  setupCancel: 'Cancelar',
+  authorizedToolsUnavailable: 'Autorizado. Ferramentas indisponíveis.',
+  required: 'Obrigatório',
+  namedAccount: (app: string, alias: string) => `O B-3PO nomeou esta conta de ${app} como ${alias}.`,
+  renameAccount: 'Renomear',
+  directory: {
+    suggested: 'Sugeridos',
+    allApps: 'Todos os aplicativos',
+    receiptConnected: apps => `Conectados: ${apps}`,
+    receiptNone: 'Nenhum aplicativo novo conectado',
+    receiptTimedOut: 'Fechado após 10 minutos',
+    finishInBrowser: 'Conclua no seu navegador',
+    signInFailed: 'Não foi possível conectar. Clique para tentar de novo'
+  }
+}

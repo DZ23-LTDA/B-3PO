@@ -51,6 +51,258 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     }
   },
   getConnection: (profile, opts) => ipcRenderer.invoke('hermes:connection', profile, opts),
+  crmCompanyLogo: {
+    config: () => ipcRenderer.invoke('hermes:crm-company-logo:config')
+  },
+  crmContacts: {
+    list: () => ipcRenderer.invoke('hermes:crm-contacts:list'),
+    remove: phone => ipcRenderer.invoke('hermes:crm-contacts:remove', phone),
+    upsert: payload => ipcRenderer.invoke('hermes:crm-contacts:upsert', payload)
+  },
+  crmPipeline: {
+    list: () => ipcRenderer.invoke('hermes:crm-pipeline:list'),
+    remove: id => ipcRenderer.invoke('hermes:crm-pipeline:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:crm-pipeline:upsert', payload)
+  },
+  crmTasks: {
+    list: () => ipcRenderer.invoke('hermes:crm-tasks:list'),
+    remove: id => ipcRenderer.invoke('hermes:crm-tasks:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:crm-tasks:upsert', payload)
+  },
+  fiscal: {
+    cancelar: pedido => ipcRenderer.invoke('hermes:fiscal:cancelar', pedido),
+    emitir: pedido => ipcRenderer.invoke('hermes:fiscal:emitir', pedido),
+    list: () => ipcRenderer.invoke('hermes:fiscal:list'),
+    status: () => ipcRenderer.invoke('hermes:fiscal:status')
+  },
+  lookup: {
+    cep: cep => ipcRenderer.invoke('hermes:lookup:cep', cep),
+    cnpj: cnpj => ipcRenderer.invoke('hermes:lookup:cnpj', cnpj)
+  },
+  privacy: {
+    anonymize: pedido => ipcRenderer.invoke('hermes:privacy:anonymize', pedido),
+    export: telefone => ipcRenderer.invoke('hermes:privacy:export', telefone),
+    preview: telefone => ipcRenderer.invoke('hermes:privacy:preview', telefone)
+  },
+  documents: {
+    list: payload => ipcRenderer.invoke('hermes:documents:list', payload),
+    remove: id => ipcRenderer.invoke('hermes:documents:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:documents:upsert', payload)
+  },
+  crmConversations: {
+    list: () => ipcRenderer.invoke('hermes:crm-conversations:list'),
+    remove: id => ipcRenderer.invoke('hermes:crm-conversations:remove', id),
+    upsert: payload => ipcRenderer.invoke('hermes:crm-conversations:upsert', payload)
+  },
+  // Business Core. Catálogo e estoque; os outros domínios entram quando ganharem tela.
+  catalog: {
+    list: tenantId => ipcRenderer.invoke('hermes:catalog:list', tenantId),
+    remove: (id, tenantId) => ipcRenderer.invoke('hermes:catalog:remove', id, tenantId),
+    upsert: payload => ipcRenderer.invoke('hermes:catalog:upsert', payload)
+  },
+  inventory: {
+    append: payload => ipcRenderer.invoke('hermes:inventory:append', payload),
+    inventario: payload => ipcRenderer.invoke('hermes:inventory:inventario', payload),
+    balances: tenantId => ipcRenderer.invoke('hermes:inventory:balances', tenantId),
+    list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
+  },
+  // r21 do GOAL V2: Sofia. Os seis canais nasceram com guarda na r19 — o bridge so repassa.
+  sofia: {
+    aprovar: payload => ipcRenderer.invoke('hermes:sofia:aprovar', payload),
+    criar: payload => ipcRenderer.invoke('hermes:sofia:criar', payload),
+    plano: planoId => ipcRenderer.invoke('hermes:sofia:plano', planoId),
+    planos: () => ipcRenderer.invoke('hermes:sofia:planos'),
+    status: payload => ipcRenderer.invoke('hermes:sofia:status', payload),
+    tarefa: payload => ipcRenderer.invoke('hermes:sofia:tarefa', payload)
+  },
+  automations: {
+    create: payload => ipcRenderer.invoke('hermes:automations:create', payload),
+    list: () => ipcRenderer.invoke('hermes:automations:list'),
+    setActive: payload => ipcRenderer.invoke('hermes:automations:setActive', payload),
+    sweep: () => ipcRenderer.invoke('hermes:automations:sweep'),
+    tools: () => ipcRenderer.invoke('hermes:automations:tools'),
+    triggers: () => ipcRenderer.invoke('hermes:automations:triggers')
+  },
+  analytics: {
+    dashboard: () => ipcRenderer.invoke('hermes:analytics:dashboard')
+  },
+  marketing: {
+    campaigns: () => ipcRenderer.invoke('hermes:marketing:campaigns'),
+    createCampaign: payload => ipcRenderer.invoke('hermes:marketing:createCampaign', payload),
+    createPost: payload => ipcRenderer.invoke('hermes:marketing:createPost', payload),
+    indicators: () => ipcRenderer.invoke('hermes:marketing:indicators'),
+    posts: () => ipcRenderer.invoke('hermes:marketing:posts'),
+    setCampaignStatus: payload => ipcRenderer.invoke('hermes:marketing:setCampaignStatus', payload),
+    setPostStatus: payload => ipcRenderer.invoke('hermes:marketing:setPostStatus', payload)
+  },
+  aftersales: {
+    create: payload => ipcRenderer.invoke('hermes:aftersales:create', payload),
+    indicators: () => ipcRenderer.invoke('hermes:aftersales:indicators'),
+    list: () => ipcRenderer.invoke('hermes:aftersales:list'),
+    setStatus: payload => ipcRenderer.invoke('hermes:aftersales:setStatus', payload)
+  },
+  admin: {
+    actors: () => ipcRenderer.invoke('hermes:admin:actors'),
+    deactivate: id => ipcRenderer.invoke('hermes:admin:deactivate', id),
+    saveActor: payload => ipcRenderer.invoke('hermes:admin:saveActor', payload),
+    whoami: () => ipcRenderer.invoke('hermes:admin:whoami')
+  },
+  desk: {
+    indicators: () => ipcRenderer.invoke('hermes:desk:indicators'),
+    open: payload => ipcRenderer.invoke('hermes:desk:open', payload),
+    rate: (id, satisfaction) => ipcRenderer.invoke('hermes:desk:rate', id, satisfaction),
+    setStatus: (id, status) => ipcRenderer.invoke('hermes:desk:setStatus', id, status),
+    tickets: () => ipcRenderer.invoke('hermes:desk:tickets')
+  },
+  hr: {
+    departments: () => ipcRenderer.invoke('hermes:hr:departments'),
+    employees: withSalary => ipcRenderer.invoke('hermes:hr:employees', withSalary),
+    offboarding: payload => ipcRenderer.invoke('hermes:hr:offboarding', payload),
+    policy: (operation, reason) => ipcRenderer.invoke('hermes:hr:policy', operation, reason),
+    saveDepartment: payload => ipcRenderer.invoke('hermes:hr:saveDepartment', payload),
+    saveEmployee: payload => ipcRenderer.invoke('hermes:hr:saveEmployee', payload),
+    treinamentos: payload => ipcRenderer.invoke('hermes:hr:treinamentos', payload)
+  },
+  services: {
+    find: name => ipcRenderer.invoke('hermes:services:find', name),
+    list: () => ipcRenderer.invoke('hermes:services:list'),
+    remove: id => ipcRenderer.invoke('hermes:services:remove', id),
+    save: payload => ipcRenderer.invoke('hermes:services:save', payload)
+  },
+  // r78 (G4): vasilhame em comodato. O casco que sai com o cliente continua sendo ativo da revenda; sem
+  // este canal o renderer não tinha como perguntar quantos são nossos nem quais estão com quem.
+  gas: {
+    cadastrar: payload => ipcRenderer.invoke('hermes:gas:cadastrar', payload),
+    devolver: id => ipcRenderer.invoke('hermes:gas:devolver', id),
+    doCliente: customerId => ipcRenderer.invoke('hermes:gas:doCliente', customerId),
+    entregar: (id, customerId) => ipcRenderer.invoke('hermes:gas:entregar', id, customerId),
+    list: () => ipcRenderer.invoke('hermes:gas:list'),
+    perder: (id, motivo) => ipcRenderer.invoke('hermes:gas:perder', id, motivo)
+  },
+  // r79 (T-11): leitura periódica de medidor. Água não se cobra por casco — se cobra pela diferença
+  // entre duas leituras, e isso é uma série, não um campo.
+  medidores: {
+    cadastrar: payload => ipcRenderer.invoke('hermes:medidores:cadastrar', payload),
+    leitura: payload => ipcRenderer.invoke('hermes:medidores:leitura', payload),
+    list: () => ipcRenderer.invoke('hermes:medidores:list')
+  },
+  // r100 (T-12): tabela de tarifas. `calcular` devolve `null` quando nao ha politica vigente — o
+  // renderer mostra "nao configurada" em vez de um valor que o codigo teria inventado.
+  tarifas: {
+    calcular: payload => ipcRenderer.invoke('hermes:tarifas:calcular', payload),
+    list: () => ipcRenderer.invoke('hermes:tarifas:list'),
+    remover: payload => ipcRenderer.invoke('hermes:tarifas:remover', payload),
+    salvar: payload => ipcRenderer.invoke('hermes:tarifas:salvar', payload)
+  },
+  // r88: backup e restore dos dados de negocio. O restore SOBRESCREVE — e antes de sobrescrever ele
+  // guarda o estado atual como mais uma versao, entao ele proprio e reversivel.
+  backup: {
+    list: () => ipcRenderer.invoke('hermes:backup:list'),
+    restore: (nomeArquivo, versaoArquivo) => ipcRenderer.invoke('hermes:backup:restore', nomeArquivo, versaoArquivo)
+  },
+  sales: {
+    cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:sales:cancel', id, tenantId, reason),
+    create: payload => ipcRenderer.invoke('hermes:sales:create', payload),
+    faturar: payload => ipcRenderer.invoke('hermes:sales:faturar', payload),
+    list: tenantId => ipcRenderer.invoke('hermes:sales:list', tenantId)
+  },
+  companies: {
+    branches: companyId => ipcRenderer.invoke('hermes:companies:branches', companyId),
+    list: () => ipcRenderer.invoke('hermes:companies:list'),
+    saveBranch: payload => ipcRenderer.invoke('hermes:companies:saveBranch', payload),
+    saveCompany: payload => ipcRenderer.invoke('hermes:companies:saveCompany', payload)
+  },
+  logistica: {
+    // r59 do GOAL V2: a entrega - a ultima etapa do vertical (distribuidora de gas).
+    criar: payload => ipcRenderer.invoke('hermes:logistica:criar', payload),
+    entregas: tenantId => ipcRenderer.invoke('hermes:logistica:entregas', tenantId),
+    porPedido: orderId => ipcRenderer.invoke('hermes:logistica:porPedido', orderId),
+    transitar: payload => ipcRenderer.invoke('hermes:logistica:transitar', payload)
+  },
+  projetos: {
+    // r79 do GOAL V2: o plano persistente do §12. O projeto liga a organizacao (o que a empresa e) a
+    // tarefa (o que precisa ser feito) - e sem ele, um conjunto de tarefas e uma lista.
+    ativos: tenantId => ipcRenderer.invoke('hermes:projetos:ativos', tenantId),
+    criar: payload => ipcRenderer.invoke('hermes:projetos:criar', payload),
+    listar: tenantId => ipcRenderer.invoke('hermes:projetos:listar', tenantId),
+    mudar: payload => ipcRenderer.invoke('hermes:projetos:mudar', payload),
+    podeIniciar: payload => ipcRenderer.invoke('hermes:projetos:podeIniciar', payload)
+  },
+  organizacao: {
+    // r90 do GOAL V2: o DESENHO da empresa - departamentos e o que cada um faz. O cadastro continua em
+    // companies-store; este bloco e a estrutura (r81/r88).
+    definir: payload => ipcRenderer.invoke('hermes:organizacao:definir', payload),
+    estrutura: companyId => ipcRenderer.invoke('hermes:organizacao:estrutura', companyId),
+    listar: tenantId => ipcRenderer.invoke('hermes:organizacao:listar', tenantId),
+    setorConhecido: setor => ipcRenderer.invoke('hermes:organizacao:setorConhecido', setor),
+    // A sugestao e canal, e nao import do catalogo: a tela nao pode carregar uma copia que envelhece.
+    sugestao: setor => ipcRenderer.invoke('hermes:organizacao:sugestao', setor)
+  },
+  trabalhos: {
+    // r86 do GOAL V2: o trabalho pontual - o terceiro tipo do §12. Ele EXPIRA, ao contrario da
+    // organizacao e do projeto, e e isso que impede a lista de virar arquivo de arrependimentos.
+    abertos: tenantId => ipcRenderer.invoke('hermes:trabalhos:abertos', tenantId),
+    criar: payload => ipcRenderer.invoke('hermes:trabalhos:criar', payload),
+    descartarVencidos: tenantId => ipcRenderer.invoke('hermes:trabalhos:descartarVencidos', tenantId),
+    listar: tenantId => ipcRenderer.invoke('hermes:trabalhos:listar', tenantId),
+    mudar: payload => ipcRenderer.invoke('hermes:trabalhos:mudar', payload),
+    vencidos: tenantId => ipcRenderer.invoke('hermes:trabalhos:vencidos', tenantId)
+  },
+  auditoria: {
+    // r36 do GOAL V2: leitura da trilha. O ledger existe desde a r35; este e o caminho ate a tela.
+    listar: payload => ipcRenderer.invoke('hermes:auditoria:listar', payload)
+  },
+  purchases: {
+    // r42 do GOAL V2: a solicitacao - etapa 1 do §26.
+    atenderSolicitacao: payload => ipcRenderer.invoke('hermes:purchases:atenderSolicitacao', payload),
+    solicitacaoStatus: payload => ipcRenderer.invoke('hermes:purchases:solicitacaoStatus', payload),
+    solicitacoes: tenantId => ipcRenderer.invoke('hermes:purchases:solicitacoes', tenantId),
+    solicitar: payload => ipcRenderer.invoke('hermes:purchases:solicitar', payload),
+    // r28 do GOAL V2: os tres canais que faltavam na tela (r26/r27).
+    aprovar: payload => ipcRenderer.invoke('hermes:purchases:aprovar', payload),
+    definirLimite: payload => ipcRenderer.invoke('hermes:purchases:definirLimite', payload),
+    limite: () => ipcRenderer.invoke('hermes:purchases:limite'),
+    cotacao: payload => ipcRenderer.invoke('hermes:purchases:cotacao', payload),
+    quotations: tenantId => ipcRenderer.invoke('hermes:purchases:quotations', tenantId),
+    removeQuotation: id => ipcRenderer.invoke('hermes:purchases:removeQuotation', id),
+    orders: tenantId => ipcRenderer.invoke('hermes:purchases:orders', tenantId),
+    receive: payload => ipcRenderer.invoke('hermes:purchases:receive', payload),
+    saveOrder: payload => ipcRenderer.invoke('hermes:purchases:saveOrder', payload),
+    saveQuotation: payload => ipcRenderer.invoke('hermes:purchases:saveQuotation', payload),
+    saveSupplier: payload => ipcRenderer.invoke('hermes:purchases:saveSupplier', payload),
+    suppliers: tenantId => ipcRenderer.invoke('hermes:purchases:suppliers', tenantId)
+  },
+  scheduling: {
+    book: payload => ipcRenderer.invoke('hermes:scheduling:book', payload),
+    bookFromCatalog: payload => ipcRenderer.invoke('hermes:scheduling:bookFromCatalog', payload),
+    cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:scheduling:cancel', id, tenantId, reason),
+    confirm: (id, tenantId) => ipcRenderer.invoke('hermes:scheduling:confirm', id, tenantId),
+    day: (tenantId, from, to, resourceId) => ipcRenderer.invoke('hermes:scheduling:day', tenantId, from, to, resourceId),
+    list: tenantId => ipcRenderer.invoke('hermes:scheduling:list', tenantId)
+  },
+  schedulingBlocks: {
+    create: payload => ipcRenderer.invoke('hermes:scheduling:block:create', payload),
+    list: () => ipcRenderer.invoke('hermes:scheduling:block:list'),
+    remove: id => ipcRenderer.invoke('hermes:scheduling:block:remove', id)
+  },
+  // Agentes. Forma PLANA - sem nivel `block`/`agent` aninhado. A r127 mostrou que um tipo declarando nivel
+  // inexistente compila (por `as unknown as`) e a tela mostra nada.
+  agents: {
+    approvals: (status?: string) => ipcRenderer.invoke('hermes:agent:approvals', status),
+    cancelExecution: (id: string) => ipcRenderer.invoke('hermes:agent:executions:cancel', id),
+    decide: (payload: { decidir: 'aprovar' | 'recusar'; id: string; quem: string }) =>
+      ipcRenderer.invoke('hermes:agent:approvals:decide', payload),
+    executions: (filtro?: { owner?: string; task_id?: string }) =>
+      ipcRenderer.invoke('hermes:agent:executions', filtro),
+    roster: () => ipcRenderer.invoke('hermes:agent:roster')
+  },
+  finance: {
+    append: payload => ipcRenderer.invoke('hermes:finance:append', payload),
+    costCenters: tenantId => ipcRenderer.invoke('hermes:finance:costCenters', tenantId),
+    list: tenantId => ipcRenderer.invoke('hermes:finance:list', tenantId),
+    settle: (id, tenantId) => ipcRenderer.invoke('hermes:finance:settle', id, tenantId),
+    totals: tenantId => ipcRenderer.invoke('hermes:finance:totals', tenantId)
+  },
   // Loopback origin that hosts YouTube's player for the file:// renderer.
   getEmbedHostOrigin: () => ipcRenderer.invoke('hermes:embed-host:origin'),
   // Registry-scoped backend resolution: { connectionId, profile } → descriptor.

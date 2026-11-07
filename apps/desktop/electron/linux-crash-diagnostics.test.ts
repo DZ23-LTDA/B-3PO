@@ -21,7 +21,8 @@ test('on linux, fatal Chromium output lands in a file under the Hermes logs dir'
   const logFile = switches.get('log-file')
 
   assert.ok(logFile)
-  assert.equal(path.dirname(logFile), '/home/u/.hermes/logs')
+  // `path` é o do host: no Windows o separador muda, o diretório pretendido não.
+  assert.equal(path.dirname(logFile).replace(/\\/g, '/'), '/home/u/.hermes/logs')
   // FATAL (3) must survive the level filter; anything stricter would drop it.
   assert.ok(Number(switches.get('log-level')) <= 3)
   assert.equal(plan.crashReporter.uploadToServer, false)

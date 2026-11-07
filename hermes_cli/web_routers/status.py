@@ -419,6 +419,12 @@ def _nous_session_validity() -> str:
         return "unknown"
 
 
+# r90 — o veredito de ``overall`` cobre DISPONIBILIDADE DO PROCESSO, não capacidade de inferência.
+# A lista é explícita e vira parte do payload (``overall_from``) para que a exclusão seja visível a
+# quem consome, em vez de descobrível só lendo este arquivo.
+OVERALL_COMPONENTS: tuple[str, ...] = ("gateway", "dashboard", "storage", "platforms")
+
+
 async def _component_health(gateway: dict[str, Any]) -> dict[str, Any]:
     """Component-level health rollup: counts and status enums only (public payload — no
     messages, paths or other detail that could carry secrets). The storage probe reuses the
@@ -448,6 +454,29 @@ async def _component_health(gateway: dict[str, Any]) -> dict[str, Any]:
     connected = sum(1 for state in platform_states if state in _HEALTHY_PLATFORM_STATES)
     components["platforms"] = {"status": "ok" if connected == len(platform_states) else "degraded",
                                "configured": len(platform_states), "connected": connected}
+    # r90 — a inferência não aparecia em lugar nenhum deste payload.
+    #
+    # Medido: ``/api/status`` devolvia ``overall: ok`` enquanto a linha de status do app dizia
+    # "inferência indisponível". Um health que ignora o sintoma nº 1 do produto é o pior lugar
+    # para economizar — e o sinal já existia no runtime (``gateway.readiness`` checa ``model``),
+    # só não chegava aqui.
+    #
+    # O QUE ESTE CAMPO É: há um nome de modelo na configuração.
+    # O QUE ELE NÃO É: prova de credencial. Um nome em config.yaml pode existir sem chave de API,
+    # e a prova completa é o ``setup.runtime_check`` que a UI já consome. Marcar "ok" sem essa
+    # ressalva seria trocar um campo enganoso por outro.
+    #
+    # Por isso ele NÃO entra em ``overall``: ver OVERALL_COMPONENTS.
+    try:
+        model_cfg = await run_in_threadpool(lambda: (load_config() or {}).get("model") or {})
+        bruto = (model_cfg.get("default") or model_cfg.get("model")) if isinstance(model_cfg, dict) else model_cfg
+        tem_modelo = bool(str(bruto or "").strip())
+        components["inference"] = {"status": "ok" if tem_modelo else "degraded",
+                                   "model_configured": tem_modelo, "probe": "model_name"}
+    except Exception:  # health: allow BLE001 -- status route must never 500; traceback is logged
+        _log.exception("inference component unavailable")
+        components["inference"] = {"status": "degraded", "model_configured": False,
+                                    "probe": "model_name"}
     return components
 
 
@@ -505,7 +534,7 @@ def _fts_rebuild_status() -> Optional[dict[str, Any]]:
 #: by everyone on the network. The standalone dashboard keeps its public body: Hermes Cloud reads
 #: the profile list there without a session (#60585).
 _WEBAPP_SIGNED_OUT_STATUS_KEYS = frozenset({
-    "version", "release_date", "gateway_running", "gateway_state", "overall", "components",
+    "version", "release_date", "gateway_running", "gateway_state", "overall", "overall_from", "components",
     "auth_required", "auth_providers", "auth_flows"})
 
 
@@ -606,8 +635,16 @@ async def get_status(profile: Optional[str] = None,
 
         components = await _component_health(gateway)
         status["components"] = components
-        status["overall"] = ("ok" if all(item.get("status") == "ok" for item in components.values())
-                             else "degraded")
+        # r90 — ``overall`` sobre uma lista NOMEADA, e a lista vai no payload.
+        #
+        # Antes: ``all(... for item in components.values())`` sobre TUDO o que estivesse em
+        # ``components`` — então o novo ``inference`` derrubaria o veredito de todo dashboard e
+        # varredura de disponibilidade numa máquina que deliberadamente não tem provedor. Com a
+        # lista explícita, acrescentar componente informativo não muda veredito por acidente, e
+        # quem lê o payload sabe exatamente o que ``overall`` cobre.
+        status["overall_from"] = list(OVERALL_COMPONENTS)
+        status["overall"] = ("ok" if all(components.get(name, {}).get("status") == "ok"
+                                         for name in OVERALL_COMPONENTS) else "degraded")
         await _advisory_pressure(status, profile_dir if profile_dir else get_hermes_home())
 
         # Profile NAMES and ``gateway_mode`` are low-sensitivity product surface (Hermes Cloud

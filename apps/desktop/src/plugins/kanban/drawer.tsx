@@ -405,7 +405,7 @@ function CommentComposer({
         <Tip label={sendLabel}>
           <Button
             aria-label={sendLabel}
-            className="absolute top-1 right-1 text-muted-foreground/80 hover:text-foreground"
+            className="absolute top-1 right-1 text-muted-foreground hover:text-foreground"
             disabled={empty}
             onClick={submit}
             size="icon-xs"

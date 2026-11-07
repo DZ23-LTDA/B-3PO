@@ -1,3 +1,4 @@
+import { translateNow } from '@/i18n/runtime'
 import type { ThreadMessage } from '@assistant-ui/react'
 import type { ModelOptionsResult } from '@hermes/shared'
 import { SLASH_COMMAND_RE } from '@hermes/shared'
@@ -68,7 +69,12 @@ export function sessionTitle(session: SessionInfo): string {
 
 /** What a session is called before it has been sent — and before its composer
  *  has been typed into, which is the only thing that can name it earlier. */
-export const NEW_SESSION_TITLE = 'New session'
+/** The caption of a session that has no row yet, in the active locale. Kept as a function (not a
+ *  module constant) so switching language re-renders the tab instead of freezing the launch locale. */
+export function newSessionTitle(): string {
+  return translateNow('sidebar.nav.new-session')
+}
+
 
 export function coerceGatewayText(value: unknown): string {
   if (typeof value === 'string') {

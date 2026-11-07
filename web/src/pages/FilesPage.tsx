@@ -334,7 +334,7 @@ export default function FilesPage() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         disabled={!canUpload}
-        aria-label="Upload files"
+        /* r97: sem aria-label — o conteudo do botao ja o nomeia (2.5.3) */
         className={`flex min-h-20 w-full min-w-0 items-center justify-between gap-4 border border-dashed px-4 py-3 text-left transition ${
           draggingFiles
             ? "border-primary bg-primary/10 text-foreground"
@@ -362,7 +362,7 @@ export default function FilesPage() {
       <Card className="min-w-0 max-w-full overflow-hidden">
         <CardContent className="overflow-x-auto p-0">
           {error && (
-            <div className="border-b border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="border-b border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive-text">
               {error}
             </div>
           )}

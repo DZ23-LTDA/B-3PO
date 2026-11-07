@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "strict": true,
+    "target": "es2022",
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*.ts", "vitest.config.ts"]
+}

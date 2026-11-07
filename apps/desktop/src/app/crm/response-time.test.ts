@@ -1,0 +1,109 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  averageResponseTime,
+  conversationsCreatedSince,
+  needsReply,
+  responseTime,
+  responseTimeLabel,
+} from './response-time'
+
+const msg = (direction: 'entrada' | 'saida', sent_at: number) => ({
+  body: 'x',
+  direction,
+  external_id: `id_${direction}_${sent_at}`,
+  sent_at,
+})
+
+describe('responseTime', () => {
+  it('mede do ultimo "entrada" ate a saida', () => {
+    expect(responseTime([msg('entrada', 1000), msg('saida', 61000)])).toEqual({ amostras: 1, mediaMs: 60000 })
+  })
+
+  it('conversa sem resposta devolve null — nao zero', () => {
+    expect(responseTime([msg('entrada', 1000)])).toBeNull()
+    expect(responseTime([])).toBeNull()
+  })
+
+  it('saida sem entrada antes nao entra na conta', () => {
+    expect(responseTime([msg('saida', 1000), msg('entrada', 2000)])).toBeNull()
+  })
+
+  it('duas saidas seguidas nao contam como duas respostas', () => {
+    const r = responseTime([msg('entrada', 0), msg('saida', 10000), msg('saida', 20000)])
+
+    expect(r).toEqual({ amostras: 1, mediaMs: 10000 })
+  })
+
+  it('ordena por horario em vez de confiar na ordem de chegada', () => {
+    const r = responseTime([msg('saida', 61000), msg('entrada', 1000)])
+
+    expect(r).toEqual({ amostras: 1, mediaMs: 60000 })
+  })
+})
+
+describe('averageResponseTime', () => {
+  it('ignora conversa sem resposta em vez de conta-la como zero', () => {
+    const r = averageResponseTime([
+      { messages: [msg('entrada', 0), msg('saida', 60000)] },
+      { messages: [msg('entrada', 0)] },
+    ])
+
+    expect(r).toEqual({ amostras: 1, mediaMs: 60000 })
+  })
+
+  it('sem nenhuma resposta, null', () => {
+    expect(averageResponseTime([{ messages: [msg('entrada', 0)] }])).toBeNull()
+  })
+})
+
+describe('responseTimeLabel', () => {
+  it('segundos, minutos e horas', () => {
+    expect(responseTimeLabel(45000)).toBe('45 s')
+    expect(responseTimeLabel(12 * 60000)).toBe('12 min')
+    expect(responseTimeLabel((3 * 60 + 20) * 60000)).toBe('3 h 20 min')
+    expect(responseTimeLabel(2 * 3600000)).toBe('2 h')
+  })
+})
+
+describe('needsReply', () => {
+  it('espera resposta quando a ultima mensagem e do cliente', () => {
+    expect(needsReply([msg('entrada', 1000)])).toBe(true)
+    expect(needsReply([msg('saida', 500), msg('entrada', 1000)])).toBe(true)
+  })
+
+  it('nao espera quando ja respondemos por ultimo', () => {
+    expect(needsReply([msg('entrada', 500), msg('saida', 1000)])).toBe(false)
+  })
+
+  it('conversa vazia nao espera resposta', () => {
+    expect(needsReply([])).toBe(false)
+  })
+
+  it('ordena por horario em vez de confiar na ordem de chegada', () => {
+    expect(needsReply([msg('entrada', 5000), msg('saida', 1000)])).toBe(true)
+  })
+})
+
+describe('conversationsCreatedSince', () => {
+  const AGORA = 1_700_000_000_000
+  const DIA = 86_400_000
+
+  it('conta so as que comecaram dentro da janela', () => {
+    const lista = [{ created_at: AGORA - DIA }, { created_at: AGORA - 10 * DIA }, { created_at: AGORA }]
+
+    expect(conversationsCreatedSince(lista, AGORA - 7 * DIA, AGORA)).toBe(2)
+  })
+
+  it('descarta data no futuro: relogio errado nao e lead', () => {
+    expect(conversationsCreatedSince([{ created_at: AGORA + DIA }], AGORA - 7 * DIA, AGORA)).toBe(0)
+  })
+
+  it('lista vazia conta zero, nao quebra', () => {
+    expect(conversationsCreatedSince([], AGORA - 7 * DIA, AGORA)).toBe(0)
+  })
+
+  it('borda: exatamente no inicio da janela entra', () => {
+    expect(conversationsCreatedSince([{ created_at: AGORA - 7 * DIA }], AGORA - 7 * DIA, AGORA)).toBe(1)
+  })
+})

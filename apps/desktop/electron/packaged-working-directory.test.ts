@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { mkdir, mkdtemp, rename, rm } from 'node:fs/promises'
 import os from 'node:os'
@@ -19,15 +19,65 @@ import { packagedWorkingDirectoryTarget, releasePackagedWorkingDirectory } from 
 // app) never joins it.
 const HELPER = 'console.log(JSON.stringify({ pid: process.pid, cwd: process.cwd() })); setInterval(() => {}, 1000)'
 
+/**
+ * r190 do GOAL V2: **mata a ÁRVORE no Windows**.
+ *
+ * O helper é criado com `detached: true` — **um grupo de processo próprio**. **`process.kill(pid)` no Windows
+ * termina o processo nomeado, mas não necessariamente o que ele criou**, e o `setInterval` que o mantém vivo é
+ * justamente o que segura o CWD.
+ *
+ * `taskkill /T` percorre a árvore. **Fora do Windows o `process.kill` já sinaliza o grupo.**
+ */
 function killPid(pid: number | undefined): void {
   if (!pid) {
     return
+  }
+
+  if (process.platform === 'win32') {
+    try {
+      execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true })
+
+      return
+    } catch {
+      // Cai no `process.kill` abaixo — pode já ter morrido, ou o taskkill pode não estar no PATH.
+    }
   }
 
   try {
     process.kill(pid)
   } catch {
     // already gone
+  }
+}
+
+/**
+ * r189 do GOAL V2: espera o processo sumir antes de remover a árvore.
+ *
+ * **O `rm` do `finally` falhava com `EBUSY`** porque o helper órfão ainda segurava o `workspace` como CWD: **no
+ * Windows, `process.kill()` retorna antes do processo morrer**, e o `rmdir` de um diretório que é o CWD de alguém é
+ * recusado.
+ *
+ * **Não é o bug do produto.** A r188 leu o `EBUSY` como "o CWD não é liberado" — **e o `EBUSY` de que o teste fala
+ * está na L149, dentro do `if (!packaged)`, e é ESPERADO**. **O que quebrava era a limpeza do diretório temporário.**
+ *
+ * **r190: 30 s, não 5.** A r189 mediu **isolado** e passou; **junto com o `updater`, o helper levou mais de 5 s
+ * para morrer sob carga** — e o teste voltou a falhar. **A espera é o orçamento do processo mais lento, não o
+ * tempo que ele levou uma vez.**
+ *
+ * A espera é limitada e não esconde um vazamento: **se o processo não morrer em 30 s, o teste falha no próprio
+ * `rm`**, que é o comportamento certo para um helper que não morre.
+ */
+async function esperarMorrer(pid: number | undefined): Promise<void> {
+  if (!pid) return
+
+  for (let tentativa = 0; tentativa < 300; tentativa += 1) {
+    try {
+      process.kill(pid, 0)
+    } catch {
+      return // sumiu
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
 }
 
@@ -107,7 +157,11 @@ test.skipIf(process.platform !== 'win32')(
                 builder.onLoad({ filter: /.*/, namespace: 'fixture' }, ({ path: name }) => ({
                   contents:
                     name === 'electron'
-                      ? `export const app = { isPackaged: ${packaged} }`
+                      ? // r186: `session` entrou. O `system-proxy-env` (alcançado pelo entry) importa
+                        // `{ session } from 'electron'`, e um fixture que só exporta `app` **quebra o bundle** — o
+                        // teste falhava em `No matching export in "fixture:electron" for import "session"`, que é
+                        // um erro de FIXTURE e não do produto. Era o bug #2 da r181, e ele nunca foi flaky.
+                        `export const app = { isPackaged: ${packaged} }\nexport const session = { defaultSession: { resolveProxy: async () => 'DIRECT' } }`
                       : [
                           `import { spawn } from 'node:child_process'`,
                           `spawn(process.env.FIXTURE_NODE, ['-e', ${JSON.stringify(HELPER)}], { detached: true, stdio: ['ignore', 'inherit', 'ignore'] })`,

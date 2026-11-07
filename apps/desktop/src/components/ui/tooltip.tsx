@@ -265,6 +265,63 @@ interface TipProps extends Omit<TooltipContentProps, 'content'> {
 // tried and reverted. `asChild` puts `data-slot="tooltip-trigger"` on the
 // child element itself, so arming REPLACES that node — which broke 18 tests
 // encoding that contract, and risks focus/ref identity at every call site.
+/**
+ * r291 — o `Tip` também VIRA O NOME acessível de um filho só-ícone.
+ *
+ * O `axe-core` reprovou três botões do rodapé de Configurações com `button-name` (**critical**):
+ * `<Tip label="Exportar"><OverlayIconButton><Download/></OverlayIconButton></Tip>` tem tooltip,
+ * mas o Radix `TooltipTrigger` emite `aria-describedby` — que é DESCRIÇÃO, não nome. Sem nome, o
+ * NVDA anuncia "botão" e o usuário não sabe o que ele faz.
+ *
+ * Era um problema de CLASSE, não de três call sites: qualquer ícone envolto em `Tip` sem
+ * `aria-label` próprio herdava o vazio. Corrigir aqui conserta todos os ~107 pontos de uma vez.
+ *
+ * O cuidado para não criar um bug pior (`label-content-name-mismatch`): só injetamos quando o
+ * filho é um elemento SEM texto renderizável e SEM nome declarado. Um `<button>Salvar</button>`
+ * dentro de `<Tip label="Salvar arquivo">` continua nomeado pelo próprio texto — sobrescrevê-lo
+ * com o tooltip mudaria o nome que o usuário vê na tela.
+ */
+function filhoSoIcone(child: React.ReactNode): child is React.ReactElement<Record<string, unknown>> {
+  if (!React.isValidElement(child)) {
+    return false
+  }
+
+  const props = child.props as Record<string, unknown>
+
+  if (props['aria-label'] || props['aria-labelledby']) {
+    return false
+  }
+
+  // Texto (direto ou aninhado) já dá nome ao controle.
+  //
+  // r53 — a checagem anterior era `typeof children !== 'string' || children.trim() === ''`, que
+  // respondia "só ícone" para QUALQUER children que não fosse uma string — inclusive um ARRAY, o
+  // caso comum de `<button><Icon />{label}</button>`. Resultado: `aria-label` injetado por cima de
+  // um botão que JÁ tinha texto visível, criando `label-content-name-mismatch` (WCAG 2.5.3) em
+  // todo o app. `slot.test.tsx` pegou: o chip de contribuição que falha aparecia como
+  // "broken-plugin: <erro>" em vez de "broken-plugin".
+  //
+  // Descer a árvore é a checagem que o comentário já prometia ("direto ou aninhado") e o código
+  // não fazia.
+  return !temTexto(props['children'])
+}
+
+function temTexto(node: unknown): boolean {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node).trim() !== ''
+  }
+
+  if (Array.isArray(node)) {
+    return node.some(temTexto)
+  }
+
+  if (React.isValidElement(node)) {
+    return temTexto((node.props as { children?: unknown }).children)
+  }
+
+  return false
+}
+
 function Tip({ label, children, delayDuration = TIP_DELAY_MS, ...props }: TipProps) {
   // A component rendered in isolation (every unit test, and any surface
   // mounted outside the app root) has no provider above it, and Radix throws
@@ -279,7 +336,11 @@ function Tip({ label, children, delayDuration = TIP_DELAY_MS, ...props }: TipPro
 
   const tip = (
     <Tooltip delayDuration={delayDuration} disableHoverableContent>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipTrigger asChild>
+        {filhoSoIcone(children) && typeof label === 'string'
+          ? React.cloneElement(children, { 'aria-label': label })
+          : children}
+      </TooltipTrigger>
       <TooltipContent {...props}>{label}</TooltipContent>
     </Tooltip>
   )

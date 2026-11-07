@@ -1,0 +1,356 @@
+# Autorização de dispositivo — envio de mensagem pelo celular
+
+Status: **especificação** (nada implementado ainda)
+Origem: bloqueio comprovado nas rodadas 59–61 do `MOBILE-REPORT.md`
+Objetivo: permitir que um celular pareado **envie** mensagem a um Bot, sem enfraquecer o modelo de
+autenticação do runtime.
+
+## 1. O problema, com evidência
+
+| Tentativa | Resultado |
+|---|---|
+| `POST /api/auth/ws-ticket` com `x-hermes-session-token` | **401** — `_require_session` exige login do dashboard |
+| `WS /api/ws?token=<session-token>` | upgrade recusado, **close 1006** |
+| `x-hermes-gateway-ticket` como header | é **credencial de entrada**, não algo que o servidor devolve |
+
+Fontes lidas:
+
+- `hermes_cli/dashboard_auth/routes.py:573` — `api_auth_ws_ticket` → `_require_session(request)`
+- `hermes_cli/web_server_chat.py:376` — `_consume_ws_ticket` aceita **ticket** (subprotocolo ou
+  `?ticket=`) ou credencial interna (`?internal=`)
+- `hermes_cli/dashboard_auth/ws_tickets.py` — `internal_ws_credential`: *"Never injected into the SPA
+  or returned over REST — only passed to a spawned child via its environment."*
+- `hermes_cli/dashboard_auth/native_http.py:1-6` — *"Same-user private bootstrap… This is not
+  remote/exposure delegation. The daemon captures the actual socket peer… the private control channel
+  is the credential issuer. A browser Origin (including an empty one) always disqualifies this path."*
+- `hermes_cli/gateway_client.py:285` — ticket de sessão é mintado pelo **socket de controle privado**
+
+**Conclusão:** o runtime, de propósito, só admite enviar prompt por (a) sessão de dashboard logada ou
+(b) processo do mesmo usuário com acesso ao socket privado. Um celular não é nenhum dos dois. Não há
+falha de configuração a corrigir — há uma funcionalidade de produto a construir.
+
+## 2. O que NÃO fazer (rejeitado com motivo)
+
+| Ideia | Por que não |
+|---|---|
+| expor `internal_ws_credential` por REST ou no link de pareamento | é segredo de processo; vazá-lo dá acesso total ao gateway, sem revogação por dispositivo e sem rastro |
+| aceitar `?token=` no WS | transforma o token de sessão (que vale para REST) em chave de execução; um token vazado executaria turnos |
+| abrir `/api/ws` sem autenticação em rede local | qualquer processo/hóspede na LAN executaria prompts |
+| relay em nuvem | GOAL §16 proíbe adicionar relay sem avaliar privacidade, custo e operação; desnecessário para o caso local |
+
+## 3. Desenho proposto — chave por dispositivo
+
+Modelo de ameaça resumido: quem tem a chave do dispositivo pode **enviar prompt** para o perfil que a
+autorizou, até ser revogado. Não pode ler configuração, não pode alterar providers, não pode aprovar
+ações sensíveis por conta própria (aprovação exige `approval.respond` com política, que continua
+validada no backend).
+
+### 3.1. Emissão (no pareamento)
+
+1. o desktop, ao gerar o link `b3po://pair`, cria um registro de dispositivo
+   `{device_id, label, key_hash, profile, created_at, last_seen_at, revoked_at: null}`;
+2. a chave é aleatória (32 bytes, base64url) e vai **no link**, uma vez; o servidor guarda só o
+   **hash** (SHA-256) — igual a senha, não igual a token de sessão;
+3. o link continua com validade curta (`expires_at`), como hoje.
+
+### 3.2. Emissão de ticket (nova rota, primeira parte do produto)
+
+```
+POST /api/b3po/device-ticket
+  headers: x-b3po-device-key: <chave>
+  body:    { "profile": "<bot>" }
+  200:     { "ticket": "<opaco>", "ttl_seconds": 30 }
+  401:     chave inválida/revogada
+  403:     perfil fora do escopo autorizado do dispositivo
+```
+
+A rota:
+
+- valida a chave contra o hash do dispositivo (comparação em tempo constante);
+- confere que o `profile` pedido é o que o dispositivo recebeu no pareamento;
+- minta ticket via `hermes_cli.dashboard_auth.ws_tickets.mint_ticket(...)` com
+  `provider="b3po-device"` e `user_id` do dono do perfil;
+- grava auditoria (`device_ticket_minted`) com `device_id`, perfil e IP — **sem** a chave;
+- aplica rate limit por dispositivo (ex.: 20/min) para conter abuso.
+
+### 3.3. Aceitação no WS
+
+`_consume_ws_ticket` passa a reconhecer `provider == "b3po-device"` como login válido **apenas** para os
+métodos de sessão (`session.resume`, `prompt.submit`, `prompt.cancel`, `session.interrupt`,
+`session.events.since`), recusando os demais (`session.mutate`, `approval.respond`, `config.*`).
+Hoje `provider == "bot-desktop"` é recusado explicitamente; a lista de recusa é o ponto natural para
+separar as capacidades por provedor de ticket.
+
+### 3.4. Revogação
+
+- `DELETE /api/b3po/devices/{device_id}` (autenticado pelo dashboard do dono) marca `revoked_at`;
+- tickets já emitidos expiram em ≤30 s; sockets abertos com ticket de dispositivo revogado são
+  fechados no próximo `prompt.submit` (verificação por `device_id` no grant);
+- tela de Dispositivos lista `label`, `last_seen_at` e botão Revogar.
+
+## 4. Critérios de aceite (o que vai ser testado)
+
+| # | Critério | Como provo |
+|---|---|---|
+| 1 | chave errada → 401 | teste de rota |
+| 2 | chave revogada → 401 | teste de rota |
+| 3 | perfil fora do escopo → 403 | teste de rota |
+| 4 | ticket emitido abre WS e `session.resume` responde | teste de integração com servidor real |
+| 5 | `prompt.submit` com ticket de dispositivo é aceito e o turno acontece | teste ao vivo no emulador |
+| 6 | método fora da allowlist (`approval.respond`) é recusado com ticket de dispositivo | teste de integração |
+| 7 | revogação no meio da sessão derruba o próximo envio | teste de integração |
+| 8 | chave não aparece em log nem em resposta | inspeção de log + grep no código |
+| 9 | rate limit responde 429 acima do teto | teste de rota |
+
+## 5. Escopo de arquivos
+
+| Arquivo | Mudança |
+|---|---|
+| `hermes_cli/web_routers/b3po_devices.py` (novo) | rotas de dispositivo: ticket, listar, revogar |
+| `hermes_cli/web_server_boundary.py` | allowlist de métodos por provedor de ticket (ponto já existente) |
+| `hermes_cli/dashboard_auth/device_store.py` (novo) | persistência do registro de dispositivo (hash, escopo, revogação) |
+| `mobile/b3po-app/src/api/gateway-rpc.ts` | já pronto: aceita `{kind:'ticket'}` |
+| `mobile/b3po-app/src/api/rest-client.ts` | `deviceTicket(deviceKey, profile)` |
+| `mobile/b3po-app/App.tsx` | composer ligado somente quando há ticket válido |
+
+Nada disso está implementado. O que existe hoje é o cliente (`gateway-rpc.ts`, 10 testes) esperando a
+credencial e a tela de conversa em modo leitura, ambos comprovados no aparelho.
+
+## 6. Implementado até aqui
+
+### 6.1. Cofre de dispositivos — `hermes_cli/b3po_devices.py` (16 testes)
+
+Núcleo de decisão, sem HTTP e sem ticket: é o que a rota vai chamar.
+
+| Função | Contrato |
+|---|---|
+| `create_device(label, profile_id, now)` | devolve `(record, key)`; a chave em claro sai **uma vez** e o registro guarda só `sha256` |
+| `verify_key(record, key)` | `hmac.compare_digest`; recusa `invalid_key` e `revoked` |
+| `authorize(...)` | chave + **escopo do perfil** + **janela de taxa**; devolve registro atualizado |
+| `revoke_device(record, now)` | marca revogação e zera a janela |
+| `public_view(record)` | o que a tela mostra: sem hash, sem chave |
+| `save_devices` / `load_devices` | escrita atômica (tmp + `os.replace`); leitura **fail-closed** |
+
+Testes que valem destaque:
+
+- **`key` não aparece no arquivo salvo** — o teste escreve o cofre e procura a chave em claro no JSON;
+- `public_view` não serializa nem a chave nem o hash;
+- dispositivo revogado recusa **mesmo com a chave correta**;
+- chave de um perfil recusada em outro (`scope_mismatch`);
+- taxa: 20 pedidos passam, o 21º é `rate_limited`, e fora da janela volta a passar;
+- arquivo corrompido devolve lista vazia (ninguém é liberado por engano);
+- registro corrompido é ignorado **sem perder os válidos**;
+- roundtrip preserva `last_seen_at`, contador e revogação, e a chave original continua valendo.
+
+### 6.2. Erros meus nesta rodada (dois, ambos pegos pelo gate)
+
+1. `read_text(encoding="utf-8")` — regra de footgun do Windows exige `utf-8-sig` (BOM). Corrigido.
+2. variável desempacotada não usada (`key_second`) — `RUF059` do ruff. Corrigido com `_key_second`.
+
+Nenhum dos dois era falha de lógica; os dois eram o gate fazendo o trabalho dele **antes** do commit.
+
+### 6.3. O que falta
+
+`POST /api/b3po/device-ticket`, a allowlist de métodos por provedor de ticket no WS e a tela de
+Dispositivos. O cliente mobile (`gateway-rpc.ts`) já aceita `{kind:'ticket'}`.
+
+## 7. Rota implementada — `hermes_cli/web_routers/b3po_devices.py` (10 testes)
+
+| Rota | O que faz |
+|---|---|
+| `POST /api/b3po/devices` | pareia: devolve a chave **uma vez** e o dispositivo sem segredo |
+| `POST /api/b3po/device-ticket` | valida `x-b3po-device-key`, escopo e taxa; minta ticket de uso único |
+| `GET /api/b3po/devices` | lista para a tela de Dispositivos (sem hash, sem chave) |
+| `DELETE /api/b3po/devices/{device_id}` | revoga |
+
+Mapa de erro → status: `invalid_key` 401, `revoked` 401, `scope_mismatch` 403, `rate_limited` 429,
+`invalid_input` 400.
+
+O teste mais importante é `test_ticket_attributes_it_to_the_device_not_a_user_login`: ele consome o
+ticket mintado e confere `provider == "b3po-device"`, `device_id` e `user_id` prefixado por
+`b3po-device:` — isto é, o ticket **não** é uma sessão de usuário logado. Os outros cobrem: chave
+ausente e chave errada devolvem o **mesmo** detalhe (não enumera dispositivos), revogado não pega
+ticket, perfil fora do escopo dá 403, teto de taxa dá 429, e a listagem não serializa hash.
+
+## 8. O que ainda NÃO está provado
+
+1. **Aceitação no WebSocket.** Não verifiquei ao vivo se `_consume_ws_ticket` aceita
+   `provider="b3po-device"` — só `bot-desktop` é recusado explicitamente, então a expectativa é que
+   aceite, mas expectativa não é prova. E a **allowlist de métodos** (só sessão, nunca `approval.respond`
+   ou `session.mutate`) ainda não existe: é o item de endurecimento obrigatório antes de liberar a UI.
+2. **Servidor real.** Tentei provar contra `hermes serve` na porta 9119 e o `POST /api/b3po/devices`
+   devolveu **405**: o processo em execução é o runtime **pré-instalado** em `%TEMP%\b3po-f5-home\bin`,
+   que não contém o meu código. `/openapi.json` não lista nenhum caminho `b3po`, confirmando. Testar ao
+   vivo exige rodar o `serve` **do checkout**, não do binário instalado — próximo passo.
+3. Tela de Dispositivos e composer no celular continuam fora até (1) estar feito.
+
+## 9. Porta HTTP provada ao vivo — e o muro do WebSocket
+
+### 9.1. Como rodar o `serve` do checkout
+
+O `hermes.exe` instalado em `%TEMP%\b3po-f5-home\bin` **não** contém o código do checkout — foi por
+isso que a rodada 43 viu 405. Rodando o pacote do próprio checkout, as rotas aparecem. É preciso um
+arquivo lançador, porque `python -c` com espaços é quebrado pelo pwsh:
+
+```
+"import sys; sys.argv=['hermes','serve']; from hermes_cli.main import main; main()" > launcher.py
+python launcher.py        # cwd = raiz do checkout
+```
+
+`/openapi.json` então lista:
+
+```
+/api/b3po/device-ticket        [post]
+/api/b3po/devices              [get,post]
+/api/b3po/devices/{device_id}  [delete]
+```
+
+### 9.2. O gate global barrava a rota (causa raiz)
+
+Com a rota registrada, `POST /api/b3po/device-ticket` com a chave correta devolvia **401
+`Unauthorized`** — detalhe do middleware, não `invalid_key` do meu handler. Ou seja: o gate de auth
+rodava **antes** e exigia sessão de dashboard.
+
+Correção: `/api/b3po/device-ticket` entrou em `PUBLIC_API_PATHS`
+(`hermes_cli/dashboard_auth/public_paths.py`), seguindo o precedente de `/api/cron/fire` — rota pública
+**cuja credencial é verificada no próprio handler**. Aqui a credencial é a chave do dispositivo (hash
+em tempo constante, escopo de perfil, taxa, revogação). Um teste de contrato garante as duas pontas: a
+rota de ticket está na lista pública e a de pareamento **não** está.
+
+Depois da correção, ao vivo:
+
+| Pedido | Resultado |
+|---|---|
+| `POST /api/b3po/devices` com token de sessão | **200**, dispositivo `dev-3a35e2128eae98da`, chave emitida |
+| `POST /api/b3po/device-ticket` **só** com `x-b3po-device-key` | **200**, ticket de 30 s, perfil `revisor-codigo` |
+| mesmo pedido com chave errada | **401** (a isenção não abre a porta para qualquer um) |
+
+### 9.3. O muro: upgrade do WebSocket responde 403
+
+Quatro variantes contra o servidor real, todas recusadas:
+
+| Variante | Resultado |
+|---|---|
+| `?ticket=` no query + `hermes-gateway-v1` | close **1006**, sem motivo |
+| subprotocolo `hermes-gateway-ticket.<ticket>` | close **1006**, sem motivo |
+| idem, ticket recém-mintado (<1 s) | close **1006** |
+| header `x-hermes-gateway-ticket: <ticket>` (cliente `ws`, que permite header) | **upgrade 403** |
+
+O 403 é o dado novo e útil: o upgrade é recusado por uma camada anterior ao handler, e o log do
+servidor não registra nada (sem traceback). O caminho nativo (`native_http.authenticate_native_ws`)
+espera um ticket de propósito `native-http`, mintado pelo **socket de controle privado** — não um
+ticket de qualquer provedor.
+
+**Próximo passo concreto:** ler `authenticate_native_ws` e a regra que devolve 403 no upgrade, e decidir
+entre (a) mapear `b3po-device` como provedor aceito naquela função, ou (b) aceitar nosso ticket no mesmo
+ponto em que o nativo é aceito. Não vou chutar: o 403 é a pista.
+
+**Status:** credencial de dispositivo funciona em HTTP, comprovada; envio por WebSocket continua
+bloqueado nessa camada. `NOT_READY`.
+
+## 10. RESOLVIDO: o contrato real do WebSocket (e o envio aceito)
+
+Quatro hipóteses caíram até sobrar a verdade. Cada erro foi um dado:
+
+| Tentativa | Erro observado | Conclusão |
+|---|---|---|
+| `?ticket=<ticket de dispositivo>` | close **1006** | o ramo sem gate só consome ticket na superfície `webapp`; em `serve` ele é ignorado |
+| subprotocolo `hermes-gateway-ticket.<t>` | close **1006** | mesma razão |
+| header `x-hermes-gateway-ticket` | upgrade **403** | o docstring é explícito: em socket de núcleo o grant nativo é recusado de propósito |
+| `?token=<session token>` sem `Origin` | close **1006** | falta `Origin` |
+| `?token=…` + `Origin` + subprotocolo pedido | **"Server sent no subprotocol"** | pedir `hermes-gateway-v1` quebra: o servidor não o devolve nesse ramo |
+| **`?token=…` + `Origin` + nenhum subprotocolo** | **WS ABERTO** | contrato correto |
+
+Depois de aberto:
+
+| Frame | Erro / resultado |
+|---|---|
+| `session.resume` com id curto de `session.create` | `4007 session not found` |
+| `session.resume` com `stored_session_id` | **ok** |
+| `prompt.submit` com `submission_id` | `4000 invalid params: Extra inputs are not permitted` |
+| `prompt.submit` com `input_id` | idem |
+| **`prompt.submit` com `{session_id, text}`** | **`{"status":"streaming","user_row_id":1}`** |
+
+O `mobile/b3po-app/src/api/gateway-rpc.ts` foi reescrito para esse contrato, com 12 testes: URL com
+`?token=`, `Origin` obrigatório, **zero subprotocolo**, `resume` com id canônico
+(`canonicalSessionId` prefere `stored_session_id`) e `prompt.submit` só com `session_id` + `text`.
+Teste de integração contra servidor `ws` real que, como o backend, não seleciona subprotocolo.
+
+### O que isso muda no diagnóstico anterior
+
+O bloqueio **não** era falta de autorização de dispositivo: a credencial que o WS aceita nesta
+superfície é o **token de sessão que o pareamento já carrega**. A chave de dispositivo (§3–§9) continua
+valendo como evolução — dá revogação por dispositivo e escopo por perfil — mas não é pré-requisito para
+o envio funcionar.
+
+**Pendente para fechar no aparelho:** `App.tsx` precisa abrir o socket com `gatewayWsUrl` +
+`gatewayHeaders`, criar/retomar a conversa e enviar pelo composer. O transporte está provado; falta
+ligar a tela.
+
+## Estado: IMPLEMENTADO (rodada 68)
+
+A allowlist de métodos por provedor de ticket saiu do papel:
+
+| Peça | Onde | Teste |
+|---|---|---|
+| lista de verbos de sessão + recusa com motivo fixo | `tui_gateway/device_scope.py` (`DEVICE_SESSION_METHODS`, `method_refusal`) | `tests/tui_gateway/test_device_method_scope.py` |
+| fiação no funil único de despacho (vale para as faixas serial e concorrente) | `tui_gateway/ws.py::_dispatch_one` | 3 testes dirigindo o **`handle_ws` real** com `auth_identity={"provider":"b3po-device"}` |
+
+Código de erro: **4030** (`DEVICE_METHOD_FORBIDDEN`), fora da faixa 4000/4001 de parâmetros para o cliente
+distinguir "seu ticket não vale para isto" de "seu payload está errado".
+
+### Comprovado
+
+- `approval.respond` com ticket de dispositivo → erro 4030 **e o pedido não chega ao dispatcher**
+  (asserção sobre a lista de métodos vistos pelo `server.dispatch`).
+- `prompt.submit` com o mesmo ticket → passa.
+- Credencial de dono (`provider="local"`) → `approval.respond` continua passando: a regra não vaza.
+- Texto da recusa não ecoa parâmetro do cliente.
+
+17 testes no arquivo; gate `14 checks, ok`.
+
+### A prova ao vivo: causa real do HTTP 403 (diagnóstico corrigido)
+
+Na rodada anterior eu escrevi que o 403 vinha do "gate de upgrade" e que faltava descobrir a credencial.
+Investiguei o código e o diagnóstico estava **errado**. A causa é outra, e está no fluxo de autenticação:
+
+`hermes_cli/web_server_chat.py::_ws_auth_reason` tem duas metades:
+
+- **modo gated** (`app.state.auth_required`): consome `?ticket=` (linha ~293) — é onde um ticket de
+  dispositivo abre `/api/ws` e onde a allowlist vale;
+- **modo loopback** (o nosso `serve` de desenvolvimento): consome ticket **apenas quando a superfície é
+  webapp** (`... if webapp else None`, linha ~353); fora disso exige `?token=` igual ao `_SESSION_TOKEN`
+  (linha ~359).
+
+Nosso servidor roda loopback com token estático, então `ws://…/api/ws?ticket=…` cai em "no_credential" →
+fecha 4401 no upgrade, que o cliente vê como **HTTP 403**. Não é bug, não é gate de origem, e não dá para
+"consertar afrouxando" nada: é o contrato de credencial do modo loopback.
+
+### Cadeia fechada por teste (o que a prova ao vivo ia mostrar)
+
+`tests/hermes_cli/test_ws_device_ticket_admission.py` dirige o **gate de upgrade real**
+(`web_server_chat._ws_auth_reason`) com um ticket mintado por `ws_tickets.mint_ticket`:
+
+| Teste | O que prova |
+|---|---|
+| gate em modo **gated** + `?ticket=` de dispositivo | `reason is None`, credencial `ticket`, e a identidade carimbada é `{"user_id": "b3po-device:dev-1", "provider": "b3po-device"}` |
+| gate em modo **loopback** + mesmo ticket | recusa com `no_credential` — a causa real do 403, agora presa por teste |
+
+Com o teste de recusa em `tests/tui_gateway/test_device_method_scope.py`, a cadeia fica completa e
+verificada ponta a ponta **em processo**: o gate aceita o ticket e carimba `b3po-device` → o dispatcher
+recusa qualquer verbo fora da lista de sessão.
+
+O que **não** foi feito: subir um servidor em modo gated e conectar um cliente de verdade por `wss`, porque
+isso exige credencial de login no dashboard (não configurada aqui). Fica declarado como pendência de
+homologação, não como funcionalidade comprovada em campo.
+
+### O que isso significa para o produto
+
+| Cenário | Credencial que abre `/api/ws` | Allowlist de dispositivo entra? |
+|---|---|---|
+| `serve` local (loopback, token estático) | `?token=<_SESSION_TOKEN>` | não — identidade não é de dispositivo |
+| implantação **gated** (login no dashboard) | `?ticket=<ticket>` | **sim**, e é para isso que existe |
+| webapp em loopback | ticket de socket do webapp | não |
+
+O app mobile hoje usa `?token=` (loopback), coerente com o modo do servidor. Quando o produto for para
+implantação gated com pareamento por ticket, o caminho já está protegido pela allowlist e testado.

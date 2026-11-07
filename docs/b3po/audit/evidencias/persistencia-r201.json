@@ -1,0 +1,13 @@
+{
+  "antes": {
+    "adicionadas": 2,
+    "linhas": 2
+  },
+  "depois": {
+    "linhas": [
+      "Distribuidora Alfa · R$ 10,50 × 10 · 20d",
+      "Atacado Beta · R$ 12,00 × 10 · 7d"
+    ],
+    "sobreviveu": 2
+  }
+}

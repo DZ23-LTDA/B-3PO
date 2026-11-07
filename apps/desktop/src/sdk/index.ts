@@ -21,6 +21,7 @@
 import { computed, type ReadableAtom } from 'nanostores'
 import type { ReactNode } from 'react'
 
+import { withTimeout } from '@/lib/with-timeout'
 import { capabilityScoped, getApiRequestConnection } from '@/api/client'
 import { mutateSessionFenced } from '@/api/sessions'
 import { PRIMARY_SESSION_VIEW } from '@/app/chat/session-view'
@@ -107,6 +108,8 @@ import type { PaginatedSessions, UsageStats } from '@/types/hermes'
 
 import type { SessionMutationSnapshot } from '../../../shared/src/session-http-mutations'
 
+import { traceWakeStep } from './wake-trace'
+import { resumeExistingTile } from './wake-tile'
 import { pluginDecisions, profiles, skills, toolsets } from './bridge'
 import { composerHost } from './composer'
 import { i18nHost } from './i18n'
@@ -946,7 +949,7 @@ export const host = {
         // Retry surface both already exist. A plain open never asked for a
         // deadline and has nowhere to render one, so it keeps today's
         // behaviour rather than gaining a rejection its callers cannot handle.
-        await (options.awaitHydration ? awaitProfileActivation(dial, targetProfile, hydrationTimeoutMs) : dial())
+        await (options.awaitHydration ? traceWakeStep('activation', awaitProfileActivation(dial, targetProfile, hydrationTimeoutMs)) : traceWakeStep('dial', dial()))
         profileActiveAt = Date.now()
       }
 
@@ -1069,28 +1072,27 @@ export const host = {
             const tileDelegate = existingTile ? sessionTileDelegate() : null
 
             if (tileDelegate) {
-              try {
-                await tileDelegate.resumeTile(storedSessionId, { refreshTranscript: true })
-              } catch {
-                requestSessionResume(storedSessionId, ownerRoute || undefined)
-              }
+              await traceWakeStep('tile-resume', resumeExistingTile(tileDelegate, storedSessionId, ownerRoute, hydrationTimeoutMs))
             } else {
               requestSessionResume(storedSessionId, ownerRoute || undefined)
             }
           }
 
           if (options.awaitHydration) {
-            await waitForFocusedSessionHydration({
-              expectHistory,
-              generation,
-              isCurrent: openingStillCurrent,
-              profile: targetProfile,
-              // A background dial never moves $activeGatewayProfile, so gating
-              // hydration on it would wait for something that is not coming.
-              requireActiveProfile: ownerRoute ? false : plan.requireActiveProfileForHydration,
-              storedSessionId,
-              timeoutMs: hydrationTimeoutMs
-            })
+            await traceWakeStep(
+              'hydration',
+              waitForFocusedSessionHydration({
+                expectHistory,
+                generation,
+                isCurrent: openingStillCurrent,
+                profile: targetProfile,
+                // A background dial never moves $activeGatewayProfile, so gating
+                // hydration on it would wait for something that is not coming.
+                requireActiveProfile: ownerRoute ? false : plan.requireActiveProfileForHydration,
+                storedSessionId,
+                timeoutMs: hydrationTimeoutMs
+              })
+            )
           }
 
           break

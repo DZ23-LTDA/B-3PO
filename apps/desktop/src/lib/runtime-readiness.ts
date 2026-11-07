@@ -63,7 +63,15 @@ export type RuntimeReadinessDisplay = 'checking' | 'needs_setup' | 'ready' | 'un
 
 export type RuntimeReadinessRequester = <T = unknown>(method: string, params?: Record<string, unknown>) => Promise<T>
 
-const DEFAULT_NOT_READY_REASON = 'Add a provider credential before sending your first message.'
+/**
+ * A frase que aparece quando não há NENHUM provider configurado.
+ *
+ * **Exportada para a UI poder traduzi-la.** Ela nasceu em inglês dentro de uma função pura de
+ * prontidão, e a UI a exibia crua — num produto cujo idioma é pt-BR. O valor continua sendo a
+ * identidade da frase (o painel compara com ela para saber que pode trocar pela tradução); o
+ * TEXTO que o usuário lê vem de i18n.
+ */
+export const DEFAULT_NOT_READY_REASON = 'Add a provider credential before sending your first message.'
 
 function toErrorMessage(error: unknown): null | string {
   if (error instanceof Error) {

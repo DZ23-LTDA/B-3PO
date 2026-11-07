@@ -12,7 +12,8 @@ from hermes_state_runtime import RuntimeStoreError
 
 SURFACES = frozenset({'hud', 'voice-live'})
 _VOICE_CONTEXT_LIMIT = 6000
-_SUBMIT_FIELDS = ('surface', 'voice_context', 'interrupted', 'voice_turn')
+_PRODUTO_CONTEXT_LIMIT = 400
+_SUBMIT_FIELDS = ('surface', 'voice_context', 'interrupted', 'voice_turn', 'produto_contexto')
 _surface_turn = ContextVar('surface_turn', default=None)
 
 
@@ -22,9 +23,17 @@ def submit_surface_fields(params):
 
 
 def admit_surface(params):
-    """Wire ``surface`` / ``voice_context`` / ``interrupted`` / ``voice_turn`` -> committed ``surface_v1``
-    (``{}`` when absent). ``voice_turn`` marks a spoken voice-mode turn: it runs on ``auxiliary.voice_chat``."""
-    surface, context, interrupted, voice_turn = (params.get(key) for key in _SUBMIT_FIELDS)
+    """Wire ``surface`` / ``voice_context`` / ``interrupted`` / ``voice_turn`` / ``produto_contexto``
+    -> committed ``surface_v1`` (``{}`` when absent). ``voice_turn`` marks a spoken voice-mode turn:
+    it runs on ``auxiliary.voice_chat``.
+
+    ``produto_contexto`` (B-3PO) is the ambient/project/actor scope the Desktop sent with the turn.
+    **It is NOT a surface**: it needs no HUD or voice-live to be meaningful, so it is validated and
+    committed on its own. It is a *description* of where the user is working — it grants nothing;
+    ``permission-guard`` remains the only door, and the renderer already clipped it to what the
+    actor may read.
+    """
+    surface, context, interrupted, voice_turn, produto = (params.get(key) for key in _SUBMIT_FIELDS)
     if surface is not None and surface not in SURFACES:
         raise RuntimeStoreError('invalid_params')
     # The spoken transcript only makes sense for a live-voice delegation; anywhere else it is
@@ -32,6 +41,8 @@ def admit_surface(params):
     if context is not None and (surface != 'voice-live' or not isinstance(context, str)):
         raise RuntimeStoreError('invalid_params')
     if any(flag is not None and type(flag) is not bool for flag in (interrupted, voice_turn)):
+        raise RuntimeStoreError('invalid_params')
+    if produto is not None and not isinstance(produto, str):
         raise RuntimeStoreError('invalid_params')
     committed = {}
     if surface:
@@ -42,6 +53,8 @@ def admit_surface(params):
         committed['interrupted'] = True
     if voice_turn:
         committed['voice_turn'] = True
+    if produto and produto.strip():
+        committed['produto_contexto'] = produto[:_PRODUTO_CONTEXT_LIMIT]
     return {'surface_v1': committed} if committed else {}
 
 
@@ -67,10 +80,34 @@ def _voice_live_note(committed, valid_tool_names):
 _SURFACE_NOTES = {'hud': _hud_note, 'voice-live': _voice_live_note}
 
 
+def _produto_note(committed):
+    """The B-3PO ambient/project scope as a note on the user message (r273).
+
+    **O que ele diz e o que ele NÃO diz.** Ele diz onde a pessoa está trabalhando — ambiente,
+    projeto, e quantos domínios ela pode ler. Ele **não** diz "você pode acessar X": a nota é
+    contexto para a resposta não vir do ambiente errado, e o ``permission-guard`` continua sendo
+    a única porta de acesso. A última linha da nota existe para o modelo não confundir as duas.
+
+    **Ride the user message, never the system prompt** — same seam as the voice/HUD notes, so the
+    frozen cached prefix is untouched and a mid-conversation ambient switch costs no cache.
+    """
+    contexto = committed.get('produto_contexto')
+    if not contexto:
+        return ''
+    return (
+        f'Contexto do produto (B-3PO): o usuário está trabalhando em {contexto}. '
+        'Use isto para situar a resposta; não é uma permissão de acesso.'
+    )
+
+
 def surface_note(committed, valid_tool_names=None):
-    """The model-bound note for a committed surface (``""`` for the plain app window): barge-in
-    first, then the HUD read-the-window-below prior or the spoken-delegation contract."""
+    """The model-bound note for a committed surface (``""`` for the plain app window): the B-3PO
+    product context first, then barge-in, then the HUD read-the-window-below prior or the spoken
+    delegation contract."""
     notes = []
+    produto = _produto_note(committed)
+    if produto:
+        notes.append(produto)
     if committed.get('interrupted'):
         from tools.tts_streaming import SPEECH_INTERRUPTED_NOTE
         notes.append(SPEECH_INTERRUPTED_NOTE)

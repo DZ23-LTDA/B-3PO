@@ -16,6 +16,7 @@ import {
   resolveNoConsolePython,
   simpleGitBinary
 } from './no-console-git'
+import { resolverPython } from './updater/python-for-tests'
 
 const gitArgs = ['-c', 'windows.appendAtomically=false', 'merge-base', '--is-ancestor', 'origin/main', 'HEAD']
 const gitBin = 'C:\\Program Files\\Git\\cmd\\git.exe'
@@ -44,7 +45,14 @@ function hangingTreeFixture() {
   )
 
   if (process.platform === 'win32') {
-    const python = execFileSync('python3', ['-c', 'import sys; print(sys.executable)'], { encoding: 'utf8' }).trim()
+    // r214 do GOAL V2: python3 no Windows e o stub da Microsoft Store - o TERCEIRO arquivo com a linha antiga.
+    //
+    // A r187 corrigiu o checkout-source, a r200 corrigiu os dois do channel-build-version, e ESTE ficou:
+    // execFileSync('python3', ...) falha com "Python nao foi encontrado" e derruba 3 testes com um erro de spawn
+    // que nao diz nada sobre o produto. O helper do python-for-tests resolve por execucao, e o valor vai para
+    // HERMES_DESKTOP_PYTHON - a variavel que o codigo sob teste le.
+    const python = resolverPython() ?? 'python'
+
     vi.stubEnv('HERMES_DESKTOP_PYTHON', python)
   }
 
@@ -217,7 +225,8 @@ test('host script forwards git argv unchanged and sets CREATE_NO_WINDOW', () => 
 
     fs.writeFileSync(script, NO_CONSOLE_GIT_SCRIPT)
 
-    const out = execFileSync('python3', [script, ...gitArgs], {
+    // r214: o mesmo `python3` do L47 — este roda o SCRIPT do host, e o stub da Store o derruba.
+    const out = execFileSync(resolverPython() ?? 'python', [script, ...gitArgs], {
       encoding: 'utf8',
       env: {
         ...process.env,

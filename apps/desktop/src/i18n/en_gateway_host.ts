@@ -3,10 +3,10 @@ import type { GatewayHostTranslations } from './types_gateway_host'
 // Settings → Gateways copy where the connection cannot change, spread into en.ts.
 export const enGatewayHost: GatewayHostTranslations = {
   unavailableTitle: 'Gateway settings unavailable',
-  unavailableDesc: 'Connection settings can only be changed from the Hermes Desktop app on the computer running it.',
+  unavailableDesc: 'Connection settings can only be changed from the B-3PO Desktop app on the computer running it.',
   webappHostTitle: 'Hermes host',
   webappHostDesc:
-    'The Webapp always uses the Hermes host that serves it. To switch gateways, sign in to Hermes Cloud or manage saved connections, use the Hermes Desktop app.',
+    'The Webapp always uses the Hermes host that serves it. To switch gateways, sign in to B-3PO Cloud or manage saved connections, use the B-3PO Desktop app.',
   webAccess: {
     title: 'Web access',
     intro: 'Open Hermes on this computer from your phone or another computer, signed in with your Nous account. Whoever signs in can run commands on this computer.',

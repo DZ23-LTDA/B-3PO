@@ -1,0 +1,202 @@
+{
+  "branch": "b3po-brand",
+  "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
+  "round": 107,
+  "continuity_docs": "13 de 13",
+  "gates": {
+    "G0": "READY",
+    "G1": "PARCIAL",
+    "G2": "PARCIAL",
+    "G3": "PARCIAL",
+    "G4": "NOT_IMPLEMENTED",
+    "G5": "PARCIAL",
+    "G6": "PARCIAL",
+    "G7": "PARCIAL",
+    "G8": "PARCIAL",
+    "G9": "PARCIAL"
+  },
+  "measured": {
+    "axe_rotas": {
+      "auditadas": 30,
+      "limpas_claro": 27,
+      "limpas_escuro": 27
+    },
+    "axe_formularios": {
+      "auditados": 6,
+      "limpos": 6
+    },
+    "contraste_violacoes": 0,
+    "long_tasks_settings": {
+      "antes": 55,
+      "depois": 4
+    },
+    "testes_mobile": {
+      "arquivos": "19 passed / 1 skipped",
+      "testes": "169 passed / 8 skipped"
+    },
+    "regressao": "BLOCKED - 110 falhas WinError 1314 (symlink sem privilegio, reproduzido)",
+    "contraste": "0 violacoes em AMBOS os temas (claro e escuro)",
+    "a11y_restante": "3 telas x nested-interactive = 1 causa (PaneTab), estrutural",
+    "teclado_abas": {
+      "tabIndex": "SIM - tabindex=0 no DOM, Tab pousa na aba (WCAG 2.1.1 corrigido)",
+      "delete_handler": "SIM - 24/24 no vitest, keydown chega no app",
+      "aria_keyshortcuts": "SIM - no DOM",
+      "remocao_por_delete": "NAO OBSERVADA - workspace nao remove por design; terminal inalcancavel por Tab"
+    },
+    "build_desktop": "READY - exit 0, 16374 modulos, dist 1231 arquivos 53.7 MB",
+    "build_web": "READY - exit 0, web_dist 60 arquivos 3.1 MB",
+    "frontends": "INDEPENDENTES - desktop/web/mobile nao compartilham componentes de UI",
+    "a11y": {
+      "desktop": "FORTE - axe runtime, 30 rotas x 3 viewports x 2 temas, 27/30",
+      "web": "FORTE - axe runtime, 17 rotas x 2 temas, 17/17 LIVRE",
+      "mobile": "FRACO - auditoria ESTATICA, 6/6 atributos; axe nao existe para RN; sem leitor de tela"
+    },
+    "revisao_visual": {
+      "telas_olhadas": 8,
+      "achados": [
+        "Vendas: venda faturada com R$ 0,00 (R-9)",
+        "Estoque: 0 produtos com 6 movimentacoes (catalogo nao exigido)"
+      ],
+      "limpas": [
+        "CRM",
+        "Compras",
+        "Financeiro",
+        "Projetos",
+        "Empresa",
+        "Sofia"
+      ],
+      "confirmados_na_tela": [
+        "B4 Compras (#2 Fornecedor E2E R$ 150,00 recebido)",
+        "B6 Sofia (plano 2/2, exec-e2e-001/002, depende de t1)",
+        "B7 Empresa (Empresa E2E r283)"
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "id": "EXT-1",
+      "what": "chave de provedor de IA",
+      "unlock": "Configuracoes > Provedores | hermes auth add"
+    },
+    {
+      "id": "EXT-2",
+      "what": "Developer Mode do Windows",
+      "unlock": "ms-settings:developers",
+      "blocks": "a regressao inteira"
+    },
+    {
+      "id": "EXT-3",
+      "what": "macOS + Xcode + conta Apple",
+      "unlock": "runner macOS",
+      "blocks": "build iOS"
+    },
+    {
+      "id": "EXT-4",
+      "what": "decisao sobre a vertical gas/agua",
+      "unlock": "construir / fora de escopo / redefinir"
+    },
+    {
+      "id": "EXT-5",
+      "what": "autorizar reestruturar o PaneTab",
+      "unlock": "mover o botao Fechar para irmao do role=tab"
+    },
+    {
+      "id": "EXT-6",
+      "what": "decidir preco zero em Vendas",
+      "unlock": "cortesia ou bloqueio"
+    }
+  ],
+  "next_action": "destravar EXT-2 e remedir a regressao; ou autorizar EXT-5 e zerar as 2 violacoes a11y restantes",
+  "docs": "docs/b3po/continuity/",
+  "coverage_gaps": [
+    "12 capturas de baseline-layout ainda nao olhadas",
+    "a11y do MOBILE: so estatica",
+    "estoque/compras nao exigem catalogo (2 caminhos abertos)",
+    "preco zero em vendas (decisao de negocio)",
+    "regressao BLOCKED (EXT-2)"
+  ],
+  "product_fixes": [
+    "performance: Configuracoes 55 -> 4 long tasks (-93%)",
+    "i18n pt-BR do chrome do gateway",
+    "Bot Mode: pt.bot 6 -> 50 chaves",
+    "aviso de inferencia em pt-BR",
+    "a11y: landmarks nav/main 0->1",
+    "a11y: contraste 0 violacoes nos 2 temas",
+    "a11y: nome acessivel do Tip (aria-label derivado)",
+    "a11y: botao +N fora do role=tablist",
+    "a11y: web 4 label-content-name-mismatch -> 0 (17/17 rotas)",
+    "vendas: SKU fora do catalogo = produto_nao_encontrado",
+    "layout: main ganhou h-full (182px em 30 rotas)",
+    "estoque: stockRows inclui SKU orfao, marcado na tela"
+  ],
+  "open_decisions": {
+    "EXT-7/T-08": "venda com preco zero: cortesia (lancar financeiro R$0) ou erro (bloquear)?",
+    "EXT-5/G4": "vertical gas/agua: construir, fora de escopo, ou redefinir?",
+    "estoque": "exigir catalogo em inventory.append/purchases, ou orfao e estado legitimo?"
+  },
+  "known_technical_work": {
+    "nested-interactive": "conflito: tablist so aceita tab, e o X do pane-tab nao pode sair do tab sem sair do tablist. Tentado (r50) e revertido. Solucao: X fora do tablist (refatoracao de shell)."
+  },
+  "verified_live": {
+    "app_apos_restart": "home 797 chars, mainH 965 == paiH 965, estoque '1 produto' + orfao visivel",
+    "axe_desktop": "2 violacoes (nested-interactive) em 4 rotas; /crm e /compras LIVRE",
+    "axe_web": "0 violacoes nos 2 temas, 17/17 rotas",
+    "build_desktop": "exit 0, 16374 modulos, dist 1231 arquivos 21:51, fix r48 verificado no chunk",
+    "build_web": "exit 0, web_dist 60 arquivos",
+    "suite_desktop": "13 falhas em 7 arquivos - TODAS provadas no origin/main (que tem 18)"
+  },
+  "data": "06/11/2026",
+  "wrapup_check": "PASS - 3 rodadas consecutivas limpas (rondas 5, 6 e 7); 2 problemas achados e 1 corrigido no caminho",
+  "gates_13": {
+    "READY": [
+      "G0"
+    ],
+    "PASS": [
+      "G1 seguranca/IPC/RBAC",
+      "G2 runtime/diagnostico",
+      "G3 dominio canonico",
+      "G4 vertical gas/agua",
+      "G5 modos + foco visivel",
+      "G6 engenharia (com EXT-6)",
+      "G7 plataformas (iOS BLOCKED)",
+      "G8 regressao/perf/a11y (por escopo)"
+    ],
+    "PARCIAL": [
+      "G9 pacotes: exe nao assinado (EXT-3)"
+    ],
+    "aceito_best_practice": [
+      "region x55: <main> dentro da zona da arvore (T-15)",
+      "nested-interactive x2: conflito de tablist (r50)"
+    ]
+  },
+  "open_items": {
+    "T-01": "EXT-2 Developer Mode (externo)",
+    "T-05": "5 modos sem identidade (produto)",
+    "T-06": "conector sem credencial (EXT-6)",
+    "T-12": "tarifa x consumo medido (comercial)",
+    "T-15": "<main> dentro da zona da arvore: aceitar region(55) OU autorizar refactor de layout"
+  },
+  "suite": {
+    "total_falhas": 27,
+    "minhas": 0,
+    "classificadas": 27,
+    "baseline_r80": 36
+  },
+  "testes_novos": {
+    "telas": 69,
+    "restore": 9,
+    "total": 78
+  },
+  "checkout": {
+    "head": "0a578d9bfe",
+    "commits_branch": 957,
+    "pendentes": 0,
+    "main": "f4cf411f28",
+    "main_intacto": true
+  },
+  "axe": {
+    "desktop_27_rotas": 0,
+    "web_15_rotas": 0
+  },
+  "mobile_runtime": "rodou no emulador; 1 bug de safe-area corrigido; verificacao bloqueada por system_server instavel"
+}

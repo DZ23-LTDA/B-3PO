@@ -4,7 +4,11 @@
  * names them so the painted label cannot be read as "Discord is up".
  */
 
-import { runtimeReadinessDisplay, type RuntimeReadinessResult } from '@/lib/runtime-readiness'
+import {
+  DEFAULT_NOT_READY_REASON,
+  runtimeReadinessDisplay,
+  type RuntimeReadinessResult
+} from '@/lib/runtime-readiness'
 
 export interface GatewayHealthPillCopy {
   backend: string
@@ -79,6 +83,29 @@ function inferenceDetail(copy: GatewayHealthPillCopy, inferenceStatus: RuntimeRe
     ready: copy.ready,
     unavailable: copy.unavailable
   }[runtimeReadinessDisplay(inferenceStatus)]
+}
+
+/**
+ * O aviso "não há provedor de IA" chega em duas formas, ambas em inglês:
+ *
+ *  1. `DEFAULT_NOT_READY_REASON` — a frase da função pura de prontidão;
+ *  2. a `AuthError` de `hermes_cli/auth.py` (code `no_provider_configured`), que o runtime devolve
+ *     como `error` e chega à UI como texto livre: "Hermes is not connected to any AI provider yet…".
+ *
+ * As duas são reconhecidas AQUI, num lugar só, para que toda superfície que mostre o motivo possa
+ * trocá-lo pela tradução. Comparar por trecho (e não por igualdade) porque a do servidor interpola
+ * o `HERMES_HOME` no fim.
+ */
+export function ehAvisoSemProvedor(motivo: null | string | undefined): boolean {
+  if (!motivo) {
+    return false
+  }
+
+  return (
+    motivo === DEFAULT_NOT_READY_REASON ||
+    motivo.includes('not connected to any AI provider') ||
+    motivo.includes('Add a provider credential')
+  )
 }
 
 export function statusBarGatewayHealth({
