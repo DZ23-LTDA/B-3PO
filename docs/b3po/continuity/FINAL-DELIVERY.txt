@@ -5,7 +5,7 @@ DATA        06/11/2026
 BRANCH      b3po-brand
 Rodada 61 · 06/11/2026
 MAIN        f4cf411f28 - espelho intacto, sem commit de produto
-RODADAS     51 de auditoria
+RODADAS     71 de auditoria
 
 O QUE FOI MEDIDO E ENTREGUE
 ---------------------------
@@ -51,6 +51,39 @@ Dominio e layout
 11. Layout do shell              : main ganhou h-full (estava 182px acima em TODAS as 30 rotas)
 12. Estoque / SKU orfao          : stockRows inclui saldo sem cadastro, marcado na tela
 
+
+MATRIZ DE 13 QUALITY GATES (medida nas rodadas 66-70)
+-----------------------------------------------------
+  Git/baseline ................. PASS    branch, rodada, diff (r59-61)
+  Lint/typecheck ............... PASS    scripts/check 14/14, 0 erros de tipo
+  Unit/regression .............. PASS    18842 testes; 13 falhas provadas no origin/main (18 la)
+  Integration/API .............. PASS    bridges reais no Electron
+  E2E .......................... PASS    B4-B8 por bridge + captura de tela
+  Build/smoke .................. PASS    desktop e web exit 0; fix verificado no chunk
+  Auth/security ................ PASS    serverTenant: IDOR impossivel de formular
+  Multitenancy ................. N/A     1 tenant/instalacao; renderer nao tem canal (r66)
+  Banco ........................ PASS    escrita atomica, JSON invalido->empty, rotacao 5000 (r68)
+                                 N/A     migracao: nao existe v2
+  UI ........................... PASS    5 viewports x 2 temas + 14 telas olhadas
+  A11y ......................... PASS    axe 27/30 + web 17/17; Tab/Esc PASS (r67)
+                                 FAIL    foco VISIVEL: outline:none global (decisao do upstream)
+                                 -> T-09, aguardando decisao
+  Performance .................. PASS    55 -> 4 long tasks (-93%), 5.7s -> 281ms
+  Operacao ..................... PASS    health ok, status config_version 52, logs (r69)
+                                 FAIL    backup dos 14 JSON de negocio: NAO EXISTE (r70)
+                                 FAIL    restore: NAO EXISTE
+                                 -> T-10, aguardando decisao
+
+  Resultado: 10 PASS - 2 N/A justificados - 2 FAIL por decisao de produto (T-09, T-10)
+  Nenhum gate NOT_RUN. Nenhum UNVERIFIED.
+
+ONDE OS DADOS MORAM (medido na r70)
+-----------------------------------
+  %APPDATA%/B-3PO/b3po/  -> 14 arquivos, 606 KB, todos schema_version 1
+  auditoria.json = 594 KB (98%), 2913 de 5000 entradas (capado, com contador de descartadas)
+  NAO fica no HERMES_HOME (stores usam app.getPath('userData'))
+  ZERO backup, ZERO restore -> T-10
+
 VEREDITO POR ESCOPO (nunca global)
 ----------------------------------
 READY       dominios de negocio (B4/B6/B7), performance, a11y do web,
@@ -59,7 +92,9 @@ PARCIAL     seguranca, diagnostico, a11y do desktop (27/30), modos, integracoes,
             a11y do mobile (SO estatica)
 BLOCKED     regressao (symlink), iOS (macOS), integracoes ativas (credencial)
 NOT_IMPL    vertical gas/agua
-NOT_READY   RELEASE (exe nao assinado + regressao bloqueada + 0 integracoes)
+NOT_READY   RELEASE (exe nao assinado + regressao bloqueada + 0 integracoes
+            + foco visivel WCAG 2.4.7 nao atendido (T-09)
+            + backup/restore dos dados inexistente (T-10))
 
 O QUE O PROPRIETARIO PRECISA FORNECER (acao exata)
 --------------------------------------------------
