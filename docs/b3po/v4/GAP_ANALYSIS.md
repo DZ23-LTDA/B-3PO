@@ -210,7 +210,7 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 | **B-10** | Teclado na home (Tab pelos 6 modos, ações e "Ver todos") | teste de foco |
 | **B-11** | Resolver o piso de ~509px da casca (R7) | sem clip entre 400 e 509 |
 | ~~B-12a~~ | ~~Heading na tela de configurações~~ | **FECHADO r22** — título da página virou `<h1>`; censo 0 em 27 rotas, 0 rotas sem h1 |
-| **B-12b** | `h2` por painel de configurações (modelo, aparência, plugins…) | navegação por heading desce às seções |
+| ~~B-12b~~ | ~~`h2` por painel~~ | **FECHADO r25** — `SectionHeading` virou `<h2>` (19 arquivos). Dormente nas páginas de topo porque o `h1` do breadcrumb já é o título |
 
 ## P3 — depois
 

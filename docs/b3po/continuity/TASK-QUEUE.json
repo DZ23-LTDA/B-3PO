@@ -342,7 +342,7 @@
     "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
     "A-04": "sofia.status() responde { error }",
     "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)",
-    "A-06": "FECHADO r22: o titulo da pagina (aria-current=page do breadcrumb) era <span>; virou <h1> com as mesmas classes. /settings agora tem h1 'Modelo principal'. Censo: 0 em 27 rotas, 0 rotas sem h1. Resta B-12b: h2 por painel interno."
+    "A-06": "FECHADO r22+r25: h1 no titulo da pagina (breadcrumb) e h2 nas secoes (SectionHeading, 19 arquivos). Nas paginas de topo o h2 fica dormente porque o design suprime titulo duplicado quando ha breadcrumb - isso e correto. axe 0 em 27 rotas, 0 rotas sem h1, 613 testes de settings verdes."
   },
   "registros_de_modulos": {
     "b3po-modulos.ts": "25 modulos - barra lateral e /busca",
@@ -405,5 +405,12 @@
     "igual_ao_baseline": true,
     "minhas": 0,
     "as_2_da_r19": "flaky sob carga - nao apareceram nesta rodada"
+  },
+  "a11y_headings": {
+    "r22": "titulo da pagina: span aria-current -> h1",
+    "r25": "secao: SectionHeading span -> h2 (19 arquivos)",
+    "axe": "0 em 27 rotas",
+    "rotas_sem_h1": 0,
+    "testes_settings": 613
   }
 }

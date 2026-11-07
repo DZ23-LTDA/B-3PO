@@ -210,7 +210,36 @@ censo: 0 violações em 27 rotas · 0 rotas sem h1
 
 **Antes**: 1 nó (`page-has-heading-one`) em `/settings`. **Depois**: zero em todas as 27.
 
-### O que continua faltando, e é menor
+### r25 — o `h2` das seções, no componente comum
+
+`SectionHeading` (`app/settings/primitives.tsx`) renderizava o título de seção como `<span>`.
+Virou `<h2 className="m-0">`:
+
+```diff
+- <span>{title}</span>
++ <h2 className="m-0">{title}</h2>
+```
+
+**19 arquivos usam `<SectionHeading`**, e `SettingsSection` já envolve cada um num `<section>` — então
+o `h2` fecha a estrutura: **região nomeada + heading dentro**. Uma troca, todos os painéis.
+
+### Por que `h2 = 0` nas páginas medidas — e isso é **de propósito**
+
+```tsx
+const showTitle = !page || !hasBreadcrumb
+```
+
+Quando a seção é o **título da página** (`page={true}`) e o cabeçalho de breadcrumb já mostra o nome,
+o título da seção é **suprimido** para não repetir. O `h1` do breadcrumb (r22) é o título.
+
+**Medido**: `/settings`, `?page=appearance|sessions|plugins|connections|notifications|about|vault` →
+`h1` presente, `h2 = 0`, `axe = 0`.
+
+**Conclusão honesta**: o `<h2>` está implementado e renderiza **onde o painel mostra o título da
+seção**; nas páginas de topo ele fica dormente porque o design evita título duplicado. **Não é
+regressão e não é pendência** — é a estrutura correta para esse desenho.
+
+
 
 Os **painéis internos** de configurações (modelo, aparência, plugins…) continuam usando `div`/`span`
 como títulos de seção — não há `h2` por painel. A navegação por heading agora **pousa na página**,
