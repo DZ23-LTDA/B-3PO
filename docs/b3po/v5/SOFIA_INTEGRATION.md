@@ -280,6 +280,21 @@ antes de delegar — exatamente quando o acúmulo atrapalha.
 **O `session_id` gravado é o da sessão real que existia**, não um id que eu digitei — o main consultou
 `GET /api/sessions/<id>` antes de gravar (r38) e a sessão respondeu.
 
+### r46 — o transporte automatico do texto foi tentado e **revertido**
+
+Tentei levar o pedido ao composer com um botao `Levar o pedido a conversa`:
+`$composerDraft.set(prompt)` + `location.hash = '#/'`.
+
+**Medido no app**: o botao existe, fica habilitado, **navega** — e o composer chega **vazio**.
+
+**A causa**: o composer reidrata o rascunho da sessao nova ao montar, e a nova conversa tem rascunho
+vazio. Escrever de outra rota corre contra essa reidratacao.
+
+**Revertido**. Um botao que as vezes preenche e' pior que nenhum: o goal proibe botao falso, e um
+preenchimento intermitente e' a mesma mentira com timing melhor.
+
+**O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
+
 ### O que continua **manual**
 
 | Passo | Manual? |
