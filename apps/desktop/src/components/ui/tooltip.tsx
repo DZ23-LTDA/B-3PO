@@ -293,7 +293,33 @@ function filhoSoIcone(child: React.ReactNode): child is React.ReactElement<Recor
   }
 
   // Texto (direto ou aninhado) já dá nome ao controle.
-  return typeof props['children'] !== 'string' || props['children'].trim() === ''
+  //
+  // r53 — a checagem anterior era `typeof children !== 'string' || children.trim() === ''`, que
+  // respondia "só ícone" para QUALQUER children que não fosse uma string — inclusive um ARRAY, o
+  // caso comum de `<button><Icon />{label}</button>`. Resultado: `aria-label` injetado por cima de
+  // um botão que JÁ tinha texto visível, criando `label-content-name-mismatch` (WCAG 2.5.3) em
+  // todo o app. `slot.test.tsx` pegou: o chip de contribuição que falha aparecia como
+  // "broken-plugin: <erro>" em vez de "broken-plugin".
+  //
+  // Descer a árvore é a checagem que o comentário já prometia ("direto ou aninhado") e o código
+  // não fazia.
+  return !temTexto(props['children'])
+}
+
+function temTexto(node: unknown): boolean {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node).trim() !== ''
+  }
+
+  if (Array.isArray(node)) {
+    return node.some(temTexto)
+  }
+
+  if (React.isValidElement(node)) {
+    return temTexto((node.props as { children?: unknown }).children)
+  }
+
+  return false
 }
 
 function Tip({ label, children, delayDuration = TIP_DELAY_MS, ...props }: TipProps) {

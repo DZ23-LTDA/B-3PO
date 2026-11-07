@@ -164,7 +164,12 @@ async function contributions({
 
   try {
     plugin.register({
-      i18n: { register: () => () => undefined },
+      // r53 — o plugin passou a usar `ctx.i18n.t` (i18n do Bot Mode, r16). O stub so tinha
+      // `register`, entao `plugin.register()` lancava em plugin.tsx:743 DEPOIS de registrar
+      // `mention-completions` e ANTES de `mention-middleware` — e o `catch {}` do teste engolia,
+      // deixando `handler` undefined em 27 casos. O `t` devolve a propria chave: o teste nao
+      // depende de texto traduzido, so do contrato.
+      i18n: { register: () => () => undefined, t: (key: string) => key },
       onDispose: () => undefined,
       register: (contribution: Contribution) => registered.push(contribution),
       storage: { get: async () => undefined, remove: async () => undefined, set: async () => undefined }

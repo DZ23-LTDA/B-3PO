@@ -2880,3 +2880,86 @@ commit-base** — e não fiz.
 `plugin.mentions` (27) · `desktop-installation` · `ssh-connection` · `stage-native-deps` ·
 `channel-build-version` — **todos em `electron/` ou plugins, nenhum tocado por mim**. **Esses eu não
 verifiquei um a um** e portanto **não afirmo que são alheios** — afirmo que **não os investiguei**.
+
+---
+
+## G8 · ADENDO 24 — baseline REAL contra `origin/main`: **29 falhas eram minhas**, e uma escondia um bug de a11y
+
+**Rodada 53.** A r52 descobriu que o baseline da r50 (com `git stash`) era inválido. Fiz o
+experimento certo: **um `git worktree` em `origin/main`**, com `node_modules` ligado por junção.
+
+### O método que devia ter sido usado desde a r50
+
+```powershell
+git worktree add $TEMP\b3po-baseline-main origin/main
+cmd /c mklink /J "$wt\node_modules" "<repo>\node_modules"
+cmd /c mklink /J "$wt\apps\desktop\node_modules" "<repo>\apps\desktop\node_modules"
+# rodar os testes DENTRO do worktree
+```
+
+**Zero risco**: o worktree é descartável e roda o código do `main` de verdade.
+
+### O resultado
+
+| Arquivo | `origin/main` | minha branch |
+|---|---|---|
+| `preview-file-save-scope` | 4 passed | **4 → 4 passed** (r52) |
+| `browser-session-workspace-files` | 14 passed | **1 → 14 passed** (r52) |
+| `plugin.mentions` | **27 passed** | **27 failed** |
+| `overlay-completeness` | **2 passed** | **1 failed** |
+| `slot.test.tsx` | **2 passed** | **1 failed** |
+| `sync-handoff` | 5 passed | 5 passed |
+
+**5 dos 6 arquivos "pré-existentes" eram regressão MINHA. Só `sync-handoff` era alheio.**
+
+### As três causas, e a terceira era um bug de acessibilidade REAL
+
+**1. `plugin.mentions` (27 falhas)** — `ctx.i18n.t is not a function`
+
+O plugin passou a usar `ctx.i18n.t` (i18n do Bot Mode, r16); o stub do teste só tinha `i18n.register`.
+`plugin.register()` lançava em `plugin.tsx:743` **depois** de registrar `mention-completions` e
+**antes** de `mention-middleware` — e o `catch {}` do teste **engolia**, deixando `handler` undefined.
+
+**2. `overlay-completeness` (1 falha)** — 8 chaves novas no `en` sem gap registrado
+
+O teste tem o mecanismo oficial: `OVERLAY_GAPS_UPDATE=1 npx vitest run ...`. Rodei, o
+`overlay-gaps.json` ganhou as 8 chaves, e o ratchet voltou a passar.
+
+**3. `slot.test.tsx` (1 falha)** — **o meu `filhoSoIcone` do r22 estava errado**
+
+```ts
+// ANTES — responde "só ícone" para qualquer children que não seja string:
+return typeof props['children'] !== 'string' || props['children'].trim() === ''
+```
+
+Um `<button><Codicon />{id}</button>` tem `children` = **array** `[elemento, string]` → a condição
+dava `true` → **`aria-label` injetado por cima de um botão que já tinha texto visível**.
+
+**Isso cria `label-content-name-mismatch` (WCAG 2.5.3) em todo o app** — exatamente a violação que
+eu "corrigi" no web na r39. O comentário prometia "direto ou aninhado"; o código só olhava string.
+
+```ts
+// DEPOIS — desce a árvore:
+function temTexto(node) { ...string/number → trim; Array → some; Element → children... }
+return !temTexto(props['children'])
+```
+
+**O `slot.test.tsx` não é um teste de a11y** — é um teste de "a fronteira de contribuição contém a
+falha". **Ele pegou um bug de a11y por acidente**, porque o nome do chip dependia do texto.
+
+### O que isto custa e o que ensina
+
+| Rodada | O que eu fiz de errado |
+|---|---|
+| r50 | baseline com `git stash` — **nunca testou o código sem mim** |
+| r51 | concluí "pré-existente" com base nele |
+| r52 | achei 1 caso e ainda disse "os outros não investiguei" |
+| **r53** | **worktree em `origin/main`: 29 falhas eram minhas** |
+
+**Quatro rodadas para fazer o experimento que leva 2 minutos.** E no caminho, **um bug de
+acessibilidade real ficou escondido atrás do rótulo "pré-existente"** — o mesmo rótulo que eu já
+tinha usado para não investigar o `nested-interactive` (r49) e a opção C do estoque (r48).
+
+> **"Pré-existente" é o rótulo mais perigoso que eu usei nesta auditoria**, porque ele para a
+> investigação e **parece rigoroso** — tem até medição. A medição estava certa; o experimento é que
+> não testava o que eu dizia.
