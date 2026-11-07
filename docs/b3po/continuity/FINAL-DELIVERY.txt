@@ -13,8 +13,8 @@ Prioridade zero do V3 (8 itens) - FECHADA
   B1 causa raiz da inferencia indisponivel : .env com 0 de 29 chaves; aviso traduzido
   B2 modal "Novo bot" em ingles            : pt.bot 6 -> 50 chaves; paleta traduzida
   B3 os seis modos                         : persistencia/foco/rolagem/rotas OK; RBAC parcial
-  B4 Compras por etapas                    : 7 etapas E2E, estoque 3000, financeiro R\$ 150
-  B5 Vendas                                : baixa 3000->2000 + conta a receber R\$ 80
+  B4 Compras por etapas                    : 7 etapas E2E, estoque 3000, financeiro R$ 150
+  B5 Vendas                                : baixa 3000->2000 + conta a receber R$ 80
   B6 Sofia                                 : plano persiste, execucao_id por tarefa
   B7 Projetos/Trabalhos/Automacoes/Empresa  : 4 de 4 criam e persistem
   B8 Bots                                  : criar/editar SOUL/renomear/revogar (5 de 8)
@@ -72,8 +72,8 @@ EXT-4  macOS + Xcode + conta Apple Developer    [build iOS]
 EXT-5  decisao sobre a vertical gas/agua        [G4: construir / fora de escopo / redefinir]
 EXT-6  autorizacao para testar UM conector sem credencial comercial (ntfy/irc)
 EXT-7  DECISAO: venda com preco zero            [T-08]
-       -> cortesia legitima (lancar financeiro de R\$ 0) OU erro (bloquear o faturamento)?
-       -> hoje: fatura R\$ 0,00 e NAO lanca financeiro. Ha captura em evidence/baseline-layout/
+       -> cortesia legitima (lancar financeiro de R$ 0) OU erro (bloquear o faturamento)?
+       -> hoje: fatura R$ 0,00 e NAO lanca financeiro. Ha captura em evidence/baseline-layout/
 
 ROLLBACK
 --------
