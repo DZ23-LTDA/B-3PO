@@ -233,6 +233,50 @@ renderer informa, e nada confirma que a sessao e real.
 **Correcao possivel, nao feita**: `vincularSessao` poderia perguntar ao gateway se a sessao existe antes
 de gravar. Sem isso, um `session_id` inventado deixa a execucao "executando" para sempre.
 
+## 4f. r43/r44 — o vinculo tem tela, e o bloqueio global caiu
+
+### O que foi verificado no app (r44, depois do restart)
+
+```
+plano criado ..... plano-mw70gu77-l1gy
+clique ........... "Delegar c1"
+tela ............. Execução exec-plano-mw70gu77-l1gy-c1 aguardando sessão · tarefa c1
+botão ............ "Abra uma conversa para vincular" (desabilitado — não há sessão)
+descartar ........ presente
+erros ............ nenhum
+```
+
+**Persistiu entre rotas**: delegar em `#/sofia`, ir para `#/`, voltar — o bloco continua lá.
+
+### Por que o botão está desabilitado, e por que isso é correto
+
+`$activeSessionId` é nulo enquanto não há sessão. **"Nova conversa" cria um rascunho, não uma sessão** — a
+sessão nasce no primeiro envio. Vincular a um rascunho afirmaria que ele existe.
+
+### O defeito que apareceu ao implementar (r43)
+
+`bloqueioParaIniciar` checava a duração com `consulta.todas.some(...)` — **global**. Uma execução presa
+em **qualquer** tarefa bloqueava **toda** delegação nova.
+
+**Medido**: a execução da r37 (vinculada a `sess-r37-probe`) ficou `executando`, e a delegação seguinte
+devolveu **`duracao_maxima`** tendo outro `task_id`.
+
+**Corrigido** (`ab399a3c2f`): escopo por `task_id`. *"Esta tarefa já tem execução presa"* ≠ *"o produto
+inteiro está parado"*. **Provado vermelho.**
+
+E `expirarPendentes` (r39) ganhou o **chamador** que faltava: o `sofia:delegar` limpa pendentes vencidas
+antes de delegar — exatamente quando o acúmulo atrapalha.
+
+### O que **não** foi verificado
+
+| Item | Por quê |
+|---|---|
+| botão **habilitado** | exige `$activeSessionId` não-nulo |
+| o vínculo **gravado** pela UI | exige uma sessão real, criada pelo primeiro envio de uma conversa |
+| o ciclo completo delegar → conversa → vincular | idem |
+
+**O contrato do vínculo está testado** (3 casos, r38). **A UI dele não foi exercitada ponta a ponta.**
+
 ## 5. O que este documento **não** afirma
 
 - Não afirma que o slice acima resolve retomada, idempotência e compensação do G2 — são itens 5–7.
