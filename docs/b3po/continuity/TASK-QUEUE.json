@@ -335,5 +335,18 @@
     "mobile": "app-release.apk 44,2MB constroi; suite 179; MAS os seis modos NAO existem; emulador com systemui em ANR",
     "consequencia": "os seis modos existem em UMA plataforma; nenhuma promessa de paridade e possivel",
     "decisao_pendente": "A portar p/ mobile | B rebrandar web | C desktop e o produto, web/mobile sao operacionais | D foco em profundidade no desktop"
+  },
+  "findings_v4": {
+    "A-01": "modos estrategico e ia tem menu IDENTICO (5 combinacoes para 6 modos) - medido alternando o seletor",
+    "A-02": "modo engenharia nao revela Construcao/Qualidade: os modulos existem em lib/engenharia.ts mas a barra le lib/b3po-modulos.ts (25 modulos, nenhum nesses grupos)",
+    "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
+    "A-04": "sofia.status() responde { error }",
+    "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)"
+  },
+  "registros_de_modulos": {
+    "b3po-modulos.ts": "25 modulos - barra lateral e /busca",
+    "engenharia.ts": "8 modulos com Construcao/Qualidade - SOMENTE /ambiente",
+    "problema": "dois registros; o da barra nao tem Construcao nem Qualidade",
+    "nao_corrigido": "unificar toca barra + /ambiente + /busca + testes de contagem; duplicar seria o que o objetivo proibe"
   }
 }
