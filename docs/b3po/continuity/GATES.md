@@ -3094,3 +3094,51 @@ que são "do upstream".
 **Levei 4 rodadas (r50–r53) para aprender que "pré-existente" exigia rodar no `main`.** Na r54, rodar
 nos dois lados **levou 3 minutos** e fechou o quadro com número — **e o número diz que estou melhor que
 a base**, não apenas "não pior".
+
+---
+
+## G8 · ADENDO 27 — o fix do `Tip` verificado em runtime: **a11y igual, e o web intacto**
+
+**Rodada 55.** O `filhoSoIcone` do r22 mudou de comportamento: **deixou de injetar `aria-label`** em
+botões que já tinham texto. Isso podia ter **criado** `button-name` vazio onde antes havia um nome
+(por tooltip). **Verifiquei em vez de supor.**
+
+### O app desktop, 8 rotas
+
+| Rota | `axe` |
+|---|---|
+| `/` | 1 — `nested-interactive` |
+| `/settings` | 1 — `nested-interactive` |
+| `/crm` `/compras` `/sales` `/stock` `/capabilities` `/messaging` | **0 — LIVRE** |
+| **total** | **2 violações em 8 rotas** |
+
+**O mesmo número de antes do fix.** As 2 são as `nested-interactive` conhecidas (o ✕ dentro do
+`role="tab"`, r50). **Nenhum `button-name` novo.**
+
+### E o web continua limpo
+
+| Tema | `axe` |
+|---|---|
+| **Claro** | **0** |
+| **Escuro** | **0** |
+
+**O web não foi afetado** — e a razão é estrutural: `web/src/components/ui/tooltip.tsx` **não existe**;
+o web tem a própria cópia. **Medido, não suposto** (mesma verificação do G7).
+
+### O que isso prova e o que não prova
+
+| Provado | Como |
+|---|---|
+| o fix não criou `button-name` vazio no desktop | 8 rotas, axe, 2 violações = as de antes |
+| o fix não tocou o web | rota `/`, 2 temas, 0 violações |
+| os 5 testes `ui/` voltaram | rodados, 20 passed |
+| os nomes acessíveis dos botões continuam | `slot.test` e `legacy-sdk-compat` verdes |
+
+**Não provado**: que **todos** os ~107 pontos de `Tip` do app estejam corretos. **O `axe` cobre as 8
+rotas que eu abri**, e o `axe` não testa nome acessível de tudo que só existe em hover.
+
+### A lição curta
+
+**Um fix de acessibilidade pode criar outra violação de acessibilidade** — foi o que o r22 fez (injetar
+nome em botão com texto) e o que o r53 corrigiu. **A única forma de saber é rodar o `axe` de novo
+depois.** Foi o que fiz.
