@@ -133,6 +133,23 @@ ninguém**. O status agora é honesto — `pendente` e parado. **Ligar o executo
 **Cinco de cinco classificações por nome estavam erradas.** O método mudou na r4: efeito medido no
 corpo, não nome.
 
+### r6 — G2 auditado: Sofia **não alcança o runtime**
+
+| Medição | Resultado |
+|---|---|
+| Planos | `%userData%/b3po/sofia-planos.json` — **local do Electron** |
+| `grep sofia` em `hermes_cli/` + `gateway/` | **zero** — o backend não conhece Sofia |
+| `delegarTarefa` / `lerExecucao` / `statusDerivadoDaExecucao` | **0 chamadores em produção** |
+| Botão de executar em `/sofia` | **não existe** — a tela não promete execução |
+| Transporte de `session.create` | **RPC canônico**, não REST |
+
+**Veredito**: Sofia é uma superfície de planejamento local, correta e honesta, que **não** chega ao
+runtime. O slice de integração está especificado em `SOFIA_INTEGRATION.md` §4, com a decisão A/B do
+transporte em §3.
+
+**Não implementado**: implementar exige decidir onde o cliente canônico vive (hoje em `src/api/`), o
+que muda o passo 5. Documentado em vez de chutado.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
