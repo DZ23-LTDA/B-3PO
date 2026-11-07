@@ -141,14 +141,34 @@ export function modulosDoAmbiente<T extends { grupo: string }>(
  */
 export function foraDoAmbiente(modulos: readonly ModuloDoAmbiente[], ambiente: Ambiente): string {
   const { fora } = modulosDoAmbiente(modulos, ambiente)
-  const outro = ambiente === 'empresa' ? 'Engenharia' : 'Empresa'
 
   if (fora.length === 0) return ''
 
-  return `${fora.length} módulo(s) do ambiente ${outro}.`
+  /*
+   * r103 — com SEIS ambientes, "o outro" deixou de existir.
+   *
+   * A frase nomeia os ambientes que REALMENTE têm os módulos escondidos. Dizer "do ambiente
+   * Empresa" para quem está em `automacao` era o resto de um mundo de dois — a r271 já corrigiu
+   * `alternarAmbiente` pelo mesmo motivo, e esta função ficou para trás.
+   */
+  const outros = AMBIENTES.filter(a => a !== ambiente && modulosDoAmbiente(modulos, a).dentro.length > 0).map(
+    a => AMBIENTE_LABEL[a]
+  )
+
+  if (outros.length === 0) return `${fora.length} módulo(s) fora deste ambiente.`
+
+  return `${fora.length} módulo(s) do ambiente ${outros.join(' / ')}.`
 }
 
-/** O outro ambiente — para a tela poder oferecer a troca. */
+/**
+ * O PRÓXIMO ambiente na ordem de `AMBIENTES` — para a tela oferecer a troca.
+ *
+ * **Não é "o outro"**: com dois ambientes os dois nomes coincidiam e o erro era invisível; com
+ * seis, "o outro" não tem resposta. Quem quiser alternar de verdade usa `alternarAmbiente()` do
+ * store, que cicla pelos seis.
+ */
 export function outroAmbiente(ambiente: Ambiente): Ambiente {
-  return ambiente === 'empresa' ? 'engenharia' : 'empresa'
+  const indice = AMBIENTES.indexOf(ambiente)
+
+  return AMBIENTES[(indice + 1) % AMBIENTES.length]
 }

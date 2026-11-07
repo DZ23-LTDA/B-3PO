@@ -1,5 +1,5 @@
 {
-  "round": 102,
+  "round": 103,
   "queue": [
     {
       "id": "T-01",
@@ -34,8 +34,9 @@
       "id": "T-05",
       "what": "Diferenciar os 5 modos sem identidade (G5)",
       "owner": "proprietario+dsh",
-      "status": "blocked",
-      "blocked_by": "decisao de produto"
+      "status": "done",
+      "blocked_by": "decisao de produto",
+      "done_in": "r103: identidade visual dos 6 modos (matiz por token) + outroAmbiente/foraDoAmbiente cientes dos 6"
     },
     {
       "id": "T-06",
@@ -237,5 +238,19 @@
     "acao_de_desbloqueio": "hermes auth add <provider> OU definir <PLATAFORMA>_BOT_TOKEN no .env do perfil e reiniciar o gateway",
     "nao_provado_por_que": "exige credencial real; nada foi simulado",
     "desvio": "scripts/run_tests.sh exige bash (ausente); pytest direto com HERMES_HOME isolado e TZ=UTC"
+  },
+  "t05": {
+    "status": "done",
+    "pronto": "6 matizes distintos via data-ambiente + token --ambiente-accent; 8 testes; axe 0 nos 6 modos",
+    "accent_por_modo": {
+      "empresa": "#38bdf8",
+      "engenharia": "#4ade80",
+      "automacao": "#fbbf24",
+      "ia": "#22d3ee",
+      "estrategico": "#f472b6",
+      "administracao": "#a78bfa"
+    },
+    "corrigido": "outroAmbiente/foraDoAmbiente assumiam 2 ambientes; agora percorrem os 6",
+    "nao_e_rbac": true
   }
 }

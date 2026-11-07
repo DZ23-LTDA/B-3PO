@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   AMBIENTES,
+  type Ambiente,
   AMBIENTE_LABEL,
   foraDoAmbiente,
   gruposDoAmbiente,
@@ -126,7 +127,31 @@ describe('o que fica escondido é DITO', () => {
 
 describe('outroAmbiente', () => {
   it('alterna', () => {
+    /*
+     * r103 — o contrato mudou porque a realidade mudou.
+     *
+     * Este teste afirmava `outroAmbiente('engenharia') === 'empresa'`: a expressão de um mundo de
+     * DOIS ambientes. Com seis, "o outro" não tem resposta, e a função passou a devolver o PRÓXIMO
+     * na ordem de `AMBIENTES`. O teste antigo não estava errado — ele travava a decisão antiga.
+     *
+     * O contrato novo é mais forte e cobre os seis:
+     */
     expect(outroAmbiente('empresa')).toBe('engenharia')
-    expect(outroAmbiente('engenharia')).toBe('empresa')
+
+    // Percorre o ciclo inteiro de `AMBIENTES` e volta ao começo.
+    const ciclo = AMBIENTES.map((_, i) => {
+      let atual: Ambiente = AMBIENTES[0]
+
+      for (let volta = 0; volta < i; volta += 1) atual = outroAmbiente(atual)
+
+      return atual
+    })
+
+    expect(ciclo).toEqual([...AMBIENTES])
+
+    // Nenhum ambiente é seu próprio "próximo", e o último volta ao primeiro.
+    for (const ambiente of AMBIENTES) expect(outroAmbiente(ambiente)).not.toBe(ambiente)
+
+    expect(outroAmbiente('administracao')).toBe('empresa')
   })
 })

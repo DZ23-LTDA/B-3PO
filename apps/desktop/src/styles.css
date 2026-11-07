@@ -4343,3 +4343,37 @@ html[data-hermes-desktop-host='browser'] [data-slot='sidebar-container'] {
   background: none;
   color: var(--err-ink);
 }
+
+/* ============================================================================
+ * r103-ambiente-identidade — a cor de cada MODO DE TRABALHO.
+ *
+ * Decisão do dono #5: os seis ambientes precisam de identidade visual DISTINTA dentro de UM
+ * design system. Isso aqui é a parte "um design system": **nada é duplicado**. O componente não
+ * muda, a paleta não muda — um TOKEN muda de valor conforme o `data-ambiente` que o store põe no
+ * `<html>` (ver `lib/ambiente-identidade.ts`).
+ *
+ * POR QUE `--ambiente-accent` E NÃO `--ui-accent`:
+ * sobrescrever `--ui-accent` pintaria TODO botão primário do app com a cor do ambiente, e um
+ * matiz por ambiente multiplicaria por seis o risco de contraste que já custou uma violação na
+ * r101. Este token pinta só o que IDENTIFICA o ambiente: a faixa do seletor e o marcador do item
+ * ativo na barra.
+ *
+ * POR QUE ISSO NÃO É PERMISSÃO: cor é orientação ("onde eu estou"), não autorização. Trocar de
+ * ambiente troca o que a barra mostra; `permission-guard` continua sendo a única porta.
+ * ============================================================================ */
+:root {
+  --ambiente-accent: #38bdf8; /* empresa é o padrão do store (PADRAO = 'empresa') */
+}
+
+[data-ambiente='empresa']       { --ambiente-accent: #38bdf8; }
+[data-ambiente='engenharia']    { --ambiente-accent: #4ade80; }
+[data-ambiente='automacao']     { --ambiente-accent: #fbbf24; }
+[data-ambiente='ia']            { --ambiente-accent: #22d3ee; }
+[data-ambiente='estrategico']   { --ambiente-accent: #f472b6; }
+[data-ambiente='administracao'] { --ambiente-accent: #a78bfa; }
+
+/* A faixa do seletor de ambiente: a identidade fica visível sem gritar. */
+[data-slot='ambiente-seletor'] {
+  border-left: 2px solid var(--ambiente-accent, var(--ui-accent));
+  padding-left: 0.5rem;
+}

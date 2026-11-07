@@ -27,6 +27,7 @@ import { atom } from 'nanostores'
 import { persistString, storedString } from '@/lib/storage'
 
 import { type Ambiente, AMBIENTES, isAmbiente } from '@/lib/ambiente'
+import { aplicarIdentidadeDoAmbiente } from '@/lib/ambiente-identidade'
 
 /** Versionado: uma mudança de forma não lê o valor antigo como se fosse novo. */
 const KEY = 'hermes.desktop.b3po-ambiente.v1'
@@ -45,10 +46,16 @@ function normalizar(valor: unknown): Ambiente {
 
 export const $ambiente = atom<Ambiente>(normalizar(storedString(KEY)))
 
+// r103: a identidade visual acompanha o estado. O atributo vai para o `<html>` no boot (antes da
+// primeira pintura da barra) e é reaplicado em toda troca — inclusive quando outra janela troca e
+// `recarregarAmbiente` roda.
+aplicarIdentidadeDoAmbiente($ambiente.get())
+
 export function setAmbiente(valor: unknown): void {
   const ambiente = normalizar(valor)
 
   $ambiente.set(ambiente)
+  aplicarIdentidadeDoAmbiente(ambiente)
   persistString(KEY, ambiente)
 }
 
@@ -79,7 +86,10 @@ export function alternarAmbiente(): void {
  * o evento `storage` só dispara em OUTRAS abas — não na que escreveu.
  */
 export function recarregarAmbiente(): void {
-  $ambiente.set(normalizar(storedString(KEY)))
+  const ambiente = normalizar(storedString(KEY))
+
+  $ambiente.set(ambiente)
+  aplicarIdentidadeDoAmbiente(ambiente)
 }
 
 export const AMBIENTE_STORAGE_KEY = KEY

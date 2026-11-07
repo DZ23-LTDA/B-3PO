@@ -6661,3 +6661,77 @@ significar honestamente. **Chamar isso de "conector provado" seria o `SEM TEATRO
 (`execvpe(/bin/bash) failed`). Rodei `pytest` direto **com `HERMES_HOME` em diretório temporário e
 `TZ=UTC`** — o isolamento que o runner existe para garantir. **É um desvio, não uma equivalência**:
 o runner também faz subprocesso por arquivo e desliga credenciais; aqui são 12 testes num arquivo só.
+
+---
+
+## G5 · ADENDO — os seis modos têm identidade visual distinta, **num design system só**
+
+**Rodada 103.** Decisão do dono #5: *"Implemente identidade visual distinta para os seis modos.
+Preserve um único design system e não duplique módulos. Modo de navegação não substitui RBAC."*
+
+### O que existia
+
+Os **seis ambientes já estavam definidos** (`lib/ambiente.ts`, r265): Empresa, Engenharia, Automação,
+IA e Agentes, Estratégico, Administração — com rótulo e grupos. **O que não existia era identidade**:
+o `<html>` não carregava nada que o CSS pudesse ler, então os seis pareciam o mesmo produto com um
+menu diferente.
+
+### O que foi feito — e por que não é componente
+
+**Dado, não componente.** `lib/ambiente-identidade.ts` tem seis matizes e seis frases; o matiz entra
+no `<html>` como `data-ambiente` e o CSS o lê por **um token** (`--ambiente-accent`).
+
+**Nenhuma variante de componente, nenhuma cópia de estilo.** Se a paleta mudar, muda num arquivo e no
+`styles.css`, e os seis acompanham.
+
+**Por que um token separado, e não `--ui-accent`**: sobrescrever `--ui-accent` pintaria **todo botão
+primário** do app com a cor do ambiente — e um matiz por ambiente multiplicaria por seis o risco de
+contraste que já custou uma violação na r101 (2,64:1 num par montado à mão). `--ambiente-accent`
+pinta só o que **identifica**: a faixa do seletor.
+
+### Medido no app real, trocando pelo seletor de verdade
+
+```
+empresa        data-ambiente=empresa        faixa=rgb(56,189,248)    axe=0
+engenharia     data-ambiente=engenharia     faixa=rgb(74,222,128)    axe=0
+automacao      data-ambiente=automacao      faixa=rgb(251,191,36)    axe=0
+ia             data-ambiente=ia             faixa=rgb(34,211,238)    axe=0
+estrategico    data-ambiente=estrategico    faixa=rgb(244,114,182)   axe=0
+administracao  data-ambiente=administracao  faixa=rgb(167,139,250)   axe=0
+---
+cores distintas: 6/6 · axe total nos 6 modos: 0
+```
+
+**8 testes** novos cobrem: todo ambiente tem identidade · as **seis cores são distintas** · as seis
+descrições são distintas · o atributo é aplicado, trocado (sem acumular) e percorrido nos seis · não
+quebra fora do DOM.
+
+### O bug que a rodada achou: duas funções ainda de um mundo de DOIS
+
+`lib/ambiente.ts` tinha:
+
+```ts
+export function outroAmbiente(ambiente: Ambiente): Ambiente {
+  return ambiente === 'empresa' ? 'engenharia' : 'empresa'
+}
+```
+
+Com **seis** ambientes, isso respondia `'empresa'` para quem estava em `automacao`, `ia`,
+`estrategico` ou `administracao` — quatro modos sem "próximo". A r271 corrigiu `alternarAmbiente`
+pelo mesmo motivo, e **estas duas ficaram para trás**.
+
+- `outroAmbiente` passou a devolver o **próximo na ordem de `AMBIENTES`** (e o último volta ao
+  primeiro);
+- `foraDoAmbiente` passou a **nomear os ambientes que realmente têm os módulos escondidos**, em vez
+  de dizer "do ambiente Empresa" para quem está em Automação.
+
+**O teste antigo afirmava o contrato de dois** (`outroAmbiente('engenharia') === 'empresa'`). Não
+estava errado — **travava a decisão antiga**. Foi reescrito para o contrato de seis, e mais forte:
+percorre o ciclo inteiro, garante que nenhum ambiente é seu próprio próximo, e que o último volta ao
+primeiro.
+
+### E o que a identidade NÃO é
+
+**Cor é orientação ("onde eu estou"), não autorização.** `permission-guard` continua sendo a única
+porta, e trocar de ambiente continua trocando **o que a barra mostra**. Nenhuma linha deste trabalho
+toca RBAC — e o teste da API garante que a função só sabe pintar.

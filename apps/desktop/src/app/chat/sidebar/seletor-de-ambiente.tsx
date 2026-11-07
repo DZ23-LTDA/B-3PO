@@ -34,7 +34,7 @@ export function SeletorDeAmbiente() {
   const ativo = useStore($ambiente)
 
   return (
-    <label className="mb-2 flex flex-col gap-1 px-2">
+    <label className="mb-2 flex flex-col gap-1 px-2" data-slot="ambiente-seletor">
       <span className="text-[0.625rem] font-semibold tracking-wider text-(--ui-text-tertiary) uppercase">
         Modo de Trabalho
       </span>
