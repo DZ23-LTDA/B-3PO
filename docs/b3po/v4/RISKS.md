@@ -106,6 +106,48 @@ orçamento da rodada esgotado. Ligar isso às pressas é exatamente o risco que 
 `podeOperarMaquina(ator, 'escrita')`, e um teste provando que sem ator **recusa** e com o dono
 **permite**.
 
+### r8 do V4 — `terminal:start` **agora consulta a fronteira de máquina**
+
+`hermes:terminal:start` spawna um shell. Era o canal mais perigoso dos 47 sem guarda, e agora
+recusa **antes de spawnar**:
+
+```ts
+if (!podeOperarMaquina(await actorOf(), 'escrita')) return RECUSA_MAQUINA
+```
+
+`TerminalIpcDeps` ganhou `actorOf`, injetado em `main.ts` com o **mesmo** resolvedor do git
+(`atorDeMaquina` → `ActorsStore`). Três pontos de montagem atualizados.
+
+**5 testes provam as três decisões:**
+
+| Caso | Resultado | Por quê |
+|---|---|---|
+| **sem ator** | **recusa** e `node-pty` **não é chamado** | negar por padrão |
+| **`level: null`** | **recusa** | `null` é "sem acesso", não "padrão" |
+| **dono** (`SUPERVISED_AUTONOMY` + `owner`) | **permite** | o fluxo normal não quebra |
+| **bot com `EXECUTE_ALLOWED`** | **passa** — e isso é **documentado, não decidido** | ver abaixo |
+| a recusa | só tem `error` + `reason` | recusa que carrega dado não recusou |
+
+**A ordem é testada**: o spawn acontece **depois** da guarda. Se viesse antes, o processo já existiria
+quando a recusa fosse decidida — e o teste afirma `spawnMock.mock.calls.length === 0`.
+
+**Dívida: 47 → 41 canais** (terminal tinha 6). Ratchet: **12 de 48**.
+
+### Achado que não fui eu que decido: `kind: 'bot'` não é considerado
+
+`podeOperarMaquina` **não olha `kind`**. Um ator `kind: 'bot'` com `level: 'EXECUTE_ALLOWED'` passa
+para `escrita` e consegue spawnar shell local.
+
+Duas leituras são defensáveis, e eu **não escolho por conta própria** numa regra de segurança:
+
+1. o RBAC diz *"Bot não herda permissão de humano"* — mas isso é sobre **recurso de negócio**
+   (`sales`, `financeiro`), e a fronteira de máquina é outra pergunta;
+2. os agentes de Engenharia **precisam** executar comandos — mas eles fazem isso pelo **backend**
+   (Python + `tool terminal`), **não** por este canal IPC, que é o terminal da **interface**.
+
+O teste trava o comportamento **atual** (`terminal-guarda-maquina.test.ts`) para que mudá-lo seja
+decisão consciente. **Pergunta para o dono**: um agente pode abrir um shell na máquina pela interface?
+
 ### Ponto cego declarado
 
 Os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que **não** é `*-ipc.ts` e não é

@@ -17062,7 +17062,7 @@ registerMcpOauthCallbackIpc()
 
 // Embedded terminal PTY host (hermes:terminal:*) — see terminal-ipc.ts.
 const terminalIpc = registerTerminalIpc({
-  isWindows: IS_WINDOWS,
+  actorOf: () => atorDeMaquina(app.getPath('userData')), isWindows: IS_WINDOWS,
   findOnPath,
   rememberLog,
   activeSshTerminalTarget,

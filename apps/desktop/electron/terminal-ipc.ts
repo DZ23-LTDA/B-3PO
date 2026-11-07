@@ -2,6 +2,8 @@
 // registry, and the hermes:terminal:* IPC surface. Extracted from main.ts; the
 // factory owns the session map and returns the dispose helpers main.ts needs
 // for SSH teardown. findOnPath / logging / connection routing stay injected.
+import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
+import type { Actor } from './rbac'
 import { execFile } from 'node:child_process'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
@@ -37,6 +39,17 @@ export interface TerminalIpcDeps {
    *  tabs that recorded none. */
   gatewayTarget: (owner: TerminalGatewayOwner) => TerminalGatewayTarget
   ensureGatewayBackend: (owner: TerminalGatewayOwner) => Promise<unknown>
+  /**
+   * Resolvedor do ator (r8 do V4).
+   *
+   * `hermes:terminal:start` **spawna um shell neste computador** — é capacidade de máquina, não
+   * recurso de negócio. A política certa é `podeOperarMaquina`, a mesma de `git-ipc`: nega por
+   * padrão, exige poder de execução para `escrita`.
+   *
+   * O dono da instalação nasce com `level: 'SUPERVISED_AUTONOMY'` e `role: 'owner'`, então o fluxo
+   * normal **passa**. O que a guarda nega é bot e ator com `level: null`.
+   */
+  actorOf: () => Promise<Actor | null>
 }
 
 export interface TerminalIpcApi {
@@ -69,7 +82,8 @@ export function registerTerminalIpc({
   ensureBackend,
   getSshConnectionState,
   gatewayTarget,
-  ensureGatewayBackend
+  ensureGatewayBackend,
+  actorOf
 }: TerminalIpcDeps): TerminalIpcApi {
   const terminalSessions = new Map()
 
@@ -365,6 +379,14 @@ export function registerTerminalIpc({
   }
 
   ipcMain.handle('hermes:terminal:start', async (event, payload = {}) => {
+    /*
+     * r8 do V4 — a guarda vem ANTES de qualquer efeito.
+     *
+     * `terminal:start` spawna um processo. Sem ator com poder de execução, recusa — e a recusa não
+     * carrega dado nenhum. É a mesma fronteira que `git-ipc` usa para `escrita`.
+     */
+    if (!podeOperarMaquina(await actorOf(), 'escrita')) return RECUSA_MAQUINA
+
     ensureNodePtySpawnHelper()
 
     const id = crypto.randomUUID()

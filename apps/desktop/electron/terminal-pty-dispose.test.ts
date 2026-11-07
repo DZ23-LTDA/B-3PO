@@ -61,7 +61,9 @@ function makeSender(id: number) {
 
 async function startSession() {
   registerTerminalIpc({
-    isWindows: false,
+    // r8 do V4: o dono da instalacao — mesmo nivel que `ensureOwner` cria.
+  actorOf: async () => ({ id: 'act_owner_test', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
+  isWindows: false,
     findOnPath: () => null,
     rememberLog: () => {},
     activeSshTerminalTarget: () => null,
