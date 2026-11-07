@@ -292,6 +292,19 @@ A execução nasce `pendente` e **ninguém a executa**. O slice para ligar o exe
 `SOFIA_INTEGRATION.md` §4: falta decidir onde o cliente canônico do gateway vive (ele é RPC, não
 REST) e criar a sessão de fato.
 
+### r14 — o contrato de prontidão ganhou consumidor
+
+`GET /api/connectors/readiness` em `hermes_cli/web_routers/connectors.py`, incluído no `web_server`.
+
+**Uma passada no registry** (o resumo deriva das linhas, sem chamar `all_connectors()` duas vezes),
+leitura em threadpool, e **atrás do middleware de autenticação** — medido: `401` sem credencial.
+
+**3 testes**: a rota responde · o resumo bate com as linhas (monkeypatch provando a derivação) ·
+`ready` não afirma conexão.
+
+**A lição menor da rodada**: o primeiro `import` falhou por um `hmac.py` perdido em `%TEMP%` — dos
+meus próprios scripts — sombreando a stdlib. Instrumento, não produto.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

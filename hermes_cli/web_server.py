@@ -800,6 +800,7 @@ from hermes_cli.web_routers import (
     analytics as _analytics_routes,
     chat_ws as _chat_ws_routes,
     chat_workspaces as _chat_workspaces_routes,
+    connectors as _connectors_routes,
     dashboard_ui as _dashboard_ui_routes,
     webapp as _webapp_routes,
     shared_metrics as _shared_metrics_routes,
@@ -822,6 +823,8 @@ app.include_router(_desktop_plugin_routes.router, dependencies=[_Depends(_route_
 app.include_router(_git_routes.router)
 app.include_router(_local_models_routes.router)
 app.include_router(_status_routes.router)
+# r14 do V5 (G4): o contrato de prontidao existia sem consumidor nenhum.
+app.include_router(_connectors_routes.router)
 app.include_router(_actions_routes.router)
 app.include_router(_audio_routes.router)
 app.include_router(_display_routes.router)

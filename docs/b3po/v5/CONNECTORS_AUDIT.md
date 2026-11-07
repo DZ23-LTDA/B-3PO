@@ -93,7 +93,29 @@ calculado e não o exibe.
 | 3 | tela Capacidades (ou Configuração → Gateway) | lista com os 5 estados e a `next_action` |
 | 4 | teste | `missing_credential` aparece quando a var não está no `.env`, **sem** a tela dizer "conectado" |
 
-**Nenhum passo foi implementado.** Este documento é a auditoria, e o slice está especificado.
+### Passo 1 — FEITO na r14 (`hermes_cli/web_routers/connectors.py`)
+
+```
+GET /api/connectors/readiness
+  → { "connectors": [...], "resumo": { por_status, prontos, credenciais_faltando, total } }
+```
+
+**Uma passada no registry**: `summary()` chamaria `all_connectors()` internamente, então o resumo é
+calculado a partir das linhas que a rota já tem. A leitura é bloqueante (o registry é lazy e resolve
+cada adapter on demand), então roda em `run_in_threadpool`.
+
+**Medido**:
+
+| Verificação | Resultado |
+|---|---|
+| rota registrada no app real | `['/api/connectors/readiness']` |
+| **exige autenticação** | **`401`** sem credencial — herda o middleware global, não é rota aberta |
+| `pytest tests/gateway/test_connectors_route.py` | **3 passed** |
+| `ready` afirma conexão? | **não** — o teste `ready_nao_significa_conectado` verifica que não existe campo `connected`/`conectado` |
+| valor de credencial no payload? | **não** — o teste verifica que `credenciais_faltando` traz nomes, deduplicados e ordenados |
+
+**Os passos 2–4 (cliente no desktop, tela, teste de tela) não foram feitos.** O dado está alcançável
+por API autenticada; a superfície de UI continua sem mostrar.
 
 ## 6. O que **não** foi verificado
 
