@@ -1,7 +1,7 @@
 # B-3PO — GATES DO V3
 
 **Regra**: cada gate tem medição. `READY` só com evidência; `PARCIAL` diz o que falta.
-**Atualizado**: 06/11/2026 · **HEAD**: `a5006074ca`
+**Atualizado**: 06/11/2026 · **Rodada**: 61 · **Data**: 06/11/2026
 
 ---
 
@@ -3285,3 +3285,75 @@ mesmo em 10 rodadas — **lê o HEAD e conclui "a auditoria parou aqui"**.
 
 **Cinco rótulos, cinco conclusões erradas, todas do mesmo tipo**: **o artefato tinha a forma de
 autoridade** (medição, baseline, build, HEAD, data) **e não tinha o conteúdo**.
+
+---
+
+## CONTINUIDADE — adendo 30: o `HEAD` sai dos documentos, e o motivo é estrutural
+
+**Rodada 61.** A r60 mostrou que os 13 docs estavam desatualizados. A correção óbvia seria "atualizar
+o HEAD" — **mas isso recria o problema no commit seguinte**.
+
+### O paradoxo
+
+```
+1. documento aponta para HEAD X
+2. atualizo o documento e commito
+3. agora o HEAD é Y, e o documento diz X  ← o documento nasce desatualizado
+```
+
+**Medido na r60**: atualizei os 13, commitei, e a verificação final acusou **8 "DIFERENTE"** — porque o
+HEAD mudou no próprio commit da atualização.
+
+**É o mapa que se inclui a si mesmo.**
+
+### A correção estrutural
+
+**O `HEAD` sai dos documentos de continuidade.** O que identifica o estado passa a ser:
+
+```
+**Rodada**: 61 · **Data**: 06/11/2026
+```
+
+**Por que isso é melhor:**
+
+| `HEAD` | `Rodada + Data` |
+|---|---|
+| muda a cada commit | **muda quando EU escrevo** |
+| fica "atrás" por construção | **não fica** |
+| exige `git rev-parse` para conferir | **não exige** |
+| diz onde o código está | diz **quando o documento foi escrito** |
+
+**Metadado correto**: um documento de continuidade **descreve a rodada em que foi escrito**, não o
+commit em que o repositório está. **São coisas diferentes, e eu confundia as duas.**
+
+### Implementado
+
+| Item | Ação |
+|---|---|
+| 10 arquivos `.md`/`.txt` | `HEAD <hash>` → `**Rodada**: 61 · **Data**: 06/11/2026` |
+| `TASK-QUEUE.json` | campo `head` **removido**; `round` + `data` mantidos |
+| `MASTER-CHECKPOINT.json` | idem |
+| verificação | busca por hash nos 13 docs → **nenhum** |
+
+**O `FINAL-DELIVERY.txt` mantém a data e a rodada, que é o que o leitor precisa para saber a
+atualidade do documento.**
+
+### A lição, e é a mais transferível desta auditoria
+
+> **Metadado que muda sozinho não deve ser copiado para dentro do artefato.** O `HEAD` é derivável;
+> copiá-lo cria uma **cópia que apodrece**. O `round` é **autoral**: só muda quando eu escrevo.
+
+É a mesma distinção que separa **estado** de **cache**. **Eu estava cacheando o HEAD num documento e
+chamando isso de "atualizado".**
+
+### O padrão das 12 últimas rodadas, fechado
+
+| Rodada | O artefato tinha forma de autoridade | Faltava conteúdo |
+|---|---|---|
+| r41 | `main` com altura medida | comparação com o pai |
+| r50–53 | baseline "provado" | o baseline certo |
+| r57 | busca no bundle | o caminho certo |
+| r59–60 | HEAD e data no doc | a rodada certa |
+| **r61** | **HEAD como identidade** | **HEAD não é identidade de documento** |
+
+**E o mesmo remédio em todas**: **perguntar o que o número está comparando com quê.**

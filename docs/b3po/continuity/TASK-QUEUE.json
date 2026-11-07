@@ -1,6 +1,5 @@
 {
-  "head": "673cd7f5af",
-  "round": 60,
+  "round": 61,
   "queue": [
     {
       "id": "T-01",
@@ -54,5 +53,6 @@
       "owner": "proprietario",
       "status": "blocked"
     }
-  ]
+  ],
+  "data": "06/11/2026"
 }

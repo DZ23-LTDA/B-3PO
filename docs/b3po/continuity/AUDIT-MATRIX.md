@@ -2,7 +2,7 @@
 
 **Regra**: cada linha é uma medição, não uma opinião. `READY` exige evidência reproduzível;
 `PARCIAL` diz exatamente o que falta; `NOT_READY` não tem desculpa.
-**Atualizado**: 06/11/2026 · **HEAD**: `673cd7f5af`
+**Atualizado**: 06/11/2026 · **Rodada**: 61 · **Data**: 06/11/2026
 
 ---
 

@@ -1,7 +1,7 @@
 # B-3PO — TEST EVIDENCE
 
 **Regra**: cada linha tem o comando, a saída e a data. O que não foi exercitado fica `NOT_TESTED`.
-**Atualizado**: 06/11/2026 · **HEAD**: `673cd7f5af`
+**Atualizado**: 06/11/2026 · **Rodada**: 61 · **Data**: 06/11/2026
 
 ---
 

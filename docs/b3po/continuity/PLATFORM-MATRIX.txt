@@ -1,5 +1,5 @@
 B-3PO — PLATFORM MATRIX
-medido em 06/11/2026 · HEAD 673cd7f5af · Windows 11 Pro
+medido em 06/11/2026 · Rodada 61 · 06/11/2026 · Windows 11 Pro
 
 PLATAFORMA   ESTADO        EVIDENCIA MEDIDA
 -----------  ------------  -------------------------------------------------------------
