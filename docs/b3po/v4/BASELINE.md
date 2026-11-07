@@ -74,20 +74,57 @@ limitação de ambiente comprovada** (GPU, rede) e **três são de empacotamento
 bloco a atacar — não porque o primeiro relatório dizia, mas porque a classificação acima é a do
 código.
 
-## 6. Gateway Python — `NOT_TESTED`, e o motivo é o instrumento
+## 6. Gateway Python — de `NOT_TESTED` para **executável**, com falhas classificadas
+
+**O estado anterior (r1–r8):** `NOT_TESTED`. O módulo `aiohttp` faltava no meu interpretador e a
+coleta abortava com 91 erros — o que impedia qualquer medição do backend.
+
+**O que mudou na r9:** instalei `aiohttp` **no env isolado** (`b3po-testenv`, autorizado pelo P0:
+*"instalar dependências somente em ambiente isolado"*) e reproduzi a coleta.
 
 ```
-$ pytest tests/gateway/ -q
-91 errors during collection
-  ModuleNotFoundError: No module named 'aiohttp'
+antes:  91 errors during collection · 12.576 testes coletados
+depois:  2 errors during collection · 13.337 testes coletados
 ```
 
-**Isto não é 91 testes falhando.** É o **meu** interpretador de teste (`b3po-testenv`) sem
-`aiohttp`; o ambiente do projeto (`pm.build_env --group test`) o tem. O runner oficial
-(`scripts/run_tests.sh`) é **bash**, e não há bash/WSL nesta máquina
-(`execvpe(/bin/bash): No such file or directory`).
+**Os 2 restantes, nomeados e explicados:**
 
-**Estado correto: `NOT_TESTED`** — nem PASS, nem FAIL.
+| Arquivo | Causa | Classificação |
+|---|---|---|
+| `test_boot_reserve_lock_probe.py` | `import fcntl` — **Unix-only** | limitação de plataforma, não de código |
+| `test_feishu_card_action_gateway_authz.py` | `ValueError: la…` | **não diagnosticado** — fica registrado como aberto |
+
+**A suíte agora RODA.** Amostra medida (`-k test_status`, com `-x`):
+
+```
+1 failed, 40 passed, 3 skipped em 22,34 s
+FAILED tests/gateway/test_status.py::TestGetProcessStartTime::test_live_process_is_stable_int
+  FileNotFoundError: [WinError 2] — um `subprocess` tentando um binário ausente no meu env mínimo
+```
+
+**A falha é do instrumento, não do produto**: o teste spawna um executável que o env do projeto tem e o
+meu não. É o mesmo padrão do `aiohttp`.
+
+**O que continua NÃO medido, e por quê**:
+
+| Item | Estado | Motivo |
+|---|---|---|
+| Suíte completa do gateway | **`NOT_TESTED`** | 13.337 testes levam >30 min; rodei até 44% numa tentativa e interrompi |
+| Falhas por arquivo | **`NOT_TESTED`** | não classifiquei cada `F` do log parcial |
+| `test_feishu_card_action_gateway_authz.py` | **`NOT_TESTED`** | `ValueError` na coleta, sem diagnóstico |
+
+**Nenhuma afirmação de "o backend funciona" é feita aqui.** O que está provado: a suíte **coleta** e
+**executa**, e a amostra medida **passa** exceto por uma dependência de binário externo.
+
+### O padrão que se repetiu cinco vezes
+
+| Rodada | Instrumento | Resultado |
+|---|---|---|
+| r5 | contei só `writeFileSync` | 32 stores "sem escrita atômica" → **falso** |
+| r6 | contei arquivo, não canal | 16 "sem guarda" → 2 não tinham canal |
+| r7 | não reconheci `podeOperarMaquina` | git "desprotegido" → **estava protegido** |
+| r9 | env sem `aiohttp` | backend "NOT_TESTED" → **coleta e roda** |
+| r9 | env sem binário do `subprocess` | "1 teste falhou" → **falta de ferramenta** |
 
 ## 7. Android — o app roda, a tela não compõe
 

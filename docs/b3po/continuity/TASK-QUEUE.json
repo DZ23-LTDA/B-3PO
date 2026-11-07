@@ -308,5 +308,16 @@
       "sem_rename": 0,
       "total": 36
     }
+  },
+  "v4_gateway": {
+    "coleta_antes": "91 errors · 12576 coletados",
+    "coleta_depois": "2 errors · 13337 coletados",
+    "fix": "aiohttp instalado no env isolado b3po-testenv",
+    "restantes": [
+      "test_boot_reserve_lock_probe.py: fcntl Unix-only",
+      "test_feishu_card_action_gateway_authz.py: ValueError nao diagnosticado"
+    ],
+    "amostra": "test_status: 1 failed (FileNotFoundError de subprocess), 40 passed, 3 skipped",
+    "suite_completa": "NOT_TESTED - 13337 testes > 30min"
   }
 }
