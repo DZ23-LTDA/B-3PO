@@ -1,7 +1,7 @@
 {
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 97,
+  "round": 98,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",

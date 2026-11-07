@@ -87,7 +87,7 @@ const tabEl = (paneId: string) => document.querySelector<HTMLElement>(`[data-tre
   // `role="tab"`) e virou `<span aria-hidden>`. O contrato deste arquivo NÃO mudou — o ✕ existe se e
   // somente se o gesto de mouse fecha — só a forma do elemento.
   const hasCloseButton = (paneId: string) =>
-    Boolean(tabEl(paneId)?.querySelector('[data-slot="pane-tab-close"]'))
+    Boolean(document.querySelector(`[data-slot="pane-tab-close"][data-pane="${paneId}"]`))
 
 /** Does the middle-click gesture actually close this tab? Observed through the
  *  tree, not through a spy — a pane that is gone stopped being a tab. */

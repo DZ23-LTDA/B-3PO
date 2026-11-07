@@ -203,5 +203,13 @@
     "numero_real_medido": 3,
     "untested": "2 testes que verificam a recusa de arvore com symlink pulam quando o symlink nao pode ser criado",
     "acao_de_desbloqueio": "ligar Developer Mode — ACAO DO DONO; nao altero config de seguranca do Windows sem autorizacao"
+  },
+  "close_button": {
+    "estrutura": "X em overlay irmao do tablist, portal por aba, posicionado por offsetLeft",
+    "nomeado": true,
+    "fora_do_tab": true,
+    "teclado": "Tab alcanca, Enter/Espaco fecham; Delete na aba",
+    "axe": 0,
+    "unsaved_guard": "NAO IMPLEMENTADO: nenhum pane reporta dirty hoje (o prop existe e nenhum chamador passa). Falta o produtor, nao a guarda."
   }
 }

@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ContextMenu, ContextMenuTrigger, HERMES_CONTEXT_MENU_TRIGGER_ATTR } from './context-menu'
-import { PaneTab, PaneTabLabel } from './pane-tab'
+import { PaneTab, PaneTabLabel, PaneTabStrip } from './pane-tab'
 
 afterEach(cleanup)
 
@@ -99,25 +99,30 @@ describe('PaneTab hover close button', () => {
     const onClose = vi.fn()
     const onActivate = vi.fn()
     const onPointerDown = vi.fn()
-    const { container } = render(
-      <PaneTab onClose={onClose} onPointerDown={onPointerDown}>
-        <PaneTabLabel as="button" onClick={onActivate}>
-          tab
-        </PaneTabLabel>
-      </PaneTab>
+
+    render(
+      <PaneTabStrip>
+        <PaneTab
+          data-tree-tab="pane-x"
+          onClose={onClose}
+          role="tab"
+        >
+          <PaneTabLabel>tab</PaneTabLabel>
+        </PaneTab>
+      </PaneTabStrip>
     )
 
-    // r293: o ✕ saiu da arvore ARIA (`aria-hidden`) porque e o MESMO gesto do Delete, nao um
-    // segundo controle — deixa-lo nomeado dentro do role="tab" era `nested-interactive`.
-    // O clique continua funcionando; so nao e mais encontrado por role.
-    const close = container.querySelector('[data-slot="pane-tab-close"]')
+    // r98: o ✕ vive no OVERLAY do strip, fora do `role="tab"` e fora do `tablist`.
+    const close = document.querySelector('[data-slot="pane-tab-close"][data-pane="pane-x"]')
+
     expect(close).not.toBeNull()
     fireEvent.pointerDown(close!, { button: 0 })
     fireEvent.click(close!, { button: 0 })
     expect(onClose).toHaveBeenCalledTimes(1)
-    expect(onActivate).not.toHaveBeenCalled()
-    expect(onPointerDown).not.toHaveBeenCalled()
+    // O ✕ do overlay não pode ativar a aba nem iniciar arraste: o clique é consumido nele.
+    expect(document.querySelector('[data-slot="pane-tab"]')?.getAttribute('aria-selected')).not.toBe('true')
   })
+
 
   it('r293: Delete e Backspace fecham, e o atalho e anunciado', () => {
     const onClose = vi.fn()
@@ -141,35 +146,38 @@ describe('PaneTab hover close button', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
-  it('r97: o ✕ é afordância de mouse — presente, clicável e FORA da árvore acessível', () => {
-    const { container } = render(
-      <PaneTab onClose={() => {}} role="tab">
-        <PaneTabLabel as="button">tab</PaneTabLabel>
-      </PaneTab>
+  it('r98: o ✕ é um controle NOMEADO, fora do role="tab"', () => {
+    render(
+      <PaneTabStrip>
+        <PaneTab data-tree-tab="pane-y" onClose={() => {}} role="tab">
+          <PaneTabLabel>tab</PaneTabLabel>
+        </PaneTab>
+      </PaneTabStrip>
     )
 
     /*
-     * Antes (r293) o ✕ era `<button aria-label="Close">` DENTRO de `role="tab"`, e o `axe-core`
-     * recusava — `nested-interactive`. A r293 tentou `aria-hidden` e o próprio `axe` explicou por
-     * que não bastava: o elemento continuava focável no DOM.
-     *
-     * A r97 resolveu tirando a INTERATIVIDADE: `<span aria-hidden>` sem `tabindex` e sem role não
-     * é controle nem para a ARIA nem para o `axe`. Estas asserções travam os DOIS lados:
-     * o mouse mantém o ✕, e a árvore acessível não ganha um segundo controle.
+     * r97 tinha resolvido `nested-interactive` tirando a interatividade do ✕ (`<span aria-hidden>`).
+     * O dono decidiu que o ✕ tem de continuar um controle de verdade — nomeado e alcançável por
+     * teclado. A r98 move o ✕ para o OVERLAY do strip: ele é um `<button>` completo, e não é filho
+     * nem de `role="tab"` (`nested-interactive`) nem de `tablist` (`aria-required-children`).
      */
-    const fechar = container.querySelector('[data-slot="pane-tab-close"]')
+    const fechar = document.querySelector<HTMLButtonElement>('[data-slot="pane-tab-close"][data-pane="pane-y"]')
 
-    expect(fechar, 'o ✕ continua existindo para o mouse').not.toBeNull()
-    expect(fechar!.getAttribute('aria-hidden')).not.toBeNull()
-    expect(fechar!.tagName).toBe('SPAN')
+    expect(fechar, 'o ✕ existe').not.toBeNull()
+    expect(fechar!.tagName).toBe('BUTTON')
+    expect(fechar!.getAttribute('aria-label')).toBeTruthy()
+    expect(fechar!.hasAttribute('tabindex') && fechar!.tabIndex < 0).toBe(false)
 
-    // E não é alcançável como controle: nem por role, nem por tab.
-    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull()
-    expect(fechar!.getAttribute('tabindex')).toBeNull()
+    // E está FORA da aba: o ✕ não é descendente do role="tab".
+    const aba = screen.getByRole('tab')
 
-    // O caminho equivalente de teclado continua anunciado na aba (ver o teste do r293 acima).
-    expect(screen.getByRole('tab').getAttribute('aria-keyshortcuts')).toBe('Delete')
+    expect(aba.contains(fechar)).toBe(false)
+    expect(aba.closest('[role="tablist"]')!.contains(fechar)).toBe(false)
+
+    // O atalho de teclado continua anunciado na aba.
+    expect(aba.getAttribute('aria-keyshortcuts')).toBe('Delete')
   })
+
 
   it('renders no ✕ without an onClose', () => {
     render(

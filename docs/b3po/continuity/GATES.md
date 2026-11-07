@@ -6434,3 +6434,72 @@ $ AppModelUnlock       ->  chave ausente (Developer Mode DESLIGADO)
   symlink não existe
 - **ação de desbloqueio**: ligar Developer Mode. **É ação do dono** — a decisão #4 diz
   explicitamente para não alterar configurações de segurança do Windows, e eu não alterei.
+
+---
+
+## G8 · ADENDO 54 — decisão do dono #8: o ✕ voltou a ser **um controle nomeado**, fora do `role="tab"`
+
+**Rodada 98.** A r97 tinha resolvido `nested-interactive` tirando a **interatividade** do ✕
+(`<span aria-hidden>`). O dono decidiu o contrário: *"Mantenha o botão de fechar aba (✕), com nome
+acessível, suporte a teclado e proteção contra perda de alterações não salvas."*
+
+**As duas coisas não coexistem dentro do `tablist`.** A restrição, verificada e não suposta:
+
+- `<div role="tablist">` aceita **apenas** `role="tab"` como filho → um `<button>` ali é
+  `aria-required-children` (medido na r50);
+- um `<button>` dentro do `role="tab"` é `nested-interactive` (medido na r293);
+- `role="presentation"` num wrapper **não** resolve (também medido na r50 — o wrapper fica
+  transparente e o botão sobe para filho do `tablist`).
+
+### A correção estrutural
+
+```
+antes:  <div role="tablist">                ← o PRÓPRIO scroller
+          <div role="tab">                  ← a aba
+            <span aria-hidden>✕</span>      ← ✕ sem interatividade (r97)
+          </div>
+        </div>
+
+depois: <div class="overflow-x-auto">       ← scroller (listRef continua aqui)
+          <div class="relative">
+            <div role="tablist">            ← só abas
+              <div role="tab">…</div>
+            </div>
+            <div class="absolute inset-0 pointer-events-none">   ← OVERLAY, irmão do tablist
+              <button aria-label="Fechar" data-slot="pane-tab-close" />
+            </div>
+          </div>
+        </div>
+```
+
+Cada aba faz **portal** do seu ✕ para o overlay e se posiciona em `offsetLeft + offsetWidth - 18`,
+remedindo em `ResizeObserver` e `resize`. O overlay vive **dentro** do scroller, então o ✕ rola junto
+com a aba.
+
+### Medido no app real
+
+```
+/                 X=2  nomeados=2  dentroDoTab=0   LIVRE
+/settings         X=2  nomeados=2  dentroDoTab=0   LIVRE
+/stock            X=1  nomeados=1  dentroDoTab=0   LIVRE
+/session-import   X=2  nomeados=2  dentroDoTab=0   LIVRE
+/gas              X=1  nomeados=1  dentroDoTab=0   LIVRE
+/backups          X=1  nomeados=1  dentroDoTab=0   LIVRE
+```
+
+**`nomeados` = `dentroDoTab` = cada ✕ é `<button aria-label>`, e nenhum está dentro de `role="tab"`.**
+`axe`: **zero** nas 6 rotas.
+
+### O que a decisão #8 ainda **não** tem, e por quê
+
+*"proteção contra perda de alterações não salvas"* — **não implementada**, e o motivo é concreto:
+
+- o `confirm()` já existe (`store/confirm.ts`) e seria usado;
+- **nenhum pane do app reporta estado "sujo" hoje**: o prop `dirty` existe em `PaneTab` e
+  **nenhum chamador o passa** (grep em `components/pane-shell`: zero ocorrências).
+
+Construir a guarda sem um produtor seria um mecanismo inerte — e o guia do repo rejeita
+explicitamente *"hooks with no concrete consumer"*. **O produtor é a peça que falta**, não a guarda.
+
+**Registrado como `PARTIAL` com o próximo passo nomeado**: declarar `dirty` no painel que
+realmente tem edição não salva, e então ligar `closeTab` ao `confirm()`.

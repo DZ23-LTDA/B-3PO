@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 
 import { type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
@@ -47,6 +48,25 @@ const TAB_IDLE =
 // over `--tab-bg` without fighting the active underline / hover shadows.
 const TAB_SELECTED =
   '[background-image:linear-gradient(color-mix(in_srgb,var(--ui-accent)_14%,transparent),color-mix(in_srgb,var(--ui-accent)_14%,transparent))] text-foreground'
+
+
+/**
+ * r98 — o ✕ de fechar NÃO pode morar dentro do `role="tab"`.
+ *
+ * `nested-interactive` (WCAG 4.1.2): um controle interativo dentro de outro. A r97 resolveu isso
+ * tirando a INTERATIVIDADE do ✕ (`<span aria-hidden>`), mas o dono decidiu que o ✕ deve continuar
+ * sendo um controle de verdade — nomeado, alcançável por teclado e com proteção contra perda de
+ * alteração não salva.
+ *
+ * As duas coisas só coexistem se o ✕ sair do `role="tab"`. E dentro de `<div role="tablist">` só
+ * pode haver `role="tab"`, então ele também não pode ser irmão da aba ali dentro (a r50 mediu:
+ * `aria-required-children`).
+ *
+ * A saída: o strip renderiza um OVERLAY irmão do `tablist`, dentro do mesmo contêiner que rola.
+ * Cada aba faz portal do seu ✕ para esse overlay e se posiciona sobre a própria borda direita.
+ * O ✕ está no DOM fora da aba, continua um `<button aria-label>` focável, e rola junto com as abas.
+ */
+const TabCloseOverlay = React.createContext<HTMLDivElement | null>(null)
 
 interface PaneTabProps extends React.ComponentProps<'div'> {
   active?: boolean
@@ -127,6 +147,15 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
   },
   ref
 ) {
+
+  // r98: ref interna para o ✕ medir a própria aba; mesclada com a ref de quem chamou.
+  const abaRef = React.useRef<HTMLDivElement | null>(null)
+  const refMesclada = (node: HTMLDivElement | null) => {
+    abaRef.current = node
+
+    if (typeof ref === 'function') ref(node)
+    else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node
+  }
   // Vertical rails only. Horizontal tabs draw no bottom border — the strip owns
   // that rule, and a per-tab border stacked a second translucent line over it.
   const edge = vertical ? (side === 'right' ? 'border-l' : 'border-r') : undefined
@@ -222,7 +251,7 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
         fecharPorTeclado(event, onClose, vertical)
         props.onKeyDown?.(event)
       }}
-      ref={ref}
+      ref={refMesclada}
       data-slot="pane-tab"
     >
       <div
@@ -241,48 +270,88 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
           <span className="size-2 rounded-full bg-amber-500 shadow-[0_0_0_2px_var(--tab-bg),0_1px_2px_rgba(0,0,0,0.45)] dark:bg-amber-400" />
         </span>
       )}
-      {onClose && !vertical && (
-        // Mask the content beneath the close button instead of painting over it.
-        // Geometry stays fixed; the same fade works on solid and glass surfaces.
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-stretch opacity-0 transition-opacity group-hover/tab:pointer-events-auto group-hover/tab:opacity-100">
-          {/*
-           * r97 — o ✕ é uma AFORDÂNCIA DE MOUSE, não um segundo controle.
-           *
-           * O `nested-interactive` existia porque isto era `<button tabIndex={-1}>` DENTRO de
-           * `role="tab"`: focável no DOM, logo "interativo dentro de interativo" — e o r293 já
-           * provou que `aria-hidden` não resolve enquanto o elemento continuar focável.
-           *
-           * A saída é tirar a INTERATIVIDADE, não o nome. Um `<span>` sem `tabindex` e sem role
-           * não é controle para a ARIA nem para o `axe`, e continua clicável pelo mouse. O caminho
-           * de teclado e de leitor de tela é o `Delete`/`Backspace` da própria aba, anunciado por
-           * `aria-keyshortcuts` (ver `onKeyDown` acima), e há também "Fechar" no menu de contexto
-           * do strip. **Ninguém perde caminho**: o mouse mantém o ✕, o teclado já tinha o Delete.
-           */}
-          <span
-            aria-hidden
-            className="grid w-(--pane-tab-close-width) cursor-pointer place-items-center bg-transparent text-(--ui-text-tertiary) hover:text-foreground"
-            data-slot="pane-tab-close"
-            onClick={event => {
-              event.preventDefault()
-              event.stopPropagation()
-              onClose()
-            }}
-            onPointerDown={event => {
-              // Claim a plain left press so the shell can't also activate or
-              // drag the tab. Middle/⌘ presses bubble on purpose — the tab's
-              // own close gestures already route them.
-              if (event.button === 0 && !isMetaClose(event)) {
-                event.stopPropagation()
-              }
-            }}
-          >
-            <Codicon name="close" size="0.6875rem" />
-          </span>
-        </span>
+{onClose && !vertical && (
+        <TabCloseButton
+          onClose={onClose}
+          paneId={(props as { 'data-tree-tab'?: string })['data-tree-tab']}
+          tabRef={abaRef}
+        />
       )}
     </div>
   )
 })
+
+
+/**
+ * r98 — o ✕ de uma aba, renderizado no overlay do strip (fora do `role="tab"` e do `tablist`).
+ *
+ * Mede a própria aba e se posiciona na borda direita dela. `data-slot="pane-tab-close"` continua
+ * igual para quem já procura por ele. É um `<button>` de verdade: nome acessível, `Tab` alcança,
+ * `Enter`/`Espaço` fecham — e `dirty` pede confirmação antes de descartar (ver `onClose`, que o
+ * chamador já envolve com a guarda de alteração não salva).
+ */
+function TabCloseButton({
+  onClose,
+  paneId,
+  tabRef
+}: {
+  onClose: () => void
+  paneId?: string
+  tabRef: React.RefObject<HTMLElement | null>
+}) {
+  const overlay = React.useContext(TabCloseOverlay)
+  const alvo = React.useRef<HTMLElement | null>(null)
+  const [left, setLeft] = React.useState<number | null>(null)
+
+  React.useLayoutEffect(() => {
+    if (!overlay) return
+
+    const atualizar = () => {
+      const aba = tabRef.current
+
+      if (aba) setLeft(aba.offsetLeft + aba.offsetWidth - 18)
+    }
+
+    atualizar()
+
+    // `ResizeObserver` não existe em todo ambiente (jsdom sem stub, SSR): sem ele a medição
+    // inicial já basta, e não adianta derrubar o componente por causa da observação.
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(atualizar)
+
+    if (ro && tabRef.current) ro.observe(tabRef.current)
+    window.addEventListener('resize', atualizar)
+
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', atualizar)
+    }
+  }, [overlay, tabRef])
+
+  if (!overlay || left === null) return null
+
+  return createPortal(
+    <button
+      aria-label={translateNow('common.close')}
+      className="pointer-events-auto absolute top-1/2 z-10 grid h-[18px] w-[18px] -translate-y-1/2 cursor-pointer place-items-center rounded-sm bg-transparent text-(--ui-text-tertiary) outline-none hover:bg-(--ui-state-hover) hover:text-foreground focus-visible:ring-2 focus-visible:ring-(--ui-accent)"
+      data-pane={paneId}
+      data-slot="pane-tab-close"
+      onClick={event => {
+        event.preventDefault()
+        event.stopPropagation()
+        onClose()
+      }}
+      onPointerDown={event => {
+        if (event.button === 0 && !isMetaClose(event)) event.stopPropagation()
+      }}
+      style={{ left }}
+      type="button"
+    >
+      <Codicon name="close" size="0.6875rem" />
+    </button>,
+    overlay
+  )
+}
+
 
 interface PaneTabLabelProps extends React.ComponentProps<'button'> {
   /** `button` when the label is the activation target (preview rail);
@@ -341,6 +410,10 @@ export const PaneTabStrip = React.forwardRef<HTMLDivElement, PaneTabStripProps>(
   { children, className, listRef, trailing, titlebar = false, ...props },
   ref
 ) {
+  // r98: o nó onde os ✕ das abas são portalizados (irmão do tablist, dentro do scroller).
+  const [overlay, setOverlay] = React.useState<HTMLDivElement | null>(null)
+  const overlayNode = React.useCallback((node: HTMLDivElement | null) => setOverlay(node), [])
+
   return (
     <div
       // Strip and active tab both sit on the sidebar surface, so the bar reads
@@ -354,12 +427,22 @@ export const PaneTabStrip = React.forwardRef<HTMLDivElement, PaneTabStripProps>(
       ref={ref}
       {...props}
     >
+      {/* r98: o SCROLLER deixou de ser o `tablist`; `listRef` fica nele e o `tablist` virou
+          filho. Isso libera um IRMÃO dele — o overlay — para receber os ✕ por portal, sem que
+          nenhum `<button>` seja filho de `tablist` (`aria-required-children`) nem de
+          `role="tab"` (`nested-interactive`). */}
       <div
         className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         ref={listRef}
-        role="tablist"
       >
-        {children}
+        <div className="relative flex w-max min-w-full">
+          <TabCloseOverlay.Provider value={overlay}>
+            <div className="flex" role="tablist">
+              {children}
+            </div>
+          </TabCloseOverlay.Provider>
+          <div className="pointer-events-none absolute inset-0" ref={overlayNode} />
+        </div>
       </div>
       {trailing}
     </div>
