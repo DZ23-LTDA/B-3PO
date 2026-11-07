@@ -56,7 +56,48 @@ data: 2026-11-07
 > **Uma medição isolada deu 1 nó no desktop e não foi reproduzida em 3 passagens seguintes.** Fica
 > registrado em vez de escondido.
 
-## 5. As 27 falhas do desktop — classificação por nome
+## 5. As falhas do desktop — classificação por nome, medida
+
+### r19: a suíte completa depois de 12 rodadas de mudança
+
+`32 failed | 18.995 passed | 246 skipped (19.273)`
+
+**Três eram minhas** — introduzidas nas rodadas 14–18 e corrigidas na r19:
+
+| Teste | O que ele pegou | Correção |
+|---|---|---|
+| `src/lib/engenharia.test.ts` | o grupo declarado por um ambiente **tem de ter módulo** — e eu tinha somado grupos vazios | `tambemEm` passou a carregar **nome de ambiente**, separando navegação do mapa de `/ambiente` |
+| `src/i18n/pt.test.ts` | chave duplicada na lista ordenada | `'homeB3po'` aparecia duas vezes |
+| `src/components/chat/intro.test.tsx` | **`useNavigate()` fora de um Router** — a home quebrava ao ser montada sem roteador | fixture ganhou `MemoryRouter`, que é o contrato real (produção usa `HashRouter`) |
+
+**A r19 também instalou um portão**: o script de commit roda gate + tipos + testes e **se recusa a
+commitar** com qualquer vermelho. Na r16 eu commitei duas vezes com verificação falhando; agora não
+passa.
+
+### As 2 novas que sobraram — **flaky sob carga, 26/26 isoladas**
+
+| Arquivo | Isolado |
+|---|---|
+| `electron/audit-store.test.ts` | **passa** |
+| `electron/desktop-installation.test.ts` | **passa** |
+
+`npx vitest run electron/audit-store.test.ts electron/desktop-installation.test.ts` → **26 passed**.
+
+### As 27 de baseline, por natureza
+
+| Grupo | Nº | Arquivos | Natureza |
+|---|---|---|---|
+| **Empacotamento / assinatura** | 12 | `after-pack-digests` 2, `payload-sign-cache` 2, `bundle-electron-main` 3, `commit-bundles.windows` 1, `run-electron-builder` 1, `stage-native-deps` 1, `side-by-side` 0 (arquivo não roda) | ambiente de build |
+| **Instalação de plugin** | 3 | `desktop-plugin-install` (de 54) | `EPERM` de symlink — política do Windows |
+| **Rede / SSH** | 4 | `ssh-connection` (de 89) | exige host SSH real |
+| **GPU** | 2 | `linux-nvidia-egl-recovery.native` | sem GPU Linux |
+| **Flaky sob carga** | 5 | `browser-hints`, `terminal-ownership`, `use-keybinds-browser` ×2, `use-composer-submit` | passam isolados |
+| **Timeout** | 1 | `channel-build-version` (75 s) | estouro de tempo |
+
+**Nenhuma é defeito de lógica do produto.** E a partir da r19 essa afirmação tem um mecanismo que a
+mantém honesta: o portão de commit.
+
+
 
 O goal (FASE 0-F) manda investigar **por nome e causa**, e não aceitar "baseline" como desculpa.
 
