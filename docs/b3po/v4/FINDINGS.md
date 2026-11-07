@@ -12,33 +12,50 @@ data: 2026-11-07
 
 ---
 
-## A-01 · O modo **Estratégico** e o modo **IA e Agentes** têm o menu **idêntico**
+## A-01 · **Estratégico** e **IA e Agentes** tinham o menu idêntico — **CORRIGIDO na r15**
 
-**Medido (r13):** alternando pelo seletor real no app, os grupos renderizados são:
+**Medido (r13):** alternando o seletor real, os dois renderizavam os **mesmos grupos**
+(`VISÃO GERAL · INTELIGÊNCIA`) e os mesmos 68 itens. Trocar entre eles mudava a **cor** e nada mais.
+**5 combinações para 6 modos.**
 
-| Modo | Grupos na barra |
-|---|---|
-| Empresa | VISÃO GERAL · OPERAÇÃO · COMÉRCIO · TRABALHO · CRESCIMENTO · INTELIGÊNCIA · CONFIGURAÇÃO |
-| Engenharia | VISÃO GERAL · CONFIGURAÇÃO |
-| Automação | VISÃO GERAL · TRABALHO · INTELIGÊNCIA |
-| **IA e Agentes** | **VISÃO GERAL · INTELIGÊNCIA** |
-| **Estratégico** | **VISÃO GERAL · INTELIGÊNCIA** |
-| Administração | VISÃO GERAL · TRABALHO · CONFIGURAÇÃO |
+**Causa**: `lib/ambiente.ts` declarava os dois com a mesma lista.
 
-**5 combinações distintas para 6 modos.** Trocar entre IA e Estratégico muda a **cor** e nada mais.
+### A correção — os grupos vêm do propósito documentado, não de gosto
 
-**Causa**: `lib/ambiente.ts` declara os dois com os mesmos grupos:
+`b3po-workspaces.md` diz o que Estratégico é: *"indicadores, metas, relatórios, planejamento,
+**análise financeira e operacional**"*. Cruzando com o que existe:
+
+| Grupo escolhido | Módulos | Por que |
+|---|---|---|
+| `Visão geral` | **Painel** | indicadores — e é comum a todos, por definição |
+| `Comércio` | **Financeiro, Vendas, Entregas** | análise financeira |
+| `Crescimento` | **Marketing, Pós-venda** | análise de crescimento |
+
 ```ts
-automacao: ['Visão geral', 'Inteligência', 'Trabalho'],
-ia: ['Visão geral', 'Inteligência'],
-estrategico: ['Visão geral', 'Inteligência'],   // ← igual a `ia`
+estrategico: ['Visão geral', 'Comércio', 'Crescimento'],
 ```
 
-**Fix exige decisão**: quais módulos pertencem a "Estratégico"? O produto tem grupos
-Comércio/Operação/Trabalho/Crescimento/Inteligência — escolher quais vão para Estratégico é
-**política de produto**, não dedução.
+### Medido depois — **6 de 6 distintos**
 
----
+| Modo | Itens | Grupos |
+|---|---:|---|
+| Empresa | 122 | VG · OPERAÇÃO · COMÉRCIO · TRABALHO · CRESCIMENTO · INTELIGÊNCIA · CONFIGURAÇÃO |
+| Engenharia | 105 | VG · TRABALHO · INTELIGÊNCIA · CONFIGURAÇÃO |
+| Automação | 102 | VG · TRABALHO · INTELIGÊNCIA |
+| IA e Agentes | 99 | VG · INTELIGÊNCIA |
+| **Estratégico** | **106** | **VG · COMÉRCIO · CRESCIMENTO** |
+| Administração | 100 | VG · TRABALHO · CONFIGURAÇÃO |
+
+`axe` 0 em todos.
+
+### O custo, declarado
+
+`Comércio` é um balde de 8: além de Financeiro, Vendas e Entregas, traz **Produtos, Estoque, Compras,
+Vasilhames e Medidores** — operacionais. Um leitor de estratégia olhando estoque e compras é
+defensável, mas é **inclusão a mais, não a menos**.
+
+**Reverter é uma linha** — e se o dono quiser um "Estratégico" mais estreito, o mecanismo `tambemEm`
+da r14 permite criar um grupo `Análise` com os três módulos certos.
 
 ## A-02 · O modo **Engenharia** não revelava nada de engenharia — **CORRIGIDO na r14**
 

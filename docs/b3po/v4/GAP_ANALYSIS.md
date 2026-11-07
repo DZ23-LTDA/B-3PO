@@ -98,7 +98,7 @@ data: 2026-11-07
 |---|---|---|---|
 | F5-1 | Os seis modos como navegação, sem autorizar | **DONE** | `lib/ambiente.ts` + `permission-guard` separado |
 | F5-2 | Identidade visual distinta dos seis | **DONE** | 6/6 cores, `axe` 0, alinhado ao mockup |
-| **F5-2b** | A navegação dos seis difere de fato | **PARTIAL** | r14: **Engenharia corrigida** (2→4 grupos, 66→105 itens) via `tambemEm`; `estrategico` = `ia` continua pendente de decisão (FINDINGS A-01) |
+| **F5-2b** | A navegação dos seis difere de fato | **DONE** | r14: Engenharia 2→4 grupos (66→105 itens) via `tambemEm`. r15: Estratégico ganhou grupos próprios. **6/6 combinações distintas**, `axe` 0 |
 | F5-3 | Empresa: **uma** vertical ponta a ponta com dados transacionais reais e RBAC | **PARTIAL** | módulos e testes existem (30–98 por store); **nenhuma jornada completa exercitada** |
 | F5-4 | Engenharia: Git, terminal, testes, CI/CD, deploy com aprovação | **PARTIAL** | `git-ipc`, `terminal-ipc` existem; deploy não |
 | F5-5 | Automação: gatilhos, filas, retries, reprocessamento | **PARTIAL** | `automation-ipc` (5 canais), 58 testes; fila/dead-letter não |

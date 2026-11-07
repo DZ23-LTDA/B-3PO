@@ -337,7 +337,7 @@
     "decisao_pendente": "A portar p/ mobile | B rebrandar web | C desktop e o produto, web/mobile sao operacionais | D foco em profundidade no desktop"
   },
   "findings_v4": {
-    "A-01": "PENDENTE DE DECISAO: estrategico e ia tem menu identico; falta saber o que pertence a Estrategico",
+    "A-01": "CORRIGIDO r15: estrategico = Visao geral + Comercio + Crescimento (do proposito documentado). 6/6 combinacoes distintas, axe 0. Custo: Comercio traz tambem estoque/compras",
     "A-02": "CORRIGIDO r14: tambemEm (um modulo em varios grupos). Engenharia 2->4 grupos, 66->105 itens, Projetos/Agentes/Automacoes visiveis. axe 0",
     "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
     "A-04": "sofia.status() responde { error }",
@@ -348,5 +348,19 @@
     "engenharia.ts": "8 modulos com Construcao/Qualidade - SOMENTE /ambiente",
     "problema": "dois registros; o da barra nao tem Construcao nem Qualidade",
     "nao_corrigido": "unificar toca barra + /ambiente + /busca + testes de contagem; duplicar seria o que o objetivo proibe"
+  },
+  "seis_modos_navegacao": {
+    "r13": "5/6 distintos (estrategico == ia; engenharia sem Construcao/Qualidade)",
+    "r14": "engenharia 2->4 grupos, 66->105 itens (tambemEm)",
+    "r15": "estrategico com grupos proprios -> 6/6 distintos",
+    "medido": {
+      "empresa": 122,
+      "engenharia": 105,
+      "automacao": 102,
+      "ia": 99,
+      "estrategico": 106,
+      "administracao": 100
+    },
+    "axe": 0
   }
 }

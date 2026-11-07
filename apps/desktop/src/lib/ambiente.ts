@@ -110,7 +110,25 @@ const GRUPOS_POR_AMBIENTE: Record<Ambiente, readonly string[]> = {
    */
   automacao: ['Visão geral', 'Inteligência', 'Trabalho'],
   ia: ['Visão geral', 'Inteligência'],
-  estrategico: ['Visão geral', 'Inteligência'],
+    /*
+     * r15 do V4 — Estratégico tinha o menu IDÊNTICO ao de IA e Agentes.
+     *
+     * Medido em r13: alternar entre os dois mudava a cor e mais nada — 5 combinações para 6 modos.
+     *
+     * Os grupos vêm do propósito DOCUMENTADO do modo (`b3po-workspaces.md`: *"Estratégico:
+     * indicadores, metas, relatórios, planejamento, análise financeira e operacional"*), não de gosto:
+     *
+     *   - `Visão geral`  → **Painel** (indicadores) — comum a todos, por definição;
+     *   - `Comércio`     → **Financeiro**, **Vendas**, **Entregas** (análise financeira);
+     *   - `Crescimento`  → **Marketing**, **Pós-venda** (análise de crescimento).
+     *
+     * **Custo declarado**: `Comércio` é um balde de 8 e traz também Produtos, Estoque, Compras,
+     * Vasilhames e Medidores — operacionais. Um leitor de estratégia olhando estoque e compras é
+     * defensável, mas é inclusão A MAIS, não a menos. Registrado em FINDINGS A-01.
+     *
+     * Reverter é uma linha.
+     */
+    estrategico: ['Visão geral', 'Comércio', 'Crescimento'],
   administracao: ['Visão geral', 'Configuração', 'Trabalho']
 }
 
