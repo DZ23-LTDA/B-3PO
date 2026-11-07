@@ -6862,3 +6862,61 @@ DESKTOP 0 violações em 27 rotas   (main=1 em todas)
 passagens seguintes deram **0**. Não consegui reproduzir o nó nem identificar a regra — foi transitório,
 provavelmente um estado de render no instante da medição. **Registro o fato em vez de escondê-lo**: o
 número estável é 0, e houve uma medição isolada de 1 que eu não consegui reproduzir em 3 tentativas.
+
+---
+
+## G7 · ADENDO 13 — o fix do safe-area virou **testável**, porque o emulador não é
+
+**Rodada 106.** O item mobile estava `PARTIAL` por um motivo específico: *"verificação do fix bloqueada
+pelo emulador"*. Duas passagens desta rodada confirmaram que o bloqueio é real e **não é do app**:
+
+```
+$ adb shell dumpsys window
+mCurrentFocus=Window{… Application Not Responding: system}   ← o processo SYSTEM do Android
+
+$ adb shell am start -n com.dz23.b3po/.MainActivity
+ActivityTaskManager: Displayed com.dz23.b3po/.MainActivity for user 0: +13s51
+
+$ adb shell screencap   →  1080×2400, INTEIRO PRETO
+$ mCurrentFocus  →  null
+```
+
+**O app sobe** (`Displayed +13s51`) **e o Android não compõe nada**: o `system_server` aborta com
+`SuspendAll timeout` e o `systemui` entra em ANR. É o emulador, não o produto.
+
+### A resposta certa não foi "tentar mais uma vez"
+
+Foi **tirar a correção do território que depende do aparelho**. A conta do inset saiu do `App.tsx`
+para `src/app/tela-inset.ts` — uma função pura:
+
+```ts
+insetDoTopo({ os: 'android', alturaDaStatusBar: 24 })   // 24
+insetDoTopo({ os: 'ios',     alturaDaStatusBar: 47 })   // 0   <- o SafeAreaView já aplica no iOS
+insetDoTopo({ os: 'android' })                          // 0   <- nunca undefined/NaN
+```
+
+**`0` no iOS é a decisão, não um esquecimento**: somar os dois aplicaria o inset **duas vezes** e
+criaria uma faixa morta no topo. E `undefined` que escapasse para o estilo viraria uma chave ignorada
+pelo React Native — o bug voltaria **em silêncio**, que é exatamente como ele apareceu.
+
+### O que isso muda no estado do mobile
+
+| Antes (r105) | Agora (r106) |
+|---|---|
+| correção provada só por captura | **10 testes** cobrindo a conta |
+| verificação refém de um emulador instável | provável em **qualquer** máquina |
+| `PARTIAL` por bloqueio de ambiente | **READY** no que é verificável |
+
+```
+mobile · suíte: 179 passed | 8 skipped
+mobile · typecheck: PASS
+mobile · APK release: BUILD SUCCESSFUL (18s)
+```
+
+### O que continua **não** provado, e por quê
+
+**O aparelho não mostra a tela corrigida.** A captura é preta porque o sistema Android não compõe. O
+que está provado é: o app **sobe** (log do `ActivityTaskManager`), a **conta do inset está certa**
+(10 testes), e o APK **constrói**. O que falta é **um aparelho que funcione** — e a ação de
+desbloqueio é reiniciar o emulador por completo (`emulator -avd <nome> -wipe-data`), que é operação de
+ambiente do dono.

@@ -1,5 +1,5 @@
 {
-  "round": 105,
+  "round": 106,
   "queue": [
     {
       "id": "T-01",
@@ -182,14 +182,14 @@
     "heading_order": "0 (aria-level=2 no CardTitle)"
   },
   "mobile_runtime": {
-    "rodou": true,
-    "evidencia": "docs/b3po/evidence/mobile-runtime-r97.png",
-    "bugs_encontrados": 1,
-    "corrigidos": 1,
-    "bug": "SafeAreaView do react-native e no-op no Android: o wordmark desenhava sobre o relogio do sistema",
-    "fix": "paddingTop: StatusBar.currentHeight no styles.screen (App.tsx)",
-    "verificacao_do_fix_no_aparelho": "BLOCKED_BY_EXTERNAL_DEPENDENCY: system_server do emulador aborta (SuspendAll timeout) e o systemui entra em ANR",
-    "acao_de_desbloqueio": "reiniciar o emulador por completo (emulator -avd <nome> -wipe-data)"
+    "app_sobe": true,
+    "evidencia": "ActivityTaskManager: Displayed com.dz23.b3po/.MainActivity +13s51",
+    "bug_encontrado_e_corrigido": "SafeAreaView do react-native e no-op no Android: wordmark sobre o relogio",
+    "fix_testavel": "src/app/tela-inset.ts + 10 testes (android usa StatusBar.currentHeight; ios 0 para nao somar duas vezes)",
+    "suite": "179 passed | 8 skipped",
+    "apk": "BUILD SUCCESSFUL",
+    "nao_provado": "a tela corrigida em aparelho: o emulador aborta o system_server (screenshot preto, mCurrentFocus null)",
+    "acao_de_desbloqueio": "reiniciar o emulador por completo (emulator -avd <nome> -wipe-data) - operacao do dono"
   },
   "symlink": {
     "reproduzido": true,

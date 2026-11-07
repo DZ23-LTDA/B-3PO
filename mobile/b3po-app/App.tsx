@@ -12,6 +12,7 @@
  * (defeito registrado no MOBILE-REPORT) e este caminho mais curto remove a variável.
  */
 
+import { estiloDaTela } from './src/app/tela-inset'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -597,11 +598,10 @@ const styles = StyleSheet.create({
   // r97: `SafeAreaView` do react-native é NO-OP no Android — medido no emulador, o wordmark
   // desenhava por cima do relógio do sistema. O inset vem de `StatusBar.currentHeight` (0 no iOS,
   // onde o SafeAreaView já resolve).
-  screen: {
-    backgroundColor: '#0b0d12',
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0,
-  },
+  // r106: a conta do inset saiu para `src/app/tela-inset.ts` — uma função pura, provável por teste
+  // em qualquer máquina. O bug (wordmark sobre o relógio) só apareceu rodando no emulador, e o
+  // emulador desta máquina é instável; a conta testável não é.
+  screen: estiloDaTela({ alturaDaStatusBar: StatusBar.currentHeight, os: Platform.OS }),
   tagline: { color: '#8f9bb3', fontSize: 14 },
   wordmark: { color: '#2f6bff', fontSize: 26, fontWeight: '700', letterSpacing: -0.5 }
 })
