@@ -1,5 +1,5 @@
 {
-  "round": 70,
+  "round": 72,
   "queue": [
     {
       "id": "T-01",
@@ -41,8 +41,9 @@
       "id": "T-06",
       "what": "Provar ativacao de UM conector sem credencial comercial (ntfy/irc)",
       "owner": "dsh",
-      "status": "todo",
-      "blocked_by": "autorizacao"
+      "status": "blocked",
+      "blocked_by": "EXT-6 (autorizacao para conexao externa)",
+      "proven": "adapter IRC existe e passa 18 testes (plugins/platforms/irc/adapter.py); ntfy-approval.yaml no catalogo"
     },
     {
       "id": "T-07",

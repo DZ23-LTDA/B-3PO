@@ -4024,3 +4024,61 @@ usuário.
 | **backup dos dados de negócio** | **`FAIL`** — não existe |
 | **restore** | **`FAIL`** — não existe |
 | TLS | **`N/A`** — app local |
+
+---
+
+## G6 · ADENDO 2 — T-06 (conector sem credencial): **o que dá para provar sem efeito externo**
+
+**Rodada 72.** O T-06 pedia "provar ativação de UM conector sem credencial comercial (ntfy/irc)". Fui
+ver o que existe — e **o adapter IRC existe, com teste**.
+
+### O que encontrei
+
+```
+plugins/platforms/irc/adapter.py        <- o adapter (plugin, nao core)
+plugin-catalog/ntfy-approval.yaml       <- ntfy como plugin de aprovacao
+tests/gateway/test_irc_adapter.py       <- o teste
+```
+
+### O que eu PROVEI
+
+```
+python -m pytest tests/gateway/test_irc_adapter.py -q
+..................                                                       [100%]
+18 passed in 1.95s
+```
+
+**18 testes do adapter IRC passam.** O adapter:
+- existe,
+- é carregado pelo loader de plugins,
+- e o comportamento é testado (conexão, leitura, envio, reconexão — coberto pelo teste).
+
+### O que eu NÃO provei — e por quê
+
+**"Ativação" significa conectar a um servidor IRC real e trocar uma mensagem.** Isso é:
+
+| Aspecto | Por que eu não faço |
+|---|---|
+| conexão a servidor público | **efeito externo** — mensagem sai da máquina e pode chegar a terceiros |
+| identidade/hostname na rede | expõe a instalação a logs de terceiros |
+| autorização | **EXT-6** pede exatamente a sua palavra para isso |
+
+**O `/goal` e as regras do workspace dizem: ação com efeito externo exige autorização.** Eu tenho
+autorização para **medir**, não para **aparecer num servidor IRC**.
+
+### O veredito do T-06
+
+| Parte | Estado |
+|---|---|
+| o adapter existe e carrega | **`PASS`** — 18 testes |
+| o catálogo tem um conector sem credencial comercial | **`PASS`** — `ntfy-approval.yaml` |
+| **ativação real (conectar e trocar mensagem)** | **`BLOCKED_BY_EXTERNAL_DEPENDENCY`** — EXT-6 |
+
+**O T-06 passa de `todo` para `blocked` com evidência**: o trabalho técnico que eu podia fazer **está
+feito**; o que falta é **a sua autorização para uma conexão externa**.
+
+### O que muda na leitura do G6
+
+**"99 plugins oficiais, 27 de mensageria, ZERO ativos"** era o veredito da r10. **Continua correto** —
+**zero ATIVOS** — mas a diferença agora é que eu sei **por quê**: não é falta de adapter, é **falta de
+autorização** para ativar. **É `BLOCKED`, não `NOT_IMPLEMENTED`.**
