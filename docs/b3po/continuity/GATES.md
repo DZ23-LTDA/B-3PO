@@ -6569,3 +6569,40 @@ falta a superfície onde o dono digita as faixas. É `PARTIAL`, e o próximo pas
 `/medidores` com a lista de faixas, o formulário e o estado "não configurada".
 
 **Nenhum preço foi inventado em nenhum ponto do caminho** — nem no modelo, nem no teste, nem na API.
+
+### Adendo — a tela de tarifas existe, e o `axe` dela é zero
+
+**Rodada 101.** Fechando o `PARTIAL` da r100.
+
+`src/app/medidores/tarifas-section.tsx` — a superfície onde o dono digita a política:
+
+- **estado "não configurada"** com explicação de que o consumo é medido mas não cobrado;
+- formulário de faixas que **começa vazio** (nenhuma faixa pré-preenchida, moeda em branco);
+- cálculo sobre um volume informado, com a conta **linha por linha** (água, esgoto, taxa fixa, total);
+- o erro do IPC aparece **como veio** (`politica_sem_faixa`, `faixa_1_fora_de_ordem`…) — traduzir
+  para "algo deu errado" esconderia exatamente o que a validação protege.
+
+**Medido em runtime**: `axe /medidores: 0 violações` · a seção aparece como
+`section[aria-label="Política de tarifas"]` · a tela mostra **"Nenhuma política de tarifas
+configurada"**.
+
+### E a primeira versão da tela tinha um defeito de contraste — meu
+
+`axe` acusou **`color-contrast` 2,64:1** no botão "Salvar política":
+
+```
+foreground #1d2635  background #0053fd  (9.0pt)
+```
+
+**Causa**: eu montei o botão à mão com `bg-(--ui-accent)` + `text-(--ui-accent-foreground)`, e esse par
+**não é** o par de contraste do design system — `--ui-accent-foreground` é escuro, feito para outra
+superfície.
+
+**Correção**: usar o `<Button>` do design system, que já carrega o par correto. **Não é só conserto de
+cor — é parar de reimplementar um primitivo que existe.**
+
+> Um componente novo é onde o design system é mais fácil de furar: a paleta está a uma classe de
+> distância, e nada impede escrever a combinação errada. `axe` é o que transforma isso de gosto em
+> medida.
+
+Depois: **`axe /medidores: 0`**.

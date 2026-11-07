@@ -1096,7 +1096,38 @@ export interface Translations extends NoticeTranslations {
       tipos: { hidrometro: string; gasometro: string; outro: string }
       indisponivel: string
       erro: Record<string, string>
+      tarifas: {
+        titulo: string
+        intro: string
+        naoConfigurada: string
+        explicacao: string
+        faixa: string
+        ate: string
+        semTeto: string
+        preco: string
+        moeda: string
+        minimo: string
+        opcional: string
+        taxaFixa: string
+        esgoto: string
+        vigencia: string
+        adicionarFaixa: string
+        removerFaixa: string
+        salvar: string
+        removida: string
+        salva: string
+        calcular: string
+        contaAgua: string
+        contaEsgoto: string
+        contaTaxa: string
+        contaTotal: string
+        consumoFaturado: string
+        consumoMedido: string
+        minimoAplicado: string
+        salvarFalhou: string
+      }
     }
+
     stock: {
       inventoryApply: string
       inventoryEmpty: string

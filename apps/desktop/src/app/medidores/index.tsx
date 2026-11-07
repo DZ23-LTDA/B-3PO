@@ -8,6 +8,7 @@
  * contexto — quem olha quer saber quanto foi, e só depois conferir se o relógio bate.
  */
 
+import { TarifasSection } from './tarifas-section'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { listCrmContacts, type CrmContactRow } from '@/api/crm-contacts'
@@ -320,6 +321,7 @@ export function MedidoresView() {
         </table>
         </div>
       )}
+          <TarifasSection />
     </div>
   )
 }

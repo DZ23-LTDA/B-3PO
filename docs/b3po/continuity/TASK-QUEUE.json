@@ -1,5 +1,5 @@
 {
-  "round": 100,
+  "round": 101,
   "queue": [
     {
       "id": "T-01",
@@ -221,9 +221,10 @@
     "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes"
   },
   "t12": {
-    "status": "PARTIAL",
-    "pronto": "modelo + calculo puro + validacao + persistencia + IPC(4) + preload + api + 32 testes",
-    "falta": "tela de configuracao da politica (lista de faixas, formulario, estado 'nao configurada')",
-    "regra": "nenhum preco padrao no codigo: sem politica vigente, calcular devolve null"
+    "status": "done",
+    "pronto": "modelo + calculo puro + validacao + persistencia + IPC(4) + preload + api + 32 testes + TELA (tarifas-section) com estado 'nao configurada'",
+    "falta": null,
+    "regra": "nenhum preco padrao no codigo: sem politica vigente, calcular devolve null",
+    "axe_medidores": 0
   }
 }
