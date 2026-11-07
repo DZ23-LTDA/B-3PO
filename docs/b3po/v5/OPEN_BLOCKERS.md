@@ -37,7 +37,7 @@ fase: G7
 |---|---|---|
 | Suíte completa do gateway | `NOT_TESTED` | `EXT-4` |
 | **IDOR / isolamento multi-tenant** | `NOT_TESTED` | exige dois tenants reais; 6 handlers normalizam o tenant, mas não há teste de cruzamento A×B |
-| **SSRF / egress allowlist** | **NÃO EXISTE** | 11 canais de rede medidos; nenhum com allowlist de destino |
+| **SSRF / egress allowlist** | **NÃO EXISTE** | confirmado na r28: os allowlists do repo são de **entrada**, não de destino |
 | **Path traversal** | `NOT_TESTED` | `fs` (13 canais) e `plugin-files` (4) |
 | **Replay de webhook** | `NOT_TESTED` | assinatura + janela de 10 min existem; replay não exercitado |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
@@ -55,3 +55,9 @@ fase: G7
 | "144 canais sem guarda" | medido em canal, não em arquivo; a maioria é UI sem recurso de negócio |
 | "25 canais de dívida" | número do handoff antigo; o real é **341 registros, 144 sem helper** — e "sem helper" ≠ vulnerável |
 | "Sofia está implementada" | **planejamento local**; a execução não acontece |
+
+## WebSocket: origem **verify**, não bloqueio
+
+`ws_host_origin_reason` valida Host e Origin do upgrade, falha fechado em Origin malformado e rejeita
+outra porta de loopback. **64 testes** (`test_web_server_host_header.py`). Não é bloqueio: é controle
+existente e exercitado.

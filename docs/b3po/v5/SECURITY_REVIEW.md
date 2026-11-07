@@ -11,6 +11,37 @@ fase: G1
 > Todo item aqui foi **medido no código ou provado por teste**. O que não foi, está na última seção
 > como `NOT_VERIFIED`. Nenhuma afirmação de "o produto é seguro" é feita.
 
+## 8. WebSocket: validacao de origem — **EXISTE e esta testada** (correcao da r28)
+
+O G1 pede *"definir validacao de origem"* para o console Electron / WebSocket. Eu tinha isso como
+`NOT_TESTED`. **Estava errado — e para o lado pessimista.**
+
+`hermes_cli/web_server_boundary.py:251` → `ws_host_origin_reason(ws, state)`:
+
+| Defesa | Como |
+|---|---|
+| DNS-rebinding | o header `Host` tem de bater com o host vinculado (`host_mismatch`) |
+| Origin presente | tem de apontar para o host vinculado (`origin_mismatch`) |
+| Origin malformado | `parsed = None` → **falha fechado** |
+| **Outra porta de loopback** | rejeitada, a menos que seja origem confiavel configurada |
+| Origem nao-web (Electron `file://`, `null`, `app://`) | confiada — **a credencial e a fronteira real ali** |
+
+O comentario do codigo explica o ataque que a regra de porta fecha: *"uma pagina em OUTRA porta de
+loopback e uma origem diferente ... sem isso ela abre `/api/pty` com um token que leu do index."*
+
+**Medido**: `pytest tests/hermes_cli/test_web_server_host_header.py` → **64 passed** (19,12 s),
+cobrindo pagina propria, LAN, outra pagina local, binds `0.0.0.0`/`::` e proxy reverso com URL publica.
+
+## 9. Egress: allowlist de destino — **NAO EXISTE** (confirmado na r28)
+
+Os `allowlist` do repositorio sao de **entrada** (`gateway/platforms/access_policy_mixin.py`: quem pode
+mandar mensagem ao bot), nao de **saida**. Nao ha allowlist de destino para as requisicoes HTTP de
+saida do gateway.
+
+**Diferenca que importa**: validacao de *origem* (quem chama o gateway) esta feita; validacao de
+*destino* (para onde o gateway chama) nao existe.
+
+
 ## 1. As três políticas, e por que são três
 
 | Política | Pergunta | Onde |
