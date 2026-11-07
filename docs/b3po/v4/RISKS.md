@@ -19,18 +19,34 @@ grau menor — e a lista existe porque esconder isso seria pior que o risco.
 
 ## HIGH
 
-### R1 — 36 stores persistem JSON independente, sem transação nem escrita atômica
+### R1 — `RETRATADO` — a escrita **É** atômica nos 36 stores
 
-**Evidência**: `electron/*-store.ts` (36 arquivos); `sales-store.ts:86` mostra o padrão
-`join(userDataDir, 'b3po', 'sales.json')`. **Não há helper compartilhado** — cada store tem o seu
-`readFileSync` + `JSON.parse` + validação.
+**O que eu escrevi na r4 (errado):** *"36 stores persistem JSON independente, sem transação nem
+escrita atômica… um crash durante a escrita deixa o arquivo truncado"*, classificado **HIGH**.
 
-**Impacto**: o fluxo *pedido → estoque → financeiro* atravessa três arquivos. Uma falha no meio deixa
-os três em estados diferentes, e não há como reverter. Um crash durante a escrita deixa o arquivo
-truncado.
+**O que a auditoria da r5 mediu:**
 
-**Não foi verificado** se cada store grava em arquivo temporário + rename (atômico). **Isso precisa
-ser auditado antes de qualquer fluxo transacional real.**
+| Situação | Nº | Evidência |
+|---|---:|---|
+| **Atômico** (`writeFile(temp)` + `rename`) | **35** | ex. `sales-store.ts:362-364` — `writeFile(temp, …)` e `rename(temp, this.filePath)` |
+| **Delega a escrita** (por projeto) | **1** | `native-token-store.ts`: *"main.ts owns the electron-coupled halves and injects… the userData store-file read/write"* |
+| **Sem rename** | **0** | — |
+
+**O padrão é uniforme e correto**: `mkdir` recursivo, escrita num temporário, `rename` por cima. Isso
+é a escrita atômica de fato em POSIX e no NTFS quando origem e destino estão no mesmo volume.
+
+**Por que eu errei**: minha primeira varredura contou só `writeFileSync`. Os stores usam
+`node:fs/promises` (`writeFile` **async** + `rename`). O resultado "32 de 36 não escrevem" devia ter
+me alertado de que o **meu detector** estava cego — não de que 32 stores não gravam. É o mesmo erro
+que a r105 já tinha catalogado no `ipc-invariants`: **a régua errada acusa o código inocente.**
+
+**O que continua sendo risco de verdade — e é menor:**
+
+O **mecanismo** existe nos 35; a **garantia** não é testada. Existem 36 arquivos `*-store.test.ts`
+que exercitam escrita real em `mkdtemp` e um deles testa *"arquivo corrompido vira vazio"* — mas
+**nenhum** prova que não sobra `.tmp` nem simula crash no meio da escrita.
+
+**Classificação corrigida: `LOW`** — "atomicidade implementada, não provada".
 
 ### R2 — duas superfícies IPC para a mesma informação
 

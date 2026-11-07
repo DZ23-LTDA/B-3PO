@@ -7002,3 +7002,53 @@ Se o `wrapup_check` não exigisse typecheck, a entrega teria:
 
 **O commit certo lista os arquivos.** A partir daqui, `git add <caminho>` explícito para o que eu
 toquei, e nada mais.
+
+---
+
+## G0 · ADENDO 3 — retratação: a escrita dos stores **é atômica**, e o risco HIGH era meu
+
+**Rodada 5 do V4.** O `RISKS.md` que eu escrevi na rodada anterior abria com:
+
+> *"**R1 — 36 stores persistem JSON independente, sem transação nem escrita atômica** … Um crash
+> durante a escrita deixa o arquivo truncado."* — classificado **HIGH**.
+
+**Está errado.** A auditoria da r5 mediu:
+
+| Situação | Nº |
+|---|---:|
+| **Atômico** — `writeFile(temp)` + `rename` | **35** |
+| **Delega a escrita** — `native-token-store` injeta o I/O do `main.ts` | **1** |
+| **Sem `rename`** — o caso que eu temia | **0** |
+
+O padrão é uniforme e correto (`sales-store.ts:359-365`):
+
+```ts
+await mkdir(dirname(this.filePath), { recursive: true })
+const temp = `${this.filePath}.tmp`
+await writeFile(temp, JSON.stringify(file, null, 2), 'utf8')
+await backupRotativo(this.filePath)
+await rename(temp, this.filePath)
+```
+
+### Por que eu errei
+
+Minha primeira varredura contou **só `writeFileSync`**. Os stores usam `node:fs/promises` —
+`writeFile` **async** + `rename`. O resultado saiu *"32 de 36 não escrevem"*, e **um detector que diz
+que 32 arquivos não fazem o que deviam é uma acusação contra o detector**, não contra os arquivos.
+
+É o mesmo erro que a r105 catalogou no `ipc-invariants`: **régua errada acusa código inocente.**
+
+### O que de fato faltava — e agora está provado
+
+A garantia não era testada. Os 36 `*-store.test.ts` exercitam escrita real em `mkdtemp`, mas
+**nenhum** afirmava que o temporário não fica para trás. Um `rename` esquecido não quebraria teste
+nenhum, e deixaria um `.tmp` órfão por gravação.
+
+`electron/store-escrita-atomica.test.ts` — **5 testes**:
+
+- gravar **não deixa `.tmp`** no diretório (Sales e Tariff);
+- gravar de novo **substitui** (não duplica);
+- um `.tmp` órfão de gravação interrompida **não impede** a próxima;
+- arquivo corrompido devolve vazio **sem lançar** — o app abre.
+
+**Classificação corrigida: `LOW`** ("atomicidade implementada, não provada" → provada).

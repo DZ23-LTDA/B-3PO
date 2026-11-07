@@ -176,7 +176,8 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 
 | ID | Item | Risco | Aceite |
 |---|---|---|---|
-| **B-01** | Auditar escrita atômica nos 36 stores (R1) | **HIGH** | cada store grava temp+rename, ou a ausência é documentada com teste de falha |
+| ~~B-01~~ | ~~Auditar escrita atômica nos 36 stores~~ | **FECHADO r5** | **35/36 gravam temp+rename; 0 sem rename; 1 delega ao main.ts por projeto.** O risco era do meu detector, não do código |
+| **B-01'** | Provar a atomicidade: teste que garante não sobrar `.tmp` e que crash no meio não trunca | **LOW** | teste de falha por store (ou um compartilhado) |
 | **B-02** | Fechar a dívida de **16 canais IPC** sem `exigirAtor` (R3) | **HIGH** | ratchet em 0; teste por canal |
 | **B-03** | Testar o gateway num env com `aiohttp` (R6) | **HIGH** | `pytest tests/gateway/` coleta e passa no env do projeto |
 | **B-04** | Corrigir `sofia.status()` (R5) | **MEDIUM** | responde estado real; teste no backend |
