@@ -101,7 +101,12 @@ export interface ErpMounted {
   varrer: () => Promise<void>
 }
 
-export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMounted {
+export function mountErpIpc(
+  ipcMain: IpcRegistrar,
+  userDataDir: string,
+  /** r38 do V5: prova de que a sessão existe no runtime. Fail-closed quando ausente. */
+  runtime: { sessaoExiste?: (sessionId: string) => Promise<boolean> } = {}
+): ErpMounted {
   // r35 do GOAL V2: a trilha de auditoria passa a existir em DISCO.
   //
   // Antes disto, onAudit nunca era passado (rp-ipc tinha zero ocorrencias) e a auditoria vivia so
@@ -509,7 +514,8 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
 
   // r19 do GOAL V2: os seis canais de Sofia nascem com guarda. openSofiaStore e sincrono no nome mas
   // devolve uma Promise — a montagem nao espera: os canais so leem quando o renderer chamar.
-  void openSofiaStore(userDataDir).then(store => registerSofiaIpc(ipcMain, { actorOf: () => actorOf(), store , execucoes: openExecutionStore(userDataDir) }))
+  void openSofiaStore(userDataDir).then(store => registerSofiaIpc(ipcMain, {
+      ...(runtime.sessaoExiste ? { sessaoExiste: runtime.sessaoExiste } : {}), actorOf: () => actorOf(), store , execucoes: openExecutionStore(userDataDir) }))
 
   // As ferramentas do agente usam ESTES stores: nao ha segundo conjunto de dados.
   const tools: AgentTool[] = buildDomainTools({

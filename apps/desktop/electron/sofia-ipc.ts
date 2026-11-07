@@ -40,6 +40,20 @@ export interface SofiaIpcDeps {
    * Hermes (a execução nasce `pendente`, honesta).
    */
   execucoes: ExecucaoStore
+  /**
+   * r38 do V5 — responde se a sessão existe de verdade no runtime.
+   *
+   * Sem isto, `vincularSessao` aceitava **qualquer** string: um `session_id` inventado deixava a
+   * execução em `executando` para sempre, e a tela mostraria trabalho que nunca aconteceu. O main
+   * não pode afirmar o que o renderer apenas alega.
+   *
+   * **Fail-closed**: se não der para verificar, a vinculação recusa. É a mesma regra do goal —
+   * default deny — e é preferível a aceitar um id que não existe.
+   *
+   * Opcional na injeção para os testes do contrato puro; quando ausente, o comportamento antigo
+   * (aceitar) permanece e está declarado.
+   */
+  sessaoExiste?: (sessionId: string) => Promise<boolean>
   store: SofiaStore
 }
 
@@ -233,6 +247,13 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
 
         if (!execucaoId) return { error: 'execucao_obrigatoria' }
         if (!sessionId.trim()) return { error: 'sessao_obrigatoria' }
+
+        // r38: o main não afirma o que o renderer apenas alega. Sem prova, recusa.
+        if (deps.sessaoExiste) {
+          const existe = await deps.sessaoExiste(sessionId).catch(() => false)
+
+          if (!existe) return { error: 'sessao_inexistente' }
+        }
 
         return deps.execucoes.vincularSessao(execucaoId, sessionId)
       })

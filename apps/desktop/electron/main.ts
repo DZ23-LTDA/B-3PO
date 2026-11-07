@@ -240,6 +240,7 @@ import {
 } from './desktop-uninstall'
 import { mountCrmContacts } from './crm-contacts-ipc'
 import { mountErpIpc } from './erp-ipc'
+import { sessaoExisteCom } from './sofia-sessao-runtime'
 import { describeDevCdpDecision, resolveDevCdpPort } from './dev-cdp'
 import { preReadyDockLaunchSteps } from './dock-launch-order'
 import { embedHostOrigin } from './embed-host'
@@ -729,7 +730,6 @@ if (USER_DATA_OVERRIDE || process.env.HERMES_DATA_DIR_SUFFIX) {
   fs.mkdirSync(resolvedUserData, { recursive: true })
   app.setPath('userData', resolvedUserData)
 }
-
 // Only the lock owner may persist launch recovery markers, adopt a workspace or start a
 // backend, so the lock is taken as soon as userData is final (#131055, #143056).
 // #78101: on Linux/X11 a zombie/defunct Electron process leaves the
@@ -17503,7 +17503,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 }
 
 mountCrmContacts(ipcMain, app.getPath('userData'))
-  mountErpIpc(ipcMain, app.getPath('userData'))
+  mountErpIpc(ipcMain, app.getPath('userData'), { sessaoExiste: sessaoExisteCom(handleHermesApiRequest) })
 
 registerDesktopUninstallIpc({
   actorOf: () => atorDeMaquina(app.getPath('userData')), ipcMain,
