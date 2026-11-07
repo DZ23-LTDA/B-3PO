@@ -107,17 +107,3 @@ export async function perderVasilhame(
   return api ? api.perder(id, motivo) : { error: 'indisponivel' }
 }
 
-/** Rótulo humano do tipo — a tela fala "13 kg", não "botijao_13". */
-export const VASILHAME_LABEL: Record<VasilhameKind, string> = {
-  botijao_13: '13 kg',
-  botijao_45: '45 kg',
-  botijao_p13: 'P-13',
-  galao_20: 'Galão 20 L',
-  outro: 'Outro',
-}
-
-export const VASILHAME_STATUS_LABEL: Record<VasilhameRow['status'], string> = {
-  comodato: 'com o cliente',
-  estoque: 'na revenda',
-  perdido: 'perdido',
-}

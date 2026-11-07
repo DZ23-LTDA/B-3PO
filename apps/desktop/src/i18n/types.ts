@@ -1029,6 +1029,57 @@ export interface Translations extends NoticeTranslations {
       unitPrice: string
       unavailable: string
     }
+    gas: {
+      title: string
+      intro: string
+      saldoAria: string
+      emEstoque: string
+      emEstoqueNota: string
+      emComodato: string
+      emComodatoNota: string
+      perdidos: string
+      perdidosNota: string
+      entrada: string
+      tipo: string
+      serieOpcional: string
+      serieAria: string
+      clienteParaEntregar: string
+      cadastrar: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      escolhaCliente: string
+      perderMotivo: string
+      perderMotivoPadrao: string
+      colunas: { tipo: string; serie: string; situacao: string; cliente: string; saiu: string; acoes: string }
+      acoes: { entregar: string; devolver: string; perder: string }
+      tipos: { botijao_p13: string; botijao_13: string; botijao_45: string; galao_20: string; outro: string }
+      status: { estoque: string; comodato: string; perdido: string }
+      indisponivel: string
+      erro: Record<string, string>
+    }
+    medidores: {
+      title: string
+      intro: string
+      novo: string
+      tipo: string
+      numero: string
+      cliente: string
+      cadastrar: string
+      lancarLeitura: string
+      medidor: string
+      leitura: string
+      lancar: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      escolhaMedidor: string
+      primeiraLeitura: string
+      colunas: { medidor: string; cliente: string; consumo: string; atual: string; anterior: string; lida: string }
+      tipos: { hidrometro: string; gasometro: string; outro: string }
+      indisponivel: string
+      erro: Record<string, string>
+    }
     stock: {
       inventoryApply: string
       inventoryEmpty: string

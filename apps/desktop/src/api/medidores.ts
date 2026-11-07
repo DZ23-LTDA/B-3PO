@@ -103,19 +103,4 @@ export function litros(milli: number): string {
   return `${milli.toLocaleString('pt-BR')} L`
 }
 
-export const MEDIDOR_LABEL: Record<MedidorKind, string> = {
-  gasometro: 'Gasômetro',
-  hidrometro: 'Hidrômetro',
-  outro: 'Outro',
-}
 
-/** Tradução dos erros do store — a tela fala português, não chave. */
-export const MEDIDOR_ERRO: Record<string, string> = {
-  dados_invalidos: 'Dados inválidos.',
-  leitura_invalida: 'Informe uma leitura válida (número não negativo).',
-  leitura_regrediu:
-    'A leitura é menor que a anterior. Um medidor não anda para trás — se ele foi trocado, cadastre o medidor novo.',
-  medidor_nao_encontrado: 'Medidor não encontrado.',
-  medidor_obrigatorio: 'Escolha o medidor.',
-  tipo_invalido: 'Tipo de medidor inválido.',
-}

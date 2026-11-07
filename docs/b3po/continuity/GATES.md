@@ -5041,3 +5041,70 @@ restantes são **uma escolha**, devidamente documentada por quem a fez.
 
 > **Medir com filtro é escolher o que não quero ver.** A r82 aprendeu isso na estrutura; a r83, na
 > estatística: **o mesmo app, o mesmo dia, e o número passou de 2 para 84 só por tirar um argumento.**
+
+---
+
+## G5 · ADENDO 2 — i18n nas telas novas: **~80 strings hardcoded**, e a mesma lição do padding
+
+**Rodada 84.** Na r81 eu corrigi o padding das telas de gás/medidores comparando com as vizinhas. **Sobrou
+a mesma classe de defeito**: as duas telas tinham **todo o texto em português, direto no JSX**, enquanto
+**100% das outras telas** usam `t.settings.*`.
+
+### A medição
+
+```
+gas/index.tsx       ~35 strings  (título, 3 cards, 6 rótulos, 6 cabeçalhos, 3 ações, 7 mensagens)
+medidores/index.tsx ~27 strings
+api/gas.ts          VASILHAME_LABEL + VASILHAME_STATUS_LABEL  (mapas de texto)
+api/medidores.ts    MEDIDOR_LABEL + MEDIDOR_ERRO
+```
+
+**Um usuário em inglês veria as duas telas inteiras em português** — inclusive as mensagens de erro e
+os rótulos dos tipos de vasilhame.
+
+### O que foi feito
+
+| Arquivo | Mudança |
+|---|---|
+| `i18n/types.ts` | blocos `gas` e `medidores` (com `colunas`, `acoes`, `tipos`, `status`, `erro: Record<string,string>`) |
+| `i18n/en.ts` | base em inglês — **é o `Translations` que o TypeScript cobra** |
+| `i18n/pt.ts` | overlay pt-BR completo |
+| `gas/index.tsx` · `medidores/index.tsx` | `const copy = t.settings.gas` / `.medidores`, 62 substituições |
+| `api/gas.ts` · `api/medidores.ts` | mapas de texto **removidos** — o texto não mora mais na camada de dados |
+
+**`overlay-gaps.json` e `_keys.desktop.json` regenerados** pelos mecanismos oficiais.
+
+### A prova
+
+```
+/gas        h1: Vasilhames   main=846/846   axe: region(3)
+/medidores  h1: Medidores    main=846/846   axe: region(3)
+
+gas E2E: cadastrou=estoque · entregou=comodato · devolver=ok
+erro do store: ja_esta_em_comodato  (chave — a tela traduz via copy.erro)
+```
+
+**Testes: 51 passam** (gas 17 + medidores 19 + RBAC 13 + overlay 2).
+
+### Por que a camada de dados não guarda texto
+
+`VASILHAME_LABEL` vivia em `api/gas.ts` — **a camada que fala IPC carregando português**. Isso amarra a
+tradução ao transporte e faz o mesmo texto existir em dois lugares no dia em que alguém traduzir.
+**O texto saiu de lá**: a API devolve `kind: 'botijao_13'`, e a tela resolve o rótulo.
+
+**O mesmo erro da r81, um nível mais fundo**: lá era padding no lugar errado; aqui é idioma no lugar
+errado — e nos dois casos o código *funcionava*, só **não era o mesmo produto** das outras telas.
+
+### A lição
+
+**Eu vi o padding e não vi o idioma no mesmo arquivo.** A r81 me ensinou a **comparar com a vizinha** —
+mas eu comparei **só o que estava olhando** (a caixa), não o que a vizinha faz **para cada string**.
+
+> **"Comparar com a vizinha" não é olhar a vizinha; é passar item por item: padding, largura, heading,
+> idioma, foco, tabela.** Eu tinha a lista de itens e usei um.
+
+### O que ainda não é i18n nestas telas
+
+**Nada visível.** O que resta sem tradução são **formatos** (`metrosCubicos` devolve `12,345 m³` com
+vírgula decimal, e `litros` usa `toLocaleString('pt-BR')`) — o separador decimal é locale, e isso segue
+o padrão do repo (`priceLabel` faz o mesmo). Registrado como observação, não como gap.
