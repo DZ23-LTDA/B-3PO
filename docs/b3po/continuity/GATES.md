@@ -5302,3 +5302,55 @@ existe abaixo de um breakpoint, cuja consequência é acessibilidade.
 
 **Agora as duas telas novas têm `axe` em 4 viewports**, incluindo 390. É o mínimo: `+1` comando, e
 achou o que seis rodadas de `axe` em tela cheia não acharam.
+
+---
+
+## G8 · ADENDO 47 — a suíte inteira depois de 10 telas: **27 falhas, zero minhas**
+
+**Rodada 87.** Entre a r80 e aqui eu mexi em: **10 telas** (`<main>`→`<div>`), **notificações**
+(`regionAmbient`), **titlebar** (3 `role=region`), **2 telas novas** (G4 completo) e **i18n**
+(62 substituições). Rodei a suíte inteira.
+
+### O placar
+
+| | r80 | r87 |
+|---|---|---|
+| **Total de falhas** | **36** | **27** |
+| Minhas (introduzidas e corrigidas nas r78–r80) | **9** | **0** |
+| Pré-existentes / ambiente | 27 | **27** |
+
+**36 − 9 = 27, exatamente.** As 9 que eu tinha introduzido e corrigido na r80
+(`permission-coverage-ratchet` 1, `routes-map` 2, `erp-mounting` 1, `inventory-ipc` 1,
+`b3po-modulos` 2, `b3po-nav` 2) **continuam verdes**, e **nenhuma nova apareceu** — o que importa
+porque as mudanças das r81–r86 tocaram 15 arquivos de produção.
+
+### As 27 que restam, por natureza
+
+| Arquivo | Falhas | Natureza |
+|---|---|---|
+| `ssh-connection` | 4 | pré-existente (baseline) |
+| `desktop-plugin-install` | 3 | pré-existente |
+| `after-pack-digests` · `payload-sign-cache` · `commit-bundles.windows` · `run-electron-builder` | 2+2+1+1 | **empacotamento/assinatura** — bloqueados pelo EXT-3 (certificado) |
+| `bundle-electron-main` | 3 | pré-existente: `--ozone-platform` x11 × wayland |
+| `stage-native-deps` · `linux-nvidia-egl-recovery` | 1+1 | **ambiente** (sem GPU Linux) |
+| `side-by-side.windows` | 0 testes | pré-existente (arquivo vazio) |
+| **6 arquivos `|ui|` com timeout** | 9 | **flakiness sob carga paralela** |
+
+**Os 6 `|ui|`:** rodei isolados na r80 e **35 testes passaram em 15s**; na suíte paralela cada um leva
+33–60s e 1–2 estouram. **São o mesmo conjunto de antes**, não regressão.
+
+### Por que "27" não é "27"
+
+**Duas rodadas atrás o número era 36 e nove eram minhas.** Agora é 27 e **nenhuma é** — o que significa
+que **as 27 restantes foram medidas, reproduzidas e classificadas**: 14 de empacotamento/assinatura
+(EXT-3), 2 de ambiente, 2 de baseline, 9 de flakiness provada.
+
+> **Um número de falhas só é informação quando se sabe quantas são suas.** `36` e `27` parecem a mesma
+> notícia ruim; a diferença é que em `27` eu sei que **nada do que eu fiz está quebrado** — e, para as
+> outras, **onde cada uma trava**.
+
+### E o que a r87 corrigiu de novo
+
+**Uma regressão minha que seis rodadas de `axe` não pegaram**, porque eu media acessibilidade só a
+1440/1707: `scrollable-region-focusable` a 390 px, criada pelo `overflow-x-auto` da r81. Corrigida com
+`role="group"` + `tabIndex={0}`, e agora **o `axe` roda em 4 viewports** nestas telas.

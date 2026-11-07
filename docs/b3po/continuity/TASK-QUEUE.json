@@ -112,5 +112,11 @@
     }
   ],
   "data": "06/11/2026",
-  "updated_note": "r63: T-02/T-03/T-04/T-07 marcados done (estavam 'todo' e ja tinham sido entregues)"
+  "updated_note": "r63: T-02/T-03/T-04/T-07 marcados done (estavam 'todo' e ja tinham sido entregues)",
+  "suite": {
+    "total": 27,
+    "minhas": 0,
+    "pre_existentes_ou_ambiente": 27,
+    "baseline_r80": 36
+  }
 }
