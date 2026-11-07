@@ -155,5 +155,13 @@
     "color_contrast": "8 (text-destructive sobre bg-destructive/10 - MESMO token, nao ha valor que conserte; precisa de token separado ou fundo neutro)",
     "heading_order": "0 (r97: aria-level=2 no CardTitle)",
     "label_content_name_mismatch": "0 (r97)"
+  },
+  "web_spa_axe": {
+    "rotas": 15,
+    "nos": 0,
+    "button_name": "0 (NamedSelect aplica aria-label no button[role=combobox]; o kit descarta props)",
+    "color_contrast": "0 (o web e DARK-ONLY: --color-destructive-text #f87171; escurecer piorava)",
+    "heading_order": "0 (aria-level=2 no CardTitle)",
+    "label_content_name_mismatch": "0"
   }
 }

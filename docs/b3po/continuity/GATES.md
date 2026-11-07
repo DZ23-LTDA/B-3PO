@@ -6189,3 +6189,69 @@ Duas saídas, e as duas mudam a aparência de todo erro no web:
 2. **Fundo neutro** nos blocos de erro em vez de `bg-destructive/10`.
 
 **Nenhuma das duas é correção de bug — são mudanças de sistema visual.** Ficam com o dono.
+
+---
+
+## G7 · ADENDO 11 — **web: zero violações de `axe` em 15 rotas**. E as duas causas-raiz que explicam 56 rodadas de cegueira
+
+**Rodada 97.** O placar final do SPA web:
+
+```
+antes (r96, 13 rotas): 14 nós — button-name 4, color-contrast 6, heading-order 4, label-mismatch 2
+depois (r97, 15 rotas): 0 nós
+```
+
+Medido com `axe.run(document, {})` — **sem `runOnly`**, em **15 rotas**, servindo o build real.
+
+### `button-name` × 2 → 0: `role="combobox"` não aceita nome do conteúdo
+
+O `Select` do `@nous-research/ui` renderiza `<button role="combobox">` cujo único nome possível
+seria o texto do `<span>` interno. **Pela ARIA, `combobox` não herda nome do conteúdo** — só
+`aria-label`/`aria-labelledby`. E o componente faz **destructuring de props fixas**, então um
+`aria-label` passado de fora é **silenciosamente descartado**.
+
+**Prova de que a intenção já existia e era ignorada**: `ChatWorkspacePicker.tsx` **já passava**
+`aria-label={t.sessions.workspace}` — e o botão continuava sem nome.
+
+**Correção**: `web/src/components/NamedSelect.tsx` — wrapper que aplica o nome no
+`button[role="combobox"]` interno via `ref` + `useEffect`, com `display: contents` para
+**não criar caixa de layout**. Fica na nossa camada porque patchear `node_modules` se perde no
+próximo `npm install`. Aplicado em `CronPage` (que também tinha `Label htmlFor` apontando para o
+`<div>` do kit, não para o botão) e em `ChatWorkspacePicker`.
+
+### `color-contrast` × 8 → 0: **o web é DARK-ONLY**, e eu errei a premissa
+
+Duas tentativas erradas antes de acertar, **as duas medidas**:
+
+| Tentativa | Medição | Resultado |
+|---|---|---|
+| `#dc2626` (mais escuro) | 8 → 13 nós | **pior** |
+| `#b91c1c` (bem escuro) | 2,73:1 sobre `#041c1c` | **pior** |
+| **`#f87171` (mais CLARO)** | **5,84 / 6,39 / 6,04:1** nos três fundos | **0 nós** |
+
+**O erro**: assumi tema claro. O app define `--background-base: #041c1c` — **é escuro**. Escurecer o
+vermelho de erro **piora** sobre fundo escuro. O tom certo é mais **claro**.
+
+`--color-destructive: #fb2c36` continua para fundo/borda/ícone; `--color-destructive-text: #f87171`
+existe só para texto. E o `Toast` do upstream, que fixa `text-destructive` e **não aceita
+`className`**, é coberto por um seletor no **nosso** CSS (`[role='status'].text-destructive`), com a
+condição de saída anotada.
+
+### E o erro de medição que quase me fez "consertar" duas vezes
+
+```
+r96: 8 nós de color-contrast em 13 rotas
+r97: 13 nós em 15 rotas   <- eu comparei 15 rotas com 13 e chamei de regressao
+```
+
+**Rotas diferentes não comparam.** Depois de fixar as 15 rotas como unidade, o número foi 8 → 0 sem
+nenhum "piorou" intermediário.
+
+### O que fica
+
+| Item | Estado |
+|---|---|
+| `axe` no SPA web (15 rotas) | **0 violações** |
+| `axe` no desktop (27 rotas) | 89 `region` (T-15) + 3 `nested-interactive` (r50) |
+| testes web | 475/475 |
+| build web | exit 0 |

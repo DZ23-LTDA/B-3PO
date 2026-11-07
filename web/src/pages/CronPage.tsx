@@ -7,6 +7,7 @@ import { Clock, Pause, Pencil, Play, Trash2, X, Zap } from "lucide-react";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
+import { NamedSelect } from "@/components/NamedSelect";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { H2 } from "@nous-research/ui/ui/components/typography/h2";
 import { api } from "@/lib/api";
@@ -1094,7 +1095,7 @@ export default function CronPage() {
 
           <div className="grid gap-1 min-w-[220px]">
             <Label htmlFor="cron-profile-filter">Profile</Label>
-            <Select
+            <NamedSelect label="Profile"
               id="cron-profile-filter"
               value={selectedProfile}
               onValueChange={(v) => setSelectedProfile(v)}
@@ -1105,7 +1106,7 @@ export default function CronPage() {
                   {profileLabel(profile.name)}
                 </SelectOption>
               ))}
-            </Select>
+            </NamedSelect>
           </div>
         </div>
 
