@@ -424,6 +424,27 @@ host, never by faking sys.platform"*.
 **Correção proposta, não aplicada**: marcar os 3 como Linux-only, ou dar a eles um `home` POSIX quando
 fingem POSIX. Não aplico porque desabilitar teste exige decisão de quem cuida do CI.
 
+### r21 — a matriz de plataformas e a prontidão de release, medidas
+
+Os dois documentos que o G7/G8 pedem não existiam para o v5. Escritos **a partir de medição desta
+sessão**, não de cópia do v4:
+
+| Medição | Número |
+|---|---|
+| web build | `✓ built in 5.28s` |
+| web testes | **71 arquivos · 478 testes** |
+| mobile testes | **20 arquivos · 179 testes · 8 skipped** |
+| mobile typecheck | **PASS** |
+| APK | **44,2 MB** · 07/11 08:39 |
+| desktop | **27 failed · 19.000 passed** — todas classificadas |
+
+**Nenhum veredito global.** `PLATFORM_MATRIX.md` dá estado **por fluxo**: a prontidão de conectores
+está READY, a execução de plano da Sofia está PARTIAL (nada executa), a identidade no web está AUSENTE.
+
+`RELEASE_READINESS.md` diz o que **não** está pronto e por quê, incluindo um item que eu não tinha
+escrito antes: **o build não é reproduzível** porque o backend em uso é uma cópia deployada que não é
+reconstruída — e isso já produziu um 404 real (r15).
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
