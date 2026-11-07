@@ -77,7 +77,19 @@ export function SectionHeading({
       {showTitle && (
         <>
           <Icon className="size-4 shrink-0 text-muted-foreground" />
-          <span>{title}</span>
+          {/*
+            * r25 do V4 — o titulo de secao e <h2>, nao <span>.
+            *
+            * Medido na r22: a tela de configuracoes tinha ZERO headings. A r22 deu `h1` ao titulo
+            * da PAGINA (o breadcrumb); faltavam as SECOES.
+            *
+            * Este componente e usado em 19 arquivos, e `SettingsSection` ja envolve cada um num
+            * `<section>` — entao o `<h2>` aqui fecha a estrutura: regiao nomeada + heading dentro.
+            *
+            * `m-0` porque `h2` traz margem propria e o pai e `flex items-center`: sem ele o texto
+            * desloca alguns pixels.
+            */}
+          <h2 className="m-0">{title}</h2>
         </>
       )}
       {meta && <Pill>{meta}</Pill>}
