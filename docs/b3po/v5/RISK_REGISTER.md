@@ -28,22 +28,33 @@ Isso é G5. Sem ele, a explorabilidade é **"requer injeção no renderer"**, n�
 
 ## CRITICAL
 
-### R-01 · `secret-storage:get` / `secret-storage:set` sem autorização
+### R-01 · ~~`secret-storage` devolve segredos~~ — **RETRATADO na r2**
 
-| | |
-|---|---|
-| Arquivo | `apps/desktop/electron/main.ts` |
-| Canais | `hermes:secret-storage:get`, `hermes:secret-storage:set` |
-| Guarda | **nenhuma** |
-| Impacto | leitura e escrita de **segredos da instalação**: chaves de API, tokens de conector |
-| Explorabilidade | qualquer JS no renderer lê **e sobrescreve** credenciais |
-| Severidade | **CRITICAL** |
+**O que eu escrevi na r1**: *"leitura e escrita de segredos — chaves de API, tokens — CRITICAL"*.
 
-**Por que CRITICAL e não HIGH**: escrita permite *substituir* um token válido por um do atacante
-(exfiltração por redirecionamento), não só ler. E não há caminho alternativo: se o renderer chama, o
-main executa.
+**O que o código diz** (`main.ts:14612`):
 
-**Estado**: `OPEN` — não corrigido nesta rodada.
+```ts
+ipcMain.handle('hermes:secret-storage:get', async () => ({ on: secretStoragePolicy().on ... }))
+ipcMain.handle('hermes:secret-storage:set', async (_event, on) => applySecretStorageEncryption(on))
+```
+
+Devolve **`{ on: boolean }`** — uma **flag de política** (criptografia de keychain ligada/desligada),
+consumida por `keychain-encryption-setting.tsx` (Configurações → Gateway). **Não lê nem devolve
+segredo nenhum.**
+
+**Eu inferi o risco pelo NOME do canal.** É o mesmo erro de instrumento que já registrei oito vezes
+no ciclo anterior.
+
+**Varredura confirmatória**: procurei em todos os 100 canais do `main.ts` por `token|apiKey|secret|
+password` no corpo — os **únicos** dois hits são estes, e ambos são a flag. E `connection-config:get`
+passa por **`sanitizeDesktopConnectionConfig(...)`** antes de responder.
+
+**Veredito**: **não existe canal que devolva credencial ao renderer.** É uma boa propriedade do
+produto, medida.
+
+**O risco real do `set`**: desligar a criptografia **decripta todos os segredos para plaintext em
+disco**. Severidade **HIGH** (enfraquece a proteção), não CRITICAL (não exfiltra). `OPEN`.
 
 ### R-02 · `uninstall:run` sem autorização
 
@@ -56,7 +67,24 @@ main executa.
 | Explorabilidade | um clique forjado ou JS injetado dispara a desinstalação |
 | Severidade | **CRITICAL** |
 
-**Estado**: `OPEN`.
+**Estado**: ✅ **FECHADO na r5/r2** (`5e0af2a416`)
+
+```ts
+const ator = await actorOf()
+
+if (!podeOperarMaquina(ator, 'escrita') || ator?.role !== 'owner' || ator?.kind !== 'human') {
+  return { ok: false, error: 'sem_permissao', message: 'Apenas o dono desta instalação pode desinstalar o produto.' }
+}
+```
+
+**A guarda vem antes de qualquer decisão de efeito.** E o teste de guarda encontrou um buraco que eu
+não havia previsto: **um bot com `EXECUTE_ALLOWED` e `role: 'owner'` passava**. Por isso `kind ===
+'human'` entrou — não existe cenário legítimo em que um bot desinstale o produto. É exatamente o
+G1 §36: `EXECUTE_ALLOWED` isolado não concede permissão universal.
+
+**5 testes negativos** (`desktop-uninstall-guarda.test.ts`): sem ator · `level: null` · não-owner ·
+bot com `EXECUTE_ALLOWED` · dono (o único que passa). Em todos os quatro primeiros, `runUninstall`
+**não é chamado**.
 
 ---
 
