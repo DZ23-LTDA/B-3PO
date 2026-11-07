@@ -57,6 +57,9 @@ export interface SofiaIpcDeps {
   store: SofiaStore
 }
 
+/** r43: quanto tempo uma delegação pode esperar por sessão antes de falhar. */
+const LIMITE_PENDENTE_MS = 30 * 60_000
+
 export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): void {
   /** Lista os planos do tenant. O grafo vai junto: a tela não recalcula topologia. */
   ipcMain.handle('hermes:sofia:planos', async (): Promise<unknown> =>
@@ -207,6 +210,18 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
         const plano = await deps.store.obter(planoId)
 
         if (!plano) return { error: 'plano_inexistente' }
+
+        /*
+         * r43 do V5 — `pendente` sem sessão tem prazo, e alguém precisa cobrar isso.
+         *
+         * A r39 criou `expirarPendentes` e **ninguém a chamava**. Medido: a execução `pendente` de
+         * uma delegação antiga continuava contando para concorrência e duração, e a delegação
+         * seguinte falhava com `duracao_maxima` — bloqueada por um trabalho que nunca começou.
+         *
+         * Limpar aqui, antes de delegar, é o momento natural: é exatamente quando o acúmulo
+         * atrapalha.
+         */
+        deps.execucoes.expirarPendentes(Date.now(), LIMITE_PENDENTE_MS)
 
         return delegarTarefa(
           {

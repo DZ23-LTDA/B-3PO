@@ -25,6 +25,8 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { type ActorRow, whoami } from '@/api/admin'
 import { chamarSofia, type PlanoComGrafo } from '@/api/sofia'
+import { $activeSessionId } from '@/store/session'
+import { $delegacaoPendente, limparDelegacaoPendente, registrarDelegacaoPendente } from '@/store/delegacao-pendente'
 import { useStore } from '@nanostores/react'
 
 import { contextoDaSofia, descreverContexto } from '@/lib/contexto-da-sofia'
@@ -135,8 +137,13 @@ function PlanoCard({
           const d = r as { execucao_id: string; prompt: null | string }
 
           // Sem título no plano não há pedido. Dizer o contrário seria inventar o que o agente fará.
-          if (!d.prompt) setErro('a tarefa não tem título — não há pedido para a sessão')
-          else setDelegado(d)
+          if (!d.prompt) {
+            setErro('a tarefa não tem título — não há pedido para a sessão')
+          } else {
+            setDelegado(d)
+            // r43: guarda a delegação para o vínculo acontecer depois, na tela, com a conversa aberta.
+            registrarDelegacaoPendente({ execucao_id: d.execucao_id, prompt: d.prompt, tarefa_id: tarefaId })
+          }
 
           onAtualizar()
         }
@@ -177,6 +184,8 @@ function PlanoCard({
 
       {erro && <p className="mt-2 text-xs text-(--ui-warning)">{erro}</p>}
 
+      <VinculoDaDelegacao onAtualizar={onAtualizar} />
+
       {plano.prontas.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {plano.prontas.map(id => (
@@ -192,6 +201,76 @@ function PlanoCard({
         </div>
       )}
     </article>
+  )
+}
+
+/**
+ * r43 do V5 — o vinculo entre a delegacao e a conversa que a executa.
+ *
+ * A delegacao nasce `pendente` e a sessao nasce no fluxo de chat, fora desta tela. Este bloco e a
+ * ponte **explicita**: mostra o pedido para a pessoa colar na conversa, e oferece vincular a execucao
+ * a sessao que estiver aberta agora.
+ *
+ * POR QUE NAO AUTOMATICO
+ *
+ * Ligar a primeira sessao que aparecesse afirmaria que ela recebeu o pedido — e pode nao ter recebido.
+ * O vinculo so acontece quando a pessoa diz qual conversa e a execucao, e o main **verifica** que ela
+ * existe antes de gravar (r38). Sem verificacao, um id inventado deixaria a execucao "executando"
+ * para sempre.
+ */
+function VinculoDaDelegacao({ onAtualizar }: { onAtualizar: () => void }): React.ReactElement | null {
+  const pendente = useStore($delegacaoPendente)
+  const sessaoAtiva = useStore($activeSessionId)
+  const [erro, setErro] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+
+  if (!pendente) return null
+
+  const vincular = async () => {
+    if (!sessaoAtiva) return
+
+    setOcupado(true)
+    setErro('')
+
+    try {
+      const r = await chamarSofia('execucaoVinculada', {
+        execucao_id: pendente.execucao_id,
+        session_id: sessaoAtiva
+      })
+
+      if (r && typeof r === 'object' && 'error' in r) setErro(String((r as { error: unknown }).error))
+      else {
+        limparDelegacaoPendente()
+        onAtualizar()
+      }
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'falha ao vincular')
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-md border border-(--ui-warning) p-2 text-xs">
+      <p className="text-(--ui-text-tertiary)">
+        Execução {pendente.execucao_id} aguardando sessão · tarefa {pendente.tarefa_id}
+      </p>
+      <p className="mt-1 whitespace-pre-wrap text-foreground">{pendente.prompt}</p>
+      <div className="mt-2 flex items-center gap-2">
+        <button
+          className={BOTAO}
+          disabled={ocupado || !sessaoAtiva}
+          onClick={() => void vincular()}
+          type="button"
+        >
+          {sessaoAtiva ? `Vincular à conversa aberta` : 'Abra uma conversa para vincular'}
+        </button>
+        <button className={BOTAO} disabled={ocupado} onClick={() => limparDelegacaoPendente()} type="button">
+          Descartar
+        </button>
+      </div>
+      {erro && <p className="mt-1 text-(--ui-warning)">{erro}</p>}
+    </div>
   )
 }
 

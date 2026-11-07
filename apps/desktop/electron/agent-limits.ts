@@ -165,9 +165,22 @@ export function bloqueioParaIniciar(consulta: ConsultaLimite): MotivoBloqueio | 
    * A **duração** é outra pergunta: só `executando` tem relógio correndo. Uma tarefa `pendente` não
    * tem executor, então acusar timeout nela seria inventar um problema que não existe.
    */
+  /*
+   * r43 do V5 — a duração é por **tarefa**, não global.
+   *
+   * Antes: `consulta.todas.some(...)`. Uma execução `executando` travada em QUALQUER tarefa
+   * bloqueava TODA delegação nova, de qualquer agente. Medido: a execução da r37 (vinculada a uma
+   * sessão de teste) ficou `executando` e a delegação seguinte devolveu `duracao_maxima` — mesmo
+   * sendo outra tarefa.
+   *
+   * O que a regra quer dizer é "esta tarefa já tem uma execução presa"; não é "o produto inteiro
+   * está parado". Escopo por `task_id` mantém a intenção sem transformar um travamento local em
+   * indisponibilidade global.
+   */
   const estourou = consulta.todas.some(
     e =>
       e.status === 'executando' &&
+      e.task_id === consulta.candidata.task_id &&
       e.started_at !== null &&
       consulta.agora - e.started_at > limites.duracao_ms
   )
