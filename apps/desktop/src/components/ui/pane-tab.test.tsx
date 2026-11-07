@@ -141,17 +141,34 @@ describe('PaneTab hover close button', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
-  it('r293: o ✕ continua nomeado (a correcao estrutural ficou pendente)', () => {
-    render(
+  it('r97: o ✕ é afordância de mouse — presente, clicável e FORA da árvore acessível', () => {
+    const { container } = render(
       <PaneTab onClose={() => {}} role="tab">
         <PaneTabLabel as="button">tab</PaneTabLabel>
       </PaneTab>
     )
 
-    // `aria-hidden` foi TENTADO e o `axe-core` recusou: o `nested-interactive` nao se resolve
-    // tirando o nome do no, porque o botao segue focavel no DOM. O ✕ permanece nomeado ate a
-    // refatoracao estrutural (irmao do role=tab, nao filho).
-    expect(screen.getByRole('button', { name: 'Close' })).not.toBeNull()
+    /*
+     * Antes (r293) o ✕ era `<button aria-label="Close">` DENTRO de `role="tab"`, e o `axe-core`
+     * recusava — `nested-interactive`. A r293 tentou `aria-hidden` e o próprio `axe` explicou por
+     * que não bastava: o elemento continuava focável no DOM.
+     *
+     * A r97 resolveu tirando a INTERATIVIDADE: `<span aria-hidden>` sem `tabindex` e sem role não
+     * é controle nem para a ARIA nem para o `axe`. Estas asserções travam os DOIS lados:
+     * o mouse mantém o ✕, e a árvore acessível não ganha um segundo controle.
+     */
+    const fechar = container.querySelector('[data-slot="pane-tab-close"]')
+
+    expect(fechar, 'o ✕ continua existindo para o mouse').not.toBeNull()
+    expect(fechar!.getAttribute('aria-hidden')).not.toBeNull()
+    expect(fechar!.tagName).toBe('SPAN')
+
+    // E não é alcançável como controle: nem por role, nem por tab.
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull()
+    expect(fechar!.getAttribute('tabindex')).toBeNull()
+
+    // O caminho equivalente de teclado continua anunciado na aba (ver o teste do r293 acima).
+    expect(screen.getByRole('tab').getAttribute('aria-keyshortcuts')).toBe('Delete')
   })
 
   it('renders no ✕ without an onClose', () => {
