@@ -208,7 +208,7 @@ gateway anterior à rota (r15), e a cópia sem o módulo (r16).
 | Conector real conectado ponta a ponta | **`BLOCKED_BY_EXTERNAL_DEPENDENCY`** — exige credencial de plataforma (`EXT-3`) |
 | `/api/connectors/readiness` | **não existe** |
 | Webhooks: assinatura, replay, idempotência | assinatura + janela de 10 min existem (V4); replay **não testado nesta rodada** |
-| Allowlist de egress / SSRF | **não existe** |
+| Allowlist de egress / SSRF | **SSRF DEFENDIDO** (r36), allowlist de destino não existe |
 | Segredos em log | `_next_action` nomeia a **variável**, nunca o valor — verificado por leitura; **não** por teste nesta rodada |
 
 **Não afirmo que os conectores funcionam. Afirmo que o cálculo de prontidão está correto, testado, e

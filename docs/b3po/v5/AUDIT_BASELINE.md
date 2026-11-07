@@ -44,7 +44,7 @@ fase: G0
 | Classificação | Arquivos | Canais |
 |---|---:|---:|
 | Com guarda (`withPermission`/`exigirAtor`/`podeOperarMaquina`/`guardedHandler`) | 39 | **197** |
-| **Sem guarda** | 20 | **144** |
+| **Sem guarda** | 20 | **~151** (RETRATAÇÃO r32–r33) |
 
 ### Por que o número anterior era 25 — e por que está errado
 
@@ -64,7 +64,13 @@ function canais(): string[] {
 | **Só olha `*-ipc.ts`** | `main.ts` (**100 canais**) e mais 10 arquivos de fiação — **125 canais** — estão **fora do radar** |
 
 **Portanto**: "25 de 48" era "25 arquivos de 48 arquivos". A superfície real é **341 canais**, dos
-quais **144 sem guarda**.
+quais **"sem guarda"**.
+
+> **RETRATAÇÃO (r32–r33)**: o número deste documento vem de um coletor que conta **arquivos**, e o
+> posterior, que conta **canais**, deu **281 canais, 130 com guarda por nome**. Nenhum dos dois é
+> publicável como "canais sem guarda": wrappers locais (`comGuarda` em `finance`) não são detectados
+> por nome. Ver [`IPC_AUTHORIZATION_MATRIX.md`](IPC_AUTHORIZATION_MATRIX.md) — o número real é
+> **desconhecido e menor** que qualquer um dos dois.
 
 > **Nada aqui afirma que 144 canais são vulneráveis.** "Sem guarda" significa "não chama helper de
 > autorização". O risco depende do efeito colateral — e é o que a seção 4 mede.

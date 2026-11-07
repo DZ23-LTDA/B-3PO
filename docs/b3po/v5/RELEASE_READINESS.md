@@ -39,7 +39,8 @@ fase: G7
 | iOS | **NOT_READY** | `EXT-2` — sem macOS |
 | Suíte completa do gateway | **NOT_TESTED** | 1.685 arquivos ≈ 4,7 h; exige bash |
 | IDOR / multi-tenant | **NOT_TESTED** | exige dois tenants reais |
-| SSRF / egress allowlist | **NÃO EXISTE** | 11 canais de rede medidos, nenhum com allowlist |
+| SSRF | **DEFENDIDO** — `tools/url_safety.py` + revalidação de redirect, 169 testes (r36) |
+| Allowlist de egress (destino) | **NÃO EXISTE** — o modelo é blocklist de endereço privado |
 | Path traversal | **NOT_TESTED** | `fs`/`plugin-files` |
 | Replay de webhook | **NOT_TESTED** | assinatura + janela existem; replay não exercitado |
 | Performance (LCP/INP/CLS) | **NOT_RUN** | não medido |
