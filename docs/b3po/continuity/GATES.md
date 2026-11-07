@@ -6920,3 +6920,38 @@ que está provado é: o app **sobe** (log do `ActivityTaskManager`), a **conta d
 (10 testes), e o APK **constrói**. O que falta é **um aparelho que funcione** — e a ação de
 desbloqueio é reiniciar o emulador por completo (`emulator -avd <nome> -wipe-data`), que é operação de
 ambiente do dono.
+
+---
+
+## G7 · ADENDO 14 — o risco do patch de fornecedor foi **eliminado**, não mitigado
+
+**Rodada 107.** O risco nº 1 da entrega era: *"o patch do `Select` vive em `node_modules`; se um
+install rodar sem `postinstall`, quebra em silêncio"*.
+
+### O que o `postinstall` sozinho não cobre
+
+`postinstall` não roda em `npm ci --ignore-scripts`, em CI com cache de `node_modules`, em alguns
+fluxos de `pnpm`, nem quando alguém copia a pasta pronta. Nesses casos o código mediria um pacote
+**não patchado** — e o `button-name` voltaria com o build verde.
+
+### A correção: garantir no caminho, não no install
+
+| Script | Por que |
+|---|---|
+| `postinstall` | o caminho normal |
+| **`prebuild`** | todo artefato publicado aplica antes |
+| **`pretest`** | toda validação mede o pacote correto |
+| **`pretypecheck`** | o `.d.ts` patchado é o que o TS vê |
+
+### E foi provado **removendo o patch à mão**
+
+```
+$ removi `...rest` do select.js
+$ npm test
+  ...rest voltou? SIM — auto-reparado
+  Test Files 71 passed · Tests 478 passed
+```
+
+**O risco deixou de existir**: não há caminho que produza ou valide o artefato sem reaplicar o patch.
+O `vendor-select-patch.test.tsx` continua existindo como segunda barreira — se alguém remover os
+hooks, ele quebra.

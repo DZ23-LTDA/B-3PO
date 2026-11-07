@@ -1,5 +1,5 @@
 {
-  "round": 106,
+  "round": 107,
   "queue": [
     {
       "id": "T-01",
@@ -216,10 +216,11 @@
   "select_patch": {
     "motivo": "Select descarta aria-label (destructuring fixo) e role=combobox nao herda nome do conteudo",
     "patch": "web/scripts/vendor-patches/nous-research-ui-select.mjs (idempotente, falha alto se a ancora sumir)",
-    "reaplicado_por": "web/package.json postinstall",
+    "reaplicado_por": "postinstall + prebuild + pretest + pretypecheck",
     "testado": "web/src/components/vendor-select-patch.test.tsx (3 testes)",
     "aditivo": true,
-    "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes"
+    "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes",
+    "risco_residual": "ELIMINADO: provado removendo o patch a mao e vendo o pretest reaplicar"
   },
   "t12": {
     "status": "done",
