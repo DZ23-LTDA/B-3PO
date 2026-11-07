@@ -28,11 +28,11 @@ describe('o catálogo cobre o menu', () => {
     ])
   })
 
-  it('24 módulos, sem path repetido — o CRM vem do menu do NÚCLEO (r94)', () => {
+  it('25 módulos, sem path repetido — o CRM vem do menu do NÚCLEO (r94)', () => {
     const paths = pathsDoCatalogo()
 
-    expect(paths).toHaveLength(24)
-    expect(new Set(paths).size).toBe(24)
+    expect(paths).toHaveLength(25)
+    expect(new Set(paths).size).toBe(25)
   })
 
   it('a ordem do catálogo é a ordem do menu — duas ordens para a mesma lista confundem', () => {

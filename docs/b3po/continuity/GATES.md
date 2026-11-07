@@ -5354,3 +5354,82 @@ que **as 27 restantes foram medidas, reproduzidas e classificadas**: 14 de empac
 **Uma regressão minha que seis rodadas de `axe` não pegaram**, porque eu media acessibilidade só a
 1440/1707: `scrollable-region-focusable` a 390 px, criada pelo `overflow-x-auto` da r81. Corrigida com
 `role="group"` + `tabIndex={0}`, e agora **o `axe` roda em 4 viewports** nestas telas.
+
+---
+
+## G8 · ADENDO 48 — o RESTORE que eu tinha fechado por definição: **agora existe, e é reversível**
+
+**Rodada 88.** Na r75 eu escrevi, sobre o restore:
+
+> *"Um `restore` tem semântica própria (qual versão? sobrescreve o quê? avisa o usuário?) e **não deve ser
+> efeito colateral de um backup**. O arquivo está lá, com timestamp, e pode ser copiado de volta."*
+
+**A primeira frase está certa. A conclusão não.** "Não deve ser automático" e "não deve existir" são
+afirmações diferentes, e eu usei a primeira para justificar a segunda. **Um `.bak` que ninguém consegue
+aplicar é um backup que só serve para conferir à mão** — e o T-10 estava `done` com metade do nome.
+
+### O que foi construído
+
+| Arquivo | Papel |
+|---|---|
+| `electron/backup-restore.ts` | `listarBackups` + `restaurarBackup` com **3 garantias** |
+| `electron/backup-ipc.ts` | `hermes:backup:list` e `hermes:backup:restore`, nível `execute` |
+| `electron/preload.ts` | `window.hermesDesktop.backup` |
+| `src/api/backup.ts` | wrapper + `tamanho()` legível + tradução de erro |
+| `src/app/backups/index.tsx` | a tela: arquivos, versões, restaurar com confirmação |
+| rotas · nav · busca · i18n | `/backups` em **Visão geral** |
+
+### As três garantias, e por que cada uma
+
+**1. O estado atual vira mais uma versão ANTES da troca.** Restaurar é escrita destrutiva; se ela não for
+reversível, **um restore errado termina o assunto**. Agora o restore entra na mesma série que ele
+restaura — desfazer é o mesmo gesto.
+
+**2. Versão que não é JSON válido é recusada.** Trocar um dado bom por lixo é **pior que não restaurar**.
+A verificação é `JSON.parse`, nada além: o formato de cada store é do store, e ler aqui seria duplicar 20
+parsers.
+
+**3. A versão tem de pertencer àquele arquivo.** `sales.123.json` não restaura `inventory.json` — dois
+formatos no mesmo caminho, e o parser do store descartaria tudo **em silêncio**.
+
+### O bug que o teste do limite de versões achou
+
+**A primeira versão chamava `copyFile(origem, destino)` DEPOIS de `backupRotativo(destino)`.**
+`backupRotativo` **poda para 5 versões** — então restaurar **a mais antiga** fazia o próprio restore
+**apagar o arquivo de origem antes de copiá-lo**. Resultado: `falha_ao_restaurar`, com o disco perfeito.
+
+**A correção**: o conteúdo **já estava em memória** (lido e validado antes). `writeFile(destino, conteudo)`
+em vez de copiar do caminho — imune à poda.
+
+> **Eu tinha o dado na mão e pedi ao disco de novo.** O teste com 8 escritas e cap de 5 expôs em 500 ms um
+> erro que só apareceria em produção **no dia em que alguém tentasse restaurar a versão mais antiga** — o
+> caso mais provável de todos, porque é justamente quando se precisa voltar atrás.
+
+### A prova em runtime
+
+```
+1) bridge backup: ["list","restore"]
+2) arquivos com versão: crm-contacts (5) · gas (5) · medidores (2)   -> 12 versões
+3) restore('gas.json', 'gas.1794023519941.json')  ->  { ok: true }
+4) tela: h1=Backups · main=846/pai=846 · axe: region(3)  (só o T-15)
+
+depois do restore:
+  gas.json válido, 5 vasilhames, saldo coerente
+  backups de gas: 5 (o cap respeitado)
+  versão mais recente: gas.1794025681004.json  <- o estado que o restore sobrescreveu
+```
+
+**Testes: 9/9** em `backup-restore.test.ts` — lista, restaura, **é reversível**, recusa JSON inválido,
+recusa versão de outro arquivo, recusa caminho com `..`/separador, recusa não-`.json`, versão inexistente,
+e **o cap de 5 com restore da mais antiga**.
+
+### O T-10 completo
+
+| | r75 | r88 |
+|---|---|---|
+| backup | **PASS** (19 stores, 5 versões) | PASS |
+| **restore** | **FAIL — "deliberadamente não feito"** | **PASS** (listar, validar, aplicar, reverter) |
+
+**O gate de operação deixa de ter `FAIL`.** O que era "uma decisão de arquitetura" era **trabalho que eu
+não queria fazer e chamei de decisão** — e a diferença aparece no nome do item da fila, que dizia `done`
+há 13 rodadas.

@@ -4,6 +4,8 @@
 // sobre os mesmos arquivos sob `userData`, e o renderer só alcança o que está registrado.
 
 import type { IpcRegistrar } from './ipc-types'
+import { join } from 'node:path'
+
 import type { IpcMain } from 'electron'
 
 import { CatalogStore, catalogStorePath } from './catalog-store'
@@ -31,6 +33,7 @@ import { GasStore, gasStorePath } from './gas-store'
 import { registerGasIpc } from './gas-ipc'
 import { MeterStore, meterStorePath } from './meter-store'
 import { registerMeterIpc } from './meter-ipc'
+import { registerBackupIpc } from './backup-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { createDispatcher, dispatchQuietly } from './automation-dispatch'
@@ -171,6 +174,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // r79 (T-11): leitura periodica de medidor. O comodato (r78) conta o CASCO; agua encanada se cobra
   // pela DIFERENCA entre duas leituras - um segundo modelo, com a serie por medidor.
   registerMeterIpc(ipcMain, new MeterStore(meterStorePath(userDataDir)), { actorOf: () => actorOf() })
+  // r88: backup e RESTORE. A r75 fez o backup e deixou o restore de fora com a desculpa certa (nao deve
+  // ser efeito colateral) e a conclusao errada (entao nao existe). Um .bak que ninguem aplica e um
+  // backup que so serve para conferir a mao.
+  registerBackupIpc(ipcMain, { actorOf: () => actorOf(), dadosDir: join(userDataDir, 'b3po') })
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r152 do GOAL V2: o `afterSales` e criado AQUI, antes do `desk`, porque o `onRated` do atendimento o usa.

@@ -96,6 +96,7 @@ const MODULOS: readonly ItemDeMenu[] = [
     { codicon: 'library', label: 'Empresa', path: '/empresa' , grupo: 'Visão geral' },
     // r98: a busca global (§13:450). Fica na visao geral porque e uma porta de entrada, como o Painel.
     { codicon: 'search', label: 'Busca', path: '/busca' , grupo: 'Visão geral' },
+    { codicon: 'history', label: 'Backups', path: '/backups' , grupo: 'Visão geral' },
 
     // 2. OPERACAO - o que chega e quem atende
     //

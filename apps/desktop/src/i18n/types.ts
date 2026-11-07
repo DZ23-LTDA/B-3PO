@@ -1029,6 +1029,23 @@ export interface Translations extends NoticeTranslations {
       unitPrice: string
       unavailable: string
     }
+    backups: {
+      title: string
+      intro: string
+      carregando: string
+      vazio: string
+      carregarFalhou: string
+      indisponivel: string
+      ver: string
+      ocultar: string
+      restaurar: string
+      resumo: (arquivos: number, versoes: number) => string
+      versoes: (n: number) => string
+      confirmar: (arquivo: string, quando: string) => string
+      confirmarDica: string
+      restaurado: (arquivo: string) => string
+      colunas: { quando: string; tamanho: string; arquivo: string; acoes: string }
+    }
     gas: {
       title: string
       intro: string

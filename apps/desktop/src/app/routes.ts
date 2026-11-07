@@ -45,6 +45,9 @@ export const GAS_ROUTE = '/gas'
 /** r79 (T-11): leitura periodica de medidor — a segunda metade da vertical de agua. */
 export const MEDIDORES_ROUTE = '/medidores'
 
+/** r88: backup e restore dos dados de negocio. */
+export const BACKUPS_ROUTE = '/backups'
+
 /** r80 do GOAL V2: projetos - o plano persistente do §12. */
 export const PROJETOS_ROUTE = '/projetos'
 
@@ -84,6 +87,7 @@ export type AppView =
   | 'entregas'
   | 'gas'
   | 'medidores'
+  | 'backups'
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
@@ -129,6 +133,7 @@ export type AppRouteId =
   | 'entregas'
   | 'gas'
   | 'medidores'
+  | 'backups'
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
@@ -180,6 +185,7 @@ export const APP_ROUTES = [
   { id: 'entregas', path: ENTREGAS_ROUTE, view: 'entregas' },
   { id: 'gas', path: GAS_ROUTE, view: 'gas' },
   { id: 'medidores', path: MEDIDORES_ROUTE, view: 'medidores' },
+  { id: 'backups', path: BACKUPS_ROUTE, view: 'backups' },
   { id: 'projetos', path: PROJETOS_ROUTE, view: 'projetos' },
   { id: 'trabalhos', path: TRABALHOS_ROUTE, view: 'trabalhos' },
   { id: 'organizacao', path: ORGANIZACAO_ROUTE, view: 'organizacao' },

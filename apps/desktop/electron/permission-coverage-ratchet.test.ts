@@ -6,7 +6,7 @@
 //
 //   "Sem isto, `rbac.ts` e uma politica que ninguem consulta - permissao que nao decide nada."
 //
-// A medicao de hoje (r80): **32 de 48 canais** consultam a guarda (os tres padroes: `exigirAtor`,
+// A medicao de hoje (r80): **33 de 49 canais** consultam a guarda (os tres padroes: `exigirAtor`,
 // leem sem verificar permissao.
 //
 // POR QUE UM RATCHET E NAO UMA CORRECAO
@@ -106,11 +106,11 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-it('a divida medida hoje e 16 de 48', () => {
+it('a divida medida hoje e 16 de 49', () => {
     // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
     expect(SEM_GUARDA).toHaveLength(16)
     // r36 do GOAL V2: audit-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
     // r58: delivery-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
-    expect(canais()).toHaveLength(48)
+    expect(canais()).toHaveLength(49)
   })
 })

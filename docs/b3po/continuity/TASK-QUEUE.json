@@ -1,5 +1,5 @@
 {
-  "round": 87,
+  "round": 88,
   "queue": [
     {
       "id": "T-01",
@@ -76,7 +76,7 @@
       "blocked_by": "decisao de arquitetura (nao e correcao: define politica de disco do usuario)",
       "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore",
       "done_in": "r75: store-backup.ts + 19 stores; 5 versoes por arquivo; provado em runtime (5 backups apos 8 escritas)",
-      "remaining": "restore nao existe - e deliberado (nao e efeito colateral de backup)"
+      "remaining": "FECHADO na r88: restore implementado (listar, validar, aplicar, reverter) e provado em runtime + 9 testes"
     },
     {
       "id": "T-11",

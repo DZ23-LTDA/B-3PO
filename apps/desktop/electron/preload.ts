@@ -186,6 +186,12 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     leitura: payload => ipcRenderer.invoke('hermes:medidores:leitura', payload),
     list: () => ipcRenderer.invoke('hermes:medidores:list')
   },
+  // r88: backup e restore dos dados de negocio. O restore SOBRESCREVE — e antes de sobrescrever ele
+  // guarda o estado atual como mais uma versao, entao ele proprio e reversivel.
+  backup: {
+    list: () => ipcRenderer.invoke('hermes:backup:list'),
+    restore: (nomeArquivo, versaoArquivo) => ipcRenderer.invoke('hermes:backup:restore', nomeArquivo, versaoArquivo)
+  },
   sales: {
     cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:sales:cancel', id, tenantId, reason),
     create: payload => ipcRenderer.invoke('hermes:sales:create', payload),

@@ -1361,6 +1361,24 @@ export const ptOverrides: TranslationOverrides = {
       unitPrice: 'Preço unitário',
       unavailable: 'As vendas precisam do aplicativo desktop para funcionar.'
     },
+    backups: {
+      title: 'Backups',
+      intro: 'Cada gravação guarda a versão anterior. Restaurar troca o arquivo de trabalho por uma dessas versões.',
+      carregando: 'Carregando…',
+      vazio: 'Nenhuma versão ainda. A primeira gravação de cada arquivo cria uma.',
+      carregarFalhou: 'Não foi possível carregar os backups.',
+      indisponivel: 'Os backups precisam do aplicativo desktop para funcionar.',
+      ver: 'Ver versões',
+      ocultar: 'Ocultar',
+      restaurar: 'Restaurar',
+      resumo: (arquivos: number, versoes: number) =>
+        `${arquivos} ${arquivos === 1 ? 'arquivo' : 'arquivos'} · ${versoes} ${versoes === 1 ? 'versão' : 'versões'}`,
+      versoes: (n: number) => `${n} ${n === 1 ? 'versão' : 'versões'}`,
+      confirmar: (arquivo: string, quando: string) => `Restaurar ${arquivo} para a versão de ${quando}?`,
+      confirmarDica: 'O estado atual vira mais uma versão, então isto pode ser desfeito do mesmo jeito.',
+      restaurado: (arquivo: string) => `${arquivo} restaurado.`,
+      colunas: { quando: 'Gravada em', tamanho: 'Tamanho', arquivo: 'Versão', acoes: 'Ações' }
+    },
     gas: {
       title: 'Vasilhames',
       intro: 'O casco que sai com o cliente continua sendo da revenda. Aqui ele é contado até voltar.',

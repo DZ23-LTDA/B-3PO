@@ -1121,7 +1121,25 @@ export const en: Translations = {
       unitPrice: 'Unit price',
       unavailable: 'Sales need the desktop app to work.'
     },
-    gas: {
+    backups: {
+    title: 'Backups',
+    intro: 'Every write keeps the previous version. Restoring swaps the working file for one of those versions.',
+    carregando: 'Loading…',
+    vazio: 'No versions yet. The first write of each file creates one.',
+    carregarFalhou: 'Could not load the backups.',
+    indisponivel: 'Backups need the desktop app to work.',
+    ver: 'See versions',
+    ocultar: 'Hide',
+    restaurar: 'Restore',
+    resumo: (arquivos: number, versoes: number) =>
+      `${arquivos} ${arquivos === 1 ? 'file' : 'files'} · ${versoes} ${versoes === 1 ? 'version' : 'versions'}`,
+    versoes: (n: number) => `${n} ${n === 1 ? 'version' : 'versions'}`,
+    confirmar: (arquivo: string, quando: string) => `Restore ${arquivo} to the version from ${quando}?`,
+    confirmarDica: 'The current state becomes one more version, so this can be undone the same way.',
+    restaurado: (arquivo: string) => `${arquivo} restored.`,
+    colunas: { quando: 'Saved on', tamanho: 'Size', arquivo: 'Version', acoes: 'Actions' }
+  },
+  gas: {
     title: 'Cylinders',
     intro: 'A cylinder that leaves with the customer is still the dealer\'s. Here it is counted until it comes back.',
     saldoAria: 'Cylinder balance',
