@@ -5587,7 +5587,7 @@ export const esOverrides = {
       title: 'Barra lateral',
       description: 'Muestra la barra lateral móvil.',
       toggle: open => `${open ? 'Mostrar' : 'Ocultar'} barra lateral`
-    }
+    },
   }
 } satisfies TranslationOverrides
 

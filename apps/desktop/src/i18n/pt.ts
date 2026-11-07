@@ -60,7 +60,9 @@ export const ptOverrides: TranslationOverrides = {
     agentesTitulo: 'Seus Agentes',
     agentesVazio: 'Nenhum agente cadastrado ainda. Crie um para delegar trabalho.',
     irParaAgentes: 'Ir para Agentes',
-    projetosTitulo: 'Projetos em Andamento',
+    // r30 do V4: a secao lista por RECENCIA, nao por status. O KPI conta so `status === 'ativo'`,
+    // e o projeto real aparece aqui com status 'a começar' — entao o titulo antigo contradizia o numero.
+    projetosTitulo: 'Projetos recentes',
     projetosVazio: 'Nenhum projeto cadastrado ainda. Crie um para acompanhar o progresso.',
     irParaProjetos: 'Ir para Projetos',
     visaoTitulo: 'Visão Geral',
