@@ -102,8 +102,8 @@ describe('o mapa de montagem', () => {
     expect(orfaos).toEqual([])
   })
 
-  it('sao 53 registers — se o numero mudou, revise a montagem', () => {
-    expect(definicoes().size).toBe(53)
+  it('sao 55 registers — se o numero mudou, revise a montagem', () => {
+    expect(definicoes().size).toBe(55)
   })
 
   it('os tres da r109 ESTAO montados — o bug que este teste existe para pegar', () => {

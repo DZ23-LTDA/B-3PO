@@ -32,8 +32,8 @@ describe('o menu declara os grupos que a regra do ambiente usa', () => {
     expect(doMenu).toEqual(daRegra)
   })
 
-  it('são 23 módulos — se o número mudou, alguém acrescentou um sem grupo', () => {
-    expect(MODULOS_DO_PRODUTO).toHaveLength(23)
+  it('são 25 módulos — se o número mudou, alguém acrescentou um sem grupo', () => {
+    expect(MODULOS_DO_PRODUTO).toHaveLength(25)
   })
 
   it('nenhum rótulo se repete — a ambiguidade que o §13:444 proíbe', () => {

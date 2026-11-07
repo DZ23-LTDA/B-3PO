@@ -28,11 +28,11 @@ describe('o catálogo cobre o menu', () => {
     ])
   })
 
-  it('22 módulos, sem path repetido — o CRM vem do menu do NÚCLEO (r94)', () => {
+  it('24 módulos, sem path repetido — o CRM vem do menu do NÚCLEO (r94)', () => {
     const paths = pathsDoCatalogo()
 
-    expect(paths).toHaveLength(22)
-    expect(new Set(paths).size).toBe(22)
+    expect(paths).toHaveLength(24)
+    expect(new Set(paths).size).toBe(24)
   })
 
   it('a ordem do catálogo é a ordem do menu — duas ordens para a mesma lista confundem', () => {
@@ -72,8 +72,8 @@ describe('a busca encontra o que a pessoa procura', () => {
     expect(buscarModulos(MODULOS_BUSCAVEIS, 'quem faz o que')[0]?.label).toBe('Estrutura')
   })
 
-  it('"comercio" acha os 6 do grupo', () => {
-    expect(buscarModulos(MODULOS_BUSCAVEIS, 'comercio')).toHaveLength(6)
+  it('"comercio" acha os 8 do grupo', () => {
+    expect(buscarModulos(MODULOS_BUSCAVEIS, 'comercio')).toHaveLength(8)
   })
 
   it('"a" acha muitos — e a ordem é estável entre duas chamadas', () => {

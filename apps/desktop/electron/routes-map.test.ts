@@ -65,8 +65,8 @@ function noMenu(): Set<string> {
 }
 
 describe('o mapa de rotas', () => {
-  it('37 rotas declaradas — se o número mudou, o documento do §13 precisa mudar junto', () => {
-    expect(constantes().size).toBe(37)
+  it('39 rotas declaradas — se o número mudou, o documento do §13 precisa mudar junto', () => {
+    expect(constantes().size).toBe(39)
   })
 
   it('TODA constante está registrada em APP_ROUTES — nenhuma rota declarada e esquecida', () => {
@@ -98,8 +98,8 @@ describe('o mapa de rotas', () => {
     expect(mortos).toEqual([])
   })
 
-  it('o menu tem 23 itens, todos distintos', () => {
-    expect(noMenu().size).toBe(23)
+  it('o menu tem 25 itens, todos distintos', () => {
+    expect(noMenu().size).toBe(25)
   })
 })
 

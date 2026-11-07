@@ -4731,3 +4731,68 @@ l3 (9,000 m³)   -> leitura_regrediu      (recusada)
 **O G4 agora tem os dois modelos, medidos e provados.** O que resta é **ligar consumo a preço**, que é
 política de cobrança (tarifa por faixa, mínimo, taxa de esgoto) — **decisão do dono**, registrada como
 `T-12`.
+
+---
+
+## G8 · ADENDO 43 — o que uma tela nova quebra: **6 ratchets**, e todos estavam certos
+
+**Rodada 80.** Fechei o G4 nas r78/r79 e fui rodar a suíte inteira. **36 falhas** (o baseline era 13).
+**Investiguei uma por uma em vez de dizer "pré-existente".**
+
+### As minhas: 7 testes em 6 arquivos
+
+| Arquivo | O que ele guarda | O que eu quebrei |
+|---|---|---|
+| `permission-coverage-ratchet` | **48 canais** de IPC, 16 sem guarda | 46 → 48 (os 2 novos **nasceram com guarda**, a dívida não cresceu) |
+| `routes-map` | **39 rotas**, **25 no menu**, 13 fora | 37 → 39, menu 23 → 25 |
+| `erp-mounting` | **55 registers** | 53 → 55 |
+| `inventory-ipc` | domínios de canal conhecidos | faltavam `gas` e `medidores` no regex |
+| `b3po-modulos.test` | **24 módulos buscáveis**, 8 em Comércio | 22 → 24, 6 → 8 |
+| `b3po-nav/plugin.test` + `grupos.test` | **25 no menu** | 23 → 25 |
+
+**Nenhuma era bug de produto.** Todas eram **contadores que existem para forçar a revisão** quando a
+superfície cresce — e **forçaram**.
+
+### E 6 arquivos `|ui|` que pareciam falha e não eram
+
+```
+browser-hints · floating-panes · use-keybinds-browser
+terminal-ownership · gateway-background-reconnect · use-composer-submit
+
+na suíte paralela: 1 a 2 falhas cada, com 33–60s de duração
+rodados isolados:  6 arquivos, 35 testes, TODOS PASSAM (15s)
+```
+
+**Eram timeouts de ambiente sob carga**, não regressão. **A distinção só apareceu porque eu rodei
+isolado** — no relatório da suíte eles parecem idênticos a uma falha real.
+
+> **"Falhou na suíte" e "está quebrado" são afirmações diferentes.** É a mesma lição da r73 (o teste que
+> reprovava o fix do FOUC), agora na direção do ambiente em vez do teste.
+
+### O que ficou de verdade aberto
+
+| Arquivo | Falhas | Natureza |
+|---|---|---|
+| `ssh-connection` | 4 | pré-existente (baseline) |
+| `desktop-plugin-install` | 3 | pré-existente |
+| `run-electron-builder` · `commit-bundles.windows` · `after-pack-digests` · `payload-sign-cache` | 1+1+2+2 | pré-existente (empacotamento/assinatura) |
+| `bundle-electron-main` | 3 | pré-existente: `--ozone-platform` x11 × wayland |
+| `stage-native-deps` · `linux-nvidia-egl-recovery` | 1+1 | ambiente (sem GPU Linux) |
+| `side-by-side.windows` | 0 test | pré-existente (teste vazio) |
+
+**Somando: 18 falhas pré-existentes ou de ambiente**, contra **13 do baseline** — a diferença é que eu
+rodei a suíte **inteira** (antes eu rodei subconjuntos). **Não é regressão**: é medição mais ampla.
+
+### O que a r80 acrescentou
+
+**A auditoria do que eu mesmo construí** — e ela achou 3 coisas que eu não tinha visto:
+
+1. **`axe`: 0 violações** nas 2 telas novas, nos 2 temas
+2. **foco visível: 10/10** nas duas (o fix da r77 vale por ser global)
+3. **RBAC sem teste**: `gas-ipc` e `meter-ipc` tinham guarda mas **nenhum teste a exercitava**.
+   Escrevi `gas-medidores-ipc-permission.test.ts` — **13 testes**, incluindo o caso que importa:
+   **bot com escopo em `gas` NÃO lança leitura de água**.
+
+> **A guarda existir não é a mesma coisa que a guarda funcionar.** 6 canais novos, 0 testes de
+> permissão — e a ratchet da r10 diria "coberto" porque ela conta **presença de `exigirAtor`**, não
+> **exercício**.
