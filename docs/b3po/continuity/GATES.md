@@ -4082,3 +4082,67 @@ feito**; o que falta é **a sua autorização para uma conexão externa**.
 **"99 plugins oficiais, 27 de mensageria, ZERO ativos"** era o veredito da r10. **Continua correto** —
 **zero ATIVOS** — mas a diferença agora é que eu sei **por quê**: não é falta de adapter, é **falta de
 autorização** para ativar. **É `BLOCKED`, não `NOT_IMPLEMENTED`.**
+
+---
+
+## G8 · ADENDO 38 — `color-contrast` na home: **falso positivo do `axe`**, e um FOUC de tema real
+
+**Rodada 73.** Na checagem de fechamento (rodada 3 do `wrapup_check`) o `axe` acusou **3 violações** em 6
+rotas: `/` tinha `color-contrast` + `nested-interactive`. **Antes eram 2, só `nested-interactive`.**
+
+**Investiguei em vez de anotar.**
+
+### O que o `axe` viu
+
+```
+1.01  foreground #1c232e  background #17243a   <- dois escuros
+1.7   foreground #ffb900  background #fefefe   <- ambar sobre CLARO
+1.1   foreground #eef3f7  background #fefefe   <- escuro sobre CLARO
+```
+
+**Texto escuro sobre fundo claro e vice-versa** — as duas paletas **ao mesmo tempo**. Isso não é um par
+de cores desenhado por alguém: é **uma transição**.
+
+### A prova
+
+| Cenário | Resultado |
+|---|---|
+| home como **primeira** navegação | **`color-contrast` presente** |
+| home **depois** de outra rota (tema estabilizado) | **`0` violações**, em 600 / 1200 / 2200 / 4000 ms |
+| tema claro explícito (`emulateMedia light`) | **`0`** |
+| tema escuro explícito (`emulateMedia dark`) | **`0`** |
+
+**O estado estável é limpo nos dois temas.** O `axe` estava medindo **o instante em que a home monta e o
+tema ainda está sendo aplicado**.
+
+### O que isso É: um FOUC de tema, e é um defeito de UX real
+
+**Na primeira pintura, o app mostra as cores do tema "errado" por um instante.** É o *flash of unstyled
+theme* clássico de Electron: o CSS carrega antes do `data-theme` / classe de tema ser aplicada pelo JS.
+
+**O `axe` o pegou por acidente** — ele não estava procurando FOUC, estava medindo contraste, e encontrou
+o único frame onde as duas paletas coexistem.
+
+**Não é violação de WCAG** (o estado de repouso passa), **mas é percebido**: quem abre o app vê um
+"pisca" de cor.
+
+### O que eu NÃO vou fazer
+
+**Corrigir o FOUC exige injetar o tema antes da primeira pintura** (script inline no `<head>` que lê a
+preferência e aplica `data-theme` antes do React montar). Isso é:
+
+1. **mudança no bootstrap do HTML** — o `index.html` é do upstream;
+2. **risco**: script inline no head + CSP;
+3. **escopo novo** — não é correção de bug, é otimização de percepção.
+
+**Registro como observação** com a medição. Se o dono quiser, é uma linha no `<head>` e um teste.
+
+### O que a r73 corrige no placar do `axe`
+
+| Medição anterior | Medição com tema estabilizado |
+|---|---|
+| "3 violações em 6 rotas" | **2** — as `nested-interactive` de sempre |
+| `color-contrast` na home | **falso positivo de transição**, 0 no estado estável |
+
+**O número "3" que eu ia reportar estava errado**, e a diferença não era regressão: era **o momento da
+medição**.
