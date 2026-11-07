@@ -16,8 +16,7 @@
 
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Input } from "@nous-research/ui/ui/components/input";
-import { SelectOption } from "@nous-research/ui/ui/components/select";
-import { NamedSelect } from "@/components/NamedSelect";
+import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
 import { FolderGit2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -124,11 +123,11 @@ export function ChatWorkspacePicker({
           <RefreshCw className={cn(loading && "animate-spin")} />
         </Button>
       </div>
-      <NamedSelect
+      <Select
         className="min-w-0"
         onValueChange={onSelect}
         value={customOpen ? CUSTOM_VALUE : value}
-        label={t.sessions.workspace}
+        aria-label={t.sessions.workspace}
       >
         <SelectOption value="">{defaultLabel}</SelectOption>
         {options.map((opt) => (
@@ -140,7 +139,7 @@ export function ChatWorkspacePicker({
           <SelectOption value={value}>{abbreviateHomePath(value, home)}</SelectOption>
         )}
         <SelectOption value={CUSTOM_VALUE}>{t.sessions.workspaceCustom}</SelectOption>
-      </NamedSelect>
+      </Select>
       {customOpen && (
         <Input
           autoFocus

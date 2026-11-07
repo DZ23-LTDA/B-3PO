@@ -56,3 +56,62 @@ b3po-brand    = 9f662fc67c  (+ commits de produto, adiante do main)
 ```
 
 **Verificado**: `main` == `origin/main` — espelho intacto, sem commit de produto.
+
+---
+
+## 14. Patch de fornecedor: `@nous-research/ui` — `Select` descartava `aria-label`
+
+**Rodada 99.** Decisão do dono #2: *"Primeiro investigue a API pública do Select; se insuficiente,
+implemente um patch mínimo, versionado e testado, preservando compatibilidade upstream."*
+
+### A API pública é insuficiente — medido
+
+```js
+function Select({ children, className, disabled, id, onValueChange, placeholder, style, value }) {
+```
+
+**Destructuring de props fixas, sem `...rest`.** Um `aria-label` passado de fora é silenciosamente
+descartado. E o componente usa `role="combobox"`, que **não herda nome do conteúdo** (ARIA) — então o
+botão fica sem nome acessível e o `axe` reporta `button-name` **critical**.
+
+**A prova de que a intenção já existia e era ignorada**: `ChatWorkspacePicker.tsx` **já passava**
+`aria-label={t.sessions.workspace}` e o botão continuava sem nome.
+
+### O patch
+
+| Arquivo | Mudança |
+|---|---|
+| `dist/ui/components/select.js` | `value` → `value, ...rest` no destructuring; `...rest` no `<button role="combobox">` |
+| `dist/ui/components/select.d.ts` | `'aria-label'?` e `'aria-labelledby'?` opcionais |
+| `src/ui/components/select.tsx` | o mesmo, para quem reconstruir o pacote |
+
+**É aditivo**: quem não passa essas props vê exatamente o comportamento de antes — por isso o patch
+pode ser removido quando o upstream publicar a correção, sem migração.
+
+### Como é versionado e reaplicado
+
+- `web/scripts/vendor-patches/nous-research-ui-select.mjs` — **idempotente**, e **falha alto** se a
+  âncora não casar exatamente uma vez (um patch que não acha o alvo tem de gritar, não passar em
+  silêncio);
+- `web/package.json` → `"postinstall": "node scripts/vendor-patches/nous-research-ui-select.mjs"`;
+- **sem dependência nova**: `patch-package` não está no projeto e instalá-lo exigiria rede.
+
+### Como é testado
+
+`web/src/components/vendor-select-patch.test.tsx` — **3 testes**:
+`aria-label` chega ao `combobox` · `aria-labelledby` chega · **sem as props o comportamento do
+upstream não muda**.
+
+**Este teste é a garantia de que o patch continua aplicado**: se um `npm install` limpar
+`node_modules` e o `postinstall` não rodar, é ali que quebra — não no `axe` de produção.
+
+### Resultado
+
+```
+WEB · 15 rotas · 0 violações de axe
+comboboxes com nome acessível: 15
+testes do web: 478 (475 + 3 do patch)
+```
+
+E o `NamedSelect` que eu tinha criado na r98 como contorno **foi removido**: com o patch, o `<Select>`
+cru já entrega o nome, e manter um wrapper por cima seria complexidade sem consumidor.

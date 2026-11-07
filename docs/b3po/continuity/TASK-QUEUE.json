@@ -1,5 +1,5 @@
 {
-  "round": 98,
+  "round": 99,
   "queue": [
     {
       "id": "T-01",
@@ -211,5 +211,13 @@
     "teclado": "Tab alcanca, Enter/Espaco fecham; Delete na aba",
     "axe": 0,
     "unsaved_guard": "NAO IMPLEMENTADO: nenhum pane reporta dirty hoje (o prop existe e nenhum chamador passa). Falta o produtor, nao a guarda."
+  },
+  "select_patch": {
+    "motivo": "Select descarta aria-label (destructuring fixo) e role=combobox nao herda nome do conteudo",
+    "patch": "web/scripts/vendor-patches/nous-research-ui-select.mjs (idempotente, falha alto se a ancora sumir)",
+    "reaplicado_por": "web/package.json postinstall",
+    "testado": "web/src/components/vendor-select-patch.test.tsx (3 testes)",
+    "aditivo": true,
+    "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes"
   }
 }
