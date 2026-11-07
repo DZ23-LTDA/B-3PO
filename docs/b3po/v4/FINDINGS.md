@@ -337,6 +337,49 @@ passada o que quatro camadas de teste não encontraram.
 
 ---
 
+## A-08 · Varredura estática de canais **não serve**: 3 falsos positivos por registro dinâmico
+
+**Tentativa (r29)**: comparar os canais que o `preload.ts` expõe (`ipcRenderer.invoke('hermes:x:y')`)
+com os que o main registra (`ipcMain.handle('hermes:x:y')`), por varredura de **strings literais**.
+
+```
+canais na ponte: 327 · canais no main: 327
+PONTE SEM HANDLER: 3
+  hermes:hud-modifier:permission
+  hermes:screenshot:capture
+  hermes:screenshot:permission
+```
+
+**Os três são falsos positivos:**
+
+| Canal | Por que não aparece na varredura |
+|---|---|
+| `hud-modifier:permission` | registrado em **laço**: `ipcMain.handle(\`hermes:hud-modifier:${name}\`)` (`hud-modifier.ts:127`) |
+| `screenshot:capture` · `screenshot:permission` | idem, **e** a ponte só os expõe em `process.platform === 'darwin'` |
+
+**Um laço com template literal é invisível para quem procura string literal.** A varredura estática
+de canais IPC **não é um instrumento válido** neste código.
+
+### O instrumento que **funciona** para essa pergunta
+
+**A varredura de console no app vivo.** Ela chama o canal de verdade: se não há handler, o renderer
+recebe `No handler registered` e o `pageerror` aparece. Foi assim que o A-07 (T-12) foi encontrado —
+e ela mede **0 erros em 27 rotas** depois da correção.
+
+**Registrado para não repetir**: para "existe handler?", pergunte ao **runtime**, não ao texto.
+
+### O que a varredura **achou de útil**, apesar disso
+
+Do outro lado: **3 canais registrados que a ponte nunca expõe** —
+
+```
+hermes:desktop:zoomLevel · hermes:hud:native-drag · hermes:sales:devolver
+```
+
+Nenhum é defeito por si: um handler sem chamador é código morto, não bug. Fica como nota.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |

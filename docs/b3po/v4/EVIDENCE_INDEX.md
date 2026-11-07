@@ -65,3 +65,4 @@ Registrados porque **um número errado num documento vale menos que um número a
 | r10 | `test_feishu` quebrado | vazamento entre módulos | medir sozinho, importar direto, medir na pasta |
 | r19 | "32 = baseline" | 3 eram **minhas** | rodar a suíte completa, não só o suspeito |
 | r19/r21 | `/settings` não renderiza | **renderiza**; falta `h1` | ler o fim do texto, não o começo |
+| r29 | 3 canais de ponte sem handler | **registro dinâmico** em laço | o runtime (varredura de console), não o texto |
