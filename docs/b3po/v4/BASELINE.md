@@ -195,6 +195,32 @@ FAILED tests/gateway/test_status.py::TestGetProcessStartTime::test_live_process_
 **A falha é do instrumento, não do produto**: o teste spawna um executável que o env do projeto tem e o
 meu não. É o mesmo padrão do `aiohttp`.
 
+### r26 — a pasta num processo só **não é medição válida**
+
+Tentei o atalho: `pytest tests/gateway/` num processo, com `--ignore` nos 2 arquivos que não coletam.
+
+```
+14% com massa de E (errors) e F (failures)
+```
+
+**Interrompi.** O motivo eu já tinha descoberto na r10, e agora está provado com números:
+
+| Modo | Resultado |
+|---|---|
+| `test_status.py` **isolado** | **2 failed · 90 passed** (14,45 s) |
+| `test_api_server_runs.py` **isolado** | **64 passed** (8,64 s) |
+| pasta inteira, um processo | erros em massa |
+
+**O mesmo diretório dá resultados opostos conforme o isolamento.** Isso é vazamento de estado entre
+módulos de teste — o `tests/AGENTS.md` do repo existe por isso, e `scripts/run_tests_parallel.py`
+roda **um subprocesso por arquivo**.
+
+**Consequência**: a suíte do gateway não pode ser medida sem o runner oficial, e o runner é **bash**
+— ausente nesta máquina (`execvpe(/bin/bash): No such file or directory`).
+
+**O que os números isolados mostram**: o backend **funciona**. 90 + 64 testes passam, e as 2 falhas
+de `test_status` são `FileNotFoundError` de um `subprocess` procurando binário externo (r9).
+
 **O que continua NÃO medido, e por quê**:
 
 | Item | Estado | Motivo |

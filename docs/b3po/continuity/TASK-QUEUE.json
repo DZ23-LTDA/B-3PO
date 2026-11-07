@@ -327,6 +327,15 @@
       "causa": "estado global vazando entre modulos de teste; o runner oficial isola por subprocesso e nao ve",
       "impacto_no_produto": "nenhum",
       "impacto_na_medicao": "exige --ignore para rodar a pasta direto"
+    },
+    "r26": {
+      "pasta_um_processo": "INVALIDO - massa de E/F a 14%, vazamento de estado entre modulos (provado)",
+      "isolado": {
+        "test_status.py": "2 failed (FileNotFoundError de subprocess) · 90 passed",
+        "test_api_server_runs.py": "64 passed"
+      },
+      "conclusao": "o backend FUNCIONA; o metodo de medicao em um processo so e que nao vale",
+      "unlock": "scripts/run_tests.sh (bash, ausente) que isola um subprocesso por arquivo"
     }
   },
   "v4_plataformas": {

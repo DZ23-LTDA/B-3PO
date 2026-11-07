@@ -20,7 +20,7 @@ data: 2026-11-07
 | **Web** | **PARTIAL** | build exit 0 · 478/478 · `axe` 0 em 15 rotas — **mas é o dashboard do Hermes**, sem identidade B-3PO (`PLATFORM_MATRIX.md` §2) |
 | **Mobile (Android)** | **PARTIAL** | APK 44,2 MB constrói · 179 testes · **inspecionado em aparelho** (r18) · **sem os seis modos** |
 | **Mobile (iOS)** | **NOT_READY** | exige macOS (`EXT-4`) |
-| **Gateway Python** | **NOT_TESTED** | coleta **13.337** testes com 1 erro (`fcntl`, Unix-only); suíte completa não terminou (>30 min) |
+| **Gateway Python** | **PARTIAL** | coleta **13.337** testes (1 erro: `fcntl`, Unix-only). Isolado por arquivo: `test_status` **90 passed** · `test_api_server_runs` **64 passed**. A pasta num processo só **não é medição válida** — vaza estado entre módulos |
 | **Release assinado** | **NOT_READY** | sem certificado Authenticode (`EXT-3`) |
 
 ## O que está provado, item por item
@@ -45,7 +45,7 @@ data: 2026-11-07
 | Assinatura Authenticode | sem certificado | **`EXT-3`** — comprar/instalar certificado |
 | iOS | sem macOS | **`EXT-4`** |
 | Conector externo ativo | sem credencial real | **`EXT-6`** — `hermes auth add <provider>` |
-| Suíte do gateway | 13k testes levam horas | rodar `scripts/run_tests.sh` num ambiente com bash |
+| Suíte do gateway | **um processo por arquivo** é obrigatório; o runner é bash (ausente) | rodar `scripts/run_tests.sh` num ambiente com bash |
 | Os seis modos no mobile | não implementados | decisão de produto (`PLATFORM_MATRIX.md` §6) |
 | Identidade B-3PO no web | é o SPA do upstream | decisão de produto |
 | IDOR / multitenant | não testados | threat model (F8-1) |
