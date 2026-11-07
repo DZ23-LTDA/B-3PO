@@ -186,7 +186,9 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 | **B-02g** | **DECISÃO DO DONO**: `kind: 'bot'` pode spawnar shell pela interface? | **HIGH** | `podeOperarMaquina` não olha `kind`; comportamento atual travado por teste |
 | **B-02f** | Avaliar guarda em `fs`(13), `agent`(5), `plugin-files`(4) | **MEDIUM** | exige decidir se são capacidade de máquina ou recurso de negócio |
 | **B-02c** | Ligar a guarda em git, terminal e fs | **FECHADO r8/r16** | git 21 (já estava) · terminal 6 · fs 13 · dívida 68 → 34 |
-| **B-02h** | Guardar `agent` (5) e `plugin-files` (4) | **MEDIUM** | os únicos dois restantes que têm recurso para proteger |
+| ~~B-02h~~ | ~~Guardar `agent` e `plugin-files`~~ | **FECHADO r17** | plugin-files 4 (máquina) · agent 5 (withPermission) · **dívida 68 → 25** |
+| **B-02i** | **Achado**: a identidade do aprovador vinha do renderer | **FECHADO r17** | `decide` usa `ator.id` do processo principal; `input.quem` é ignorado |
+| **B-02j** | Dívida permanente: 9 canais de UI sem recurso de negócio | **ACEITO** | ratchet impede crescimento; `mcp-oauth-callback` é unguarded por desenho |
 | **B-02d** | Varrer o grafo de delegação no ratchet (canais de `ui-preferences`) | **MEDIUM** | ponto cego declarado |
 | **B-03** | Testar o gateway num env com `aiohttp` (R6) | **HIGH** | `pytest tests/gateway/` coleta e passa no env do projeto |
 | **B-04** | Corrigir `sofia.status()` (R5) | **MEDIUM** | responde estado real; teste no backend |

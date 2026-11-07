@@ -368,7 +368,7 @@
     "r8": "terminal:start guardado",
     "r16": "fs 13 canais guardados (leitura+escrita)",
     "divida_canais": "68 -> 34",
-    "ratchet": "11 de 48 arquivos",
+    "ratchet": "9 de 48 arquivos",
     "restam_com_recurso": [
       "agent (5)",
       "plugin-files (4)"
@@ -383,6 +383,9 @@
       "startup-latency",
       "challenge-window"
     ],
-    "unguarded_por_desenho": "mcp-oauth-callback"
+    "unguarded_por_desenho": "mcp-oauth-callback",
+    "r17": "plugin-files 4 (maquina) + agent 5 (withPermission); identidade do aprovador movida do renderer para o main",
+    "divida_final": "68 -> 25 canais",
+    "restantes": "9 canais de UI/preferencia (sem recurso) + mcp-oauth-callback (unguarded por desenho)"
   }
 }

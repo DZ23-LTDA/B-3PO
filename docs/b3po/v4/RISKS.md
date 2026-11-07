@@ -186,6 +186,63 @@ Distribuição por capacidade:
 `mcp-oauth-callback` é **unguarded por desenho** (o callback externo chega sem ator).
 Os que **merecem decisão** são `agent` (orquestração) e `plugin-files` (arquivos de plugin).
 
+### r17 do V4 — `plugin-files` e `agent` fecham a dívida **com recurso**
+
+**`plugin-files-ipc` (4 canais)** — um plugin com acesso a uma pasta **opera arquivo neste
+computador**. Capacidade de máquina, como `fs`/`git`/`terminal`:
+
+```ts
+const recusa = async () => (podeOperarMaquina(await deps.actorOf(), 'escrita') ? null : RECUSA_MAQUINA)
+```
+
+`request` (o diálogo de escolher pasta), `grants`, `revoke` e `op` passam por ela.
+
+**`agent-ipc` (5 canais)** — e aqui a rodada achou algo pior que "sem guarda":
+
+```ts
+// ANTES, no código:
+// `quem` vem do renderer porque o produto ainda nao tem login proprio.
+if (!input?.quem?.trim()) return { error: 'quem_obrigatorio' }
+...
+aprovacoes.aprovar(input.id, input.quem)   // ← identidade VINDA DO RENDERER
+```
+
+**A identidade do aprovador era auto-declarada.** Qualquer coisa que alcançasse o IPC aprovava uma
+ação de negócio **em nome de outra pessoa** — o oposto de "não confiar no frontend", que é a regra
+escrita no cabeçalho do próprio `rbac.ts`.
+
+O comentário antigo dizia *"o produto ainda não tem login próprio"*. **Não é mais verdade**:
+`atorDeMaquina` lê `ActorsStore` e devolve o dono com `id`, `role` e `level`.
+
+```ts
+const ator = await actorOf()
+
+if (!ator) return { error: 'sem_permissao', reason: 'sem_ator' }
+
+const permitido = await withPermission(ator, 'execute', { resource: 'agents' }, async () => true)
+
+if (permitido !== true) return { error: 'sem_permissao' }
+
+return input.decidir === 'recusar'
+  ? aprovacoes.recusar(input.id, ator.id)     // ← identidade do MAIN
+  : aprovacoes.aprovar(input.id, ator.id)
+```
+
+`input.quem` continua no tipo para não quebrar o chamador, mas é **ignorado**. `executions:cancel`
+também exige ator.
+
+**Dívida: 34 → 25 canais.** Ratchet: **9 de 48**.
+
+### O que sobrou — e nenhum tem recurso de negócio
+
+`clipboard` (2) · `hud` (4) · `lookup` (2) · `notification` (1) · `pet-overlay` (2) ·
+`spellcheck-dictionary` (3) · `startup-latency` (1) · `challenge-window` (1) — **UI/preferência**.
+
+`mcp-oauth-callback` (3) — **unguarded por desenho**: o callback externo chega sem ator, e é o
+OAuth funcionando como deve.
+
+**Os 9 são aceitáveis como dívida permanente**, e o ratchet impede que cresçam.
+
 ### Ponto cego declarado
 
 Os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que **não** é `*-ipc.ts` e não é
