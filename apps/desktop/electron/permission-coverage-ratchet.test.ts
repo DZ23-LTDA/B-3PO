@@ -34,7 +34,6 @@ const SEM_GUARDA: readonly string[] = [
   'agent-ipc.ts',
   'challenge-window-ipc.ts',
   'clipboard-ipc.ts',
-  'erp-ipc.ts',
   'fs-ipc.ts',
   'git-ipc.ts',
   'hud-ipc.ts',
@@ -45,12 +44,32 @@ const SEM_GUARDA: readonly string[] = [
   'plugin-files-ipc.ts',
   'spellcheck-dictionary-ipc.ts',
   'startup-latency-ipc.ts',
-  'terminal-ipc.ts',
-  'ui-preferences-ipc.ts'
+  'terminal-ipc.ts'
 ]
 
+/**
+ * r6 do V4 — a unidade passa a ser **canal registrado**, não arquivo.
+ *
+ * O DEFEITO QUE ISTO CORRIGE
+ *
+ * A régua contava todo `*-ipc.ts` como dívida. Dois deles **não registram canal nenhum**:
+ * `erp-ipc.ts` só fia stores (0 `handle`) e `ui-preferences-ipc.ts` delega a
+ * `registerUiPreferencesIpc` em outro módulo. Contar arquivo inflava a dívida de 14 para 16 e —
+ * pior — um arquivo de fiação aparecia como "canal sem guarda", que é uma acusação sem objeto.
+ *
+ * **Ponto cego que continua aberto, e fica declarado**: os canais de `ui-preferences-ipc.ts` vivem
+ * em `ui-preferences.ts`, que **não** é `*-ipc.ts` e portanto **não é varrido por esta régua**. Fechar
+ * isso exige varrer o grafo de delegação; não foi feito aqui, e omitir seria pior. (r6 do V4)
+ */
 function canais(): string[] {
-  return readdirSync(DIR).filter(nome => nome.endsWith('-ipc.ts') && !nome.endsWith('.test.ts'))
+  return readdirSync(DIR).filter(
+    nome => nome.endsWith('-ipc.ts') && !nome.endsWith('.test.ts') && registraCanal(nome)
+  )
+}
+
+/** O arquivo registra canal DIRETO? Fiação e delegação não contam como dívida. */
+function registraCanal(nome: string): boolean {
+  return /\.handle\(|ipcMain\.handle\(/.test(readFileSync(join(DIR, nome), 'utf8'))
 }
 
 function temGuarda(nome: string): boolean {
@@ -106,11 +125,23 @@ describe('cobertura de permissao', () => {
     expect(temGuarda('scheduling-ipc.ts')).toBe(true)
   })
 
-it('a divida medida hoje e 16 de 50', () => {
-    // Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
-    expect(SEM_GUARDA).toHaveLength(16)
-    // r36 do GOAL V2: audit-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
-    // r58: delivery-ipc.ts nasceu COM guarda e NAO entrou na divida - o total subiu, a divida nao.
-    expect(canais()).toHaveLength(50)
+it('a divida medida hoje e 14 de 48 — os 2 que sairam nao registram canal', () => {
+    /*
+     * r6 do V4 — o numero encolheu de 16/50 para 14/48, e NAO por correcao de canal nenhum.
+     *
+     * `erp-ipc.ts` e `ui-preferences-ipc.ts` nao registram canal: o primeiro fia stores, o segundo
+     * delega a `registerUiPreferencesIpc`. Eles apareciam como "canal sem guarda" sem ter canal —
+     * uma acusacao sem objeto que inflava a divida em 2 e o denominador em 2.
+     *
+     * O denominador cai junto (50 -> 48) porque a unidade agora e **arquivo que registra canal**.
+     * A divida em CANAIS e outra conta e esta em RISKS.md R3: 68 canais nos 14 arquivos, sendo
+     * 49 em 5 arquivos sensiveis (git 21, fs 13, terminal 6, agent 5, plugin-files 4).
+     *
+     * Numero congelado de proposito: muda-lo e uma decisao consciente, nao um efeito colateral.
+     */
+    expect(SEM_GUARDA).toHaveLength(14)
+
+    // r36: audit-ipc.ts nasceu COM guarda. r58: delivery-ipc.ts idem. O total sobe, a divida nao.
+    expect(canais()).toHaveLength(48)
   })
 })

@@ -57,12 +57,52 @@ que exercitam escrita real em `mkdtemp` e um deles testa *"arquivo corrompido vi
 **Impacto**: um domínio pode estar correto numa superfície e desatualizado na outra, e **nenhum gate
 compara as duas**.
 
-### R3 — 16 de 50 canais IPC sem `exigirAtor`
+### R3 — **68 canais** IPC sem guarda, dos quais **49 em 5 arquivos sensíveis**
 
-**Evidência**: `permission-coverage-ratchet.test.ts` mede **50 canais, dívida 16**.
+**Número corrigido na r6 do V4.** A versão anterior dizia "16 de 50 canais". Os dois números estavam
+errados em unidades diferentes — e a diferença importa.
 
-**Impacto**: canal sem verificação de ator no host é confiança na UI. O ratchet impede que aumente,
-mas não impede que exista.
+**Régua errada (arquivo ≠ canal).** O ratchet contava todo `*-ipc.ts` como uma unidade de dívida.
+Dois deles **não registram canal nenhum**:
+
+| Arquivo | Canais | O que faz |
+|---|---:|---|
+| `erp-ipc.ts` | **0** | fia stores; nenhum `ipcMain.handle` |
+| `ui-preferences-ipc.ts` | **0** | delega a `registerUiPreferencesIpc` em outro módulo |
+
+Contá-los produzia *"16 arquivos"* e o denominador errado de 50. Corrigido: **14 de 48**.
+
+**O que a correção revela é maior que o que ela conserta.** Medindo **canais**:
+
+| Arquivo | Canais | Sensibilidade |
+|---|---:|---|
+| `git-ipc.ts` | **21** | **GIT** — opera repositório |
+| `fs-ipc.ts` | **13** | **ARQUIVOS** — leitura, escrita, revelar |
+| `terminal-ipc.ts` | **6** | **SHELL** — executa processo |
+| `agent-ipc.ts` | **5** | **ORQUESTRAÇÃO** — roster e execuções |
+| `plugin-files-ipc.ts` | **4** | **ARQUIVOS** de plugin |
+| `mcp-oauth-callback-ipc.ts` | 3 | callback externo — **unguardado por desenho** |
+| 8 arquivos de UI/preferência | 16 | clipboard, HUD, notificações, dicionário, overlay |
+| **Total** | **68** | **49 em 5 arquivos sensíveis** |
+
+**Por que eu NÃO liguei a guarda nos 49 nesta rodada:** o próprio ratchet documenta o motivo, e ele
+está certo —
+
+> *"hoje o produto não tem login — `actorOf()` devolve o dono da instalação. **Uma guarda que sempre
+> permite é pior que guarda nenhuma, porque parece proteção.**"*
+
+Ligar `exigirAtor` em `terminal`/`fs`/`git` exige obter um `actorOf` real nesses caminhos, e eu **não
+consigo exercer esses fluxos aqui** (terminal precisa de shell viva, git precisa de operação real).
+Uma guarda que recusa por falta de ator **quebraria** essas superfícies — e eu não teria como provar
+que não quebrei.
+
+**O que fica aberto, com precisão**: 49 canais sensíveis sem verificação de ator, em 5 arquivos, com
+o caminho e a contagem acima. **O próximo passo não é "adicionar guarda"** — é criar um `actorOf` que
+tenha identidade de verdade, e só então ligar.
+
+**Ponto cego declarado**: os canais de `ui-preferences-ipc.ts` vivem em `ui-preferences.ts`, que
+**não** é `*-ipc.ts` e **não é varrido pelo ratchet**. Fechar exige varrer o grafo de delegação; não
+foi feito, e omitir seria pior.
 
 ## MEDIUM
 

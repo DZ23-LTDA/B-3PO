@@ -178,7 +178,10 @@ Ordem: **segurança/integridade → indisponibilidade → regressão → fluxo c
 |---|---|---|---|
 | ~~B-01~~ | ~~Auditar escrita atômica nos 36 stores~~ | **FECHADO r5** | **35/36 gravam temp+rename; 0 sem rename; 1 delega ao main.ts por projeto.** O risco era do meu detector, não do código |
 | **B-01'** | Provar a atomicidade: teste que garante não sobrar `.tmp` e que crash no meio não trunca | **LOW** | teste de falha por store (ou um compartilhado) |
-| **B-02** | Fechar a dívida de **16 canais IPC** sem `exigirAtor` (R3) | **HIGH** | ratchet em 0; teste por canal |
+| **B-02a** | ~~Medir a dívida em canais~~ | **FECHADO r6** | 14 de 48 arquivos · **68 canais**, 49 sensíveis em 5 arquivos |
+| **B-02b** | Criar `actorOf` com identidade real (não "dono da instalação") | **HIGH** | é pré-requisito: guarda que sempre permite é pior que nenhuma |
+| **B-02c** | Ligar `exigirAtor` em git(21), fs(13), terminal(6), agent(5), plugin-files(4) | **HIGH** | só depois de B-02b, com cada fluxo exercido |
+| **B-02d** | Varrer o grafo de delegação no ratchet (canais de `ui-preferences`) | **MEDIUM** | ponto cego declarado |
 | **B-03** | Testar o gateway num env com `aiohttp` (R6) | **HIGH** | `pytest tests/gateway/` coleta e passa no env do projeto |
 | **B-04** | Corrigir `sofia.status()` (R5) | **MEDIUM** | responde estado real; teste no backend |
 | **B-05** | Fazer as duas superfícies IPC concordarem (R2) | **MEDIUM** | um teste que compare ponte × REST por domínio |
