@@ -100,3 +100,31 @@ falar. A diferença é que agora ele diz isso em português e aponta a porta.
 | causa raiz identificada e medida | **READY** |
 | aviso traduzido e acionável | **READY** (prova acima) |
 | inferência funcionando de ponta a ponta | **BLOCKED_BY_EXTERNAL_DEPENDENCY** — chave do provedor |
+
+
+---
+
+## RISCO DE CONFORMIDADE — WCAG 2.4.7 (Focus Visible) nao atendido no app inteiro
+
+**Medido na r67.**
+
+```
+elemento ativo apos Tab:  outline: none · box-shadow: none
+regra no styles.css:      *:focus, *:focus-visible { outline: none }
+                          *:focus-visible { --tw-ring-shadow: 0 0 #0000 !important }
+```
+
+**E uma decisao de produto EXPLICITA do upstream** (comentario no proprio CSS): *"nenhum anel de foco em
+lugar nenhum"*. O r277 marcou duas superficies com `[data-b3po-foco]` (cartoes da home, seletor de modo);
+o resto do app nao tem indicador.
+
+**DECISAO NECESSARIA (proprietario):**
+
+| Opcao | Consequencia |
+|---|---|
+| **A** manter a regra | WCAG 2.4.7 nao atendido; se "conformidade AA" for requisito, isto e BLOCKER |
+| **B** reverter a regra global | todo controle focado ganha anel; muda a identidade visual do produto |
+| **C** marcar superficie por superficie | meio-termo; exige escolher quais telas importam |
+
+**Nao e regressao minha nem bug de codigo**: e conflito entre a identidade visual do upstream e a
+norma. **Eu nao escolho por voce.**

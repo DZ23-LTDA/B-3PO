@@ -3697,3 +3697,85 @@ lugar só** (`serverTenant`), e todos os canais acompanham.
 | Operação (health/logs/rollback) | **PASS** — rollback atômico provado em 2 falhas reais |
 
 **Nenhum gate fica `NOT_RUN` sem justificativa.** É a primeira vez na auditoria que consigo dizer isso.
+
+---
+
+## G8 · ADENDO 34 — a11y de TECLADO medida: **foco visível é ZERO por decisão do upstream**
+
+**Rodada 67.** O gate de a11y estava `PASS com ressalva` porque o teclado não tinha sido exercitado. Medi.
+
+### O que passou
+
+```
+Tab x10  ->  10/10 dentro do <main>           PASS (foco contido)
+           Exportar CSV > INPUT > INPUT > INPUT > Adicionar contato
+Esc      ->  conteudo 1583 -> 1583            PASS (nada quebrou)
+dialogs  ->  0 na tela                        N/A para foco de modal
+```
+
+### O que falhou — e por decisão de produto
+
+```
+indicador de foco no elemento ativo:
+  outline:    none  2.66667px
+  boxShadow:  none
+```
+
+**O CSS do app tem, globalmente:**
+
+```css
+/* No focus rings, anywhere. Kills the native outline plus Tailwind's
+   `focus-visible:ring-*` ... Unlayered so it beats the utilities layer. */
+*:focus,
+*:focus-visible {
+  outline: none;
+}
+
+*:focus-visible {
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+```
+
+**É WCAG 2.4.7 (Focus Visible) violado — para todo o app.**
+
+### E o r277 já sabia disso
+
+O comentário no próprio `styles.css`:
+
+> *"A regra acima (`*:focus-visible { outline: none }`) é uma **decisão de produto**: nenhum anel de
+> foco em lugar nenhum. Ela é unlayered de propósito, para vencer o `utilities` do Tailwind. (...)*
+> *A missão final pede 'navegação por teclado, foco visível', e as duas coisas se contradizem. A saída
+> não é reverter a decisão global (mudaria o produto inteiro, **e é do upstream**): é marcar as
+> superfícies onde o foco é necessário para operar."*
+
+**E marcou duas**: os cartões da home e o seletor de modo, via
+`[data-b3po-foco]:focus-visible { outline: 2px solid var(--theme-primary) }`.
+
+### O veredito honesto deste gate
+
+| Item | Estado |
+|---|---|
+| navegação por Tab alcança os controles | **PASS** — 10/10 dentro do `main` |
+| foco não escapa do `main` | **PASS** |
+| `Esc` não quebra a tela | **PASS** |
+| **foco VISÍVEL** | **`FAIL` por decisão do upstream**, com 2 exceções marcadas |
+| foco em modal | **`N/A`** — não há modal nas telas medidas |
+
+**Não é regressão minha** e **não é algo que eu possa consertar sem mudar o produto inteiro** — a regra
+é global, unlayered, e vem do upstream.
+
+### O que eu NÃO vou fazer
+
+**Não vou adicionar `[data-b3po-foco]` em todas as superfícies.** Isso:
+1. contraria uma **decisão de produto explícita** do upstream;
+2. muda a aparência de **todo** controle focado no app;
+3. é **escopo novo**, não correção — o `/goal` diz "não amplie o escopo".
+
+### O que fica registrado como risco para o dono
+
+**`WCAG 2.4.7` não é atendido no app inteiro.** Se o requisito for conformidade AA, isso é um
+**`BLOCKER` de conformidade** — e a decisão é: **manter a identidade visual sem anel de foco** (posição
+do upstream) ou **reverter a regra global** (muda o produto).
+
+**Nenhuma das duas é minha para escolher.** Está no `BLOCKERS.md` como risco de conformidade.
