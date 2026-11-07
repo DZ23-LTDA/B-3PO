@@ -159,6 +159,43 @@ seria exatamente reescrever. A autorização continua no main — só o **transp
 `execucao:vinculada` — o contrato está pronto e **não é exercitado por usuário**. E a transição para
 `executando` é **por comando**, não por evento do runtime.
 
+## 4d. r25 — o chamador existia no main e não existia para o usuário
+
+**`hermes:sofia:delegar` nasceu na r11 e nunca foi exposto pelo preload.**
+
+```js
+sole: {
+  aprovar, criar, plano, planos, status, tarefa   // 6 métodos
+}
+```
+
+Nenhum código do renderer podia chamá-lo. A r11 disse *"a ponte deixou de ser código morto"* — e ela
+deixou de ser **não testada**; continuou **inalcançável**. **Retratação.**
+
+**O que a r25 fez** (`3a42476f06`):
+
+| Elo | Antes | Agora |
+|---|---|---|
+| preload | 6 métodos | **8** (`delegar`, `execucaoVinculada`) |
+| `Bridge`/`OperacaoSofia` | sem `delegar` | com os dois |
+| tela de Sofia | sem ação | **botão "Delegar {id}"** por tarefa pronta |
+
+**Verificado no app em execução** (`#/sofia`, plano criado pela própria tela):
+
+```
+antes:  botões = ["Delegar v1"]
+clique: "Delegar v1" → tela mostra "sem_agente"
+```
+
+**O `sem_agente` é a recusa correta**: a tarefa foi criada com `agente_id: null`, e a ponte exige um
+agente dono da execução. A UI mostra o motivo — não finge sucesso.
+
+**O caminho feliz não foi exercitado**: exige uma tarefa com `agente_id` de um agente com credencial
+(`EXT-3`). O que está provado é: o botão existe, chama o canal, e a recusa aparece na tela.
+
+**A tela nunca diz "executando".** Quando a delegação funciona, ela mostra
+`Execução … criada · aguardando sessão` e o pedido que a sessão deve receber.
+
 ## 5. O que este documento **não** afirma
 
 - Não afirma que o slice acima resolve retomada, idempotência e compensação do G2 — são itens 5–7.
