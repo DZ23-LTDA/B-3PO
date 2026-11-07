@@ -46,6 +46,8 @@ type Resposta = { error: string } | Record<string, unknown>
 interface Bridge {
   aprovar: (payload: Record<string, unknown>) => Promise<Resposta>
   criar: (payload: Record<string, unknown>) => Promise<Resposta>
+  delegar: (payload: Record<string, unknown>) => Promise<Resposta>
+  execucaoVinculada: (payload: Record<string, unknown>) => Promise<Resposta>
   plano: (planoId: string) => Promise<Resposta>
   planos: () => Promise<Resposta>
   status: (payload: Record<string, unknown>) => Promise<Resposta>
@@ -53,7 +55,7 @@ interface Bridge {
 }
 
 /** As seis operações, nomeadas como os canais. `chamarSofia` evita seis funções quase idênticas. */
-export type OperacaoSofia = 'aprovar' | 'criar' | 'plano' | 'planos' | 'status' | 'tarefa'
+export type OperacaoSofia = 'aprovar' | 'criar' | 'delegar' | 'execucaoVinculada' | 'plano' | 'planos' | 'status' | 'tarefa'
 
 function bridge(): Bridge | null {
   return (globalThis as { hermesDesktop?: { sofia?: Bridge } }).hermesDesktop?.sofia ?? null

@@ -85,6 +85,7 @@ function PlanoCard({
 }): React.ReactElement {
   const [erro, setErro] = useState('')
   const [ocupado, setOcupado] = useState(false)
+  const [delegado, setDelegado] = useState<null | { execucao_id: string; prompt: null | string }>(null)
 
   const concluir = useCallback(
     async (tarefaId: string) => {
@@ -102,6 +103,45 @@ function PlanoCard({
         else onAtualizar()
       } catch (e) {
         setErro(e instanceof Error ? e.message : 'falha ao atualizar')
+      } finally {
+        setOcupado(false)
+      }
+    },
+    [onAtualizar, plano.plano_id]
+  )
+
+  /**
+   * r25 do V5 — o chamador que faltava.
+   *
+   * `hermes:sofia:delegar` nasceu na r11 e **nunca foi exposto pelo preload**: nenhum código do
+   * renderer podia chamá-lo. Este botão é a primeira porta de usuário para a ponte.
+   *
+   * O que ele NÃO faz: criar a sessão. O cliente canônico vive no fluxo de chat, e reescrevê-lo aqui
+   * seria duplicar. Ele cria a execução — estado real, com trilha — e mostra o pedido que a sessão
+   * deve receber. A tela diz "aguardando sessão", nunca "executando".
+   */
+  const delegar = useCallback(
+    async (tarefaId: string) => {
+      setOcupado(true)
+      setErro('')
+      setDelegado(null)
+
+      try {
+        const r = await chamarSofia('delegar', { plano_id: plano.plano_id, tarefa_id: tarefaId })
+
+        if (r && typeof r === 'object' && 'error' in r) {
+          setErro(String((r as { error: unknown }).error))
+        } else if (r && typeof r === 'object' && 'execucao_id' in r) {
+          const d = r as { execucao_id: string; prompt: null | string }
+
+          // Sem título no plano não há pedido. Dizer o contrário seria inventar o que o agente fará.
+          if (!d.prompt) setErro('a tarefa não tem título — não há pedido para a sessão')
+          else setDelegado(d)
+
+          onAtualizar()
+        }
+      } catch (e) {
+        setErro(e instanceof Error ? e.message : 'falha ao delegar')
       } finally {
         setOcupado(false)
       }
@@ -140,9 +180,14 @@ function PlanoCard({
       {plano.prontas.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {plano.prontas.map(id => (
-            <button className={BOTAO} disabled={ocupado} key={id} onClick={() => void concluir(id)} type="button">
-              Concluir {id}
-            </button>
+            <span className="flex gap-2" key={id}>
+              <button className={BOTAO} disabled={ocupado} onClick={() => void delegar(id)} type="button">
+                Delegar {id}
+              </button>
+              <button className={BOTAO} disabled={ocupado} onClick={() => void concluir(id)} type="button">
+                Concluir {id}
+              </button>
+            </span>
           ))}
         </div>
       )}

@@ -110,6 +110,10 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   sofia: {
     aprovar: payload => ipcRenderer.invoke('hermes:sofia:aprovar', payload),
     criar: payload => ipcRenderer.invoke('hermes:sofia:criar', payload),
+    // r25 do V5: `delegar` nasceu na r11 e **nunca foi exposto aqui** — nenhum codigo do renderer
+    // podia chama-lo. `execucaoVinculada` e o caminho de volta da r24.
+    delegar: payload => ipcRenderer.invoke('hermes:sofia:delegar', payload),
+    execucaoVinculada: payload => ipcRenderer.invoke('hermes:sofia:execucao:vinculada', payload),
     plano: planoId => ipcRenderer.invoke('hermes:sofia:plano', planoId),
     planos: () => ipcRenderer.invoke('hermes:sofia:planos'),
     status: payload => ipcRenderer.invoke('hermes:sofia:status', payload),
