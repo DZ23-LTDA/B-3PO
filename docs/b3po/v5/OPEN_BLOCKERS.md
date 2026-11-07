@@ -36,9 +36,9 @@ fase: G7
 | Item | Estado | Por quê |
 |---|---|---|
 | Suíte completa do gateway | `NOT_TESTED` | `EXT-4` |
-| **IDOR / isolamento multi-tenant** | `NOT_TESTED` | exige dois tenants reais; 6 handlers normalizam o tenant, mas não há teste de cruzamento A×B |
+| IDOR / isolamento multi-tenant | `EXISTE` — **não roda no Windows** | `tests/e2e/core/tenancy/test_two_tenant_gateway.py`: 3 perfis, turnos intercalados, `check_isolation`. Falha na coleta aqui: `signal.SIGKILL` não existe no Windows (r29) |
 | **SSRF / egress allowlist** | **NÃO EXISTE** | confirmado na r28: os allowlists do repo são de **entrada**, não de destino |
-| **Path traversal** | `NOT_TESTED` | `fs` (13 canais) e `plugin-files` (4) |
+| Path traversal | **`TESTADO`** — 7 testes verdes | `electron/hardening-traversal.test.ts` + `docs/b3po/audit/PATH-TRAVERSAL-R156.md`. **Não confina a uma raiz por decisão escrita**: o comentário no handler diz que confinar é decisão de produto, não check faltando (r29) |
 | **Replay de webhook** | `NOT_TESTED` | assinatura + janela de 10 min existem; replay não exercitado |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
@@ -61,3 +61,17 @@ fase: G7
 `ws_host_origin_reason` valida Host e Origin do upgrade, falha fechado em Origin malformado e rejeita
 outra porta de loopback. **64 testes** (`test_web_server_host_header.py`). Não é bloqueio: é controle
 existente e exercitado.
+
+## O padrao `NOT_TESTED` — tres correcoes em duas rodadas (r28, r29)
+
+| Rodada | Item | Eu disse | Era |
+|---|---|---|---|
+| r28 | validacao de origem do WebSocket | `NOT_TESTED` | **existe**, 64 testes |
+| r29 | IDOR / multi-tenant | `NOT_TESTED` | **existe** (`test_two_tenant_gateway.py`), nao roda no Windows |
+| r29 | path traversal | `NOT_TESTED` | **testado** (7 verdes) e **documentado** como decisao |
+
+**`NOT_TESTED` e uma afirmacao, nao um espaco em branco.** Nos tres casos eu escrevi "nao testei" sem
+procurar; nos tres o repositorio tinha a resposta.
+
+**Regra que fica**: antes de escrever `NOT_TESTED`, procure o termo em `tests/` e no codigo. Se existir
+e nao rodar aqui, o rotulo correto e **`EXISTE, NAO RODA NESTE HOST`** com o motivo — nao "nao testado".
