@@ -12,16 +12,31 @@ fase: G1
 > Este arquivo é **gerado** de `apps/desktop/electron/*.ts`, não escrito à mão. Dados brutos em
 > [`evidence/ipc-matriz-2026-11-07.json`](../evidence/ipc-matriz-2026-11-07.json).
 
-## Totais
+## Totais — e o que **não** é confiável neles
 
-| Medida | Valor |
+| Medida | Valor | Confiável? |
+|---|---|---|
+| Canais registrados | **281** | ✅ medido por regex de `ipcMain.handle`/`on` |
+| Guarda **por nome** (`exigirAtor`, `withPermission`, `comMaquina`, `recusaSeNaoPuder`, `podeAdministrarInstalacao`, `podeOperarMaquina`) | **130** | ✅ o nome está no corpo do handler |
+| "Sem guarda" | **~151** | ❌ **superestimado** — ver abaixo |
+| Com menção em teste | **141** | ✅ |
+
+### Por que "sem guarda" não é um número publicável
+
+Duas tentativas de medir, duas erradas:
+
+| Tentativa | Erro |
 |---|---|
-| Canais registrados (`ipcMain.handle` + `on`) | **281** |
-| Com guarda | **130** |
-| **Sem guarda** | **151** |
-| Com alguma menção em teste | **141** |
+| r32: lista fixa de nomes | **falso negativo**: `finance-ipc.ts` guarda com um wrapper local `comGuarda(...)` que a lista não conhecia — `finance:append` e `finance:settle` apareciam "sem guarda" e **são guardados** |
+| r33: detectar wrappers automaticamente | **falso positivo em massa**: a heurística listou 66 "wrappers", incluindo `registerFinanceIpc`, `bruto`, `texto`, `raw` — e mesmo assim **não achou** `comGuarda` |
 
-### Por guarda
+**A causa**: `comGuarda` é declarada **aninhada dentro de `registerFinanceIpc`** (L48 de `finance-ipc.ts`), com
+indentação — não é `function` de topo. Um scanner de texto não a vê como wrapper.
+
+**Então**: o número de canais **realmente sem guarda é desconhecido**, e é **menor** que 151. Publicar 151
+como se fosse medição seria o erro que eu venho corrigindo desde a r18.
+
+### Por guarda (estes são medidos)
 
 | Guarda | Canais |
 |---|---:|
@@ -31,10 +46,19 @@ fase: G1
 | `recusaSeNaoPuder(capacidade)` | **4** |
 | `podeAdministrarInstalacao(ator)` | **2** |
 | `podeOperarMaquina(ator, capacidade, domínio)` | **1** |
-| **SEM GUARDA** | **151** |
+| **subtotal medido** | **130** |
 
-**"Sem guarda" não é sinônimo de vulnerável.** A maioria é canal de **apresentação**: ler preferência,
-mover janela, abrir menu de contexto, tamanho do zoom. O que importa é **efeito**.
+**Mais** os canais guardados por wrapper local, cuja contagem exige **ler cada módulo**: `finance` (4) é o
+caso verificado.
+
+## O que a matriz **consegue** afirmar
+
+Um canal que **não** aparece em nenhuma das seis guardas por nome é, no mínimo, **candidato a revisão** —
+não "sem guarda". Foi assim que `sales:create/cancel/devolver` apareceu, e ali a leitura do arquivo
+**confirmou** o problema (era código direto para o store, sem wrapper).
+
+**A regra que fica**: a matriz **aponta candidatos**; a confirmação é ler o handler. Foi o que separou o
+achado real (`sales`) dos falsos suspeitos (`finance`, `terminal`).
 
 ## Sem guarda, por domínio
 
