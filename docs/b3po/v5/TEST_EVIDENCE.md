@@ -114,10 +114,29 @@ npx vitest run \
 Ambiente: Windows 11, Node do ambiente do projeto, sem `HERMES_HOME` especial.
 Resultado medido: **17 failed · 206 passed · 6 skipped**.
 
-## 5. O que continua sem resposta
+## 5. `bundle-electron-main` (3) — `NOT_CLASSIFIED`, e a r19 tentou e falhou
 
-- **`bundle-electron-main`** (3): por que o bundle não vê o config. **`NOT_CLASSIFIED`** — as funções
-  puras estão certas e o `entry.ts` implementa a precedência; a divergência está no caminho empacotado.
+**A r19 instrumentou o preload do teste para ver por que o entry empacotado não enxerga o config.**
+Dois "achados" apareceram e **os dois eram artefato do meu próprio instrumento**:
+
+| "Achado" | O que era |
+|---|---|
+| `HERMES_HOME` no filho é a raiz, não o `home-XXXX` | **truncamento**: a string tem 162 caracteres e eu cortava em 110 — o sufixo `home-` ficava fora da tela |
+| `platform=win32` no filho | o `console.error` foi inserido **antes** do `Object.defineProperty(process, 'platform', { value: 'linux' })` |
+
+E a instrumentação do `readFileSync` **não funcionou**: o bundle importa `readFileSync` estaticamente,
+então trocar a propriedade do módulo depois não afeta o import já vinculado.
+
+**Portanto: continua `NOT_CLASSIFIED`.** O que **permanece medido e verdadeiro**:
+
+- as funções puras estão **corretas** (3 testes: parser, precedência, escolha padrão);
+- `entry.ts` implementa a precedência certa (`explicitOzonePlatform(electronFlags)` vence);
+- o resolvedor devolve `env.HERMES_HOME` antes de qualquer checagem;
+- os 3 testes falham de forma determinística (não é flakiness).
+
+**A pergunta que falta** é específica: *o entry empacotado lê `config.yaml` do `HERMES_HOME` que o
+teste cria?* Um `console.error` dentro de `configuredElectronFlags` (no fonte, não em preload)
+responderia — e não foi feito.
 
 ## 6. O que **foi** confirmado depois da primeira versão deste documento
 

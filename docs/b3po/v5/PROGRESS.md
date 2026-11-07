@@ -379,6 +379,22 @@ it('monta a secao de prontidao de conectores na tela de gateway', async () => {
 O mock do componente **não esconde a montagem** — ele substitui o conteúdo por um texto fixo, e o
 teste procura esse texto na tela renderizada. Se a linha de montagem sumir, o texto não existe.
 
+### r19 — investiguei as 3 não classificadas e o instrumento me enganou duas vezes
+
+Instrumentei o preload de `bundle-electron-main` para ver o que o entry empacotado enxerga. Dois
+"achados" surgiram e **os dois eram artefato**:
+
+1. **`HERMES_HOME` parecia ser a raiz** — era **truncamento**: a string tem 162 caracteres, eu cortava
+   em 110, e o sufixo `home-` ficava fora da tela.
+2. **`platform=win32` parecia significativo** — meu `console.error` foi inserido **antes** do
+   `Object.defineProperty` que finge Linux.
+
+E a instrumentação do `readFileSync` não pegou: o bundle importa a função **estaticamente**.
+
+**Resultado**: continua `NOT_CLASSIFIED`, agora com a pergunta certa escrita — *o entry empacotado lê
+o `config.yaml` do `HERMES_HOME`?* A resposta exige um `console.error` **dentro de
+`configuredElectronFlags`**, no fonte.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.
