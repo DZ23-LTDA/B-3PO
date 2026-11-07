@@ -17506,7 +17506,7 @@ mountCrmContacts(ipcMain, app.getPath('userData'))
   mountErpIpc(ipcMain, app.getPath('userData'))
 
 registerDesktopUninstallIpc({
-  ipcMain,
+  actorOf: () => atorDeMaquina(app.getPath('userData')), ipcMain,
   stamp: INSTALL_STAMP,
   fallbackSummary: fallbackUninstallSummary,
   probeSummary: probeUninstallSummary,
