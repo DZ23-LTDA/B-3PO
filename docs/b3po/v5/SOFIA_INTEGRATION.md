@@ -56,8 +56,9 @@ statusDerivadoDaExecucao(…) // 0 chamadores em produção
 | 1 | Canal `sofia:delegar` com `exigirAtor` | ✅ **FEITO na r11** (`4b00249450`) — 4 testes |
 | 2 | `delegarTarefa` receber um **iniciador de sessão** | **AUSENTE** — a dep `SofiaPonteDeps` não tem |
 | 3 | Criar sessão no gateway com a tarefa como prompt | **AUSENTE** no caminho de Sofia |
-| 4 | Gravar `session_id` na execução | **AUSENTE** — `Execucao` não tem o campo |
+| 4 | Gravar `session_id` na execução | ✅ **FEITO na r23** (`fb9f9162ca`) — campo opcional + `vincularSessao` |
 | 4b | `execucao_id` forjável pelo renderer | ✅ **FECHADO na r11** — o handler remove o campo do patch |
+| 4c | `vincularSessao` | ✅ **r23** — move `pendente`→`executando`; recusa trocar de sessão; idempotente
 | 5 | Transição `pendente → executando` dirigida por evento do runtime | **AUSENTE** |
 | 6 | `finalizar` chamado quando o turno termina | **AUSENTE** — só teste chama |
 | 7 | Retomada após reinício sem repetir efeito | **AUSENTE** |
@@ -110,6 +111,30 @@ cliente canônico vive em `src/api/`, não em `electron/` — mover ou compartil
 
 **Passo 6 é o mais importante**: a falha do iniciador tem de reverter para `pendente` ou `falhou` — um
 registro `executando` sem sessão é a mentira de volta.
+
+## 4b. O que a r23 acrescentou — e o defeito colateral que apareceu
+
+`Execucao` ganhou `session_id?: string | null`, e o store ganhou `vincularSessao(id, sessionId)`:
+
+| Regra | Por quê |
+|---|---|
+| move `pendente` → `executando` | com sessão, o executor começou |
+| **recusa trocar** de sessão (`ja_vinculada`) | reescrever onde o trabalho rodou apaga a trilha |
+| idempotente com a **mesma** sessão | retry de rede não pode falhar |
+| campo **opcional** | registro antigo continua carregando |
+
+**7 testes** cobrem as bordas, incluindo o registro antigo.
+
+### 🔴 Defeito colateral encontrado ao testar: `tenant_id` não tem backfill
+
+`visiveis()` filtra `e.tenant_id === serverTenant()`. Um registro gravado **antes** de `tenant_id`
+existir fica **invisível** — não aparece em `listar()`, e pode nem contar vaga.
+
+**Não corrigi**: exigiria decidir qual tenant adotar para registros órfãos, e isso é migração de dado
+com efeito sobre a contabilidade de concorrência. Registrado como item aberto.
+
+**No teste**, o registro "antigo" recebeu `tenant_id` explícito — o que ele prova é a ausência de
+`session_id`, não a de `tenant_id`.
 
 ## 5. O que este documento **não** afirma
 
