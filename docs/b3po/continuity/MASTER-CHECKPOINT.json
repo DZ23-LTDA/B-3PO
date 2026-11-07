@@ -1,8 +1,8 @@
 {
-  "head": "843d6253377524ace55fbc1d85a35c7ee035d7fe",
+  "head": "0af78e9f226da5990d0c56e449d5e4d1dc3deefd",
   "branch": "b3po-brand",
   "main_mirror": "f4cf411f28f90ab2cb0a8ffd7427a64bde386fbb",
-  "round": 51,
+  "round": 58,
   "continuity_docs": "13 de 13",
   "gates": {
     "G0": "READY",
@@ -136,6 +136,14 @@
     "estoque": "exigir catalogo em inventory.append/purchases, ou orfao e estado legitimo?"
   },
   "known_technical_work": {
-    "nested-interactive": "conflito: tablist so aceita tab, e o X do pane-tab nao pode sair do tab sem sair do tablist. Tentado e revertido na r50."
+    "nested-interactive": "conflito: tablist so aceita tab, e o X do pane-tab nao pode sair do tab sem sair do tablist. Tentado (r50) e revertido. Solucao: X fora do tablist (refatoracao de shell)."
+  },
+  "verified_live": {
+    "app_apos_restart": "home 797 chars, mainH 965 == paiH 965, estoque '1 produto' + orfao visivel",
+    "axe_desktop": "2 violacoes (nested-interactive) em 4 rotas; /crm e /compras LIVRE",
+    "axe_web": "0 violacoes nos 2 temas, 17/17 rotas",
+    "build_desktop": "exit 0, 16374 modulos, dist 1231 arquivos 21:51, fix r48 verificado no chunk",
+    "build_web": "exit 0, web_dist 60 arquivos",
+    "suite_desktop": "13 falhas em 7 arquivos - TODAS provadas no origin/main (que tem 18)"
   }
 }
