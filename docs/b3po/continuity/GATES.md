@@ -6606,3 +6606,58 @@ cor — é parar de reimplementar um primitivo que existe.**
 > medida.
 
 Depois: **`axe /medidores: 0`**.
+
+---
+
+## G6 · ADENDO — T-06: a integração está **preparada até o limite do que não exige segredo**, e o resto é `BLOCKED` com ação
+
+**Rodada 102.** Decisão do dono #6: *"Prepare a integração externa T-06 sem utilizar credenciais reais.
+Se precisar delas, registre BLOCKED_BY_EXTERNAL_DEPENDENCY."*
+
+### O que existia, e por que não bastava
+
+O status já dizia `platforms: { configured: 27, connected: 0 }` — **números mudos**. Quem opera não
+sabia se faltava token, se faltava dependência, ou se a plataforma simplesmente não estava escolhida.
+
+### O que foi construído
+
+`gateway/connector_readiness.py` — derivado do `PlatformEntry` do registry (o **mesmo** campo
+`required_env` que o `hermes setup` usa), não de uma lista minha.
+
+```python
+connector_readiness("telegram", env={})
+# {"status": "missing_credential", "required_env": ["TELEGRAM_BOT_TOKEN"],
+#  "missing_env": ["TELEGRAM_BOT_TOKEN"], "next_action": "Defina TELEGRAM_BOT_TOKEN …"}
+```
+
+**Três garantias, e as três são o motivo de o módulo ser puro:**
+
+1. **Nunca lê nem devolve valor de segredo** — compara **nomes** de variável e devolve **nomes**.
+   Uma função que devolvesse o valor vazaria credencial por log, por tela e por relatório. Há um
+   teste dedicado a isso: o valor `token-super-secreto-123456` é passado no `env` e **não aparece**
+   no `repr` do resultado.
+2. **Nunca inventa o que falta** — plataforma fora do registry é `unknown_platform`, não um palpite.
+3. **Nunca toca a rede** — `check_fn` é sonda **passiva** de import por contrato do registry.
+
+**Ordem de precedência decidida e testada**: credencial **antes** de dependência. Sem token,
+instalar o SDK não adianta — o operador precisa do nome do token primeiro.
+
+### Estado: `BLOCKED_BY_EXTERNAL_DEPENDENCY`
+
+**12 testes** cobrem a regra. O que **não** está provado é o que exige segredo real:
+
+| Não provado | Por quê | Desbloqueio (ação exata) |
+|---|---|---|
+| conexão viva com uma plataforma de verdade | exige token válido | `hermes auth add <provider>` ou definir `<PLATAFORMA>_BOT_TOKEN` no `.env` do perfil e reiniciar o gateway |
+| mensagem recebida e respondida ponta a ponta | exige a credencial acima + canal | o mesmo, mais convidar o bot num canal de teste |
+
+**Eu não criei, não simulei e não reusei credencial nenhuma.** A integração está pronta para
+conectar no instante em que o segredo existir — e é isso que "preparar sem credencial" pode
+significar honestamente. **Chamar isso de "conector provado" seria o `SEM TEATRO` violado.**
+
+### Desvio declarado no runner
+
+`tests/AGENTS.md` exige `scripts/run_tests.sh`. Ele é **bash**, e não há bash/WSL neste ambiente
+(`execvpe(/bin/bash) failed`). Rodei `pytest` direto **com `HERMES_HOME` em diretório temporário e
+`TZ=UTC`** — o isolamento que o runner existe para garantir. **É um desvio, não uma equivalência**:
+o runner também faz subprocesso por arquivo e desliga credenciais; aqui são 12 testes num arquivo só.

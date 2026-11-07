@@ -1,5 +1,5 @@
 {
-  "round": 101,
+  "round": 102,
   "queue": [
     {
       "id": "T-01",
@@ -42,7 +42,7 @@
       "what": "Provar ativacao de UM conector sem credencial comercial (ntfy/irc)",
       "owner": "dsh",
       "status": "blocked",
-      "blocked_by": "EXT-6 (autorizacao para conexao externa)",
+      "blocked_by": "EXT-6: credencial real de uma plataforma (acao do dono)",
       "proven": "adapter IRC existe e passa 18 testes (plugins/platforms/irc/adapter.py); ntfy-approval.yaml no catalogo"
     },
     {
@@ -226,5 +226,16 @@
     "falta": null,
     "regra": "nenhum preco padrao no codigo: sem politica vigente, calcular devolve null",
     "axe_medidores": 0
+  },
+  "t06": {
+    "status": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "preparado": "gateway/connector_readiness.py + 12 testes: nomeia o que falta sem ler segredo, sem inventar e sem tocar rede",
+    "bloqueado": [
+      "conexao viva com plataforma real",
+      "mensagem recebida e respondida ponta a ponta"
+    ],
+    "acao_de_desbloqueio": "hermes auth add <provider> OU definir <PLATAFORMA>_BOT_TOKEN no .env do perfil e reiniciar o gateway",
+    "nao_provado_por_que": "exige credencial real; nada foi simulado",
+    "desvio": "scripts/run_tests.sh exige bash (ausente); pytest direto com HERMES_HOME isolado e TZ=UTC"
   }
 }
