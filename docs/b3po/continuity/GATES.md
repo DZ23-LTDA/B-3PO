@@ -2727,3 +2727,88 @@ saída para trabalho desconfortável** — e eu só notei quando o próprio r48 
 **O `nested-interactive` eu reclassifico como ABERTO TÉCNICO**, não como decisão sua. **Eu poderia
 fazer** — e a r31 já tem o plano (botão irmão do `role="tab"`). O que me trava é **risco de quebrar 4
 tipos de aba**, não permissão. **Registro honestamente que é meu, não seu.**
+
+---
+
+## G8 · ADENDO 22 — `nested-interactive` (r50): tentei a correção estrutural, **revertida com prova**
+
+**Rodada 50.** Eu disse na r49 que o `nested-interactive` era **trabalho meu**, não decisão do dono.
+Fui fazer. **Descobri por que ele é difícil — e não é "risco", é um conflito entre dois requisitos.**
+
+### O que tentei
+
+Mover o `role="tab"` do wrapper para o conteúdo, deixando o `<button>` do ✕ **irmão** do tab:
+
+```
+ANTES:  div[role=tab] > span > button      ← nested-interactive
+DEPOIS: div[role=presentation] > div[role=tab] + span > button
+```
+
+**Implementado, tipos 0 erros, 34 testes de aba passando.**
+
+### O resultado medido
+
+| Regra | Antes | Depois |
+|---|---|---|
+| `nested-interactive` | **1** | **0** ✅ |
+| `aria-required-children` | 0 | **1** ❌ |
+
+```
+Element has children which are not allowed: button[aria-label]
+```
+
+**Troquei uma violação `serious` por outra.** Não é progresso.
+
+### Por que: o conflito real entre duas regras
+
+| Regra WCAG | O que exige |
+|---|---|
+| **`nested-interactive`** (4.1.2) | o `<button>` **não pode estar dentro** do `role="tab"` |
+| **`aria-required-children`** (1.3.1) | o `role="tablist"` **só aceita `tab`** como filho |
+
+**O ✕ precisa estar fora do `role="tab"` E fora do `tablist`.** Mas ele vive **dentro** da aba, no layout.
+
+**O `role="presentation"` no wrapper e no `<span>` não resolve** — o `axe` continua vendo o `<button>`
+como filho do `tablist` (medido: `presentation` nos dois níveis, violação persiste).
+
+### A solução que existe, e por que ela é grande
+
+**O ✕ tem de sair do `tablist`.** Isso significa:
+
+- renderizar o ✕ **fora** do `PaneTabStrip`'s tablist, posicionado em absoluto sobre a aba em hover;
+- ou **eliminar o ✕ por aba** e fechar só por middle-click / `Delete` / menu de contexto
+  (é o que o **VS Code** faz — a aba não tem ✕ individual na maioria dos temas).
+
+**Nas duas, muda o desktop inteiro**: `tree-group`, `narrow-overlays`, `preview` rail, o browser e o
+terminal. **É uma rodada própria com escopo de refatoração de shell**, não um ajuste.
+
+### A decisão: revertido
+
+```powershell
+git checkout -- pane-tab.tsx narrow-overlays.test.tsx
+# 34 testes passam · axe volta a nested-interactive:1 · 0 pendentes
+```
+
+**Reverti porque "1 violação trocada por outra" não é correção.** O `nested-interactive` da r31 é o
+**estado menos ruim conhecido**, e o `aria-keyshortcuts` com `Delete` **já dá o caminho de teclado**.
+
+### O que a r50 corrige no meu discurso
+
+**Na r49 eu escrevi**: *"o que me trava é risco de quebrar 4 tipos de aba, não falta de permissão"*.
+**Estava certo sobre não ser permissão, e errado sobre ser "risco".**
+
+**Não era risco genérico: é um conflito específico entre `nested-interactive` e
+`aria-required-children`.** Eu não sabia disso na r49; **sei agora porque tentei**.
+
+> **O rótulo "risco" escondia um fato técnico que só a tentativa revelaria.** Trocar "risco" por
+> "conflito entre X e Y" é a diferença entre uma desculpa e um diagnóstico.
+
+### O estado final honesto
+
+| Item | Estado |
+|---|---|
+| `nested-interactive` (desktop) | **ABERTO** — 1 ocorrência, 2 telas |
+| causa | **documentada**: `tablist` não aceita `button` |
+| tentativa de correção | **feita e revertida** com prova (0 testes quebrados, axe igual) |
+| caminho de teclado para fechar | **EXISTE** (`Delete` + `aria-keyshortcuts`) |
+| o que falta | **mover o ✕ para fora do tablist** — refatoração de shell |
