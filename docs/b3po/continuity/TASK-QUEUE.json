@@ -1,5 +1,5 @@
 {
-  "round": 91,
+  "round": 92,
   "queue": [
     {
       "id": "T-01",
@@ -104,11 +104,11 @@
     },
     {
       "id": "T-15",
-      "what": "Decidir o conflito `region` x r291: o axe quer todo conteudo em landmark; o upstream escolheu role=group para nao encher o atalho de landmarks",
+      "what": "Decidir T-15 com a causa estrutural nomeada: <main> esta DENTRO de uma zona da arvore de paineis",
       "owner": "proprietario",
       "status": "blocked",
-      "blocked_by": "decisao de produto: 55 nos de axe vs. a navegacao por landmark do app",
-      "measured_in": "r83 - tree-group.tsx:272 documenta a escolha; trocar para region zeraria o axe e pioraria o salto de landmark"
+      "blocked_by": "decisao de produto: aceitar region(55) OU autorizar o refactor que tira <main> de dentro da zona (ai as duas regras passam)",
+      "measured_in": "r92 - a terceira via (1 region no root) foi tentada: 57->13 nos, mas criou landmark-main-is-top-level em 11 rotas; revertida e registrada no codigo"
     }
   ],
   "data": "06/11/2026",

@@ -5645,3 +5645,69 @@ backend lê:  %TEMP%\b3po-menu-view6\hermes-agent\hermes_cli\…    <- intocado
 
 **`G2` deixa de ser `PARCIAL` por este motivo.** O que resta dele é o `EXT-1` (chave do provedor), que é
 externo — e agora **o próprio produto sabe e diz** que ela falta.
+
+---
+
+## G8 · ADENDO 50 — T-15: a terceira via **existia**, foi medida, e **foi revertida** — com o número
+
+**Rodada 92.** O T-15 estava `blocked` na sua decisão: *55 nós de `axe` vs. a navegação por landmark que
+o r291 protege*. Fui ver se havia uma saída que não precisasse da decisão.
+
+### A causa estrutural, medida
+
+```js
+landmarkAcima: null      // nos 3 tipos de nó, subindo 9-11 níveis
+mainPai:      DIV.absolute.inset-0
+comumPai:     DIV.relative.flex     <- o root do LayoutTreeRoot
+```
+
+**Não eram 55 recusas: era 1 container sem landmark.** A árvore de painéis é uma região de layout
+**irmã** do `<main>`, não filha — então tudo dentro dela fica fora de landmark.
+
+### A terceira via, e o que ela custou
+
+**Parecia** a resposta certa: `role="region"` **no root da árvore** — **um** landmark cobrindo todos os
+painéis, exatamente o oposto de "um por zona" que a r291 recusou.
+
+**Medido:**
+
+```
+antes:  region(55) + nested-interactive(2)                      = 57 nós
+depois: landmark-main-is-top-level(11) + nested-interactive(2)  = 13 nós
+```
+
+**Funcionou para `region` — e criou `landmark-main-is-top-level` em TODAS as rotas.** Porque o `<main>`
+do chat **vive dentro de uma zona da árvore**: a região passa a envolvê-lo.
+
+### Por que revertida
+
+| Violação | O que custa ao usuário de leitor de tela |
+|---|---|
+| `region` × 55 | conteúdo **não alcançável pelo salto de landmark** — mas continua no fluxo normal |
+| `landmark-main-is-top-level` × 1 | **`main` deixa de ser top-level** — pode quebrar o landmark **mais importante** |
+
+**13 < 57 no número, e pior no efeito.** Reverter foi a decisão certa, e **a medição ficou registrada no
+próprio arquivo** (comentário em `renderer/index.tsx`) para que ninguém repita o experimento achando que
+descobriu algo.
+
+### O que a rodada acrescenta ao T-15
+
+**O T-15 não é mais "aceitar 55 ou não".** A causa real é estrutural e agora está nomeada:
+
+> **`<main>` está dentro de uma zona da árvore de painéis.** Enquanto isso for verdade, **nenhuma região
+> única pode cobrir os painéis sem envolver o `main`** — e a única forma de satisfazer as duas regras é
+> **tirar o `main` de dentro da zona**, o que é uma mudança de layout do shell, não um atributo.
+
+**Isso é o que a decisão sua agora decide**: aceitar `region` (status quo, conteúdo alcançável
+linearmente) **ou** autorizar o refactor de layout que move `<main>` para fora da árvore — e aí as duas
+regras ficam satisfeitas juntas.
+
+### O que eu aprendi sobre "a terceira via"
+
+Na r08 (T-08), r09 (T-09), r10 (T-10) e r13 (T-13) eu encontrei a terceira via e ela **funcionou**. Aqui
+ela **também existia**, e **custava mais do que valia** — mas eu só sei disso porque **medi os dois
+lados**. Sem a segunda medição, eu teria entregado "57 → 13 nós" como melhoria e introduzido uma
+regressão de uma regra que eu não estava olhando.
+
+> **Toda correção precisa ser medida na regra que ela melhora E nas que ela toca.** O número que sobe
+> não aparece no relatório de quem só olha o número que desce.

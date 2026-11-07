@@ -23,6 +23,8 @@
 import { useStore } from '@nanostores/react'
 import { type ReactNode, useEffect } from 'react'
 
+import { useI18n } from '@/i18n/context'
+
 import { useLayoutEditHotkey } from '../../edit-mode'
 import { publishWorkspaceGeometry } from '../../geometry'
 import { $layoutTree, trackActiveTreeGroup } from '../store'
@@ -36,6 +38,7 @@ import { NarrowOverlays } from './narrow-overlays'
 import { TreeNode } from './tree-node'
 
 export function LayoutTreeRoot({ children, titlebar = false }: { children?: ReactNode; titlebar?: boolean }) {
+  const { t } = useI18n()
   const tree = useStore($layoutTree)
 
   useLayoutEditHotkey(true)
@@ -48,6 +51,21 @@ export function LayoutTreeRoot({ children, titlebar = false }: { children?: Reac
   useEffect(publishWorkspaceGeometry, [])
 
   return (
+    /*
+     * r92 — TENTADO E REVERTIDO: um `role="region"` neste root.
+     *
+     * A ideia parecia a terceira via do T-15: o `axe` acusava `region` em ~55 nós porque os tab
+     * strips e os corpos de zona ficam fora de qualquer landmark, e um único landmark no root
+     * cobriria todos eles — respeitando a objeção da r291 (que era contra um `region` por ZONA).
+     *
+     * Medido, funcionou para `region`: 57 -> 13 nós. E criou `landmark-main-is-top-level` em TODAS
+     * as rotas, porque o `<main>` do chat vive DENTRO de uma zona desta árvore — a região passa a
+     * envolvê-lo.
+     *
+     * A troca é ruim: `region` só significa "não alcançável pelo salto de landmark" (o conteúdo
+     * continua no fluxo), enquanto `main` não-top-level pode quebrar o landmark MAIS importante
+     * para leitores de tela. Revertido, e a causa estrutural ficou registrada no T-15.
+     */
     <div className="relative flex min-h-0 min-w-0 flex-1">
       {/* THE SEAM INVARIANT: boundaries are drawn by the tree (one sash
           hairline per seam) — content mounted in a zone must not paint its
