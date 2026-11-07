@@ -1,5 +1,5 @@
 {
-  "round": 94,
+  "round": 95,
   "queue": [
     {
       "id": "T-01",
@@ -137,5 +137,14 @@
     "nested_interactive_causa": "X do PaneTab dentro de role=tab (r50)",
     "region": 89,
     "region_causa": "T-15: <main> dentro da zona da arvore"
+  },
+  "web_spa_verificado_r95": {
+    "build": "exit 0",
+    "typecheck": "0 erros",
+    "lint": "0 erros / 28 warnings",
+    "testes": "475 pass / 70 arquivos",
+    "axe": "0 violacoes",
+    "main": 1,
+    "h1": 1
   }
 }

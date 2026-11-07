@@ -5974,3 +5974,66 @@ das rotas que eu medía**.
 > **"Verificado" sem o tamanho da amostra é uma afirmação sem conteúdo.** A diferença entre
 > `axe: 0 violações` e `axe: 0 violações em 12 de 27 rotas` é a diferença entre um relatório e um número
 > que não sabe o que não cobriu.
+
+---
+
+## G7 · ADENDO 8 — o SPA web, entregue na r39, **re-verificado na r95**: build, tipos, lint, 475 testes e `axe`
+
+**Rodada 95.** O `web/` foi construído na r39 e **nunca mais foi exercitado**. Cinco gates citam
+"web OK" desde então, com base numa medição de **56 rodadas atrás**.
+
+### O que foi medido agora
+
+| Verificação | Resultado |
+|---|---|
+| `npm run build` (web → `hermes_cli/web_dist`) | **exit 0** · 60 arquivos |
+| `npm run typecheck` | **PASS** · 0 erros |
+| `npm run lint` | **0 erros**, 28 warnings (pré-existentes) |
+| `npm test` | **475 testes · 70 arquivos · 0 falhas** |
+| runtime servido em `:8899` | carrega, `h1=1`, `main=1` |
+| **`axe` sem `runOnly`** | **0 violações** |
+
+### O contraste com o desktop, e o que ele explica
+
+```
+web SPA   ..... 1 <main> · 1 <h1> · axe: 0 nos
+desktop   ..... 27 rotas · 1 <main> cada · axe: 89 region + 3 nested-interactive
+```
+
+**O web é limpo porque não herdou a árvore de painéis.** Os 89 `region` do desktop existem porque o
+`<main>` vive **dentro** de uma zona dessa árvore (T-15) — um layout que o SPA não usa. **Não é
+inconsistência entre as duas superfícies: é a mesma decisão de produto cobrando preço em uma delas.**
+
+### Os 16 erros de console: não são bug
+
+```
+Failed to load resource: 404 — /api/…   (×16)
+```
+
+**Servidor estático não tem backend.** O SPA pede `/api/*` e recebe 404 — comportamento correto para o
+ambiente, não defeito. Registrado para que ninguém leia os 16 como falha numa próxima rodada.
+
+### O que isso fecha, e o que continua aberto
+
+**Fecha**: a afirmação "web OK" em G7 deixa de ser herança de r39 e passa a ter medição na r95.
+
+**Continua aberto** (e não é do web):
+- desktop: `region` × 89 (T-15, causa estrutural nomeada)
+- desktop: `nested-interactive` × 3 (r50/r293 — precisa do ✕ fora do `tablist`, refactor de shell)
+- mobile: a11y só estática (sem aparelho conectado, EXT-4/EXT-6)
+
+### O padrão que esta rodada fecha
+
+**Sexta vez na série** em que uma afirmação antiga não tinha medição recente:
+
+| Rodada | A afirmação | O que faltava |
+|---|---|---|
+| r80 | "as telas estão prontas" | padding, i18n, foco |
+| r89 | "/backups auditada" | prova por viewport |
+| r90 | "`overall` cobre a saúde" | a inferência |
+| r93 | "docs atualizados" | 4 resíduos |
+| r94 | "T-13 feito: 10 telas" | 7 telas |
+| **r95** | **"web OK"** | **56 rodadas sem rodar** |
+
+> **Um gate que cita uma medição antiga não é um gate medido — é um gate herdado.** A diferença entre
+> os dois é exatamente a rodada em que alguém voltou a rodar o comando.
