@@ -5711,3 +5711,75 @@ regressão de uma regra que eu não estava olhando.
 
 > **Toda correção precisa ser medida na regra que ela melhora E nas que ela toca.** O número que sobe
 > não aparece no relatório de quem só olha o número que desce.
+
+---
+
+## G9 · ADENDO — os docs de estado estavam **33 rodadas atrasados**, e a consistência entre eles era zero
+
+**Rodada 93.** Fui verificar os arquivos que um humano leria **primeiro** — e eles descreviam outro
+produto.
+
+### O que estava lá
+
+| Doc | Dizia |
+|---|---|
+| `HANDOFF.txt` | **"G4 NOT_IMPLEMENTED — espera decisão do dono"** (r59) |
+| `FINAL-DELIVERY.txt` | **"NOT_IMPL vertical gas/agua"**, **"ZERO backup, ZERO restore"**, "Rodada 61" |
+| `MASTER-STATE.md` | linha `G4 NOT_IMPLEMENTED — só o placeholder` na tabela de gates |
+
+**A vertical foi construída na r78/r79. O backup na r75. O restore na r88.** O `HANDOFF` descrevia o
+estado de **33 rodadas antes** — e um humano que abrisse ali concluiria que o produto não tem vertical,
+não tem backup e espera decisão para duas coisas que já estão prontas.
+
+### O que foi reescrito
+
+**`HANDOFF.txt`** — do zero:
+- matriz de gates na r92, com o que **cada `PASS` não cobre**
+- **o que mudou da r59 até aqui**, item por item
+- **como rodar** (comando exato, incluindo `Remove-Item Env:ELECTRON_RUN_AS_NODE`)
+- **as 4 armadilhas** que custaram rodadas (env var, cópia do backend, bundle, `git stash`)
+- o que espera o dono, com o que cada item destrava
+- **o que não foi testado** — declarado, como parte da entrega
+
+**`MASTER-STATE.md`** — matriz de gates na r92 + "como ler este estado" (r91) apontando para o índice de
+retratações.
+
+**`FINAL-DELIVERY.txt`** — veredito por escopo reescrito: `READY` cobre agora segurança, diagnóstico,
+modos, foco visível, **backup/restore** e **vertical**; `PARCIAL` é a11y do desktop e empacotamento;
+`BLOCKED` são os 5 itens externos; **`NOT_READY` é só o exe assinado**.
+
+**`MASTER-CHECKPOINT.json`** — rodada, gates, suite, testes novos e checkout.
+
+### E a checagem que achou o que a minha própria reescrita deixou passar
+
+Depois de "atualizar os docs", rodei uma **consistência cruzada** — e ela acusou **3 resíduos que eu
+mesmo tinha deixado**:
+
+```
+FINAL-DELIVERY  "Rodada 61"                       -> ainda lá
+FINAL-DELIVERY  "ZERO backup, ZERO restore"       -> ainda lá
+MASTER-STATE    "G4 NOT_IMPLEMENTED" na tabela    -> ainda lá (eu ADICIONEI a matriz nova
+                                                     e deixei a tabela velha acima)
+```
+
+**O terceiro é o mais instrutivo**: eu **acrescentei** uma matriz na r92 sem **remover** a da r59.
+**Um documento com duas verdades é pior que um desatualizado** — o leitor escolhe a que vier primeiro.
+
+> **"Atualizei o doc" e "o doc está atualizado" são afirmações diferentes** — a quarta variação do
+> mesmo padrão da série (r57 bundle, r75 build, r81 vite, r90 cópia do backend, **r93 documento**).
+> O que resolve é sempre a mesma coisa: **ir ler o que ficou, não o que eu escrevi.**
+
+### A regra que fica
+
+**Um doc de estado tem de concordar consigo mesmo e com os vizinhos.** A checagem é barata:
+
+```powershell
+# a mesma rodada nos 4 arquivos de estado
+foreach ($f in 'HANDOFF.txt','MASTER-STATE.md','MASTER-CHECKPOINT.json','FINAL-DELIVERY.txt') { ... }
+
+# afirmações que já foram superadas
+Select-String -Pattern "NOT_IMPLEMENTED|ZERO backup|inexistente" -Path docs/b3po/continuity/*.md
+```
+
+**Rodei isso só depois de escrever, e é por isso que achei os 3 resíduos** — mas o certo é rodar
+**antes de declarar pronto**, do mesmo jeito que o `typecheck` roda antes do commit.

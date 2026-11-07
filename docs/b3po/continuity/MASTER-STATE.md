@@ -72,7 +72,7 @@ ead, **depois** do ambiente |
 | **G1** segurança/IPC/RBAC/tenant | **PARCIAL** — 40 testes de permissão, 837 decisões auditadas, 16/46 canais sem guarda |
 | **G2** runtime/modelos/inferência | **PARCIAL** — causa raiz do aviso provada (.env 0 de 29 chaves); inferência BLOCKED (EXT-1) |
 | **G3** domínio canônico | **PARCIAL** — B4-B8 medidos; estoque aceita SKU fora do catálogo (2 caminhos abertos) |
-| **G4** vertical gás/água E2E | **NOT_IMPLEMENTED** — só o placeholder em projetos/index.tsx:139; aguarda decisão |
+| **G4** vertical gás/água E2E | **PASS** — comodato + leitura de medidor (r78/r79); ver a matriz da r92 acima |
 | **G5** seis modos + revisão visual | **PARCIAL** — 27/27 rotas, 6 modos com captura, 14 telas olhadas |
 | **G6** engenharia/automação | **PARCIAL** — 99 plugins oficiais, 27 de mensageria, ZERO ativos |
 | **G7** plataformas | **PARCIAL** — desktop/web/android OK; iOS BLOCKED (EXT-4); a11y web 17/17 |

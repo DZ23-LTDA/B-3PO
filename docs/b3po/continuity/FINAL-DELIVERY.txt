@@ -3,7 +3,7 @@ B-3PO - ENTREGA FINAL (V3)
 
 DATA        06/11/2026
 BRANCH      b3po-brand
-Rodada 61 · 06/11/2026
+Rodada 92 · 06/11/2026
 MAIN        f4cf411f28 - espelho intacto, sem commit de produto
 RODADAS     92 de auditoria
 
@@ -24,7 +24,7 @@ Gates do V3
   G1 PARCIAL          seguranca/IPC/RBAC/tenant
   G2 PARCIAL          runtime/modelos/diagnostico
   G3 PARCIAL          dominio canonico (estoque: SKU orfao agora VISIVEL)
-  G4 NOT_IMPLEMENTED  vertical gas/agua
+  G4 PASS             vertical gas/agua (comodato + leitura de medidor)
   G5 PARCIAL          seis modos + revisao visual (9 telas olhadas)
   G6 PARCIAL          engenharia/automacao/integracoes
   G7 PARCIAL          desktop/web/android/iOS
@@ -82,7 +82,7 @@ ONDE OS DADOS MORAM (medido na r70)
   %APPDATA%/B-3PO/b3po/  -> 14 arquivos, 606 KB, todos schema_version 1
   auditoria.json = 594 KB (98%), 2913 de 5000 entradas (capado, com contador de descartadas)
   NAO fica no HERMES_HOME (stores usam app.getPath('userData'))
-  ZERO backup, ZERO restore -> T-10
+  backup: 19 stores, 5 versoes cada (r75) · restore: listar/validar/aplicar/reverter (r88)
 
 VEREDITO POR ESCOPO (nunca global) - ATUALIZADO NA R92
 ------------------------------------------------------
