@@ -45,6 +45,7 @@ fase: G7
 | **XSS** | **`TESTADO`** — 5 verdes | `tests/agent/lsp/test_reporter.py`: `test_format_diagnostic_escapes_html_in_message` e o caso de `code`/`source`; o renderer é React (escape estrutural) |
 | **CSRF** | **`DEFENDIDO`** — 15 verdes | `dashboard_auth/middleware.py`: `_CROSS_ORIGIN_WRITE_DETAIL` + `own_origin_cookie_writes` + `SameSite=lax` medido em `test_dashboard_auth_cookies.py`. O caso **e2e de WebSocket cross-origin** (`test_dashboard_auth.py`) **pula no Windows**: precisa de PTY POSIX |
 | **Performance** (LCP/INP/CLS) | `NOT_RUN` | não medido nesta sessão |
+| **E2E Playwright** | **EXISTE, NÃO COMPLETA AQUI** | **66 specs** em `e2e/` com configs próprias (`core/`, `update/`). Medido na r41: (1) sem `ELECTRON_RUN_AS_NODE` o app **sobe**; (2) o boot handshake **não completa** — timeout de 120 s esperando `provider.completions`; (3) `EPERM` na limpeza de temporário no Windows |
 | **Benchmark de tarefas** | `NOT_TESTED` | harness não existe — ver `BENCHMARKS.md` |
 | SBOM / dependency audit | **MEDIDO na r30** | `npm audit`: **24 vulnerabilidades, 0 críticas, 3 altas** (`follow-redirects`, `joi`, `undici` — DoS/redirect, nenhuma de execução). `pip-audit` **não está instalado** |
 | **Secrets scan** | **MEDIDO na r31: LIMPO** | `git grep` de 6 padrões (`sk-`, `ghp_`, `xox[baprs]-`, `AKIA`, `BEGIN PRIVATE KEY`, `AIza`) — **0 em código de produção**; todos os achados são fixtures de teste e exemplos de doc; **0 `.env` versionados** |
@@ -134,3 +135,26 @@ bypass the pre-flight `is_safe_url()`"*.
 
 **O que continua verdadeiro**: nao ha **allowlist** de destinos — o modelo e **blocklist** de endereco
 privado. Uma allowlist por conector seria feature nova, nao correcao de falha.
+
+## E2E Playwright — o que a r41 mediu
+
+**Existe e e grande**: 66 specs em `apps/desktop/e2e/`, com **tres configs** (`playwright.config.ts`,
+`e2e/core/playwright.config.ts`, `e2e/update/playwright.config.ts`). A config raiz **exclui** `core/**` e
+`update/**` de proposito; `core/` tem `retries: 0` e `workers: 1` por decisao escrita no proprio arquivo.
+
+### O que impede rodar nesta maquina
+
+| Causa | Medicao |
+|---|---|
+| **`ELECTRON_RUN_AS_NODE=1` no ambiente do DSH** | com ele, `electron.exe <app>` morre com `MODULE_NOT_FOUND`; **removido, o app sobe** |
+| boot handshake nao completa | `Timeout 120000ms exceeded while waiting on the predicate` em `provider.completions` |
+| `EPERM` na limpeza | `EPERM, Permission denied: ...\pw-*` — temporario do Windows |
+
+**A primeira e a causa da mensagem `Process failed to launch!`** que eu ia classificar como "suite
+quebrada". Era o ambiente.
+
+**As outras duas sao de runtime**, nao do teste: o app precisa de um provedor respondendo para o
+handshake fechar.
+
+**O que continua nao medido**: se os 66 specs passam num ambiente com o runtime completo. **Nao
+afirmo que passam.**
