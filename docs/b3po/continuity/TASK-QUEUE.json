@@ -1,5 +1,5 @@
 {
-  "round": 77,
+  "round": 78,
   "queue": [
     {
       "id": "T-01",
@@ -77,6 +77,13 @@
       "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore",
       "done_in": "r75: store-backup.ts + 19 stores; 5 versoes por arquivo; provado em runtime (5 backups apos 8 escritas)",
       "remaining": "restore nao existe - e deliberado (nao e efeito colateral de backup)"
+    },
+    {
+      "id": "T-11",
+      "what": "Leitura periodica de hidrometro/medidor (serie temporal de medicao) - o segundo modelo da vertical agua",
+      "owner": "dsh",
+      "status": "todo",
+      "note": "r78 entregou o comodato (vasilhame). O G4 fica PASS com escopo declarado: vasilhame PASS, medicao nao construida."
     }
   ],
   "data": "06/11/2026",

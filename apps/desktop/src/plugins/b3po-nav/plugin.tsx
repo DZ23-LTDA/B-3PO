@@ -111,6 +111,9 @@ const MODULOS: readonly ItemDeMenu[] = [
     // 3. COMERCIO - o que eu vendo, tenho, compro e recebo
     { codicon: 'package', label: 'Produtos', path: '/products' , grupo: 'Comércio' },
     { codicon: 'archive', label: 'Estoque', path: '/stock' , grupo: 'Comércio' },
+  // r78 (G4): o casco em comodato — a vertical de gas/agua. Icone `package` porque a pergunta e
+  // "quantos cascos sao meus", nao "quanto produto tenho" (esse e o Estoque).
+  { codicon: 'package', label: 'Vasilhames', path: '/gas', grupo: 'Comércio' },
     { codicon: 'cloud-download', label: 'Compras', path: '/compras' , grupo: 'Comércio' },
     { codicon: 'credit-card', label: 'Vendas', path: '/sales' , grupo: 'Comércio' },
     // r60: a entrega e a ultima etapa do vertical - a venda registra, a entrega leva.

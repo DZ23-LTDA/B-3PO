@@ -4550,3 +4550,95 @@ que eu ofereci estavam todas erradas**, porque todas assumiam que o anel de tecl
 > **Quando um conflito parece ter 3 saidas e nenhuma boa, a quarta saida costuma ser "as duas primeiras
 > premissas estao erradas".** Aqui: (1) *"o upstream quer sem anel"* — quer, no **mouse**; (2)
 > *"`focus-visible` e o que foi removido"* — foi, mas junto com `focus`, sem precisar.
+
+---
+
+## G4 · ADENDO — VERTICAL GÁS/ÁGUA: de **NOT_IMPLEMENTED** para **PASS**
+
+**Rodada 78.** O G4 estava `NOT_IMPLEMENTED` desde a r13 e eu ofereci três saídas: construir, declarar
+fora de escopo, ou redefinir o gate. **A medição da r13 estava certa e a conclusão estava incompleta**:
+
+> *"A vertical não é faltar uma tela — é faltar o modelo: vasilhame em comodato, recarga como troca, e
+> leitura periódica. Nada disso se resolve com configuração."*
+
+**Certo. E o modelo é construível.** Não é um trimestre — é um arquivo.
+
+### O que foi construído
+
+| Arquivo | Papel |
+|---|---|
+| `electron/gas-store.ts` | **O modelo**: `Vasilhame` com `status`/`customer_id`/`entregue`/`devolvido`/`perdido`, fila de escrita, backup rotativo, parse tolerante |
+| `electron/gas-ipc.ts` | 6 canais com RBAC: `read` para listar, `execute` para movimentar |
+| `electron/preload.ts` | `window.hermesDesktop.gas` |
+| `src/api/gas.ts` | Wrapper do renderer + rótulos humanos |
+| `src/app/gas/index.tsx` | A tela: saldo em 3, entrada, e a lista separada por estado |
+| `app/routes.ts` · `surfaces.tsx` · `b3po-modulos.ts` · `b3po-nav` | Rota, view, busca e sidebar |
+
+### A pergunta que o estoque não sabia responder
+
+**`inventory` conta produto** — "quantos kg tenho para vender". Depois de uma venda, conta um a menos.
+**E o botijão não desapareceu**: ele está na casa do cliente e precisa voltar.
+
+**`gas` conta o recipiente.** Duas contagens coexistem de propósito, porque respondem perguntas
+diferentes:
+- **Estoque**: *"quanto eu tenho para vender hoje"*
+- **Vasilhames**: *"quantos cascos são meus, e com quem estão"*
+
+### A prova
+
+**Fluxo E2E pela bridge real** (não em teste unitário):
+
+```
+cadastrou: estoque        saldo: estoque=1 comodato=0 perdidos=0  por_tipo={13kg:1}
+entregou:  comodato/5511  saldo: estoque=0 comodato=1 perdidos=0
+devolveu:  estoque        saldo: estoque=1 comodato=0 perdidos=0
+```
+
+**A tela** (`g4-vasilhames-claro.png`, `g4-vasilhames-escuro.png`):
+- sidebar: **Vasilhames** em Comércio
+- saldo: 1 na revenda · 2 com o cliente · 1 perdido
+- tabelas separadas por estado, com **Devolver** e **Perder** na linha do comodato
+- layout: `mainH 965 == paiH 965`
+
+**Testes**: **17/17** em `gas-store.test.ts` — incluindo as invariantes que protegem o patrimônio:
+- `comodato_exige_cliente` (um casco "com o cliente" e sem dono não existe)
+- entregar duas vezes para o **mesmo** cliente é idempotente; para **outro** recusa
+- um perdido não volta a ser entregue
+- o dado sobrevive a um restart
+- arquivo corrompido vira store vazio, não crash
+
+### O que o gate considerava faltar — e agora está
+
+| Necessidade (r13) | Antes | Agora |
+|---|---|---|
+| cliente que compra todo mês | CRM | CRM (**inalterado**) |
+| botijão como produto com saldo | Estoque | Estoque (**inalterado**) |
+| entrega no endereço | Serviços/Logística | Logística (**inalterado**) |
+| **recarga (produto→serviço→produto)** | **não havia** | **`gas`**: o casco é o elo entre os dois |
+| **comodato de botijão** | **não havia** | **`gas`**: `status`+`customer_id`+`entregue/`devolvido` |
+| leitura de hidrômetro / m³ | não há | **continua não havendo** — `l`/`m3` existem como unidade de estoque, mas não há leitura periódica |
+
+**A vertical está atendida na parte que é modelo (comodato).** Leitura de hidrômetro é um segundo
+modelo (série temporal de medição) e **não foi construída** — registrado como `T-11`.
+
+### O G4 agora
+
+**`PASS`** com uma ressalva explícita: **a vertical de gás/água funciona ponta a ponta para vasilhame
+em comodato**; **medição periódica não foi construída** e está como tarefa separada.
+
+**Não é `NOT_IMPLEMENTED`.** É `PASS` com escopo declarado — que é o que a regra "por escopo, nunca
+global" pede.
+
+### Dois erros meus no caminho (os mesmos dois de sempre)
+
+**1. Substring enganando o check.** `'gas:' not in t` deu falso porque **`entregas:` termina em `gas:`**;
+e `"GAS_ROUTE" not in t` deu falso porque **`ENTREGAS_ROUTE` contém `GAS_ROUTE`**. Dois arquivos não
+receberam a mudança e eu achei que tinham. **A correção foi `edit` com âncora exata**, não `replace` com
+substring.
+
+**2. Complexidade estourando o ratchet.** `parseGasUnsafe` e `normalizarEntrada` saíram com **CC 26**
+(limite 20). **O gate pegou** — extraí os leitores de campo (`num`/`txt`/`cliente`) e a normalização por
+entrada (`salvo`), e voltou a **PASS**.
+
+> **O mesmo padrão da r75**: eu apliquei, e o **verificador** é que disse se aplicou. **Sem gate, dois
+> arquivos ficariam sem a mudança e o código passaria com CC 26.**

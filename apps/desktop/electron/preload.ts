@@ -169,6 +169,16 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     remove: id => ipcRenderer.invoke('hermes:services:remove', id),
     save: payload => ipcRenderer.invoke('hermes:services:save', payload)
   },
+  // r78 (G4): vasilhame em comodato. O casco que sai com o cliente continua sendo ativo da revenda; sem
+  // este canal o renderer não tinha como perguntar quantos são nossos nem quais estão com quem.
+  gas: {
+    cadastrar: payload => ipcRenderer.invoke('hermes:gas:cadastrar', payload),
+    devolver: id => ipcRenderer.invoke('hermes:gas:devolver', id),
+    doCliente: customerId => ipcRenderer.invoke('hermes:gas:doCliente', customerId),
+    entregar: (id, customerId) => ipcRenderer.invoke('hermes:gas:entregar', id, customerId),
+    list: () => ipcRenderer.invoke('hermes:gas:list'),
+    perder: (id, motivo) => ipcRenderer.invoke('hermes:gas:perder', id, motivo)
+  },
   sales: {
     cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:sales:cancel', id, tenantId, reason),
     create: payload => ipcRenderer.invoke('hermes:sales:create', payload),

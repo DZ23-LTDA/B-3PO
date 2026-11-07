@@ -43,6 +43,8 @@ const CapabilitiesView = lazy(async () => ({ default: (await import('../capabili
 const CrmView = lazy(async () => ({ default: (await import('../crm')).CrmView }))
 const ProductsView = lazy(async () => ({ default: (await import('../products')).ProductsView }))
 const StockView = lazy(async () => ({ default: (await import('../stock')).StockView }))
+// r78 (G4): a vertical de gas/agua — o casco em comodato.
+const GasView = lazy(async () => ({ default: (await import('../gas')).GasView }))
 const SalesView = lazy(async () => ({ default: (await import('../sales')).SalesView }))
 const FinanceView = lazy(async () => ({ default: (await import('../finance')).FinanceView }))
 const AgendaView = lazy(async () => ({ default: (await import('../agenda')).AgendaView }))
@@ -224,6 +226,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       {/* Mesmo motivo do CRM: sem rota propria, `/products` abriria uma sessao chamada "products". */}
       <Route element={page(<ProductsView />)} path="products" />
       <Route element={page(<StockView />)} path="stock" />
+          <Route element={page(<GasView />)} path="gas" />
       <Route element={page(<SalesView />)} path="sales" />
       <Route element={page(<FinanceView />)} path="finance" />
       <Route element={page(<AgendaView />)} path="agenda" />

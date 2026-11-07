@@ -27,6 +27,8 @@ import { registerPrivacyIpc } from './privacy-ipc'
 import { DocumentsStore, documentsStorePath } from './documents-store'
 import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
+import { GasStore, gasStorePath } from './gas-store'
+import { registerGasIpc } from './gas-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { createDispatcher, dispatchQuietly } from './automation-dispatch'
@@ -160,6 +162,10 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   const services = new ServicesStore(servicesStorePath(userDataDir))
 
   registerServicesIpc(ipcMain, services, { actorOf: () => actorOf() })
+  // r78 (G4): a vertical de gas/agua. Faltava o MODELO, nao uma tela: o botijao que sai para o cliente
+  // continua sendo ativo da revenda, e o estoque nao sabia disso (contava um a menos e esquecia que a
+  // peca volta). `gas` conta o RECIPIENTE; `inventory` conta o PRODUTO - duas perguntas diferentes.
+  registerGasIpc(ipcMain, new GasStore(gasStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r152 do GOAL V2: o `afterSales` e criado AQUI, antes do `desk`, porque o `onRated` do atendimento o usa.
