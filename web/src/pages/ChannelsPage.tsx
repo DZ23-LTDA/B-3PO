@@ -1005,7 +1005,7 @@ export function WhatsAppOnboardingPanel({
         </div>
 
         {error && (
-          <div className="border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-text">
             {error}
           </div>
         )}
@@ -1401,7 +1401,7 @@ function TelegramOnboardingPanel({
       )}
 
       {error && (
-        <div className="mt-3 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="mt-3 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-text">
           {error}
         </div>
       )}

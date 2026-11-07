@@ -362,7 +362,7 @@ export default function FilesPage() {
       <Card className="min-w-0 max-w-full overflow-hidden">
         <CardContent className="overflow-x-auto p-0">
           {error && (
-            <div className="border-b border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="border-b border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive-text">
               {error}
             </div>
           )}

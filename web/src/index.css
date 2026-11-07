@@ -171,6 +171,14 @@ code { font-size: 0.875rem; }
   --color-accent: color-mix(in srgb, var(--midground-base) 10%, var(--background-base));
   --color-accent-foreground: var(--midground);
   --color-destructive: #fb2c36;
+  /* r97: o web é DARK-ONLY (#041c1c). `text-destructive` (#fb2c36) sobre as superfícies
+     reais mede 4,24:1 no toast e 4,39:1 na superfície — abaixo de 4,5:1. Texto de erro
+     usa este tom mais CLARO: 5,84 / 6,39 / 6,04:1 nos três fundos. Escurecer (a tentativa
+     anterior) piorava, porque o fundo é escuro. */
+  --color-destructive-text: #f87171;
+  /* r97: texto de erro usa um token PROPRIO. `text-destructive` sobre `bg-destructive/5-10`
+     e o mesmo token nos dois lados: #fb2c36 da 3,56:1 alí e nenhum valor conserta, porque
+     escurecer o token escurece a tinta junto. Este tom da 6,47:1 no branco (AA = 4,5:1). */
   --color-destructive-foreground: #ffffff;
   --color-success: #4ade80;
   --color-warning: #ffbd38;
@@ -253,3 +261,11 @@ html[dir="rtl"] {
   direction: rtl;
 }
 
+/* r97-toast-override — o `Toast` do `@nous-research/ui` fixa `text-destructive` (#fb2c36) sobre
+   `bg-destructive/15`. Medido: 4,24:1, abaixo do mínimo AA de 4,5:1 para texto pequeno.
+   O componente NÃO aceita `className` (só recebe `{ message, type }`), então a correção é por
+   seletor aqui — no nosso CSS, não num patch de `node_modules`. #f87171 dá 5,84:1 ali.
+   Se o upstream passar a aceitar `className`, este bloco sai. */
+[role='status'].text-destructive {
+  color: var(--color-destructive-text);
+}
