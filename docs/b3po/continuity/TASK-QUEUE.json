@@ -1,5 +1,5 @@
 {
-  "round": 80,
+  "round": 81,
   "queue": [
     {
       "id": "T-01",
@@ -93,6 +93,13 @@
       "status": "blocked",
       "blocked_by": "decisao comercial: a tarifa e politica da revenda, nao codigo",
       "measured_in": "r79 - consumo calculado e provado; nenhuma tarifa aplicada"
+    },
+    {
+      "id": "T-13",
+      "what": "5 telas aninham dois <main> (HTML invalido) - trocar o wrapper por <div> como foi feito em gas/medidores",
+      "owner": "dsh",
+      "status": "todo",
+      "note": "r81: visual identico, entao nao e urgencia; e correcao de estrutura. afeta stock, sales, crm, compras, finance."
     }
   ],
   "data": "06/11/2026",

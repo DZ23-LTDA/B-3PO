@@ -157,7 +157,7 @@ export function GasView() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         O casco que sai com o cliente continua sendo da revenda. Aqui ele é contado até voltar.
       </p>
@@ -259,7 +259,8 @@ export function GasView() {
                   {grupo.titulo} ({grupo.linhas.length})
                 </h2>
 
-                <table className="w-full border-collapse text-left text-[length:var(--conversation-caption-font-size)]">
+                <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-[length:var(--conversation-caption-font-size)]">
                   <thead>
                     <tr className="text-(--ui-text-tertiary)">
                       <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">Tipo</th>
@@ -316,6 +317,7 @@ export function GasView() {
                     ))}
                   </tbody>
                 </table>
+        </div>
               </section>
             ))}
         </div>

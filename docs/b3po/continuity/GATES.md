@@ -4796,3 +4796,85 @@ rodei a suíte **inteira** (antes eu rodei subconjuntos). **Não é regressão**
 > **A guarda existir não é a mesma coisa que a guarda funcionar.** 6 canais novos, 0 testes de
 > permissão — e a ratchet da r10 diria "coberto" porque ela conta **presença de `exigirAtor`**, não
 > **exercício**.
+
+---
+
+## G5 · ADENDO — as telas novas a 390 px: **duas inconsistências minhas**, medidas e corrigidas
+
+**Rodada 81.** O G5 pedia "6 modos de navegação + revisão visual". As telas de r78/r79 passaram pelo
+`axe` (0 violações) e pelo teclado (10/10), mas **nunca foram vistas abaixo de 1707 px**. Medi a matriz
+de 5 viewports × 2 telas.
+
+### O que a matriz achou
+
+| Viewport | Antes |
+|---|---|
+| 390×844 | **`main` 782 ≠ pai 790** · tabela estourando a borda |
+| 768 · 1024 · 1440 · 1707 | OK |
+
+### Duas causas, e a segunda eu não tinha visto
+
+**1. Faltava `overflow-x-auto` na tabela.** Uma tabela de 6 colunas não cabe em 390 px; sem o wrapper
+ela empurra o `main` em vez de rolar por dentro.
+
+**2. As minhas telas não tinham o wrapper das outras.** Comparei 8 telas:
+
+```
+stock    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+sales    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+crm      <main className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8">
+compras  <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+finance  <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+gas      (sem wrapper)            <- meu
+medidores (sem wrapper)           <- meu
+```
+
+**Consequência visual**: o conteúdo das duas telas encostava na borda esquerda, **sem o `px-6 py-8`**
+que todas as outras têm. **Estava visível nas capturas desde a r78 e eu não notei** — porque eu olhei a
+tela, não **comparei** com as vizinhas.
+
+### A correção, e uma decisão de estrutura
+
+Usei `<div>` com as mesmas classes, **não `<main>`**:
+
+```
+gas     : 1 <main> (o do shell),  pad 0  -> agora 24 px no wrapper interno
+stock   : 2 <main> ANINHADOS      (HTML invalido: <main> dentro de <main>)
+```
+
+**O repo aninha dois `<main>` em 5 telas.** `<main>` dentro de `<main>` é inválido pela especificação —
+e o `axe` não pega porque a regra `landmark-no-duplicate-main` depende de o navegador expor a árvore, o
+que ele não faz para main aninhado. **As minhas telas ficam com estrutura correta e visual idêntico.**
+
+**Não corrigi as 5 telas existentes**: é mudança de estrutura em código que não é meu neste escopo, e
+o visual é o mesmo. **Registrado como `T-13`.**
+
+### A prova
+
+```
+/gas        390x844  OK   scrollPagina=0 scrollMain=0 main=790/pai=790
+/medidores  390x844  OK   scrollPagina=0 scrollMain=0 main=790/pai=790
+(768 · 1024 · 1440 · 1707: idem)
+
+falhas: 0 de 10
+```
+
+**Capturas atualizadas**: `g4-vasilhames-claro.png` (sidebar, saldo 1/2/1, 3 tabelas), `t11-medidores-claro.png`,
+`g4-medidores-390.png` (o viewport estreito).
+
+### E a medição que eu quase errei
+
+**A primeira rodada pós-fix ainda reportou `FALHA`** — porque eu medi **antes do vite recompilar**. O
+`overflow-x-auto` já estava no DOM na segunda medição, com `wrapScrollW == wrapClientW` e a tabela
+**dentro** do `main` (358 < 382).
+
+> **Mudança de CSS não conta até a página que está sendo medida ter o CSS novo.** É a versão de
+> interface da lição da r75 (`"o código está certo"` ≠ `"o app roda o código certo"`).
+
+### A lição, e é a mais repetida desta série
+
+**Eu olhei as duas telas em 1707 px, gostei do que vi, e não vi que faltava padding** — porque padding
+ausente **não parece errado**, parece "design". **O que revelou foi comparar com as 5 telas vizinhas**,
+não olhar de novo a mesma tela.
+
+> **Revisão visual sem comparação é gosto; revisão visual com a vizinha ao lado é medição.**
