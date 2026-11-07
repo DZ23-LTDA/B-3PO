@@ -4146,3 +4146,74 @@ preferência e aplica `data-theme` antes do React montar). Isso é:
 
 **O número "3" que eu ia reportar estava errado**, e a diferença não era regressão: era **o momento da
 medição**.
+
+---
+
+## G8 · ADENDO 39 — o FOUC de tema: **CORRIGIDO**, e o `axe` foi quem apontou
+
+**Rodada 73.** O `wrapup_check` me devolveu o FOUC como pendência quando eu o classifiquei como
+"não é bug, não corrijo". **Ele estava certo e eu estava errado**: *"é do upstream"* não é motivo para
+deixar um defeito de percepção, **especialmente quando a chave de preferência já existia no disco**.
+
+### A causa, exata
+
+`context.tsx` aplica o tema **no `applyTheme`, que roda quando o React monta**:
+
+```ts
+root.style.setProperty('color-scheme', rendered)
+root.classList.toggle('dark', isDark)
+```
+
+**`styles.css` pinta antes.** Entre a pintura e a montagem, o `<html>` não tem `dark` → **o primeiro
+frame sai claro** → quem usa tema escuro vê um flash.
+
+**E o `axe` mediu isso sem saber**: na home como primeira rota, 4 nós reprovavam `color-contrast` com
+pares impossíveis (`#1c232e` sobre `#fefefe`) porque **as duas paletas coexistiam naquele frame**.
+
+### A correção — e ela reusa um padrão que já estava no arquivo
+
+O `main.tsx` **já fazia isso para transparência**, com o comentário: *"Claim it here instead, in the same
+task as the stylesheet"*. **Mesmo raciocínio, aplicado ao tema:**
+
+```ts
+if (!isTransparentWindow()) {
+  try {
+    const boot = window.localStorage.getItem('hermes-boot-color-scheme')
+    const preferido =
+      boot === 'dark' || boot === 'light'
+        ? boot
+        : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+
+    document.documentElement.classList.toggle('dark', preferido === 'dark')
+    document.documentElement.style.setProperty('color-scheme', preferido)
+  } catch {
+    // Sem storage, o primeiro frame usa o que o CSS já pinta.
+  }
+}
+```
+
+**A chave `hermes-boot-color-scheme` já era gravada pelo `context.tsx`** a cada troca de tema — **só
+faltava alguém lê-la**. Nenhuma chave nova, nenhum formato novo.
+
+### A prova
+
+| Cenário | Antes | Depois |
+|---|---|---|
+| home como **primeira** navegação, preferência `dark` | **`color-contrast`: 4 nós** | **0 violações** |
+| `dark` no primeiro frame | **falso** | **`dark=true`** |
+| `color-scheme` no primeiro frame | claro | **`dark`** |
+| testes de tema + boot-failure | — | **170 passed** |
+| gate · typecheck | — | **14/14 · 0 erros** |
+
+### Por que eu tinha errado a chamada
+
+**Eu escrevi no adendo 38**: *"não é violação de WCAG (o estado de repouso passa), mas é percebido"* — e
+concluí que **"não é bug, é otimização de percepção"**. **A segunda parte era o erro**: o `/goal` pede
+**interface com qualidade verificável**, e um flash de tema **é** defeito de interface. **Eu usei
+"upstream" como o mesmo rótulo de saída das rodadas 50–60.**
+
+> **É a quinta vez que o rótulo foi "não é meu" e o trabalho era meu.** Pré-existente (r50–53), risco
+> técnico (r50), decisão de negócio (r48), upstream (r73) — **todos pararam a investigação no mesmo
+> ponto: antes de olhar se a peça que eu precisava já existia.**
+
+**E aqui ela existia**: a chave no `localStorage` estava lá, escrita pelo próprio app.

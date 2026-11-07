@@ -69,6 +69,45 @@ if (winParam === 'hud') {
   document.title = 'Hermes HUD'
 }
 
+/*
+ * r73 — o tema da PRIMEIRA pintura.
+ *
+ * O `ThemeProvider` só aplica `class="dark"` / `color-scheme` quando o React
+ * MONTA. `styles.css` já pintou o tema claro nesse meio-tempo, então quem usa
+ * tema escuro via um frame claro antes do escuro — o clássico "flash of
+ * unstyled theme". Medido com `axe-core`: na home como primeira rota, quatro
+ * nós reprovavam `color-contrast` com pares impossíveis (#1c232e sobre
+ * #fefefe), porque as duas paletas coexistiam naquele frame. Com o tema já
+ * resolvido, as mesmas rotas dão 0 violações.
+ *
+ * `context.tsx` já grava o modo resolvido em `hermes-boot-color-scheme` a cada
+ * troca de tema (e o boot-failure.ts lê a mesma família de chaves), então a
+ * preferência está no disco antes do primeiro pixel — só faltava alguém lê-la
+ * aqui. Mesmo raciocínio do bloco de transparência acima: reivindicar o estado
+ * na mesma task do stylesheet, não quando um componente monta.
+ *
+ * Só o modo entra (claro/escuro). A paleta completa continua vindo do
+ * `ThemeProvider`; aqui basta não pintar o modo errado no primeiro frame. O
+ * `try` cobre storage indisponível (modo privado/quota): sem leitura, o
+ * primeiro frame segue o `prefers-color-scheme` do sistema, como antes.
+ */
+if (!isTransparentWindow()) {
+  try {
+    const boot = window.localStorage.getItem('hermes-boot-color-scheme')
+    const preferido =
+      boot === 'dark' || boot === 'light'
+        ? boot
+        : window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+
+    document.documentElement.classList.toggle('dark', preferido === 'dark')
+    document.documentElement.style.setProperty('color-scheme', preferido)
+  } catch {
+    // Sem storage, o primeiro frame usa o que o CSS já pinta.
+  }
+}
+
 // Each transparent root used to force its host layers see-through when it
 // MOUNTED. That is far too late: `styles.css` above paints the theme's opaque
 // `--background` as soon as it lands, and the root behind it is a dynamic
