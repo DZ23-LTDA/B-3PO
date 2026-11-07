@@ -336,6 +336,20 @@
       },
       "conclusao": "o backend FUNCIONA; o metodo de medicao em um processo so e que nao vale",
       "unlock": "scripts/run_tests.sh (bash, ausente) que isola um subprocesso por arquivo"
+    },
+    "r27_amostra": {
+      "metodo": "um arquivo por processo (como run_tests_parallel.py)",
+      "resultado": "263 passed · 2 failed",
+      "arquivos": {
+        "test_status": "90p/2f",
+        "test_api_server_runs": "64p",
+        "test_config": "93p",
+        "test_shared_platform_boilerplate": "13p",
+        "test_session_identity": "3p"
+      },
+      "falhas": "FileNotFoundError de subprocess procurando binario externo - zero de logica",
+      "suite_inteira": "1685 arquivos ~ 4.7 horas - fora do alcance de uma sessao",
+      "veredito": "PARTIAL por COBERTURA, nao por falha conhecida"
     }
   },
   "v4_plataformas": {

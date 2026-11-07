@@ -20,7 +20,7 @@ data: 2026-11-07
 | **Web** | **PARTIAL** | build exit 0 · 478/478 · `axe` 0 em 15 rotas — **mas é o dashboard do Hermes**, sem identidade B-3PO (`PLATFORM_MATRIX.md` §2) |
 | **Mobile (Android)** | **PARTIAL** | APK 44,2 MB constrói · 179 testes · **inspecionado em aparelho** (r18) · **sem os seis modos** |
 | **Mobile (iOS)** | **NOT_READY** | exige macOS (`EXT-4`) |
-| **Gateway Python** | **PARTIAL** | coleta **13.337** testes (1 erro: `fcntl`, Unix-only). Isolado por arquivo: `test_status` **90 passed** · `test_api_server_runs` **64 passed**. A pasta num processo só **não é medição válida** — vaza estado entre módulos |
+| **Gateway Python** | **PARTIAL** | coleta **13.337** testes (1 erro: `fcntl`, Unix-only). Isolado por arquivo (amostra de 5): **263 passed · 2 failed** (ambas `FileNotFoundError` de binário externo). A pasta num processo só **não é medição válida**. Suíte inteira: **1.685 arquivos ≈ 4,7 h** |
 | **Release assinado** | **NOT_READY** | sem certificado Authenticode (`EXT-3`) |
 
 ## O que está provado, item por item

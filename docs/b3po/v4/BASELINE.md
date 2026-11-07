@@ -221,6 +221,36 @@ roda **um subprocesso por arquivo**.
 **O que os números isolados mostram**: o backend **funciona**. 90 + 64 testes passam, e as 2 falhas
 de `test_status` são `FileNotFoundError` de um `subprocess` procurando binário externo (r9).
 
+### r27 — amostra com o método correto: **263 passed · 2 failed**
+
+Um arquivo por processo, como o runner oficial faz:
+
+| Arquivo | Resultado |
+|---|---|
+| `test_status.py` | **90 passed · 2 failed** |
+| `test_api_server_runs.py` | **64 passed** |
+| `test_config.py` | **93 passed** |
+| `test_shared_platform_boilerplate.py` | **13 passed** |
+| `test_session_identity.py` | **3 passed** |
+| **Total** | **263 passed · 2 failed** |
+
+**As 2 falhas são a mesma de sempre**: `FileNotFoundError` de um `subprocess` procurando binário
+externo que o meu env não tem (r9). **Zero falhas de lógica.**
+
+### A suíte inteira continua fora de alcance, agora com o número
+
+```
+tests/gateway/ = 1.685 arquivos de teste
+a ~10 s por arquivo (import incluso) = ~4,7 HORAS
+```
+
+**Não é desleixo — é aritmética.** A suíte completa exige `scripts/run_tests.sh` (bash, ausente) num
+ambiente que rode uma vez e termine, não numa sessão de agente.
+
+**O que a amostra sustenta**: o backend **funciona** nos cinco arquivos medidos, incluindo os dois
+maiores (`status` 92, `config` 93). O veredito `PARTIAL` do gateway é por **cobertura insuficiente**,
+não por falha conhecida.
+
 **O que continua NÃO medido, e por quê**:
 
 | Item | Estado | Motivo |
