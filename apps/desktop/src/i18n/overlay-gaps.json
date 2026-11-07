@@ -2433,6 +2433,7 @@
   "shell.minimizeWindow": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "shell.modelOptions.ultra": ["ar"],
   "shell.modelOptions.xhigh": ["ar"],
+  "shell.paneTools": ["ar","de","es","fr","ja","ru","zh","zh-hant"],
   "shell.statusbar.backend": ["de","es","fr"],
   "shell.statusbar.cacheHitRateTitle": ["ar","ja","zh-hant"],
   "shell.statusbar.compressions": ["de","es","fr"],

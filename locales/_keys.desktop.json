@@ -5087,6 +5087,7 @@
     "shell.modelOptions.useStandardSpeed",
     "shell.modelOptions.xhigh",
     "shell.paneControls",
+    "shell.paneTools",
     "shell.statusbar.agents",
     "shell.statusbar.backend",
     "shell.statusbar.backendLabel",

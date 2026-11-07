@@ -154,6 +154,8 @@ export function MedidoresView() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <h1 className="text-lg font-semibold text-foreground">Medidores</h1>
+
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         Água se cobra pela diferença entre duas leituras. O número do relógio sozinho não diz nada — o
         consumo é o que vira conta.

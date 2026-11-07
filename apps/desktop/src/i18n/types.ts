@@ -4063,6 +4063,8 @@ export interface Translations extends NoticeTranslations {
 
   shell: {
     windowControls: string
+    /** r83: os dois clusters do titlebar precisam de nomes distintos (`landmark-unique`). */
+    paneTools: string
   minimizeWindow: string
   closeWindow: string
     paneControls: string

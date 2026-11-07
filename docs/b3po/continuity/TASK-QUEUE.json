@@ -1,5 +1,5 @@
 {
-  "round": 82,
+  "round": 83,
   "queue": [
     {
       "id": "T-01",
@@ -101,6 +101,14 @@
       "status": "done",
       "note": "r81: visual identico, entao nao e urgencia; e correcao de estrutura. afeta stock, sales, crm, compras, finance.",
       "done_in": "r82: 10 telas com <main> -> <div>; + regionAmbient na pilha de confirmacoes; 16/16 rotas com 1 main e 0 landmark"
+    },
+    {
+      "id": "T-15",
+      "what": "Decidir o conflito `region` x r291: o axe quer todo conteudo em landmark; o upstream escolheu role=group para nao encher o atalho de landmarks",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "decisao de produto: 55 nos de axe vs. a navegacao por landmark do app",
+      "measured_in": "r83 - tree-group.tsx:272 documenta a escolha; trocar para region zeraria o axe e pioraria o salto de landmark"
     }
   ],
   "data": "06/11/2026",

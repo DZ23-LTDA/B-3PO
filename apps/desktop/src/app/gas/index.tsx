@@ -158,6 +158,8 @@ export function GasView() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8">
+      <h1 className="text-lg font-semibold text-foreground">Vasilhames</h1>
+
       <p className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">
         O casco que sai com o cliente continua sendo da revenda. Aqui ele é contado até voltar.
       </p>
@@ -268,7 +270,9 @@ export function GasView() {
                       <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">Situação</th>
                       <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">Cliente</th>
                       <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">Saiu</th>
-                      <th className="border-b border-(--ui-border) py-1 font-medium" />
+                      <th className="border-b border-(--ui-border) py-1 font-medium">
+                        <span className="sr-only">Ações</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>

@@ -4967,3 +4967,77 @@ pegam `<main>` duplicado e `aria-label` repetido.
 
 **`/` e `/settings` passavam "0 violações" desde a r31 com dois `<main>` cada.** O número estava certo
 para o que eu perguntei, e a pergunta estava incompleta.
+
+---
+
+## G8 · ADENDO 45 — o `axe` **sem filtro**: 84 nós, 7 corrigidos, e 55 que são decisão do produto
+
+**Rodada 83.** A r82 descobriu que eu media só `wcag2a/aa/21aa` desde a r31. Rodei **sem `runOnly`** —
+todas as regras, incluindo `best-practice`.
+
+### O que estava escondido
+
+| Regra | Nós | Rotas | Natureza |
+|---|---|---|---|
+| `region` | 75 | 14 | conteúdo fora de landmark |
+| **`empty-table-header`** | **5** | 3 | `<th>` vazio |
+| **`page-has-heading-one`** | **2** | 2 | página sem `<h1>` |
+| `nested-interactive` | 2 | 2 | o conflito de `tablist` da r50 |
+
+### O que era meu, e foi corrigido
+
+**`page-has-heading-one`** em `/gas` e `/medidores`: **as duas telas que eu construí não tinham `<h1>`**,
+enquanto todas as outras têm. Adicionei.
+
+**`empty-table-header`** em `/gas` (3), `/sales` (1) e `/finance` (1): a coluna de ações era
+`<th />` vazio. Um leitor de tela anuncia uma coluna sem nome. Passou a `<th><span className="sr-only">
+Ações</span></th>`.
+
+**`region`** nos 3 clusters do titlebar: tinham `aria-label` mas **nenhum role** — e `<div aria-label>`
+sem role é **um div com um nome que ninguém anuncia**. Ganharam `role="region"`. Os dois clusters
+chamados "App controls" eram **landmarks duplicados** (o mesmo defeito que a r82 corrigiu nas
+notificações); o do painel virou `paneTools` — "Ferramentas do painel".
+
+### O que NÃO corrigi, e a razão está escrita no código
+
+Os 55 nós restantes de `region` vêm de **um** componente, e a decisão é deliberada:
+
+```tsx
+// tree-group.tsx:272
+// r291 — `role="group"` porque `aria-label` num `div` sem role é PROIBIDO
+// (`aria-prohibited-attr`, medido pelo axe-core em /settings e /cron): o navegador descarta o
+// rótulo, então o menu da zona se anunciava sem nome para quem usa leitor de tela.
+//
+// `group` e não `region`: o corpo é um agrupamento de controles, não uma landmark navegável —
+// `region` entraria no atalho de landmarks e mudaria a lista de regiões do app inteiro.
+```
+
+**O upstream pesou as duas opções e escolheu `group`** para não encher o atalho de landmarks com uma
+região por zona de painel. **O `axe` discorda** — e o `axe` está certo *na regra dele*: a recomendação
+"todo conteúdo dentro de um landmark" pressupõe que landmarks são baratos.
+
+**Trocar para `region` faria o número do `axe` chegar a zero e deixaria a navegação por landmark pior**:
+o app passaria a ter uma região por zona de painel, e o atalho que deveria levar aos lugares principais
+viraria uma lista de contentores.
+
+> **Um número de `axe` em zero obtido contra uma decisão documentada não é uma melhoria — é uma
+> regressão que passou no teste.** Registrei como `T-15` para decisão, não como bug.
+
+### O placar
+
+```
+antes (r82, só wcag):  2 nós    nested-interactive
+r83 sem filtro:       84 nós    region 75 · th 5 · h1 2 · nested 2
+r83 corrigido:        57 nós    region 55 · nested 2
+```
+
+**7 dos 27 nós que eu podia corrigir eram meus** (2 `h1` + 5 `th`), **3 eram do titlebar**, e os 55
+restantes são **uma escolha**, devidamente documentada por quem a fez.
+
+### A lição
+
+**Rodar sem filtro revelou 84 problemas onde eu reportava 2.** Três eram **meus** — e um deles
+(`page-has-heading-one`) estava nas telas que eu tinha acabado de chamar de "limpas" na r80.
+
+> **Medir com filtro é escolher o que não quero ver.** A r82 aprendeu isso na estrutura; a r83, na
+> estatística: **o mesmo app, o mesmo dia, e o número passou de 2 para 84 só por tirar um argumento.**

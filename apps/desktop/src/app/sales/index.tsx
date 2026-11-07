@@ -326,7 +326,9 @@ export function SalesView() {
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.status}</th>
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.items}</th>
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.total}</th>
-                  <th className="border-b border-(--ui-border) py-1 font-medium" />
+                  <th className="border-b border-(--ui-border) py-1 font-medium">
+                      <span className="sr-only">Ações</span>
+                    </th>
                 </tr>
               </thead>
               <tbody>

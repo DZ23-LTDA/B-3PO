@@ -278,6 +278,7 @@ export const ptOverrides: TranslationOverrides = {
     minimizeWindow: 'Minimizar janela',
     closeWindow: 'Fechar janela',
     windowControls: 'Controles da janela',
+    paneTools: 'Ferramentas do painel',
     // r280: o painel do gateway renderiza `t.shell.gatewayMenu`. O runtime devolve a frase em
     // inglês quando não há provedor nenhum; esta tradução existe para que a pessoa leia o que
     // falta E onde resolver, no idioma do produto.

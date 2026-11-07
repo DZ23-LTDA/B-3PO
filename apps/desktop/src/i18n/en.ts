@@ -4617,6 +4617,7 @@ export const en: Translations = {
     closeWindow: 'Close window',
     paneControls: 'Pane controls',
     appControls: 'App controls',
+    paneTools: 'Pane tools',
     modelMenu: enModelMenu,
     modelOptions: {
       noOptions: 'No options for this model',

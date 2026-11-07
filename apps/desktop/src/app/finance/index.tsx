@@ -236,7 +236,9 @@ export function FinanceView() {
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">{copy.status}</th>
                   {/* r165: a origem — de onde o lancamento veio. */}
                   <th className="border-b border-(--ui-border) py-1 pr-2 font-medium">origem</th>
-                  <th className="border-b border-(--ui-border) py-1 font-medium" />
+                  <th className="border-b border-(--ui-border) py-1 font-medium">
+                      <span className="sr-only">Ações</span>
+                    </th>
                 </tr>
               </thead>
               <tbody>
