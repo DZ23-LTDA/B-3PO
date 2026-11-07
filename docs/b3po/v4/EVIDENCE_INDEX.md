@@ -21,6 +21,9 @@ data: 2026-11-07
 | `v4-home-r11.png` | roster expandido 4 → 11 | r11 |
 | `v4-web-r12.png` | **o web é o dashboard do Hermes** — logo "HERMES AGENT", Nous Research | r12 |
 | **`mobile-r18.png`** | **o app Android renderiza e o wordmark saiu de baixo do relógio** | **r18** |
+| `v4-home-r30.png` | a home completa: 6 modos, 5 ações, Sofia, 4+7 agentes, KPIs com a legenda do `—` | r30 |
+| `v4-sofia-r31.png` | plano real com dependência (`depende de t1`) e execuções (`exec-e2e-001`) | r31 |
+| `v4-projetos-r31.png` | formulário real + invariante "sem critério não conclui" + contador `0 em andamento` | r31 |
 | `t05-modos-r103.png` | identidade dos seis modos (ciclo anterior) | r103 |
 
 ## Comandos reproduzíveis

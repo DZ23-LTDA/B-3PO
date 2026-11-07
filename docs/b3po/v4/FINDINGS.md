@@ -426,6 +426,63 @@ e eu coloquei fora do objeto). **Revertido** em vez de forçar: um `es.ts` corro
 
 ---
 
+## A-10 · Sofia e Projetos conferidos no renderizado — **coerentes**, e o rename da r30 fica provado
+
+A lição da r30 foi que **screenshot pega contradição semântica** que `axe` e console não veem.
+Aplicado às duas telas que o goal nomeia.
+
+### `/sofia` — plano real, com dependências reais
+
+```
+Sofia
+Planos de coordenação: o que foi pedido, o que depende do quê, e o que já terminou.
+Administração · nenhum escopo liberado
+
+Validar a jornada de planos da Sofia (r282)                        2/2
+  ORGANIZACAO · CONCLUIDO · 1 NIVEIS
+  Primeira tarefa do plano     concluida · execução exec-e2e-001
+  Segunda tarefa, depende da primeira   concluida · depende de t1 · execução exec-e2e-002
+```
+
+**Dependência real** (`depende de t1`), **execuções reais** (`exec-e2e-001/002`), e um estado honesto
+(`nenhum escopo liberado`). Nada decorativo.
+
+### `/projetos` — formulário real e um invariante de produto
+
+```
+Projetos
+Para que existe, até quando e como saber que terminou.
+Um projeto sem critério de aceite não pode ser concluído.
+
+Novo projeto                                              0 em andamento
+  Nome · Para que existe · Como saber que terminou — uma linha por critério · Prazo
+  [Criar]  Sem critério, ele não poderá ser concluído depois.
+
+Projeto E2E r283 · a começar                              [Começar]
+  Validar o domínio de projetos · sem tarefas · entrega A · entrega B
+```
+
+**O invariante está escrito na tela**: sem critério de aceite, o projeto não conclui. E o contador
+diz **`0 em andamento`** enquanto o cartão diz **`a começar`** — **coerente**.
+
+### Isso prova que o rename da r30 estava certo
+
+A home dizia "Projetos em Andamento" com um projeto que **a própria tela de Projetos** não conta como
+"em andamento". O KPI e a `/projetos` concordavam; **só o título da seção na home divergia**.
+
+### O que **não** foi exercitado
+
+| Ação | Por quê |
+|---|---|
+| **[Começar]** no projeto | **muta dado real**. Não cliquei: seria alterar o projeto E2E sem pedido |
+| **[Criar]** projeto | idem — criaria registro novo |
+| **[Tentar de novo]** no erro | exigiria derrubar o backend |
+
+**Ação que muda estado não se testa por curiosidade.** O que está provado é que o formulário, o
+invariante e os dados são reais — não que o botão grava.
+
+---
+
 ## O que **não** é defeito, apesar de parecer
 
 | Aparência | Realidade |
