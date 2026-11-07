@@ -318,6 +318,15 @@
       "test_feishu_card_action_gateway_authz.py: ValueError nao diagnosticado"
     ],
     "amostra": "test_status: 1 failed (FileNotFoundError de subprocess), 40 passed, 3 skipped",
-    "suite_completa": "NOT_TESTED - 13337 testes > 30min"
+    "suite_completa": "NOT_TESTED - 13337 testes > 30min",
+    "achado_r10": {
+      "teste": "test_feishu_card_action_gateway_authz.py",
+      "sozinho": "17 testes coletam em 0,66s",
+      "import_direto": "sem erro",
+      "na_pasta": "ERROR ValueError — impede a coleta dos 13337",
+      "causa": "estado global vazando entre modulos de teste; o runner oficial isola por subprocesso e nao ve",
+      "impacto_no_produto": "nenhum",
+      "impacto_na_medicao": "exige --ignore para rodar a pasta direto"
+    }
   }
 }

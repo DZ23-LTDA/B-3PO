@@ -87,12 +87,40 @@ antes:  91 errors during collection · 12.576 testes coletados
 depois:  2 errors during collection · 13.337 testes coletados
 ```
 
-**Os 2 restantes, nomeados e explicados:**
+**Os 2 restantes — um diagnosticado até o fim, o outro virou um achado:**
 
 | Arquivo | Causa | Classificação |
 |---|---|---|
-| `test_boot_reserve_lock_probe.py` | `import fcntl` — **Unix-only** | limitação de plataforma, não de código |
-| `test_feishu_card_action_gateway_authz.py` | `ValueError: la…` | **não diagnosticado** — fica registrado como aberto |
+| `test_boot_reserve_lock_probe.py` | `import fcntl` — **Unix-only** | limitação de plataforma |
+| `test_feishu_card_action_gateway_authz.py` | **defeito de isolamento** (ver abaixo) | **achado de teste**, não de produto |
+
+### Achado r10: um teste que só falha quando os vizinhos são coletados
+
+O `test_feishu_card_action_gateway_authz.py` **passa** sozinho e **impede a coleta** da pasta:
+
+```
+$ pytest tests/gateway/test_feishu_card_action_gateway_authz.py --co
+  17 tests collected in 0,66s            ← SOZINHO: coleta
+
+$ python -c "import tests.gateway.test_feishu_card_action_gateway_authz"
+  (sem erro)                             ← IMPORT DIRETO: funciona
+
+$ pytest tests/gateway/ --co
+  ERROR tests/gateway/test_feishu_card_action_gateway_authz.py - ValueError
+  13337 tests collected, 1 error         ← NA PASTA: quebra
+```
+
+**Isso é dependência de estado entre módulos de teste.** Algum outro módulo, ao ser importado durante
+a coleta, deixa estado global (provavelmente política de event loop ou de locale) que faz este
+levantar `ValueError`. O `tests/AGENTS.md` do repo exige isolamento por subprocesso justamente por
+isso — `scripts/run_tests_parallel.py` isola cada arquivo, então **no CI oficial este defeito não
+aparece**.
+
+**Consequência prática**: rodar `pytest tests/gateway/` direto (sem o runner) **não funciona** —
+precisa de `--ignore` no arquivo. Foi o que fiz para medir.
+
+**Não corrigido nesta rodada**: encontrar a mutação global que vaza é uma investigação própria, e o
+defeito **não afeta o produto nem o CI** (o runner isola). Fica registrado.
 
 **A suíte agora RODA.** Amostra medida (`-k test_status`, com `-x`):
 
