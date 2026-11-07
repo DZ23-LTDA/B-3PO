@@ -4642,3 +4642,92 @@ entrada (`salvo`), e voltou a **PASS**.
 
 > **O mesmo padrão da r75**: eu apliquei, e o **verificador** é que disse se aplicou. **Sem gate, dois
 > arquivos ficariam sem a mudança e o código passaria com CC 26.**
+
+---
+
+## G4 · ADENDO 2 — T-11: **leitura periódica de medidor**, o segundo modelo da vertical água
+
+**Rodada 79.** O adendo anterior declarou: *"a vertical está atendida na parte que é modelo (comodato);
+leitura de hidrômetro é um segundo modelo e não foi construída — registrado como T-11."* **Foi
+construída.**
+
+### Por que são dois modelos, e não um
+
+**O comodato conta o RECIPIENTE.** O botijão sai, continua sendo da revenda, e volta. Isso é um
+**estado** (`estoque`/`comodato`/`perdido`).
+
+**A leitura conta o CONSUMO.** Água encanada não tem casco: tem um relógio que só cresce, e a conta é
+`leitura_atual − leitura_anterior`. Isso é uma **série**, não um campo.
+
+**Um botijão e um hidrômetro respondem perguntas diferentes**, e forçar os dois no mesmo modelo daria
+um `status` que não significa nada para um deles.
+
+### O que foi construído
+
+| Arquivo | Papel |
+|---|---|
+| `electron/meter-store.ts` | `Medidor` + `Leitura` + `consumoDoMedidor`; fila, backup, parse tolerante |
+| `electron/meter-ipc.ts` | 3 canais com RBAC (`read` listar, `execute` cadastrar/lançar) |
+| `electron/preload.ts` | `window.hermesDesktop.medidores` |
+| `src/api/medidores.ts` | Wrapper + `metrosCubicos`/`litros` + tradução de erros |
+| `src/app/medidores/index.tsx` | A tela: consumo primeiro, leitura como contexto |
+| rotas/nav/busca | `/medidores`, sidebar, busca |
+
+### A decisão que o teste me obrigou a mudar
+
+**A primeira versão da guarda comparava com "a leitura mais recente em `read_at`"** — e recusava uma
+leitura de campo **digitada depois de outra**. O teste `ordena por read_at` falhou, e o motivo era real:
+
+> **Um leitor anota o relógio no dia 1 e só sincroniza no fim do mês. Outro leu e lançou no dia 3.**
+> A leitura do dia 1 **é válida** — e a guarda a recusava porque 9.500 < 12.000.
+
+**A validação correta é por vizinhos NO TEMPO, não contra a última gravada:**
+
+```ts
+const antes  = [...serie].reverse().find(l => l.read_at <= readAt)
+const depois = serie.find(l => l.read_at > readAt)
+
+if (antes  && readingMilli < antes.reading_milli)  return 'leitura_regrediu'
+if (depois && readingMilli > depois.reading_milli) return 'leitura_ultrapassa_seguinte'
+```
+
+**Duas recusas, não uma**: a leitura não pode ser menor que a **anterior** nem maior que a
+**seguinte** — senão a série deixa de ser monotônica e o consumo de alguém sai negativo.
+
+### A prova
+
+**Runtime, pela bridge real:**
+
+```
+bridge medidores: ["cadastrar","leitura","list"]
+medidor: HID-PROVA
+l1 (10,000 m³)  -> consumo = null        (primeira: não há com o que comparar)
+l2 (12,100 m³)  -> consumo = 2100        (2,100 m³ = 2.100 L)
+l3 (9,000 m³)   -> leitura_regrediu      (recusada)
+```
+
+**A tela** (`t11-medidores-claro.png`): sidebar **Medidores** em Comércio; tabela com **Consumo
+2,100 m³ / 2.100 L**, Leitura atual 12,100 m³, Anterior 10,000 m³; `mainH 965 == paiH 965`.
+
+**Testes: 19/19** — incluindo os que protegem a conta:
+- primeira leitura não tem consumo (nem inventa zero)
+- segunda dá a diferença
+- regressão recusada
+- **leitura atrasada que cabe entre as vizinhas é ACEITA** (o caso do leitor que sincroniza depois)
+- **leitura atrasada que ultrapassa a seguinte é RECUSADA**
+- **medidor trocado: cada um tem a própria série** — trocar o relógio zera a comparação em vez de
+  produzir consumo negativo
+- ordenação por `read_at`, não por inserção
+- persiste entre instâncias
+
+### O fecho do G4
+
+| Parte da vertical | Modelo | Estado |
+|---|---|---|
+| **gás de botijão** | vasilhame em comodato | **`PASS`** (r78) |
+| **água encanada** | leitura periódica | **`PASS`** (r79) |
+| tarifa × consumo → cobrança | — | **não construído**: o consumo existe, a tarifa é decisão comercial |
+
+**O G4 agora tem os dois modelos, medidos e provados.** O que resta é **ligar consumo a preço**, que é
+política de cobrança (tarifa por faixa, mínimo, taxa de esgoto) — **decisão do dono**, registrada como
+`T-12`.

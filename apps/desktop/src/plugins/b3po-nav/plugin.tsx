@@ -114,6 +114,8 @@ const MODULOS: readonly ItemDeMenu[] = [
   // r78 (G4): o casco em comodato — a vertical de gas/agua. Icone `package` porque a pergunta e
   // "quantos cascos sao meus", nao "quanto produto tenho" (esse e o Estoque).
   { codicon: 'package', label: 'Vasilhames', path: '/gas', grupo: 'Comércio' },
+  // r79 (T-11): consumo medido — agua se cobra por diferenca de leitura.
+  { codicon: 'dashboard', label: 'Medidores', path: '/medidores', grupo: 'Comércio' },
     { codicon: 'cloud-download', label: 'Compras', path: '/compras' , grupo: 'Comércio' },
     { codicon: 'credit-card', label: 'Vendas', path: '/sales' , grupo: 'Comércio' },
     // r60: a entrega e a ultima etapa do vertical - a venda registra, a entrega leva.

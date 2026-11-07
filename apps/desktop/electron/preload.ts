@@ -179,6 +179,13 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     list: () => ipcRenderer.invoke('hermes:gas:list'),
     perder: (id, motivo) => ipcRenderer.invoke('hermes:gas:perder', id, motivo)
   },
+  // r79 (T-11): leitura periódica de medidor. Água não se cobra por casco — se cobra pela diferença
+  // entre duas leituras, e isso é uma série, não um campo.
+  medidores: {
+    cadastrar: payload => ipcRenderer.invoke('hermes:medidores:cadastrar', payload),
+    leitura: payload => ipcRenderer.invoke('hermes:medidores:leitura', payload),
+    list: () => ipcRenderer.invoke('hermes:medidores:list')
+  },
   sales: {
     cancel: (id, tenantId, reason) => ipcRenderer.invoke('hermes:sales:cancel', id, tenantId, reason),
     create: payload => ipcRenderer.invoke('hermes:sales:create', payload),

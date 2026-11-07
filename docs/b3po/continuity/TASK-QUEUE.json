@@ -1,5 +1,5 @@
 {
-  "round": 78,
+  "round": 79,
   "queue": [
     {
       "id": "T-01",
@@ -82,8 +82,17 @@
       "id": "T-11",
       "what": "Leitura periodica de hidrometro/medidor (serie temporal de medicao) - o segundo modelo da vertical agua",
       "owner": "dsh",
-      "status": "todo",
-      "note": "r78 entregou o comodato (vasilhame). O G4 fica PASS com escopo declarado: vasilhame PASS, medicao nao construida."
+      "status": "done",
+      "note": "r78 entregou o comodato (vasilhame). O G4 fica PASS com escopo declarado: vasilhame PASS, medicao nao construida.",
+      "done_in": "r79: meter-store + ipc + bridge + tela + 19 testes; validacao por vizinhos no tempo (aceita leitura atrasada)"
+    },
+    {
+      "id": "T-12",
+      "what": "Ligar consumo medido a cobranca (tarifa por faixa, minimo, esgoto)",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "decisao comercial: a tarifa e politica da revenda, nao codigo",
+      "measured_in": "r79 - consumo calculado e provado; nenhuma tarifa aplicada"
     }
   ],
   "data": "06/11/2026",

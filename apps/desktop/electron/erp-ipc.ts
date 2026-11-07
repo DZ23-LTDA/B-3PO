@@ -29,6 +29,8 @@ import { FinanceStore, financeStorePath } from './finance-store'
 import { registerFinanceIpc } from './finance-ipc'
 import { GasStore, gasStorePath } from './gas-store'
 import { registerGasIpc } from './gas-ipc'
+import { MeterStore, meterStorePath } from './meter-store'
+import { registerMeterIpc } from './meter-ipc'
 import { InventoryStore, inventoryStorePath } from './inventory-store'
 import { registerInventoryIpc } from './inventory-ipc'
 import { createDispatcher, dispatchQuietly } from './automation-dispatch'
@@ -166,6 +168,9 @@ export function mountErpIpc(ipcMain: IpcRegistrar, userDataDir: string): ErpMoun
   // continua sendo ativo da revenda, e o estoque nao sabia disso (contava um a menos e esquecia que a
   // peca volta). `gas` conta o RECIPIENTE; `inventory` conta o PRODUTO - duas perguntas diferentes.
   registerGasIpc(ipcMain, new GasStore(gasStorePath(userDataDir)), { actorOf: () => actorOf() })
+  // r79 (T-11): leitura periodica de medidor. O comodato (r78) conta o CASCO; agua encanada se cobra
+  // pela DIFERENCA entre duas leituras - um segundo modelo, com a serie por medidor.
+  registerMeterIpc(ipcMain, new MeterStore(meterStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r221: o RH exige ator. `actorOf` e o resolvedor desta montagem (ensureOwner + primaryOwner).
   registerHrIpc(ipcMain, new HrStore(hrStorePath(userDataDir)), { actorOf: () => actorOf() })
   // r152 do GOAL V2: o `afterSales` e criado AQUI, antes do `desk`, porque o `onRated` do atendimento o usa.

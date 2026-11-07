@@ -45,6 +45,8 @@ const ProductsView = lazy(async () => ({ default: (await import('../products')).
 const StockView = lazy(async () => ({ default: (await import('../stock')).StockView }))
 // r78 (G4): a vertical de gas/agua — o casco em comodato.
 const GasView = lazy(async () => ({ default: (await import('../gas')).GasView }))
+// r79 (T-11): leitura periodica de medidor.
+const MedidoresView = lazy(async () => ({ default: (await import('../medidores')).MedidoresView }))
 const SalesView = lazy(async () => ({ default: (await import('../sales')).SalesView }))
 const FinanceView = lazy(async () => ({ default: (await import('../finance')).FinanceView }))
 const AgendaView = lazy(async () => ({ default: (await import('../agenda')).AgendaView }))
@@ -227,6 +229,7 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       <Route element={page(<ProductsView />)} path="products" />
       <Route element={page(<StockView />)} path="stock" />
           <Route element={page(<GasView />)} path="gas" />
+          <Route element={page(<MedidoresView />)} path="medidores" />
       <Route element={page(<SalesView />)} path="sales" />
       <Route element={page(<FinanceView />)} path="finance" />
       <Route element={page(<AgendaView />)} path="agenda" />

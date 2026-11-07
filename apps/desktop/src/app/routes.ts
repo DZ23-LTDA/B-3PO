@@ -42,6 +42,9 @@ export const ENTREGAS_ROUTE = '/entregas'
 /** r78 (G4): vasilhame em comodato — a vertical de gás/água. */
 export const GAS_ROUTE = '/gas'
 
+/** r79 (T-11): leitura periodica de medidor — a segunda metade da vertical de agua. */
+export const MEDIDORES_ROUTE = '/medidores'
+
 /** r80 do GOAL V2: projetos - o plano persistente do §12. */
 export const PROJETOS_ROUTE = '/projetos'
 
@@ -80,6 +83,7 @@ export type AppView =
   | 'sofia'
   | 'entregas'
   | 'gas'
+  | 'medidores'
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
@@ -124,6 +128,7 @@ export type AppRouteId =
   | 'sofia'
   | 'entregas'
   | 'gas'
+  | 'medidores'
   | 'projetos'
   | 'trabalhos'
   | 'organizacao'
@@ -174,6 +179,7 @@ export const APP_ROUTES = [
   { id: 'sofia', path: SOFIA_ROUTE, view: 'sofia' },
   { id: 'entregas', path: ENTREGAS_ROUTE, view: 'entregas' },
   { id: 'gas', path: GAS_ROUTE, view: 'gas' },
+  { id: 'medidores', path: MEDIDORES_ROUTE, view: 'medidores' },
   { id: 'projetos', path: PROJETOS_ROUTE, view: 'projetos' },
   { id: 'trabalhos', path: TRABALHOS_ROUTE, view: 'trabalhos' },
   { id: 'organizacao', path: ORGANIZACAO_ROUTE, view: 'organizacao' },

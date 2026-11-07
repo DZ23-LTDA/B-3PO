@@ -43,6 +43,7 @@ export const MODULOS_BUSCAVEIS: readonly ModuloBuscavel[] = [
   { grupo: 'Comércio', label: 'Produtos', path: '/products', sinonimos: ['catálogo', 'item', 'sku', 'preço'] },
   { grupo: 'Comércio', label: 'Estoque', path: '/stock', sinonimos: ['inventário', 'saldo', 'mercadoria'] },
   { grupo: 'Comércio', label: 'Vasilhames', path: '/gas', sinonimos: ['botijão', 'casco', 'comodato', 'gás', 'água', 'revenda', 'recarga', 'glp'] },
+  { grupo: 'Comércio', label: 'Medidores', path: '/medidores', sinonimos: ['hidrômetro', 'leitura', 'consumo', 'm³', 'medidor', 'gasômetro'] },
   { grupo: 'Comércio', label: 'Compras', path: '/compras', sinonimos: ['fornecedor', 'cotação', 'pedido de compra'] },
   { grupo: 'Comércio', label: 'Vendas', path: '/sales', sinonimos: ['pedido', 'faturamento', 'cliente vende'] },
   { grupo: 'Comércio', label: 'Entregas', path: '/entregas', sinonimos: ['logística', 'caminhão', 'rota', 'comprovante'] },
