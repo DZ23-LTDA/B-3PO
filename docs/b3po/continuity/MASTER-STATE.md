@@ -76,7 +76,7 @@ ead, **depois** do ambiente |
 | **G5** seis modos + revisão visual | **PARCIAL** — 27/27 rotas, 6 modos com captura, 14 telas olhadas |
 | **G6** engenharia/automação | **PARCIAL** — 99 plugins oficiais, 27 de mensageria, ZERO ativos |
 | **G7** plataformas | **PARCIAL** — desktop/web/android OK; iOS BLOCKED (EXT-4); a11y web 17/17 |
-| **G8** regressão/segurança/perf/a11y | **PARCIAL** — perf -93%, a11y 27/30 + web 17/17, regressão BLOCKED (EXT-2), 13 falhas provadas no main |
+| **G8** regressão/segurança/perf/a11y | **PARCIAL** — perf -93%, web 17/17 LIVRE; desktop 57 nós, todos 1 regra best-practice (T-15). Nenhuma violação WCAG desde a r77 |ED (EXT-2), 13 falhas provadas no main |
 | **G9** pacotes+veredito | **PARCIAL** — builds desktop/web exit 0, rollback atômico provado, exe NotSigned |
 
 > **Nada aqui é READY global.** Cada linha tem seu próprio status, como o aditivo A exige.

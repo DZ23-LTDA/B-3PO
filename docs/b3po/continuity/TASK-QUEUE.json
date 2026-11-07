@@ -121,7 +121,7 @@
   },
   "invariantes": [
     "Recusa escrita ('nao vou fazer porque...') exige, na frase seguinte, o id do item na fila. Recusa sem item de fila e recusa que se perde.",
-    "Doc de estado tem de concordar consigo mesmo e com os vizinhos: mesma rodada nos 4 arquivos e nenhuma afirmacao ja superada (NOT_IMPLEMENTED, ZERO backup, inexistente)."
+    "Doc de estado tem de concordar com os vizinhos e nao conter afirmacao superada - VERIFICADO POR apps/desktop/electron/docs-continuity.test.ts (6 testes, provado por mutacao na r94)"
   ],
   "retratacoes": {
     "total_afirmacoes_nao_vou_fazer": 10,

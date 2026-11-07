@@ -5783,3 +5783,72 @@ Select-String -Pattern "NOT_IMPLEMENTED|ZERO backup|inexistente" -Path docs/b3po
 
 **Rodei isso só depois de escrever, e é por isso que achei os 3 resíduos** — mas o certo é rodar
 **antes de declarar pronto**, do mesmo jeito que o `typecheck` roda antes do commit.
+
+---
+
+## G9 · ADENDO 2 — a consistência dos docs virou **teste**, e o teste achou **4 resíduos** que a checagem manual não achou
+
+**Rodada 94.** O `wrapup_check` me devolveu isto:
+
+> *"não existe verificação automática de que eles concordam — a checagem é manual e eu a fiz só porque o
+> `wrapup_check` pede. Registrado como invariante no `TASK-QUEUE`, não como teste."*
+
+**Ele estava certo, e é a mesma estrutura da r73**: eu transformei um problema em uma frase
+("registrado como invariante") em vez de trabalho.
+
+### O teste
+
+`electron/docs-continuity.test.ts` — **6 casos**:
+
+| Caso | O que impede |
+|---|---|
+| os 5 docs na **mesma rodada** | alguém atualizar um só (era 92/92/92/92/**93**) |
+| nenhum **doc de estado** com afirmação superada | copy-paste de rodada antiga |
+| nenhum **hash de HEAD** cravado | apodrece no commit seguinte (a lição da r61) |
+| **todo item da fila tem dono e status válido** | item órfão |
+| **a fila não tem `todo` esquecido** | trabalho meu declarado e não feito |
+| o `GATES.md` mantém o **índice de retratações** | a proteção contra ler a recusa como estado |
+
+### O que ele achou na primeira execução — e que eu NÃO tinha achado à mão
+
+```
+MASTER-STATE     "a11y 27/30"                      <- count de 3 rodadas atras
+FINAL-DELIVERY   "axe 27/30 + web 17/17"           <- o mesmo, na matriz de gates
+FINAL-DELIVERY   "A11y ... axe 27/30"              <- segunda ocorrencia
+HANDOFF          "HEAD 0a578d9bfe"                 <- hash cravado E ja obsoleto
+```
+
+**Eu tinha rodado a checagem de consistência à mão na r93 e na r94** e declarei "0 afirmações
+superadas". **Estava errado nos quatro.** A diferença: à mão eu procurei as strings que **lembrei** de
+ter escrito; o teste procura as que **defini como proibidas** — e defini-las obriga a pensar em todas.
+
+### E o teste teve de aprender duas coisas para ser honesto
+
+**1. `GATES.md` não entra no banimento.** Ele é **cronológico**: lá `27/30` é o número **correto da rodada
+em que foi medido**. Banir história de um log seria **editar o passado para ele combinar com o presente**.
+O teste passou a cobrir só `HANDOFF`, `MASTER-STATE` e `FINAL-DELIVERY` — os que afirmam o presente.
+
+**2. `"antes: 3,78 e 2,14"` é citação, não afirmação.** Um doc que diz *"0 violações (antes: 3,78)"* está
+mostrando a melhoria. A função `ehCitacaoHistorica` passou a reconhecer `antes:`, `passou de`, `até a rNN`
+e `->`.
+
+> **Um teste de prosa precisa distinguir afirmação de citação.** Sem isso ele proíbe a única coisa que
+> faz um relatório de progresso valer: **o número velho ao lado do novo**.
+
+### E ele protege de verdade — provado por mutação
+
+```
+mutação: HANDOFF com "Rodada 77" no lugar de 94  -> DETECTOU
+restaurado                                        -> 6 passed
+```
+
+**Um teste que nunca falhou não é um teste** — é uma linha verde. Quebrei o doc de propósito para ver a
+linha ficar vermelha.
+
+### O invariante virou código
+
+O `TASK-QUEUE` tinha o invariante escrito:
+> *"Doc de estado tem de concordar consigo mesmo e com os vizinhos..."*
+
+Agora ele **roda em CI**, junto com os outros 18 testes de ratchet. **Invariante que só existe como texto
+é uma intenção; invariante que falha o build é uma regra.**

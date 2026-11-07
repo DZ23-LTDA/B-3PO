@@ -65,7 +65,7 @@ MATRIZ DE 13 QUALITY GATES (medida nas rodadas 66-70)
   Banco ........................ PASS    escrita atomica, JSON invalido->empty, rotacao 5000 (r68)
                                  N/A     migracao: nao existe v2
   UI ........................... PASS    5 viewports x 2 temas + 14 telas olhadas
-  A11y ......................... PASS    axe 27/30 + web 17/17; Tab/Esc PASS (r67)
+  A11y ......................... PASS    web 17/17 LIVRE; desktop 57 nos, todos 1 regra best-practice (T-15); Tab/Esc PASS (r67)
                                  FAIL    foco VISIVEL: outline:none global (decisao do upstream)
                                  -> T-09, aguardando decisao
   Performance .................. PASS    55 -> 4 long tasks (-93%), 5.7s -> 281ms
