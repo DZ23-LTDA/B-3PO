@@ -124,10 +124,10 @@ it.each(['connection', 'profile', 'local', 'api-route'] as const)(
         />
       )
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+      fireEvent.click(await screen.findByRole('button', { name: /^(Editar|Edit)\b/ }))
       const editor = EditorView.findFromDOM(rendered.container.querySelector('.cm-content')!)!
       act(() => editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: 'draft for origin' } }))
-      fireEvent.click(screen.getByRole('button', { name: /Save/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Salvar|Save/ }))
       await started
 
       await act(async () => {
@@ -146,7 +146,7 @@ it.each(['connection', 'profile', 'local', 'api-route'] as const)(
       expect(editor.state.doc.toString()).toBe('draft for origin')
 
       // Save is still refused when invoked after the switch.
-      fireEvent.click(screen.getByRole('button', { name: /Save/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Salvar|Save/ }))
       await screen.findByText(/original connection/)
       expect(writes).toEqual([])
 
@@ -155,7 +155,7 @@ it.each(['connection', 'profile', 'local', 'api-route'] as const)(
       if (destination === 'connection') {
         // An Overwrite decision belongs to the same owner as the conflict.
         await writeFile(originFile, 'external edit at origin')
-        fireEvent.click(screen.getByRole('button', { name: /Save/ }))
+        fireEvent.click(screen.getByRole('button', { name: /Salvar|Save/ }))
         await screen.findByRole('button', { name: /Overwrite/ })
         await act(async () => activate(other))
         fireEvent.click(screen.getByRole('button', { name: /Overwrite/ }))
@@ -165,10 +165,10 @@ it.each(['connection', 'profile', 'local', 'api-route'] as const)(
         await act(async () => activate(origin))
         fireEvent.click(screen.getByRole('button', { name: /Overwrite/ }))
       } else {
-        fireEvent.click(screen.getByRole('button', { name: /Save/ }))
+        fireEvent.click(screen.getByRole('button', { name: /Salvar|Save/ }))
       }
 
-      await screen.findByRole('button', { name: 'Edit' })
+      await screen.findByRole('button', { name: /^(Editar|Edit)\b/ })
       expect(writes).toEqual([originFile])
       expect(await readFile(originFile, 'utf8')).toBe('draft for origin')
       expect(await readFile(otherFile, 'utf8')).toBe('unrelated valuable contents')

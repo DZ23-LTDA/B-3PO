@@ -2812,3 +2812,71 @@ git checkout -- pane-tab.tsx narrow-overlays.test.tsx
 | tentativa de correção | **feita e revertida** com prova (0 testes quebrados, axe igual) |
 | caminho de teclado para fechar | **EXISTE** (`Delete` + `aria-keyshortcuts`) |
 | o que falta | **mover o ✕ para fora do tablist** — refatoração de shell |
+
+---
+
+## G8 · ADENDO 23 — os 4 testes "pré-existentes" eram **minha regressão**, e o culpado era eu de novo
+
+**Rodada 52.** Desde a r50 eu tratava `preview-file-save-scope` (4 falhas) como **pré-existente**.
+Fui investigar porque um teste verde é mais útil que um vermelho documentado.
+
+### A causa: duas mudanças MINHAS quebraram o mesmo teste
+
+```html
+<button aria-label="Edit (e)">  ...  Edit  </button>
+```
+
+**Dois bets diferentes, uma frase só:**
+
+1. **r16 (i18n pt-BR)** traduziu `Edit` → **`Editar`**
+2. **r22 (nome acessível)** deu ao botão `aria-label="Edit (e)"` — porque o `Tip` agora **injeta o atalho**
+   no nome acessível, e o nome acessível **substitui o texto visível** para o `Testing Library`
+
+**O teste procurava `{ name: 'Edit' }` exato.** Nenhum dos dois estados existe.
+
+### O que eu tentei ANTES de achar (e por que cada tentativa falhou)
+
+| Tentativa | Resultado |
+|---|---|
+| buscar `'Editar'` | falhou (o teste roda em **inglês**) |
+| regex `/^Editar$\|^Edit$/` | falhou (o nome real é **`Edit (e)`**, não `Edit`) |
+| **dump do DOM** | **achou**: `<button aria-label="Edit (e)">` |
+
+**A terceira leitura funcionou.** As duas primeiras foram **chutes plausíveis** — e eu gastei duas
+rodadas nelas porque **supus o texto em vez de olhar o DOM**.
+
+> **Eu já sabia que a primeira hipótese costuma estar errada** (lição da r41, repetida em 6 correções)
+> e ainda assim testei dois palpites antes de abrir o DOM.
+
+### A correção
+
+```ts
+{ name: /^(Editar|Edit)/ }   // aceita os dois idiomas e o sufixo do atalho
+```
+
+| Arquivo | Antes | Depois |
+|---|---|---|
+| `preview-file-save-scope.test.tsx` | **4 failed** | **4 passed** |
+| `browser-session-workspace-files.test.tsx` | **1 failed** | **1 passed** |
+
+### O que isto diz sobre o "baseline provado"
+
+**Na r50 eu provei que as 34 falhas existiam no `main`** — e concluí "pré-existentes". **A prova estava
+certa e a conclusão errada**: elas existiam no `main` porque **o `main` também tem o meu código
+commitado**? Não — o `main` é o **espelho upstream**, sem meus commits.
+
+**O que aconteceu**: eu rodei o baseline com `git stash`, e o `git stash` guardou **só as mudanças
+não commitadas**. **O i18n e o `Tip` do r22 já estavam commitados na branch** — então o baseline
+**nunca testou o código sem as minhas mudanças**.
+
+**Baseline com `git stash` não é baseline do `main`.** Eu precisaria de `git stash` **+ checkout do
+commit-base** — e não fiz.
+
+> **"Provado pré-existente" era uma conclusão que o experimento não sustentava.** O experimento certo
+> teria sido rodar no `origin/main`, não no HEAD com stash.
+
+### O que continua vermelho (e é realmente alheio)
+
+`plugin.mentions` (27) · `desktop-installation` · `ssh-connection` · `stage-native-deps` ·
+`channel-build-version` — **todos em `electron/` ou plugins, nenhum tocado por mim**. **Esses eu não
+verifiquei um a um** e portanto **não afirmo que são alheios** — afirmo que **não os investiguei**.
