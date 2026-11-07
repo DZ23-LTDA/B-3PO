@@ -5,6 +5,44 @@
 
 ---
 
+---
+
+## ÍNDICE DE RETRATAÇÕES — o que este documento disse que **não** faria, e depois fez
+
+**Por que este índice existe.** O `GATES.md` é cronológico: a rodada 13 afirma *"não vou corrigir X"* e
+a rodada 77 diz *"X corrigido"* — **4.000 linhas depois**. Quem lê a recusa primeiro a toma por estado
+atual. **Um documento que registra a decisão e não a revisão mente por omissão** — e mente *melhor* que
+um documento em branco, porque tem a autoridade de ter sido escrito.
+
+**Cada linha abaixo é uma afirmação minha que ficou obsoleta**, com onde ela foi desfeita:
+
+| Eu disse (rodada) | O que eu disse | Onde foi desfeito |
+|---|---|---|
+| r13 | *"Não corrigi o `overall: ok` que ignora inferência — pede decisão de produto"* | **r90** — `inference` no payload + `overall_from` explícito |
+| r46 | *"Não vou adicionar `[data-b3po-foco]` em todas as superfícies"* | **r77** — `:focus-visible` global, sem tocar em cada superfície |
+| r48 | *"o estoque sem catálogo é decisão de modelagem"* | **r48 mesmo** — listar o órfão **era** correção |
+| r50 | *"`nested-interactive` é risco técnico do upstream"* | **aberto** — ver T-09/T-15; é conflito real de `tablist` |
+| r67 | *"o foco visível é decisão de produto: manter, reverter ou marcar por superfície"* | **r77** — nenhuma das três; o `:focus-visible` já distinguia teclado de mouse |
+| r70 | *"não vou criar backup sem autorização — é decisão de arquitetura"* | **r75** — implementado (19 stores, 5 versões) |
+| r73 | *"o FOUC de tema não é bug, é otimização de percepção"* | **r73 mesmo** — corrigido no `main.tsx` |
+| r75 | *"restore não deve existir: não é efeito colateral de um backup"* | **r88** — implementado, com 3 garantias e 9 testes |
+| r78 | *"a vertical é um trimestre, não um arquivo"* | **r78 mesmo** — foi um arquivo (`gas-store.ts`) |
+| r81 | *"as telas estão prontas"* | **r81 mesmo** — faltava padding, e depois i18n (r84) e foco (r87) |
+
+**O padrão das 10 linhas**: em **9 delas** a afirmação virou obsoleta — e em todas as 9 a diferença foi
+a mesma: **troquei "isto exige decisão" por "isto não é meu"**. **Só a r50 continua de pé**, e ela é um
+conflito real de acessibilidade (`nested-interactive` × `tablist`), não uma recusa.
+
+**Contagem honesta**: 9 de 10 afirmações minhas de "não vou fazer" estavam erradas. Isso não é um
+histórico de decisões difíceis — é um viés: **eu trato fadiga como se fosse julgamento**, e escrevo a
+justificativa no mesmo tom com que escreveria uma análise.
+
+> **A regra que sai disto**: quando eu escrevo *"não vou fazer porque…"*, a frase seguinte tem de ser
+> **"…e por isso ele está no TASK-QUEUE como `<id>`"**. Recusa sem item de fila é recusa que se perde.
+
+
+---
+
 ## G1 · Segurança / IPC / RBAC / tenant — **PARCIAL**
 
 ### O que está construído (medido)
@@ -1471,6 +1509,8 @@ qualquer auditoria pode conferir.**
 diferença que apareceu aqui.
 
 ### O que eu NÃO vou fazer
+
+> **SUPERADO na r67 (teclado entregue) e r77 (foco visível).** Ver o Índice de Retratações no topo.
 
 **Não vou declarar o teclado "entregue".** O handler existe, o atributo existe, e o caminho que
 liga os dois **falha no app real** em pelo menos uma aba. Chamar isso de pronto seria o tipo de
@@ -3765,6 +3805,9 @@ O comentário no próprio `styles.css`:
 **Não é regressão minha** e **não é algo que eu possa consertar sem mudar o produto inteiro** — a regra
 é global, unlayered, e vem do upstream.
 
+> **SUPERADO na r77.** Não foi preciso tocar em cada superfície: `:focus-visible` global resolveu.
+> Ver o Índice de Retratações no topo.
+
 ### O que eu NÃO vou fazer
 
 **Não vou adicionar `[data-b3po-foco]` em todas as superfícies.** Isso:
@@ -3997,6 +4040,8 @@ cópia**.
 escrita sobrescreve o anterior. E o `parse` **descarta o inválido em vez de falhar**, então a perda pode
 passar **silenciosa**.
 
+> **SUPERADO na r75 (backup) e r88 (restore).** Ver o Índice de Retratações no topo.
+
 ### O que eu não vou fazer sem autorização
 
 **Criar um mecanismo de backup é mudança de produto**, não correção: define **quando** copiar,
@@ -4125,6 +4170,9 @@ o único frame onde as duas paletas coexistem.
 
 **Não é violação de WCAG** (o estado de repouso passa), **mas é percebido**: quem abre o app vê um
 "pisca" de cor.
+
+> **SUPERADO na mesma rodada (r73).** O fix usou a chave que o app **já gravava** — sem script inline.
+> Ver o Índice de Retratações no topo.
 
 ### O que eu NÃO vou fazer
 
