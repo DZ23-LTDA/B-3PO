@@ -89,6 +89,50 @@ ser atualizados com justificativa.
 **Não aplicada nesta rodada** porque muda contrato em 3 arquivos + 2 testes e merece slice próprio
 com teste de regressão.
 
+### Rodadas 2–5 — o que foi aplicado
+
+| Rodada | Entrega | Evidência |
+|---|---|---|
+| r2 | `uninstall:run` exige dono humano | `5e0af2a416` · 5 testes negativos |
+| r3 | `podeAdministrarInstalacao` centraliza a política; governa `uninstall:run` e `secret-storage:set` | `cc3e3b7399` · 6 testes de borda |
+| r4 | matriz de **efeito medido** nos 329 handlers; 4 classificações por nome retratadas | `619c72c7f3` |
+| r5 | **a execução nasce `pendente`, não `executando`** | `75ed9c1dfe` · 3 testes de contrato |
+
+### r5 — o status que mentia (A-13)
+
+Medido na r1: `iniciar()` gravava `status: 'executando'`, `finalizar()` só é chamado em **teste**, e
+**nenhum consumidor executa** a tarefa. A tela mostrava "executando" para trabalho que ninguém
+começou — e que nunca terminaria.
+
+A causa do `'executando'`: `bloqueioParaIniciar` contava esse status para concorrência. O status foi
+escolhido para a **contabilidade** fechar, e vazou para a tela como se fosse execução.
+
+**Correção**: separar as duas perguntas.
+
+| Pergunta | Resposta |
+|---|---|
+| "a vaga está ocupada?" | `pendente` **ou** `executando` (a reserva é imediata) |
+| "o relógio está correndo?" | só `executando` (uma `pendente` não tem executor) |
+
+3 testes novos provam a separação, incluindo o efeito colateral que a mudança **não** pode causar:
+se só `executando` contasse, N delegações passariam do limite.
+
+**O que continua verdade e não foi escondido**: a execução criada por Sofia **não é executada por
+ninguém**. O status agora é honesto — `pendente` e parado. **Ligar o executor é o G2 e não foi feito.**
+
+### Correções de premissa (retratações)
+
+| ID | Escrito na r1 | Medido |
+|---|---|---|
+| R-01 | `secret-storage` devolve segredos, CRITICAL | devolve `{on:boolean}`; HIGH, fechado na r3 |
+| R-03 | `ssh-config:resolve` injetável | `spawn` array + `--`; **SEGURO** |
+| R-04 | `connections:import` injeta conexão | importa último perfil; **LOW** |
+| R-06 | `updates:apply` supply chain | **ignora o payload**; MEDIUM |
+| R-07 | `prepared-submissions` confused deputy | diário de rascunho; **MEDIUM** |
+
+**Cinco de cinco classificações por nome estavam erradas.** O método mudou na r4: efeito medido no
+corpo, não nome.
+
 ### Próximo passo
 
 1. **R-01** `secret-storage` — autorização mínima no main, com teste negativo.

@@ -126,10 +126,17 @@ cria conexão, não carrega credencial, e passa por `isKnownConnection`.
 `main.ts` · sessão de OAuth e login de agente na nuvem sem autorização. Trocar a conta vinculada
 tem efeito sobre **quem** o produto representa. Severidade **HIGH**. `OPEN`.
 
-### R-06 · `updates:apply` sem autorização
+### R-06 · ~~`updates:apply` é supply chain~~ — **RETRATADO na r5: MEDIUM**
 
-`main.ts` · aplica atualização. Se o canal de update for comprometido a jusante, o renderer pode
-antecipar a aplicação. Severidade **HIGH**. `OPEN`.
+```ts
+ipcMain.handle('hermes:updates:apply', async (_event, payload) => applyUpdates()...)
+```
+
+**O `payload` do renderer é ignorado.** A atualização vem do canal configurado no *install stamp*, não
+de um endereço escolhido pelo chamador. Não há injeção de URL nem de artefato.
+
+**Residual**: um renderer comprometido **dispara** a atualização legítima fora de hora —
+**disrupção (MEDIUM)**, não RCE. A verificação de assinatura é do canal de update, não deste handler.
 
 ### R-07 · ~~`prepared-submissions` é confused deputy~~ — **RETRATADO na r4: MEDIUM**
 
