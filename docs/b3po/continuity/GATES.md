@@ -3232,3 +3232,56 @@ está"**.
 
 > **Uma busca negativa só vale depois de confirmar que o caminho existe.** `dist/product/assets` não
 > existe; `dist/assets` sim. **Testar o caminho é parte da busca.**
+
+---
+
+## CONTINUIDADE — adendo 29: os 13 documentos de continuidade estavam TODOS desatualizados
+
+**Rodada 60.** A r59 consertou o `HANDOFF.txt` (estava na r19). Fui ver os outros — e o diagnóstico
+é pior.
+
+### O que cada doc declarava como HEAD
+
+| Documento | HEAD declarado | Realidade |
+|---|---|---|
+| `MASTER-STATE.md` | `05034dd5c9` | 8 rodadas atrás |
+| `AUDIT-MATRIX.md` | `b3a5d03abc` | — |
+| `BLOCKERS.md` | `05034dd5c9` | 8 rodadas atrás |
+| **`TASK-QUEUE.json`** | **`9f662fc67c`** | **r19 — 41 rodadas atrás** |
+| `PLATFORM-MATRIX.txt` | `df2b186a78` | **antes do G7** |
+| `TEST-EVIDENCE.md` | `35c87cfb36` | — |
+| `PERFORMANCE.md` | `05034dd5c9` | **antes do fix da performance** |
+
+**Nenhum estava no HEAD atual.** O `FINAL-DELIVERY.txt` (r51) e o `HANDOFF.txt` (r59) eram os únicos
+corrigidos.
+
+### O que foi feito
+
+1. **Todos os HEADs** trocados pelo atual (`673cd7f5af`)
+2. **`TASK-QUEUE.json`**: `head` e `round` (agora 60)
+3. **Rótulos obsoletos removidos**: `"(antes do G7)"`, `"(antes do fix)"`, `"G9 PENDENTE"`,
+   `"docs 8/13"`, `"sem axe-core, nao medir"`
+4. **Verificação final**: busca por rótulo obsoleto nos 13 docs → **nenhum**
+
+### Por que isto importa mais que uma correção de código
+
+**Um documento de continuidade é um contrato de estado.** Quem chega depois — outro agente, o dono, eu
+mesmo em 10 rodadas — **lê o HEAD e conclui "a auditoria parou aqui"**.
+
+**O `TASK-QUEUE.json` dizia r19.** Um agente que confiasse nele **recomeçaria 41 rodadas de trabalho**.
+
+> **Documento desatualizado não é dívida cosmética: é a forma mais eficiente de fazer alguém
+> re-trabalhar.** E é invisível — o arquivo existe, tem data, tem HEAD, **parece** confiável.
+
+### O padrão das últimas 11 rodadas, completo
+
+| Rodada | O que parecia | O que era |
+|---|---|---|
+| r50 | "risco técnico" | conflito entre 2 regras WCAG |
+| r50–53 | "pré-existente" | **7 de 9 eram minhas** |
+| r57 | "o fix não está no bundle" | **caminho errado** |
+| r59 | `HANDOFF` na r19 | **40 rodadas de atraso** |
+| **r60** | **13 docs "de continuidade"** | **nenhum no HEAD atual** |
+
+**Cinco rótulos, cinco conclusões erradas, todas do mesmo tipo**: **o artefato tinha a forma de
+autoridade** (medição, baseline, build, HEAD, data) **e não tinha o conteúdo**.

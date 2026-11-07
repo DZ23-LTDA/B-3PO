@@ -1,7 +1,7 @@
 # B-3PO — TEST EVIDENCE
 
 **Regra**: cada linha tem o comando, a saída e a data. O que não foi exercitado fica `NOT_TESTED`.
-**Atualizado**: 06/11/2026 · **HEAD**: `35c87cfb36`
+**Atualizado**: 06/11/2026 · **HEAD**: `673cd7f5af`
 
 ---
 
@@ -14,7 +14,7 @@
 
 | # | Etapa | Chamada | Resultado medido |
 |---|---|---|---|
-| 1 | **Solicitação** | `purchases.solicitar({motivo, product_sku, quantity_milli})` | `sol-f1d7fd26-b694-4ed2-b3b0-5bd8051fc5d4` · status `aberta` |
+| 1 | **Solicitação** | `purchases.solicitar({motivo, product_sku, quantity_milli})` | `sol-673cd7f5af-b694-4ed2-b3b0-5bd8051fc5d4` · status `aberta` |
 | 2 | **Fornecedor** | `purchases.saveSupplier({name, cnpj})` | `sup_1793997200272_u3nue2` · `active: true` |
 | 3 | **Pedido** (da solicitação) | `purchases.atenderSolicitacao({id, supplier_id, unit_cost_cents})` | `po_1793997200286_p36vp8` · `status: rascunho` · `total_cents: 15000` |
 | 4 | **Aprovação** | `purchases.aprovar({pedido_id})` | `{"error":"compra_nao_precisa"}` — **correto**: sem limite definido, não há aprovação a pedir |
@@ -190,7 +190,7 @@ com reload de janela entre criar e conferir.
 | Domínio | bridge | criar | persistiu após reload |
 |---|---|---|---|
 | **Projetos** | `projetos` | `proj-1-1793997644973` · `rascunho` · 2 critérios | **1** — "Projeto E2E r283" |
-| **Trabalhos** | `trabalhos` | `tp-2c36bddb-…` · `pedido` · expira em 2026 | **1** — "Pesquisa E2E r283" |
+| **Trabalhos** | `trabalhos` | `tp-673cd7f5af-…` · `pedido` · expira em 2026 | **1** — "Pesquisa E2E r283" |
 | **Empresa** | `companies` | `emp_1793997645002_a4oz66` · `America/Sao_Paulo` | **1** — "Empresa E2E r283" |
 | **Automações** | `automations` | `rule_1793997705174_mwp0cc` · `venda.faturada` | **1** — "Regra E2E r283" |
 

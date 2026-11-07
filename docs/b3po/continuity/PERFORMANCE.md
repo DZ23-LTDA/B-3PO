@@ -1,6 +1,6 @@
 # B-3PO — PERFORMANCE (medida, não estimada)
 
-**Atualizado**: 06/11/2026 · **HEAD**: `05034dd5c9` (antes do fix)
+**Atualizado**: 06/11/2026 · **HEAD**: `673cd7f5af`
 
 ---
 

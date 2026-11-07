@@ -1,7 +1,7 @@
 # B-3PO — MASTER STATE (V3)
 
 **Atualizado**: 2026-11-06T18:54:45Z UTC
-**Branch**: `b3po-brand` · **HEAD**: `05034dd5c99ec09882c99d83e654ec2bcc955f58`
+**Branch**: `b3po-brand` · **HEAD**: `673cd7f5afd9bbdf781c053126582a7abc6ccf7a`
 **main**: `f4cf411f28` = `origin/main` — **espelho do upstream, intacto**
 **Remotes**: `origin` (DZ23-LTDA/B-3PO) · `upstream` (NousResearch/hermes-agent)
 
