@@ -2730,6 +2730,16 @@ export interface Translations extends NoticeTranslations {
     erroCarregar: string
     indisponivel: string
     verTodos: string
+    sofiaTitulo: string
+    sofiaVazio: string
+    carregando: string
+    tentarDeNovo: string
+    acoesRapidas: string
+    acaoAnalisar: string
+    acaoGerenciarEmpresa: string
+    acaoCriarSistema: string
+    acaoAutomatizar: string
+    acaoPlanejarProjeto: string
   }
   agents: {
     extendedTranscript: string

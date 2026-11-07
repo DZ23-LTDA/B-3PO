@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router'
 
 import { type AgenteDaLista, listarAgentesComEstado } from '@/api/agents'
 import { listarProjetosComEstado, type ProjetoRow, STATUS_LABEL } from '@/api/projetos'
+import { listarPlanosComEstado, type PlanoResumo } from '@/api/sofia'
 import { BrandHero, BRAND_HERO_ALT } from '@/components/chat/brand-hero'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
@@ -140,7 +141,7 @@ function LinhaDeAgente({ agente }: { agente: AgenteDaLista }) {
       >
         {inicialDoNome(agente.nome)}
       </span>
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 flex-1 text-left">
         <span className="block truncate text-[0.8125rem] text-(--ui-text-primary)">{agente.nome}</span>
         {agente.missao && (
           <span className="block truncate text-[0.75rem] text-(--ui-text-tertiary)">{agente.missao}</span>
@@ -164,6 +165,128 @@ function LinhaDeProjeto({ projeto, rotulo }: { projeto: ProjetoRow; rotulo: stri
 /** O rótulo do status do projeto, vindo do próprio módulo — sem tabela paralela. */
 const PROJETO_ROTULO = STATUS_LABEL
 
+
+/**
+ * As AÇÕES RÁPIDAS do topo (r2 do V4).
+ *
+ * O mockup mostra cinco chips. Cada um aqui **navega para uma rota que existe** e, quando faz
+ * sentido, **troca o modo de trabalho antes** — que é a mesma chamada `setAmbiente` da barra. Nenhum
+ * deles é decorativo: se a rota não existisse, o chip não existiria.
+ *
+ * "Criar sistema ou app" e "Gerenciar a empresa" trocam o modo porque a rota destino vive sob ele —
+ * levar para `/projetos` com o menu em `empresa` mostraria uma barra que não contém o destino.
+ */
+interface AcaoRapida {
+  ambiente?: Ambiente
+  icone: string
+  rota: string
+  titulo: string
+}
+
+function AcoesRapidas({ acoes }: { acoes: AcaoRapida[] }) {
+  const navegar = useNavigate()
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      {acoes.map(a => (
+        <button
+          className="flex cursor-pointer items-center gap-1.5 rounded-full border border-(--ui-border) px-3 py-1.5 text-[0.8125rem] text-(--ui-text-secondary) transition-colors hover:text-(--ui-text-primary)"
+          data-b3po-foco
+          key={a.rota + a.titulo}
+          onClick={() => {
+            if (a.ambiente) setAmbiente(a.ambiente)
+
+            void navegar(a.rota)
+          }}
+          type="button"
+        >
+          <span aria-hidden="true" className={`codicon codicon-${a.icone} text-[0.875rem]`} />
+          {a.titulo}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * A SOFIA na home, com os planos REAIS (r2 do V4).
+ *
+ * O que a Sofia é: a orquestradora. O que a home mostra dela: **os planos que existem**, com o status
+ * que o backend reporta. Nada é simulado.
+ *
+ * Medido em 07/11: a ponte devolve 1 plano (`concluido`). O `status()` da Sofia responde `{ error }`
+ * nesta versão — por isso a seção tem estado `erro` próprio e **não** mostra lista vazia quando a
+ * leitura falha.
+ */
+function SecaoSofia({
+  planos,
+  carregando,
+  aoTentarDeNovo,
+  aoVerTodos,
+  t
+}: {
+  aoTentarDeNovo: () => void
+  aoVerTodos: () => void
+  carregando: boolean
+  planos: Secao<PlanoResumo>
+  t: ReturnType<typeof useI18n>['t']
+}) {
+  const copy = t.homeB3po
+
+  return (
+    <section aria-label={copy.sofiaTitulo} className="flex flex-col gap-2 rounded-xl border border-(--ui-border) p-4">
+      <header className="flex items-center justify-between gap-2">
+        <h2 className="flex items-center gap-1.5 text-[0.9375rem] font-semibold text-(--ui-text-primary)">
+          <span aria-hidden="true" className="codicon codicon-sparkle text-[0.9375rem]" />
+          {copy.sofiaTitulo}
+        </h2>
+        <button
+          className="cursor-pointer text-[0.75rem] text-(--ui-text-tertiary) hover:text-(--ui-text-primary)"
+          onClick={aoVerTodos}
+          type="button"
+        >
+          {copy.verTodos}
+        </button>
+      </header>
+
+      {carregando && (
+        <p className="text-[0.8125rem] text-(--ui-text-tertiary)" role="status">
+          {copy.carregando}
+        </p>
+      )}
+
+      {!carregando && planos.estado === 'vazio' && <p className="text-[0.8125rem] text-(--ui-text-secondary)">{copy.sofiaVazio}</p>}
+
+      {!carregando && planos.estado === 'erro' && (
+        <div className="flex flex-col items-start gap-2" role="alert">
+          <p className="text-[0.8125rem] text-(--ui-text-secondary)">{copy.erroCarregar}</p>
+          {planos.erro && <p className="text-[0.75rem] text-(--ui-text-tertiary)">{planos.erro}</p>}
+          <Button onClick={aoTentarDeNovo} size="sm" variant="outline">
+            {copy.tentarDeNovo}
+          </Button>
+        </div>
+      )}
+
+      {!carregando && planos.estado === 'indisponivel' && (
+        <p className="text-[0.8125rem] text-(--ui-text-tertiary)">{copy.indisponivel}</p>
+      )}
+
+      {!carregando && planos.estado === 'ok' && (
+        <ul className="flex flex-col">
+          {planos.itens.slice(0, 3).map(p => (
+            <li className="flex items-center justify-between gap-2 py-1" key={p.plano_id}>
+              <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-(--ui-text-primary)">{p.objetivo}</span>
+              <span className="shrink-0 rounded-full bg-(--ui-bg-secondary) px-2 py-0.5 text-[0.6875rem] text-(--ui-text-tertiary)">
+                {p.status} · {p.qtdTarefas}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export function HomeB3po() {
   const ativo = useStore($ambiente)
   const { t } = useI18n()
@@ -172,6 +295,7 @@ export function HomeB3po() {
 
   const [agentes, setAgentes] = useState<Secao<AgenteDaLista>>(secaoCarregando)
   const [projetos, setProjetos] = useState<Secao<ProjetoRow>>(secaoCarregando)
+  const [planos, setPlanos] = useState<Secao<PlanoResumo>>(secaoCarregando)
   const [tentativa, setTentativa] = useState(0)
 
   const recarregar = useCallback(() => setTentativa(n => n + 1), [])
@@ -181,6 +305,7 @@ export function HomeB3po() {
 
     setAgentes(secaoCarregando())
     setProjetos(secaoCarregando())
+    setPlanos(secaoCarregando())
 
     void listarAgentesComEstado().then(r => {
       if (vivo) setAgentes(estadoDaSecao({ erro: r.erro, estado: r.estado, itens: r.agentes }))
@@ -190,16 +315,38 @@ export function HomeB3po() {
       if (vivo) setProjetos(estadoDaSecao({ erro: r.erro, estado: r.estado, itens: r.projetos }))
     })
 
+    void listarPlanosComEstado().then(r => {
+      if (vivo) setPlanos(estadoDaSecao({ erro: r.erro, estado: r.estado, itens: r.planos }))
+    })
+
     return () => {
       vivo = false
     }
   }, [tentativa])
 
+  /*
+   * As cinco ações do mockup, cada uma ligada a uma rota que EXISTE.
+   *
+   * `Criar sistema ou app` e `Gerenciar a empresa` trocam o modo antes de navegar: a rota destino
+   * vive sob aquele modo, e chegar em `/projetos` com a barra em `empresa` mostraria um menu que não
+   * contém o destino — uma navegação incoerente.
+   */
+  const acoes = useMemo<AcaoRapida[]>(
+    () => [
+      { ambiente: 'estrategico', icone: 'graph', rota: '/painel', titulo: copy.acaoAnalisar },
+      { ambiente: 'empresa', icone: 'organization', rota: '/empresa', titulo: copy.acaoGerenciarEmpresa },
+      { ambiente: 'engenharia', icone: 'code', rota: '/projetos', titulo: copy.acaoCriarSistema },
+      { ambiente: 'automacao', icone: 'git-branch', rota: '/automacoes', titulo: copy.acaoAutomatizar },
+      { icone: 'tasklist', rota: '/projetos', titulo: copy.acaoPlanejarProjeto }
+    ],
+    [copy]
+  )
+
   const kpis = useMemo(() => indicadores({ agentes, projetos }), [agentes, projetos])
   const recentes = useMemo(() => (projetos.estado === 'ok' ? projetosPorRecencia(projetos.itens, 3) : []), [projetos])
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 pb-10">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 pb-10 text-left">
       <div className="flex flex-col items-center pt-2 text-center">
         <BrandHero alt={BRAND_HERO_ALT} className="mb-2" />
 
@@ -208,6 +355,10 @@ export function HomeB3po() {
         </h1>
 
         <p className="mt-2 text-[0.9375rem] text-(--ui-text-secondary)">{copy.subtitulo}</p>
+
+        <div className="mt-5 w-full">
+          <AcoesRapidas acoes={acoes} />
+        </div>
       </div>
 
       <section aria-label={copy.modosTitulo} className="flex flex-col gap-3">
@@ -256,6 +407,14 @@ export function HomeB3po() {
           })}
         </div>
       </section>
+
+      <SecaoSofia
+        aoTentarDeNovo={recarregar}
+        aoVerTodos={() => void navegar('/sofia')}
+        carregando={planos.estado === 'carregando'}
+        planos={planos}
+        t={t}
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <SecaoComEstado

@@ -2994,7 +2994,17 @@ export const en: Translations = {
     kpiNota: '— significa que a leitura não aconteceu; 0 significa que a lista foi lida e estava vazia.',
     erroCarregar: 'Não foi possível carregar agora.',
     indisponivel: 'Indisponível nesta versão.',
-    verTodos: 'Ver todos'
+    verTodos: 'Ver todos',
+    sofiaTitulo: 'Sofia — orchestrated plans',
+    sofiaVazio: 'Sofia has no plan yet. Give her an objective to get started.',
+    carregando: 'Loading…',
+    tentarDeNovo: 'Try again',
+    acoesRapidas: 'Quick actions',
+    acaoAnalisar: 'Analisar dados',
+    acaoGerenciarEmpresa: 'Gerenciar a empresa',
+    acaoCriarSistema: 'Criar sistema ou app',
+    acaoAutomatizar: 'Automatizar processos',
+    acaoPlanejarProjeto: 'Planejar projeto',
   },
   agents: {
     extendedTranscript: 'Extended transcript',

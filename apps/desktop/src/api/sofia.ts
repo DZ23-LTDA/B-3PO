@@ -59,6 +59,65 @@ function bridge(): Bridge | null {
   return (globalThis as { hermesDesktop?: { sofia?: Bridge } }).hermesDesktop?.sofia ?? null
 }
 
+/**
+ * O resumo de um plano da Sofia, para a home (r2 do V4).
+ *
+ * **Só o que a lista devolve.** O plano completo (grafo, tarefas, aprovação) vive em `/sofia`; a home
+ * não recalcula topologia — `sofia.ts` já diz desde a r21 que recalcular aqui criaria uma segunda
+ * verdade que diverge no primeiro plano com ciclo.
+ */
+export interface PlanoResumo {
+  atualizado_em: number
+  escopo: string
+  objetivo: string
+  plano_id: string
+  qtdTarefas: number
+  status: string
+}
+
+export interface CargaDePlanos {
+  erro?: string
+  estado: 'erro' | 'indisponivel' | 'ok'
+  planos: PlanoResumo[]
+}
+
+/**
+ * A leitura **honesta** dos planos da Sofia.
+ *
+ * O `status()` da ponte responde `{ error }` nesta versão (medido em 07/11) — por isso existe
+ * `estado: 'erro'` separado de lista vazia. Mostrar *"nenhum plano"* quando a leitura falhou é o
+ * zero enganoso que a decisão de produto proíbe.
+ */
+export async function listarPlanosComEstado(): Promise<CargaDePlanos> {
+  if (!sofiaDisponivel()) return { estado: 'indisponivel', planos: [] }
+
+  try {
+    const r = await chamarSofia('planos', {})
+
+    if (!r) return { estado: 'indisponivel', planos: [] }
+
+    if ('error' in r) return { erro: String((r as { error: string }).error), estado: 'erro', planos: [] }
+
+    const brutos = (r as { planos?: unknown }).planos
+
+    if (!Array.isArray(brutos)) return { estado: 'ok', planos: [] }
+
+    return {
+      estado: 'ok',
+      planos: brutos.map((x: Record<string, unknown>) => ({
+        atualizado_em: Number(x.atualizado_em ?? 0),
+        escopo: String(x.escopo ?? ''),
+        objetivo: String(x.objetivo ?? ''),
+        plano_id: String(x.plano_id ?? ''),
+        qtdTarefas: Array.isArray(x.tarefas) ? x.tarefas.length : 0,
+        status: String(x.status ?? '')
+      }))
+    }
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : String(e), estado: 'erro', planos: [] }
+  }
+}
+
 export function sofiaDisponivel(): boolean {
   return bridge() !== null
 }
