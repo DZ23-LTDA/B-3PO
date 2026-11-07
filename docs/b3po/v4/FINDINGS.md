@@ -309,6 +309,24 @@ censo de console: 0 erros em 27 rotas
 axe: 0
 ```
 
+### E o teste de domínio pegou o segundo erro
+
+Ao registrar `tarifas`, `inventory-ipc.test.ts` falhou:
+
+```
+expect(canais.every(canal => /^hermes:(admin|aftersales|...):/.test(canal))).toBe(true)
+  → false
+```
+
+**O teste estava certo**: eu introduzi um domínio novo sem registrá-lo no allowlist. E na minha
+primeira tentativa de corrigir, **eu apaguei `scheduling`** da lista — o teste continuou vermelho e
+denunciou o segundo erro.
+
+**Os 31 registros do `mountErpIpc` têm 24 domínios distintos.** O allowlist precisa cobrir todos;
+faltava só `scheduling`, que a minha edição anterior tinha removido.
+
+Depois: **`inventory-ipc` 5/5 · `erp-mounting` 4/4**.
+
 ### A lição, e é a mais dura da sessão
 
 > **Teste com API mockada prova o componente, não o produto.** Uma importação sem chamada atravessa
