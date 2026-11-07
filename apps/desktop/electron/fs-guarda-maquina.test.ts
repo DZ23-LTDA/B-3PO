@@ -64,7 +64,7 @@ function montar(ator: Actor | null) {
 
     if (!h) throw new Error(canal + ' nao registrado')
 
-    return h
+    return (...args: unknown[]) => (h as (...a: unknown[]) => unknown)(...args)
   }
 }
 
