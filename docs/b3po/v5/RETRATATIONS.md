@@ -66,6 +66,52 @@ Uma foi do lado do produto.
 | 23 | r38 | `Measure-Object -Line` (15.529) vs ratchet (18.220+) | o teto real de `main.ts` — commitei 15 linhas acima |
 | 24 | r18 | rótulo copiado de handoff ("EPERM de symlink") | **2 de 3** eram `core.autocrlf=true` |
 
+## A retratação mais séria: um commit que **descreveu** o que eu quis fazer
+
+| # | Rodada | Eu escrevi | O que era |
+|---|---|---|---|
+| 25 | r32 → r51 | `fix(V5/r32): criar, cancelar **e devolver** venda exigem permissao` | **duas** guardas foram adicionadas, não três |
+
+**Prova mecânica** (r52):
+
+```
+git show 9a0cf7104e -- apps/desktop/electron/sales-ipc.ts
+  linhas adicionadas ........................ 25
+  "const permitido = await withPermission" .. 2   <-- duas guardas
+  canais alegados no commit ................. 3
+```
+
+O `devolver` só "aparece" no diff como **linha de contexto** — nenhuma guarda foi adicionada nele.
+
+**Por que passou por 19 rodadas:**
+
+- o gate passava;
+- o typecheck passava;
+- **o teste `sales-guarda.test.ts` documentava os três canais no cabeçalho e cobria dois** — um
+  comentário descrevendo o problema não é um teste do problema;
+- a mensagem de commit convenceu a não procurar.
+
+**O que encontrou**: a auditoria por canal (r51), feita canais depois.
+
+> **Um commit que descreve a intenção em vez do resultado é pior que um bug.** O bug alguém acha; o
+> commit falso ensina a não procurar.
+
+### A auditoria das mensagens de commit (r52)
+
+Verificado arquivo por arquivo, o arquivo que o commit diz ter mudado:
+
+| Commit | Afirmação | O arquivo contém? |
+|---|---|---|
+| `5e0af2a416` | uninstall exige dono | ✅ |
+| `cc3e3b7399` | política de instalação | ✅ |
+| `a37273e094` | escopos concedíveis | ✅ |
+| `10813d2fed` | identidade do aprovador | ✅ |
+| `352a5a0c92` | posse do terminal | ✅ |
+| `4b00249450` | sofia delegar | ✅ |
+| **`9a0cf7104e`** | **três canais de venda** | **❌ duas guardas** |
+
+**Sete auditadas, seis verdadeiras.** E a sétima era a que eu mais tinha citado como exemplo de qualidade.
+
 ## O padrão, em uma frase
 
 > **Toda vez que eu parei de confiar no meu resumo e fui medir, o número mudou — e mudou para melhor.**
