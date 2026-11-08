@@ -28,7 +28,12 @@ import { chamarSofia, type PlanoComGrafo } from '@/api/sofia'
 import { useNavigate } from 'react-router'
 
 import { $activeSessionId } from '@/store/session'
-import { $delegacaoPendente, limparDelegacaoPendente, registrarDelegacaoPendente } from '@/store/delegacao-pendente'
+import {
+  $delegacaoPendente,
+  limparDelegacaoPendente,
+  registrarDelegacaoPendente,
+  registrarExecucaoEmAndamento
+} from '@/store/delegacao-pendente'
 import { useStore } from '@nanostores/react'
 
 import { contextoDaSofia, descreverContexto } from '@/lib/contexto-da-sofia'
@@ -261,6 +266,9 @@ function VinculoDaDelegacao({ onAtualizar }: { onAtualizar: () => void }): React
    * nunca automatico. O envio passa pelo `onSubmit` do composer (ver `use-middleware-submit.ts`).
    */
   const executar = () => {
+    // A sessao que vai executar ainda nao existe. Guardamos a atual para so' vincular quando ela MUDAR
+    // (r3 da V6) — senao o vinculo cairia na conversa em que a pessoa ja' estava.
+    registrarExecucaoEmAndamento({ execucao_id: pendente.execucao_id, sessaoAnterior: sessaoAtiva })
     registrarDelegacaoPendente({ ...pendente, executar: true })
     navegar('/')
   }

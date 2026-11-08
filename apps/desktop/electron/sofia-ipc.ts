@@ -21,7 +21,7 @@ import { exigirAtor } from './permission-guard'
 import type { Actor } from './rbac'
 import { serverTenant } from './server-tenant'
 import { diagnosticarGrafo, profundidadeDoPlano, tarefasProntas } from './sofia-grafo'
-import { delegarTarefa } from './sofia-ponte'
+import { delegarTarefa, statusDerivadoDaExecucao } from './sofia-ponte'
 import type { ExecucaoStore } from './agent-execution-store'
 import type { SofiaStore } from './sofia-store'
 
@@ -270,7 +270,49 @@ export function registerSofiaIpc(ipcMain: IpcRegistrar, deps: SofiaIpcDeps): voi
           if (!existe) return { error: 'sessao_inexistente' }
         }
 
-        return deps.execucoes.vincularSessao(execucaoId, sessionId)
+        const vinculo = deps.execucoes.vincularSessao(execucaoId, sessionId)
+
+        if (vinculo.error) {
+          return vinculo
+        }
+
+        /*
+         * r3 da V6 — a TAREFA tambem precisa saber que comecou.
+         *
+         * `vincularSessao` move a execucao de `pendente` para `executando`, mas o plano continuava
+         * mostrando a tarefa como `pendente` para sempre: o painel de Sofia mentia sobre o estado do
+         * proprio trabalho. `statusDerivadoDaExecucao` (sofia-ponte.ts) existe exatamente para esta
+         * conta e **nao tinha chamador nenhum** — o mesmo padrao do `retries: 2` contra
+         * `tentativas: 0` (V5 r40).
+         *
+         * A escrita e' best-effort: o vinculo ja' aconteceu e desfaze-lo por causa do rotulo seria
+         * pior. Falha aqui deixa a tarefa desatualizada, nao a execucao errada.
+         */
+        const execucao = deps.execucoes.listar().find(e => e.execution_id === execucaoId)
+        const tarefaId = execucao?.task_id ?? ''
+        // `statusDerivadoDaExecucao` so' precisa do store de execucoes para esta conta; o segundo campo
+        // da assinatura (`gravarExecucao`) e' usado por `delegarTarefa`, nao pelo calculo.
+        const derivado = statusDerivadoDaExecucao(
+          { execucoes: deps.execucoes, gravarExecucao: async () => undefined },
+          execucaoId
+        )
+
+        if (tarefaId && derivado) {
+          const planos = await Promise.resolve(
+            deps.store.listar?.({ tenant_id: serverTenant(undefined) })
+          ).catch(() => null)
+          const plano = planos?.find(p => p.tarefas.some(x => x.tarefa_id === tarefaId))
+
+          if (plano) {
+            // `Promise.resolve` porque `atualizarTarefa` pode ser sincrono num duplo de teste e
+            // `.catch` sobre `undefined` derrubaria o vinculo inteiro por um rotulo.
+            await Promise.resolve(
+              deps.store.atualizarTarefa(plano.plano_id, tarefaId, { status: derivado })
+            ).catch(() => undefined)
+          }
+        }
+
+        return vinculo
       })
   )
 }

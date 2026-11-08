@@ -24,11 +24,15 @@
 import { useStore } from '@nanostores/react'
 import { useEffect } from 'react'
 
+import { chamarSofia } from '@/api/sofia'
 import {
+  $delegacaoEmExecucao,
   $delegacaoPendente,
   limparDelegacaoPendente,
+  limparExecucaoEmAndamento,
   pedirEnvioDaDelegacao
 } from '@/store/delegacao-pendente'
+import { $activeSessionId } from '@/store/session'
 
 export function useDelegacaoPendenteNoComposer(
   loadIntoComposer: (text: string, attachments: never[]) => void
@@ -55,4 +59,30 @@ export function useDelegacaoPendenteNoComposer(
 
     limparDelegacaoPendente()
   }, [delegacaoPendente, loadIntoComposer])
+
+  /*
+   * r3 da V6 — fechar o ciclo: vincular a execucao a sessao que nasceu.
+   *
+   * A sessao so' existe **depois** do envio, e o id chega de forma assincrona. Este efeito espera
+   * `$activeSessionId` virar um valor **diferente** do que existia no clique: assim um trabalho
+   * delegado nunca e' vinculado a uma conversa que a pessoa ja' tinha aberta.
+   *
+   * Falha em silencio de proposito: o vinculo e' conveniencia de estado, e um erro dele nao deve
+   * derrubar a conversa que acabou de comecar. O estado continua `pendente` e a pessoa pode vincular
+   * pela tela de Sofia.
+   */
+  const emAndamento = useStore($delegacaoEmExecucao)
+  const sessaoAtiva = useStore($activeSessionId)
+
+  useEffect(() => {
+    if (!emAndamento || !sessaoAtiva || sessaoAtiva === emAndamento.sessaoAnterior) {
+      return
+    }
+
+    limparExecucaoEmAndamento()
+    void chamarSofia('execucaoVinculada', {
+      execucao_id: emAndamento.execucao_id,
+      session_id: sessaoAtiva
+    }).catch(() => undefined)
+  }, [emAndamento, sessaoAtiva])
 }

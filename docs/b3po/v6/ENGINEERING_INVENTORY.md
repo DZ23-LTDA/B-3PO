@@ -40,6 +40,34 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 **Nenhuma capacidade é declarada IMPLEMENTED sem o caminho completo** — ler arquivo existe (#3), mas isso
 não é "trabalhar num projeto" (#1) nem "entregar código" (#13).
 
+## D1 — r3: o vinculo automatico e o status da tarefa
+
+**O ciclo fecha**: na r3 a execucao passou de `pendente` para **`executando`** com `session_id` gravado,
+sem ninguem clicar em "Vincular":
+
+```
+2. antes:  exec-plano-...-v3a · tarefa "pendente"
+3. depois: #/local-8d4fbeef...  · execucaoStatus "executando" · temSessionId: true
+```
+
+**O vínculo so' acontece na sessao NOVA**: o clique guarda a sessao de entao, e o efeito so' vincula
+quando `$activeSessionId` muda para outro valor. Sem essa guarda, um trabalho delegado seria vinculado a
+uma conversa que a pessoa ja' tinha aberta.
+
+### E achei um mecanismo morto no caminho
+
+`statusDerivadoDaExecucao` (sofia-ponte.ts:191) existe para converter status de **execucao** em status de
+**tarefa**, e **nao tinha chamador nenhum**. Consequencia: a execucao virava `executando` e o painel de
+Sofia continuava mostrando a tarefa como **`pendente` para sempre** — a tela mentia sobre o proprio
+trabalho. E' o mesmo padrao do `retries: 2` contra `tentativas: 0` (V5 r40).
+
+**Corrigido** no canal `hermes:sofia:execucao:vinculada`: depois do vinculo, o status derivado e' gravado
+na tarefa. Escrita best-effort — o vinculo ja' aconteceu, e desfaze-lo por causa de um rotulo seria pior.
+
+**ATENCAO — nao verificado ao vivo ainda**: a mudanca e' no **processo principal** (`electron/sofia-ipc.ts`),
+e o Vite so' recarrega o renderer. A instancia em execucao tem o `main` anterior. Typecheck, gate (17) e
+128 testes de Sofia passam; **a confirmacao no app exige reiniciar o Electron**.
+
 ## D1 entregue (r2): o pedido delegado passa a ser **executado**
 
 Antes: delegar → a execução ficava `pendente` → o pedido chegava ao composer e **parava ali**.

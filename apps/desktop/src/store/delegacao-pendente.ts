@@ -53,6 +53,28 @@ export const $delegacaoPendente = atom<DelegacaoPendente | null>(null)
  */
 export const $delegacaoParaEnviar = atom<string | null>(null)
 
+/**
+ * A execucao que esta' rodando e ainda nao foi vinculada (r3 da V6).
+ *
+ * `sessaoAnterior` existe para NAO vincular na sessao errada: quem dispara a execucao pode ja' estar
+ * numa conversa, e essa conversa nao e' a que vai executar o trabalho. O vinculo so' acontece quando
+ * `$activeSessionId` muda para um valor **diferente** do que havia no clique.
+ */
+export interface ExecucaoEmAndamento {
+  execucao_id: string
+  sessaoAnterior: null | string
+}
+
+export const $delegacaoEmExecucao = atom<ExecucaoEmAndamento | null>(null)
+
+export function registrarExecucaoEmAndamento(execucao: ExecucaoEmAndamento): void {
+  $delegacaoEmExecucao.set(execucao)
+}
+
+export function limparExecucaoEmAndamento(): void {
+  $delegacaoEmExecucao.set(null)
+}
+
 export function pedirEnvioDaDelegacao(texto: string): void {
   $delegacaoParaEnviar.set(texto)
 }
