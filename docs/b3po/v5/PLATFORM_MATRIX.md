@@ -73,7 +73,51 @@ timeout.
 | `/artifacts` | 1 | `page-has-heading-one` |
 | `/capabilities` | 1 | `page-has-heading-one` |
 
-### 🔴 O censo NAO e' reprodutivel (r58) — os numeros sao indicativos
+### 🔴 O censo NAO e' um numero (r58–r59) — parei de tentar
+
+**Tres metodos, tres resultados para as mesmas rotas:**
+
+| Metodo (r59) | Rotas com violacao |
+|---|---|
+| `waitForTimeout(6 s)` (r54) | 6 |
+| "DOM estavel por 600 ms" (r55–r58) | 6, depois 5, depois 6 |
+| **`role="status"` ausente (r59)** | **33** |
+
+**O terceiro e' o mais correto e revelou que os dois primeiros mediam uma pagina ainda carregando** —
+com menos elementos montados, menos violacoes.
+
+**E o terceiro tambem nao e' estavel**: `color-contrast` em `/agenda` apareceu (3 nos com o elemento
+identificado) e **sumiu na carga seguinte**.
+
+**Parei.** Recensear `axe` de 39 rotas exige um **marcador de prontidao por rota** — o elemento que so
+existe com o dado carregado —, e eu nao tenho isso. Todo numero que eu produzir sem ele e' uma foto de
+um instante que eu nao escolhi.
+
+### O que **e'** afirmavel, porque foi verificado em cargas repetidas
+
+| Correcao | Evidencia |
+|---|---|
+| `#/agents` 2 → 0 (r55) | 3 cargas, estavel |
+| `/webhooks` 1 → 0 (r57) | 2 cargas, estavel |
+| `/profiles`: `aria-input-field-name` sumiu (r56) | o `.cm-content` passou a ter `aria-label="SOUL.md"` |
+
+### O que o terceiro metodo revelou, e que os outros escondiam
+
+**33 de 39 rotas tem violacao.** A dominante e' `page-has-heading-one` — **a maioria das rotas nao tem
+`<h1>`** — e isso **e' estrutural, nao um bug de componente**:
+
+- `OverlayBreadcrumbHeader` usa `<h1>` e so algumas rotas o usam;
+- `PanelHeader` usa `<h2>` — correto em overlay (ha um h1 atras), errado quando o painel **e'** a pagina.
+
+**Decidir se `#/artifacts`, `#/capabilities`, `#/messaging` sao "paginas" ou "overlays" e' decisao de
+arquitetura de interface**, e ela muda o HTML de rotas inteiras.
+
+**Achado mais severo, medido uma vez com o elemento identificado**: em `/agenda`, os rotulos
+`Inteligente` e `cliente dev` renderizam a **1.12:1** (11 px, `oklab` com alpha 0.66 sobre `#0d1015`).
+Isso **nao e' "texto discreto"** — e' texto ilegivel, e a causa e' um **token de cor**, nao um `className`.
+Mexer nele muda **todo** o texto secundario do app: e' decisao de design, registrada como `DEC-5`.
+
+
 
 Medi `/cron` duas vezes seguidas **com o mesmo metodo** (prontidao = heading presente + DOM estavel):
 
