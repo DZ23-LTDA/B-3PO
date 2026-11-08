@@ -56,7 +56,11 @@ foi **tentado e revertido** (r46): o composer reidrata o rascunho da conversa no
 `GET /api/connectors/readiness` → **1 de 28 prontos, 51 credenciais faltando**, com o desbloqueio
 nomeado. **A tela nunca diz "conectado".**
 
-### Autorização — 10 correções
+### Autorização e correção — **16 commits de fix**, medidos na r53
+
+O repositório tem **17 commits `fix`/`revert`** de escopo V5 entre `f4cf411f28` e `HEAD`; um é o revert
+da r46, então **16 correções**. A tabela abaixo lista **9 commits de autorização** — os outros 6 são de
+estado (retry, duração, sessão, `pendente`), 1 de teste e 1 de UI.
 
 | Rodada | Correção |
 |---|---|

@@ -15,7 +15,8 @@ fase: G8
 
 ## Por que este documento existe
 
-Em 42 rodadas eu escrevi 14 retratações espalhadas por seis documentos. **Espalhadas não é registro.**
+Em 53 rodadas eu escrevi **26 retratações**: 25 numeradas na tabela abaixo e a mais séria em prosa
+(um commit que descreveu três correções e fez duas — ver § "A retratação mais séria"). **Espalhadas não é registro.**
 Quem retoma o projeto precisa ver o padrão de erro, não só a correção.
 
 **O padrão, medido:** onze das catorze foram eu **subestimando o repositório** — escrevendo
