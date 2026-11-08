@@ -50,7 +50,7 @@ fase: G5
 | Suíte desktop | **27 failed · 19.000 passed** | `npx vitest run` |
 | Suíte web | **71 arquivos · 478 testes** | `npm test` |
 | Suíte mobile | **20 arquivos · 179 testes · 8 skip** | `npx vitest run` |
-| Gate | **15 checks** | `python scripts/check` |
+| Gate | **16 checks** | `python scripts/check` |
 | `axe` desktop | **0 / 27 rotas** | CDP + `axe.run(document, {})` |
 | `axe` web | **0 / 15 rotas** | idem |
 | Console desktop | **0 erros / 27 rotas** | varredura de `console`/`pageerror` |

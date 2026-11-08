@@ -15,7 +15,7 @@ fase: G7
 
 | Item | Número | Comando |
 |---|---|---|
-| Gate | **15 checks, ok** | `python scripts/check` |
+| Gate | **16 checks, ok** | `python scripts/check` |
 | Typecheck | **0 erros** em 2 projetos | `python scripts/check-b3po-types` |
 | Suíte desktop | **27 failed · 19.000 passed** | `npx vitest run` |
 | — as 27 | **classificadas** — 0 defeito de produto | `TEST_EVIDENCE.md` |

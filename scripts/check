@@ -116,6 +116,9 @@ _GUARDS = {
     # r71 do V5: as tabelas de `docs/b3po/v5` quebravam em silencio (seis linhas com coluna
     # faltando, todas de edicao programatica). O gate nao via porque markdown nao e' testado.
     "docs-tables": ["scripts/ci/check_docs_tables.py"],
+    # r72 do V5: a regra do `<main>` unico esta escrita em dois arquivos do projeto e mesmo assim
+    # `master-detail.tsx` e `mcp-editor.tsx` renderizavam `<main>` dentro do `<main>` do shell.
+    "single-main": ["scripts/ci/check_single_main.py"],
 }
 # Guards that judge a diff, not a tree: they get the same base/head as the ratchet
 # (blob-size-check.yml).
