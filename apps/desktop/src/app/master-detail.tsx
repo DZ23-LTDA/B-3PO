@@ -173,7 +173,7 @@ export function DetailColumn({
   footer?: ReactNode
 }) {
   return (
-    <main className="flex min-h-0 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
         <div className="mx-auto max-w-2xl space-y-5 px-5 py-4">{children}</div>
       </div>
@@ -187,7 +187,7 @@ export function DetailColumn({
           <div className="mx-auto flex max-w-2xl flex-wrap items-center gap-2">{actionBar}</div>
         </footer>
       )}
-    </main>
+    </div>
   )
 }
 

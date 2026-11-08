@@ -103,6 +103,25 @@ violacoes: landmark-main-is-top-level, landmark-no-duplicate-main, landmark-uniq
 **`/messaging` continua com dois `<main>`** — isso nao e' heading, e' shell duplicado, e nao tem correcao
 de uma linha.
 
+### r66 — dois `<main>` no mesmo documento
+
+`/messaging` tinha **dois `<main>`**, um **dentro** do outro: o do shell (`controller.tsx`, r289) e um
+segundo em `master-detail.tsx`, mais um terceiro em `mcp-editor.tsx`. `main` dentro de `main` e' **HTML
+invalido** e o `axe` acusava tres violacoes (`landmark-main-is-top-level`, `landmark-no-duplicate-main`,
+`landmark-unique`).
+
+O proprio projeto **ja tinha decidido isso** — `overlay-split-layout.tsx` registra *"r82 — `<div>`, nao
+`<main>`. O overlay abre POR CIMA do shell, e o shell ja tem o `<main>`"*. Dois arquivos ficaram de fora.
+
+**Corrigido**: `master-detail.tsx` e `mcp-editor.tsx` passaram a `<div>`, como o precedente manda.
+
+**Verificado**: `mains = 1` em **todas as 5 rotas** auditadas, e as tres violacoes de `/messaging`
+**sumiram**. 157 testes dos componentes afetados continuam verdes.
+
+**O que resta**: `region` (conteudo fora de landmark), que aparece de forma **intermitente** em
+`/messaging`, `/capabilities`, `/artifacts` e de forma estavel em `/cron`; e `/profiles` mantem
+`landmark-no-duplicate-banner` (dois `<header>`).
+
 ### Censo definitivo (r63): **5 rotas com violacao persistente de 39**
 
 O metodo que funcionou: **prontidao** (`role="status"` ausente) **+ 3 amostras com 1,2 s de intervalo**,
