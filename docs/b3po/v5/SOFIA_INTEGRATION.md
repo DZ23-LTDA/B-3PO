@@ -295,6 +295,38 @@ preenchimento intermitente e' a mesma mentira com timing melhor.
 
 **O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
 
+### r77 — a causa das delegacoes recusadas: **`concorrencia_maxima`**
+
+A r76 deixou escrito que "delegar pela UI numa tarefa nova" era o proximo teste. Na r77 executei **a
+receita exata** (criar com `tarefa_id` → recarregar → clicar Delegar → navegar client-side sem recarregar)
+e o store continuou `null`.
+
+**Desta vez eu li a mensagem de erro da tela**, que estava la' o tempo todo:
+
+```
+concorrencia_maxima
+```
+
+`agent-limits.ts`: `concorrencia: 3` — **tres execucoes simultaneas por bot**. `simultaneas >= 3` devolve
+`concorrencia_maxima` (L160). O roster tem **um** agente, e os meus cliques de teste — muitos deles na
+mesma tarefa ja delegada, outros em tarefas novas — **encheram os tres slots com execucoes `pendente`**.
+
+**Portanto**: nas r76/r77 a delegacao era **recusada antes de chegar ao
+`registrarDelegacaoPendente`**. Nao era o consumidor, nao era o atom, nao era o seam. **Era o limite de
+concorrencia, e o erro estava escrito na tela que eu nao lia.**
+
+**O que isso NAO prova**: que o consumidor funciona. Ele foi escrito, passou o typecheck e foi
+**revertido de novo** (terceira vez) por falta de verificacao — o ambiente nao tinha slot livre para uma
+delegacao bem-sucedida.
+
+**A receita completa, agora com a pre-condicao que faltava**:
+
+1. `criar` com `tarefa_id` explicito (sem ele a tarefa e' descartada);
+2. **garantir slot livre** (`concorrencia < 3` para aquele bot) — reiniciar o app com HERMES_HOME limpo,
+   ou aguardar `expirarPendentes` (30 min), ou usar um bot diferente;
+3. clicar **Delegar na UI** (o IPC direto nao passa pelo callback que registra);
+4. navegar **client-side** para `/`, sem `reload` (o atom e' so em memoria).
+
 ### O que a r76 provou sobre o fluxo — e o que impede o transporte
 
 **Quatro fatos medidos, cada um derrubando uma suposicao:**
