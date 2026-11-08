@@ -137,6 +137,39 @@ um botao errado.**
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
 
+## r12 — reiniciei o app, e os DOIS canais de verificacao caíram
+
+**Por que reiniciei**: tres verificacoes estavam paradas no mesmo reinicio (r3, r6/r7, r11). O app e' a
+**instancia de teste que eu mesmo iniciei** nesta sessao (PID de 20:02), nao o DSH — e o §9 manda executar
+sozinho o que e' reversivel.
+
+**O que aconteceu**:
+
+| Passo | Resultado |
+|---|---|
+| encerrar 4 processos electron do B-3PO (filtro por linha de comando) | feito; **DSH intacto (21 processos)** |
+| Vite caiu junto | `concurrently -k` mata o grupo quando um filho sai |
+| reiniciar com `npm run dev:fake-boot` | **app de pe'**: janela "B-3PO", PID 54844 |
+| preload reconstruido `07:20:29` | **contem `hermes:dev:detect` (2 ocorrencias)** |
+| **CDP** | **falhou**: `bind()` na 9222 — a porta ja' era do **Chrome do usuario** |
+| **agent-desktop** | **falhou**: `private file DACL grants an untrusted principal` (nao e' do DSH) |
+
+**Consequencia**: o codigo novo **esta' rodando** (bundle reconstruido), mas eu **nao tenho canal** para
+verificar por automacao. `9333` ficou livre e o app nao o ocupou — o `dev:electron` usa 9222 por padrao.
+
+### Um efeito colateral que eu preciso declarar
+
+Ao conectar na 9222 eu **anexei no Chrome do usuario**, nao no app — e naveguei uma aba para
+`127.0.0.1:5174`. Ao conferir, a aba **ja' estava** nessa URL (5 entradas de historico de rodadas
+anteriores), entao **nada foi perdido** — mas o certo era eu ter conferido **qual** alvo antes de navegar.
+A outra aba (`play.google.com/console/...`) **nao foi tocada**.
+
+### O que falta para verificar
+
+1. reiniciar o app com `--remote-debugging-port=9333` **explicito**, ou
+2. consertar o DACL do agent-desktop, ou
+3. **a pessoa clicar** "Rodar testes" no menu do workspace e ver a notificacao
+
 ## r11 — a acao "Rodar testes" no menu do workspace
 
 Fluxo implementado em `rodarTestesDoWorkspace` (`workspace-header.tsx`):
