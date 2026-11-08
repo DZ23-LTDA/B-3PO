@@ -48,8 +48,25 @@ verificação . session_id = local-e2e76a5ad…  (sessão real, conferida pelo m
 | retry com `tentativas` real | r40 | `retries: 2` que nunca disparava |
 | **duração escopada por tarefa** | r43 | uma execução presa bloqueava tudo |
 
-**Continua manual**: criar a conversa e colar o pedido (o bloco mostra o texto). O transporte automático
-foi **tentado e revertido** (r46): o composer reidrata o rascunho da conversa nova e chega vazio.
+**O transporte automático FUNCIONA desde a r78.** Delegado em Sofia, o pedido chega ao composer da
+conversa nova — sem copiar e colar. Verificado duas vezes no app:
+
+```
+store  -> { tem: true, prompt: "PEDIDO-V78 pos-extracao" }
+composer -> "PEDIDO-V78 pos-extracaoObjetivo do plano: Verificacao r78 po..."
+```
+
+O consumidor é `app/chat/composer/hooks/use-delegacao-pendente.ts`, chamado por `useComposerDraft` —
+extraído do `ChatBar` porque ele já estava no teto de `FUNC_LINES`.
+
+**As quatro pré-condições**, cada uma descoberta por uma falha diferente em dez rodadas:
+
+| # | Pré-condição | Rodada |
+|---|---|---|
+| 1 | `criar` exige `tarefa_id` explícito | r76 |
+| 2 | **slot de concorrência livre** (`concorrencia: 3` por bot) | r77 |
+| 3 | delegar pela **UI** (o IPC direto não registra) | r76 |
+| 4 | navegar **client-side** (o átomo é só em memória) | r75 |
 
 ### Conectores — prontidão verdadeira (r13 → r17)
 

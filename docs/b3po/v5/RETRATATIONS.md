@@ -15,7 +15,7 @@ fase: G8
 
 ## Por que este documento existe
 
-Em 53 rodadas eu escrevi **26 retratações**: 25 numeradas na tabela abaixo e a mais séria em prosa
+Em 79 rodadas eu escrevi **27 retratações**: 26 numeradas na tabela abaixo e a mais séria em prosa
 (um commit que descreveu três correções e fez duas — ver § "A retratação mais séria"). **Espalhadas não é registro.**
 Quem retoma o projeto precisa ver o padrão de erro, não só a correção.
 
@@ -72,6 +72,7 @@ Uma foi do lado do produto.
 | # | Rodada | Eu escrevi | O que era |
 |---|---|---|---|
 | 25 | r32 → r51 | `fix(V5/r32): criar, cancelar **e devolver** venda exigem permissao` | **duas** guardas foram adicionadas, não três |
+| 26 | r78 | commitei `8eb7e0e79a` com **o gate vermelho** (`FUNC_LINES ChatBar 771 > 754`) porque a funcionalidade funcionava e eu quis registra-la | **A regra e' "nunca commitar com gate vermelho", sem excecao por entusiasmo.** Os 17 linhas do consumidor engordaram `ChatBar`, que ja estava no teto; a correcao foi extrair para `use-delegacao-pendente.ts` e restaurar o composer ao estado anterior. Pegou em 30 segundos o que eu ia deixar passar |
 
 **Prova mecânica** (r52):
 
