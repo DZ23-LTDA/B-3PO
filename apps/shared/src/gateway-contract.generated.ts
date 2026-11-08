@@ -2759,6 +2759,7 @@ export interface PromptSubmitParams {
   surface?: string | null
   voice_context?: string | null
   voice_turn?: boolean | null
+  produto_contexto?: string | null
   title_preview?: string | null
   truncate_before_user_ordinal?: number | null
   truncate_before_row_id?: number | null
@@ -5194,6 +5195,7 @@ export interface CanonicalSubmitParams {
   unattended?: boolean
   surface?: string | null
   voice_context?: string | null
+  produto_contexto?: string | null
   interrupted?: boolean
   voice_turn?: boolean
   display_kind?: 'hidden' | null

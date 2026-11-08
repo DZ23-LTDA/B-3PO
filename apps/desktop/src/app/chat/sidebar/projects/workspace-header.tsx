@@ -9,6 +9,7 @@ import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
 import { cn } from '@/lib/utils'
 import { openWorktreeDialog } from '@/store/coding-status'
 import { copyPath, revealPath } from '@/store/projects'
+import { rodarTestesDoProjeto } from './run-project-tests'
 
 import {
   SIDEBAR_LEAD_ICON_SIZE,
@@ -159,6 +160,14 @@ function useWorkspaceItems({ path, onRemove }: { path: null | string; onRemove: 
         key: 'copy',
         label: p.copyPath,
         onSelect: () => void copyPath(path)
+      })}
+      <kit.Separator />
+      {renderActionItem(kit, {
+        disabled: !path,
+        icon: 'beaker',
+        key: 'run-tests',
+        label: p.runTests,
+        onSelect: () => void rodarTestesDoProjeto(path, p.runTests)
       })}
       <kit.Separator />
       {renderActionItem(kit, {

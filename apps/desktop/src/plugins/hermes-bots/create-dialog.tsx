@@ -40,6 +40,8 @@ import {
 import { useEffect, useRef, useState } from 'react'
 
 import { avatarColor, blobatarSvg, botAppearance, BotFace } from './avatar'
+import { defaultMascotFor } from './mascots'
+import { StarterBotPicker } from './starter-bot-picker'
 import { isBackfilledFacePng } from './avatar-image'
 import { AvatarPicker } from './avatar-picker'
 import { $selectedBot } from './bot-state'
@@ -280,6 +282,19 @@ function useDraftProfile(
   return { discardDraft, draftGenRef, draftTargetRef }
 }
 
+/** Rotulo legivel da conexao escolhida (id cru quando a registry nao tem label). */
+function connectionLabel(connections: ConnectionRow[] | null, targetConnection: string): string {
+  return (connections || []).find(c => c.id === targetConnection)?.label || targetConnection
+}
+
+/** Conexao ativa desta janela + se o alvo escolhido e remoto. */
+function useConnectionTarget(targetConnection: string): { activeConnectionId: string; remoteTarget: boolean } {
+  const activeConnectionId = String(host.state?.connectionId?.get?.() || '').trim()
+  const remoteTarget = Boolean(targetConnection) && targetConnection !== (activeConnectionId || 'local')
+
+  return { activeConnectionId, remoteTarget }
+}
+
 export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: CreateAgentDialogProps) {
   const { t } = useI18n()
   const b = useBots()
@@ -301,6 +316,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
   const [shape, setShape] = useState(blobatarSvg ? 'blobatar' : 'circle')
   const [color, setColor] = useState<null | string>(null)
   const [image, setImage] = useState<null | string>(null)
+  const [mascotId, setMascotId] = useState<null | string>(null)
   const [advanced, setAdvanced] = useState(false)
   const [cloneFrom, setCloneFrom] = useState('default')
   const [model, setModel] = useState('')
@@ -335,14 +351,9 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
       )
       .catch(() => setConnections([]))
   }, [open, connections])
-  const activeConnectionId = String(host.state?.connectionId?.get?.() || '').trim()
-  // Remote target = an explicitly picked registry connection that is not the
-  // one this window is already on.
-  const remoteTarget = Boolean(targetConnection) && targetConnection !== (activeConnectionId || 'local')
+  const { activeConnectionId, remoteTarget } = useConnectionTarget(targetConnection)
 
-  const targetLabel = remoteTarget
-    ? (connections || []).find(c => c.id === targetConnection)?.label || targetConnection
-    : ''
+  const targetLabel = remoteTarget ? connectionLabel(connections, targetConnection) : ''
 
   /** Where the profile is created right now: the picked connection id for a
    *  remote target, '' for the active gateway. */
@@ -378,6 +389,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
   // A remote-target create is gated by the TARGET machine's roster: a local
   // name clash is fine there, and the remote's own duplicate check rejects
   // real collisions at profiles.create time.
+  const starterFields = { name: setName, title: setTitle, description: setDescription, soul: setSoul, mascotId: setMascotId }
   const taken = slugTaken(roster, slug, createTarget, createdRef.current)
 
   const reset = () => {
@@ -592,6 +604,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
+          mascot_id: mascotId ?? defaultMascotFor(name).id,
           created: Date.now()
         }
 
@@ -620,6 +633,7 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
           image,
           imageKind: image ? 'photo' : 'shape',
           title: botTitle,
+          mascot_id: mascotId ?? defaultMascotFor(name).id,
           created: Date.now()
         })
       }
@@ -778,11 +792,14 @@ export function CreateAgentDialog({ open, onClose, onConfigureModel, roster }: C
               description
             }}
             image={image}
+            mascotId={mascotId}
             onColor={setColor}
             onImage={setImage}
+            onMascot={mascot => setMascotId(mascot.id)}
             onShape={setShape}
             shape={shape}
           />
+          <StarterBotPicker fields={starterFields} label={b.editor.startFromTemplate ?? 'Start from a template'} />
           {labeled(
             b.editor.name,
             <Input autoFocus onChange={event => setName(event.target.value)} placeholder="inbox-triage" value={name} />

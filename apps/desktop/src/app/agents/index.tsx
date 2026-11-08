@@ -31,7 +31,7 @@ function statusGlyph(status: SubagentStatus, a: Translations['agents']): ReactNo
     return (
       <GlyphSpinner
         ariaLabel={a.running}
-        className="size-3.5 shrink-0 text-[0.95rem] text-muted-foreground/80"
+        className="size-3.5 shrink-0 text-[0.95rem] text-muted-foreground"
         spinner="breathe"
       />
     )
@@ -47,7 +47,7 @@ function statusGlyph(status: SubagentStatus, a: Translations['agents']): ReactNo
 const STREAM_TONE: Record<SubagentStreamEntry['kind'], string> = {
   progress: 'text-muted-foreground/75',
   summary: 'text-foreground/85',
-  thinking: 'text-muted-foreground/80',
+  thinking: 'text-muted-foreground',
   tool: 'text-foreground/85'
 }
 
@@ -414,7 +414,7 @@ export function SubagentRow({ node, depth = 0, nowMs }: { node: SubagentNode; de
             {t.agents.files}
           </p>
           {fileLines.slice(0, 8).map(line => (
-            <p className="wrap-break-word font-mono text-[0.67rem] leading-relaxed text-muted-foreground/80" key={line}>
+            <p className="wrap-break-word font-mono text-[0.67rem] leading-relaxed text-muted-foreground" key={line}>
               {line}
             </p>
           ))}

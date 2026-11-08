@@ -37,6 +37,7 @@ export const zhProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   moveNoProjects: '没有其他项目',
   reveal: '在文件夹中显示',
   copyPath: '复制路径',
+  runTests: '运行测试',
   removeFromSidebar: '从侧边栏移除',
   createdInPreviousContext: '项目已在之前的连接或配置文件中创建。请切换回去；IDEA.md 尚未写入。',
   hiddenFromSidebar: '已从侧边栏隐藏',

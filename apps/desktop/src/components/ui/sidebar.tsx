@@ -146,8 +146,21 @@ function Sidebar({
   if (collapsible === 'none') {
     return (
       <div
+        /*
+         * r289 — LANDMARK: a barra lateral passa a se anunciar como navegação.
+         *
+         * Medido na auditoria (G8): a home não tinha `<main>`, `<nav>` nem `<aside>` — zero
+         * landmarks. Para NVDA/VoiceOver, a página inteira era um bloco só, sem "navegação" nem
+         * "conteúdo principal" para pular entre regiões.
+         *
+         * `role="navigation"` num `<div>` (em vez de trocar a tag por `<nav>`) porque o elemento
+         * carrega `data-slot`/`data-sidebar` que o CSS e o shell consultam por seletor de atributo
+         * — trocar a tag mudaria o contrato de estilo sem necessidade. A semântica vem do role.
+         */
+        aria-label={t.ui.sidebar.title}
         className={cn('flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground', className)}
         data-slot="sidebar"
+        role="navigation"
         {...props}
       >
         {children}
@@ -159,10 +172,12 @@ function Sidebar({
     return (
       <Sheet onOpenChange={setOpenMobile} open={openMobile} {...props}>
         <SheetContent
+          aria-label={t.ui.sidebar.title}
           className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           data-mobile="true"
           data-sidebar="sidebar"
           data-slot="sidebar"
+          role="navigation"
           side={side}
           style={
             {
@@ -182,12 +197,14 @@ function Sidebar({
 
   return (
     <div
+      aria-label={t.ui.sidebar.title}
       className="group peer hidden text-sidebar-foreground md:block"
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-side={side}
       data-slot="sidebar"
       data-state={state}
       data-variant={variant}
+      role="navigation"
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div

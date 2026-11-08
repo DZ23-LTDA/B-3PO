@@ -586,7 +586,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                   {goal.wait_barrier.type === 'session' && ctrl.waitSession(goal.wait_barrier.target)}
                   {goal.wait_barrier.type === 'pid' && ctrl.waitPid(goal.wait_barrier.target)}
                   {goal.wait_barrier.reason && (
-                    <div className="italic text-muted-foreground/80 mt-0.5">{goal.wait_barrier.reason}</div>
+                    <div className="italic text-muted-foreground mt-0.5">{goal.wait_barrier.reason}</div>
                   )}
                 </div>
               </div>
@@ -605,7 +605,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                       key={`${i}-${gate.command}`}
                     >
                       <div className="font-mono text-[0.7rem] text-foreground/95">{gate.command}</div>
-                      <div className="mt-1 flex items-center gap-2 text-[0.68rem] text-muted-foreground/80">
+                      <div className="mt-1 flex items-center gap-2 text-[0.68rem] text-muted-foreground">
                         <span>{ctrl.gateAttempts(gate.attempts, gate.max_retries)}</span>
                         <span className="text-muted-foreground/40">·</span>
                         <span>{ctrl.gateTimeout(gate.timeout_seconds)}</span>

@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Typecheck dos dois projetos TypeScript do desktop, com o tsc do repo.
+
+    python scripts/check-b3po-types            # os dois projetos
+    python scripts/check-b3po-types --electron # so o processo principal
+    python scripts/check-b3po-types --renderer # so o renderer
+
+Por que este script existe: por 26 rodadas o typecheck reportado foi
+``npx tsc --noEmit -p tsconfig.json``, que **nao cobre ``apps/desktop/electron/``** — o
+``tsconfig.json`` do app exclui esse diretorio. Todo o Business Core (stores, IPC, guarda de
+permissao, migracao de tenant) vive la. A verificacao nunca olhou para ele, e 27 erros de tipo
+(incluindo 2 em producao) ficaram escondidos. Ver ``docs/b3po/audit/TYPECHECK-GAP.md``.
+
+Duas armadilhas que este script resolve:
+
+- ``npx tsc`` nao acha o TypeScript local para ``tsconfig.electron.json`` e tenta instalar o pacote
+  ``tsc`` da npm, que nao e o compilador. Aqui o binario vem de ``node_modules/typescript/bin/tsc``.
+- rodar so o ``tsconfig.json`` da uma resposta incompleta que parece completa. Os dois projetos sao
+  checados, e cada um diz seu nome no resultado.
+
+Nao substitui ``scripts/check``: aquele e o gate do upstream (lint Python, ratchets, CI) e nao e
+modificado por este fork. Este script cobre o que o gate nao ve.
+"""
+
+from __future__ import annotations
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+APP = REPO / "apps" / "desktop"
+TSC = REPO / "node_modules" / "typescript" / "bin" / "tsc"
+
+# (rotulo, diretorio de trabalho, tsconfig)
+PROJETOS = {
+    "electron": ("processo principal", APP, "tsconfig.electron.json"),
+    "renderer": ("renderer", APP, "tsconfig.json"),
+}
+
+
+def run(chave: str) -> tuple[bool, str]:
+    rotulo, cwd, cfg = PROJETOS[chave]
+
+    if not TSC.exists():
+        return False, f"typescript nao encontrado em {TSC}; rode npm install na raiz do repo"
+
+    if not (cwd / cfg).exists():
+        return False, f"{cfg} nao existe em {cwd}"
+
+    proc = subprocess.run(
+        ["node", str(TSC), "--noEmit", "-p", cfg],
+        cwd=str(cwd),
+        capture_output=True,
+        text=True,
+    )
+    saida = (proc.stdout + proc.stderr).strip()
+
+    if proc.returncode == 0:
+        return True, ""
+
+    # O tsc lista um erro por linha; reportar so a contagem esconde qual arquivo quebrou.
+    erros = [linha for linha in saida.splitlines() if "error TS" in linha]
+
+    return False, "\n".join(erros) if erros else saida[:2000]
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--electron", action="store_true", help="so o processo principal")
+    ap.add_argument("--renderer", action="store_true", help="so o renderer")
+    args = ap.parse_args()
+
+    if args.electron and args.renderer:
+        print("escolha um: --electron ou --renderer, nao os dois", file=sys.stderr)
+
+        return 2
+
+    escolhidos = ["electron", "renderer"]
+
+    if args.electron:
+        escolhidos = ["electron"]
+    elif args.renderer:
+        escolhidos = ["renderer"]
+
+    falhas = 0
+
+    for chave in escolhidos:
+        rotulo = PROJETOS[chave][0]
+        ok, detalhe = run(chave)
+
+        if ok:
+            print(f"typecheck {rotulo}: ok")
+        else:
+            falhas += 1
+            print(f"typecheck {rotulo}: FALHOU")
+            print(detalhe)
+
+    if falhas:
+        print(f"\n{falhas} projeto(s) com erro de tipo", file=sys.stderr)
+
+        return 1
+
+    print(f"\n{len(escolhidos)} projeto(s) sem erro de tipo")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -15,6 +15,7 @@ import { saveMemoryProviderConfig } from '@/hermes'
 import { ExternalLink, Loader2, Save, SlidersHorizontal } from '@/lib/icons'
 import { notify, notifyError } from '@/store/notifications'
 import { $activeGatewayProfile } from '@/store/profile'
+import { useI18n } from '@/i18n'
 import type { MemoryProviderConfig, MemoryProviderField } from '@/types/hermes'
 
 import { ListRow } from '../primitives'
@@ -59,6 +60,7 @@ export function ProviderConfigModal({
   onOpenChange: (open: boolean) => void
   onSaved: () => Promise<void> | void
 }) {
+  const { t } = useI18n()
   const activeProfile = useStore($activeGatewayProfile)
   const [values, setValues] = useState<Record<string, string>>({})
   const [seeded, setSeeded] = useState<Record<string, string>>({})
@@ -147,7 +149,7 @@ export function ProviderConfigModal({
         <DialogFooter>
           <DialogClose asChild>
             <Button size="sm" type="button" variant="ghost">
-              Cancel
+              {t.common.cancel}
             </Button>
           </DialogClose>
           <Button disabled={saving} onClick={() => void save()} size="sm">

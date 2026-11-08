@@ -526,7 +526,7 @@ gateway:
     timed_out: "❌ La actualización de Hermes expiró tras 30 minutos."
     finished_success: "✅ La actualización de Hermes terminó correctamente."
     last_lines: "{msg}\n\nÚltimas líneas:\n```\n{tail}\n```"
-    managed_action: "actualizar Hermes Agent"
+    managed_action: "actualizar B-3PO"
     not_applicable: "✗ `hermes update` no aplica a esta instalación ({method}).\nActualiza con: {command}"
   usage:
     rate_limits: "⏱️ **Límites de tasa:** {state}"
@@ -1459,13 +1459,13 @@ platform:
       size_downgraded: "{label} pesa {size_mb}MB y supera el límite de {cap}; se envió como archivo."
   email:
     image_line: "Imagen: {url}"
-    standalone_subject: "Hermes Agent"
+    standalone_subject: "B-3PO"
   dingtalk:
     emotion:
       thinking: "🤔Pensando"
       done: "🥳Listo"
   irc:
-    quit_message: "Hermes Agent se está apagando"
+    quit_message: "B-3PO se está apagando"
     standalone_quit: "entregado"
   relay:
     confirm_approve_once: "Aprobar una vez"
@@ -1487,7 +1487,7 @@ slash:
   sethome:
     description: "Establecer este chat como canal principal"
   update:
-    description: "Actualizar Hermes Agent a la última versión"
+    description: "Actualizar B-3PO a la última versión"
   category:
     session: "Sesión"
     configuration: "Configuración"
@@ -1695,7 +1695,7 @@ slash:
   image:
     description: "Adjuntar un archivo de imagen local para tu próximo prompt"
   version:
-    description: "Mostrar la versión de Hermes Agent"
+    description: "Mostrar la versión de B-3PO"
   debug:
     description: "Subir un informe de depuración (info del sistema + registros) y obtener enlaces compartibles"
   quit:
@@ -1768,8 +1768,8 @@ cli:
     no_saved_card_add_funds_hint: "No hay tarjeta guardada; “Añadir fondos” te guía para agregar una."
     actions_require_admin: "Las acciones de facturación requieren admin/propietario de la org."
     remote_spending_off_for_org: "El gasto remoto está desactivado para esta org."
-    killswitch_reason_overview: "Un administrador de facturación puede activarlo desde la página Hermes Agent del portal para añadir fondos aquí."
-    killswitch_reason_buy: "Un administrador de facturación puede activarlo desde la página Hermes Agent del portal antes de añadir fondos."
+    killswitch_reason_overview: "Un administrador de facturación puede activarlo desde la página B-3PO del portal para añadir fondos aquí."
+    killswitch_reason_buy: "Un administrador de facturación puede activarlo desde la página B-3PO del portal antes de añadir fondos."
     add_funds_now_hint: "Añadir fondos ahora: un solo cargo, sumado a tu saldo hoy."
     refill_when_low_amounts: "Recargar cuando baje: cobra {reload_to} automáticamente cuando tu saldo cae por debajo de {threshold}."
     refill_when_low_generic: "Recargar cuando baje: cobra a tu tarjeta automáticamente cuando tu saldo cae por debajo del monto que definas."
@@ -1840,7 +1840,7 @@ cli:
     charge_failed_card_declined: "🔴 Tu tarjeta fue rechazada. Prueba con otra tarjeta en el portal."
     charge_failed_generic: "🔴 El cargo no se completó ({reason})."
     charge_error_no_payment_method: "💳 No hay tarjeta guardada: recarga y gestiona la facturación en el portal."
-    charge_error_remote_spending_disabled: "El gasto remoto está desactivado para esta cuenta; un administrador de facturación puede activarlo desde la página Hermes Agent del portal."
+    charge_error_remote_spending_disabled: "El gasto remoto está desactivado para esta cuenta; un administrador de facturación puede activarlo desde la página B-3PO del portal."
     charge_error_role_required: "Añadir fondos requiere un administrador o propietario de la org. Pídeselo a un administrador o gestiónalo en el portal."
     charge_error_idempotency_conflict: "🔴 Esa clave de cargo ya se usó con un monto distinto. Inicia una recarga nueva."
     revoked_by_admin: "Un administrador detuvo el gasto de esta terminal."
@@ -1857,7 +1857,7 @@ cli:
     charge_stepup_noninteractive: "Ejecuta `hermes portal`, permite el Gasto remoto y luego reintenta."
     charge_stepup_declined: "No se hizo ningún cargo. Ejecuta /topup cuando quieras permitir el Gasto remoto."
     charge_stepup_not_granted: "No se pudo permitir el Gasto remoto: debe aprobarlo un administrador o propietario de la org. No se cobró a tu tarjeta."
-    allowed_but_org_off: "El Gasto remoto está permitido para esta terminal, pero sigue desactivado para esta org. Un administrador de facturación puede activarlo desde la página Hermes Agent del portal; luego ejecuta /topup de nuevo."
+    allowed_but_org_off: "El Gasto remoto está permitido para esta terminal, pero sigue desactivado para esta org. Un administrador de facturación puede activarlo desde la página B-3PO del portal; luego ejecuta /topup de nuevo."
     allowed_no_card: "Gasto remoto permitido, pero aún no hay ninguna tarjeta guardada."
     topup_on_portal_to_continue: "Recarga y gestiona la facturación en el portal para continuar."
     allowed_run_topup: "Gasto remoto permitido. Ejecuta /topup para continuar."
@@ -2163,7 +2163,7 @@ cli:
     images_attached_one: "📎 {count} imagen adjunta"
     images_attached_other: "📎 {count} imágenes adjuntas"
     command_interrupted: "Comando interrumpido."
-    welcome: "¡Bienvenido a Hermes Agent! Escribe tu mensaje o /help para ver los comandos."
+    welcome: "¡Bienvenido a B-3PO! Escribe tu mensaje o /help para ver los comandos."
     activated_skills_label: "Skills activadas:"
     redaction_disabled_title: "⚠  La redacción de secretos está DESACTIVADA"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value}). Las claves de API y los tokens pueden aparecer sin ocultar en la salida del chat, los JSON de sesión y los registros. Establece {setting} en config.yaml para reactivarla."
@@ -2243,7 +2243,7 @@ cli:
   render:
     response_transformed: "[Respuesta transformada después del streaming]"
     banner_tagline: "{name} - Framework de agentes de IA"
-    banner_version: "Hermes Agent v{version} ({date})"
+    banner_version: "B-3PO v{version} ({date})"
   subagents:
     cannot_steer_process: "Los procesos en segundo plano no se pueden redirigir; deténlos o lee el registro."
     count_live: "{count} activos"
@@ -3120,12 +3120,12 @@ cli:
       usage: "/timestamps [on|off|status]"
       label: "Marcas de tiempo de los mensajes"
     update:
-      managed_action: "actualizar Hermes Agent"
+      managed_action: "actualizar B-3PO"
       choice_update: "Actualizar ahora"
-      choice_update_desc: "salir de la sesión actual y actualizar Hermes Agent"
+      choice_update_desc: "salir de la sesión actual y actualizar B-3PO"
       choice_cancel: "Cancelar"
       choice_cancel_desc: "mantener la sesión actual"
-      title: "☤  Actualizar Hermes Agent"
+      title: "☤  Actualizar B-3PO"
       detail: "Esto cerrará la sesión actual y ejecutará `hermes update`."
       cancelled: "🟡 /update cancelado."
       launching: "☤ Iniciando la actualización..."
@@ -3145,7 +3145,7 @@ cli:
     fix_lm_studio: "Solución LM Studio: ajusta el contexto en los ajustes del modelo → recárgalo"
     fix_local_server: "Solución: inicia tu servidor con al menos {tokens_k}K de contexto (llama.cpp: -c {tokens}), o define model.ollama_num_ctx en config.yaml con la ventana que realmente sirve"
     fix_config: "Solución: define model.context_length en config.yaml, o aumenta el ajuste de contexto de tu servidor"
-    hermes_models_not_agentic: "⚠  Los modelos Hermes 3 y 4 de Nous Research NO son agénticos y no están diseñados para usarse con Hermes Agent."
+    hermes_models_not_agentic: "⚠  Los modelos Hermes 3 y 4 de Nous Research NO son agénticos y no están diseñados para usarse con B-3PO."
     hermes_models_lack_tools: "Carecen de la capacidad de llamar herramientas que requieren los flujos de trabajo del agente. Considera usar un modelo agéntico (Claude, GPT, Gemini, DeepSeek, etc.)."
     hermes_models_switch_hint: "Cambia con: /model sonnet  o  /model gpt5"
     project_skills_loaded: "◆ {count} skill(s) del proyecto cargada(s) desde este repositorio"

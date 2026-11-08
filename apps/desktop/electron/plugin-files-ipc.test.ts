@@ -23,6 +23,8 @@ const broadcastChange = vi.fn()
 const window = { id: 1 }
 
 registerPluginFilesIpc({
+  // r17 do V4: o dono da instalacao — operar arquivo e capacidade de maquina.
+  actorOf: async () => ({ id: 'act_owner_test', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
   ipcMain: { handle: (channel: string, handler: never) => handlers.set(channel, handler) } as never,
   dialog: { showOpenDialog } as never,
   windowFor: () => window as never,

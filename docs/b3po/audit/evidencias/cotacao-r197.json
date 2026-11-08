@@ -1,0 +1,34 @@
+{
+  "passos": [],
+  "rotulos": [
+    "Quantidade a comprar",
+    "Fornecedor",
+    "Custo unitário",
+    "Quantidade",
+    "Prazo (dias)"
+  ],
+  "tem_rotulos_visiveis": true,
+  "campos_por_rotulo": {
+    "prazo": true,
+    "preco": true,
+    "qtd": true,
+    "fornecedor": true,
+    "volume": true
+  },
+  "botoes": [
+    "Adicionar item",
+    "Comparar fornecedores"
+  ],
+  "fornecedores": [
+    "Atacado Beta",
+    "Distribuidora Alfa"
+  ],
+  "linhas": [
+    "Atacado Beta · R$ 12,00 × 10 · 7dRemover",
+    "Distribuidora Alfa · R$ 10,50 × 10 · 20dRemover"
+  ],
+  "total_linhas": 2,
+  "melhor_oferta_visivel": true,
+  "economia_visivel": true,
+  "texto_final": "Comparar fornecedoresQuantidade a comprarFornecedorFornecedorAtacado BetaDistribuidora AlfaCusto unitárioQuantidadePrazo (dias)Adicionar itemComparar fornecedoresAtacado Beta · R$ 12,00 × 10 · 7dRemoverDistribuidora Alfa · R$ 10,50 × 10 · 20dRemoverMelhor oferta: Distribuidora Alfa · R$ 105,00Atacado Beta: economiza R$ 15,00 em relacao a proxima"
+}

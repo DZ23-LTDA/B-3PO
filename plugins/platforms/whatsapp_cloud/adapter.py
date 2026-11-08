@@ -14,6 +14,8 @@ import asyncio
 import contextlib
 import hashlib
 import hmac
+
+from plugins.platforms.whatsapp_cloud.crm_bridge import forward_to_crm
 import importlib
 import json
 import logging
@@ -751,6 +753,9 @@ class WhatsAppCloudAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             payload = None
         if not isinstance(payload, dict):
             return web.Response(status=400)
+        # Ponte para o CRM do desktop (opcional): so repassa o corpo cru + a assinatura ja validada.
+        # Nao bloqueia o canal: forward_to_crm tem timeout curto e engole qualquer erro.
+        forward_to_crm(raw, signature_header)
         await self._dispatch_payload(payload)
         return web.Response(status=200)
 
@@ -1112,8 +1117,8 @@ def register(ctx) -> None:
     from . import gateway_env  # env -> GatewayConfig bridge (gateway.config_env)
     ctx.register_platform(
         name="whatsapp_cloud", label="WhatsApp Business (Cloud)", adapter_factory=WhatsAppCloudAdapter,
-        dashboard_label="WhatsApp Cloud API",
-        dashboard_description="Use Hermes via Meta's hosted WhatsApp Cloud API (no local bridge).",
+        dashboard_label="WhatsApp Cloud API (official)",
+        dashboard_description="The official Meta WhatsApp Business Platform: no local bridge, no QR pairing, templates and webhooks per Meta policy.",
         docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud",
         check_fn=check_whatsapp_cloud_requirements, is_connected=_is_connected,
         config_connected_fn=config_connected_extra("phone_number_id", "access_token"),

@@ -28,6 +28,8 @@
 import path from 'node:path'
 
 import type { InstallStamp } from './install-stamp'
+import { podeAdministrarInstalacao } from './machine-access'
+import type { Actor } from './rbac'
 import { ownAppImage } from './relaunch-target'
 
 export interface UninstallSummaryDetails {
@@ -68,9 +70,17 @@ export interface DesktopUninstallIpcDeps {
   runUninstall: (mode: string) => Promise<DesktopUninstallResult>
   removableAppPath: () => string | null
   openAppsSettings: () => Promise<void>
+  /**
+   * r2 do V5 (R-02) — resolver do ator, para a fronteira de máquina.
+   *
+   * Desinstalar é a ação mais destrutiva do produto: remove o bundle, o agente e — no modo `full` —
+   * todos os dados. Ela era chamável por qualquer JavaScript no renderer.
+   */
+  actorOf: () => Promise<Actor | null>
 }
 
 export function registerDesktopUninstallIpc({
+  actorOf,
   ipcMain,
   stamp,
   fallbackSummary,
@@ -106,6 +116,29 @@ export function registerDesktopUninstallIpc({
   ipcMain.handle(
     'hermes:uninstall:run',
     async (_event: unknown, payload?: unknown): Promise<DesktopUninstallResult> => {
+      /*
+       * r2 do V5 (R-02) — AUTORIZAÇÃO PRIMEIRO, antes de qualquer decisão de efeito.
+       *
+       * Antes disto o canal não consultava ator: um renderer comprometido (XSS em saída de modelo,
+       * plugin, webview) desinstalava o produto sem interação. A confirmação na interface **não
+       * protege** — ela é código do próprio renderer.
+       *
+       * Política: capacidade de `escrita` na máquina, papel `owner` **e** `kind: 'human'`.
+       *
+       * O `kind` entrou porque o teste de guarda mostrou o buraco: um bot com `EXECUTE_ALLOWED` e
+       * `role: 'owner'` passava. `EXECUTE_ALLOWED` é permissão de executar trabalho, não de
+       * desinstalar a instalação — e não existe cenário legítimo em que um bot desinstale o produto.
+       *
+       * O goal G1 §36 diz o mesmo: `EXECUTE_ALLOWED` isolado não concede permissão universal.
+       */
+      if (!podeAdministrarInstalacao(await actorOf())) {
+        return {
+          ok: false,
+          error: 'sem_permissao',
+          message: 'Apenas o dono desta instalação pode desinstalar o produto.'
+        }
+      }
+
       // Every cleanup mode can remove the bundle, including a hidden data request.
       if (!codeRemovalAllowed) {
         return {

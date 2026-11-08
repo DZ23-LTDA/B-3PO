@@ -1,3 +1,5 @@
+import { BotFace } from './avatar'
+
 /**
  * The avatar face: blobatar shape strings, the markup they render to, and the
  * catchlight polarity fix.
@@ -15,7 +17,7 @@
  * like they had "no dots in their eyes".
  */
 
-import { render } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { blobatarSvgMock } = vi.hoisted(() => ({ blobatarSvgMock: vi.fn() }))
@@ -190,3 +192,31 @@ describe('an SDK that predates blobatarSvg', () => {
     expect(container.querySelector('svg[data-hb-math]')?.getAttribute('data-hb-shape')).toBe(defaultShapeFor('agent'))
   })
 })
+
+it('mascote em PNG pisca por animação e desloca a piscada por nome', () => {
+  const primeiro = render(<BotFace color="#6c5ce7" image="/avatars/bit.png" name="Revisor" shape="squircle" />)
+  const img = primeiro.container.querySelector('img')!
+
+  expect(img.className).toContain('hb-mascot-blink')
+  expect(img.style.animationDelay).toBe(mascotDelayForTest('Revisor'))
+  // O keyframe é injetado uma única vez, não por rosto.
+  expect(primeiro.container.ownerDocument.querySelectorAll('#hb-mascot-blink')).toHaveLength(1)
+
+  cleanup()
+
+  const segundo = render(<BotFace color="#6c5ce7" image="/avatars/bit.png" name="Analista Financeiro" shape="squircle" />)
+  const outra = segundo.container.querySelector('img')!
+
+  expect(outra.style.animationDelay).toBe(mascotDelayForTest('Analista Financeiro'))
+})
+
+/** Mesma conta do componente: desloca a piscada por mascote. */
+function mascotDelayForTest(name: string): string {
+  let hash = 0
+
+  for (const char of name) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  }
+
+  return `${((hash % 44) / 10).toFixed(1)}s`
+}

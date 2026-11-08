@@ -1,0 +1,115 @@
+B-3PO - HANDOFF
+===============
+
+Rodada 107 · 06/11/2026 (fechamento de a11y) · branch: b3po-brand · 958 commits
+(HEAD nao vai aqui de proposito: apodrece no commit seguinte - ver a licao da r61)
+main == origin/main == f4cf411f28 (intacto, nunca recebe commit de produto)
+
+> ESTE ARQUIVO SUBSTITUI O DE R59. O anterior dizia "G4 NOT_IMPLEMENTED" e "G2 PARCIAL" —
+> 33 rodadas de diferença. Se você leu aquele primeiro, leu o passado.
+
+
+ONDE ESTAMOS — MATRIZ DE GATES (medida, por escopo)
+---------------------------------------------------
+  G0 READY            inventario, baseline, docs de continuidade
+  G1 PASS             seguranca/IPC/RBAC/tenant · serverTenant: IDOR impossivel de formular
+  G2 PASS             runtime/modelos · /api/status agora expoe "inference" + "overall_from"
+  G3 PASS             dominio canonico · preco zero = cortesia avisada, com marca na linha
+  G4 PASS             vertical gas/agua · vasilhame em comodato + leitura de medidor
+  G5 PASS             seis modos + foco visivel (WCAG 2.4.7) em 30/30 controles
+  G6 PASS (com EXT-6) 99 plugins, 27 de mensageria, ZERO ativos · adapter IRC 18/18 testes
+  G7 PASS             desktop/web/android OK · iOS BLOCKED (precisa macOS, EXT-4)
+  G8 PASS (por escopo) perf -93% long tasks · a11y MEDIDA · suite 27 falhas, 0 minhas
+  G9 PARCIAL          builds exit 0, rollback provado · exe NAO assinado (EXT-3)
+
+  Nenhum gate NOT_RUN. Nenhum UNVERIFIED.
+
+  O que cada "PASS" NAO cobre esta no GATES.md, item por item. "PASS" aqui e por escopo,
+  nunca global - esta escrito assim no MASTER-STATE desde a r91.
+
+
+O QUE MUDOU DESDE O HANDOFF ANTERIOR (r59 -> r92)
+-------------------------------------------------
+  T-08  RESOLVIDO  preco zero: a decisao ja estava no codigo (receivableForSale devolve null);
+                   faltava a tela dizer. Agora confirm + marca "(cortesia)" na linha.
+  T-09  RESOLVIDO  foco visivel: `:focus-visible` global. Nao era "manter/reverter"; a regra do
+                   upstream removeu `focus` E `focus-visible` quando queria so o mouse.
+  T-10  RESOLVIDO  backup (19 stores, 5 versoes) E restore (r88) - listar, validar, aplicar,
+                   reverter. O restore era "deliberadamente nao feito" e virou 9 testes.
+  T-11  RESOLVIDO  leitura periodica de medidor: serie por medidor, validacao por vizinhos no
+                   tempo (aceita leitura atrasada que cabe entre as vizinhas).
+  T-13  RESOLVIDO  um <main> por pagina em 10 telas (era invalido: <main> dentro de <main>).
+  G4    RESOLVIDO  vasilhame em comodato + leitura de medidor, ponta a ponta, com tela.
+  G2    RESOLVIDO  /api/status dizia "overall: ok" com a inferencia fora do payload.
+
+  Tambem: i18n das telas novas, acessibilidade medida em 4 viewports, 78 testes novos.
+
+
+AS TELAS CONSTRUIDAS NOVAMENTE (r78-r92)
+----------------------------------------
+  Rota          Modelo  RBAC  axe 4+ viewports  i18n  testes
+  /gas            sim    sim        sim          sim   17 store + 7 view + 5 i18n
+  /medidores      sim    sim        sim          sim   19 store
+  /backups        sim    sim        sim          sim    9 restore + 5 i18n
+
+  Todas com rota, entrada na sidebar, busca e capturas em docs/b3po/evidence/.
+  69 testes nas telas + 9 do restore. 174 capturas PNG no total.
+
+
+COMO RODAR (exato, sem adivinhar)
+---------------------------------
+  gate:      PYTHONIOENCODING=utf-8 HERMES_PYTHON=<py> PYTHONPATH=<repo> python scripts/check
+  tipos:     python scripts/check-b3po-types
+  app:       cd apps/desktop ; HERMES_HOME=%TEMP%\b3po-menu-view6
+             HERMES_DESKTOP_CDP_PORT=9333 npm run dev:fake-boot
+             (ANTES: Remove-Item Env:ELECTRON_RUN_AS_NODE - o harness exporta isso e o
+              electron.exe vira node puro, quebrando o main com "no export named BrowserWindow")
+  drive:     Playwright chromium.connectOverCDP('http://127.0.0.1:9333'), app em #/
+  axe:       injetar node_modules/axe-core/axe.min.js e rodar window.axe.run(document, {})
+             SEM runOnly: com tags wcag voce perde toda a familia best-practice (landmarks).
+
+
+AS QUATRO ARMADILHAS QUE CUSTARAM RODADAS (leia antes de concluir "nao funciona")
+--------------------------------------------------------------------------------
+  1. ELECTRON_RUN_AS_NODE herdado do harness -> o app nao sobe. Remova a env var.
+  2. O BACKEND roda de uma COPIA do repo em %TEMP%\b3po-menu-view6\hermes-agent\.
+     Editar hermes_cli/ no repo NAO chega no backend vivo. Copie o arquivo ou aponte o home.
+     (r90 perdeu duas tentativas nisto.)
+  3. apps/desktop/electron/*.ts e src/*.tsx nao sao o que roda: dist/electron-main.mjs e o
+     bundle do vite. Rebuild antes de concluir que o fix nao funcionou. (r57, r75, r81.)
+  4. git stash NAO e baseline. Use git worktree add <tmp> origin/main + mklink /J node_modules.
+
+
+O QUE ESPERA O DONO (5 itens, com o que cada um destrava)
+---------------------------------------------------------
+  T-01  Developer Mode (Windows)         Start-Process "ms-settings:developers"
+                                         -> destrava 110 falhas de symlink da regressao
+  T-05  5 modos sem identidade propria    decisao de produto (o que cada modo faz de diferente)
+  T-06  1 conector sem credencial         autorizacao para conexao externa (EXT-6)
+  T-12  tarifa x consumo medido           politica comercial (faixa, minimo, esgoto)
+  T-15  <main> dentro de uma zona da arvore de paineis
+                                         aceitar region(55) OU autorizar o refactor de layout
+
+  O que NAO espera o dono: nada. Nenhum todo tecnico aberto.
+
+
+O QUE NAO FOI TESTADO (declarar e parte da entrega)
+---------------------------------------------------
+  - iOS: sem macOS nesta maquina (EXT-4)
+  - exe assinado: sem certificado Authenticode (EXT-3)
+  - as 6 falhas de empacotamento nos scripts: dependem de assinatura de payload
+  - 9 testes |ui| que estouram sob carga paralela (passam isolados, 35/35 em 15s)
+  - o app renderizado em INGLES: provado por teste (componente montado), nao por captura,
+    porque display.language:'en' e o default e perde para o idioma da maquina por decisao
+    documentada em languages.ts
+
+
+LEIA TAMBEM
+-----------
+  GATES.md           84 secoes. COMECE PELO "INDICE DE RETRATACOES" no topo: 9 das 10
+                     afirmacoes "nao vou fazer" foram desfeitas depois. Ler a recusa
+                     primeiro e ler o passado.
+  MASTER-STATE.md    os gates com a evidencia de cada
+  TASK-QUEUE.json    9 done, 5 blocked, 0 todo
+  UPSTREAM-PATCH-REGISTER.md   os patches no upstream, com a razao de cada
+  FINAL-DELIVERY.txt o que pode ser entregue hoje e o que nao pode

@@ -1,0 +1,185 @@
+// O ambiente (r121 do GOAL V2) — a navegacao contextual do §13:413.
+
+import { describe, expect, it } from 'vitest'
+
+import {
+  AMBIENTES,
+  type Ambiente,
+  AMBIENTE_LABEL,
+  foraDoAmbiente,
+  gruposDoAmbiente,
+  isAmbiente,
+  modulosDoAmbiente,
+  outroAmbiente,
+  type ModuloDoAmbiente
+} from './ambiente'
+
+const MODULOS: ModuloDoAmbiente[] = [
+  { grupo: 'Visão geral', label: 'Painel', path: '/painel' },
+  { grupo: 'Visão geral', label: 'Empresa', path: '/empresa' },
+  { grupo: 'Comércio', label: 'Vendas', path: '/sales' },
+  { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['engenharia'] },
+  { grupo: 'Inteligência', label: 'Sofia', path: '/sofia' },
+  { grupo: 'Construção', label: 'Repositórios', path: '/repos' },
+  { grupo: 'Qualidade', label: 'Testes', path: '/testes' }
+]
+
+describe('os dois ambientes do §13:416-419', () => {
+  /*
+   * r265: o contrato mudou de DOIS para SEIS ambientes, e este teste mudou junto.
+   *
+   * **Ele nao foi removido nem afrouxado**: o que ele afirmava era "existem exatamente dois",
+   * e isso deixou de ser verdade quando a missao final nomeou seis. O que continua sendo
+   * verdade - e que o teste agora guarda - e que **os dois originais mantiveram o mesmo id**,
+   * para que a preferencia ja salva de quem usava o produto nao vire um valor invalido.
+   */
+  it('os seis ambientes da missao, na ordem em que a pessoa entra', () => {
+    expect(AMBIENTES).toEqual([
+      'empresa',
+      'engenharia',
+      'automacao',
+      'ia',
+      'estrategico',
+      'administracao'
+    ])
+    expect(Object.keys(AMBIENTE_LABEL)).toHaveLength(6)
+  })
+
+  it('os dois ambientes originais mantiveram o id e o rotulo', () => {
+    // Compatibilidade: quem tinha 'empresa' ou 'engenharia' salvo nao perde a escolha.
+    expect(isAmbiente('empresa')).toBe(true)
+    expect(isAmbiente('engenharia')).toBe(true)
+    expect(AMBIENTE_LABEL.empresa).toBe('Empresa')
+    expect(AMBIENTE_LABEL.engenharia).toBe('Engenharia')
+  })
+
+  it('isAmbiente reconhece os seis e recusa o resto', () => {
+    for (const a of AMBIENTES) expect(isAmbiente(a)).toBe(true)
+    expect(isAmbiente('outro')).toBe(false)
+    expect(isAmbiente(undefined)).toBe(false)
+    expect(isAmbiente('')).toBe(false)
+  })
+})
+
+describe('os grupos', () => {
+  it('EMPRESA tem os 7 grupos do §13:429-438 — vieram do texto, não de escolha', () => {
+    expect(gruposDoAmbiente('empresa')).toHaveLength(7)
+    expect(gruposDoAmbiente('empresa')).toContain('Comércio')
+    expect(gruposDoAmbiente('empresa')).toContain('Crescimento')
+  })
+
+  /*
+   * r14 do V4 — o contrato MUDOU, e o teste antigo travava uma declaração que não produzia conteúdo.
+   *
+   * Ele exigia `Construção` e `Qualidade` na lista de Engenharia. Elas estavam lá desde a r265, mas
+   * **nenhum módulo da barra tinha esses grupos** — medido em runtime: escolher Engenharia mostrava
+   * VISÃO GERAL + CONFIGURAÇÃO, e nada de engenharia.
+   *
+   * A lista agora diz o que RENDERIZA. A cobertura continua sendo 4 grupos (o mesmo argumento de
+   * "oito telas em oito grupos seria um menu de oito itens"), e a Construção entra pelo outro lado:
+   * os módulos de engenharia ganharam `tambemEm` no plugin — provado no teste de filtro abaixo.
+   */
+  it('ENGENHARIA declara os grupos do MAPA de /ambiente', () => {
+    /*
+     * r19 do V4 — `gruposDoAmbiente` serve o mapa de `/ambiente`, e `engenharia.test.ts` exige
+     * casamento nos DOIS sentidos com `MODULOS_DE_ENGENHARIA`. A navegação não entra aqui: ela usa
+     * `tambemEm`, que agora carrega **nome de ambiente**, não nome de grupo.
+     */
+    expect(gruposDoAmbiente('engenharia')).toEqual([
+      'Visão geral',
+      'Construção',
+      'Qualidade',
+      'Configuração'
+    ])
+  })
+})
+
+describe('o filtro', () => {
+  it('em Empresa, o Comércio fica e a Construção não', () => {
+    const { dentro, fora } = modulosDoAmbiente(MODULOS, 'empresa')
+
+    expect(dentro.some(m => m.path === '/sales')).toBe(true)
+    expect(dentro.some(m => m.path === '/repos')).toBe(false)
+    expect(fora.some(m => m.path === '/repos')).toBe(true)
+  })
+
+  it('em Engenharia, o que tem tambemEm aparece e o Comércio não', () => {
+    /*
+     * r19 do V4 — o filtro de NAVEGAÇÃO: um módulo entra no modo se o grupo dele está no ambiente
+     * OU se `tambemEm` lista o **nome do ambiente**.
+     */
+    const modulos = [
+      { grupo: 'Trabalho', label: 'Projetos', path: '/projetos', tambemEm: ['engenharia'] },
+      { grupo: 'Comércio', label: 'Vendas', path: '/sales' },
+      { grupo: 'Inteligência', label: 'Busca', path: '/busca' }
+    ]
+    const { dentro, fora } = modulosDoAmbiente(modulos, 'engenharia')
+
+    expect(dentro.some(m => m.path === '/projetos')).toBe(true)
+    expect(dentro.some(m => m.path === '/sales')).toBe(false)
+    expect(fora.some(m => m.path === '/sales')).toBe(true)
+  })
+
+  it('VISÃO GERAL é comum aos dois — esconder o Painel seria esconder onde a pessoa está', () => {
+    expect(modulosDoAmbiente(MODULOS, 'empresa').dentro.some(m => m.path === '/painel')).toBe(true)
+    expect(modulosDoAmbiente(MODULOS, 'engenharia').dentro.some(m => m.path === '/painel')).toBe(true)
+  })
+
+  it('nada se perde: dentro + fora = todos', () => {
+    for (const a of AMBIENTES) {
+      const { dentro, fora } = modulosDoAmbiente(MODULOS, a)
+
+      expect(dentro.length + fora.length).toBe(MODULOS.length)
+    }
+  })
+})
+
+describe('o que fica escondido é DITO', () => {
+  it('a frase nomeia o OUTRO ambiente — um menu menor sem explicação parece quebrado', () => {
+    const s = foraDoAmbiente(MODULOS, 'empresa')
+
+    expect(s).toContain('Engenharia')
+    expect(s).toContain('2') // Construção + Qualidade
+  })
+
+  it('e diz o contrário para o outro lado', () => {
+    const s = foraDoAmbiente(MODULOS, 'engenharia')
+
+    expect(s).toContain('Empresa')
+  })
+
+  it('sem nada escondido, a frase é vazia', () => {
+    expect(foraDoAmbiente([{ grupo: 'Visão geral', label: 'Painel', path: '/' }], 'empresa')).toBe('')
+  })
+})
+
+describe('outroAmbiente', () => {
+  it('alterna', () => {
+    /*
+     * r103 — o contrato mudou porque a realidade mudou.
+     *
+     * Este teste afirmava `outroAmbiente('engenharia') === 'empresa'`: a expressão de um mundo de
+     * DOIS ambientes. Com seis, "o outro" não tem resposta, e a função passou a devolver o PRÓXIMO
+     * na ordem de `AMBIENTES`. O teste antigo não estava errado — ele travava a decisão antiga.
+     *
+     * O contrato novo é mais forte e cobre os seis:
+     */
+    expect(outroAmbiente('empresa')).toBe('engenharia')
+
+    // Percorre o ciclo inteiro de `AMBIENTES` e volta ao começo.
+    const ciclo = AMBIENTES.map((_, i) => {
+      let atual: Ambiente = AMBIENTES[0]
+
+      for (let volta = 0; volta < i; volta += 1) atual = outroAmbiente(atual)
+
+      return atual
+    })
+
+    expect(ciclo).toEqual([...AMBIENTES])
+
+    // Nenhum ambiente é seu próprio "próximo", e o último volta ao primeiro.
+    for (const ambiente of AMBIENTES) expect(outroAmbiente(ambiente)).not.toBe(ambiente)
+
+    expect(outroAmbiente('administracao')).toBe('empresa')
+  })
+})

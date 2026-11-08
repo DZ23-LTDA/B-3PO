@@ -17,6 +17,9 @@ interface PickerLabels {
   title?: unknown
 }
 
+import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
+import type { Actor } from './rbac'
+
 export interface PluginFilesIpcDeps extends Omit<PluginFilesDeps, 'protectedRoots'> {
   ipcMain: Pick<IpcMain, 'handle'>
   dialog: Pick<Dialog, 'showOpenDialog'>
@@ -25,6 +28,14 @@ export interface PluginFilesIpcDeps extends Omit<PluginFilesDeps, 'protectedRoot
   broadcastChange: (change: { pluginId: string }) => void
   /** The resolved HERMES_HOME plus the platform-default homes it may differ from. */
   hermesHomes: () => string[]
+  /**
+   * r17 do V4 — resolver do ator.
+   *
+   * Um plugin que recebeu acesso a uma pasta **opera arquivo neste computador**. É capacidade de
+   * máquina, como `fs`/`git`/`terminal` — a política certa é `podeOperarMaquina`, não o RBAC de
+   * recurso de negócio.
+   */
+  actorOf: () => Promise<Actor | null>
 }
 
 const label = (value: unknown, fallback: string) =>
@@ -33,9 +44,16 @@ const label = (value: unknown, fallback: string) =>
 export function registerPluginFilesIpc(deps: PluginFilesIpcDeps): PluginFiles {
   const files = createPluginFiles({ ...deps, protectedRoots: deps.hermesHomes })
 
+  /** A recusa, ou `null` quando pode seguir. Toda escrita num folder concedido passa por aqui. */
+  const recusa = async () => (podeOperarMaquina(await deps.actorOf(), 'escrita', 'plugin-files') ? null : RECUSA_MAQUINA)
+
   deps.ipcMain.handle(
     'hermes:pluginFiles:request',
     async (event: IpcMainInvokeEvent, pluginId: unknown, labels: PickerLabels = {}) => {
+      const negado = await recusa()
+
+      if (negado) return negado
+
       const window = deps.windowFor(event)
 
       const options = {
@@ -60,7 +78,11 @@ export function registerPluginFilesIpc(deps: PluginFilesIpcDeps): PluginFiles {
     }
   )
 
-  deps.ipcMain.handle('hermes:pluginFiles:grants', async (_event, pluginId: unknown) => files.grants(pluginId))
+  deps.ipcMain.handle('hermes:pluginFiles:grants', async (_event, pluginId: unknown) => {
+    const negado = await recusa()
+
+    return negado ?? files.grants(pluginId)
+  })
 
   deps.ipcMain.handle('hermes:pluginFiles:revoke', async (_event, pluginId: unknown, folderId?: unknown) => {
     const revoked = await files.revoke(pluginId, folderId)
@@ -72,9 +94,11 @@ export function registerPluginFilesIpc(deps: PluginFilesIpcDeps): PluginFiles {
     return revoked
   })
 
-  deps.ipcMain.handle('hermes:pluginFiles:op', async (_event, pluginId: unknown, request) =>
-    files.run(pluginId, request)
-  )
+  deps.ipcMain.handle('hermes:pluginFiles:op', async (_event, pluginId: unknown, request) => {
+    const negado = await recusa()
+
+    return negado ?? files.run(pluginId, request)
+  })
 
   return files
 }

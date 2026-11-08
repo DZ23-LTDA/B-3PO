@@ -18,6 +18,53 @@ export const MESSAGING_ROUTE = '/messaging'
 export const WEBHOOKS_ROUTE = '/webhooks'
 export const ARTIFACTS_ROUTE = '/artifacts'
 export const CRON_ROUTE = '/cron'
+export const CRM_ROUTE = '/crm'
+export const PRODUCTS_ROUTE = '/products'
+export const STOCK_ROUTE = '/stock'
+export const SALES_ROUTE = '/sales'
+export const FINANCE_ROUTE = '/finance'
+export const AGENDA_ROUTE = '/agenda'
+export const COMPRAS_ROUTE = '/compras'
+export const EMPRESA_ROUTE = '/empresa'
+export const SERVICOS_ROUTE = '/servicos'
+export const RH_ROUTE = '/rh'
+export const ATENDIMENTO_ROUTE = '/atendimento'
+export const AGENTES_ROUTE = '/agentes'
+export const POSVENDA_ROUTE = '/posvenda'
+export const MARKETING_ROUTE = '/marketing'
+export const PAINEL_ROUTE = '/painel'
+export const AUTOMACOES_ROUTE = '/automacoes'
+export const SOFIA_ROUTE = '/sofia'
+
+/** r60 do GOAL V2: entregas - a ultima etapa do vertical (distribuidora de gas). */
+export const ENTREGAS_ROUTE = '/entregas'
+
+/** r78 (G4): vasilhame em comodato — a vertical de gás/água. */
+export const GAS_ROUTE = '/gas'
+
+/** r79 (T-11): leitura periodica de medidor — a segunda metade da vertical de agua. */
+export const MEDIDORES_ROUTE = '/medidores'
+
+/** r88: backup e restore dos dados de negocio. */
+export const BACKUPS_ROUTE = '/backups'
+
+/** r80 do GOAL V2: projetos - o plano persistente do §12. */
+export const PROJETOS_ROUTE = '/projetos'
+
+/** r87 do GOAL V2: trabalhos pontuais - o terceiro tipo do §12. Ele expira. */
+export const TRABALHOS_ROUTE = '/trabalhos'
+
+/** r91 do GOAL V2: a estrutura da organizacao - o desenho, separado do cadastro. */
+export const ORGANIZACAO_ROUTE = '/organizacao'
+
+/** r98 do GOAL V2: a busca global - achar modulo sem saber o menu (§13:450). */
+export const BUSCA_ROUTE = '/busca'
+export const DOCUMENTOS_ROUTE = '/documentos'
+export const PRIVACIDADE_ROUTE = '/privacidade'
+
+// r124 do GOAL V2: a tela dos ambientes do §13:413-419. Ela troca a preferencia de ambiente; o filtro
+// da barra lateral ainda depende do host do upstream (ver docs/b3po/V2-RODADA-124).
+export const AMBIENTE_ROUTE = '/ambiente'
 export const PROFILES_ROUTE = '/profiles'
 export const AGENTS_ROUTE = '/agents'
 export const STARMAP_ROUTE = '/starmap'
@@ -25,11 +72,34 @@ export const STARMAP_ROUTE = '/starmap'
 export type AppView =
   | 'session-import'
   | 'agents'
+  | 'agenda'
   | 'artifacts'
   | 'capabilities'
   | 'chat'
   | 'command-center'
+  | 'compras'
+  | 'agentes'
+  | 'posvenda'
+  | 'marketing'
+  | 'painel'
+  | 'automacoes'
+  | 'sofia'
+  | 'entregas'
+  | 'gas'
+  | 'medidores'
+  | 'backups'
+  | 'projetos'
+  | 'trabalhos'
+  | 'organizacao'
+  | 'busca'
+  | 'documentos'
+  | 'privacidade'
+  | 'ambiente'
+  | 'atendimento'
+  | 'crm'
   | 'cron'
+  | 'empresa'
+  | 'finance'
   // A contributed (plugin) full page at its own route — NOT chat. Without this
   // distinction contributed paths fell through appViewForPath's 'chat' default,
   // so the sidebar kept a session highlighted and the titlebar kept the
@@ -37,22 +107,55 @@ export type AppView =
   | 'extension'
   | 'messaging'
   | 'profiles'
+  | 'products'
+  | 'sales'
+  | 'rh'
+  | 'servicos'
   | 'settings'
   | 'starmap'
+  | 'stock'
   | 'webhooks'
 
 export type AppRouteId =
   | 'session-import'
   | 'agents'
+  | 'agenda'
   | 'artifacts'
   | 'capabilities'
   | 'command-center'
+  | 'compras'
+  | 'agentes'
+  | 'posvenda'
+  | 'marketing'
+  | 'painel'
+  | 'automacoes'
+  | 'sofia'
+  | 'entregas'
+  | 'gas'
+  | 'medidores'
+  | 'backups'
+  | 'projetos'
+  | 'trabalhos'
+  | 'organizacao'
+  | 'busca'
+  | 'documentos'
+  | 'privacidade'
+  | 'ambiente'
+  | 'atendimento'
+  | 'crm'
   | 'cron'
+  | 'empresa'
+  | 'finance'
   | 'messaging'
   | 'new'
   | 'profiles'
+  | 'products'
+  | 'sales'
+  | 'rh'
+  | 'servicos'
   | 'settings'
   | 'starmap'
+  | 'stock'
   | 'webhooks'
 
 export interface AppRoute {
@@ -71,6 +174,34 @@ export const APP_ROUTES = [
   { id: 'webhooks', path: WEBHOOKS_ROUTE, view: 'webhooks' },
   { id: 'artifacts', path: ARTIFACTS_ROUTE, view: 'artifacts' },
   { id: 'cron', path: CRON_ROUTE, view: 'cron' },
+  { id: 'agenda', path: AGENDA_ROUTE, view: 'agenda' },
+  { id: 'compras', path: COMPRAS_ROUTE, view: 'compras' },
+  { id: 'agentes', path: AGENTES_ROUTE, view: 'agentes' },
+  { id: 'posvenda', path: POSVENDA_ROUTE, view: 'posvenda' },
+  { id: 'marketing', path: MARKETING_ROUTE, view: 'marketing' },
+  { id: 'painel', path: PAINEL_ROUTE, view: 'painel' },
+  { id: 'automacoes', path: AUTOMACOES_ROUTE, view: 'automacoes' },
+  { id: 'sofia', path: SOFIA_ROUTE, view: 'sofia' },
+  { id: 'entregas', path: ENTREGAS_ROUTE, view: 'entregas' },
+  { id: 'gas', path: GAS_ROUTE, view: 'gas' },
+  { id: 'medidores', path: MEDIDORES_ROUTE, view: 'medidores' },
+  { id: 'backups', path: BACKUPS_ROUTE, view: 'backups' },
+  { id: 'projetos', path: PROJETOS_ROUTE, view: 'projetos' },
+  { id: 'trabalhos', path: TRABALHOS_ROUTE, view: 'trabalhos' },
+  { id: 'organizacao', path: ORGANIZACAO_ROUTE, view: 'organizacao' },
+  { id: 'busca', path: BUSCA_ROUTE, view: 'busca' },
+  { id: 'documentos', path: DOCUMENTOS_ROUTE, view: 'documentos' },
+  { id: 'privacidade', path: PRIVACIDADE_ROUTE, view: 'privacidade' },
+  { id: 'ambiente', path: AMBIENTE_ROUTE, view: 'ambiente' },
+  { id: 'atendimento', path: ATENDIMENTO_ROUTE, view: 'atendimento' },
+  { id: 'crm', path: CRM_ROUTE, view: 'crm' },
+  { id: 'empresa', path: EMPRESA_ROUTE, view: 'empresa' },
+  { id: 'finance', path: FINANCE_ROUTE, view: 'finance' },
+  { id: 'products', path: PRODUCTS_ROUTE, view: 'products' },
+  { id: 'sales', path: SALES_ROUTE, view: 'sales' },
+  { id: 'rh', path: RH_ROUTE, view: 'rh' },
+  { id: 'servicos', path: SERVICOS_ROUTE, view: 'servicos' },
+  { id: 'stock', path: STOCK_ROUTE, view: 'stock' },
   { id: 'profiles', path: PROFILES_ROUTE, view: 'profiles' },
   { id: 'agents', path: AGENTS_ROUTE, view: 'agents' },
   { id: 'starmap', path: STARMAP_ROUTE, view: 'starmap' }
@@ -136,6 +267,19 @@ export interface SidebarNavContribution {
   path: string
   /** `'advanced'` keeps the row out of Simple mode; unset shows it everywhere. */
   tier?: InterfaceTier
+  /**
+   * The section this row belongs to, as a human label (r265).
+   *
+   * **Por que é string e não um enum**: as seções são vocabulário de PRODUTO, não do host.
+   * O B-3PO agrupa por fluxo de trabalho ("Comércio", "Operação"); outro consumidor pode
+   * não querer seção nenhuma. **Uma contribuição sem `group` continua uma linha solta**, que
+   * é como todas eram antes desta rodada.
+   *
+   * **A ordem das seções é a ordem em que elas aparecem pela primeira vez na lista** —
+   * o `order` da contribuição decide, e o render só desenha o cabeçalho quando o grupo muda.
+   * Isso mantém uma fonte de verdade só (`order`) em vez de duas.
+   */
+  group?: string
 }
 
 // ── Contributed profile-group header — the `sidebar.profileGroup.header` area ─

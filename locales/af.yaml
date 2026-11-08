@@ -526,7 +526,7 @@ gateway:
     timed_out: "❌ Hermes-opdatering het na 30 minute uitgetel."
     finished_success: "✅ Hermes-opdatering suksesvol voltooi."
     last_lines: "{msg}\n\nLaaste reëls:\n```\n{tail}\n```"
-    managed_action: "Hermes Agent opdateer"
+    managed_action: "B-3PO opdateer"
     not_applicable: "✗ `hermes update` geld nie vir hierdie installasie nie ({method}).\nOpdateer met: {command}"
   usage:
     rate_limits: "⏱️ **Tariefperke:** {state}"
@@ -1459,13 +1459,13 @@ platform:
       size_downgraded: "{label}-grootte {size_mb}MB oorskry die limiet van {cap}; eerder as 'n lêer gestuur."
   email:
     image_line: "Beeld: {url}"
-    standalone_subject: "Hermes Agent"
+    standalone_subject: "B-3PO"
   dingtalk:
     emotion:
       thinking: "🤔Dink"
       done: "🥳Klaar"
   irc:
-    quit_message: "Hermes Agent skakel af"
+    quit_message: "B-3PO skakel af"
     standalone_quit: "afgelewer"
   relay:
     confirm_approve_once: "Eenmalig goedkeur"
@@ -1487,7 +1487,7 @@ slash:
   sethome:
     description: "Stel hierdie geselsie as die tuiste-kanaal"
   update:
-    description: "Opdateer Hermes Agent na die nuutste weergawe"
+    description: "Opdateer B-3PO na die nuutste weergawe"
   category:
     session: "Sessie"
     configuration: "Konfigurasie"
@@ -1695,7 +1695,7 @@ slash:
   image:
     description: "Heg 'n plaaslike beeldlêer aan vir jou volgende prompt"
   version:
-    description: "Wys Hermes Agent-weergawe"
+    description: "Wys B-3PO-weergawe"
   debug:
     description: "Laai ontfoutverslag op (stelselinligting + loglae) en kry deelbare skakels"
   quit:
@@ -1768,8 +1768,8 @@ cli:
     no_saved_card_add_funds_hint: "Geen gestoorde kaart op rekord nie — “Voeg fondse by” lei jou deur die byvoeging van een."
     actions_require_admin: "Faktureringsaksies vereis 'n org-administrateur/eienaar."
     remote_spending_off_for_org: "Afstandbesteding is af vir hierdie org."
-    killswitch_reason_overview: "'n Faktureringsadministrateur kan dit aanskakel op die portaal se Hermes Agent-blad om hier fondse by te voeg."
-    killswitch_reason_buy: "'n Faktureringsadministrateur kan dit aanskakel op die portaal se Hermes Agent-blad voordat fondse bygevoeg word."
+    killswitch_reason_overview: "'n Faktureringsadministrateur kan dit aanskakel op die portaal se B-3PO-blad om hier fondse by te voeg."
+    killswitch_reason_buy: "'n Faktureringsadministrateur kan dit aanskakel op die portaal se B-3PO-blad voordat fondse bygevoeg word."
     add_funds_now_hint: "Voeg nou fondse by — 'n enkele afskrywing, vandag by jou saldo gevoeg."
     refill_when_low_amounts: "Vul aan wanneer laag — skryf outomaties {reload_to} af wanneer jou saldo onder {threshold} daal."
     refill_when_low_generic: "Vul aan wanneer laag — skryf outomaties van jou kaart af wanneer jou saldo onder die bedrag daal wat jy stel."
@@ -1840,7 +1840,7 @@ cli:
     charge_failed_card_declined: "🔴 Jou kaart is geweier. Probeer 'n ander kaart op die portaal."
     charge_failed_generic: "🔴 Die afskrywing het nie deurgegaan nie ({reason})."
     charge_error_no_payment_method: "💳 Geen kaart op rekord nie — laai op en bestuur fakturering op die portaal."
-    charge_error_remote_spending_disabled: "Afstandbesteding is af vir hierdie rekening — 'n faktureringsadministrateur kan dit aanskakel op die portaal se Hermes Agent-blad."
+    charge_error_remote_spending_disabled: "Afstandbesteding is af vir hierdie rekening — 'n faktureringsadministrateur kan dit aanskakel op die portaal se B-3PO-blad."
     charge_error_role_required: "Om fondse by te voeg vereis 'n org-administrateur/eienaar. Vra 'n administrateur, of bestuur dit op die portaal."
     charge_error_idempotency_conflict: "🔴 Daardie afskrywingsleutel is reeds vir 'n ander bedrag gebruik. Begin 'n nuwe oplaai."
     revoked_by_admin: "'n Administrateur het hierdie terminale se besteding gestop."
@@ -1857,7 +1857,7 @@ cli:
     charge_stepup_noninteractive: "Voer `hermes portal` uit en laat Afstandbesteding toe, en probeer dan weer."
     charge_stepup_declined: "Geen afskrywing gemaak nie. Voer /topup uit wanneer jy Afstandbesteding wil toelaat."
     charge_stepup_not_granted: "Kon nie Afstandbesteding toelaat nie — 'n org-administrateur of -eienaar moet dit goedkeur. Jou kaart is nie afgeskryf nie."
-    allowed_but_org_off: "Afstandbesteding is vir hierdie terminale toegelaat, maar dit is steeds af vir hierdie org. 'n Faktureringsadministrateur kan dit aanskakel op die portaal se Hermes Agent-blad; voer dan /topup weer uit."
+    allowed_but_org_off: "Afstandbesteding is vir hierdie terminale toegelaat, maar dit is steeds af vir hierdie org. 'n Faktureringsadministrateur kan dit aanskakel op die portaal se B-3PO-blad; voer dan /topup weer uit."
     allowed_no_card: "Afstandbesteding toegelaat — maar daar is nog geen kaart op rekord nie."
     topup_on_portal_to_continue: "Laai op en bestuur fakturering op die portaal om voort te gaan."
     allowed_run_topup: "Afstandbesteding toegelaat. Voer /topup uit om voort te gaan."
@@ -2163,7 +2163,7 @@ cli:
     images_attached_one: "📎 {count} beeld aangeheg"
     images_attached_other: "📎 {count} beelde aangeheg"
     command_interrupted: "Opdrag onderbreek."
-    welcome: "Welkom by Hermes Agent! Tik jou boodskap of /help vir opdragte."
+    welcome: "Welkom by B-3PO! Tik jou boodskap of /help vir opdragte."
     activated_skills_label: "Geaktiveerde vaardighede:"
     redaction_disabled_title: "⚠  Geheim-redigering is GEDEAKTIVEER"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value}). API-sleutels en tokens kan woordeliks in kletsuitvoer, sessie-JSON's en loglae verskyn. Stel {setting} in config.yaml om dit weer te aktiveer."
@@ -2243,7 +2243,7 @@ cli:
   render:
     response_transformed: "[Antwoord na stroming getransformeer]"
     banner_tagline: "{name} - KI-agentraamwerk"
-    banner_version: "Hermes Agent v{version} ({date})"
+    banner_version: "B-3PO v{version} ({date})"
   subagents:
     cannot_steer_process: "Agtergrondprosesse kan nie gestuur word nie; stop hulle of lees die log."
     count_live: "{count} lewendig"
@@ -3120,12 +3120,12 @@ cli:
       usage: "/timestamps [on|off|status]"
       label: "Boodskap-tydstempels"
     update:
-      managed_action: "Hermes Agent opdateer"
+      managed_action: "B-3PO opdateer"
       choice_update: "Dateer Nou Op"
-      choice_update_desc: "verlaat die huidige sessie en dateer Hermes Agent op"
+      choice_update_desc: "verlaat die huidige sessie en dateer B-3PO op"
       choice_cancel: "Kanselleer"
       choice_cancel_desc: "behou die huidige sessie"
-      title: "☤  Dateer Hermes Agent Op"
+      title: "☤  Dateer B-3PO Op"
       detail: "Dit sal die huidige sessie verlaat en `hermes update` uitvoer."
       cancelled: "🟡 /update gekanselleer."
       launching: "☤ Begin opdatering..."
@@ -3145,7 +3145,7 @@ cli:
     fix_lm_studio: "LM Studio-oplossing: Stel kontekslengte in die modelinstellings → herlaai model"
     fix_local_server: "Oplossing: begin jou bediener met ten minste {tokens_k}K konteks (llama.cpp: -c {tokens}), of stel model.ollama_num_ctx in config.yaml op die venster wat dit werklik bedien"
     fix_config: "Oplossing: Stel model.context_length in config.yaml, of verhoog jou bediener se konteksinstelling"
-    hermes_models_not_agentic: "⚠  Nous Research Hermes 3- & 4-modelle is NIE agenties nie en is nie ontwerp vir gebruik met Hermes Agent nie."
+    hermes_models_not_agentic: "⚠  Nous Research Hermes 3- & 4-modelle is NIE agenties nie en is nie ontwerp vir gebruik met B-3PO nie."
     hermes_models_lack_tools: "Hulle het nie die gereedskapsoproep-vermoëns wat agent-werkvloeie vereis nie. Oorweeg 'n agentiese model (Claude, GPT, Gemini, DeepSeek, ens.)."
     hermes_models_switch_hint: "Skakel oor met: /model sonnet  of  /model gpt5"
     project_skills_loaded: "◆ {count} projekvaardigheid/-hede uit hierdie bewaarplek gelaai"

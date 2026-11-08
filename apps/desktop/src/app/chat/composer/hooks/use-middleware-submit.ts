@@ -1,4 +1,10 @@
-import { useCallback, useRef } from 'react'
+import { useStore } from '@nanostores/react'
+import { useCallback, useEffect, useRef } from 'react'
+
+import {
+  $delegacaoParaEnviar,
+  limparEnvioDaDelegacao
+} from '@/store/delegacao-pendente'
 
 import { interceptsTypedVoiceStop } from '@/lib/voice-stop-word'
 
@@ -47,6 +53,27 @@ export function useMiddlewareSubmit(onSubmitProp: ChatBarProps['onSubmit']) {
     },
     [onSubmitProp]
   )
+
+  /*
+   * r2 da V6 — executar o pedido delegado.
+   *
+   * Quando a pessoa clica "Executar" no bloco de delegacao, o pedido ja' foi pintado no composer por
+   * `useDelegacaoPendenteNoComposer`. Aqui ele e' **enviado pelo mesmo `onSubmit` do Enter** — nao ha
+   * segundo caminho de submissao, nem chamada direta ao gateway.
+   *
+   * Por que um atom e nao uma prop: quem pinta nao tem o `onSubmit`, e passa-lo adiante custaria linhas
+   * em `ChatBar`, que esta' no teto de `FUNC_LINES`.
+   */
+  const delegacaoParaEnviar = useStore($delegacaoParaEnviar)
+
+  useEffect(() => {
+    if (!delegacaoParaEnviar) {
+      return
+    }
+
+    limparEnvioDaDelegacao()
+    void onSubmit(delegacaoParaEnviar)
+  }, [delegacaoParaEnviar, onSubmit])
 
   return { onSubmit, voiceStopRef }
 }

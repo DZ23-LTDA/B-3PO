@@ -37,6 +37,7 @@ export const esProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   moveNoProjects: 'No hay otros proyectos',
   reveal: 'Revelar en carpeta',
   copyPath: 'Copiar ruta',
+  runTests: 'Ejecutar pruebas',
   removeFromSidebar: 'Ocultar de la barra lateral',
   createdInPreviousContext:
     'El proyecto se creó en la conexión o el perfil anterior. Vuelve allí; no se escribió IDEA.md.',

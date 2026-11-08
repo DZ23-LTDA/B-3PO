@@ -108,7 +108,8 @@ export function AutoField({
           <Label className="text-sm">{label}</Label>
           <FieldHint schema={schema} schemaKey={schemaKey} />
         </div>
-        <Switch checked={!!value} onCheckedChange={onChange} />
+        {/* r96: `<Label>` irmão sem htmlFor nao nomeia o switch (axe: button-name critical). */}
+        <Switch aria-label={String(label)} checked={!!value} onCheckedChange={onChange} />
       </div>
     );
   }

@@ -552,6 +552,7 @@ export function MessagingView({ setStatusbarItemGroup: _setStatusbarItemGroup, .
 
   return (
     <PageSearchShell
+      title={t.sidebar.nav.messaging}
       {...props}
       onSearchChange={setQuery}
       searchHidden={(platforms?.length ?? 0) === 0}
@@ -756,7 +757,7 @@ function PlatformDetail({
         <PlatformAvatar platformId={platform.id} platformName={platform.name} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="min-w-0 truncate text-[0.9375rem] font-semibold tracking-tight">{platform.name}</h3>
+            <h2 className="min-w-0 truncate text-[0.9375rem] font-semibold tracking-tight">{platform.name}</h2>
             <StatePill tone={platformStatusTone(platform)}>{stateLabel(platform.state, m)}</StatePill>
             {/* Resting states earn no pill — only actionable ones. */}
             {!platform.configured && <SetupPill active={false}>{m.needsSetup}</SetupPill>}
@@ -1110,7 +1111,7 @@ function MessagingField({
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h4 className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{children}</h4>
+  return <h3 className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{children}</h3>
 }
 
 function PlatformHint({ platform }: { platform: MessagingPlatformInfo }) {

@@ -34,7 +34,40 @@ export const fmtMonth = new Intl.DateTimeFormat(undefined, { month: 'long' })
 export const fmtMonthYear = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' })
 
 // ── Relative time ──────────────────────────────────────────────────────────
-const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto', style: 'short' })
+// O locale da UI, não o do sistema: `Intl.*(undefined)` formata em pt-BR numa máquina pt-BR mesmo com a
+// interface em inglês (e vice-versa), e aí "5 min ago" vira "há 5 min" ao lado de um rótulo em inglês.
+// O provider de i18n chama `setTimeLocale` quando o idioma resolve; o default acompanha DEFAULT_LOCALE.
+let timeLocale: string = 'en'
+const rtfCache = new Map<string, Intl.RelativeTimeFormat>()
+
+export function setTimeLocale(locale: string | undefined): void {
+  const next = locale?.trim() || 'en'
+
+  if (next !== timeLocale) {
+    timeLocale = next
+  }
+}
+
+export function getTimeLocale(): string {
+  return timeLocale
+}
+
+function relativeFormatter(): Intl.RelativeTimeFormat {
+  const cached = rtfCache.get(timeLocale)
+
+  if (cached) {
+    return cached
+  }
+
+  const created = new Intl.RelativeTimeFormat(timeLocale, { numeric: 'auto', style: 'short' })
+  rtfCache.set(timeLocale, created)
+
+  return created
+}
+
+const rtf = {
+  format: (value: number, unit: Intl.RelativeTimeFormatUnit) => relativeFormatter().format(value, unit)
+}
 
 // Localized bidirectional "in 5 min" / "2 hr ago" — coarsest sensible unit so a
 // daily job reads "in 14 hr", not "in 840 min".

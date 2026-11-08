@@ -195,7 +195,7 @@ describe('Save in a session sandbox', () => {
         />
       )
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+      fireEvent.click(await screen.findByRole('button', { name: /^(Editar|Edit)\b/ }))
       const editor = EditorView.findFromDOM(rendered.container.querySelector('.cm-content')!)!
       act(() => editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: 'edited' } }))
       fireEvent.click(screen.getByRole('button', { name: /Save/ }))

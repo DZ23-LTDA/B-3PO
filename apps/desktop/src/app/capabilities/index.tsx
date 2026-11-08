@@ -168,6 +168,7 @@ export function CapabilitiesView({
 
   return (
     <PageSearchShell
+      title={t.sidebar.nav.capabilities}
       {...props}
       activeTab={mode}
       onTabChange={id => setMode(id as CapabilityMode)}

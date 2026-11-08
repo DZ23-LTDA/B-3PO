@@ -72,7 +72,15 @@ test('truncation really frees the file, and an append-mode writer restarts at 0'
     const handle = fs.openSync(file, 'a')
 
     try {
-      fs.ftruncateSync(handle, LOG_MAX_BYTES + 1) // Grow without writing GBs.
+      // `ftruncate` para crescer é POSIX: no Windows ele recusa. Crescer com um bloco escrito no fim
+      // produz o mesmo arquivo grande sem gravar GBs e funciona nos dois sistemas.
+      try {
+        fs.ftruncateSync(handle, LOG_MAX_BYTES + 1)
+      } catch {
+        // Crescer pelo caminho (não pelo handle em modo append: escrita com posição em O_APPEND
+        // acrescenta no fim, então o arquivo não passaria do limite).
+        fs.truncateSync(file, LOG_MAX_BYTES + 1)
+      }
 
       assert.equal(
         reclaimActiveLogIfOversized(file, {

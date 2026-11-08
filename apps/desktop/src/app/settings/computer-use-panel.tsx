@@ -179,7 +179,7 @@ export function ComputerUsePanel({ onConfiguredChange }: ComputerUsePanelProps) 
           ) : (
             <p className="text-[0.72rem] text-muted-foreground">{PLATFORM_NOTE[status.platform] ?? ''}</p>
           )}
-          {status.version && <p className="text-[0.68rem] text-muted-foreground/80">{status.version}</p>}
+          {status.version && <p className="text-[0.68rem] text-muted-foreground">{status.version}</p>}
         </div>
         <Button onClick={() => void refresh()} size="sm" variant="text">
           <RefreshCw className="size-3.5" />

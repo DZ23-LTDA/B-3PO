@@ -253,7 +253,10 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
               )}
             </div>
           </aside>
-          <main className={cn('flex min-h-0 min-w-0 flex-col', !selected && 'max-[760px]:hidden')}>
+          {
+        /* r94: o shell ja tem o <main>; duas mains (mesmo irmaos) violam landmark-no-duplicate-main. */
+      }
+      <div className={cn('flex min-h-0 min-w-0 flex-col', !selected && 'max-[760px]:hidden')}>
             {!current ? (
               <PanelEmpty description={copy.chooseHelp} icon="comment-discussion" title={copy.choose} />
             ) : (
@@ -312,7 +315,7 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
                 </footer>
               </>
             )}
-          </main>
+          </div>
         </div>
       </section>
     </OverlayView>

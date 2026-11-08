@@ -424,10 +424,21 @@ export function useStatusbarItems({
   const inferenceReady = gatewayOpen && inferenceStatus?.ready === true && !gatewayHealth.degraded
   const gatewayDegraded = gatewayOpen || gatewayConnecting || gatewayHealth.degraded
 
+  /*
+   * r290 — amber-700 no claro; **amber-400 no escuro**.
+   *
+   * A primeira versão desta correção trocou `amber-600` por `amber-700` e parou aí. No tema claro
+   * funcionou (`#b45309` = 4.98:1); **no escuro quebrou** — o `axe-core` mediu `#bb4d00` sobre
+   * `#0d1015` a **3.78:1** em 10 de 10 telas.
+   *
+   * O `amber-700` é escuro demais para fundo escuro: a cor que corrige um tema é a que estraga o
+   * outro. O padrão do projeto já fazia certo (ver `preview-file.tsx` e a linha 757 deste arquivo):
+   * uma cor por tema. Aplicado aqui.
+   */
   const gatewayClassName = inferenceReady
     ? undefined
     : gatewayDegraded
-      ? 'text-amber-600 hover:text-amber-600'
+      ? 'text-amber-700 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-400'
       : 'text-destructive hover:text-destructive'
 
   const rollbackBody = t.settings.about.channel.rollbackBody

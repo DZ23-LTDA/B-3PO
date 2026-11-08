@@ -1,0 +1,488 @@
+{
+  "round": 107,
+  "queue": [
+    {
+      "id": "T-01",
+      "what": "Desbloquear EXT-2 (Developer Mode) e remedir a regressao",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "EXT-2"
+    },
+    {
+      "id": "T-02",
+      "what": "G9: pacotes de entrega, rollback, matriz de riscos, veredito",
+      "owner": "dsh",
+      "status": "done",
+      "done_in": "builds desktop/web exit 0, rollback atomico provado (2 falhas reais), veredito por escopo"
+    },
+    {
+      "id": "T-03",
+      "what": "Completar UPSTREAM-PATCH-REGISTER.md",
+      "owner": "dsh",
+      "status": "done",
+      "done_in": "UPSTREAM-PATCH-REGISTER.md com 13 patches"
+    },
+    {
+      "id": "T-04",
+      "what": "FINAL-DELIVERY.txt",
+      "owner": "dsh",
+      "status": "done",
+      "blocked_by": "T-02",
+      "done_in": "FINAL-DELIVERY.txt reescrito na r51 (12 correcoes)"
+    },
+    {
+      "id": "T-05",
+      "what": "Diferenciar os 5 modos sem identidade (G5)",
+      "owner": "proprietario+dsh",
+      "status": "done",
+      "blocked_by": "decisao de produto",
+      "done_in": "r103: identidade visual dos 6 modos (matiz por token) + outroAmbiente/foraDoAmbiente cientes dos 6"
+    },
+    {
+      "id": "T-06",
+      "what": "Provar ativacao de UM conector sem credencial comercial (ntfy/irc)",
+      "owner": "dsh",
+      "status": "blocked",
+      "blocked_by": "EXT-6: credencial real de uma plataforma (acao do dono)",
+      "proven": "adapter IRC existe e passa 18 testes (plugins/platforms/irc/adapter.py); ntfy-approval.yaml no catalogo"
+    },
+    {
+      "id": "T-07",
+      "what": "Corrigir mensagem de SKU inexistente em Vendas",
+      "owner": "dsh",
+      "status": "done",
+      "done_in": "corrigido na r23: produto_nao_encontrado vs saldo_insuficiente (+ teste)"
+    },
+    {
+      "id": "T-08",
+      "what": "Decidir preco zero em Vendas (cortesia ou bloqueio)",
+      "owner": "proprietario",
+      "status": "done",
+      "done_in": "r76: confirm antes de faturar + marca (cortesia) na tabela; receivableForSale ja nao criava conta de R$0 (correto)"
+    },
+    {
+      "id": "T-09",
+      "what": "Decidir foco visivel (WCAG 2.4.7): manter a regra global do upstream, reverter, ou marcar superficie por superficie",
+      "owner": "proprietario",
+      "status": "done",
+      "blocked_by": "decisao de produto",
+      "measured_in": "r67 - outline:none em todo o app; 2 superficies marcadas com [data-b3po-foco]",
+      "done_in": "r77: *:focus-visible ganha outline 2px; mouse continua sem anel; provado 30/30 via Tab em 6 rotas"
+    },
+    {
+      "id": "T-10",
+      "what": "Definir backup dos 14 JSON de negocio (quando, quantas versoes, onde) e um caminho de restore",
+      "owner": "proprietario",
+      "status": "done",
+      "blocked_by": "decisao de arquitetura (nao e correcao: define politica de disco do usuario)",
+      "measured_in": "r70 - %APPDATA%/B-3PO/b3po: 14 arquivos, 606 KB, ZERO backup, ZERO restore",
+      "done_in": "r75: store-backup.ts + 19 stores; 5 versoes por arquivo; provado em runtime (5 backups apos 8 escritas)",
+      "remaining": "FECHADO na r88: restore implementado (listar, validar, aplicar, reverter) e provado em runtime + 9 testes"
+    },
+    {
+      "id": "T-11",
+      "what": "Leitura periodica de hidrometro/medidor (serie temporal de medicao) - o segundo modelo da vertical agua",
+      "owner": "dsh",
+      "status": "done",
+      "note": "r78 entregou o comodato (vasilhame). O G4 fica PASS com escopo declarado: vasilhame PASS, medicao nao construida.",
+      "done_in": "r79: meter-store + ipc + bridge + tela + 19 testes; validacao por vizinhos no tempo (aceita leitura atrasada)"
+    },
+    {
+      "id": "T-12",
+      "what": "Ligar consumo medido a cobranca (tarifa por faixa, minimo, esgoto)",
+      "owner": "proprietario",
+      "status": "blocked",
+      "blocked_by": "decisao comercial: a tarifa e politica da revenda, nao codigo",
+      "measured_in": "r79 - consumo calculado e provado; nenhuma tarifa aplicada"
+    },
+    {
+      "id": "T-13",
+      "what": "5 telas aninham dois <main> (HTML invalido) - trocar o wrapper por <div> como foi feito em gas/medidores",
+      "owner": "dsh",
+      "status": "done",
+      "note": "r81: visual identico, entao nao e urgencia; e correcao de estrutura. afeta stock, sales, crm, compras, finance.",
+      "done_in": "r82 + r94: 10 telas na r82, mais 7 na r94 (aria-label antes de className escapou do regex). 27/27 rotas com 1 <main> e 0 violacao de landmark."
+    },
+    {
+      "id": "T-15",
+      "what": "Decidir T-15 com a causa estrutural nomeada: <main> esta DENTRO de uma zona da arvore de paineis",
+      "owner": "proprietario",
+      "status": "done",
+      "blocked_by": "decisao de produto: aceitar region(55) OU autorizar o refactor que tira <main> de dentro da zona (ai as duas regras passam)",
+      "measured_in": "r92 - a terceira via (1 region no root) foi tentada: 57->13 nos, mas criou landmark-main-is-top-level em 11 rotas; revertida e registrada no codigo",
+      "done_in": "r97: o <main> virou o root da arvore de paineis; 89 nos de region -> 0"
+    }
+  ],
+  "data": "06/11/2026",
+  "updated_note": "r63: T-02/T-03/T-04/T-07 marcados done (estavam 'todo' e ja tinham sido entregues)",
+  "suite": {
+    "total": 27,
+    "minhas": 0,
+    "pre_existentes_ou_ambiente": 27,
+    "baseline_r80": 36
+  },
+  "invariantes": [
+    "Recusa escrita ('nao vou fazer porque...') exige, na frase seguinte, o id do item na fila. Recusa sem item de fila e recusa que se perde.",
+    "Doc de estado tem de concordar com os vizinhos e nao conter afirmacao superada - VERIFICADO POR apps/desktop/electron/docs-continuity.test.ts (6 testes, provado por mutacao na r94)",
+    "Commit lista os arquivos (git add <caminho>), nunca -A: num repo com outros agentes, -A varre alteracao de terceiro nao revisada. Provado na r107, que comitou a delecao de 43 linhas de crm-whatsapp-signature.ts."
+  ],
+  "retratacoes": {
+    "total_afirmacoes_nao_vou_fazer": 10,
+    "superadas": 9,
+    "aberta": 1,
+    "aberta_id": "T-15",
+    "risco_tecnico_retratado": [
+      {
+        "rodada": "V4-r5",
+        "afirmei": "36 stores sem escrita atomica (risco HIGH)",
+        "real": "35 atomicos (writeFile temp + rename), 0 sem rename, 1 delega ao main.ts por projeto",
+        "causa": "contei so writeFileSync; os stores usam node:fs/promises async",
+        "correcao": "RISKS.md R1 de HIGH para LOW; electron/store-escrita-atomica.test.ts (5 testes)"
+      }
+    ]
+  },
+  "a11y_censo": {
+    "rotas": 27,
+    "main_errado": 0,
+    "color_contrast": 0,
+    "nested_interactive": 3,
+    "nested_interactive_causa": "X do PaneTab dentro de role=tab (r50)",
+    "region": 89,
+    "region_causa": "T-15: <main> dentro da zona da arvore"
+  },
+  "web_spa_verificado_r95": {
+    "build": "exit 0",
+    "typecheck": "0 erros",
+    "lint": "0 erros / 28 warnings",
+    "testes": "475 pass / 70 arquivos",
+    "axe": "0 violacoes",
+    "main": 1,
+    "h1": 1,
+    "axe_so_home": "0 violacoes em / (unica rota medida na r95)"
+  },
+  "web_spa_axe_r96": {
+    "rotas": 15,
+    "nos": 10,
+    "button_name": "2 (upstream: Select nao aceita aria-label)",
+    "color_contrast": "8 (text-destructive sobre bg-destructive/10 - MESMO token, nao ha valor que conserte; precisa de token separado ou fundo neutro)",
+    "heading_order": "0 (r97: aria-level=2 no CardTitle)",
+    "label_content_name_mismatch": "0 (r97)"
+  },
+  "web_spa_axe": {
+    "rotas": 15,
+    "nos": 0,
+    "button_name": "0 (NamedSelect aplica aria-label no button[role=combobox]; o kit descarta props)",
+    "color_contrast": "0 (o web e DARK-ONLY: --color-destructive-text #f87171; escurecer piorava)",
+    "heading_order": "0 (aria-level=2 no CardTitle)",
+    "label_content_name_mismatch": "0"
+  },
+  "axe": {
+    "desktop": {
+      "rotas": 27,
+      "nos": 0
+    },
+    "web": {
+      "rotas": 15,
+      "nos": 0
+    },
+    "region": "0 (<main> agora E o root da arvore de paineis)",
+    "nested_interactive": "0 (o X da aba virou <span aria-hidden>; Delete + menu de contexto fecham)",
+    "color_contrast": "0 (web dark-only: token de texto claro #f87171)",
+    "button_name": "0 (NamedSelect aplica aria-label; o kit descarta props)",
+    "heading_order": "0 (aria-level=2 no CardTitle)"
+  },
+  "mobile_runtime": {
+    "app_sobe": true,
+    "evidencia": "ActivityTaskManager: Displayed com.dz23.b3po/.MainActivity +13s51",
+    "bug_encontrado_e_corrigido": "SafeAreaView do react-native e no-op no Android: wordmark sobre o relogio",
+    "fix_testavel": "src/app/tela-inset.ts + 10 testes (android usa StatusBar.currentHeight; ios 0 para nao somar duas vezes)",
+    "suite": "179 passed | 8 skipped",
+    "apk": "BUILD SUCCESSFUL",
+    "nao_provado": "a tela corrigida em aparelho: o emulador aborta o system_server (screenshot preto, mCurrentFocus null)",
+    "acao_de_desbloqueio": "reiniciar o emulador por completo (emulator -avd <nome> -wipe-data) - operacao do dono"
+  },
+  "symlink": {
+    "reproduzido": true,
+    "erro": "EPERM: operation not permitted, symlink — fs.symlinkSync no setup do teste",
+    "windows_diz": "É necessário privilégio de administrador para essa operação",
+    "developer_mode": "DESLIGADO (chave AppModelUnlock ausente)",
+    "classificacao": "LIMITACAO DE AMBIENTE — nao e defeito do produto",
+    "testes_afetados": 3,
+    "arquivo": "electron/desktop-plugin-install.test.ts (3 de 54)",
+    "desktop_installation": "13/13 passa na suite completa (NAO afetado)",
+    "numero_anterior_reportado": "110",
+    "numero_real_medido": 3,
+    "untested": "2 testes que verificam a recusa de arvore com symlink pulam quando o symlink nao pode ser criado",
+    "acao_de_desbloqueio": "ligar Developer Mode — ACAO DO DONO; nao altero config de seguranca do Windows sem autorizacao"
+  },
+  "close_button": {
+    "estrutura": "X em overlay irmao do tablist, portal por aba, posicionado por offsetLeft",
+    "nomeado": true,
+    "fora_do_tab": true,
+    "teclado": "Tab alcanca, Enter/Espaco fecham; Delete na aba",
+    "axe": 0,
+    "unsaved_guard": "NAO IMPLEMENTADO: nenhum pane reporta dirty hoje (o prop existe e nenhum chamador passa). Falta o produtor, nao a guarda."
+  },
+  "select_patch": {
+    "motivo": "Select descarta aria-label (destructuring fixo) e role=combobox nao herda nome do conteudo",
+    "patch": "web/scripts/vendor-patches/nous-research-ui-select.mjs (idempotente, falha alto se a ancora sumir)",
+    "reaplicado_por": "postinstall + prebuild + pretest + pretypecheck",
+    "testado": "web/src/components/vendor-select-patch.test.tsx (3 testes)",
+    "aditivo": true,
+    "resultado": "15 comboboxes com nome; axe 0 em 15 rotas; web 478 testes",
+    "risco_residual": "ELIMINADO: provado removendo o patch a mao e vendo o pretest reaplicar"
+  },
+  "t12": {
+    "status": "done",
+    "pronto": "modelo + calculo puro + validacao + persistencia + IPC(4) + preload + api + 32 testes + TELA (tarifas-section) com estado 'nao configurada'",
+    "falta": null,
+    "regra": "nenhum preco padrao no codigo: sem politica vigente, calcular devolve null",
+    "axe_medidores": 0
+  },
+  "t06": {
+    "status": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "preparado": "gateway/connector_readiness.py + 12 testes: nomeia o que falta sem ler segredo, sem inventar e sem tocar rede",
+    "bloqueado": [
+      "conexao viva com plataforma real",
+      "mensagem recebida e respondida ponta a ponta"
+    ],
+    "acao_de_desbloqueio": "hermes auth add <provider> OU definir <PLATAFORMA>_BOT_TOKEN no .env do perfil e reiniciar o gateway",
+    "nao_provado_por_que": "exige credencial real; nada foi simulado",
+    "desvio": "scripts/run_tests.sh exige bash (ausente); pytest direto com HERMES_HOME isolado e TZ=UTC"
+  },
+  "t05": {
+    "status": "done",
+    "pronto": "6 matizes distintos via data-ambiente + token --ambiente-accent; 8 testes; axe 0 nos 6 modos",
+    "accent_por_modo": {
+      "empresa": "#38bdf8",
+      "engenharia": "#4ade80",
+      "automacao": "#fbbf24",
+      "ia": "#22d3ee",
+      "estrategico": "#f472b6",
+      "administracao": "#a78bfa"
+    },
+    "corrigido": "outroAmbiente/foraDoAmbiente assumiam 2 ambientes; agora percorrem os 6",
+    "nao_e_rbac": true
+  },
+  "fechar_aba": {
+    "status": "done",
+    "nomeado": true,
+    "fora_do_tab": true,
+    "teclado": true,
+    "guarda_alteracao": "fecharComGuarda: consulta $dirtyPreviewUrls e usa o confirm() do app",
+    "defeito_achado": "$dirtyPreviewUrls era registro MORTO - escrito pelo editor e lido por ninguem (o 'ponto de modificado' nunca foi ligado)",
+    "conservadora_por_escolha": "pergunta se QUALQUER preview esta sujo; errar para o lado de perguntar"
+  },
+  "verificacao_final_r105": {
+    "suite": {
+      "total": 19231,
+      "falhas": 36,
+      "preexistentes": 27,
+      "minhas": 1,
+      "corrigidas": 1,
+      "flaky_isoladas_passam": "55/55"
+    },
+    "fix": "ipc-invariants: o detector de metodos casava CHAMADA como declaracao; restringido ao corpo de class",
+    "axe": {
+      "web": "0 em 15 rotas",
+      "desktop": "0 em 27 rotas",
+      "nota": "1 medicao isolada deu 1 no; 3 passagens seguintes deram 0 e nao reproduzi"
+    },
+    "web": {
+      "build": "exit 0",
+      "testes": "478/478"
+    }
+  },
+  "commit_add_a_incidente": {
+    "arquivo": "apps/desktop/electron/crm-whatsapp-signature.ts",
+    "linhas_deletadas": 43,
+    "detectado_por": "wrapup_check exigindo typecheck",
+    "restaurado": "git checkout 58058b2acc~1 -- <arquivo>",
+    "verificado": "typecheck PASS, 17/17 testes"
+  },
+  "verificacao_final_r5": {
+    "atomicidade": "PROVADA por comportamento: nao sobra .tmp, substitui, .tmp orfao nao impede, corrompido nao lanca",
+    "censo": {
+      "atomicos": 35,
+      "delega": 1,
+      "sem_rename": 0,
+      "total": 36
+    }
+  },
+  "v4_gateway": {
+    "coleta_antes": "91 errors · 12576 coletados",
+    "coleta_depois": "2 errors · 13337 coletados",
+    "fix": "aiohttp instalado no env isolado b3po-testenv",
+    "restantes": [
+      "test_boot_reserve_lock_probe.py: fcntl Unix-only",
+      "test_feishu_card_action_gateway_authz.py: ValueError nao diagnosticado"
+    ],
+    "amostra": "test_status: 1 failed (FileNotFoundError de subprocess), 40 passed, 3 skipped",
+    "suite_completa": "NOT_TESTED - 13337 testes > 30min",
+    "achado_r10": {
+      "teste": "test_feishu_card_action_gateway_authz.py",
+      "sozinho": "17 testes coletam em 0,66s",
+      "import_direto": "sem erro",
+      "na_pasta": "ERROR ValueError — impede a coleta dos 13337",
+      "causa": "estado global vazando entre modulos de teste; o runner oficial isola por subprocesso e nao ve",
+      "impacto_no_produto": "nenhum",
+      "impacto_na_medicao": "exige --ignore para rodar a pasta direto"
+    },
+    "r26": {
+      "pasta_um_processo": "INVALIDO - massa de E/F a 14%, vazamento de estado entre modulos (provado)",
+      "isolado": {
+        "test_status.py": "2 failed (FileNotFoundError de subprocess) · 90 passed",
+        "test_api_server_runs.py": "64 passed"
+      },
+      "conclusao": "o backend FUNCIONA; o metodo de medicao em um processo so e que nao vale",
+      "unlock": "scripts/run_tests.sh (bash, ausente) que isola um subprocesso por arquivo"
+    },
+    "r27_amostra": {
+      "metodo": "um arquivo por processo (como run_tests_parallel.py)",
+      "resultado": "263 passed · 2 failed",
+      "arquivos": {
+        "test_status": "90p/2f",
+        "test_api_server_runs": "64p",
+        "test_config": "93p",
+        "test_shared_platform_boilerplate": "13p",
+        "test_session_identity": "3p"
+      },
+      "falhas": "FileNotFoundError de subprocess procurando binario externo - zero de logica",
+      "suite_inteira": "1685 arquivos ~ 4.7 horas - fora do alcance de uma sessao",
+      "veredito": "PARTIAL por COBERTURA, nao por falha conhecida"
+    }
+  },
+  "v4_plataformas": {
+    "desktop": "B-3PO de verdade: 6 modos, Sofia, agentes, projetos, axe 0 em 27 rotas",
+    "web": "dashboard do Hermes upstream — title 'Hermes Agent - Dashboard', logo HERMES AGENT, Nous Research; axe 0; sem identidade B-3PO",
+    "mobile": "INSPECIONADO r18: app renderiza em pt-BR (sem conexao + pareamento). FIX DO SAFE-AREA PROVADO: APK 04/11 sobrepunha o wordmark no relogio; APK 07/11 nao. Desbloqueio: force-stop do systemui + tap em Aguarde, SEM wipe-data. Os 6 modos continuam ausentes no mobile.",
+    "consequencia": "os seis modos existem em UMA plataforma; nenhuma promessa de paridade e possivel",
+    "decisao_pendente": "A portar p/ mobile | B rebrandar web | C desktop e o produto, web/mobile sao operacionais | D foco em profundidade no desktop"
+  },
+  "findings_v4": {
+    "A-01": "CORRIGIDO r15: estrategico = Visao geral + Comercio + Crescimento (do proposito documentado). 6/6 combinacoes distintas, axe 0. Custo: Comercio traz tambem estoque/compras",
+    "A-02": "CORRIGIDO r14: tambemEm (um modulo em varios grupos). Engenharia 2->4 grupos, 66->105 itens, Projetos/Agentes/Automacoes visiveis. axe 0",
+    "A-03": "barra lateral usa <button>, nao <a> - 0 links (observacao, nao bug)",
+    "A-04": "sofia.status() responde { error }",
+    "A-05": "test_feishu so quebra na coleta da pasta (vazamento de estado entre modulos)",
+    "A-06": "FECHADO r22+r25: h1 no titulo da pagina (breadcrumb) e h2 nas secoes (SectionHeading, 19 arquivos). Nas paginas de topo o h2 fica dormente porque o design suprime titulo duplicado quando ha breadcrumb - isso e correto. axe 0 em 27 rotas, 0 rotas sem h1, 613 testes de settings verdes.",
+    "A-07": "CORRIGIDO r28: registerTariffIpc estava IMPORTADO e NUNCA CHAMADO em erp-ipc.ts. O T-12 nunca funcionou; a tela mostrava o caminho de ERRO e eu li como estado vazio na r101. Passou por gate, typecheck, 32 testes de store e testes de componente com API mockada. So a varredura de console do app vivo pegou. Depois: 0 erros em 27 rotas.",
+    "A-08": "Varredura estatica de canais IPC nao serve: registro em laco (ipcMain.handle com template literal) e invisivel para busca literal. 3 falsos positivos (hud-modifier:permission, screenshot:capture/permission). O instrumento valido e a varredura de console no app vivo, que mediu 0 erros em 27 rotas.",
+    "A-09": "Titulo 'Projetos em Andamento' contradizia o KPI 'Projetos ativos 0': a secao ordena por recencia sem filtrar status. Renomeada para 'Projetos recentes'. E o en.ts tinha 13 de 31 chaves da home em portugues - traduzidas. es.ts sem a secao: cai no ingles por design (defineLocale faz merge).",
+    "A-10": "/sofia e /projetos conferidas no renderizado: COERENTES. Sofia tem dependencia real (depende de t1) e execucoes (exec-e2e-001/002). /projetos tem formulario real, invariante 'sem criterio nao conclui' e contador 0 em andamento. Confirma que o rename da r30 estava certo. Acoes que MUTAM dados nao foram clicadas.",
+    "A-11": "6/6 modos conferidos clicando o cartao e lendo data-ambiente + grupos: empresa, engenharia, automacao, ia, estrategico, administracao - todos trocam. A-02 CONFIRMADO CORRIGIDO: Engenharia mostra Projetos, Trabalhos, Inteligencia. Medi errado 2x: 'select' nao existe (e label+radios) e o texto 'Empresa' casa o item da barra antes do cartao.",
+    "A-12": "intro.test.tsx exigia 'Bem-vindo ao' de um fixture com initialLocale='en' - so passava porque o en.ts tinha 13 chaves em portugues. Depois da traducao (A-09) o teste acusou a correcao como falha. Corrigido para 'Welcome to' / 'Your platform for business management'. 325 testes verdes."
+  },
+  "registros_de_modulos": {
+    "b3po-modulos.ts": "25 modulos - barra lateral e /busca",
+    "engenharia.ts": "8 modulos com Construcao/Qualidade - SOMENTE /ambiente",
+    "problema": "dois registros; o da barra nao tem Construcao nem Qualidade",
+    "nao_corrigido": "unificar toca barra + /ambiente + /busca + testes de contagem; duplicar seria o que o objetivo proibe"
+  },
+  "seis_modos_navegacao": {
+    "r13": "5/6 distintos (estrategico == ia; engenharia sem Construcao/Qualidade)",
+    "r14": "engenharia 2->4 grupos, 66->105 itens (tambemEm)",
+    "r15": "estrategico com grupos proprios -> 6/6 distintos",
+    "medido": {
+      "empresa": 122,
+      "engenharia": 105,
+      "automacao": 102,
+      "ia": 99,
+      "estrategico": 106,
+      "administracao": 100
+    },
+    "axe": 0
+  },
+  "permissao_ipc_v4": {
+    "r7": "git ja tinha guarda (podeOperarMaquina nao era reconhecido)",
+    "r8": "terminal:start guardado",
+    "r16": "fs 13 canais guardados (leitura+escrita)",
+    "divida_canais": "68 -> 34",
+    "ratchet": "9 de 48 arquivos",
+    "restam_com_recurso": [
+      "agent (5)",
+      "plugin-files (4)"
+    ],
+    "restam_ui_sem_recurso": [
+      "clipboard",
+      "hud",
+      "lookup",
+      "notification",
+      "pet-overlay",
+      "spellcheck-dictionary",
+      "startup-latency",
+      "challenge-window"
+    ],
+    "unguarded_por_desenho": "mcp-oauth-callback",
+    "r17": "plugin-files 4 (maquina) + agent 5 (withPermission); identidade do aprovador movida do renderer para o main",
+    "divida_final": "68 -> 25 canais",
+    "restantes": "9 canais de UI/preferencia (sem recurso) + mcp-oauth-callback (unguarded por desenho)"
+  },
+  "suite_v4_r19": {
+    "total": "32 failed | 18995 passed | 246 skipped (19273)",
+    "minhas": [
+      "engenharia.test.ts: grupo declarado sem modulo",
+      "pt.test.ts: chave duplicada",
+      "intro.test.tsx: useNavigate fora de Router"
+    ],
+    "corrigidas": 3,
+    "novas_apos_correcao": "CONFIRMADO flaky na r20: nao apareceram na re-medida",
+    "portao_de_commit": "gate + tipos + testes antes de commitar; recusa com vermelho"
+  },
+  "suite_v4_r20": {
+    "resultado": "27 failed | 19017 passed | 229 skipped (19273)",
+    "igual_ao_baseline": true,
+    "minhas": 0,
+    "as_2_da_r19": "flaky sob carga - nao apareceram nesta rodada"
+  },
+  "a11y_headings": {
+    "r22": "titulo da pagina: span aria-current -> h1",
+    "r25": "secao: SectionHeading span -> h2 (19 arquivos)",
+    "axe": "0 em 27 rotas",
+    "rotas_sem_h1": 0,
+    "testes_settings": 613
+  },
+  "varredura_console": {
+    "r28": "0 erros em 27 rotas (antes: 2 em /medidores)",
+    "custo": "~90s",
+    "rotina": true
+  },
+  "instrumento_valido_canais": "console/pageerror no app vivo - nao varredura de texto",
+  "i18n_home": {
+    "pt": "31 chaves",
+    "en": "31 chaves, 0 em portugues (eram 13)",
+    "es": "sem secao - fallback para ingles"
+  },
+  "acoes_nao_exercitadas": [
+    "Comecar projeto (muta)",
+    "Criar projeto (muta)",
+    "Tentar de novo (exigiria derrubar backend)"
+  ],
+  "modos_v4_r32": {
+    "6_de_6": true,
+    "a02_corrigido": true,
+    "seletor_correto": "button[aria-pressed] escopado, NAO [role=group] button por texto"
+  },
+  "objetivo_v4_concluido": {
+    "r33": "verificacao final: gate 14/14, tipos 0, 325 testes das areas afetadas",
+    "entregue": [
+      "6 modos com identidade e menus distintos",
+      "home com dados reais",
+      "Sofia/agentes/projetos",
+      "navegacao sem rota morta",
+      "inspecao desktop/web/mobile",
+      "13 documentos",
+      "9 capturas"
+    ],
+    "nao_entregue_por_decisao": [
+      "kind bot no terminal (B-02g)",
+      "matriz de plataformas",
+      "es.ts sem homeB3po (cai no ingles)"
+    ],
+    "nao_entregue_por_externo": [
+      "iOS (EXT-4)",
+      "Authenticode (EXT-3)",
+      "conector (EXT-6)"
+    ]
+  }
+}

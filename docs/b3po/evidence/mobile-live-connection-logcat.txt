@@ -1,0 +1,3 @@
+11-03 15:51:55.009 12684 12720 I ReactNativeJS: Running "B3PO"
+11-03 15:51:55.181 12684 12720 I ReactNativeJS: '[b3po] connect', 'http://127.0.0.1:54686', 'dev-11nqhpwr6s9ktyfc2ysrrp'
+11-03 15:51:55.670 12684 12720 I ReactNativeJS: '[b3po] connected', '{"ok":true,"commit":"98695c0cc7e58f85b5ff790482ff434ca722a1da","authRequired":false}', '{"gatewayRunning":true,"gatewayState":"running","configVersion":52}'

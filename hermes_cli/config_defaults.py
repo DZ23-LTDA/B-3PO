@@ -1737,12 +1737,11 @@ DEFAULT_CONFIG = {
     # "tone", "style"}}.
     "personalities": {},
     "auth": {  # Login policy (credentials themselves live in auth.json / .env).
-        # Borrow and refresh the Codex CLI (~/.codex/auth.json) and Claude Code (~/.claude/.credentials.json)
-        # logins automatically when Hermes has no usable login of its own. Their refresh tokens are single-use
-        # and rotate, so two programs on one login can log each other out; set false to make Hermes use only
-        # its own logins (`hermes auth add <provider>`). `hermes auth add openai-codex` still offers the import
-        # interactively.
-        "adopt_external_logins": True,
+        # OFF by default: borrowing another program's login means reading its credential file, and the
+        # Codex/Claude OAuth refresh tokens are single-use — two programs on one token family log each
+        # other out. Set true to opt in (`hermes auth add <provider>` is the supported way to give
+        # Hermes its own login; `hermes auth add openai-codex` still offers the import interactively).
+        "adopt_external_logins": False,
         # How `hermes auth add openai-codex` / `hermes model` sign in to OpenAI Codex.
         # "device_code" (default): open a URL, enter a code. "browser": authorization-code + PKCE on
         # the loopback listener http://localhost:1455/auth/callback (the redirect OpenAI registered
@@ -2325,9 +2324,9 @@ DEFAULT_CONFIG = {
             # Requires `enabled` (`send` alone logs an error). A package is sent only if its whole
             # period is inside a recorded consent window.
             "send": False,
-            # Ingest endpoint (override for staging/local). Deliberately NOT env- overridable.
-            # Non-HTTPS refused unless the host is localhost.
-            "endpoint": "https://telemetry.nousresearch.com/v1/telemetry",
+            # B-3PO uploads nothing: no third-party ingest URL ships (an operator may set their
+            # own; empty keeps every consent surface decided-and-off). Non-HTTPS needs localhost.
+            "endpoint": "",
         },
     },
 

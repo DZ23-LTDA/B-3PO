@@ -109,7 +109,7 @@ function PresetCard({ preset }: { preset: Contribution }) {
           <TreeThumbnail node={tree} resting={layoutPresetResting(preset.id)} />
         </div>
         <span
-          className={cn('truncate text-[0.68rem] font-medium', active ? 'text-foreground' : 'text-muted-foreground/80')}
+          className={cn('truncate text-[0.68rem] font-medium', active ? 'text-foreground' : 'text-muted-foreground')}
         >
           {preset.title ?? preset.id}
         </span>
@@ -150,7 +150,7 @@ function ModeCard({ mode }: { mode: InterfaceMode }) {
       onClick={() => setInterfaceMode(mode)}
       type="button"
     >
-      <span className={cn('text-[0.68rem] font-medium', active ? 'text-foreground' : 'text-muted-foreground/80')}>
+      <span className={cn('text-[0.68rem] font-medium', active ? 'text-foreground' : 'text-muted-foreground')}>
         {copy.label}
       </span>
       <span className="text-[0.62rem] leading-snug text-(--ui-text-tertiary)">{copy.description}</span>

@@ -39,6 +39,39 @@ import type { SidebarActions, WiringActions } from './types'
 const ArtifactsView = lazy(async () => ({ default: (await import('../artifacts')).ArtifactsView }))
 const MessagingView = lazy(async () => ({ default: (await import('../messaging')).MessagingView }))
 const CapabilitiesView = lazy(async () => ({ default: (await import('../capabilities')).CapabilitiesView }))
+// O CRM carrega as secoes de Configuracoes: mantem o code-split como as demais paginas.
+const CrmView = lazy(async () => ({ default: (await import('../crm')).CrmView }))
+const ProductsView = lazy(async () => ({ default: (await import('../products')).ProductsView }))
+const StockView = lazy(async () => ({ default: (await import('../stock')).StockView }))
+// r78 (G4): a vertical de gas/agua — o casco em comodato.
+const GasView = lazy(async () => ({ default: (await import('../gas')).GasView }))
+// r79 (T-11): leitura periodica de medidor.
+const MedidoresView = lazy(async () => ({ default: (await import('../medidores')).MedidoresView }))
+// r88: backup e restore.
+const BackupsView = lazy(async () => ({ default: (await import('../backups')).BackupsView }))
+const SalesView = lazy(async () => ({ default: (await import('../sales')).SalesView }))
+const FinanceView = lazy(async () => ({ default: (await import('../finance')).FinanceView }))
+const AgendaView = lazy(async () => ({ default: (await import('../agenda')).AgendaView }))
+const ComprasView = lazy(async () => ({ default: (await import('../compras')).ComprasView }))
+const EmpresaView = lazy(async () => ({ default: (await import('../empresa')).EmpresaView }))
+const ServicosView = lazy(async () => ({ default: (await import('../servicos')).ServicosView }))
+const RhView = lazy(async () => ({ default: (await import('../rh')).RhView }))
+const AtendimentoView = lazy(async () => ({ default: (await import('../atendimento')).AtendimentoView }))
+const AgentesView = lazy(async () => ({ default: (await import('../agentes')).AgentesView }))
+const PosVendaView = lazy(async () => ({ default: (await import('../posvenda')).PosVendaView }))
+const MarketingView = lazy(async () => ({ default: (await import('../marketing')).MarketingView }))
+const PainelView = lazy(async () => ({ default: (await import('../painel')).PainelView }))
+const AutomacoesView = lazy(async () => ({ default: (await import('../automacoes')).AutomacoesView }))
+const SofiaView = lazy(async () => ({ default: (await import('../sofia')).SofiaView }))
+const EntregasView = lazy(async () => ({ default: (await import('../entregas')).EntregasView }))
+const ProjetosView = lazy(async () => ({ default: (await import('../projetos')).ProjetosView }))
+const TrabalhosView = lazy(async () => ({ default: (await import('../trabalhos')).TrabalhosView }))
+const OrganizacaoView = lazy(async () => ({ default: (await import('../organizacao')).OrganizacaoView }))
+const BuscaView = lazy(async () => ({ default: (await import('../busca')).BuscaView }))
+const DocumentosView = lazy(async () => ({ default: (await import('../documentos')).DocumentosView }))
+const PrivacidadeView = lazy(async () => ({ default: (await import('../privacidade')).PrivacidadeView }))
+// r124 do GOAL V2: a tela do ambiente (§13:413-419) - mostra os dois ambientes e troca a preferencia.
+const AmbienteView = lazy(async () => ({ default: (await import('../ambiente')).AmbienteScreen }))
 
 export function LegacySessionRedirect() {
   const { sessionId } = useParams()
@@ -191,6 +224,37 @@ export const ChatRoutesSurface = memo(function ChatRoutesSurface({
       <Route element={page(<CapabilitiesView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="capabilities" />
       <Route element={page(<MessagingView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="messaging" />
       <Route element={page(<ArtifactsView setStatusbarItemGroup={setStatusbarItemGroup} />)} path="artifacts" />
+      {/* CRM is a real page (contacts + pipeline), not a chat: without this route
+          `/crm` falls through to `:sessionId` and opens a session named "crm". */}
+      <Route element={page(<CrmView />)} path="crm" />
+      {/* Mesmo motivo do CRM: sem rota propria, `/products` abriria uma sessao chamada "products". */}
+      <Route element={page(<ProductsView />)} path="products" />
+      <Route element={page(<StockView />)} path="stock" />
+          <Route element={page(<GasView />)} path="gas" />
+          <Route element={page(<MedidoresView />)} path="medidores" />
+          <Route element={page(<BackupsView />)} path="backups" />
+      <Route element={page(<SalesView />)} path="sales" />
+      <Route element={page(<FinanceView />)} path="finance" />
+      <Route element={page(<AgendaView />)} path="agenda" />
+      <Route element={page(<ComprasView />)} path="compras" />
+      <Route element={page(<EmpresaView />)} path="empresa" />
+      <Route element={page(<ServicosView />)} path="servicos" />
+      <Route element={page(<RhView />)} path="rh" />
+      <Route element={page(<AtendimentoView />)} path="atendimento" />
+      <Route element={page(<AgentesView />)} path="agentes" />
+      <Route element={page(<PosVendaView />)} path="posvenda" />
+      <Route element={page(<MarketingView />)} path="marketing" />
+      <Route element={page(<PainelView />)} path="painel" />
+      <Route element={page(<AutomacoesView />)} path="automacoes" />
+          <Route element={page(<SofiaView />)} path="sofia" />
+          <Route element={page(<EntregasView />)} path="entregas" />
+          <Route element={page(<ProjetosView />)} path="projetos" />
+          <Route element={page(<TrabalhosView />)} path="trabalhos" />
+          <Route element={page(<OrganizacaoView />)} path="organizacao" />
+          <Route element={page(<BuscaView />)} path="busca" />
+      <Route element={page(<DocumentosView />)} path="documentos" />
+        <Route element={page(<PrivacidadeView />)} path="privacidade" />
+            <Route element={page(<AmbienteView />)} path="ambiente" />
       <Route element={null} path="agents" />
       <Route element={null} path="command-center" />
       <Route element={null} path="cron" />

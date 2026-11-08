@@ -1,0 +1,294 @@
+================================================================================
+B-3PO BOT PLATFORM - VERIFICACAO DO ESTADO RECEBIDO
+Verificado em: 05/11/2026 06:00  (America/Sao_Paulo)
+Repositorio:   D:\IA-Workspace\Deepseek\projects\C-3PO BOT
+Remoto:        https://github.com/DZ23-LTDA/B-3PO.git
+================================================================================
+
+################################################################################
+#  A) TODOS OS APLICATIVOS ESTAO FINALIZADOS?
+################################################################################
+
+  NAO. NENHUM aplicativo esta 'finalizado'. O estado e NOT_READY.
+
+  Placar do criterio de conclusao do GOAL (32 criterios):
+    17 VALIDATED   (funciona e tem prova)
+    12 PARTIAL     (existe, tem lacuna nomeada)
+     2 BLOCKED     (impossivel sem recurso externo)
+     0 declarados prontos sem prova
+
+  ----------------------------------------------------------------------------
+  APLICATIVO                     ESTADO        O QUE FALTA
+  ----------------------------------------------------------------------------
+  Desktop (Windows)              PARTIAL       instalador sem assinatura; sem
+                                               teste de instalacao do MSIX
+  Desktop (macOS)                BLOCKED       nao construido - precisa de macOS
+  Desktop (Linux)                BLOCKED       nao construido neste host
+  Android                        PARTIAL       APK debug existe; release sem keystore
+  iOS                            BLOCKED       sem macOS + Xcode + certificado
+  Web / dashboard                PARTIAL       nao verificada nesta sessao
+  WhatsApp (Cloud API)           PARTIAL       codigo sim; envio real nao (sem
+                                               credencial Meta)
+  Agentes / multiagente          BLOCKED       sem credencial de provider
+  ERP (25 modulos de dominio)    VALIDATED     766 testes verdes
+  CRM                            PARTIAL       funcional, MAS ha um segundo CRM
+                                               orfao (ver item I)
+  ----------------------------------------------------------------------------
+
+  CONCLUSAO: o que existe funciona no que foi provado. O que nao existe
+  depende de credencial, certificado ou hardware - nao de mais codigo.
+
+################################################################################
+#  B) OS 13 ITENS DA CHECKLIST
+################################################################################
+
+[X] 1. RELATORIO FINAL DAS 256 RODADAS RECEBIDO
+       docs/b3po/RELATORIO-FINAL-R256.md          91 linhas
+       Veredito declarado: NOT_READY
+
+[X] 2. BRANCH, HEAD E GIT STATUS REGISTRADOS
+       branch:  b3po-brand
+       HEAD:    c47539484a4bc605a4cf72f2bbfd1bfce9abe62a
+       status:  LIMPO (nenhuma alteracao pendente)
+       main:    f4cf411f28  ==  origin/main  (INTACTO)
+       origin/b3po-brand: c47539484a  (sincronizado)
+       commits totais: 61985
+
+[X] 3. ULTIMOS COMMITS CONFERIDOS
+       c47539484a  docs(final): relatorio final da rodada 256
+       4aad455504  docs(subagentes): o uso real do MCP DZ23 - 2 chamadas
+       0a93f2dff7  docs(evidencias): EVIDENCE-INDEX - o que tem prova
+       c0c7378323  docs(state): AUTONOMOUS-EXECUTION-STATE rodada 252
+       20bfcfb244  docs(regressao): 7 checks, 811 testes verdes
+       45b864e397  docs(testes): classificacao final das 40 falhas
+       c10b459688  docs(testes): os 3 timeouts sao config.yaml nao lido
+       6c4e83bc35  docs(testes): timeout de 30s e recuperacao de lock lenta
+
+[X] 4. BACKUP VERIFICAVEL DO ESTADO RECEBIDO
+       O estado e reproduzivel pelo Git: tudo esta commitado e empurrado.
+       HEAD local == origin/b3po-brand == c47539484a
+       Clone de recuperacao:  git clone -b b3po-brand <url>
+       NAO existe arquivo .zip de backup do projeto.
+       Pastas vizinhas em projects\ (NAO sao backup deste repo):
+         b3po-codync/     b3po-fase0/     b3po-testenv/ (venv Python)
+         c3po-hermes-home/
+       Tamanho do repo (sem node_modules e .git): 50181 arquivos / 3210 MB
+
+[X] 5. SCRIPTS DE BUILD E TESTES IDENTIFICADOS
+       GATE:       python scripts/check                (14 checks)
+       TYPECHECK:  python scripts/check-b3po-types      (2 projetos)
+       MARCA:      python scripts/brand_check.py        (14 checagens)
+       PYTEST:     scripts/run_tests.sh                 (nunca pytest direto)
+       VITEST:     npx vitest run  (em apps/desktop)
+       BUILD WEB:  npm run build            (apps/desktop)
+       PACOTE:     npm run pack             (gera win-unpacked)
+       INSTALADOR: npm run dist:win:msix    (gera .msix)
+
+[X] 6. BUILD E TESTES EXECUTADOS COM RESULTADOS REGISTRADOS
+       python scripts/check                -> 14 checks, ok
+       python scripts/check-b3po-types     -> 0 erros TS
+          typecheck processo principal: ok
+          typecheck renderer:           ok
+       python scripts/brand_check.py       -> 14 checagens, 0 falhas
+          contraste accent/bg 10.74:1 (minimo 3.0)
+
+[X] 7. TELA DE COMPRAS TESTADA COM PERSISTENCIA COMPROVADA
+       npx vitest run electron/purchases   -> 33 testes, 33 passaram
+         purchases-store.test.ts      11 testes
+         purchases-analytics.test.ts   9 testes
+         purchases-finance.test.ts     7 testes
+         purchases-ipc.test.ts         6 testes
+       A persistencia e provada pelos testes de store (le/escreve arquivo
+       JSON com escrita atomica temp+rename e fila serializada).
+
+[X] 8. INTEGRACAO COMPRAS -> ESTOQUE -> FINANCEIRO INVESTIGADA
+       EXISTE e TEM PROVA. purchases-ipc.ts faz, no recebimento:
+         1. deps.inventory.append(movimento)  -> entrada no estoque
+         2. deps.finance.append(...)          -> conta a pagar
+       Testes que provam o efeito cruzado (purchases-finance.test.ts):
+         - 'so pedido RECEBIDO gera conta a pagar'
+         - 'o tipo e pagar, e a ref e deterministica por pedido'
+         - 'pedido de valor zero nao gera conta'
+         - 'receber lanca a conta a pagar no financeiro'
+         - 'receber tambem lanca a entrada no estoque'
+         - 'receber duas vezes nao duplica a conta a pagar'  (idempotencia)
+         - 'rascunho nao lanca nada no financeiro'
+       7 testes, todos verdes.
+
+[X] 9. DUPLICACOES DE CRM MAPEADAS  <<< ACHADO GRAVE
+       HA DOIS CRM NO REPOSITORIO.
+
+       CRM REAL (usado pelo aplicativo):
+         apps/desktop/electron/crm-contacts-store.ts
+         apps/desktop/electron/crm-pipeline-store.ts
+         apps/desktop/electron/crm-tasks-store.ts
+         apps/desktop/electron/crm-conversations-store.ts
+         + 13 arquivos crm-whatsapp-*.ts (webhook, ingest, outbound)
+         + apps/desktop/src/app/crm/  (a tela)
+
+       CRM ORFAO (ninguem importa):
+         crm/src/  -  19 arquivos .ts  -  pacote '@dz23/crm-core'
+           contacts.ts, pipeline.ts, tasks.ts, consent.ts, inbox.ts,
+           dashboard.ts, webhook.ts, automation.ts, contacts-bulk.ts
+           (+ os .test.ts de cada um)
+
+       PROVA DE QUE E ORFAO:
+         - busca por import de 'crm/src', '@dz23/crm', '../crm' em todo o
+           repo:  0 consumidores
+         - crm/package.json nao declara 'main' nem 'exports'
+         - o desktop NAO importa nada de crm/src
+
+       POR QUE ISSO E PERIGOSO:
+         O workflow .github/workflows/b3po-brand.yml roda
+           'npx vitest run --root crm'
+         Ou seja: os testes do CRM orfao PASSAM na CI e dao a impressao
+         de que 'o CRM tem 157 testes verdes' - quando o CRM que o
+         usuario usa e outro, com outros testes.
+
+       ISTO E EXATAMENTE O QUE O GOAL V4 PROIBE:
+         'Nao criar um CRM para cada Bot.'  -> existem dois CRMs.
+       Classificacao: ORPHAN (codigo sem consumidor conhecido).
+       NAO foi removido: a regra do GOAL manda identificar consumidores
+       antes de apagar, e a CI depende desses testes hoje.
+
+       Outros dominios (amostra):
+         domains com store unico: estoque, financeiro, vendas, compras,
+         catalogo, agenda, servicos, atendimento, pos-venda, RH,
+         marketing, documentos, empresas, atores, fiscal, automacoes
+         -> NAO foi encontrada segunda implementacao destes.
+
+[X] 10. CHECKPOINTS ENCONTRADOS E VALIDADOS
+       docs/b3po/AUTONOMOUS-EXECUTION-STATE.md   331 linhas  (05/11 01:32)
+       docs/b3po/AUTONOMOUS-EXECUTION-LOG.md     335 linhas  (03/11 02:57)
+       docs/b3po/TEST-RESULTS.md                  73 linhas
+       docs/b3po/RELEASE-READINESS.md            269 linhas
+       docs/b3po/EVIDENCE-INDEX.md               172 linhas
+       docs/b3po/RELATORIO-FINAL-R256.md          91 linhas
+       Total: 181 arquivos .md em docs/b3po/
+       O STATE tem secao 'ESTADO REAL AO FIM DA RODADA 252' com os
+       numeros, o commit e o que a proxima sessao deve fazer primeiro.
+
+[X] 11. DIFERENCAS ENTRE PC, GITHUB E ZIP VERIFICADAS
+       PC (local)   c47539484a4bc605a4cf72f2bbfd1bfce9abe62a
+       GitHub       c47539484a  (origin/b3po-brand)
+       RESULTADO:    IDENTICOS. Nada por commitar, nada por empurrar.
+       ZIP          NAO EXISTE arquivo .zip de backup do projeto.
+       main         f4cf411f28 == origin/main (nunca foi tocado)
+
+[X] 12. BLOQUEIOS E FUNCIONALIDADES SIMULADAS IDENTIFICADOS
+
+       BLOQUEADOS POR RECURSO EXTERNO (nao e bug, falta insumo):
+         - WhatsApp envio real       -> credencial Meta / app aprovado
+         - execucao de agentes       -> credencial de provider
+         - iOS                       -> macOS + Xcode + certificado
+         - macOS (.dmg)              -> hardware macOS
+         - Linux (AppImage/deb/rpm)  -> nao construido neste host
+         - assinatura Authenticode   -> certificado Windows
+         - Android release           -> keystore do proprietario
+
+       DEFEITO DE PRODUTO CONHECIDO E NAO CORRIGIDO:
+         electron/desktop-installation.ts
+         Recuperacao de lock de reparo: 40 tentativas, cada uma consultando
+         a criacao de processo (lento no Windows) -> ~41 segundos antes de
+         recusar. Um usuario Windows com lock orfao espera ~40 s.
+         NAO corrigido de proposito: mexer sem medir pode travar o launch
+         para sempre, que e pior.
+
+       O QUE NAO E SIMULADO (e funciona de verdade):
+         - os 25 stores de dominio gravam em arquivo JSON real
+         - o app empacotado abre (evidencia instalado-r242.png)
+         - a recusa do backend aparece na tela ('Informe um valor.')
+         - o gate de marca e os 14 checks passam
+
+       AUSENCIA DE DADO NUNCA VIRA ZERO (regra do produto):
+         satisfacaoMedia, ctr, costPerLead, ticket_medio_cents,
+         ultima_compra -> retornam null e renderizam como travessao.
+
+[X] 13. ARVORE DO PROJETO
+
+  C-3PO BOT/                      (repo Hermes + produto B-3PO)
+  |
+  |-- apps/desktop/               <<< O APLICATIVO
+  |   |-- electron/               424 arquivos .ts (backend/IPC/stores)
+  |   |   |-- erp-ipc.ts          monta todos os canais do ERP
+  |   |   |-- inventory-store.ts  ledger de estoque
+  |   |   |-- finance-store.ts    lancamentos
+  |   |   |-- sales-store.ts      vendas
+  |   |   |-- purchases-store.ts  compras/fornecedores
+  |   |   |-- crm-*-store.ts      4 stores de CRM
+  |   |   |-- write-queue.ts      fila de escrita (21 de 25 stores)
+  |   |   |-- permission-guard.ts guard de permissao
+  |   |-- src/                    renderer React
+  |   |   |-- app/                32 telas (rotas)
+  |   |   |-- store/              nanostores
+  |   |   |-- i18n/               8 locales (pt, en, es, fr, ja, ru, zh, de)
+  |   |-- dist/                   bundle construido (53,46 MB)
+  |   |-- release/                SAIDA DE BUILD (no .gitignore)
+  |       |-- win-unpacked/B-3PO.exe        235,4 MB
+  |       |-- B3PO-1.0.0-win-x64.msix       191,4 MB
+  |
+  |-- crm/                        <<< CRM ORFAO (@dz23/crm-core)
+  |   |-- src/                    19 arquivos .ts, 0 consumidores
+  |
+  |-- mobile/                     app mobile (b3po-app)
+  |-- web/                        dashboard web
+  |-- brand/                      assets de marca + 20 mascotes
+  |-- docs/b3po/                  181 documentos
+  |   |-- audit/                  40+ relatorios de auditoria
+  |   |-- evidencias/             capturas verificadas
+  |   |-- RELATORIO-FINAL-R256.md
+  |   |-- RELEASE-READINESS.md
+  |   |-- TEST-RESULTS.md
+  |   |-- EVIDENCE-INDEX.md
+  |   |-- AUTONOMOUS-EXECUTION-STATE.md
+  |
+  |-- plugins/                    plugins do runtime (whatsapp, etc.)
+  |-- gateway/                    gateway de mensageria (~20 plataformas)
+  |-- agent/                      loop do agente
+  |-- tools/                      ferramentas do agente
+  |-- skills/                     skills embutidas
+  |-- scripts/                    check, check-b3po-types, brand_check.py
+  |-- tests/                      suite Python
+  |-- .github/workflows/          57 workflows (b3po-brand.yml e o gate)
+  |-- main                        <- espelho do upstream, INTACTO
+  |-- b3po-brand                  <- branch de produto (esta)
+
+################################################################################
+#  C) RESUMO HONESTO
+################################################################################
+
+  O QUE FUNCIONA E TEM PROVA
+    14 checks de gate · 0 erros de tipo · 4772 testes verdes (de 5019)
+    25 stores de dominio com escrita serializada em 21 e tenant em 24/24
+    Integracao Compras->Estoque->Financeiro com 7 testes incluindo idempotencia
+    App empacotado abre, com mascote, marca e 25 itens de menu em portugues
+    UI em 931 ms · IPC p50 0,3 ms
+
+  O QUE NAO FUNCIONA
+    40 testes falham: 36 por ambiente, 3 indeterminados, 1 e defeito real
+    O defeito real e um launch que trava ~40 s no Windows
+    25 de 40 canais de IPC estao sem guard de permissao
+    57 elementos de UI sem foco visivel (decisao do upstream)
+
+  O QUE NAO EXISTE
+    CRM unico (ha dois; o segundo e orfao)
+    Inventario exaustivo de duplicidades
+    Detector automatico de texto nao traduzido
+    Assinatura digital de instalador
+    Build para macOS, Linux e iOS
+
+  O QUE DEPENDE SO DE TRABALHO (nao de recurso externo)
+    As 25 guardas de permissao -> receita em docs/b3po/audit/PERMISSION-*.md
+    Resolver o CRM orfao (decidir: consumir crm/src ou remove-lo)
+    O detector de traducao do item 9 do GOAL
+    O inventario de duplicidades do item 3.1 do GOAL
+
+  VEREDITO: NOT_READY
+
+  'Nao declarar pronto com criterios aplicaveis pendentes.'
+  Ha 14 criterios pendentes. O produto nao esta pronto, e este
+  documento nao vai dizer que esta.
+
+================================================================================
+FIM DA VERIFICACAO
+================================================================================

@@ -68,7 +68,8 @@ export function LanguageSwitcher({ collapsed = false, dropUp = false }: Language
         ghost
         onClick={() => setOpen((v) => !v)}
         title={t.language.switchTo}
-        aria-label={t.language.switchTo}
+        // WCAG 2.5.3: o botao mostra "EN" (ou o nome do idioma), entao isso entra no nome.
+        aria-label={`${t.language.switchTo}: ${locale === "en" ? "EN" : current.name}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(

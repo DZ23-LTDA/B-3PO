@@ -50,6 +50,13 @@ function captureIpc(stamp: DesktopUninstallIpcDeps['stamp']): CapturedIpc {
   }
 
   registerDesktopUninstallIpc({
+    // r2 do V5 (R-02): desinstalar exige o dono da instalação.
+    actorOf: async () => ({
+      id: 'act_owner',
+      kind: 'human',
+      level: 'SUPERVISED_AUTONOMY',
+      role: 'owner'
+    }),
     ipcMain,
     stamp,
     fallbackSummary: localSummary,

@@ -7,21 +7,19 @@
  * says whose it is.
  */
 
-import { host, useValue, Wordmark } from '@hermes/plugin-sdk'
+import { host, useValue } from '@hermes/plugin-sdk'
 
-import { avatarColor, botAppearance, BotFace } from './avatar'
+import { botAppearance } from './avatar'
 import { isBackfilledFacePng } from './avatar-image'
 import { $botMeta, $lastRoster } from './data'
 import { useBots } from './i18n'
 import { displayName } from './labels'
+import { rosterMascotSrc } from './mascots'
 import { botRosterMeta } from './routing'
 import type { RosterRow } from './types'
 
-const FACE_SIZE = 96
-const FACE_GAP = 16
-/** What the face costs the stack in height — the offset that puts the name on
- *  the center line is derived from it, so the two can never drift apart. */
-const FACE_BLOCK = FACE_SIZE + FACE_GAP
+/** Robô da marca para bot sem mascote escolhido: identidade B-3PO, não a estrela determinística. */
+const BRAND_ROBOT = `${import.meta.env.BASE_URL}b3po-hero.png`
 
 /** The bot whose canonical chat this session is, if it is one. Matches the
  *  durable registry id or the compression-lineage tip, the same pair the
@@ -83,26 +81,31 @@ export function BotChatEmpty({ sessionId }: { sessionId: string }) {
     <div
       className="pointer-events-none flex w-full min-w-0 flex-col items-center justify-center px-0.5 py-6 text-center text-muted-foreground sm:px-6 lg:px-8"
       data-slot="bot_chat_empty"
-      // The name reads as the title of the chat, so it — not the stack as a
-      // whole — is what should sit on the optical center line. Lifting the
-      // stack by half the face's block does exactly that: the face hangs above
-      // the line and the text lands on it, the same balance the splash strikes
-      // with nothing above its lettering.
-      style={{ transform: `translateY(-${FACE_BLOCK / 2}px)` }}
+
     >
       <div className="w-full min-w-0">
-        <div className="flex justify-center" style={{ marginBottom: FACE_GAP }}>
-          <BotFace
-            color={avatarColor(color, bot.name)}
-            image={photo ? image : null}
-            mood="idle"
-            name={bot.name}
-            shape={shape}
-            size={FACE_SIZE}
-          />
-        </div>
 
-        <Wordmark className="mb-1" text={name} width="calc(80% - 1rem)" />
+        {/*
+         * A arte do mascote no lugar do lettering gigante: `.fit-text` dimensiona pela LARGURA e, numa janela
+         * baixa, o nome do bot ocupava meia tela e encostava no compositor. O nome continua ali, em corpo de
+         * texto, que é o que o leitor de tela lê.
+         */}
+        {/* Mesmo herói do splash: classes de `components/chat/brand-hero.tsx` (outro bundle, repetidas de
+            propósito). A arte da marca já tem o anel de luz — nada de halo CSS em cima. */}
+        <span className="mx-auto mb-4 flex items-center justify-center">
+          <img
+            alt=""
+            aria-hidden
+            className={
+              meta?.mascot_id
+                ? 'block h-[min(9rem,24vh)] w-auto rounded-[22%] object-contain'
+                : 'block h-auto w-[min(22rem,58vw)] object-contain dark:mix-blend-screen'
+            }
+            src={meta?.mascot_id ? rosterMascotSrc(meta.mascot_id, bot.name) : BRAND_ROBOT}
+          />
+        </span>
+
+        <p className="m-0 text-center text-lg font-medium leading-normal tracking-tight">{name}</p>
 
         <p className="m-0 text-center leading-normal tracking-tight">{b.bot.chatEmpty}</p>
       </div>

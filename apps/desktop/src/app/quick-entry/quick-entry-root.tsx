@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import { ErrorBoundary } from '@/components/error-boundary'
+import { adoptDesktopLocale } from '@/i18n/window-locale'
 import { ThemeProvider } from '@/themes/context'
 
 import { QuickEntryApp } from './quick-entry-app'
@@ -19,6 +20,9 @@ export function mountQuickEntry(): void {
   const style = document.createElement('style')
   style.textContent = 'html,body,#root{background:transparent !important;}'
   document.head.appendChild(style)
+
+  // Sem provider nesta janela: herda o idioma que a janela principal publicou.
+  adoptDesktopLocale()
 
   const root = document.getElementById('root')
 

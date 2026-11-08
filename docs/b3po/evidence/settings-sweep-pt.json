@@ -1,0 +1,67 @@
+{
+ "Aparência": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Aparência › Geral",
+  "texto": "Configurações\nAparência\nGeral\nIdioma\nEscolha o idioma da interface do aplicativo.\nPortuguês\nIntro Splash\nThe wordmark and prompt shown on an empty chat.\nModel Pricing\nShow input, output, and cache-read prices per million tokens in the model picker.\nReopen Last Chat on Launch\nWhen enabled, the app reopens your most recent chat on cold start. Turn off to always start with a fresh new chat.\nIn-App Tips\nOccasional hints from the app and Hermes. Each tip appears once. Turns off automatically after your first 30 days; you can turn it back on.\nGuided Tours\nLet Hermes spotlight each step as it guides you through the app. Turns off automatically after your first 30 days; you can turn it back on."
+ },
+ "Segurança": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Segurança › Aprovações",
+  "texto": "Configurações\nSegurança\nAprovações\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nApproval Mode\nHow Hermes handles commands that need explicit approval.\nSmart\nApproval Timeout\nHow long approval prompts wait before timing out.\nConfirm MCP Reloads\nCommand Allowlist"
+ },
+ "Provedores": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Provedores › Contas",
+  "texto": "Configurações\nProvedores\nContas\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nConnect an account\nHave an API key instead?\n\nSign in with a subscription — no API key to copy. Hermes runs the browser sign-in for you, right here in the app.\n\nNous Portal\nRECOMENDADO\n\nUma assinatura, mais de 300 modelos de ponta — o jeito recomendado de rodar o Hermes\n\nRodar modelos localmente\n\nSem conta — baixe um modelo e rode nesta máquina\n\nOther providers"
+ },
+ "Memória e contexto": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Memória e contexto › Memória persistente",
+  "texto": "Configurações\nMemória e contexto\nMemória persistente\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nProvedor de memória ativo\nO B-3PO usa só a camada embutida abaixo. Escolha um provedor externo em Configurações ▸ Memória e contexto para somar uma.\nNenhum — apenas a memória embutida\nCamada embutida\nMEMORY.md e USER.md são a memória do próprio B-3PO, separada de qualquer provedor externo. As duas entram nas sessões por padrão; os botões de memória e perfil de usuário em Configurações ▸ Memória e contexto desligam cada uma. Um provedor soma a esta camada; nunca a substitui.\nLigada\nPersistent Memory\nSave durable memories that can help future sessions.\nUser Profile\nMaintain a compact profile of user preferences.\nMemory Budget\nProfile Budget\nMemory Provider\nMemory provider plugin\nBuilt-in only"
+ },
+ "Notificações": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Notificações › Alertas no desktop",
+  "texto": "Configurações\nNotificações\nAlertas no desktop\n\nNotificações do sistema operacional (não os avisos dentro do app). Por dispositivo.\n\nAtivar notificações\nDesligado silencia todas as notificações abaixo.\nAprovação necessária\nUm comando está esperando você aprovar ou recusar.\nInformação necessária\nO B-3PO fez uma pergunta ou precisa de uma senha ou segredo.\nResposta pronta\nUm turno terminou enquanto o B-3PO estava em segundo plano.\nTurno falhou\nErros de turno em segundo plano.\nTarefa em segundo plano concluída\nUm comando de terminal em segundo plano terminou.\nAvisos de crédito\nO acesso a créditos foi pausado ou restaurado.\nNotificações de plugin\nUm plugin do desktop enviou uma notificação enquanto o B-3PO estava em segundo plano.\nEnviar notificação de teste\n\nAvisos de conclusão só disparam enquanto o B-3PO está em segundo plano."
+ },
+ "Cobrança": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Cobrança › Visão geral",
+  "texto": "Configurações\nCobrança\nVisão geral\nConnect your Nous account\nSign in with your Nous account to see your balance, plan and usage here.\nSign in\nBalance\n—\nPlan\n—\nAuto-refill\n—"
+ },
+ "Sobre": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Sobre › Versão e atualizações",
+  "texto": "Configurações\nSobre\nVersão e atualizações\nHermes\n\nVersion git.6c85ca0.dirty\n\nUpdates\n\nWe couldn't reach the update server.\n\nNo Python interpreter is available to check the source update channel. check-failed\n\nLast checked just now\n\nCheck now\nRelease notes\n\nThe backend is running the latest version.\n\nLast checked just now\n\nCheck now\nVersion\nvgit.6c85ca0.dirty (!)\nConnected backend\nvgit.6c85ca0.dirty\nCommit\n89c9452be7402e uncommitted changes\nBuild Origin\nLocal (b3po-brand)\nDistribution\nSource + hermes desktop\nInstall ID\n0e984f3a422daac2 (C:\\Users\\lmpra\\AppData\\Local\\Temp\\b3po-cdp-userdata5\\hermes-home\\hermes-agent)"
+ },
+ "Plugins": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Plugins",
+  "texto": "Configurações\nPlugins\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nManage plugins\n\nOptions that installed plugins add. Each plugin gets its own page, and some add sub-pages under it.\n\nNo plugin has settings yet."
+ },
+ "Workspace": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Workspace › Projetos e descoberta",
+  "texto": "Configurações\nWorkspace\nProjetos e descoberta\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nWorking Directory\nDefault project folder for tool and terminal work.\nAutomatic Repository Discovery\nScan local folders for Git repositories to show in Projects.\nRepository Discovery Roots\nFolders to scan. Leave empty to scan your home directory.\nExcluded Repository Paths\nFolders and their descendants to skip during repository discovery."
+ },
+ "Browser": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Browser › Perfil do navegador",
+  "texto": "Configurações\nBrowser\nPerfil do navegador\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nUse My Real Browser Profile\nLocal browsing uses your real logins. Hermes copies your default browser's profile (cookies, logins, preferences) into a managed snapshot and drives it with its packaged Chromium — your live profile is never opened directly, and the copy is refreshed from it on each run. Also lets the agent open a local real-profile session on request even when a cloud browser backend is configured. Only Chromium browsers (Chrome, Edge, Brave, Brave Origin, Chromium) are supported; a non-Chromium default fails with a clear message. Off by default."
+ },
+ "Voz": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Voz › Conversa por voz",
+  "texto": "Configurações\nVoz\nConversa por voz\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nVoice recording shortcut\nSet the voice recording shortcut in Settings → Keyboard Shortcuts (\"Start / stop voice conversation\"). The voice.record_key config value only applies to the CLI and TUI.\nVoice Chat Mode\nchained: speech-to-text → Hermes → text-to-speech with the providers below. gpt-live: one full-duplex OpenAI voice model (gpt-live-1) listens and talks, and hands every real request to Hermes — any model you have selected answers with the full toolset. Needs an OpenAI API key; the voice layer bills $0.05 per minute.\nChained\nGPT-Live Voice\nVoice for GPT-Live mode. Custom voice IDs are accepted.\nGPT-Live Persona\nExtra sentences for the live voice persona (tone, pace, language). Hermes keeps its own system prompt.\nMax Recording Length\nClient Direct"
+ },
+ "Avançado": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Avançado › Desktop e inicialização",
+  "texto": "Configurações\nAvançado\nDesktop e inicialização\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nKeep computer awake\nStop this machine from sleeping. \"While working\" holds it only while a turn is in flight, so overnight runs survive without pinning the laptop awake all week. The display can still dim.\nOff\nWhile working\nAlways\nDisable F12 DevTools\nBlock F12 from opening Developer Tools. Ctrl+Shift+I (or Cmd+Opt+I on Mac) still works.\nAlways open links in external browser\nOpen every link you click in your system browser instead of the in-app browser. \"Open in in-app browser\" in the right-click menu still works.\nQuick Entry\nSummon a small composer from anywhere with a global shortcut and fire a prompt without opening Hermes.\nQuick Entry shortcut\nNeeds at least one modifier, e.g. CommandOrControl+Shift+Space.\nShortcut is active.\nRodar a configuração inicial de novo\nAbre uma conversa de configuração nova que percorre as etapas iniciais com o seu modelo atual.\nRodar de novo\nIn-App Update Local Changes\nWhen Hermes updates itself from the app (no terminal prompt), keep local source edits (stash) or throw them away (discard). Terminal updates always ask.\nStash"
+ },
+ "Conversa": {
+  "clicou": "BUTTON:row-hover flex h-7 w-full shri",
+  "trilha": "Configurações › Conversa › Comportamento",
+  "texto": "Configurações\nConversa\nComportamento\nAplica-se a\ndefault\nanalista-financeiro\nRevisor de Código\nPersonalidade\nEstilo padrão do assistente em sessões novas.\nNone\nTimezone\nIANA timezone identifier. Blank uses the system timezone.\nSearch…\nBlocos de raciocínio\nMostra as seções de raciocínio quando o backend as fornece."
+ }
+}

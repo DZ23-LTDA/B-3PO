@@ -800,6 +800,7 @@ from hermes_cli.web_routers import (
     analytics as _analytics_routes,
     chat_ws as _chat_ws_routes,
     chat_workspaces as _chat_workspaces_routes,
+    connectors as _connectors_routes,
     dashboard_ui as _dashboard_ui_routes,
     webapp as _webapp_routes,
     shared_metrics as _shared_metrics_routes,
@@ -808,11 +809,13 @@ from hermes_cli.web_routers import (
     ui_preferences as _ui_preferences_routes,
 )
 
+import hermes_cli.web_routers.b3po_devices as _b3po_device_routes
 import hermes_cli.web_routers.desktop_plugins as _desktop_plugin_routes
 import hermes_cli.web_routers.uploads as _upload_routes
 from fastapi import Depends as _Depends
 from hermes_cli.web_server_surface import route_on as _route_on
 
+app.include_router(_b3po_device_routes.router)
 app.include_router(_files_routes.router)
 # The Webapp's routes exist only on the surfaces whose policy names them (404 elsewhere).
 app.include_router(_upload_routes.router, dependencies=[_Depends(_route_on("browser_files"))])
@@ -820,6 +823,8 @@ app.include_router(_desktop_plugin_routes.router, dependencies=[_Depends(_route_
 app.include_router(_git_routes.router)
 app.include_router(_local_models_routes.router)
 app.include_router(_status_routes.router)
+# r14 do V5 (G4): o contrato de prontidao existia sem consumidor nenhum.
+app.include_router(_connectors_routes.router)
 app.include_router(_actions_routes.router)
 app.include_router(_audio_routes.router)
 app.include_router(_display_routes.router)

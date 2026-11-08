@@ -407,7 +407,7 @@ export function ZoneEditor() {
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-foreground">{t.zones.zoneEditorTitle}</h2>
-          <p className="text-xs text-muted-foreground/80">
+          <p className="text-xs text-muted-foreground">
             {t.zones.editorHintPre}
             <kbd className="rounded border border-(--ui-stroke-secondary) bg-foreground/5 px-1 font-mono text-[10px]">
               ⇧
@@ -586,7 +586,7 @@ export function ZoneEditor() {
         <Button onClick={() => $zoneEditorOpen.set(false)} size="sm" variant="ghost">
           {t.common.cancel}
         </Button>
-        {!treeExpressible && <span className="text-xs text-muted-foreground/80">{t.zones.notExpressible}</span>}
+        {!treeExpressible && <span className="text-xs text-muted-foreground">{t.zones.notExpressible}</span>}
         <span className="ml-auto text-xs text-muted-foreground/60">{t.zones.zoneCount(zones.length)}</span>
       </div>
     </div>

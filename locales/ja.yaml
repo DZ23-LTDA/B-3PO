@@ -526,7 +526,7 @@ gateway:
     timed_out: "❌ Hermes の更新は 30 分でタイムアウトしました。"
     finished_success: "✅ Hermes の更新が正常に完了しました。"
     last_lines: "{msg}\n\n最後の行:\n```\n{tail}\n```"
-    managed_action: "Hermes Agent の更新"
+    managed_action: "B-3PO の更新"
     not_applicable: "✗ `hermes update` はこのインストール方法 ({method}) には適用できません。\n更新方法: {command}"
   usage:
     rate_limits: "⏱️ **レート制限:** {state}"
@@ -1459,13 +1459,13 @@ platform:
       size_downgraded: "{label}のサイズ {size_mb}MB が上限 {cap} を超えています。代わりにファイルとして送信しました。"
   email:
     image_line: "画像: {url}"
-    standalone_subject: "Hermes Agent"
+    standalone_subject: "B-3PO"
   dingtalk:
     emotion:
       thinking: "🤔考え中"
       done: "🥳完了"
   irc:
-    quit_message: "Hermes Agent をシャットダウンしています"
+    quit_message: "B-3PO をシャットダウンしています"
     standalone_quit: "配信済み"
   relay:
     confirm_approve_once: "一度だけ承認"
@@ -1487,7 +1487,7 @@ slash:
   sethome:
     description: "このチャットをホームチャンネルに設定"
   update:
-    description: "Hermes Agent を最新バージョンに更新"
+    description: "B-3PO を最新バージョンに更新"
   category:
     session: "セッション"
     configuration: "設定"
@@ -1695,7 +1695,7 @@ slash:
   image:
     description: "次のプロンプト用にローカル画像ファイルを添付"
   version:
-    description: "Hermes Agent のバージョンを表示"
+    description: "B-3PO のバージョンを表示"
   debug:
     description: "デバッグレポート（システム情報 + ログ）をアップロードして共有リンクを取得"
   quit:
@@ -1768,8 +1768,8 @@ cli:
     no_saved_card_add_funds_hint: "保存済みのカードがありません — 「資金を追加」から登録手順に進めます。"
     actions_require_admin: "請求操作には組織の管理者/オーナー権限が必要です。"
     remote_spending_off_for_org: "この組織ではリモート支出がオフになっています。"
-    killswitch_reason_overview: "請求管理者がポータルの Hermes Agent ページでオンにすると、ここから資金を追加できます。"
-    killswitch_reason_buy: "資金を追加する前に、請求管理者がポータルの Hermes Agent ページでオンにする必要があります。"
+    killswitch_reason_overview: "請求管理者がポータルの B-3PO ページでオンにすると、ここから資金を追加できます。"
+    killswitch_reason_buy: "資金を追加する前に、請求管理者がポータルの B-3PO ページでオンにする必要があります。"
     add_funds_now_hint: "今すぐ資金を追加 — 1 回限りの課金で、本日中に残高へ追加されます。"
     refill_when_low_amounts: "残高が少なくなったら補充 — 残高が {threshold} を下回ると自動的に {reload_to} を課金します。"
     refill_when_low_generic: "残高が少なくなったら補充 — 残高が設定した金額を下回ると、カードに自動的に課金します。"
@@ -1840,7 +1840,7 @@ cli:
     charge_failed_card_declined: "🔴 カードが拒否されました。ポータルで別のカードをお試しください。"
     charge_failed_generic: "🔴 課金が完了しませんでした ({reason})。"
     charge_error_no_payment_method: "💳 カードが登録されていません — チャージと請求の管理はポータルで行ってください。"
-    charge_error_remote_spending_disabled: "このアカウントではリモート支出がオフになっています — 請求管理者がポータルの Hermes Agent ページでオンにできます。"
+    charge_error_remote_spending_disabled: "このアカウントではリモート支出がオフになっています — 請求管理者がポータルの B-3PO ページでオンにできます。"
     charge_error_role_required: "資金の追加には組織の管理者/オーナー権限が必要です。管理者に依頼するか、ポータルで管理してください。"
     charge_error_idempotency_conflict: "🔴 この課金キーは別の金額ですでに使用されています。新しいチャージを開始してください。"
     revoked_by_admin: "管理者がこのターミナルの支出を停止しました。"
@@ -1857,7 +1857,7 @@ cli:
     charge_stepup_noninteractive: "`hermes portal` を実行してリモート支出を許可し、その後再試行してください。"
     charge_stepup_declined: "課金は行われていません。リモート支出を許可するときは /topup を実行してください。"
     charge_stepup_not_granted: "リモート支出を許可できませんでした — 組織の管理者またはオーナーの承認が必要です。カードには課金されていません。"
-    allowed_but_org_off: "このターミナルではリモート支出が許可されていますが、この組織ではまだオフになっています。請求管理者がポータルの Hermes Agent ページでオンにしてから、再度 /topup を実行してください。"
+    allowed_but_org_off: "このターミナルではリモート支出が許可されていますが、この組織ではまだオフになっています。請求管理者がポータルの B-3PO ページでオンにしてから、再度 /topup を実行してください。"
     allowed_no_card: "リモート支出を許可しました — ただし、カードがまだ登録されていません。"
     topup_on_portal_to_continue: "続行するには、ポータルでチャージと請求の管理を行ってください。"
     allowed_run_topup: "リモート支出を許可しました。続行するには /topup を実行してください。"
@@ -2163,7 +2163,7 @@ cli:
     images_attached_one: "📎 画像 {count} 件を添付しました"
     images_attached_other: "📎 画像 {count} 件を添付しました"
     command_interrupted: "コマンドを中断しました。"
-    welcome: "Hermes Agent へようこそ！メッセージを入力するか、/help でコマンド一覧を表示します。"
+    welcome: "B-3PO へようこそ！メッセージを入力するか、/help でコマンド一覧を表示します。"
     activated_skills_label: "有効化されたスキル:"
     redaction_disabled_title: "⚠  シークレットの秘匿化が無効です"
     redaction_disabled_body: "(HERMES_REDACT_SECRETS={value})。API キーやトークンがチャット出力、セッション JSON、ログにそのまま表示される可能性があります。再度有効にするには config.yaml で {setting} を設定してください。"
@@ -2243,7 +2243,7 @@ cli:
   render:
     response_transformed: "[ストリーミング後に応答が変換されました]"
     banner_tagline: "{name} - AI エージェントフレームワーク"
-    banner_version: "Hermes Agent v{version} ({date})"
+    banner_version: "B-3PO v{version} ({date})"
   subagents:
     cannot_steer_process: "バックグラウンドプロセスはステアできません。停止するか、ログを確認してください。"
     count_live: "{count} 件稼働中"
@@ -3120,12 +3120,12 @@ cli:
       usage: "/timestamps [on|off|status]"
       label: "メッセージのタイムスタンプ"
     update:
-      managed_action: "Hermes Agent を更新"
+      managed_action: "B-3PO を更新"
       choice_update: "今すぐ更新"
-      choice_update_desc: "現在のセッションを終了して Hermes Agent を更新します"
+      choice_update_desc: "現在のセッションを終了して B-3PO を更新します"
       choice_cancel: "キャンセル"
       choice_cancel_desc: "現在のセッションを維持します"
-      title: "☤  Hermes Agent を更新"
+      title: "☤  B-3PO を更新"
       detail: "現在のセッションを終了し、`hermes update` を実行します。"
       cancelled: "🟡 /update をキャンセルしました。"
       launching: "☤ 更新を開始しています..."
@@ -3145,7 +3145,7 @@ cli:
     fix_lm_studio: "LM Studio の対処法: モデル設定でコンテキスト長を設定 → モデルを再読み込み"
     fix_local_server: "対処法: サーバーを少なくとも {tokens_k}K コンテキストで起動する（llama.cpp: -c {tokens}）か、config.yaml の model.ollama_num_ctx を実際に提供しているウィンドウ長に設定してください"
     fix_config: "対処法: config.yaml で model.context_length を設定するか、サーバーのコンテキスト設定を増やしてください"
-    hermes_models_not_agentic: "⚠  Nous Research の Hermes 3 および 4 モデルはエージェント向けではなく、Hermes Agent での使用を想定していません。"
+    hermes_models_not_agentic: "⚠  Nous Research の Hermes 3 および 4 モデルはエージェント向けではなく、B-3PO での使用を想定していません。"
     hermes_models_lack_tools: "これらのモデルにはエージェントワークフローに必要なツール呼び出し機能がありません。エージェント対応モデル（Claude、GPT、Gemini、DeepSeek など）の使用を検討してください。"
     hermes_models_switch_hint: "切り替え方法: /model sonnet  または  /model gpt5"
     project_skills_loaded: "◆ このリポジトリからプロジェクトスキル {count} 件を読み込みました"

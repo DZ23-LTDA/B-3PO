@@ -44,6 +44,84 @@ describe('I18nProvider', () => {
     expect(screen.getByTestId('label').textContent).toBe('Language')
   })
 
+  it('usa o display.language salvo (pt) em vez do default en', async () => {
+    const configClient = {
+      getConfig: async () => ({ display: { language: 'pt' } }),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+  })
+
+  it('sem escolha salva, segue o idioma da maquina (pt-BR) em vez de en', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      getConfig: async () => ({ display: { language: 'en' } }),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+    window.hermesDesktop = previous
+  })
+
+  it('config indisponivel nao abre a UI em ingles numa maquina pt-BR', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      getConfig: async () => {
+        throw new Error('config fora do ar')
+      },
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'))
+    window.hermesDesktop = previous
+  })
+
+  it('config que nunca responde nao segura a UI em ingles', async () => {
+    const previous = window.hermesDesktop
+    // @ts-expect-error teste: bridge minima
+    window.hermesDesktop = { getMachineProfile: async () => ({ locale: 'pt-BR' }) }
+
+    const configClient = {
+      // promessa pendente para sempre: o bridge remoto sem backend local faz exatamente isso
+      getConfig: () => new Promise<never>(() => {}),
+      saveConfig: async () => ({ ok: true })
+    }
+
+    render(
+      <I18nProvider configClient={configClient}>
+        <LanguageProbe />
+      </I18nProvider>
+    )
+
+    await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pt'), { timeout: 4000 })
+    window.hermesDesktop = previous
+  }, 8000)
+
   it('normalizes an initial locale alias and switches translations', async () => {
     render(
       <I18nProvider configClient={null} initialLocale="zh-CN">
@@ -82,7 +160,9 @@ describe('I18nProvider', () => {
   it.each([
     ['fr', 'fr'],
     ['de-DE', 'de'],
-    ['es', 'es']
+    ['es', 'es'],
+    ['pt', 'pt'],
+    ['pt-BR', 'pt']
   ] as const)('loads display.language=%s and renders the %s catalog', async (configured, locale) => {
     const configClient: I18nConfigClient = {
       getConfig: vi.fn().mockResolvedValue({ display: { language: configured } }),

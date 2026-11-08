@@ -1,6 +1,7 @@
 import { useAui, useAuiState, useComposerRuntime } from '@assistant-ui/react'
 import { SLASH_COMMAND_RE } from '@hermes/shared'
 import { type RefObject, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useDelegacaoPendenteNoComposer } from './use-delegacao-pendente'
 
 import { isElementInHiddenPane } from '@/components/pane-shell/pane-visibility'
 import { translateNow } from '@/i18n'
@@ -906,6 +907,10 @@ export function useComposerDraft({
       flushPendingDraftPersist()
     }
   }, [syncDraftFromEditor])
+
+  // r78 do V5: o pedido delegado em Sofia chega aqui (ver `use-delegacao-pendente.ts`).
+  // Mora neste hook, e nao em `ChatBar`, porque `ChatBar` ja esta acima do alvo de FUNC_LINES.
+  useDelegacaoPendenteNoComposer(loadIntoComposer)
 
   return {
     activeQueueSessionKeyRef,

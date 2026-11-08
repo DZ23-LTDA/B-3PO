@@ -11,7 +11,7 @@ export const frNotices = {
   butterbar: {
     goTo: (index, total) => `Afficher l'avis ${index} sur ${total}`,
     legal: {
-      before: "L'utilisation de Hermes Agent est soumise à nos ",
+      before: "L'utilisation de B-3PO est soumise à nos ",
       terms: "Conditions d'utilisation",
       between: ' et à notre ',
       privacy: 'Politique de confidentialité',

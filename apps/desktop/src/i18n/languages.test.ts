@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import { TRANSLATIONS } from './catalog'
-import { DEFAULT_LOCALE, isLocale, isSupportedLocaleValue, LOCALE_OPTIONS, normalizeLocale } from './languages'
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  isSupportedLocaleValue,
+  LOCALE_OPTIONS,
+  normalizeLocale,
+  resolveInitialLocalePreferringOs } from './languages'
 
 describe('desktop i18n languages', () => {
   it('normalizes supported locale aliases', () => {
@@ -70,3 +76,24 @@ describe('desktop i18n languages', () => {
     expect(Object.keys(TRANSLATIONS).sort()).toEqual(LOCALE_OPTIONS.map(option => option.id).sort())
   })
 })
+
+  describe('B-3PO: o default en não pode ganhar do idioma da máquina', () => {
+    it('máquina pt-BR com o default salvo abre em pt', () => {
+      // `display.language` chega como "en" do backend mesmo quando ninguém escolheu nada
+      expect(resolveInitialLocalePreferringOs('en', 'pt-BR')).toBe('pt')
+    })
+
+    it('escolha explícita diferente do default vence a máquina', () => {
+      expect(resolveInitialLocalePreferringOs('es', 'pt-BR')).toBe('es')
+    })
+
+    it('sem idioma da máquina, mantém a escolha salva', () => {
+      expect(resolveInitialLocalePreferringOs('es', null)).toBe('es')
+      expect(resolveInitialLocalePreferringOs('en', null)).toBe(DEFAULT_LOCALE)
+    })
+
+    it('sem nada salvo, segue a máquina', () => {
+      expect(resolveInitialLocalePreferringOs(undefined, 'pt-BR')).toBe('pt')
+      expect(resolveInitialLocalePreferringOs(null, 'ja-JP')).toBe('ja')
+    })
+  })

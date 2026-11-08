@@ -870,6 +870,11 @@ def _(rid, params: dict) -> dict:
     session["voice_live_context"] = (
         voice_context[:6000] if session["client_surface"] == "voice-live" and isinstance(voice_context, str) else "")
     session["voice_turn"] = params.get("voice_turn") is True
+    # B-3PO (r273): o contexto de ambiente/projeto do produto. Diferente do `voice_context` ele
+    # NÃO é exclusivo de uma surface — vale para o app window também. Fica na sessão porque é o
+    # último valor que o cliente mandou; a nota do turno é montada em `gateway/session_surface`.
+    produto_contexto = params.get("produto_contexto")
+    session["produto_contexto"] = produto_contexto[:400] if isinstance(produto_contexto, str) else ""
     has_truncation = any(params.get(k) is not None for k in _TRUNCATION_PARAMS)
     if has_truncation and isinstance(text, str):
         # A rewind replays what the transcript shows: re-expand a skill invocation or

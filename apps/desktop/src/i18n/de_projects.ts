@@ -37,6 +37,7 @@ export const deProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   moveNoProjects: 'Keine anderen Projekte',
   reveal: 'Im Ordner anzeigen',
   copyPath: 'Pfad kopieren',
+  runTests: 'Tests ausführen',
   removeFromSidebar: 'Aus der Sidebar ausblenden',
   createdInPreviousContext:
     'Das Projekt wurde auf der vorherigen Verbindung oder im vorherigen Profil erstellt. Wechsle zurück; IDEA.md wurde nicht geschrieben.',

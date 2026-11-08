@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { type ComponentType, useCallback, useEffect, useMemo, useRef } from 'react'
+import { type ComponentType, lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 
 import { codiconIcon } from '@/components/ui/codicon'
@@ -44,17 +44,17 @@ import { OverlayIconButton } from '../overlays/overlay-chrome'
 import { OverlayMain, OverlayNav, type OverlayNavGroup, OverlaySplitLayout } from '../overlays/overlay-split-layout'
 import { OverlayView } from '../overlays/overlay-view'
 
-import { AboutSettings } from './about-settings'
-import { AppearanceSettings } from './appearance-settings'
+const AboutSettings = lazy(() => import('./about-settings').then(m => ({ default: m.AboutSettings })))
+const AppearanceSettings = lazy(() => import('./appearance-settings').then(m => ({ default: m.AppearanceSettings })))
 import { BILLING_VIEWS, BillingSettings, type BillingSubView } from './billing'
 import { deriveBillingView, useBillingState, useSubscriptionState } from './billing/use-billing-state'
-import { ConfigSettings } from './config-settings'
+const ConfigSettings = lazy(() => import('./config-settings').then(m => ({ default: m.ConfigSettings })))
 import { SECTIONS } from './constants'
-import { GatewaySettings } from './gateway-settings'
-import { KeybindSettings } from './keybind-settings'
+const GatewaySettings = lazy(() => import('./gateway-settings').then(m => ({ default: m.GatewaySettings })))
+const KeybindSettings = lazy(() => import('./keybind-settings').then(m => ({ default: m.KeybindSettings })))
 import { KEYS_VIEWS, KeysSettings, type KeysView } from './keys-settings'
 import { movedSettingsTabRedirect } from './moved-tabs'
-import { NotificationsSettings } from './notifications-settings'
+const NotificationsSettings = lazy(() => import('./notifications-settings').then(m => ({ default: m.NotificationsSettings })))
 import {
   PAGE_SCOPED_PARAMS,
   PLUGINS_NAV_ICON,
@@ -64,7 +64,7 @@ import {
 } from './plugin-settings'
 import { SettingsBreadcrumbContext } from './primitives'
 import { PROVIDER_VIEWS, ProvidersSettings, type ProviderView } from './providers-settings'
-import { SessionsSettings } from './sessions-settings'
+const SessionsSettings = lazy(() => import('./sessions-settings').then(m => ({ default: m.SessionsSettings })))
 import { SettingsSubpageHeader } from './subpage-navigation'
 import { resolveSettingsSubpage, settingsSubpageIcon, settingsSubpages } from './subpages'
 import type { SettingsPageProps, SettingsView as SettingsViewId } from './types'
@@ -612,7 +612,20 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
             {needsSubpageRedirect ? (
               <Navigate replace to={{ hash, pathname, search: `?${subpageSearch}` }} />
             ) : (
-              activeSettingsContent
+              /*
+               * r279 — o painel ativo carrega sob demanda.
+               *
+               * Antes, `index.tsx` importava os DOZE painéis estaticamente: abrir Configurações
+               * baixava e avaliava `model-settings` (62 KB), `gateway-settings` (53 KB),
+               * `appearance-settings` (41 KB) e o resto — mesmo quando a pessoa só queria ver a
+               * aba de Aparência. Medido: **55 long tasks, 20 acima de 100 ms**, e o renderer
+               * travando o suficiente para um `screenshot` dar timeout de 30 s.
+               *
+               * Com `lazy` + `Suspense`, o chunk do painel escolhido é o único que carrega. O
+               * `fallback` é o mesmo vazio que o app já mostrava durante o carregamento — não
+               * inventa um spinner novo.
+               */
+              <Suspense fallback={null}>{activeSettingsContent}</Suspense>
             )}
           </SettingsBreadcrumbContext.Provider>
         </OverlayMain>

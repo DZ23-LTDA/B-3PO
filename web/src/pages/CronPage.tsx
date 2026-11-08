@@ -1094,7 +1094,7 @@ export default function CronPage() {
 
           <div className="grid gap-1 min-w-[220px]">
             <Label htmlFor="cron-profile-filter">Profile</Label>
-            <Select
+            <Select aria-label="Profile"
               id="cron-profile-filter"
               value={selectedProfile}
               onValueChange={(v) => setSelectedProfile(v)}

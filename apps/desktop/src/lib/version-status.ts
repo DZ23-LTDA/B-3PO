@@ -101,6 +101,26 @@ function pendingLines({ available, behind, branch, copy, latestTag, rollback, st
   return lines
 }
 
+/**
+ * Como o alvo se identifica na barra. Extraido de `resolveVersionStatus` para tirar um degrau de
+ * decisao de uma funcao que ja estava no teto de complexidade — e porque a regra tem um caso proprio:
+ *
+ * O prefixo `v` so faz sentido antes de um numero. Uma build sem release nenhuma diz `dev`, e `vdev`
+ * e ruido de desenvolvimento — exatamente o que o rotulo existe para tirar da tela.
+ */
+function baseLabel(input: {
+  client: boolean
+  copy: VersionStatusCopy
+  named: string
+  remote: boolean | undefined
+  version: null | string
+}): string {
+  if (!input.client) return input.copy.backendLabel(input.named)
+  if (input.remote) return input.copy.clientLabel(input.named)
+  if (input.version === 'dev') return input.copy.clientLabel(input.named)
+
+  return (input.version && `v${input.version}`) || input.named
+}
 export function resolveVersionStatus({
   applyMessage,
   applying,
@@ -133,11 +153,7 @@ export function resolveVersionStatus({
   // A client with no version still identifies itself by sha; a backend can't.
   const named = version ?? (client ? sha : null) ?? copy.unknown
 
-  const base = !client
-    ? copy.backendLabel(named)
-    : remote
-      ? copy.clientLabel(named)
-      : (version && `v${version}`) || named
+  const base = baseLabel({ client, copy, named, remote, version })
 
   // Main channel: commits behind is the precise diff. Stable channel: a
   // count of commits is the wrong vocabulary — a release is one step, so

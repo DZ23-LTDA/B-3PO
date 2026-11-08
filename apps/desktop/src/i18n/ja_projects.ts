@@ -32,6 +32,7 @@ export const jaProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   menuDelete: '削除',
   reveal: 'フォルダで表示',
   copyPath: 'パスをコピー',
+  runTests: 'テストを実行',
   removeFromSidebar: 'サイドバーから削除',
   createdInPreviousContext:
     'プロジェクトは以前の接続またはプロファイルで作成されました。そこに戻ってください。IDEA.md は書き込まれていません。',

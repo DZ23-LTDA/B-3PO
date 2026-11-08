@@ -9,6 +9,7 @@ import { useI18n } from '@/i18n'
 import { LayoutDashboard, Power, RefreshCw } from '@/lib/icons'
 import { platformStatusTone } from '@/lib/platform-status'
 import type { RuntimeReadinessResult } from '@/lib/runtime-readiness'
+import { ehAvisoSemProvedor } from '@/lib/gateway-health-pill'
 import { cn } from '@/lib/utils'
 import { reconnectGateway } from '@/store/gateway-reconnect'
 import { notifyError } from '@/store/notifications'
@@ -207,7 +208,22 @@ export function GatewayMenuPanel({
 
       {inferenceStatus?.reason && (
         <Section className="text-xs text-muted-foreground">
-          <div className="line-clamp-3">{inferenceStatus.reason}</div>
+          <div className="line-clamp-3">
+            {/*
+             * r280: o motivo chega do backend em INGLÊS e era exibido cru num produto em pt-BR.
+             *
+             * Dois origens, ambas reconhecidas aqui:
+             *  1. `DEFAULT_NOT_READY_REASON` — a frase da função pura de prontidão;
+             *  2. a `AuthError` do servidor (`hermes_cli/auth.py`, code `no_provider_configured`),
+             *     que o runtime devolve como `error` e chega aqui como texto livre.
+             *
+             * A tradução também diz ONDE resolver, não só o que falta: a original só manda rodar
+             * `hermes model` num terminal, o que não é o caminho de quem está usando o app.
+             */}
+            {ehAvisoSemProvedor(inferenceStatus.reason)
+              ? copy.gatewayNeedsProvider
+              : inferenceStatus.reason}
+          </div>
         </Section>
       )}
 
@@ -257,6 +273,6 @@ function Section({ children, className }: { children: ReactNode; className?: str
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">{children}</div>
+    <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{children}</div>
   )
 }

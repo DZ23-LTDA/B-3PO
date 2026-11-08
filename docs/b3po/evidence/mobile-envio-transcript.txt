@@ -1,0 +1,9 @@
+sessao: 20261103_142614_796231
+titulo: Testar celular
+
+[user] Teste do celular
+[assistant] Estou entendendo que você tem um teste de celular/celular relacionado ao botão "Teste do celular" no projeto. Vou investigar o código base existente para localizar a implementação.
+
+```bash
+skill_view(codebase-inspection)
+```

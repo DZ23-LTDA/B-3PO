@@ -1,4 +1,4 @@
-import { dirname, resolve } from 'node:path'
+import { dirname, posix, resolve, win32 } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { ScreenshotWindow } from './command-screenshot-types'
@@ -16,10 +16,21 @@ interface MonitorOptions extends NativeGestureOptions {
 }
 
 export function resolveCommandScreenshotMonitorPath(
-  appPath = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+  appPath = resolve(dirname(fileURLToPath(import.meta.url)), '..'),
+  /**
+   * r199 do GOAL V2: a plataforma é PARÂMETRO, e o caminho é montado com o separador DELA.
+   *
+   * **Antes, a função usava o `resolve` do HOST** — e o teste que passa `platform: 'darwin'` recebia um caminho de
+   * Windows: a asserção comparava o caminho de um macOS com o separador de outro sistema.
+   *
+   * **O defeito é real e é do produto**: **um caminho de macOS montado com barra invertida não abre**.
+   */
+  platform: NodeJS.Platform = process.platform
 ): string {
   // Executables cannot run inside ASAR. dist/** is already explicitly unpacked.
-  return resolve(appPath, 'dist/native/command-screenshot-monitor').replace(/\.asar(?=[/\\])/g, '.asar.unpacked')
+  const path = platform === 'win32' ? win32 : posix
+
+  return path.resolve(appPath, 'dist/native/command-screenshot-monitor').replace(/\.asar(?=[\\/]|$)/, '.asar.unpacked')
 }
 
 function parseCapture(message: Record<string, unknown>): CommandScreenshotCapture | null {
@@ -54,7 +65,7 @@ export class CommandScreenshotMonitor {
   constructor(private readonly options: MonitorOptions = {}) {
     this.monitor = new NativeGestureMonitor({
       ...options,
-      path: resolveCommandScreenshotMonitorPath(options.appPath),
+      path: resolveCommandScreenshotMonitorPath(options.appPath, options.platform),
       parseGesture: parseCapture
     })
   }

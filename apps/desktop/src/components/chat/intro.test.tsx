@@ -1,6 +1,7 @@
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import { MemoryRouter } from 'react-router'
 import { I18nProvider, useI18n } from '@/i18n'
 import type { I18nContextValue } from '@/i18n'
 
@@ -18,11 +19,15 @@ function Controls() {
 }
 
 function Fixture({ personality, seed = 0 }: { personality?: string; seed?: number }) {
+  // r19 do V4: a home usa `useNavigate()`. Em producao ela esta dentro do HashRouter; o fixture
+  // precisa do mesmo contrato, senao o componente estoura antes de qualquer assercao.
   return (
-    <I18nProvider configClient={null} initialLocale="en">
-      <Controls />
-      <Intro personality={personality} seed={seed} />
-    </I18nProvider>
+    <MemoryRouter>
+      <I18nProvider configClient={null} initialLocale="en">
+        <Controls />
+        <Intro personality={personality} seed={seed} />
+      </I18nProvider>
+    </MemoryRouter>
   )
 }
 
@@ -30,6 +35,19 @@ afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
 })
+/**
+ * r268: as personalidades NEUTRAS saíram do corpo do teste.
+ *
+ * O chat genérico (persona neutra) deixou de renderizar uma frase rotativa: ele renderiza a
+ * **home do produto** — marca, posicionamento e os seis cartões de ambiente. **O `body` só
+ * existe no chat de um BOT**, onde a fala da persona é a identidade daquela conversa.
+ *
+ * O teste de tradução continua sendo sobre os CORPOS, e é por isso que ele agora percorre só
+ * as personalidades que têm corpo. **A verificação do genérico não desapareceu** — ela está
+ * no teste seguinte, que afirma o que a home renderiza.
+ */
+const NEUTRAS = new Set(['', 'default', 'none', 'neutral'])
+
 it('translates every shipped stock body at the same personality and rotation position', async () => {
   vi.spyOn(Math, 'random').mockReturnValue(0)
 
@@ -37,8 +55,9 @@ it('translates every shipped stock body at the same personality and rotation pos
     .trim()
     .split('\n')
     .map(line => JSON.parse(line) as { personality: string; body: string })
+    .filter(entry => !NEUTRAS.has(entry.personality))
 
-  const { container, rerender } = render(<Fixture />)
+  const { container, rerender } = render(<Fixture personality={entries[0].personality} />)
 
   for (const locale of ['zh', 'zh-hant', 'ja', 'fr', 'de', 'es'] as const) {
     await act(() => i18n.setLocale(locale))
@@ -88,4 +107,33 @@ it('localizes the custom-personality fallback without translating its user-suppl
     expect(body).not.toBe(english)
     expect(body).toContain('My Custom Voice')
   }
+})
+
+it('chat genérico mostra a marca (imagem) e a home do produto, não o lettering gigante', () => {
+  vi.spyOn(Math, 'random').mockReturnValue(0)
+
+  const { container } = render(<Fixture />)
+  const img = container.querySelector('img')
+
+  // A arte oficial do herói (anel de luz embutido), não o crachá pequeno nem o lettering gigante.
+  expect(img?.getAttribute('src')).toMatch(/b3po-hero\.png$/)
+  // O lettering gigante só aparece no chat de um bot, onde o nome é a identidade.
+  expect(container.querySelector('.wordmark')).toBeNull()
+
+  // r268: no chat genérico a tela é a HOME — marca, posicionamento e os seis ambientes.
+  const texto = container.textContent ?? ''
+  /*
+   * r33 do V4 — as asserções passaram a ser em INGLÊS, que é o locale do fixture.
+   *
+   * Elas estavam em português e **só passavam porque o `en.ts` tinha 13 chaves em português** (o
+   * A-09 da r30). Quando a r30 traduziu o inglês de verdade, este teste quebrou — e estava
+   * codificando o bug: pedia português a um locale que se declarava inglês.
+   */
+  expect(texto).toContain('Welcome to')
+  expect(texto).toContain('Your platform for business management')
+
+  // Os seis cartões de ambiente, como botões de escolha (um já aceso).
+  const cartoes = container.querySelectorAll('[role="group"] button')
+  expect(cartoes).toHaveLength(6)
+  expect(container.querySelectorAll('[role="group"] button[aria-pressed="true"]')).toHaveLength(1)
 })

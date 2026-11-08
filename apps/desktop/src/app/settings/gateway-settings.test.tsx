@@ -50,6 +50,13 @@ const saveConnectionConfig = vi.fn()
 // single-purpose test.
 vi.mock('./managed-updates-section', () => ({ ManagedUpdatesSection: () => null }))
 
+// r17 do V5: a secao de conectores le a API. Este teste e do contrato da maquina;
+// a leitura tem cobertura propria. O mock NAO esconde a montagem: o teste abaixo prova
+// que o componente esta montado, que foi o erro silencioso da r15.
+vi.mock('./connectors-readiness', () => ({
+  ProntidaoDeConectores: () => <p>secao-de-conectores-montada</p>
+}))
+
 const localConnection = {
   cloudOrg: '',
   envOverride: false,
@@ -92,6 +99,24 @@ afterEach(() => {
 })
 
 describe('GatewaySettings', () => {
+  /*
+   * r17 do V5 — o teste que faltava.
+   *
+   * Na r15 eu escrevi que a secao de prontidao de conectores estava montada. Nao estava: o script de
+   * insercao falhou num assert antes da montagem, e eu conferi so o typecheck — que passa sem
+   * montagem. O componente existia, tipava, e nunca aparecia na tela.
+   *
+   * Um componente montado nao e coberto por typecheck, por lint nem por teste de unidade do
+   * componente. So um teste que RENDERIZA a tela e olha para ela pega isso.
+   */
+  it('monta a secao de prontidao de conectores na tela de gateway', async () => {
+    getConnectionConfig.mockResolvedValue(localConnection)
+
+    render(<GatewaySettings />)
+
+    expect(await screen.findByText('secao-de-conectores-montada')).toBeTruthy()
+  })
+
   it('releases a pending save after a late probe invalidates its response', async () => {
     const saved = { ...localConnection, mode: 'remote', remoteUrl: 'https://a.example', remoteTokenSet: true }
     getConnectionConfig.mockResolvedValue(saved)

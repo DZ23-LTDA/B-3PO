@@ -113,6 +113,15 @@ _GUARDS = {
     "case-collisions": ["scripts/check-case-collisions.py"],
     "lazy-deps": ["scripts/ci/check_lazy_deps_imports.py"],
     "profile-archives": ["scripts/ci/check_profile_archive_boundary.py"],
+    # r71 do V5: as tabelas de `docs/b3po/v5` quebravam em silencio (seis linhas com coluna
+    # faltando, todas de edicao programatica). O gate nao via porque markdown nao e' testado.
+    "docs-tables": ["scripts/ci/check_docs_tables.py"],
+    # r72 do V5: a regra do `<main>` unico esta escrita em dois arquivos do projeto e mesmo assim
+    # `master-detail.tsx` e `mcp-editor.tsx` renderizavam `<main>` dentro do `<main>` do shell.
+    "single-main": ["scripts/ci/check_single_main.py"],
+    # r80 do V5: um numero errado sobrevive porque e' COPIADO. "27 falhas" estava em 5 documentos,
+    # "axe 0 em 27 rotas" em 4 — e eu corrigia so' o que estava olhando.
+    "stale-numbers": ["scripts/ci/check_stale_numbers.py"],
 }
 # Guards that judge a diff, not a tree: they get the same base/head as the ratchet
 # (blob-size-check.yml).

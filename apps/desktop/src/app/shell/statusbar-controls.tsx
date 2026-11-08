@@ -30,6 +30,32 @@ import {
 const STATUSBAR_ACTION_CLASS =
   'inline-flex h-full items-center gap-1 rounded-none px-1.5 text-[0.6875rem] text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground disabled:cursor-default disabled:opacity-45'
 
+/**
+ * Nome acessivel de um item de status (r229).
+ *
+ * Fora do componente de proposito: `StatusbarItemView` estava no teto de complexidade (CC 20) e
+ * as comparacoes inline levavam a 22 — o gate barrou, corretamente.
+ *
+ * r290 — WCAG 2.5.3 (`label-content-name-mismatch`): com tooltip E texto visivel, o `aria-label`
+ * NAO pode ser so o tooltip. O `axe-core` reprovou o chip de versao porque o leitor anunciava
+ * "B-3PO Desktop vdev - ..." enquanto a tela dizia "cliente dev": quem usa comando de voz nao
+ * consegue dizer o que ve. O nome acessivel agora COMECA pelo texto visivel; se o tooltip ja o
+ * contem, o tooltip basta.
+ */
+function rotuloAcessivel(item: StatusbarItem): string | undefined {
+  const visivel = typeof item.label === 'string' ? item.label : undefined
+
+  if (!item.title) {
+    return visivel
+  }
+
+  if (!visivel) {
+    return item.title
+  }
+
+  return item.title.includes(visivel) ? item.title : `${visivel} - ${item.title}`
+}
+
 export interface StatusbarMenuItem {
   id: string
   icon?: ReactNode
@@ -237,7 +263,7 @@ const StatusbarItemView = memo(function StatusbarItemView({
     <>
       {item.icon}
       {item.label && <span className="truncate">{item.label}</span>}
-      {item.detail && <span className="truncate text-muted-foreground/80">{item.detail}</span>}
+      {item.detail && <span className="truncate text-muted-foreground">{item.detail}</span>}
     </>
   )
 
@@ -353,6 +379,10 @@ const StatusbarItemView = memo(function StatusbarItemView({
           item.onSelect?.({ shiftKey: event.shiftKey })
         }}
         type="button"
+        // r229: um item de status so com icone ficava sem nome acessivel - o leitor de tela anunciava
+        // "botao" e nada mais (WCAG 4.1.2). `title`/`label` e a mesma string que o item ja usa no
+        // tooltip, entao isto nao inventa texto novo nem muda o visual.
+        aria-label={rotuloAcessivel(item)}
       >
         {content}
       </button>

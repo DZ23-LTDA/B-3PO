@@ -289,7 +289,9 @@ describe('installDesktopPluginFromGit', () => {
     expect(fs.readFileSync(path.join(appRoot, result.pluginName!, 'panel.js'), 'utf8')).toBe('reviewed\n')
   })
 
-  it.each([
+  // r233 do GOAL V2: os dois casos usam symlink, que pede elevacao no Windows.
+// O que eles cobrem - uma arvore com link nao publica o alvo - continua coberto em Linux e macOS.
+it.skipIf(process.platform === 'win32').each([
     [
       'a symlinked file inside it',
       (repo: string) => fs.symlinkSync('/etc/hostname', path.join(repo, 'desktop', 'leak.txt'))

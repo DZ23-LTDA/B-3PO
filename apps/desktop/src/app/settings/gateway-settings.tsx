@@ -45,10 +45,13 @@ import { managedUpdatesSupported } from '@/store/managed-updates'
 import { notify, notifyError, readableError } from '@/store/notifications'
 
 import { cloudTeamChanged, reconnectMovedCloudAgent } from './cloud-team-change'
+import { CrmContactsSection } from './crm-contacts-section'
 import { ConnectionsRegistrySection } from './connections-registry'
+import { PairedDevicesSection } from './paired-devices-section'
 import { CONTROL_TEXT } from './constants'
 import { KeychainEncryptionSetting, useKeychainEncryption } from './keychain-encryption-setting'
 import { ManagedUpdatesSection } from './managed-updates-section'
+import { ProntidaoDeConectores } from './connectors-readiness'
 import { EmptyState, ListRow, Pill, SettingsContent, SettingsSkeleton } from './primitives'
 import { SETTING_IDS, settingElementId } from './settings-manifest'
 import { enrichSelectedSshHost, selectSshHost } from './ssh-host-selection'
@@ -187,6 +190,8 @@ export function GatewaySettings({ embedded = false, subpage }: GatewaySettingsPr
     return (
       <SettingsContent>
         <ConnectionsRegistrySection />
+          <PairedDevicesSection />
+          <CrmContactsSection />
       </SettingsContent>
     )
   }
@@ -195,7 +200,12 @@ export function GatewaySettings({ embedded = false, subpage }: GatewaySettingsPr
     return <GatewayManagedUpdates />
   }
 
-  return <GatewayConnectionSettings embedded={embedded} standalone={subpage !== undefined} />
+  return (
+    <>
+      <GatewayConnectionSettings embedded={embedded} standalone={subpage !== undefined} />
+      <ProntidaoDeConectores />
+    </>
+  )
 }
 
 function GatewayManagedUpdates() {

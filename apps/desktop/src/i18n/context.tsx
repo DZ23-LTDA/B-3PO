@@ -4,6 +4,8 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
 
 import { getHermesConfigRecord, type HermesConfigRecord, retainConfigReadOrigin, saveHermesConfig } from '@/hermes'
 
+import { setTimeLocale } from '@/lib/time'
+
 import { TRANSLATIONS } from './catalog'
 import {
   DEFAULT_LOCALE,
@@ -11,10 +13,12 @@ import {
   isSupportedLocaleValue,
   localeConfigValue,
   normalizeLocale,
-  resolveInitialLocale
+  resolveInitialLocale,
+  resolveInitialLocalePreferringOs
 } from './languages'
 import { $appLocaleVersion, normalizeLocaleId, resolveTranslations } from './registry'
 import { $requestedLocale, setRuntimeI18nLocale } from './runtime'
+import { persistDesktopLocale } from './window-locale'
 import type { Locale, Translations } from './types'
 
 export interface I18nConfigClient {
@@ -95,6 +99,31 @@ export interface I18nProviderProps {
   scopeKey?: string
 }
 
+/**
+ * Ler `display.language` não pode decidir o idioma da UI por omissão. Em modo remoto o bridge de config
+ * pode nunca resolver (não há backend local para responder), e a promessa pendente deixava o locale no
+ * estado inicial `en` para sempre. Um limite curto transforma "sem resposta" em "sem escolha salva", que
+ * é o que o fallback por idioma da máquina sabe tratar.
+ */
+const LOCALE_CONFIG_TIMEOUT_MS = 2500
+
+function withLocaleTimeout<T>(promise: Promise<T>, timeoutMs = LOCALE_CONFIG_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('config locale read timed out')), timeoutMs)
+
+    promise.then(
+      value => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      error => {
+        clearTimeout(timer)
+        reject(error)
+      }
+    )
+  })
+}
+
 export function I18nProvider({
   children,
   configClient = defaultConfigClient,
@@ -122,6 +151,11 @@ export function I18nProvider({
   useEffect(() => {
     localeRef.current = locale
     setRuntimeI18nLocale(locale)
+    // Outras janelas do mesmo bundle (Quick Entry) não têm provider nem cliente de config:
+    // elas leem esta chave no boot para não nascerem em inglês. localStorage é compartilhado.
+    persistDesktopLocale(locale)
+    // Tempo/data seguem o idioma da UI, não o do sistema (ver lib/time.ts).
+    setTimeLocale(localeConfigValue(locale))
     applyDocumentLocale(locale, isRtlLocale(locale))
   }, [locale, registryVersion])
 
@@ -172,8 +206,7 @@ export function I18nProvider({
       setIsLoadingConfig(true)
       setConfigLoadError(null)
 
-      return configClient
-        .getConfig()
+      return withLocaleTimeout(configClient.getConfig())
         .then(async config => {
           if (cancelled || userLocaleRef.current) {
             return
@@ -186,8 +219,10 @@ export function I18nProvider({
           requestedRef.current = typeof saved === 'string' && saved.trim() ? normalizeLocaleId(saved) : null
           $requestedLocale.set(requestedRef.current)
 
-          // A saved choice needs no machine probe and always takes precedence.
-          if (isSupportedLocaleValue(saved)) {
+          // Um idioma EXPLÍCITO vence sem sondar a máquina. O default do backend (`en`) não conta
+          // como escolha: sem isso, toda máquina pt-BR abre a UI em inglês (ver
+          // resolveInitialLocalePreferringOs).
+          if (isSupportedLocaleValue(saved) && normalizeLocale(saved) !== DEFAULT_LOCALE) {
             setLocaleState(normalizeLocale(saved))
 
             return
@@ -199,16 +234,28 @@ export function I18nProvider({
           const machineProfile = await window.hermesDesktop?.getMachineProfile?.().catch(() => null)
 
           if (!cancelled && !userLocaleRef.current) {
-            setLocaleState(resolveInitialLocale(requestedRef.current, machineProfile?.locale))
+            setLocaleState(
+              resolveInitialLocalePreferringOs(requestedRef.current, machineProfile?.locale)
+            )
           }
         })
-        .catch(error => {
+        .catch(async error => {
           if (cancelled || userLocaleRef.current) {
             return
           }
 
           setConfigLoadError(toError(error))
-          setLocaleState(DEFAULT_LOCALE)
+
+          // B-3PO: um config que não carrega não é motivo para abrir a UI em inglês numa máquina
+          // pt-BR. Sem escolha salva, o idioma da máquina é a resposta honesta; o inglês fica como
+          // último recurso (antes, este caminho fixava `en` em qualquer falha).
+          const fallbackProfile = await window.hermesDesktop?.getMachineProfile?.().catch(() => null)
+
+          if (!cancelled && !userLocaleRef.current) {
+            setLocaleState(
+              resolveInitialLocalePreferringOs(requestedRef.current, fallbackProfile?.locale)
+            )
+          }
 
           if (retryCount < MAX_LOCALE_RETRIES) {
             retryCount += 1

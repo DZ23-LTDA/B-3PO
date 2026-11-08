@@ -10,6 +10,7 @@ import { map, type MapStore } from 'nanostores'
 import type { HermesApiRequest } from '@/global'
 
 import { CanonicalDesktopProtocol, canonicalProfile, canonicalPromptParams, canonicalSessionKey, openGatewaySocket, recordCanonicalOwner, splitRewindSubmit } from './canonical-protocol'
+import { contextoDoProduto } from './contexto-do-produto'
 
 // Desktop startup fires a burst of read-only data calls (config, profiles,
 // model info/options, cron) the moment the backend passes readiness. On a
@@ -34,7 +35,7 @@ const DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS = 30_000
 // ever fires when the turn itself would have been abandoned server-side.
 export const PROMPT_SUBMIT_REQUEST_TIMEOUT_MS = 1_800_000
 
-export const GATEWAY_NOT_CONNECTED_MESSAGE = 'Hermes gateway is not connected'
+export const GATEWAY_NOT_CONNECTED_MESSAGE = 'B-3PO gateway is not connected'
 
 // Canonical shared prompts (`gateway/session_pending_controls.py`) travel as
 // `approval.request` / `clarify.request` EVENTS keyed by `prompt_id` and are
@@ -97,10 +98,46 @@ function remainingRequestBudget(deadline: number, signal?: AbortSignal): number 
   return remaining
 }
 
+/**
+ * B-3PO (r274): o contexto do produto acompanha cada `prompt.submit`.
+ *
+ * **Por que aqui, e não no `session-rpc-dispatcher`**: aquele decide PARA ONDE o RPC vai; este
+ * decide O QUE o RPC carrega. São duas perguntas, e misturá-las faria todo RPC herdar um conceito
+ * de produto que não é dele (`session.list` não tem ambiente).
+ *
+ * **O `api/` não conhece o produto**: ele chama um provider que o app instala no boot. Assim o
+ * mesmo cliente serve o Desktop, a TUI e o web sem carregar `$ambiente` em nenhum deles.
+ *
+ * **Função, não um `if` inline**: o `request` já carrega o roteamento canônico, o rewind e o
+ * clarify batch — e a guarda a mais o levou de CC 19 a 21, acima do teto que o `scripts/check`
+ * mantém. Extrair devolve a complexidade e deixa a regra testável sozinha.
+ */
+export function comContextoDoProduto(
+  method: string,
+  params: Record<string, unknown>
+): Record<string, unknown> {
+  if (method !== 'prompt.submit') return params
+
+  const contexto = contextoDoProduto()
+
+  // Sem contexto, sem chave: o backend não distingue "não sabe" de "sabe que não há nada", e um
+  // campo vazio diria a segunda coisa.
+  return contexto ? { ...params, produto_contexto: contexto } : params
+}
+
 export class HermesGateway extends JsonRpcGatewayClient {
   private canonical = false
   private readonly protocol = new CanonicalDesktopProtocol()
   private readonly promptHandlers = new Set<ServerRequestHandler>()
+  /**
+   * B-3PO (r274): de onde vem o contexto que acompanha `prompt.submit`.
+   *
+   * **Instalado pelo app, não lido aqui.** O `api/` é a camada de transporte; se ele importasse
+   * `$ambiente` e `$projectScope`, o mesmo cliente que serve a TUI e o web passaria a carregar um
+   * conceito do produto Desktop. O provider devolve `null` quando não há o que dizer — e nesse
+   * caso nenhuma chave é enviada.
+   */
+  contextoDoProduto: (() => null | string) | null = null
   // A stored ID can exist in several profile islands (for example after import).
   private readonly deliveredPrompts = new Map<string, { sessionId: string; profile: string }>()
   private readonly sessionProfiles = new Map<string, Set<string>>()
@@ -428,6 +465,8 @@ export class HermesGateway extends JsonRpcGatewayClient {
     // turn's multi-question clarify as ONE request; undeclared, one card per question. An older
     // owner refuses the unknown key, so it rides only where `client.capabilities` advertised it.
     if (method === 'prompt.submit' && this.backendClarifyBatch) { params = { ...params, clarify_batch: true } }
+
+    params = comContextoDoProduto(method, params)
 
     let prepared = this.protocol.prepare(method, params)
     const wireMethod = this.protocol.wire(method, prepared)

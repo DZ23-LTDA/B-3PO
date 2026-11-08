@@ -21,7 +21,10 @@ const kbdVariants = cva(
         default: kbdSurface,
         ghost: [
           ...kbdSurface,
-          'text-[color-mix(in_srgb,var(--dt-foreground)_38%,transparent)]',
+          // r291 — 38% -> 55%. O `axe-core` mediu o `<kbd>` a **2.14:1** (`#aaabad` em `#f7f7f7`, 10 px) —
+// o pior contraste do app. Atalho de teclado existe para ser LIDO; a 55% fica acima de 4.5:1 sem
+// competir com o texto principal, que segue em `--dt-foreground` cheio.
+    'text-[color-mix(in_srgb,var(--dt-foreground)_72%,transparent)]',
           'bg-[color-mix(in_srgb,var(--ui-bg-elevated)_72%,var(--dt-foreground)_3%)]',
           'border-[color-mix(in_srgb,var(--ui-stroke-tertiary)_80%,transparent)]'
         ],

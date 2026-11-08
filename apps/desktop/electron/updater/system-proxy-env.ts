@@ -31,6 +31,21 @@ const NO_PROXY_KEYS = ['NO_PROXY', 'no_proxy']
 export const UPDATE_PROXY_MARKER = 'HERMES_UPDATE_SYSTEM_PROXY'
 /** `${SAVED_PREFIX}NO_PROXY` holds the user's own NO_PROXY that the Desktop extended. */
 export const SAVED_PREFIX = 'HERMES_UPDATE_USER_'
+/**
+ * `${ABSENT_PREFIX}no_proxy` marca uma grafia que o usuário **não tinha** e que o Windows emprestou da outra.
+ *
+ * **r184 do GOAL V2.** No Windows, `no_proxy` e `NO_PROXY` são a mesma coisa para o filho (§ L128): quem define só
+ * a maiúscula **tem** as duas do ponto de vista do processo. O `noProxyEnv` aproveitava isso para **salvar** as duas
+ * — mas "salvar" e "o usuário tinha" eram a mesma coisa no código, e **o restore devolvia uma variável que ninguém
+ * tinha definido**.
+ *
+ * A distinção é esta chave: **`SAVED_PREFIX` diz "o usuário tinha, com este valor"** e **`ABSENT_PREFIX` diz "não
+ * tinha esta grafia, empreste o valor da outra durante o update e não devolva"**.
+ *
+ * **Por que não marcar como `added`** (a opção simples): `added` faz o restore **apagar** a chave — e quem tinha
+ * `No_Proxy` de verdade perderia a variável. **Duas situações diferentes não podem ter o mesmo tratamento.**
+ */
+export const ABSENT_PREFIX = 'HERMES_UPDATE_ABSENT_'
 
 // git + the GitHub API and assets, the release pointer, npm, PyPI + uv, Electron downloads.
 export const UPDATE_HOSTS = [
@@ -87,6 +102,18 @@ export function restoreUserProxyEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   }
 
   for (const key of NO_PROXY_KEYS) {
+    // r184: uma grafia que o usuário NÃO tinha não é devolvida — o valor só foi emprestado da outra.
+    const absent = env[`${ABSENT_PREFIX}${key}`]
+
+    if (absent !== undefined) {
+      delete env[key]
+      // r184: a marca some junto com a chave, e o valor emprestado também — senão a próxima chamada o leria como
+      // se fosse do usuário e a variável voltaria na atualização seguinte.
+      delete env[`${SAVED_PREFIX}${key}`]
+      delete env[`${ABSENT_PREFIX}${key}`]
+      continue
+    }
+
     const saved = env[`${SAVED_PREFIX}${key}`]
 
     if (saved !== undefined) {
@@ -133,6 +160,12 @@ function noProxyEnv(
       added.push(key)
     } else {
       env[`${SAVED_PREFIX}${key}`] = own
+
+      // r184: `own` pode ter vindo da OUTRA grafia (Windows). Salvar é certo — o valor é do usuário — mas devolver
+      // uma variável que ele não tinha não é. A chave registra a diferença para o restore.
+      if (userEnv[key] === undefined) {
+        env[`${ABSENT_PREFIX}${key}`] = '1'
+      }
     }
   }
 

@@ -8,6 +8,8 @@ import path from 'node:path'
 import type { Configuration } from 'app-builder-lib'
 import { afterEach, test } from 'vitest'
 
+import { resolverPython } from './updater/python-for-tests'
+
 import type { ChannelBuildRequest, InstallStamp } from './install-stamp'
 import { applyDesktopIdentity, type ProductIdentity } from './product-identity'
 
@@ -328,7 +330,8 @@ test('channel stamps verify the real checkout and retain source version and nati
       verifyBundleStamp(built, { commit: receiver.commit, platform: 'darwin', channelRequest: receiver })
     })
     execFileSync(
-      process.env.HERMES_PYTHON || 'python3',
+      // r200: o mesmo — o interpretador por execução, e o `stdio` contido.
+      resolverPython() ?? 'python',
       [
         '-c',
         `
@@ -448,7 +451,23 @@ test('actual MSIX manifest writer consumes the channel quad across rollover inst
       const output: string = execFileSync(process.execPath, ['-e', script], {
         cwd: root,
         encoding: 'utf8',
-        env: { ...process.env, HERMES_DESKTOP_VARIANT: 'bundled', _HERMES_CHANNEL_REQUEST_JSON: JSON.stringify(build) }
+        env: { ...process.env, HERMES_DESKTOP_VARIANT: 'bundled', _HERMES_CHANNEL_REQUEST_JSON: JSON.stringify(build) },
+        // r196 do GOAL V2: o `stdio` é EXPLÍCITO, e o stderr vira uma string em vez de vazar.
+        //
+        // **Sob a suíte completa, este teste falhava com:**
+        //
+        //   node.exe: Cannot process the XML from the 'Error' stream of '...\node.exe':
+        //   Data at the root level is invalid.
+        //
+        // **O `electron-builder` escreve XML no stderr** (o manifesto do MSIX sai por lá em algum caminho), e **sem
+        // `stdio` declarado o `execFileSync` herda o stderr do processo pai** — **o vitest então tenta interpretar
+        // aquilo como saída do worker**, e o erro aparece como se fosse do teste.
+        //
+        // **Com `pipe`, o stderr fica contido**: o teste continua lendo só o `stdout` (o JSON da última linha) e o
+        // XML não escapa para o runner.
+        stdio: ['ignore', 'pipe', 'pipe'],
+        // E o teto explícito, pela mesma razão do `checkout-source` (r195): este script sobe o `node` inteiro.
+        timeout: 120_000
       })
 
       const row: ManifestFacts = JSON.parse(output.trim().split('\n').at(-1)!)
@@ -469,6 +488,22 @@ with zipfile.ZipFile(package, 'w') as archive:
     archive.writestr('AppxManifest.xml', (root / 'manifest.xml').read_bytes())
     archive.writestr('app/resources/install-stamp.json', json.dumps({
         'source': 'channel-build', 'channelBuild': request, 'commit': request['commit'], 'tag': None}))
+# r192 do GOAL V2: o caminho do Windows exige o binario desempacotado.
+#
+# record faz, SO em os.name == "nt":
+#
+#   executable = single(root.glob(f"*-unpacked/{executable_name}"))
+#   row["executableVersion"] = ... powershell Get-Item ... VersionInfo.ProductVersion
+#
+# Porque o MSIX carrega a versao no binario, e o manifesto pode mentir. O fixture nao criava o arquivo, e o
+# teste falhava com "Expected exactly one artifact, found []" antes de exercitar o writer.
+#
+# A limitacao, declarada: um arquivo vazio nao tem ProductVersion, entao este teste NAO prova a leitura do
+# binario — prova o resto do record (o applicationId, a version e o channelBuild do manifesto), que e o
+# que ele se chama para provar. Um .exe de verdade aqui seria um binario versionado dentro do repo.
+unpacked = root / 'Recorder-win-x64-unpacked'
+unpacked.mkdir(exist_ok=True)
+(unpacked / 'hermes-no-registry-needed.exe').write_bytes(b'')
 out = root / 'metadata.json'
 record('windows', 'x64', root, '', request['commit'], out, channel_request=request)
 manifest = ET.fromstring((root / 'manifest.xml').read_bytes())
@@ -483,10 +518,17 @@ else:
 print(out.read_text(encoding='utf-8'))
 `
 
+      // r200 do GOAL V2: o MESMO tratamento do `execFileSync` acima — e o INTERPRETADOR resolvido por execução.
+      //
+      // **A r196 pôs `stdio` e `timeout` no execFileSync do MANIFESTO e o teste passou.** **Este arquivo tem DOIS
+      // que rodam o interpretador** — este, que chama o `record`, ficou sem — **e o teste voltou a falhar na suíte
+      // completa**: **`python3` é o stub da Store, e sem `pipe` o stderr dele vaza.**
+      //
+      // **`stdio` não é do arquivo, é de cada chamada** — a lição da r196 aplicada onde ela faltou.
       const recorded: string = execFileSync(
-        process.env.HERMES_PYTHON || 'python3',
+        resolverPython() ?? 'python',
         ['-c', recordScript, repo, root, JSON.stringify(build)],
-        { encoding: 'utf8' }
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 120_000 }
       )
 
       const metadata: RecordedMetadata = JSON.parse(recorded)

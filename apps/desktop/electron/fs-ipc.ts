@@ -23,7 +23,17 @@ import { readDirForIpc } from './fs-read-dir'
 import { gitRootForIpc } from './git-root'
 import { registerPluginFilesIpc } from './plugin-files-ipc'
 
+import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
+import type { Actor } from './rbac'
+
 export interface FsIpcDeps {
+  /**
+   * r16 do V4 — resolver do ator.
+   *
+   * `fs` é **capacidade de máquina**: ler e escrever arquivo arbitrário neste computador. A política
+   * é a mesma de `git` e `terminal` (`podeOperarMaquina`), não o RBAC de recurso de negócio.
+   */
+  actorOf: () => Promise<Actor | null>
   hermesHome: string
   readActiveDesktopProfile: () => null | string
   expandUserPath: (value: string) => string
@@ -33,6 +43,7 @@ export interface FsIpcDeps {
 }
 
 export function registerFsIpc({
+  actorOf,
   hermesHome,
   readActiveDesktopProfile,
   expandUserPath,
@@ -40,11 +51,27 @@ export function registerFsIpc({
   directoryExists,
   resolveGitBinary
 }: FsIpcDeps) {
-  ipcMain.handle('hermes:fs:readDir', async (_event, dirPath) => readDirForIpc(dirPath))
+  /**
+   * A guarda, por capacidade. Devolve a recusa ou `null` (pode seguir).
+   *
+   * `leitura` — listar diretório, descobrir raiz de git: é o que a tela de revisão já mostra.
+   * `escrita` — criar, renomear, apagar, instalar plugin: muda o disco.
+   */
+  const recusaSeNaoPuder = async (capacidade: 'escrita' | 'leitura') =>
+    podeOperarMaquina(await actorOf(), capacidade, 'fs') ? null : RECUSA_MAQUINA
+
+  ipcMain.handle('hermes:fs:readDir', async (_event, dirPath) => {
+    const recusa = await recusaSeNaoPuder('leitura')
+
+    if (recusa) return recusa
+
+    return readDirForIpc(dirPath)
+  })
 
   // `ctx.files`: a plugin's own data folder plus folders the user grants it.
   // The legacy `~/.hermes` stays protected beside the resolved and default homes.
   registerPluginFilesIpc({
+    actorOf,
     ipcMain,
     dialog,
     windowFor: event => BrowserWindow.fromWebContents(event.sender),
@@ -63,13 +90,23 @@ export function registerFsIpc({
     trashItem: target => shell.trashItem(target)
   })
 
-  ipcMain.handle('hermes:fs:gitRoot', async (_event, startPath) => gitRootForIpc(startPath))
+  ipcMain.handle('hermes:fs:gitRoot', async (_event, startPath) => {
+    const recusa = await recusaSeNaoPuder('leitura')
+
+    if (recusa) return recusa
+
+    return gitRootForIpc(startPath)
+  })
 
   // Reveal a path in the OS file manager (Finder / Explorer / Files).
   // `showItemInFolder` silently no-ops on a missing item, and a remote
   // backend's paths are missing here by construction — answer `false` so
   // the renderer can say so instead of reporting a click that showed nothing.
   ipcMain.handle('hermes:fs:reveal', async (_event, targetPath) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const target = String(targetPath || '').trim()
 
     if (!target) {
@@ -99,6 +136,10 @@ export function registerFsIpc({
   // which often doesn't exist on first use. `shell.openPath` returns '' on
   // success or an error string; both mkdir + openPath failures are surfaced.
   ipcMain.handle('hermes:fs:openDir', async (_event, dirPath) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const dir = String(dirPath || '').trim()
 
     if (!dir) {
@@ -151,13 +192,23 @@ export function registerFsIpc({
     return root
   }
 
-  ipcMain.handle('hermes:fs:desktopPluginsRoot', async () => desktopPluginsRoot())
+  ipcMain.handle('hermes:fs:desktopPluginsRoot', async () => {
+    const recusa = await recusaSeNaoPuder('leitura')
+
+    if (recusa) return recusa
+
+    return desktopPluginsRoot()
+  })
 
   // Re-run the unified-half reconcile on demand (after an agent-plugin install /
   // update / uninstall through the gateway) so the app-level copy tracks the
   // package without waiting for the next root resolution. Answers which
   // packages' halves it refused too, so the install dialog can say so.
   ipcMain.handle('hermes:fs:reconcileDesktopPlugins', async () => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const root = await ensureDir(path.join(hermesHome, DESKTOP_PLUGINS_DIR))
 
     return reconcileDesktopHalvesReport(hermesHome, root)
@@ -170,9 +221,19 @@ export function registerFsIpc({
   // caller names the profile that OWNS the failing session: a pooled backend
   // serves many profile homes, and the active Desktop profile is the launch
   // one, not the one whose agent.log holds the failure (#119080).
-  ipcMain.handle('hermes:fs:logsRoot', async (_event, profile) => localPluginsRoot('logs', profile))
+  ipcMain.handle('hermes:fs:logsRoot', async (_event, profile) => {
+    const recusa = await recusaSeNaoPuder('leitura')
+
+    if (recusa) return recusa
+
+    return localPluginsRoot('logs', profile)
+  })
 
   ipcMain.handle('hermes:plugin:probe', async (_event, payload) => {
+    const recusa = await recusaSeNaoPuder('leitura')
+
+    if (recusa) return recusa
+
     const identifier = String(payload?.identifier || payload?.repo || '').trim()
 
     if (!identifier) {
@@ -183,6 +244,10 @@ export function registerFsIpc({
   })
 
   ipcMain.handle('hermes:plugin:installDesktop', async (_event, payload) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const identifier = String(payload?.identifier || payload?.repo || '').trim()
 
     if (!identifier) {
@@ -200,14 +265,22 @@ export function registerFsIpc({
 
   // Uninstall a standalone desktop plugin by FOLDER NAME under the app-level
   // root. The renderer never passes a path; containment is re-checked inside.
-  ipcMain.handle('hermes:plugin:removeDesktop', async (_event, payload) =>
-    removeDesktopPlugin(path.join(hermesHome, DESKTOP_PLUGINS_DIR), payload?.name)
-  )
+  ipcMain.handle('hermes:plugin:removeDesktop', async (_event, payload) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
+    return removeDesktopPlugin(path.join(hermesHome, DESKTOP_PLUGINS_DIR), payload?.name)
+  })
 
   // Rename a file/folder in place. The renderer passes the existing path + a new
   // base name; the destination is resolved in the SAME parent dir so a rename can
   // never move the item elsewhere or traverse out. Rejects on a name collision.
   ipcMain.handle('hermes:fs:rename', async (_event, targetPath, newName) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const src = String(targetPath || '').trim()
     const name = String(newName || '').trim()
 
@@ -230,11 +303,20 @@ export function registerFsIpc({
     return { path: dst }
   })
 
-  // Write a small UTF-8 text file (e.g. a project's IDEA.md at creation). The path
-  // is hardened (resolveRequestedPathForIpc) and the parent must already exist —
-  // this never creates directory trees or escapes the allowed roots, and content
-  // is size-capped so it can't be abused as a bulk-write primitive.
+  // Write a small UTF-8 text file (e.g. a project's IDEA.md at creation). The path is hardened
+  // (resolveRequestedPathForIpc) against unsafe syntax and the parent must already exist, so this cannot
+  // create directory trees, and content is size-capped so it can't be abused as a bulk-write primitive.
+  //
+  // IT DOES NOT CONFINE THE PATH TO A ROOT. `resolveRequestedPathForIpc` rejects NUL and Windows device
+  // paths, and `..` is resolved rather than refused — so an absolute path anywhere on disk is accepted. The
+  // renderer is this app's own code (contextIsolation, no nodeIntegration), so the threat model is "renderer
+  // XSS means arbitrary file write". Documented in docs/b3po/audit/PATH-TRAVERSAL-R156.md and pinned by
+  // hardening-traversal.test.ts; confining to a root is a product decision, not a missing check.
   ipcMain.handle('hermes:fs:writeText', async (_event, filePath, content) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const raw = String(filePath || '').trim()
 
     if (!raw) {
@@ -261,6 +343,10 @@ export function registerFsIpc({
   // Move a file/folder to the OS trash (recoverable) — the VS Code "Delete"
   // default. `shell.trashItem` routes to Finder/Explorer/Files trash per platform.
   ipcMain.handle('hermes:fs:trash', async (_event, targetPath) => {
+    const recusa = await recusaSeNaoPuder('escrita')
+
+    if (recusa) return recusa
+
     const target = String(targetPath || '').trim()
 
     if (!target) {

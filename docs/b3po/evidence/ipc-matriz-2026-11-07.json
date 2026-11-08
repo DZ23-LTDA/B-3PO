@@ -1,0 +1,1767 @@
+{
+ "total": 281,
+ "porGuarda": {
+  "SEM GUARDA": 151,
+  "withPermission": 5,
+  "exigirAtor": 113,
+  "podeAdministrarInstalacao": 2,
+  "recusaSeNaoPuder": 4,
+  "comMaquina": 5,
+  "podeOperarMaquina": 1
+ },
+ "comTeste": 141,
+ "semGuardaPorDominio": {
+  "hud": 13,
+  "connections": 9,
+  "connection-config": 7,
+  "pet-overlay": 7,
+  "quick-entry": 6,
+  "bootstrap": 5,
+  "cloud": 5,
+  "terminal": 5,
+  "agent": 4,
+  "finance": 4,
+  "connection": 4,
+  "context-menu": 4,
+  "logs": 4,
+  "profile": 3,
+  "updates": 3,
+  "mcp-oauth": 3,
+  "prepared-submissions": 3,
+  "ui-preferences": 3,
+  "admin": 2,
+  "git": 2,
+  "lookup": 2,
+  "gateway": 2,
+  "window": 2,
+  "wake-indicator": 2,
+  "zoom": 2,
+  "ssh-config": 2,
+  "data-url-read-max": 2,
+  "translucency": 2,
+  "vscode-theme": 2,
+  "minimize-to-tray": 2,
+  "sales": 2,
+  "screenshot": 1,
+  "uninstall": 1,
+  "skin": 1,
+  "machine": 1,
+  "get-remote-display-reason": 1,
+  "embed-host": 1,
+  "power-battery": 1,
+  "backend": 1,
+  "local-backend": 1,
+  "plugin-profile-routes": 1,
+  "secret-storage": 1,
+  "agents": 1,
+  "plugin": 1,
+  "preview-guest-hidden": 1,
+  "api": 1,
+  "ambient": 1,
+  "active-work": 1,
+  "titlebar-theme": 1,
+  "native-theme": 1,
+  "feature-flags": 1,
+  "keep-awake": 1,
+  "find-in-page": 1,
+  "stop-find-in-page": 1,
+  "preview": 1,
+  "workspace": 1,
+  "version": 1,
+  "app": 1,
+  "sync-status": 1,
+  "deep-link-ready": 1,
+  "notify": 1,
+  "spellcheck": 1,
+  "startup-latency": 1,
+  "window-control": 1
+ },
+ "canais": [
+  {
+   "canal": "hermes:admin:actors",
+   "arquivo": "admin-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:admin:whoami",
+   "arquivo": "admin-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:admin:deactivate",
+   "arquivo": "admin-ipc.ts",
+   "guarda": "withPermission",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:aftersales:list",
+   "arquivo": "after-sales-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:aftersales:indicators",
+   "arquivo": "after-sales-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:aftersales:create",
+   "arquivo": "after-sales-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agent:roster",
+   "arquivo": "agent-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agent:executions",
+   "arquivo": "agent-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agent:executions:cancel",
+   "arquivo": "agent-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agent:approvals",
+   "arquivo": "agent-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agent:approvals:decide",
+   "arquivo": "agent-ipc.ts",
+   "guarda": "withPermission",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:analytics:dashboard",
+   "arquivo": "analytics-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:auditoria:listar",
+   "arquivo": "audit-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:automations:list",
+   "arquivo": "automation-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:automations:triggers",
+   "arquivo": "automation-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:automations:tools",
+   "arquivo": "automation-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:automations:sweep",
+   "arquivo": "automation-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:automations:create",
+   "arquivo": "automation-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:backup:list",
+   "arquivo": "backup-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:backup:restore",
+   "arquivo": "backup-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:catalog:list",
+   "arquivo": "catalog-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:catalog:upsert",
+   "arquivo": "catalog-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:catalog:remove",
+   "arquivo": "catalog-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:screenshot:subscribe",
+   "arquivo": "command-screenshot.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:companies:list",
+   "arquivo": "companies-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:companies:branches",
+   "arquivo": "companies-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-contacts:list",
+   "arquivo": "crm-contacts-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-contacts:upsert",
+   "arquivo": "crm-contacts-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-contacts:remove",
+   "arquivo": "crm-contacts-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-conversations:list",
+   "arquivo": "crm-conversations-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-conversations:upsert",
+   "arquivo": "crm-conversations-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-conversations:remove",
+   "arquivo": "crm-conversations-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-pipeline:list",
+   "arquivo": "crm-pipeline-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-pipeline:upsert",
+   "arquivo": "crm-pipeline-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-pipeline:remove",
+   "arquivo": "crm-pipeline-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-tasks:list",
+   "arquivo": "crm-tasks-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-tasks:upsert",
+   "arquivo": "crm-tasks-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:crm-tasks:remove",
+   "arquivo": "crm-tasks-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logistica:entregas",
+   "arquivo": "delivery-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logistica:criar",
+   "arquivo": "delivery-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logistica:transitar",
+   "arquivo": "delivery-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:uninstall:summary",
+   "arquivo": "desktop-uninstall.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:uninstall:run",
+   "arquivo": "desktop-uninstall.ts",
+   "guarda": "podeAdministrarInstalacao",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:documents:list",
+   "arquivo": "documents-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:documents:upsert",
+   "arquivo": "documents-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:documents:remove",
+   "arquivo": "documents-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:finance:list",
+   "arquivo": "finance-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:finance:totals",
+   "arquivo": "finance-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:finance:append",
+   "arquivo": "finance-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:finance:settle",
+   "arquivo": "finance-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fiscal:list",
+   "arquivo": "fiscal-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fiscal:status",
+   "arquivo": "fiscal-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fiscal:emitir",
+   "arquivo": "fiscal-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fiscal:cancelar",
+   "arquivo": "fiscal-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fs:reveal",
+   "arquivo": "fs-ipc.ts",
+   "guarda": "recusaSeNaoPuder",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:plugin:probe",
+   "arquivo": "fs-ipc.ts",
+   "guarda": "recusaSeNaoPuder",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fs:rename",
+   "arquivo": "fs-ipc.ts",
+   "guarda": "recusaSeNaoPuder",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:fs:trash",
+   "arquivo": "fs-ipc.ts",
+   "guarda": "recusaSeNaoPuder",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gas:list",
+   "arquivo": "gas-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gas:cadastrar",
+   "arquivo": "gas-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gas:entregar",
+   "arquivo": "gas-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gas:devolver",
+   "arquivo": "gas-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gas:perder",
+   "arquivo": "gas-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:list",
+   "arquivo": "git-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:diff",
+   "arquivo": "git-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:stage",
+   "arquivo": "git-ipc.ts",
+   "guarda": "comMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:unstage",
+   "arquivo": "git-ipc.ts",
+   "guarda": "comMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:revert",
+   "arquivo": "git-ipc.ts",
+   "guarda": "comMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:commit",
+   "arquivo": "git-ipc.ts",
+   "guarda": "comMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:git:review:push",
+   "arquivo": "git-ipc.ts",
+   "guarda": "comMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hr:departments",
+   "arquivo": "hr-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hr:employees",
+   "arquivo": "hr-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hr:policy",
+   "arquivo": "hr-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hr:offboarding",
+   "arquivo": "hr-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hr:treinamentos",
+   "arquivo": "hr-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hud:native-drag",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:windowing",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:workspace-transfer",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:open",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hud:frost",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hud:ignore-mouse",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:begin-move",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:end-move",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:move-by",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:set-bounds",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:reset-layout",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:hud:session",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:hud:close",
+   "arquivo": "hud-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:inventory:list",
+   "arquivo": "inventory-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:inventory:balances",
+   "arquivo": "inventory-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:inventory:append",
+   "arquivo": "inventory-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:inventory:inventario",
+   "arquivo": "inventory-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:skin:local",
+   "arquivo": "local-skin.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:lookup:cnpj",
+   "arquivo": "lookup-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:lookup:cep",
+   "arquivo": "lookup-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:machine:profile",
+   "arquivo": "machine-profile.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:get-remote-display-reason",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:embed-host:origin",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:power-battery:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection:for",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection:active-route",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:connection:revalidate",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gateway:ws-url",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:window:relay",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:wake-indicator:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:wake-indicator:set",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:zoom:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:zoom:set-percent",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:backend:recycle",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:bootstrap:reset",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:bootstrap:repair",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:bootstrap:continue-local",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:bootstrap:cancel",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:bootstrap:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:local-backend:probe",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:plugin-profile-routes",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:ssh-config:hosts",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:ssh-config:resolve",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:test",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:secret-storage:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:secret-storage:set",
+   "arquivo": "main.ts",
+   "guarda": "podeAdministrarInstalacao",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:list",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:save",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:remove",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:set-primary",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:set-launch-mode",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:set-last-used",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:test",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:agents:roster",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:gateway:ws-url-for",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:plugin:ws-url",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:update-managed",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connections:update-all",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:probe",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:oauth-login",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:oauth-logout",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:cloud:status",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:cloud:login",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:cloud:logout",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:cloud:discover",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:cloud:agent-sign-in",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:save",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:connection-config:apply",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:profile:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:profile:remember",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:profile:set",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:preview-guest-hidden",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:api",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:ambient:claim",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:data-url-read-max:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:data-url-read-max:set",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:context-menu:edit",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:context-menu:copy-image",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:active-work",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:titlebar-theme",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:native-theme",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:translucency:support",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:feature-flags",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:translucency",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:keep-awake",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:quick-entry:settings:get",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:quick-entry:settings:set",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:quick-entry:submit",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:quick-entry:ack",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:quick-entry:state",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:quick-entry:dismiss",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:find-in-page",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:stop-find-in-page",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:preview:reach",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:workspace:sanitize",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logs:reveal",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logs:recent",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:logs:renderer-error",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:logs:renderer-line",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:updates:check",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:updates:apply",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:updates:channel:set",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:version",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:app:relaunch",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sync-status",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:vscode-theme:fetch",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:vscode-theme:search",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:deep-link-ready",
+   "arquivo": "main.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:marketing:campaigns",
+   "arquivo": "marketing-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:marketing:posts",
+   "arquivo": "marketing-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:marketing:indicators",
+   "arquivo": "marketing-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:mcp-oauth:listen",
+   "arquivo": "mcp-oauth-callback-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:mcp-oauth:wait",
+   "arquivo": "mcp-oauth-callback-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:mcp-oauth:cancel",
+   "arquivo": "mcp-oauth-callback-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:medidores:list",
+   "arquivo": "meter-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:medidores:cadastrar",
+   "arquivo": "meter-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:medidores:leitura",
+   "arquivo": "meter-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:minimize-to-tray:get",
+   "arquivo": "minimize-to-tray.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:minimize-to-tray:set",
+   "arquivo": "minimize-to-tray.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:notify",
+   "arquivo": "notification-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:organizacao:estrutura",
+   "arquivo": "organization-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:organizacao:listar",
+   "arquivo": "organization-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:organizacao:sugestao",
+   "arquivo": "organization-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:organizacao:definir",
+   "arquivo": "organization-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:pet-overlay:open",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:pet-overlay:close",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:pet-overlay:set-bounds",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:pet-overlay:ignore-mouse",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:pet-overlay:set-focusable",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:pet-overlay:state",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:pet-overlay:control",
+   "arquivo": "pet-overlay-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:prepared-submissions:read",
+   "arquivo": "prepared-submissions.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:prepared-submissions:update",
+   "arquivo": "prepared-submissions.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:prepared-submissions:compare-and-set",
+   "arquivo": "prepared-submissions.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:privacy:export",
+   "arquivo": "privacy-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:privacy:preview",
+   "arquivo": "privacy-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:privacy:anonymize",
+   "arquivo": "privacy-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:projetos:listar",
+   "arquivo": "projects-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:projetos:ativos",
+   "arquivo": "projects-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:projetos:criar",
+   "arquivo": "projects-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:projetos:mudar",
+   "arquivo": "projects-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:suppliers",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:orders",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:receive",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:limite",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:aprovar",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:solicitacoes",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:solicitar",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:cotacao",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:purchases:quotations",
+   "arquivo": "purchases-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sales:list",
+   "arquivo": "sales-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sales:create",
+   "arquivo": "sales-ipc.ts",
+   "guarda": "withPermission",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sales:cancel",
+   "arquivo": "sales-ipc.ts",
+   "guarda": "withPermission",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sales:faturar",
+   "arquivo": "sales-ipc.ts",
+   "guarda": "withPermission",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sales:devolver",
+   "arquivo": "sales-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:block:list",
+   "arquivo": "scheduling-block-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:block:create",
+   "arquivo": "scheduling-block-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:block:remove",
+   "arquivo": "scheduling-block-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:book",
+   "arquivo": "scheduling-catalog-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:list",
+   "arquivo": "scheduling-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:day",
+   "arquivo": "scheduling-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:book",
+   "arquivo": "scheduling-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:cancel",
+   "arquivo": "scheduling-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:scheduling:confirm",
+   "arquivo": "scheduling-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:desk:tickets",
+   "arquivo": "service-desk-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:desk:indicators",
+   "arquivo": "service-desk-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:desk:open",
+   "arquivo": "service-desk-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:desk:rate",
+   "arquivo": "service-desk-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:services:list",
+   "arquivo": "services-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:services:find",
+   "arquivo": "services-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:services:save",
+   "arquivo": "services-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:services:remove",
+   "arquivo": "services-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:planos",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:plano",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:criar",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:tarefa",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:status",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:aprovar",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:delegar",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:sofia:execucao:vinculada",
+   "arquivo": "sofia-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:context-menu:spellcheck",
+   "arquivo": "spellcheck-dictionary-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:context-menu:guest-add-word",
+   "arquivo": "spellcheck-dictionary-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:spellcheck:dictionary",
+   "arquivo": "spellcheck-dictionary-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:startup-latency:claim",
+   "arquivo": "startup-latency-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:tarifas:list",
+   "arquivo": "tariff-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:tarifas:calcular",
+   "arquivo": "tariff-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:tarifas:salvar",
+   "arquivo": "tariff-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:tarifas:remover",
+   "arquivo": "tariff-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:start",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "podeOperarMaquina",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:attach",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:write",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:resize",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:cwd",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:terminal:dispose",
+   "arquivo": "terminal-ipc.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:ui-preferences:snapshot",
+   "arquivo": "ui-preferences.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:ui-preferences:read",
+   "arquivo": "ui-preferences.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:ui-preferences:write",
+   "arquivo": "ui-preferences.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:window-control",
+   "arquivo": "window-controls.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:window:size",
+   "arquivo": "window-growth.ts",
+   "guarda": "SEM GUARDA",
+   "tipo": "on"
+  },
+  {
+   "canal": "hermes:trabalhos:listar",
+   "arquivo": "work-items-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:trabalhos:abertos",
+   "arquivo": "work-items-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:trabalhos:vencidos",
+   "arquivo": "work-items-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:trabalhos:criar",
+   "arquivo": "work-items-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  },
+  {
+   "canal": "hermes:trabalhos:mudar",
+   "arquivo": "work-items-ipc.ts",
+   "guarda": "exigirAtor",
+   "tipo": "handle"
+  }
+ ]
+}

@@ -1,3 +1,4 @@
+import { rodarTestesDoProjeto } from './run-project-tests'
 import { LOCAL_CONNECTION_ID } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import type * as React from 'react'
@@ -136,6 +137,20 @@ function useProjectActions({
       key: 'copy',
       label: p.copyPath,
       onSelect: () => void copyPath(project.path)
+    },
+    /*
+     * r14 da V6 — rodar os testes DA PASTA PRIMARIA do projeto.
+     *
+     * Fica no menu do projeto, e nao so' no da workspace, porque e' o projeto que a pessoa ve' e clica na
+     * sidebar. A pasta que vale e' a `project.path` (a primaria) — um projeto com varias pastas roda os
+     * testes daquela que o abre.
+     */
+    {
+      disabled: !project.path,
+      icon: 'beaker',
+      key: 'run-tests',
+      label: p.runTests,
+      onSelect: () => void rodarTestesDoProjeto(project.path, p.runTests)
     }
   ]
 

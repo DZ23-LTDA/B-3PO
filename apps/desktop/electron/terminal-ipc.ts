@@ -2,6 +2,9 @@
 // registry, and the hermes:terminal:* IPC surface. Extracted from main.ts; the
 // factory owns the session map and returns the dispose helpers main.ts needs
 // for SSH teardown. findOnPath / logging / connection routing stay injected.
+import { registerDevRunIpc } from './dev-run-ipc'
+import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
+import type { Actor } from './rbac'
 import { execFile } from 'node:child_process'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
@@ -37,6 +40,17 @@ export interface TerminalIpcDeps {
    *  tabs that recorded none. */
   gatewayTarget: (owner: TerminalGatewayOwner) => TerminalGatewayTarget
   ensureGatewayBackend: (owner: TerminalGatewayOwner) => Promise<unknown>
+  /**
+   * Resolvedor do ator (r8 do V4).
+   *
+   * `hermes:terminal:start` **spawna um shell neste computador** — é capacidade de máquina, não
+   * recurso de negócio. A política certa é `podeOperarMaquina`, a mesma de `git-ipc`: nega por
+   * padrão, exige poder de execução para `escrita`.
+   *
+   * O dono da instalação nasce com `level: 'SUPERVISED_AUTONOMY'` e `role: 'owner'`, então o fluxo
+   * normal **passa**. O que a guarda nega é bot e ator com `level: null`.
+   */
+  actorOf: () => Promise<Actor | null>
 }
 
 export interface TerminalIpcApi {
@@ -60,6 +74,22 @@ export function terminalLcCtype(
   return platform === 'darwin' ? 'UTF-8' : env.LANG || 'C.UTF-8'
 }
 
+/**
+ * r50 do V5 — a sessão de terminal pertence ao renderer que a abriu.
+ *
+ * Extraída para poder ser testada: `terminalSessions` nasce **dentro** de `registerTerminalIpc`, então
+ * um teste de canal precisaria de um backend de PTY falso só para checar uma comparação de id.
+ *
+ * Sessão ausente devolve `true` no sentido de "não é de outro" — quem decide o que fazer com a
+ * inexistente é o `dispose`, que devolve `false` sem encerrar nada.
+ */
+export function sessaoPertenceAoRenderer(
+  sessao: { webContentsId?: number } | undefined,
+  senderId: number
+): boolean {
+  return !sessao || sessao.webContentsId === senderId
+}
+
 export function registerTerminalIpc({
   isWindows,
   findOnPath,
@@ -69,8 +99,12 @@ export function registerTerminalIpc({
   ensureBackend,
   getSshConnectionState,
   gatewayTarget,
-  ensureGatewayBackend
+  ensureGatewayBackend,
+  actorOf
 }: TerminalIpcDeps): TerminalIpcApi {
+  // r6 da V6: `dev:run` executa comando de desenvolvimento e roda no mesmo dominio de execucao do
+  // terminal; o factory ja' tem `actorOf`, entao ele e' registrado aqui e `main.ts` fica intacto.
+  registerDevRunIpc(ipcMain, { actorOf })
   const terminalSessions = new Map()
 
   function isExecutableFile(filePath) {
@@ -365,6 +399,14 @@ export function registerTerminalIpc({
   }
 
   ipcMain.handle('hermes:terminal:start', async (event, payload = {}) => {
+    /*
+     * r8 do V4 — a guarda vem ANTES de qualquer efeito.
+     *
+     * `terminal:start` spawna um processo. Sem ator com poder de execução, recusa — e a recusa não
+     * carrega dado nenhum. É a mesma fronteira que `git-ipc` usa para `escrita`.
+     */
+    if (!podeOperarMaquina(await actorOf(), 'escrita', 'terminal')) return RECUSA_MAQUINA
+
     ensureNodePtySpawnHelper()
 
     const id = crypto.randomUUID()
@@ -455,7 +497,15 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:write', (_event, id, data) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    /*
+     * r10 do V5 — POSSE, não só existência.
+     *
+     * `attach` já exigia `webContentsId === event.sender.id`; `write`, `resize` e `cwd` só olhavam
+     * se a sessão existia. Um renderer podia **escrever no terminal de outro** — inclusive num shell
+     * privilegiado que a pessoa abriu na outra janela. Não é "acesso à máquina": é acesso à sessão
+     * que esta janela **não abriu**.
+     */
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return false
     }
 
@@ -467,7 +517,7 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:resize', (_event, id, size = {}) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return false
     }
 
@@ -481,14 +531,29 @@ export function registerTerminalIpc({
   ipcMain.handle('hermes:terminal:cwd', async (_event, id) => {
     const sessionInfo = terminalSessions.get(String(id || ''))
 
-    if (!sessionInfo) {
+    if (!sessionInfo || sessionInfo.webContentsId !== _event.sender.id) {
       return null
     }
 
     return sessionInfo.sshScope !== undefined ? null : readProcessCwd(sessionInfo.pty.pid)
   })
 
-  ipcMain.handle('hermes:terminal:dispose', (_event, id) => disposeTerminalSession(String(id || '')))
+  /*
+   * r50 do V5 — `dispose` fecha uma sessão, e também é da janela que a abriu.
+   *
+   * A r10 fechou `write`, `resize` e `cwd` com `webContentsId === sender.id` e **deixou esta
+   * passar**: um renderer podia **encerrar o terminal de outra janela**. Não vaza dado, mas é o
+   * mesmo "acesso a algo que esta janela não abriu" — e derrubar o terminal de alguém no meio de um
+   * comando é pior que ler.
+   */
+  ipcMain.handle('hermes:terminal:dispose', (_event, id) => {
+    const chave = String(id || '')
+    const sessao = terminalSessions.get(chave)
+
+    if (!sessaoPertenceAoRenderer(sessao, _event.sender.id)) return false
+
+    return disposeTerminalSession(chave)
+  })
 
   return { disposeTerminalSession, disposeTerminalSessionsForSshScope, disposeAllTerminalSessions }
 }

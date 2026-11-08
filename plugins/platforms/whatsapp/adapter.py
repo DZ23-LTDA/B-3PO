@@ -1385,8 +1385,9 @@ def register(ctx) -> None:
         # Media goes through Baileys /send-media; ``mentions`` force the standalone route too.
         standalone_send=StandaloneSendPolicy(label="WhatsApp", media=True, captionable=True,
                                              forward_force_document=True, mentions=True, text_direct=True),
-        name="whatsapp", label="WhatsApp", adapter_factory=WhatsAppAdapter, check_fn=check_whatsapp_requirements,
-        dashboard_description="Use Hermes through the bundled WhatsApp bridge with QR-based auth.",
+        name="whatsapp", label="WhatsApp (local bridge)", adapter_factory=WhatsAppAdapter,
+        check_fn=check_whatsapp_requirements,
+        dashboard_description="Connect a phone number through the bundled local bridge (QR pairing). Not the official Meta API: it can break when WhatsApp changes its client, so prefer the Cloud API for production.",
         docs_url="https://github.com/tulir/whatsmeow",
         dashboard_env_vars=(
             "WHATSAPP_ENABLED", "WHATSAPP_MODE", "WHATSAPP_DM_POLICY", "WHATSAPP_ALLOWED_USERS",

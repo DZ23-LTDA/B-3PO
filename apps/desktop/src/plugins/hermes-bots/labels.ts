@@ -11,6 +11,9 @@
 import { aliasIdentityFor } from './routing'
 import type { BotMeta, RosterRow } from './types'
 
+/** Nome do agente/produto quando o perfil é o `default` sem título. */
+export const DEFAULT_AGENT_NAME = 'B-3PO'
+
 export function displayName(bot: Partial<RosterRow>, meta?: BotMeta | null): string {
   // A configured alias route claiming this row overrides source-derived
   // identity: the friendly alias name must survive hosted-session
@@ -66,10 +69,11 @@ export function displayName(bot: Partial<RosterRow>, meta?: BotMeta | null): str
   }
 
   // The primary profile is literally named "default" — as a bot identity
-  // that reads like nobody bothered. Present it as Hermes (the agent it is)
+  // that reads like nobody bothered. Present it as the product's agent name
+  // (the same name the skin paints in the CLI/TUI, `skin_engine.agent_name`)
   // unless the user gives it a real title.
   if ((bot.name || '').trim().toLowerCase() === 'default' && !bot.title) {
-    return 'Hermes'
+    return DEFAULT_AGENT_NAME
   }
 
   const raw = (bot.title || bot.name || '').replace(/[-_]+/g, ' ').trim()

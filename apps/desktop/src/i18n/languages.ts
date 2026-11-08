@@ -68,6 +68,12 @@ export const LOCALE_OPTIONS = [
     name: LOCALE_ENDONYMS.es,
     englishName: 'Spanish',
     configValue: 'es'
+  },
+  {
+    id: 'pt',
+    name: LOCALE_ENDONYMS.pt,
+    englishName: 'Portuguese (Brazil)',
+    configValue: 'pt'
   }
 ] as const satisfies readonly { configValue: string; englishName: string; id: BundledLocale; name: string }[]
 
@@ -134,6 +140,9 @@ const LOCALE_ALIASES: Record<string, BundledLocale> = {
   en: 'en',
   'en-us': 'en',
   en_us: 'en',
+  pt: 'pt',
+  'pt-br': 'pt',
+  pt_br: 'pt',
   zh: 'zh',
   'zh-cn': 'zh',
   zh_cn: 'zh',
@@ -264,6 +273,28 @@ export function resolveInitialLocale(saved: string | null | undefined, osLocale:
   }
 
   return osPreferredLocale(osLocale) ?? DEFAULT_LOCALE
+}
+
+/**
+ * B-3PO: o default do backend para `display.language` é `en`, então "salvo" quase sempre significa
+ * "nunca escolhido". Com a UI em pt-BR como idioma de produto, o default não pode ganhar do idioma da
+ * máquina: só uma escolha EXPLÍCITA e diferente do default tem precedência sobre o OS.
+ *
+ * Consequência conhecida: quem escolher inglês de propósito numa máquina pt-BR volta ao pt no próximo
+ * boot enquanto a escolha for igual ao default. Escolher qualquer outro idioma fixa a escolha.
+ */
+export function resolveInitialLocalePreferringOs(
+  saved: string | null | undefined,
+  osLocale: string | null | undefined
+): Locale {
+  const savedIsSupported = isSupportedLocaleValue(saved)
+  const savedIsJustTheDefault = savedIsSupported && normalizeLocale(saved) === DEFAULT_LOCALE
+
+  if (savedIsSupported && !savedIsJustTheDefault) {
+    return normalizeLocale(saved)
+  }
+
+  return osPreferredLocale(osLocale) ?? (savedIsSupported ? normalizeLocale(saved) : DEFAULT_LOCALE)
 }
 
 /** The `display.language` value for a picker choice — the bundled option's

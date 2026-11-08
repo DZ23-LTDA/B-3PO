@@ -12,7 +12,11 @@
     "preview": "vite preview",
     "typecheck": "tsc -b . --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run test && npm run lint"
+    "check": "npm run typecheck && npm run test && npm run lint",
+    "postinstall": "node scripts/vendor-patches/nous-research-ui-select.mjs",
+    "prebuild": "node scripts/vendor-patches/nous-research-ui-select.mjs",
+    "pretest": "node scripts/vendor-patches/nous-research-ui-select.mjs",
+    "pretypecheck": "node scripts/vendor-patches/nous-research-ui-select.mjs"
   },
   "dependencies": {
     "@hermes/shared": "file:../apps/shared",

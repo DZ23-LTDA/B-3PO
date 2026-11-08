@@ -3,7 +3,7 @@ import type { TranslationOverrides } from './define-locale'
 // The boot screen's copy (including the update-hold screen), composed by fr.ts.
 export const frBoot = {
   boot: {
-    ready: 'Hermes Desktop est prêt',
+    ready: 'B-3PO Desktop est prêt',
     desktopBootFailedWithMessage: message => `Échec du démarrage : ${message}`,
     steps: {
       connectingGateway: 'Connexion au gateway desktop',
@@ -11,7 +11,7 @@ export const frBoot = {
       loadingSessions: 'Chargement des sessions récentes',
       retryingRemoteBackend: 'Reconnexion au backend Hermes distant…',
       startingDesktopConnection: 'Démarrage de la connexion desktop',
-      startingHermesDesktop: 'Démarrage de Hermes Desktop…'
+      startingHermesDesktop: 'Démarrage de B-3PO Desktop…'
     },
     errors: {
       backgroundExited: "Le processus en arrière-plan de Hermes s'est arrêté.",

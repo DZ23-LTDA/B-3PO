@@ -694,7 +694,7 @@ function GroupExecutionGate(props: GroupChatWorkspaceProps) {
           if (sourceCurrent()) {openGroupChat(registerCanonicalGroup(route, room), 'key')}
         })
         .catch(e => { if (sourceCurrent()) {setError(String(e))} }).finally(() => setBusy(false))
-    }}>Start gateway group</Button>
+    }}>{b.group.startGatewayGroup}</Button>
   </div>
 }
 
@@ -1049,7 +1049,7 @@ function LegacyGroupChatWorkspace({ group, members, onBack, visible = true }: Gr
       </Tip>
       <Tip label="Manage members">
         <Button
-          aria-label="Manage group members"
+          aria-label={b.group.manageMembersAria}
           className="shrink-0 text-(--ui-text-tertiary) hover:text-foreground"
           onClick={() => setMemberPickerOpen(true)}
           size="sm"

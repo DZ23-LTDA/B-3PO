@@ -811,7 +811,7 @@ export default function PluginsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t.pluginsPage.installHeading}</CardTitle>
+            <CardTitle aria-level={2}>{t.pluginsPage.installHeading}</CardTitle>
             <p className="text-xs tracking-[0.08em] text-text-tertiary">
               {t.pluginsPage.installHint}
             </p>
@@ -839,7 +839,7 @@ export default function PluginsPage() {
 
               <div className="flex items-center gap-3">
 
-                <Switch checked={installForce} onCheckedChange={setInstallForce} />
+                <Switch aria-label={t.pluginsPage.forceReinstall} checked={installForce} onCheckedChange={setInstallForce} />
 
                 <span className="text-xs tracking-[0.06em] text-text-secondary">
                   {t.pluginsPage.forceReinstall}
@@ -848,7 +848,7 @@ export default function PluginsPage() {
 
               <div className="flex items-center gap-3">
 
-                <Switch checked={installEnable} onCheckedChange={setInstallEnable} />
+                <Switch aria-label={t.pluginsPage.enableAfterInstall} checked={installEnable} onCheckedChange={setInstallEnable} />
 
                 <span className="text-xs tracking-[0.06em] text-text-secondary">
                   {t.pluginsPage.enableAfterInstall}
