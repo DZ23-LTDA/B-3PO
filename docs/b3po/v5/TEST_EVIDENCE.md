@@ -12,16 +12,41 @@ data: 2026-11-07
 >
 > Este documento faz o que eu vinha afirmando sem medir: **leu a mensagem de erro de cada falha**.
 
-## 1. O número muda com o método
+## 1. O número muda com o método — remedido na r49 com JSON
 
 | Modo | Resultado |
 |---|---|
-| Suíte completa (`npx vitest run`) | **27 failed** |
-| Os mesmos arquivos, isolados | **17 failed · 206 passed · 6 skipped** |
+| Suite completa (`--reporter=json`) | **30 failed · 19.076 passed · 229 skipped** (19.335 testes) |
+| Dos 19 arquivos com falha, **13 passam isolados** | 30 − 13 = **17 falhas reais** |
+| Testes que falham isolados | **17** — exatamente os mesmos de antes |
 
-**10 falham só sob carga** — são testes sensíveis a tempo, não defeitos.
+**O baseline não mudou: 17 falhas reais.** O que mudou foi o número **sob carga** (27 → 30), e a causa é
+o próprio crescimento da suite (19.335 testes): mais concorrência, mais flaky.
 
-## 2. Classificação, erro por erro
+### O que a r49 encontrou de novo
+
+| Arquivo | Sob carga | Isolado |
+|---|---|---|
+| `audit-store.test.ts` | 1 falha | **13 passed** |
+| `channel-build-version.test.ts` | 1 falha | **4 passed** |
+| `desktop-installation.test.ts` | 1 falha | **13 passed** |
+| `linux-nvidia-egl-recovery.native.test.ts` | 1 falha | **4 passed** |
+
+**Flaky sob carga, não regressão.** E os 6 de UI que já constavam como flaky: **todos passam isolados**
+(7, 6, 5, 8, 1 e 8 testes).
+
+### A única falha que era **minha**
+
+`scripts/i18n-keys.test.mjs` — as 5 chaves `connectorsReadiness` entraram no catálogo na r15 e o snapshot
+`locales/_keys.desktop.json` **nunca foi regerado**. O teste falhava desde então, por 33 rodadas, porque
+eu rodava `vitest src/i18n/` e não `scripts/i18n-keys.test.mjs`.
+
+**Corrigido em `6cf7743bb4`** — 125 testes de i18n verdes.
+
+> **"Eu rodei o teste de i18n e passou"** era verdade sobre `src/i18n/` e falso sobre o repositório.
+> **Escopo do teste não é escopo da mudança.**
+
+## 2. Classificação, erro por erro## 2. Classificação, erro por erro
 
 ### Ambiente de empacotamento — não é produto
 
