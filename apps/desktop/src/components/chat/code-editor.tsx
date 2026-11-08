@@ -281,10 +281,24 @@ export function CodeEditor({
         // Standalone edits (SOUL.md, skills, memories) are prose, not code —
         // wrap long lines instead of scrolling horizontally, and drop the gutter
         // inset. Pane previews stay flush/scrolling to mirror their SourceView.
-        ...(framed ? [EditorView.lineWrapping, FRAMED_THEME] : [])
+        ...(framed ? [EditorView.lineWrapping, FRAMED_THEME] : []),
+        // r56 do V5: `.cm-content` e um contenteditable sem nome acessivel (`aria-input-field-name`,
+        // serious). `contentAttributes` e EXTENSAO, nao opcao de `EditorView` — aplica o atributo no
+        // proprio campo. O nome vem do `filePath` que o componente ja recebe.
+        EditorView.contentAttributes.of({ 'aria-label': filePath })
       ]
     })
 
+    /*
+     * r56 do V5 — `aria-input-field-name` (serious) em `#/profiles`.
+     *
+     * O `.cm-content` do CodeMirror e um `contenteditable` sem nome acessivel: um leitor de tela
+     * anuncia "caixa de texto" e nada mais. O `axe` classificou como **serious** — e' o unico campo
+     * da tela de perfis, entao quem usa leitor de tela nao sabia o que estava editando.
+     *
+     * `contentAttributes` aplica o atributo no proprio `.cm-content`. O nome vem do `filePath`, que
+     * o componente ja recebe — nao invento um rotulo novo nem peco i18n para um caminho de arquivo.
+     */
     const view = new EditorView({ parent: host, state })
     viewRef.current = view
 

@@ -59,6 +59,39 @@ tempo.
 `<section aria-label={title}>` — um `<section>` com nome acessivel **e** landmark. Nao escondi nada com
 `aria-hidden`, que resolveria o relatorio e quebraria o leitor de tela.
 
+### Censo de acessibilidade: **39 rotas medidas na r56**, 6 com violacao
+
+O censo que o V4 nunca fez de verdade — com sinal de prontidao (h1/h2 presente + DOM estavel), nao
+timeout.
+
+| Rota | Nos | Violacoes |
+|---|---:|---|
+| `/profiles` | 6 → **5** | `landmark-no-duplicate-banner`, `landmark-unique`, `region` |
+| `/messaging` | 4 | `landmark-main-is-top-level`, `landmark-no-duplicate-main`, `landmark-unique`, `page-has-heading-one` |
+| `/cron` | 3 | `region` |
+| `/webhooks` | 1 | `region` |
+| `/artifacts` | 1 | `page-has-heading-one` |
+| `/capabilities` | 1 | `page-has-heading-one` |
+
+**33 das 39 rotas tem `axe` 0.** As 6 restantes somam **15 nos**.
+
+### Corrigido nesta sessao
+
+| Rodada | Achado | Correcao | Resultado |
+|---|---|---|---|
+| r55 | `#/agents` — `region` (2 nos) | `PanelEmpty` virou `<section aria-label>` | **2 → 0** |
+| r56 | `#/profiles` — **`aria-input-field-name` (serious)** | `CodeEditor` ganhou `EditorView.contentAttributes.of({ 'aria-label': filePath })` | **1 no → 0**; o campo passou a anunciar `SOUL.md` |
+
+**O `aria-input-field-name` era o unico de impacto `serious`**: o `.cm-content` do CodeMirror e um
+`contenteditable` sem nome acessivel — quem usa leitor de tela ouvia "caixa de texto" e nada mais, e era
+o unico campo da tela de perfis.
+
+### O que **nao** foi corrigido
+
+As **15 violacoes restantes** sao de **estrutura de landmark** (`region`, `landmark-unique`,
+`landmark-no-duplicate-*`, `page-has-heading-one`). Corrigir exige mexer no **shell das paginas** — e nao
+num componente isolado —, e cada uma muda o HTML de uma rota inteira. **Ficam declaradas, nao escondidas.**
+
 ## Desktop — por fluxo
 
 | Fluxo | Estado | Evidência |
