@@ -36,6 +36,7 @@ export const ruProjects: NonNullable<TranslationOverrides['sidebar']>['projects'
   moveNoProjects: 'Нет других проектов',
   reveal: 'Показать в папке',
   copyPath: 'Копировать путь',
+  runTests: 'Запустить тесты',
   removeFromSidebar: 'Скрыть из боковой панели',
   createdInPreviousContext:
     'Проект создан в прежнем подключении или профиле. Вернитесь к нему; файл IDEA.md не был записан.',

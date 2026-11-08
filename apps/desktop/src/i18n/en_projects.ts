@@ -37,6 +37,7 @@ export const enProjects: Translations['sidebar']['projects'] = {
   moveNoProjects: 'No other projects',
   reveal: 'Reveal in folder',
   copyPath: 'Copy path',
+  runTests: 'Run tests',
   removeFromSidebar: 'Hide from sidebar',
   createdInPreviousContext:
     "Project created on the previous connection or profile. Switch back to find it; IDEA.md wasn't written.",

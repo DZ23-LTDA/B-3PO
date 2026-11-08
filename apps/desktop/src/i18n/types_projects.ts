@@ -36,6 +36,7 @@ export interface SidebarProjectsTranslations {
   moveNoProjects: string
   reveal: string
   copyPath: string
+  runTests: string,
   removeFromSidebar: string
   createdInPreviousContext: string
   hiddenFromSidebar: string

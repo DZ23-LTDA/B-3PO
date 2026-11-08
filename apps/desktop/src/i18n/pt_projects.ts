@@ -38,6 +38,7 @@ export const ptProjects: Translations['sidebar']['projects'] = {
   moveNoProjects: 'Nenhum outro projeto',
   reveal: 'Mostrar na pasta',
   copyPath: 'Copiar caminho',
+  runTests: 'Rodar testes',
   removeFromSidebar: 'Ocultar da sidebar',
   createdInPreviousContext:
     'Projeto criado na conexão ou no perfil anterior. Volte para encontrá-lo; o IDEA.md não foi escrito.',

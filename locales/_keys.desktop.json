@@ -5490,6 +5490,7 @@
     "sidebar.projects.renameTitle",
     "sidebar.projects.reorder",
     "sidebar.projects.reveal",
+    "sidebar.projects.runTests",
     "sidebar.projects.sectionLabel",
     "sidebar.projects.showAllCount",
     "sidebar.projects.showAllSessions",
