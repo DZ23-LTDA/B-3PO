@@ -4,10 +4,10 @@ agente: dsh
 projeto: c3po-bot
 data: 2026-11-07
 fase: G8
-revisao: r48
+revisao: r68
 ---
 
-# HANDOFF — V5, estado real em 07/11 (rodada 48)
+# HANDOFF — V5, estado real em 07/11 (revisao r68)
 
 > **Este arquivo foi reescrito na r48.** A versão anterior (r22) dizia que o executor de Sofia era "o
 > maior buraco" e que `sofia:delegar` "dava porta à ponte" — **as duas estavam erradas**: a r24 resolveu
@@ -23,7 +23,7 @@ revisao: r48
 | Gate | **14/14** |
 | Typecheck | **0 erros**, 2 projetos |
 | `axe` | **5 de 39 rotas** com violacao persistente quando medido em r63; **2 restantes** dependem de `DEC-6`. O "0 em 27 rotas" do V4 **nao era reproduzivel** — ver `PLATFORM_MATRIX.md`. Corrigidas nesta sessao: `/artifacts`, `/capabilities`, `/messaging`, `#/agents`, `/webhooks`, `aria-label` do editor |
-| Console | **0 erros** em 27 rotas |
+| Console | **nao remedido nesta sessao** — o "0 erros em 27 rotas" e' do V4. Ver `TEST_EVIDENCE.md` |
 | Docs v5 | **15 arquivos** |
 
 ## O que funciona, verificado no app
