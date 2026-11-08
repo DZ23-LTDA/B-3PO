@@ -295,6 +295,27 @@ preenchimento intermitente e' a mesma mentira com timing melhor.
 
 **O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
 
+### O que a r76 provou sobre o fluxo — e o que impede o transporte
+
+**Quatro fatos medidos, cada um derrubando uma suposicao:**
+
+| Medicao | Resultado |
+|---|---|
+| `criar` sem `tarefa_id` | **descarta a tarefa** — `tarefas: []`. O store filtra por `tarefa_id` vazio |
+| `criar` **com** `tarefa_id` | plano com 1 tarefa, e `delegar` devolve `prompt` **preenchido** |
+| `delegar` pela **UI** (botao) | **escreve** `$delegacaoPendente`: `store: true`, `"PEDIDO-LIMPO..."` |
+| `delegar` pelo **IPC direto** | **nao escreve** — o callback da UI e' quem chama `registrarDelegacaoPendente` |
+| `$delegacaoPendente` | **so em memoria**: `p.reload()` zera |
+
+**A receita que ainda nao foi executada, e e' o proximo passo exato**: delegar pela **UI** uma tarefa
+**nova** (nunca delegada), e **sem recarregar** navegar client-side para `/`. Na r76 cada tentativa tinha
+um desses defeitos: uma delegava mas eu recarregava antes de navegar; outra navegava mas a delegacao
+anterior ja tinha marcado a tarefa como `ja_delegada`.
+
+**O consumidor no composer** (`loadIntoComposer` + `$delegacaoPendente`) foi escrito e passou o typecheck,
+mas **nao foi verificado nesse cenario** — entao foi **revertido**, como na r46 e na r74. Nao fica no
+codigo o que nao se provou.
+
 ### Tentativa 7 (r74) e a medicao que derrubou a hipotese (r75)
 
 A r43 criou `$delegacaoPendente`; a r46 tentou com um botao e reverteu. Na r74 adicionei o **consumidor**
