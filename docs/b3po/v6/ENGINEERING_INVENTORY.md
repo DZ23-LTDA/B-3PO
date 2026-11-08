@@ -27,7 +27,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
-| 6 | Executar testes e builds | **PARTIAL** | só via terminal; sem ação orquestrada nem leitura de resultado |
+| 6 | Executar testes e builds | **PARTIAL → r6**: `hermes:dev:run` roda um comando e devolve `exit_code`, `saida`, `erro` e `duracao_ms` | falta a **UI** e a deteccao do comando do projeto (r6 entrega o canal) |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **MISSING** | o "preview" é renderização de arquivo no painel, **não** app rodando em porta |
 | 9 | Inspecionar console e rede | **MISSING** | não há captura de console/rede de app em preview |
@@ -108,6 +108,35 @@ que sabe abrir sessão e rodar ferramenta — **não conhece esse store**.
 **Consequência para o critério de aceite**: *"Coordenar pelo menos uma jornada de desenvolvimento"* não
 pode ser satisfeito enquanto ninguém pegar o trabalho. O V5 entregou a **criação** do trabalho e o
 **transporte do pedido**; falta o **consumo**.
+
+## r6 — `hermes:dev:run`: rodar e **ler o resultado**
+
+O B-3PO ja' tinha terminal (PTY), mas *"abrir terminal e digitar `npm test`"* e' capacidade **humana**:
+nada devolve exit code, nada separa stdout de stderr, nada sabe se passou.
+
+**Canal novo**: `hermes:dev:run` -> `{ cwd, argv }` -> `{ exit_code, saida, erro, duracao_ms, sinal }`.
+
+**E' execucao arbitraria, a capacidade mais perigosa do produto.** O que a cerca:
+
+| Defesa | Por que |
+|---|---|
+| guarda **antes** de qualquer efeito | mesmo padrao de `terminal:start` (r8 da V4): sem ator com `escrita` em `terminal`, nem valida caminho |
+| `cwd` absoluto e sem `..` | procurado no texto **cru**, antes de `normalize` — depois de normalizar o `..` ja' resolveu |
+| `cwd` tem de existir e ser diretorio | `stat` antes de executar |
+| **`argv` e' lista, nunca string** | sem shell nao ha interpolacao: `;`, `&&`, `|` e `$()` sao argumentos literais |
+| `timeout` 15 min · `maxBuffer` 4 MB | comando travado ou que imprime gigabytes nao derruba o app |
+
+**8 testes, 5 negativos** — sem ator, cwd relativo, cwd com `..`, cwd inexistente, argv vazio; e tres
+positivos, um deles provando que `a;b && c` chega ao processo como **um argumento**.
+
+**Onde registra**: dentro de `registerTerminalIpc` (que ja' tem `actorOf`), **nao em `main.ts`** — que esta'
+no teto de `FILE_LINES` (18.221). A primeira tentativa estourou o teto e o `health` pegou.
+
+**Dois erros meus no caminho, os dois registrados no teste**:
+1. `join(pasta,'..','..')` **normaliza** o `..` fora, entao o teste media um caminho sem travessia — e
+   rodou `node` sem argumentos, travando no REPL por 240 s. O teste agora monta a string literal.
+2. Assumi que `atualizarTarefa` devolvia Promise (r3); o mesmo tipo de suposicao apareceu aqui com
+   `execFile` e sua saida — resolvido com `String(...)` em vez de confiar no tipo.
 
 ## RETRATACAO (r5) — o inventario da r1 estava errado em duas linhas
 

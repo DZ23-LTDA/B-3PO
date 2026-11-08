@@ -2,6 +2,7 @@
 // registry, and the hermes:terminal:* IPC surface. Extracted from main.ts; the
 // factory owns the session map and returns the dispose helpers main.ts needs
 // for SSH teardown. findOnPath / logging / connection routing stay injected.
+import { registerDevRunIpc } from './dev-run-ipc'
 import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
 import type { Actor } from './rbac'
 import { execFile } from 'node:child_process'
@@ -101,6 +102,9 @@ export function registerTerminalIpc({
   ensureGatewayBackend,
   actorOf
 }: TerminalIpcDeps): TerminalIpcApi {
+  // r6 da V6: `dev:run` executa comando de desenvolvimento e roda no mesmo dominio de execucao do
+  // terminal; o factory ja' tem `actorOf`, entao ele e' registrado aqui e `main.ts` fica intacto.
+  registerDevRunIpc(ipcMain, { actorOf })
   const terminalSessions = new Map()
 
   function isExecutableFile(filePath) {
