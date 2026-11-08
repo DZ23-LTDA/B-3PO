@@ -145,25 +145,34 @@ E o projeto **ja sabia** que essa combinacao quebra — `use-statusbar-items.tsx
 mediu `#bb4d00` sobre `#0d1015` a 3.78:1 em 10 de 10 telas"*, e corrigiu com `dark:text-amber-400`, que
 **so vale quando a classe `dark` esta presente**.
 
-**ATENCAO — isto e' HIPOTESE, nao mecanismo medido (r61).** O `1.12:1` foi medido **uma vez**, com o
-elemento em `#radix-…`. Tentei reproduzir na r61 e **nao consegui**: o elemento `Inteligente` que
-localizei estava **dentro do `#root`**, sobre fundo `srgb(0.996)` (quase branco), com contraste correto.
+### Resolvido na r62: e' **flash de primeiro paint**, nao falha persistente
 
-**O que e' fato:**
+Amostrei `color-contrast` **40 vezes ao longo de 40 s** em `/agenda`, registrando toda violacao vista:
 
-| Afirmacao | Estado |
-|---|---|
-| existe texto a 1.12:1 (11 px, alpha 0.66 sobre `#0d1015`) | **medido 1 vez**, elemento identificado |
-| o token `--ui-text-tertiary` esta calculado e passa AA | **verificado no fonte** |
-| o tema resolvido e' claro (`prefers-color-scheme: dark` = false, sem `dark` em `<html>`) | **medido** |
-| o violador vinha de um popover Radix | **medido 1 vez** |
-| a causa e' o portal fora do escopo do tema | **HIPOTESE — nao reproduzida** |
+```
+3 violacoes distintas, TODAS com primeira aparicao em t=0 e 1 ocorrencia:
+  #radix-… > .truncate:nth-child(2)   3.78  (#bb4d00 sobre #0d1015)
+  #radix-… > .truncate                1.12  (#191d22 sobre #0d1015)
+  .overflow-x-clip…:nth-…             1.12  (#191d22 sobre #0d1015)
+```
 
-**O defeito nao e' de design; e' de escopo de tema em conteudo portalizado.** Corrigir exige que o portal
-herde os tokens. **Nao corrigi**: preciso saber se algum popover tambem existe no tema escuro, e a
-mudanca afeta todos.
+**Uma vez, no primeiro frame, e nunca mais.** Nao e' um estado que eu "nao consegui reproduzir": e' um
+estado que **so existe antes de o tema resolver**.
 
-**`DEC-5` e' agora**: como o conteudo portalizado herda o tema.
+**O mecanismo**: `applyTheme` (`themes/context.tsx` L467/L630) pinta os tokens em `documentElement`, mas ha
+um paint **anterior** — o shell de boot — antes de o provider montar. Nesse intervalo
+`--theme-foreground` ainda e' o fallback do `:root` e a superficie ja e' escura. **Texto escuro sobre
+fundo escuro por um frame.**
+
+**Severidade real: baixa.** E' um flash, nao texto ilegivel permanente; depois do primeiro frame o
+contraste passa.
+
+**O que faria sumir**: pintar os tokens do tema **antes do primeiro paint** — um bloco inline no
+`index.html`, como o projeto ja faz para o `color-scheme`. **Nao corrigi**: exige saber qual tema o boot
+deve usar antes de ler a configuracao.
+
+**`DEC-5` (reformulado duas vezes, agora correto)**: *qual tema o primeiro paint usa antes de a
+configuracao ser lida.*
 
 
 
