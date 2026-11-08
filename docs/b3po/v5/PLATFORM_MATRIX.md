@@ -86,9 +86,19 @@ renderiza `<h1 className="sr-only">`. A pagina nao mostra titulo visual — a id
 | `/capabilities` | `page-has-heading-one` | **0 violacoes** |
 | `/messaging` | 4 (incluindo `page-has-heading-one`) | 4, **mas diferente** |
 
-**A troca em `/messaging`**: saiu `page-has-heading-one`, entrou `heading-order`. O h1 novo vem antes de
-um h3, e a ordem de headings precisa ser descendente. **Troquei uma violacao de best-practice por outra**
-— o total nao caiu la', e eu prefiro registrar isso a contabilizar como vitoria.
+**A troca em `/messaging` — e o conserto dela (r65)**: saiu `page-has-heading-one`, entrou
+`heading-order` (h1 seguido de h3). **Nao deixei assim**: o cartao de plataforma virou `<h2>` e o
+`SectionTitle` virou `<h3>`, restaurando a hierarquia.
+
+Verificado em **3 amostras identicas**:
+
+```
+ordem: H1 > H2 > H3 > H3 > H3 > H3
+violacoes: landmark-main-is-top-level, landmark-no-duplicate-main, landmark-unique
+```
+
+`heading-order` **sumiu**, `page-has-heading-one` **nao voltou**, e sobrou o grupo estrutural (dois
+`<main>` na mesma rota), que nao e' heading.
 
 **`/messaging` continua com dois `<main>`** — isso nao e' heading, e' shell duplicado, e nao tem correcao
 de uma linha.
