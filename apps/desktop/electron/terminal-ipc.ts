@@ -73,6 +73,22 @@ export function terminalLcCtype(
   return platform === 'darwin' ? 'UTF-8' : env.LANG || 'C.UTF-8'
 }
 
+/**
+ * r50 do V5 — a sessão de terminal pertence ao renderer que a abriu.
+ *
+ * Extraída para poder ser testada: `terminalSessions` nasce **dentro** de `registerTerminalIpc`, então
+ * um teste de canal precisaria de um backend de PTY falso só para checar uma comparação de id.
+ *
+ * Sessão ausente devolve `true` no sentido de "não é de outro" — quem decide o que fazer com a
+ * inexistente é o `dispose`, que devolve `false` sem encerrar nada.
+ */
+export function sessaoPertenceAoRenderer(
+  sessao: { webContentsId?: number } | undefined,
+  senderId: number
+): boolean {
+  return !sessao || sessao.webContentsId === senderId
+}
+
 export function registerTerminalIpc({
   isWindows,
   findOnPath,
@@ -518,7 +534,22 @@ export function registerTerminalIpc({
     return sessionInfo.sshScope !== undefined ? null : readProcessCwd(sessionInfo.pty.pid)
   })
 
-  ipcMain.handle('hermes:terminal:dispose', (_event, id) => disposeTerminalSession(String(id || '')))
+  /*
+   * r50 do V5 — `dispose` fecha uma sessão, e também é da janela que a abriu.
+   *
+   * A r10 fechou `write`, `resize` e `cwd` com `webContentsId === sender.id` e **deixou esta
+   * passar**: um renderer podia **encerrar o terminal de outra janela**. Não vaza dado, mas é o
+   * mesmo "acesso a algo que esta janela não abriu" — e derrubar o terminal de alguém no meio de um
+   * comando é pior que ler.
+   */
+  ipcMain.handle('hermes:terminal:dispose', (_event, id) => {
+    const chave = String(id || '')
+    const sessao = terminalSessions.get(chave)
+
+    if (!sessaoPertenceAoRenderer(sessao, _event.sender.id)) return false
+
+    return disposeTerminalSession(chave)
+  })
 
   return { disposeTerminalSession, disposeTerminalSessionsForSshScope, disposeAllTerminalSessions }
 }

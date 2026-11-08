@@ -94,11 +94,14 @@ export function registerGitIpc({ actorOf, resolveGitBinary, resolveGhBinary }: G
   // Codex-style review pane: list changed files for a scope, fetch one file's
   // unified diff, and stage / unstage / revert. Reads return empty on failure;
   // mutations reject so the renderer can toast.
+  // r50 do V5: `review:list` e `review:diff` aceitam um `repoPath` qualquer e leem o histórico
+  // dele. Sem guarda, um renderer podia ler o git de QUALQUER diretório da máquina — inclusive de
+  // outro projeto. É leitura de máquina: `comMaquina('leitura')`, como `git:list`.
   ipcMain.handle('hermes:git:review:list', async (_event, repoPath, scope, baseRef) =>
-    reviewList(repoPath, scope, baseRef, resolveGitBinary())
+    comMaquina('leitura', () => reviewList(repoPath, scope, baseRef, resolveGitBinary()))
   )
   ipcMain.handle('hermes:git:review:diff', async (_event, repoPath, filePath, scope, baseRef, staged) =>
-    reviewDiff(repoPath, filePath, scope, baseRef, staged, resolveGitBinary())
+    comMaquina('leitura', () => reviewDiff(repoPath, filePath, scope, baseRef, staged, resolveGitBinary()))
   )
   // Working-tree-vs-HEAD diff for one file (the preview's "show the diff" view).
   ipcMain.handle('hermes:git:fileDiff', async (_event, repoPath, filePath) =>
