@@ -108,8 +108,8 @@ quais **"sem guarda"**.
 | `git`, `terminal`, `fs`, `plugin-files` guardados | **confirmado** — 21 + 6 + 13 + 4 canais com `podeOperarMaquina` |
 | `agent-ipc` usa identidade do main | **confirmado** — `atorOf` no `decide`, `input.quem` ignorado |
 | T-12 tarifas consertado | **confirmado** — `registerTariffIpc` chamado em `erp-ipc.ts` |
-| `axe` 0 em 27 rotas desktop | confirmado em V4 r22 |
-| 27 falhas desktop = baseline | confirmado em V4 r20 |
+| `axe` 0 em 27 rotas desktop | **REFUTADO na V5** — remedido em r63: 5 de 39 rotas com violacao persistente. O numero do V4 nao era reproduzivel (depende do estado da pagina). Ver `PLATFORM_MATRIX.md` |
+| 27 falhas desktop = baseline | **CORRIGIDO na V5** — medido 30 sob carga e 17 isoladas (r49); depois das correcoes, 23 sob carga com **zero arquivo novo** (r73). Ver `TEST_EVIDENCE.md` |
 | web 478 · mobile 179 · gateway 263 isolados | confirmado em V4 r26/r27 |
 
 ## 6. O que **não** foi auditado nesta rodada

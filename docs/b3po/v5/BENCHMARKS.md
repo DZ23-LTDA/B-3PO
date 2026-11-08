@@ -27,7 +27,7 @@ fase: G5
 | uso de tokens | **NÃO** |
 | intervenções humanas | **NÃO** |
 | regressões | **NÃO** |
-| acessibilidade | **PARCIAL** — `axe` 0 em 27 rotas desktop e 15 web |
+| acessibilidade | **PARCIAL** — remedido na V5 (r63): **34 de 39 rotas** sem violacao persistente; 5 tinham, **3 corrigidas** nesta sessao e 2 dependem de `DEC-6`. O "0 em 27" do V4 nao era reproduzivel |
 | satisfação UX | **NÃO** |
 
 **Nenhuma linha permite afirmar "o B-3PO é melhor que X".** E este documento **não afirma isso**.

@@ -15,7 +15,7 @@ fase: G3/G7
 
 | Plataforma | Veredito | O que sustenta |
 |---|---|---|
-| **Desktop Windows** | **READY** (uso interno) | gate 14/14 · tipos 0 · **27 falhas = baseline classificado** · `axe` 0 em 27 rotas · console 0 |
+| **Desktop Windows** | **READY** (uso interno) | gate **16/16** · tipos 0 · **23 falhas sob carga** (17 isoladas), 0 arquivo novo (r73) · `axe`: **34 de 39 rotas** sem violacao persistente (r63) · console **0 em 39** (r69) |
 | Desktop Linux | **PARTIAL** | 5 falhas exigem host Linux (SSH real, GPU NVIDIA, toolchain HUD) |
 | Desktop macOS | **NOT_TESTED** | sem macOS |
 | **Web** | **PARTIAL** | build ✓ 5,28 s · **478/478** · `axe` 0 em 15 rotas — **mas é o dashboard do Hermes** |

@@ -139,7 +139,7 @@ docs/b3po/v5/
   SECURITY_REVIEW.md          as três políticas; WS origem (64 testes), egress ausente
   SOFIA_INTEGRATION.md        o ciclo, as 8 regras e o que é manual
   CONNECTORS_AUDIT.md         5 estados dos 6 pedidos; a tela
-  TEST_EVIDENCE.md            as 27 falhas pelo erro real
+  TEST_EVIDENCE.md            as falhas da suite pelo erro real (30/17 em r49, 23 em r73)
   PLATFORM_MATRIX.md          estado por plataforma e por fluxo
   RELEASE_READINESS.md        o que está e o que não está pronto
   BENCHMARKS.md               por que nenhum resultado existe (providers vazio)

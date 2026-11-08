@@ -58,7 +58,7 @@ fase: G7
 
 | Aparência | Realidade |
 |---|---|
-| "27 falhas na suíte" | **todas classificadas**, 0 defeito de produto (`TEST_EVIDENCE.md`) |
+| "30 falhas sob carga / 17 isoladas" (o "27" do V4 estava desatualizado) | **todas classificadas**, 0 defeito de produto (`TEST_EVIDENCE.md`) |
 | "o backend não tem a rota" | era **cópia defasada** em `%TEMP%\<home>\hermes-agent\` (r15/r16) |
 | "144 canais sem guarda" | medido em canal, não em arquivo; a maioria é UI sem recurso de negócio |
 | "25 canais de dívida" | número do handoff antigo; o real é **341 registros, 144 sem helper** — e "sem helper" ≠ vulnerável |
