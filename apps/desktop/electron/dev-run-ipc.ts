@@ -26,6 +26,7 @@ import { execFile } from 'node:child_process'
 import { stat } from 'node:fs/promises'
 import { isAbsolute, normalize } from 'node:path'
 
+import { detectarProjeto } from './dev-detect'
 import type { IpcRegistrar } from './ipc-types'
 import { podeOperarMaquina, RECUSA_MAQUINA } from './machine-access'
 import type { Actor } from './rbac'
@@ -57,6 +58,32 @@ function lista(valor: unknown): string[] {
 }
 
 export function registerDevRunIpc(ipcMain: IpcRegistrar, deps: DevRunIpcDeps): void {
+  /*
+   * r7 da V6 — `dev:detect` responde "como este projeto roda testes e build".
+   *
+   * Mesma guarda do `dev:run`: descobrir o comando de um projeto e' reconhecimento de maquina, e sem
+   * ator com `leitura` nao ha razao para o renderer saber o que existe naquela pasta.
+   *
+   * Devolve `null` quando nao reconhece — a UI nao mostra botao. Um comando adivinhado produziria
+   * falha e a pessoa concluiria que o projeto esta' quebrado.
+   */
+  ipcMain.handle('hermes:dev:detect', async (_event: unknown, payload: unknown): Promise<unknown> => {
+    if (!podeOperarMaquina(await deps.actorOf(), 'leitura', 'terminal')) return RECUSA_MAQUINA
+
+    const cwd = texto((payload as { cwd?: unknown } | null)?.cwd)
+
+    if (!cwd) return { error: 'cwd_obrigatorio' }
+    if (!isAbsolute(cwd)) return { error: 'cwd_invalido' }
+    if (cwd.split(/[\\/]+/).includes('..')) return { error: 'cwd_invalido' }
+
+    const alvo = normalize(cwd)
+    const info = await stat(alvo).catch(() => null)
+
+    if (!info?.isDirectory()) return { error: 'cwd_inexistente' }
+
+    return detectarProjeto(alvo)
+  })
+
   ipcMain.handle(
     'hermes:dev:run',
     async (_event: unknown, payload: unknown): Promise<unknown> => {

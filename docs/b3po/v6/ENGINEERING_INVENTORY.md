@@ -27,7 +27,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
-| 6 | Executar testes e builds | **PARTIAL → r6**: `hermes:dev:run` roda um comando e devolve `exit_code`, `saida`, `erro` e `duracao_ms` | falta a **UI** e a deteccao do comando do projeto (r6 entrega o canal) |
+| 6 | Executar testes e builds | **IMPLEMENTED (backend)**: `dev:detect` descobre o comando pelo manifesto; `dev:run` roda e devolve `exit_code`/`saida`/`erro` | falta a **UI** que ligue os dois (r7 entrega os canais) |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **MISSING** | o "preview" é renderização de arquivo no painel, **não** app rodando em porta |
 | 9 | Inspecionar console e rede | **MISSING** | não há captura de console/rede de app em preview |
@@ -108,6 +108,34 @@ que sabe abrir sessão e rodar ferramenta — **não conhece esse store**.
 **Consequência para o critério de aceite**: *"Coordenar pelo menos uma jornada de desenvolvimento"* não
 pode ser satisfeito enquanto ninguém pegar o trabalho. O V5 entregou a **criação** do trabalho e o
 **transporte do pedido**; falta o **consumo**.
+
+## r7 — `dev:detect`: como ESTE projeto roda
+
+Sem deteccao, `dev:run` exige que alguem saiba o comando de cor. `hermes:dev:detect` olha o manifesto e
+responde `{ gerenciador, testes, build }`, com `argv` pronto — nunca string de shell.
+
+| Manifesto | Detecta |
+|---|---|
+| `package.json` com `scripts.test` | `<npm\|pnpm\|yarn\|bun> test`, decidido pelo **lockfile** |
+| `package.json` com `scripts.build` | `<gerenciador> run build` |
+| `pyproject.toml` · `pytest.ini` · `setup.cfg` | `python -m pytest` |
+| `Cargo.toml` | `cargo test` · `cargo build` |
+| `go.mod` | `go test ./...` · `go build ./...` |
+| `Makefile` | `make test` |
+
+**O que ela NAO faz — e e' o ponto**: **nao inventa comando.**
+
+- `package.json` sem `scripts.test` -> `testes: null`. Nao tenta `npx jest`, nao adivinha.
+- pasta sem manifesto reconhecivel -> `null` nos tres campos.
+- `package.json` acima de 1 MB -> nao e' lido como manifesto.
+- JSON invalido -> `null`, sem excecao.
+
+**Por que isso importa**: um botao que roda um comando adivinhado produziria falha, e a pessoa
+concluiria que o **projeto** esta' quebrado quando o errado era o comando. **Nenhum botao e' melhor que
+um botao errado.**
+
+**11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
+gigante.
 
 ## r6 — `hermes:dev:run`: rodar e **ler o resultado**
 
