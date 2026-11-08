@@ -29,8 +29,8 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
 | 6 | Executar testes e builds | **IMPLEMENTED (backend)**: `dev:detect` descobre o comando pelo manifesto; `dev:run` roda e devolve `exit_code`/`saida`/`erro` | falta a **UI** que ligue os dois (r7 entrega os canais) |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
-| 8 | Preview funcional | **MISSING** | o "preview" é renderização de arquivo no painel, **não** app rodando em porta |
-| 9 | Inspecionar console e rede | **MISSING** | não há captura de console/rede de app em preview |
+| 8 | Preview funcional | **IMPLEMENTED** | aba **Browser** no right-rail: `<webview>` real, barra de endereco com back/forward/reload/pop-out (`preview-browser-bar.tsx`), guests out-of-process (`preview-guest-*.ts`) |
+| 9 | Inspecionar console e rede | **PARTIAL** | **console: IMPLEMENTED** — `preview-console.tsx` + `preview-console-state.ts` (200 entradas, niveis log/info/warn/error, truncamento com limites); **rede: nao verificado** programaticamente — ha toggle de DevTools, o que nao e' captura |
 | 10 | Coordenar subagentes | **PARTIAL** | roster/execuções/aprovações existem; **D1 (r2) faz o pedido ser executado** — o turno roda e falha so' por falta de provedor |
 | 11 | Memória e checkpoints | **PARTIAL** | camadas de memória no gateway; checkpoint de execução existe (`retomar`) |
 | 12 | Recuperar trabalho interrompido | **IMPLEMENTED** | `retomar` + `expirarPendentes` (V5 r39/r40/r43), endurecidos |
@@ -136,6 +136,30 @@ um botao errado.**
 
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
+
+## r8 — TERCEIRA classificacao errada, e o padrao por trás delas
+
+Corrigi de novo o proprio inventario: **#8 (preview) e #9 (console) nao eram `MISSING`**.
+
+| # | Eu escrevi na r1 | O que existe |
+|---|---|---|
+| 8 | `MISSING` — "renderizacao de arquivo no painel" | **`<webview>` real** + barra de endereco (back/forward/reload/pop-out) + guests out-of-process |
+| 9 | `MISSING` | **console real**: `preview-console.tsx` + `preview-console-state.ts`, alimentado pelas mensagens do guest |
+
+**Tres classificacoes erradas em oito rodadas, todas da mesma forma:**
+
+| Rodada | Eu auditei | E generalizei para |
+|---|---|---|
+| r4 | nenhuma auditoria de provedor | "§4 nao existe" -> **existia quase inteiro** |
+| r5 | `electron/project.ts` (coordenacao) | "projeto nao tem pasta" -> **`src/store/projects.ts` tem** |
+| r8 | nome dos arquivos (`preview-file`, `preview-script`) | "preview e' renderizacao de arquivo" -> **ha `<webview>`** |
+
+**O padrao**: eu leio **um** representante de uma capacidade e concluo sobre a capacidade. O nome do arquivo
+nao diz o que o sistema faz; `preview-file.tsx` e' **um** formato de preview, nao o preview.
+
+**O que teria evitado**: para cada capacidade, listar **todos** os arquivos que a tocam e ler o que o
+**maior** deles faz. No r8 isso seria `preview-pane.tsx` (o pane que hospeda o `<webview>`), nao
+`preview-file.tsx`.
 
 ## r6 — `hermes:dev:run`: rodar e **ler o resultado**
 
