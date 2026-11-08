@@ -24,6 +24,28 @@ fase: G3/G7
 | Gateway Python | **PARTIAL** | coleta 13.337 · 5 arquivos isolados = 263 passed |
 | Release assinado | **NOT_READY** | sem certificado (`EXT-1`) |
 
+### ⚠️ O numero do `axe` nao e' reprodutivel como esta escrito (r54)
+
+O documento afirma `axe 0 em 27 rotas`. Remedido na r54 em 5 rotas: **2 violacoes em `#/agents`** — e a
+violacao **mudou entre duas cargas da mesma rota**:
+
+| Carga | Violacoes |
+|---|---|
+| 1ª | `region` (2 nos: "No live subagents") |
+| 2ª | `landmark-one-main` + `page-has-heading-one` |
+
+**A causa e' medir durante o boot**: a pagina passa por shell de carregamento, estado vazio e estado
+pronto, e cada um tem estrutura diferente. Um `waitForTimeout` fixo pega um estado arbitrario.
+
+**O que isso invalida**: o "axe 0" do V4 **nao e' reproduzivel** com o metodo que eu descrevi (esperar
+6-7 s). Para valer, a medicao precisa de um **sinal de prontidao** (um seletor do estado final), nao de
+tempo.
+
+**Nao corrigi a violacao `region`**: tentei envolver o estado vazio em `<section aria-label>` e a
+mudanca **nao pode ser verificada** — o dev server estava servindo o modulo antigo
+(`fetch('/src/app/agents/index.tsx')` devolvia o arquivo **sem** o `<section>`, mesmo apos tocar o
+arquivo). Revertida em vez de entregue sem prova.
+
 ## Desktop — por fluxo
 
 | Fluxo | Estado | Evidência |
