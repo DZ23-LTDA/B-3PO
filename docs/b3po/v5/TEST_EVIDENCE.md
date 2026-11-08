@@ -12,6 +12,20 @@ data: 2026-11-07
 >
 > Este documento faz o que eu vinha afirmando sem medir: **leu a mensagem de erro de cada falha**.
 
+## 0. Console e acessibilidade, medidos na V5 (r69)
+
+| Medicao | Metodo | Resultado |
+|---|---|---|
+| **Erros de console** | `console` nivel `error` + `pageerror`, prontidao por rota (`role="status"` ausente) | **0 em 39 rotas** |
+| **Violacao de acessibilidade persistente** | prontidao + **3 amostras identicas** com 1,2 s | **5 de 39** na r63; **2 restantes** dependem de `DEC-6` |
+| Violacao transitoria (flash) | 40 amostras ao longo de 40 s | 3 textos a 1.12:1 **so em t=0** — `DEC-5` |
+
+**O "0 erros de console em 27 rotas" do V4 se confirmou** — agora medido em 39.
+
+**O "axe 0 em 27 rotas" do V4 NAO se confirmou** e nao era reproduzivel: o numero depende do estado da
+pagina no momento da medicao. Ver `PLATFORM_MATRIX.md` para os quatro metodos e por que cada um deu um
+numero diferente.
+
 ## 1. O número muda com o método — remedido na r49 com JSON
 
 | Modo | Resultado |
@@ -46,7 +60,7 @@ eu rodava `vitest src/i18n/` e não `scripts/i18n-keys.test.mjs`.
 > **"Eu rodei o teste de i18n e passou"** era verdade sobre `src/i18n/` e falso sobre o repositório.
 > **Escopo do teste não é escopo da mudança.**
 
-## 2. Classificação, erro por erro## 2. Classificação, erro por erro
+## 2. Classificação, erro por erro
 
 ### Ambiente de empacotamento — não é produto
 
