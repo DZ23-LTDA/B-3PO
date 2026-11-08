@@ -1,0 +1,392 @@
+[
+ {
+  "rota": "/agenda",
+  "pronto": true,
+  "amostras": [
+   "color-contrast",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/agentes",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/agents",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/ambiente",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/artifacts",
+  "pronto": true,
+  "amostras": [
+   "page-has-heading-one",
+   "page-has-heading-one",
+   "page-has-heading-one"
+  ],
+  "persistente": "page-has-heading-one"
+ },
+ {
+  "rota": "/atendimento",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/automacoes",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/backups",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/busca",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/capabilities",
+  "pronto": true,
+  "amostras": [
+   "page-has-heading-one",
+   "page-has-heading-one",
+   "page-has-heading-one"
+  ],
+  "persistente": "page-has-heading-one"
+ },
+ {
+  "rota": "/command-center",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/compras",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/crm",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/cron",
+  "pronto": true,
+  "amostras": [
+   "region",
+   "region",
+   "region"
+  ],
+  "persistente": "region"
+ },
+ {
+  "rota": "/documentos",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/empresa",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/entregas",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/finance",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/gas",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/marketing",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/medidores",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/messaging",
+  "pronto": true,
+  "amostras": [
+   "landmark-main-is-top-level,landmark-no-duplicate-main,landmark-unique,page-has-heading-one",
+   "landmark-main-is-top-level,landmark-no-duplicate-main,landmark-unique,page-has-heading-one",
+   "landmark-main-is-top-level,landmark-no-duplicate-main,landmark-unique,page-has-heading-one"
+  ],
+  "persistente": "landmark-main-is-top-level,landmark-no-duplicate-main,landmark-unique,page-has-heading-one"
+ },
+ {
+  "rota": "/organizacao",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/painel",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/posvenda",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/privacidade",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/products",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/profiles",
+  "pronto": true,
+  "amostras": [
+   "landmark-no-duplicate-banner,landmark-unique,region",
+   "landmark-no-duplicate-banner,landmark-unique,region",
+   "landmark-no-duplicate-banner,landmark-unique,region"
+  ],
+  "persistente": "landmark-no-duplicate-banner,landmark-unique,region"
+ },
+ {
+  "rota": "/projetos",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/rh",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/sales",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/servicos",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/session-import",
+  "pronto": false,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/settings",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/sofia",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/starmap",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/stock",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/trabalhos",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ },
+ {
+  "rota": "/webhooks",
+  "pronto": true,
+  "amostras": [
+   "",
+   "",
+   ""
+  ],
+  "persistente": ""
+ }
+]

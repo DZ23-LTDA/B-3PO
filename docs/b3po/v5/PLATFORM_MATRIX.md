@@ -73,7 +73,46 @@ timeout.
 | `/artifacts` | 1 | `page-has-heading-one` |
 | `/capabilities` | 1 | `page-has-heading-one` |
 
-### 🔴 O censo NAO e' um numero (r58–r59) — parei de tentar
+### Censo definitivo (r63): **5 rotas com violacao persistente de 39**
+
+O metodo que funcionou: **prontidao** (`role="status"` ausente) **+ 3 amostras com 1,2 s de intervalo**,
+contando so o que aparece **identico nas tres**. Isso separa o que persiste do que e' flash.
+
+| Rota | Violacao persistente |
+|---|---|
+| `/artifacts` | `page-has-heading-one` |
+| `/capabilities` | `page-has-heading-one` |
+| `/cron` | `region` |
+| `/messaging` | `landmark-main-is-top-level`, `landmark-no-duplicate-main`, `landmark-unique`, `page-has-heading-one` |
+| `/profiles` | `landmark-no-duplicate-banner`, `landmark-unique`, `region` |
+
+**34 das 39 rotas sao limpas de forma estavel.** Uma rota teve violacao **so transitoria** (o flash de
+primeiro paint da secao anterior). Dados brutos: `evidence/axe-censo-r63.json`.
+
+### Os cinco numeros que eu produzi para a mesma pergunta
+
+| Rodada | Metodo | Rotas com violacao |
+|---|---|---:|
+| r54 | `waitForTimeout(6 s)` | 6 |
+| r55–r57 | "DOM estavel 600 ms" | 6 → 5 → 6 |
+| r59 | `role="status"` ausente, **1 amostra** | **33** |
+| **r63** | **prontidao + 3 amostras identicas** | **5** |
+
+**O r54 estava mais perto que o r59.** O metodo "sofisticado" deu 33 porque media **imediatamente**
+depois de o `role="status"` sumir — a pagina ja nao tinha loader, mas ainda nao tinha reconciliado o
+conteudo. As tres amostras com intervalo sao o que faltava.
+
+**O que os 5 tem em comum**: todos sao **estrutura de landmark/heading**, nao contraste, nao foco, nao
+rotulo. E o mesmo grupo que a r59 identificou como arquitetural: `PanelHeader` usa `<h2>` (certo em
+overlay, errado quando o painel **e'** a pagina) e `OverlayBreadcrumbHeader` (h1) so e' usado por algumas
+rotas.
+
+### O que isso NAO invalida
+
+As tres correcoes feitas continuam reais e verificadas — `#/agents` e `/webhooks` saem deste censo porque
+**nao aparecem mais** entre os cinco.
+
+
 
 **Tres metodos, tres resultados para as mesmas rotas:**
 
