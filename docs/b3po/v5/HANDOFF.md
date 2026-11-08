@@ -23,7 +23,7 @@ revisao: r68
 | Gate | **14/14** |
 | Typecheck | **0 erros**, 2 projetos |
 | `axe` | **5 de 39 rotas** com violacao persistente quando medido em r63; **2 restantes** dependem de `DEC-6`. O "0 em 27 rotas" do V4 **nao era reproduzivel** — ver `PLATFORM_MATRIX.md`. Corrigidas nesta sessao: `/artifacts`, `/capabilities`, `/messaging`, `#/agents`, `/webhooks`, `aria-label` do editor |
-| Console | **nao remedido nesta sessao** — o "0 erros em 27 rotas" e' do V4. Ver `TEST_EVIDENCE.md` |
+| Console | **0 erros em 39 rotas** — medido na r69 (`console` nivel `error` + `pageerror`), com sinal de prontidao por rota |
 | Docs v5 | **15 arquivos** |
 
 ## O que funciona, verificado no app
