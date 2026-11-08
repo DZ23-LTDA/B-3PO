@@ -23,8 +23,9 @@
  * Trabalho longo continua sendo assunto do terminal.
  */
 import { execFile } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { stat } from 'node:fs/promises'
-import { isAbsolute, normalize } from 'node:path'
+import { isAbsolute, join, normalize } from 'node:path'
 
 import { detectarProjeto } from './dev-detect'
 import type { IpcRegistrar } from './ipc-types'
@@ -55,6 +56,68 @@ function texto(valor: unknown): string {
 
 function lista(valor: unknown): string[] {
   return Array.isArray(valor) ? valor.filter((v): v is string => typeof v === 'string' && v !== '') : []
+}
+
+/**
+ * Resolve `argv[0]` no PATH do Windows (r14 da V6).
+ *
+ * O BUG QUE ISTO CORRIGE — medido no app, nao teorizado
+ *
+ * Clicar "Rodar testes" num projeto Node devolvia `exit_code: 1` em **3 ms** com **saida e erro vazios**.
+ * No Windows `npm` e' `npm.cmd`, e `execFile('npm', ...)` nao o encontra. O `node` direto funcionava —
+ * os dois lados da comparacao estavam na mesma medicao.
+ *
+ * O repo ja' resolve o mesmo problema em `updater/checkout-source.ts:118`: `.cmd` nao roda por execFile,
+ * e `shell: true` interpolaria argumento nao confiavel. A solucao de la' — `ComSpec` com guarda de
+ * metacaractere — e' a mesma adotada aqui.
+ */
+function resolverNoPath(nome: string): string {
+  if (process.platform !== 'win32') return nome
+  if (/[\\/]/.test(nome)) return nome
+  if (/\.[a-z0-9]+$/i.test(nome)) return nome
+
+  const extensoes = ['.cmd', '.exe', '.bat', '']
+  const caminhos = (process.env.PATH ?? '').split(';').filter(Boolean)
+
+  for (const dir of caminhos) {
+    for (const ext of extensoes) {
+      const candidato = join(dir, nome + ext)
+
+      if (existsSync(candidato)) return candidato
+    }
+  }
+
+  return nome
+}
+
+/**
+ * Monta o que o `execFile` recebe.
+ *
+ * Para `.cmd`/`.bat` no Windows e' preciso passar pelo `ComSpec`, e ai' o `cmd.exe` **interpreta** a linha:
+ * por isso o guarda de metacaractere. Um argumento com `&`, `|`, `>` ou `"` seria comando, nao dado —
+ * e recusar e' melhor que executar.
+ */
+function prepararExecucao(argv: string[]): { args: string[]; comando: string; verbatim: boolean } | { recusa: string } {
+  const resolvido = resolverNoPath(argv[0])
+  const viaCmd = process.platform === 'win32' && /\.(cmd|bat)$/i.test(resolvido)
+
+  if (!viaCmd) {
+    return { args: argv.slice(1), comando: resolvido, verbatim: false }
+  }
+
+  const suspeito = argv.some(parte => /["%&|<>^\r\n]/.test(parte))
+
+  if (suspeito) {
+    return { recusa: 'argumento_inseguro' }
+  }
+
+  const linha = `""${resolvido}" ${argv.slice(1).map(p => `"${p}"`).join(' ')}"`
+
+  return {
+    args: ['/d', '/v:off', '/s', '/c', linha],
+    comando: process.env.ComSpec ?? 'cmd.exe',
+    verbatim: true
+  }
 }
 
 export function registerDevRunIpc(ipcMain: IpcRegistrar, deps: DevRunIpcDeps): void {
@@ -114,18 +177,23 @@ export function registerDevRunIpc(ipcMain: IpcRegistrar, deps: DevRunIpcDeps): v
 
       if (!info?.isDirectory()) return { error: 'cwd_inexistente' }
 
+      const preparado = prepararExecucao(argv)
+
+      if ('recusa' in preparado) return { error: preparado.recusa }
+
       const inicio = Date.now()
 
       const resultado = await new Promise<ResultadoDeExecucao>((resolve) => {
         execFile(
-          argv[0],
-          argv.slice(1),
+          preparado.comando,
+          preparado.args,
           {
             cwd: alvo,
             encoding: 'utf8',
             maxBuffer: LIMITE_BYTES,
             timeout: LIMITE_MS,
-            windowsHide: true
+            windowsHide: true,
+            windowsVerbatimArguments: preparado.verbatim
           },
           (falha, saida, erro) => {
             const codigo = falha && typeof (falha as { code?: unknown }).code === 'number'

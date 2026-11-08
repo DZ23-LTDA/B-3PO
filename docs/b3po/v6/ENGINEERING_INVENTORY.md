@@ -137,6 +137,49 @@ um botao errado.**
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
 
+## r14 — o clique revelou um bug que nenhum teste pegou
+
+**A acao foi clicada de verdade.** Criei um projeto com a pasta real, abri o menu, e o item apareceu:
+
+```
+["Renomear…","Adicionar pasta","Definir como ativo","Aparência",
+ "Mostrar na pasta","Copiar caminho","RODAR TESTES","Excluir…"]
+```
+
+Cliquei. A notificacao veio: **"Rodar testes: falhou (exit 1) em 3 ms"**.
+
+### O bug
+
+**3 ms, saida vazia, erro vazio.** Comparei na mesma medicao:
+
+| Comando | Resultado |
+|---|---|
+| `['node','-e','...']` | exit 0, saida correta |
+| `['npm','test']` | **exit 1, saida vazia, erro vazio, 3 ms** |
+
+**Causa**: no Windows `npm` e' `npm.cmd`, e `execFile('npm')` nao o encontra. **`PATH` tinha 67 entradas** —
+nao era ambiente, era o `.cmd`.
+
+**O repo ja' tinha a solucao** em `updater/checkout-source.ts:118`:
+
+> *"Node refuses direct .cmd execFile; shell:true interpolates untrusted branch and path arguments. Keep
+> cmd.exe's one unavoidable parse fail-closed."*
+
+**Aplicada em `dev-run-ipc.ts`**: `resolverNoPath()` acha `.cmd`/`.exe`/`.bat` no PATH; quando e' `.cmd`, a
+chamada vai pelo `ComSpec` com guarda de `" % & | < > ^ \r \n` — argumento suspeito e' **recusado**, nao
+executado.
+
+**Nenhum teste unitario pegou isso.** Os 8 testes do `dev:run` usavam `node` — que funciona. **So' o clique
+real, com o comando que a UI de fato monta, expos o defeito.**
+
+### O que mudou
+
+- a acao esta nos **dois** menus (projeto e workspace), compartilhando `run-project-tests.ts` — duas copias
+  divergiriam
+- o menu do **projeto** era o que a pessoa ve': o da workspace so' aparece dentro de um projeto aberto
+
+**Pendente**: o fix precisa de **reconstruir o main + reiniciar** para valer no app.
+
 ## r13 — reinicio com porta explicita, e **QUATRO itens verificados ao vivo**
 
 O `dev-cdp.ts` do projeto ja' previa o problema: a porta e' `HERMES_DESKTOP_CDP_PORT` (padrao 9222). Reiniciei

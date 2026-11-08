@@ -9,8 +9,7 @@ import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
 import { cn } from '@/lib/utils'
 import { openWorktreeDialog } from '@/store/coding-status'
 import { copyPath, revealPath } from '@/store/projects'
-import { detectarProjeto, resumoDaExecucao, rodarComando, rotuloDoComando } from '@/api/dev'
-import { notify } from '@/store/notifications'
+import { rodarTestesDoProjeto } from './run-project-tests'
 
 import {
   SIDEBAR_LEAD_ICON_SIZE,
@@ -137,58 +136,6 @@ export function WorkspaceShowMoreButton({
 // and ProjectMenu kebab: reveal in the file manager, copy path, and remove the
 // worktree (runs a real `git worktree remove` via the caller's confirm dialog).
 // Shared by the kebab dropdown and the header's right-click menu so both match.
-/**
- * "Rodar testes" no menu do workspace (r11 da V6).
- *
- * TRES PASSOS, E O PRIMEIRO PODE RECUSAR
- *
- * `dev:detect` diz como ESTE projeto roda. Se nao reconhecer, a acao **para ali** e a notificacao diz
- * por que — nao executa um comando adivinhado. Um botao que roda `npm test` num projeto Rust produziria
- * falha, e a pessoa concluiria que o projeto esta' quebrado.
- *
- * "Passou" vem do exit code (`resumoDaExecucao`), nunca de procurar "fail" na saida.
- *
- * O comando completo aparece na notificacao ANTES de rodar: a pessoa ve o que executou.
- */
-async function rodarTestesDoWorkspace(path: null | string, rotulo: string): Promise<void> {
-  if (!path) return
-
-  const deteccao = await detectarProjeto(path)
-
-  if (!deteccao || 'error' in deteccao) {
-    notify({ kind: 'warning', message: rotulo, detail: 'não foi possível ler o projeto' })
-    return
-  }
-
-  if (!deteccao.testes) {
-    notify({
-      kind: 'info',
-      message: rotulo,
-      detail: 'este projeto não declara como rodar testes — nada foi executado'
-    })
-    return
-  }
-
-  const resultado = await rodarComando(path, deteccao.testes.argv)
-
-  if (!resultado || 'error' in resultado) {
-    notify({
-      kind: 'error',
-      message: rotulo,
-      detail: 'a execução foi recusada pelo processo principal'
-    })
-    return
-  }
-
-  const resumo = resumoDaExecucao(resultado)
-
-  notify({
-    kind: resumo.passou === true ? 'success' : resumo.passou === false ? 'error' : 'warning',
-    message: `${rotulo}: ${resumo.titulo}`,
-    detail: `${rotuloDoComando(deteccao.testes.argv)}\n\n${(resultado.saida || resultado.erro || '').slice(-1500) || '(sem saída)'}`
-  })
-}
-
 function useWorkspaceItems({ path, onRemove }: { path: null | string; onRemove: () => void }) {
   const { t } = useI18n()
   const p = t.sidebar.projects
@@ -220,7 +167,7 @@ function useWorkspaceItems({ path, onRemove }: { path: null | string; onRemove: 
         icon: 'beaker',
         key: 'run-tests',
         label: p.runTests,
-        onSelect: () => void rodarTestesDoWorkspace(path, p.runTests)
+        onSelect: () => void rodarTestesDoProjeto(path, p.runTests)
       })}
       <kit.Separator />
       {renderActionItem(kit, {
