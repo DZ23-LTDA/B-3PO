@@ -27,7 +27,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
-| 6 | Executar testes e builds | **IMPLEMENTED e VERIFICADO ao vivo (r13)** | `dev:detect` + `dev:run` + preload + cliente + acao no menu. Medido no app: deteccao devolveu `npm test`/`npm run build` do `package.json` real; execucao devolveu `exit_code 0` e a saida; argv vazio e `..` recusados |
+| 6 | Executar testes e builds | **IMPLEMENTED e VERIFICADO ao vivo (r13/r15)** | `dev:detect` + `dev:run` + preload + cliente + acao no menu. Medido no app: deteccao devolveu `npm test`/`npm run build` do `package.json` real; execucao devolveu `exit_code 0` e a saida; argv vazio e `..` recusados |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **IMPLEMENTED** | aba **Browser** no right-rail: `<webview>` real, barra de endereco com back/forward/reload/pop-out (`preview-browser-bar.tsx`), guests out-of-process (`preview-guest-*.ts`) |
 | 9 | Inspecionar console e rede | **PARTIAL** | **console: IMPLEMENTED** — `preview-console.tsx` + `preview-console-state.ts` (200 entradas, niveis log/info/warn/error, truncamento com limites); **rede: nao verificado** programaticamente — ha toggle de DevTools, o que nao e' captura |
@@ -136,6 +136,36 @@ um botao errado.**
 
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
+
+## r15 — o `.cmd` corrigido, e a suite REAL rodando por um clique
+
+Reconstrui o main e reiniciei com `HERMES_DESKTOP_CDP_PORT=9333`. O bundle passou a ter `resolverNoPath`.
+
+| Medicao | Antes (r14) | Depois (r15) |
+|---|---|---|
+| `dev:run(['npm','--version'])` | `exit 1` · saida vazia · 3 ms | **`exit 0` · "11.20.0"** |
+| clique em "Rodar testes" | falhou em 3 ms | **disparou a suite** |
+
+**Prova de que o clique executa o produto, nao um stub** — processos medidos durante a execucao:
+
+```
+PID 88404  C:\WINDOWS\system32\cmd.exe /d /s /c vitest run
+PID 17944  "node" "...\node_modules\.bin\vitest"
+```
+
+**O `/d /v:off /s /c` e' literalmente o padrao de `updater/checkout-source.ts:129`.** O `vitest run` da' suite
+inteira estava rodando porque uma pessoa escolheu "Rodar testes" no menu de um projeto.
+
+### A lacuna que isso revela
+
+**Nao ha estado "rodando".** A acao so' escreve a notificacao **quando o comando termina**. Para um build de
+3 s isso e' ok; para a suite deste repositorio (~10 min) a pessoa clica e **nao ve' nada acontecer**.
+
+**Nao e' bug — e' falta de feedback.** Sem `pendente/rodando`, o silencio e' indistinguivel de "o clique nao
+funcionou", que foi exatamente a minha primeira leitura na r14.
+
+**Proximo passo**: um estado intermediario (notificacao persistente ou spinner no item do menu) antes do
+resultado final.
 
 ## r14 — o clique revelou um bug que nenhum teste pegou
 
