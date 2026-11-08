@@ -27,7 +27,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
-| 6 | Executar testes e builds | **IMPLEMENTED** | `dev:detect` + `dev:run` + preload + cliente com funcoes puras + **acao "Rodar testes" no menu do workspace** (`workspace-header.tsx`, renderizado por `workspace-group.tsx:235`). **Verificacao ao vivo pendente de reinicio do app** |
+| 6 | Executar testes e builds | **IMPLEMENTED e VERIFICADO ao vivo (r13)** | `dev:detect` + `dev:run` + preload + cliente + acao no menu. Medido no app: deteccao devolveu `npm test`/`npm run build` do `package.json` real; execucao devolveu `exit_code 0` e a saida; argv vazio e `..` recusados |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **IMPLEMENTED** | aba **Browser** no right-rail: `<webview>` real, barra de endereco com back/forward/reload/pop-out (`preview-browser-bar.tsx`), guests out-of-process (`preview-guest-*.ts`) |
 | 9 | Inspecionar console e rede | **PARTIAL** | **console: IMPLEMENTED** — `preview-console.tsx` + `preview-console-state.ts` (200 entradas, niveis log/info/warn/error, truncamento com limites); **rede: nao verificado** programaticamente — ha toggle de DevTools, o que nao e' captura |
@@ -136,6 +136,32 @@ um botao errado.**
 
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
+
+## r13 — reinicio com porta explicita, e **QUATRO itens verificados ao vivo**
+
+O `dev-cdp.ts` do projeto ja' previa o problema: a porta e' `HERMES_DESKTOP_CDP_PORT` (padrao 9222). Reiniciei
+com `HERMES_DESKTOP_CDP_PORT=9333` — a 9222 era do Chrome do usuario — e o app subiu com
+`renderer debugging on http://127.0.0.1:9333`.
+
+**Desta vez conferi o alvo antes de agir**: uma page, `http://127.0.0.1:5174/#/sofia`. Sem tocar em nada
+que nao fosse o app.
+
+### O que ficou provado
+
+| Item | Medicao |
+|---|---|
+| ponte `dev` no preload | `temDev: true`, `metodosDev: ["detect","run"]` |
+| **#6 deteccao** | `{ gerenciador: "npm", testes: ["npm","test"], build: ["npm","run","build"] }` — lido do `package.json` **real** |
+| **#6 execucao** | `{ exit_code: 0, saida: "dev-run-ok", duracao_ms: 47 }` |
+| **#6 recusa** | argv vazio -> `comando_obrigatorio`; `..` -> `cwd_invalido` |
+| **r3 status derivado** | `tarefaStatus: "executando"` (saiu de `pendente`), `execucaoStatus: "executando"`, `session_id` gravado, rota `#/local-6af8a439…` |
+| **ciclo de Sofia** | delegar -> executar -> sessao criada -> vinculo automatico -> execucao `executando` |
+
+**A correcao da r3 esta' confirmada no app**: a tarefa **deixou de ficar `pendente` para sempre** enquanto a
+execucao rodava.
+
+**O que ainda nao foi clicado**: a **acao "Rodar testes" no menu da sidebar**. Os canais que ela chama estao
+provados; o clique em si depende de existir um workspace na arvore lateral desta instalacao.
 
 ## r12 — reiniciei o app, e os DOIS canais de verificacao caíram
 
