@@ -295,7 +295,35 @@ preenchimento intermitente e' a mesma mentira com timing melhor.
 
 **O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
 
-### Tentativa 7 do transporte (r74) — o diagnostico que faltava
+### Tentativa 7 (r74) e a medicao que derrubou a hipotese (r75)
+
+A r43 criou `$delegacaoPendente`; a r46 tentou com um botao e reverteu. Na r74 adicionei o **consumidor**
+no composer usando a costura certa (`loadIntoComposer`, a API do proprio hook para escrita programatica)
+e medi: o composer lia o atom como `null`.
+
+**Na r75 eu instrumentei os DOIS lados para comparar identidade.** Cinco medicoes:
+
+| Medicao | Resultado | O que derruba |
+|---|---|---|
+| `__dpSofia === __dpComposer` | **true** | a hipotese de "duas instancias do atom" — e' **o mesmo objeto** |
+| produtor chama `registrarDelegacaoPendente` | **sim** (`sofia/index.tsx` L147) | a hipotese de "o produtor nao escreve" |
+| as tarefas tem `titulo` | **sim** (`"Pedido que deve aparecer no composer"`) | a hipotese de `promptDaTarefa` devolver `null` por falta de titulo |
+| `delegar` numa tarefa ja delegada | **`{ error: 'ja_delegada' }`** | — mas explica tudo abaixo |
+| o atom e' so em memoria | **sim**, sem persistencia | recarregar a pagina zera |
+
+**A explicacao**: meus cliques anteriores **ja tinham delegado `e1`**. Todo clique seguinte devolve
+`ja_delegada`, cai em `setErro` e **nunca chega ao `registrarDelegacaoPendente`**. Por isso o store ficou
+`null` na medicao da r74 — **nao porque o consumidor falha, mas porque o produtor nunca rodou naquela
+execucao.**
+
+**O que falta testar, e e' uma questao de dado, nao de codigo**: uma delegacao que **suceda** (primeira
+vez na tarefa) seguida de navegacao **client-side** (sem reload). O teste precisa de um plano novo, e
+`criar` devolveu o plano mas `planos()` nao o listou — o passo seguinte e' ler o retorno de `criar`
+diretamente em vez de reconsultar a lista.
+
+**Nada foi deixado no codigo**: a instrumentacao foi revertida.
+
+### O que continua **manual**
 
 A r43 criou o store `$delegacaoPendente`; a r46 tentou transportar com um botao e reverteu. Na r74
 adicionei o **consumidor** que faltava no composer, usando a costura certa (`loadIntoComposer`, que e' a
