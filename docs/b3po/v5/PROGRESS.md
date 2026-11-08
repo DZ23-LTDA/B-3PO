@@ -22,7 +22,7 @@ data: 2026-11-07
 
 | Gate | Resultado |
 |---|---|
-| `python scripts/check` | **14/14 PASS** |
+| `python scripts/check` | **15/15 PASS** |
 | `python scripts/check-b3po-types` | **PASS** — 0 erros, 2 projetos |
 | `npx vitest run` (desktop) | **27 failed · 19.000 passed · 246 skipped** — **idêntico ao baseline V4**, 0 novas |
 
