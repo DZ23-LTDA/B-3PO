@@ -295,6 +295,30 @@ preenchimento intermitente e' a mesma mentira com timing melhor.
 
 **O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
 
+### Tentativa 7 do transporte (r74) — o diagnostico que faltava
+
+A r43 criou o store `$delegacaoPendente`; a r46 tentou transportar com um botao e reverteu. Na r74
+adicionei o **consumidor** que faltava no composer, usando a costura certa (`loadIntoComposer`, que e' a
+API do proprio hook para escrita programatica) e **medi**:
+
+```
+[delegacao-consumidor] { tem: false, sessionId: null }   (3 vezes, sempre false)
+```
+
+**O composer le o atom como `null` mesmo depois de `/sofia` grava-lo.** Nao e' o guard do `sessionId`
+(testado sem ele: mesmo resultado) e nao e' o caminho do import (as duas paginas usam
+`@/store/delegacao-pendente`).
+
+**Causa provavel**: duas instancias do atom (modulo duplicado entre chunks), ou o composer de `/` sendo a
+**mesma instancia keep-alive** de `/sofia`, cujo efeito nunca reavalia.
+
+**O que isso muda**: o alvo nao e' o seam de escrita. E' **provar que o atom e' o mesmo objeto** nos dois
+lados — `$delegacaoPendente.get()` comparado por identidade — **antes** de escrever qualquer efeito. Se nao
+for, o transporte precisa de um canal que atravesse os dois contextos (o main, ou o mesmo store que o
+compositor ja le).
+
+**Revertido**: nao deixei no codigo um efeito que nao funciona.
+
 ### O que continua **manual**
 
 | Passo | Manual? |
