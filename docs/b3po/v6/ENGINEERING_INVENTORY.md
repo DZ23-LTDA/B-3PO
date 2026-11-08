@@ -27,7 +27,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
-| 6 | Executar testes e builds | **IMPLEMENTED (backend)**: `dev:detect` descobre o comando pelo manifesto; `dev:run` roda e devolve `exit_code`/`saida`/`erro` | falta a **UI** que ligue os dois (r7 entrega os canais) |
+| 6 | Executar testes e builds | **IMPLEMENTED** | `dev:detect` + `dev:run` + preload + cliente com funcoes puras + **acao "Rodar testes" no menu do workspace** (`workspace-header.tsx`, renderizado por `workspace-group.tsx:235`). **Verificacao ao vivo pendente de reinicio do app** |
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **IMPLEMENTED** | aba **Browser** no right-rail: `<webview>` real, barra de endereco com back/forward/reload/pop-out (`preview-browser-bar.tsx`), guests out-of-process (`preview-guest-*.ts`) |
 | 9 | Inspecionar console e rede | **PARTIAL** | **console: IMPLEMENTED** — `preview-console.tsx` + `preview-console-state.ts` (200 entradas, niveis log/info/warn/error, truncamento com limites); **rede: nao verificado** programaticamente — ha toggle de DevTools, o que nao e' captura |
@@ -136,6 +136,42 @@ um botao errado.**
 
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
+
+## r11 — a acao "Rodar testes" no menu do workspace
+
+Fluxo implementado em `rodarTestesDoWorkspace` (`workspace-header.tsx`):
+
+```
+clique -> dev:detect(path)
+           |-- sem runner  -> notificacao: "este projeto nao declara como rodar testes — nada foi executado"
+           |-- com runner  -> dev:run(path, argv)
+                                -> resumoDaExecucao (exit code)
+                                -> notify: "Rodar testes: passou em 1.2 s" + o comando executado
+```
+
+**Tres decisoes, cada uma para nao mentir:**
+
+| Decisao | Por que |
+|---|---|
+| sem runner, **nao executa nada** | um `npm test` num projeto Rust produz falha e a pessoa conclui que o **projeto** quebrou |
+| o **comando executado** vai no corpo da notificacao | a pessoa ve o que rodou, nao so o resultado |
+| "passou" vem do **exit code** | `grep` por "fail" na saida da' falso positivo |
+
+**Alcancabilidade verificada**: `WorkspaceMenu` e' renderizado por `workspace-group.tsx:235`; o menu existe na sidebar. **Nao e' codigo morto.**
+
+**POR QUE AINDA NAO TEM EVIDENCIA AO VIVO**
+
+`dev:detect` e `dev:run` sao canais do **processo principal**, e o namespace `dev` vive no **preload**. A instancia
+aberta do app foi iniciada **antes** das r6/r7 — o Vite recarrega so' o renderer. **Sem reiniciar o Electron, a
+acao responde "nao foi possivel ler o projeto".**
+
+**E' o TERCEIRO item de verificacao parado no mesmo reinicio:**
+
+| Item | O que falta |
+|---|---|
+| r3 — status da tarefa derivado | escrita no main (`sofia-ipc.ts`) |
+| r6/r7 — canais `dev:*` | main + preload |
+| r11 — a acao acima | idem |
 
 ## r9 — os canais ficaram ALCANCAVEIS, e as funcoes puras de apresentacao
 
