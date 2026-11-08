@@ -301,8 +301,22 @@ interface PanelEmptyProps {
  * Os ícones em `/50` e `/70` continuam: são decorativos e não carregam texto.
  */
 export function PanelEmpty({ action, description, icon = 'inbox', title }: PanelEmptyProps) {
+  /*
+   * r55 do V5 — o estado vazio e' o conteudo da pagina, e precisa ser alcancavel.
+   *
+   * O `axe` acusava em `#/agents` (onde o painel fica vazio sem subagentes vivos):
+   *   `region` — "Some page content is not contained by landmarks"
+   *   `page-has-heading-one` — a pagina nao tinha h1
+   *
+   * Um `<section>` com nome acessivel E landmark; o titulo vira `<h2>` (o `<h1>` do painel e'
+   * responsabilidade de quem monta a rota — ver `AgentsView`). Trocar `<div>` por `<section>`
+   * resolve os dois sem esconder nada de leitor de tela, que e' o que um `aria-hidden` faria.
+   */
   return (
-    <div className="grid flex-1 place-items-center px-6 py-10 text-center">
+    <section
+      aria-label={typeof title === 'string' ? title : undefined}
+      className="grid flex-1 place-items-center px-6 py-10 text-center"
+    >
       <div className="flex flex-col items-center gap-2">
         <Codicon className="text-muted-foreground/50" name={icon} size="1.25rem" />
         {title ? <p className="text-sm font-medium text-foreground/90">{title}</p> : null}
@@ -311,7 +325,7 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
         ) : null}
         {action ? <div className="mt-2">{action}</div> : null}
       </div>
-    </div>
+    </section>
   )
 }
 

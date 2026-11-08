@@ -41,10 +41,23 @@ pronto, e cada um tem estrutura diferente. Um `waitForTimeout` fixo pega um esta
 6-7 s). Para valer, a medicao precisa de um **sinal de prontidao** (um seletor do estado final), nao de
 tempo.
 
-**Nao corrigi a violacao `region`**: tentei envolver o estado vazio em `<section aria-label>` e a
-mudanca **nao pode ser verificada** — o dev server estava servindo o modulo antigo
-(`fetch('/src/app/agents/index.tsx')` devolvia o arquivo **sem** o `<section>`, mesmo apos tocar o
-arquivo). Revertida em vez de entregue sem prova.
+**Corrigido na r55, com o metodo certo.** O erro da r54 foi duplo:
+
+1. eu procurava `<section` no **JS transformado** do Vite, onde JSX vira `jsx("section", …)` — nao existe
+   string literal. **O dev server nunca esteve velho**; eu procurei a marca errada;
+2. o `axe` media um estado arbitrario do boot.
+
+**Com sinal de prontidao** (h1 presente + DOM estavelpor 700 ms × 2), a medicao ficou reproduzivel:
+
+| Rota | Antes | Depois |
+|---|---:|---:|
+| `#/agents` | **2** (`region`) | **0** |
+| `#/sofia` | 0 | 0 |
+| `#/settings` | 0 | 0 |
+
+**A correcao**: `PanelEmpty` (o estado vazio do painel, compartilhado) passou de `<div>` a
+`<section aria-label={title}>` — um `<section>` com nome acessivel **e** landmark. Nao escondi nada com
+`aria-hidden`, que resolveria o relatorio e quebraria o leitor de tela.
 
 ## Desktop — por fluxo
 
