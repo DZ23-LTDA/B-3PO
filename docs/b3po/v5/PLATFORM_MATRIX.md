@@ -117,6 +117,40 @@ arquitetura de interface**, e ela muda o HTML de rotas inteiras.
 Isso **nao e' "texto discreto"** — e' texto ilegivel, e a causa e' um **token de cor**, nao um `className`.
 Mexer nele muda **todo** o texto secundario do app: e' decisao de design, registrada como `DEC-5`.
 
+#### A causa do 1.12:1 (r60): portal Radix fora do escopo do tema
+
+**Nao e' token errado.** Os tokens estao calculados e documentados em `styles.css`:
+
+```
+36 % → 2.25   45 % → 2.90   54 % → 3.76  (todos reprovados)
+58 % → 4.26   62 % → 4.84 OK  66 % → 5.53
+--ui-text-tertiary: color-mix(in srgb, var(--ui-base) 66%, transparent)
+```
+
+**O que estava errado era o contexto:**
+
+| Medido | Valor |
+|---|---|
+| modo de tema salvo | `null` → resolve para `system` |
+| `prefers-color-scheme: dark` | **false** → tema **claro** |
+| classe `dark` em `<html>` | **ausente** |
+| `--ui-base` na raiz | `#1f2328` (texto escuro — correto para claro) |
+| fundo do elemento violador | `#0d1015` (**escuro**) |
+| ancestro do elemento | `#radix-…` — **popover Radix em portal** |
+
+**O portal sai da subarvore onde os tokens do tema vivem.** O texto herda o `--ui-base` do tema claro
+(escuro) enquanto a superficie do popover e' escura: **1.12:1**.
+
+E o projeto **ja sabia** que essa combinacao quebra — `use-statusbar-items.tsx` registra *"o `axe-core`
+mediu `#bb4d00` sobre `#0d1015` a 3.78:1 em 10 de 10 telas"*, e corrigiu com `dark:text-amber-400`, que
+**so vale quando a classe `dark` esta presente**.
+
+**O defeito e' de escopo de tema em conteudo portalizado, nao de design.** Corrigir exige que o portal
+herde os tokens. **Nao corrigi**: preciso saber se algum popover tambem existe no tema escuro, e a
+mudanca afeta todos.
+
+**`DEC-5` e' agora**: como o conteudo portalizado herda o tema.
+
 
 
 Medi `/cron` duas vezes seguidas **com o mesmo metodo** (prontidao = heading presente + DOM estavel):
