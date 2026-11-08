@@ -22,8 +22,8 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 
 | # | Capacidade | Estado | O que falta |
 |---|---|---|---|
-| 1 | Criar projetos do zero | **PARTIAL** | cria o **registro** de projeto; não cria pasta nem arquivos |
-| 2 | Abrir diretório / importar repositório | **PARTIAL** | abrir e escanear repositórios existe; **não há vínculo** entre projeto e pasta |
+| 1 | Criar projetos do zero | **PARTIAL** | `createProject({ folders, primaryPath })` cria o projeto **com pasta vinculada**; nao ha scaffold de arquivos — a pasta tem de existir |
+| 2 | Abrir diretório / importar repositório | **IMPLEMENTED** | `openFolderAsProject()` abre uma pasta **como** projeto (upsert); `pickProjectFolder(s)` com multi-select; `addProjectFolder(id, path)`; `git:scanRepos` |
 | 3 | Ler/editar/criar/excluir arquivos | **IMPLEMENTED** | 4 canais com guarda (`podeOperarMaquina` + `recusaSeNaoPuder`) |
 | 4 | Terminal isolado | **IMPLEMENTED** | `node-pty` real, 6 canais, posse por janela (r10/r50), 33 testes |
 | 5 | Instalar dependências | **PARTIAL** | só via terminal; sem capacidade dedicada nem detecção |
@@ -108,6 +108,28 @@ que sabe abrir sessão e rodar ferramenta — **não conhece esse store**.
 **Consequência para o critério de aceite**: *"Coordenar pelo menos uma jornada de desenvolvimento"* não
 pode ser satisfeito enquanto ninguém pegar o trabalho. O V5 entregou a **criação** do trabalho e o
 **transporte do pedido**; falta o **consumo**.
+
+## RETRATACAO (r5) — o inventario da r1 estava errado em duas linhas
+
+**O que eu escrevi na r1**: *"`Projeto` nao tem nenhum campo de caminho … criar projeto = criar **registro de
+coordenacao**. Nao ha scaffold, nao ha `mkdir` de projeto."*
+
+**O que era**: existem **dois** stores de projeto.
+
+| Store | O que e' |
+|---|---|
+| `apps/desktop/electron/project.ts` + `project-store.ts` | coordenacao: objetivo, escopo, criterios, orcamento, equipe — **sem pasta**, e isso esta' certo |
+| **`apps/desktop/src/store/projects.ts` (1.454 linhas)** | **o projeto real**: `folders: [{path, label, is_primary}]`, `addProjectFolder`, `pickProjectFolder(s)`, `openFolderAsProject`, `createProject({folders, primaryPath})` |
+
+**Eu auditei o primeiro e concluí sobre a capacidade inteira.** E' o erro nº 1 do `RETRATATIONS` do V5 —
+*"eu subestimando o repositorio"* — repetido na primeira rodada da V6.
+
+**Consequencia pratica**: na r5 eu cheguei a implementar um campo `caminho` em `Projeto` (com validacao de
+caminho absoluto e `..`), e o `git checkout` mostrou que era **duplicacao** do que ja' existia. **Revertido.**
+O §5 e' explicito: *"Nao construir uma segunda IDE se as funcionalidades ja' existirem."*
+
+**O que sobra de real na lacuna**: nao ha **scaffold** — criar "do zero" exige uma pasta que ja' exista. Isso
+e' `PARTIAL` honesto, nao `MISSING`.
 
 ## Detalhe por capacidade
 
