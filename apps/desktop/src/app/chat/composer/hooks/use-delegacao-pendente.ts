@@ -24,7 +24,11 @@
 import { useStore } from '@nanostores/react'
 import { useEffect } from 'react'
 
-import { $delegacaoPendente, limparDelegacaoPendente } from '@/store/delegacao-pendente'
+import {
+  $delegacaoPendente,
+  limparDelegacaoPendente,
+  pedirEnvioDaDelegacao
+} from '@/store/delegacao-pendente'
 
 export function useDelegacaoPendenteNoComposer(
   loadIntoComposer: (text: string, attachments: never[]) => void
@@ -42,6 +46,13 @@ export function useDelegacaoPendenteNoComposer(
     }
 
     loadIntoComposer(delegacaoPendente.prompt, [])
+
+    // r2 da V6: pintar e enviar sao momentos diferentes. Quem pinta e' este hook; quem envia e'
+    // `useMiddlewareSubmit`, que tem o `onSubmit` do Enter. O sinal leva o texto, nao um comando.
+    if (delegacaoPendente.executar) {
+      pedirEnvioDaDelegacao(delegacaoPendente.prompt)
+    }
+
     limparDelegacaoPendente()
   }, [delegacaoPendente, loadIntoComposer])
 }

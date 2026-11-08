@@ -31,7 +31,7 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 | 7 | Git e GitHub | **IMPLEMENTED / PARTIAL** | 21 canais de Git local; GitHub via `gh` (depende de instalado+autenticado) |
 | 8 | Preview funcional | **MISSING** | o "preview" é renderização de arquivo no painel, **não** app rodando em porta |
 | 9 | Inspecionar console e rede | **MISSING** | não há captura de console/rede de app em preview |
-| 10 | Coordenar subagentes | **PARTIAL** | roster/execuções/aprovações existem; **nada consome uma execução `pendente`** |
+| 10 | Coordenar subagentes | **PARTIAL** | roster/execuções/aprovações existem; **D1 (r2) faz o pedido ser executado** — o turno roda e falha so' por falta de provedor |
 | 11 | Memória e checkpoints | **PARTIAL** | camadas de memória no gateway; checkpoint de execução existe (`retomar`) |
 | 12 | Recuperar trabalho interrompido | **IMPLEMENTED** | `retomar` + `expirarPendentes` (V5 r39/r40/r43), endurecidos |
 | 13 | Gerar artefatos e documentação | **PARTIAL** | a tela lista artefatos de sessão; **não gera** |
@@ -39,6 +39,29 @@ abaixo é herdada deles** — todas foram reconferidas nos arquivos.
 
 **Nenhuma capacidade é declarada IMPLEMENTED sem o caminho completo** — ler arquivo existe (#3), mas isso
 não é "trabalhar num projeto" (#1) nem "entregar código" (#13).
+
+## D1 entregue (r2): o pedido delegado passa a ser **executado**
+
+Antes: delegar → a execução ficava `pendente` → o pedido chegava ao composer e **parava ali**.
+
+Agora, com o botão **"Executar a tarefa"** no bloco de delegação:
+
+```
+1. Delegar d1a (UI)      -> execucao exec-plano-...-d1a criada, pendente
+2. "Executar a tarefa"   -> bloco some, navega para conversa nova
+3. composer recebe       -> "PEDIDO-D1 que deve ser executado\n\nObjetivo do plano: ..."
+4. onSubmit do Enter     -> a mensagem E' ENVIADA
+5. sessao criada         -> rota muda de #/ para #/local-2d2b1f0b...
+6. turno do modelo       -> "O B-3PO nao conseguiu concluir esta resposta"
+```
+
+**Medido ao vivo.** O passo 4 e' o que faltava desde a V5: transportar punha o texto; **executar** envia.
+
+**Por que o passo 6 falha e isso e' honesto**: `providers: {}` — sem credencial, nenhum modelo responde
+(`EXT-3`). **O B-3PO nao simula a resposta**: ele mostra que a resposta falhou.
+
+**O que o D1 NAO faz ainda**: vincular a execucao a sessao automaticamente. A sessao nasce no passo 5 com
+id real; `execucaoVinculada` ainda precisa ser chamado com esse id. **E' o proximo passo do D1.**
 
 ## O bloqueio central da V6
 

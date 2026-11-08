@@ -20,6 +20,14 @@
 import { atom } from 'nanostores'
 
 export interface DelegacaoPendente {
+  /**
+   * `true` quando a pessoa escolheu **executar** o pedido, nao apenas vincula-lo.
+   *
+   * r2 da V6. Delegar cria o trabalho; transportar coloca o pedido no composer; **executar** envia a
+   * mensagem, que e' o que cria a sessao. As tres coisas sao diferentes e a terceira custa inferencia —
+   * por isso ela so' acontece quando alguem clica, nunca sozinha.
+   */
+  executar?: boolean
   execucao_id: string
   /** O pedido montado do plano, para a pessoa colar na conversa que vai executá-lo. */
   prompt: string
@@ -33,6 +41,25 @@ export interface DelegacaoPendente {
  * vincular e não há como dizer qual das duas ela se refere.
  */
 export const $delegacaoPendente = atom<DelegacaoPendente | null>(null)
+
+/**
+ * O texto que o composer deve **enviar** agora (r2 da V6).
+ *
+ * Separado do `$delegacaoPendente` de proposito: pintar o rascunho e enviar sao momentos diferentes, e
+ * quem pinta (`useComposerDraft`) nao tem o `onSubmit`. Quem tem e' `useMiddlewareSubmit`, que observa
+ * este atom. Assim o envio nao vira um segundo caminho de submissao — e' o mesmo `onSubmit` do Enter.
+ *
+ * `null` = nada a enviar.
+ */
+export const $delegacaoParaEnviar = atom<string | null>(null)
+
+export function pedirEnvioDaDelegacao(texto: string): void {
+  $delegacaoParaEnviar.set(texto)
+}
+
+export function limparEnvioDaDelegacao(): void {
+  $delegacaoParaEnviar.set(null)
+}
 
 export function registrarDelegacaoPendente(delegacao: DelegacaoPendente): void {
   $delegacaoPendente.set(delegacao)

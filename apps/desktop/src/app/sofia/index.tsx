@@ -25,6 +25,8 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { type ActorRow, whoami } from '@/api/admin'
 import { chamarSofia, type PlanoComGrafo } from '@/api/sofia'
+import { useNavigate } from 'react-router'
+
 import { $activeSessionId } from '@/store/session'
 import { $delegacaoPendente, limparDelegacaoPendente, registrarDelegacaoPendente } from '@/store/delegacao-pendente'
 import { useStore } from '@nanostores/react'
@@ -220,6 +222,7 @@ function PlanoCard({
  */
 function VinculoDaDelegacao({ onAtualizar }: { onAtualizar: () => void }): React.ReactElement | null {
   const pendente = useStore($delegacaoPendente)
+  const navegar = useNavigate()
   const sessaoAtiva = useStore($activeSessionId)
   const [erro, setErro] = useState('')
   const [ocupado, setOcupado] = useState(false)
@@ -250,6 +253,18 @@ function VinculoDaDelegacao({ onAtualizar }: { onAtualizar: () => void }): React
     }
   }
 
+  /*
+   * r2 da V6 — executar o pedido, e nao apenas vincula-lo.
+   *
+   * Transportar coloca o pedido no composer; **executar** envia a mensagem, e e' o envio que cria a
+   * sessao. Sao coisas diferentes, e a terceira custa inferencia — por isso e' um clique explicito,
+   * nunca automatico. O envio passa pelo `onSubmit` do composer (ver `use-middleware-submit.ts`).
+   */
+  const executar = () => {
+    registrarDelegacaoPendente({ ...pendente, executar: true })
+    navegar('/')
+  }
+
   return (
     <div className="mt-3 rounded-md border border-(--ui-warning) p-2 text-xs">
       <p className="text-(--ui-text-tertiary)">
@@ -264,6 +279,9 @@ function VinculoDaDelegacao({ onAtualizar }: { onAtualizar: () => void }): React
           type="button"
         >
           {sessaoAtiva ? `Vincular à conversa aberta` : 'Abra uma conversa para vincular'}
+        </button>
+        <button className={BOTAO} disabled={ocupado} onClick={executar} type="button">
+          Executar a tarefa
         </button>
         <button className={BOTAO} disabled={ocupado} onClick={() => limparDelegacaoPendente()} type="button">
           Descartar
