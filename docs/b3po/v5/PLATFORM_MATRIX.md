@@ -73,7 +73,29 @@ timeout.
 | `/artifacts` | 1 | `page-has-heading-one` |
 | `/capabilities` | 1 | `page-has-heading-one` |
 
-**33 das 39 rotas tem `axe` 0.** As 6 restantes somam **15 nos**.
+**34 das 39 rotas tem `axe` 0.** As 5 restantes somam **10 nos**.
+
+### r57 — o `section` sem nome nao era landmark
+
+Na r55 eu troquei `PanelEmpty` de `<div>` para `<section aria-label={title}>` e `#/agents` foi a 0. Mas
+`/webhooks` **continuava** violando: ali o estado vazio tem `description` e **nenhum `title`**, entao o
+`<section>` saia **sem nome** — e `<section>` sem nome acessivel **nao e landmark**.
+
+**Corrigido**: quando falta o titulo, a propria `description` nomeia a regiao. Nao e rotulo inventado: e
+o texto que a regiao contem.
+
+| Rota | Antes | Depois |
+|---|---:|---:|
+| `/agents` | 2 | **0** (r55) |
+| `/webhooks` | 1 | **0** (r57) |
+| `/cron` | 3 | 3 (resta) |
+| `/artifacts` | 1 | 1 (resta) |
+| `/capabilities` | 1 | 1 (resta) |
+| `/messaging` | 4 | 4 (resta) |
+| `/profiles` | 6 | 5 (r56) |
+
+**O padrao**: um `<section>`/`role=region` **so** conta como landmark quando tem nome acessivel. Eu
+tratei "trocar div por section" como a correcao completa — **era metade dela**.
 
 ### Corrigido nesta sessao
 

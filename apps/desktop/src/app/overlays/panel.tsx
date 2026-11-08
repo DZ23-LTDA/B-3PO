@@ -314,7 +314,12 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
    */
   return (
     <section
-      aria-label={typeof title === 'string' ? title : undefined}
+      // r57: `<section>` sem nome NAO e landmark — `region` continuava disparando em `/webhooks`,
+      // onde o estado vazio tem `description` e nenhum `title`. Quando falta o titulo, o proprio
+      // texto do estado vazio nomeia a regiao: nao e' um rotulo inventado, e' o conteudo dela.
+      aria-label={
+        typeof title === 'string' ? title : typeof description === 'string' ? description : undefined
+      }
       className="grid flex-1 place-items-center px-6 py-10 text-center"
     >
       <div className="flex flex-col items-center gap-2">
