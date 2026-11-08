@@ -17,7 +17,7 @@ fase: G7
 |---|---|---|---|
 | `EXT-1` | Sem certificado Authenticode | release assinado | obter certificado e assinar o `.exe`; hoje `NOT_READY` |
 | `EXT-2` | Sem macOS | iOS · build macOS | rodar `npm run build` num macOS com Xcode |
-| `EXT-3` | **Sem credencial de MODELO** (`providers: {}`, modelo `anthropic/claude-opus-4.6`) — medido na r47: sessao criada, **0 mensagens**. Sem isso nenhum turno completa, entao nenhuma tarefa de agente pode ser avaliada. Conector e' o mesmo bloqueio em outro nivel | `hermes auth add <provider>` ou `ANTHROPIC_API_KEY` no `.env` do perfil + reiniciar o gateway |
+| `EXT-3` | **Sem credencial de MODELO** (`providers: {}`, modelo `anthropic/claude-opus-4.6`) — medido na r47: sessao criada, **0 mensagens**. Sem isso nenhum turno completa, entao nenhuma tarefa de agente pode ser avaliada. Conector e' o mesmo bloqueio em outro nivel | `hermes auth add <provider>` ou `ANTHROPIC_API_KEY` no `.env` do perfil + reiniciar o gateway | obter uma credencial de modelo (`ANTHROPIC_API_KEY` ou equivalente) e reiniciar o gateway |
 | `EXT-4` | Sem bash | suíte completa do gateway (**1.685 arquivos ≈ 4,7 h**) | rodar `scripts/run_tests.sh` num ambiente com bash |
 | `EXT-5` | `core.autocrlf=true` nesta máquina | 2 testes de `desktop-plugin-install` (CRLF) | `git config core.autocrlf false` **ou** os testes normalizarem EOL |
 | `EXT-6` | Sem host SSH real | 2 testes de `ssh-connection` | apontar para um host alcançável, ou marcar como integração |
@@ -26,12 +26,12 @@ fase: G7
 
 | ID | Pergunta | Estado atual | Por que não decidi |
 |---|---|---|---|
-| ~~`DEC-1`~~ | **RESOLVIDA na r24** — o cliente canônico **fica no renderer**. O goal manda *integrar, não reescrever*; reimplementar `session.create` no main seria reescrever. A autorização permanece no main; só o transporte é do renderer. Implementada em `daaef95e32`/`3a42476f06` |
+| ~~`DEC-1`~~ | Onde vive o cliente canonico (`session.create`)? | **RESOLVIDA na r24** — fica no **renderer**. O goal manda *integrar, nao reescrever*; reimplementar `session.create` no main seria reescrever. A autorizacao permanece no main; so o transporte e' do renderer. Implementada em `daaef95e32`/`3a42476f06` | resolvida na r24, nao ha o que decidir |
 | `DEC-2` | **Identidade do web**: rebrandar o dashboard do Hermes, ou declará-lo o dashboard do runtime? | web = Hermes upstream | decisão de produto; a matriz registra o estado real |
 | `DEC-3` | **Seis modos no mobile**: portar, ou assumir o app como cliente de conversa? | ausentes | idem |
 | `DEC-4` | **Testes que fingem `platform`**: marcar como Linux-only (regra do repo) ou dar a eles um `home` POSIX? | 3 falhas permanentes no Windows | desabilitar teste exige decisão de quem cuida do CI |
-| `DEC-5` | **Primeiro paint**: qual tema a pagina usa **antes** de a configuracao ser lida. Medido na r62: tres textos a **1.12:1** existem **so no primeiro frame** (`#191d22` sobre `#0d1015`), depois o contraste passa. Nao e' falha persistente; e' flash. Opcoes: bloco inline no `index.html` com o tema inicial, ou aceitar o flash | **Bloqueia**: nada. E' severidade baixa |
-| `DEC-6` | **Overlay que e' rota**: `OverlayView` e' `role="presentation"` e o card nao tem role, entao `/cron` e `/profiles` ficam **fora do `<main>`** — dai `region` e dois `<header>` virando duas `banner`. Opcoes: `dialog`, `region` com `aria-label` (exige prop de titulo em todas as rotas de overlay), ou mover o overlay para dentro do `<main>` | **Bloqueia**: `G6` completo (2 rotas). E' a ultima pendencia de acessibilidade |
+| `DEC-5` | **Primeiro paint**: qual tema a pagina usa **antes** de a configuracao ser lida. Medido na r62: tres textos a **1.12:1** existem **so no primeiro frame** (`#191d22` sobre `#0d1015`), depois o contraste passa. Nao e' falha persistente; e' flash. Opcoes: bloco inline no `index.html` com o tema inicial, ou aceitar o flash | **Bloqueia**: nada. E' severidade baixa | e' severidade baixa e a decisao custa mexer no boot; preferi registrar com o numero medido a escolher por voce |
+| `DEC-6` | **Overlay que e' rota**: `OverlayView` e' `role="presentation"` e o card nao tem role, entao `/cron` e `/profiles` ficam **fora do `<main>`** — dai `region` e dois `<header>` virando duas `banner`. Opcoes: `dialog`, `region` com `aria-label` (exige prop de titulo em todas as rotas de overlay), ou mover o overlay para dentro do `<main>` | **Bloqueia**: `G6` completo (2 rotas). E' a ultima pendencia de acessibilidade | a mudanca atinge todas as rotas de overlay de uma vez, e o goal proibe decidir sozinho o que muda a interface inteira |
 
 ## Bloqueios de verificação (não de produto)
 

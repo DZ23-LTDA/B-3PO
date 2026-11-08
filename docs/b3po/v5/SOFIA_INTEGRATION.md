@@ -58,7 +58,7 @@ statusDerivadoDaExecucao(…) // 0 chamadores em produção
 | 3 | Criar sessão no gateway com a tarefa como prompt | **AUSENTE** no caminho de Sofia |
 | 4 | Gravar `session_id` na execução | ✅ **FEITO na r23** (`fb9f9162ca`) — campo opcional + `vincularSessao` |
 | 4b | `execucao_id` forjável pelo renderer | ✅ **FECHADO na r11** — o handler remove o campo do patch |
-| 4c | `vincularSessao` | ✅ **r23** — move `pendente`→`executando`; recusa trocar de sessão; idempotente
+| 4c | `vincularSessao` | ✅ **r23** — move `pendente`→`executando`; recusa trocar de sessão; idempotente |
 | 5 | Transição `pendente → executando` | 🟡 **POR COMANDO na r24** — o canal `execucao:vinculada` move o status quando a sessão é informada. Dirigida por evento do runtime: **AUSENTE** |
 | 6 | `finalizar` chamado quando o turno termina | **AUSENTE** — só teste chama |
 | 7 | Retomada após reinício sem repetir efeito | **AUSENTE** |
