@@ -347,7 +347,20 @@ export function registerSalesIpc(ipcMain: IpcRegistrar, deps: SalesDeps): void {
     async (
       _event: IpcMainInvokeEvent,
       saleId: unknown
-    ): Promise<{ error: string } | { finance: FinanceEntry | null; sale: Sale; stock: InventoryMovement[] }> => {
+    ): Promise<{ error: string; reason?: string } | { finance: FinanceEntry | null; sale: Sale; stock: InventoryMovement[] }> => {
+      // r51 do V5 — a guarda que o commit da r32 DISSE ter posto e nao pos.
+      const ator = await deps.actorOf()
+
+      if (!ator) {
+        return { error: 'sem_permissao', reason: 'sem_ator' }
+      }
+
+      const permitido = await withPermission(ator, 'execute', { resource: 'sales' }, async () => true)
+
+      if (permitido !== true) {
+        return { error: 'sem_permissao', reason: (permitido as { reason: string }).reason }
+      }
+
       // Sem tenant do renderer: o servidor usa o da instalacao.
       const vendas = await deps.sales.list()
       const venda = vendas.find(v => v.id === saleId)

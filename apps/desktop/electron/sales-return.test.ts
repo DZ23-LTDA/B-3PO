@@ -105,7 +105,9 @@ describe('devolver pelo canal IPC', () => {
     registerSalesIpc(
       { handle: (c: string, l: (e: unknown, p?: unknown, t?: unknown, r?: unknown) => unknown) => mapa.set(c, l) } as never,
       {
-        actorOf: async () => ({ id: 'actor_1', role: 'owner' }),
+        // r51: `devolver` passou a exigir `withPermission`, então o fake precisa ser um Actor
+        // completo (`kind`, `level`, `role`) — um `{ id, role }` não descreve ator nenhum.
+        actorOf: async () => ({ id: 'actor_1', kind: 'human', level: 'SUPERVISED_AUTONOMY', role: 'owner' }),
         finance,
         inventory,
         sales

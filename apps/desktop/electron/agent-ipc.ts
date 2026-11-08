@@ -58,10 +58,22 @@ export function registerAgentIpc(
     execucoes.listar(filtro)
   )
 
+  /*
+   * r51 do V5 — presença de ator não é permissão.
+   *
+   * Este canal checava só `if (!ator)`, e um ator de leitura podia **cancelar a execução de
+   * qualquer pessoa**. A política é a mesma de `approvals:decide`: `execute` em `agents`.
+   */
   ipcMain.handle('hermes:agent:executions:cancel', async (_evento, id: string) => {
     const ator = await actorOf()
 
     if (!ator) return { error: 'sem_permissao', reason: 'sem_ator' }
+
+    const permitido = await withPermission(ator, 'execute', { resource: 'agents' }, async () => true)
+
+    if (permitido !== true) {
+      return { error: 'sem_permissao', reason: (permitido as { reason: string }).reason }
+    }
 
     return execucoes.cancelar(id)
   })
