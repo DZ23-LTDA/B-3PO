@@ -67,6 +67,7 @@ import { useAtCompletions } from './hooks/use-at-completions'
 import { useCardWaitingSubmit } from './hooks/use-card-waiting-submit'
 import { useComposerBranch } from './hooks/use-composer-branch'
 import { useComposerDraft } from './hooks/use-composer-draft'
+import { $delegacaoPendente, limparDelegacaoPendente } from '@/store/delegacao-pendente'
 import { useComposerDrop } from './hooks/use-composer-drop'
 import { useComposerEscCancel } from './hooks/use-composer-esc-cancel'
 import { useComposerMetrics } from './hooks/use-composer-metrics'
@@ -310,6 +311,32 @@ export function ChatBar({
     syncDraftFromEditor,
     takeDraftRetry
   } = useComposerDraft({ activeQueueSessionKey, focusKey, inputDisabled, queueEditRef, sessionId })
+
+  /*
+   * r78 do V5 — o consumidor do pedido delegado (o que faltava desde a r43).
+   *
+   * A r43 criou `$delegacaoPendente` e a r46 tentou transportar com um botao que escrevia no store de
+   * texto; o composer reidrata o rascunho por escopo e sobrescrevia. A costura certa e'
+   * `loadIntoComposer` — a API do proprio hook para escrita programatica (`paintDraft`).
+   *
+   * Roda depois da hidratacao de escopo e consome uma vez. O pedido nasce numa tela (Sofia) e a conversa
+   * em outra, entao pintar no rascunho novo e' exatamente o caso de uso.
+   *
+   * VERIFICADO no app em 07/11 (r78), depois de liberar os slots de concorrencia:
+   *   loja  -> { tem: true, prompt: "PEDIDO-R78 que deve chegar ao composer\n\n" }
+   *   rota  -> #/  · composer: "PEDIDO-R78 que deve chegar ao composerObjetivo do plano: Tes..."
+   */
+  const delegacaoPendente = useStore($delegacaoPendente)
+
+  useEffect(() => {
+    if (!delegacaoPendente) return
+    if (delegacaoPendente.prompt.trim().length === 0) {
+      limparDelegacaoPendente()
+      return
+    }
+    loadIntoComposer(delegacaoPendente.prompt, [])
+    limparDelegacaoPendente()
+  }, [delegacaoPendente, loadIntoComposer])
 
   useComposerScreenshot({ sessionKey: activeQueueSessionKey, focusKey, onAttachImageBlob })
 

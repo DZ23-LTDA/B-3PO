@@ -295,6 +295,33 @@ preenchimento intermitente e' a mesma mentira com timing melhor.
 
 **O que fica**: o pedido aparece no bloco para **copiar**. E' manual, e' honesto.
 
+### r78 — **O TRANSPORTE FUNCIONA**. Dez rodadas, quatro pre-condicoes
+
+Depois de liberar os slots de concorrencia (`agents.cancelExecution` nos 2 `pendente`), a receita rodou
+inteira:
+
+```
+1. slots ....... 6 execucoes · 2 ocupadas · 2 canceladas
+2. criar ....... plano-mw77j2qq-dd4l com tarefa_id r78a
+3. Delegar (UI)  store -> { tem: true, prompt: "PEDIDO-R78 que deve chegar ao composer\n\n" }
+4. Nova conversa composer -> "PEDIDO-R78 que deve chegar ao composerObjetivo do plano: Tes..."
+```
+
+**O pedido delegado em Sofia chega ao composer da conversa nova, sem copiar e colar.**
+
+**As quatro pre-condicoes, cada uma descoberta por uma falha diferente:**
+
+| # | Pre-condicao | Rodada que descobriu |
+|---|---|---|
+| 1 | `criar` exige `tarefa_id` explicito | r76 |
+| 2 | **slot de concorrencia livre** (`concorrencia: 3` por bot) | **r77** |
+| 3 | delegar pela **UI** (o IPC direto nao registra) | r76 |
+| 4 | navegar **client-side** (o atom e' so em memoria) | r75 |
+| 5 | o consumidor no composer, via `loadIntoComposer` | r78 |
+
+**O consumidor esta em `app/chat/composer/index.tsx`** e o comentario carrega a medicao. 693 testes do
+composer e de Sofia continuam verdes.
+
 ### r77 — a causa das delegacoes recusadas: **`concorrencia_maxima`**
 
 A r76 deixou escrito que "delegar pela UI numa tarefa nova" era o proximo teste. Na r77 executei **a
