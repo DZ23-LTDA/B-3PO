@@ -12,6 +12,29 @@ data: 2026-11-07
 >
 > Este documento faz o que eu vinha afirmando sem medir: **leu a mensagem de erro de cada falha**.
 
+## 0a. Verificacao de regressao depois das mudancas da sessao (r73)
+
+Nove mudancas de codigo nesta sessao (`terminal-ipc`, `git-ipc`, `sales-ipc`, `agent-ipc`, `panel.tsx`,
+`code-editor.tsx`, `page-search-shell.tsx`, `master-detail.tsx`, `mcp-editor.tsx`, `messaging/index.tsx`).
+Suite completa depois delas:
+
+| | r49 (baseline) | **r73 (agora)** |
+|---|---:|---:|
+| Testes | 19.335 | **19.338** |
+| Falhas | **30** | **23** |
+| Arquivos com falha | 19 | **14** |
+| **Arquivos novos em falha** | — | **0** |
+
+**Cinco arquivos deixaram de falhar**: `audit-store`, `linux-nvidia-egl-recovery`, `use-composer-submit`,
+`floating-panes`, `gateway-background-reconnect`.
+
+**Cuidado com a leitura**: os cinco eram **flaky sob carga** (todos passavam isolados ja na r49). O
+desaparecimento **nao prova correcao**; prova que a suite rodou com menos contencao. O que este numero
+prova e' o que importa: **nenhum arquivo novo passou a falhar depois das minhas mudancas**.
+
+`terminal-ownership.test.ts` — o unico dos 14 que toca um arquivo que eu mudei — **passa isolado (5/5)**;
+a falha sob carga e' a mesma da r49.
+
 ## 0. Console e acessibilidade, medidos na V5 (r69)
 
 | Medicao | Metodo | Resultado |
