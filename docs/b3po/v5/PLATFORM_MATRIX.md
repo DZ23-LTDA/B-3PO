@@ -145,7 +145,21 @@ E o projeto **ja sabia** que essa combinacao quebra — `use-statusbar-items.tsx
 mediu `#bb4d00` sobre `#0d1015` a 3.78:1 em 10 de 10 telas"*, e corrigiu com `dark:text-amber-400`, que
 **so vale quando a classe `dark` esta presente**.
 
-**O defeito e' de escopo de tema em conteudo portalizado, nao de design.** Corrigir exige que o portal
+**ATENCAO — isto e' HIPOTESE, nao mecanismo medido (r61).** O `1.12:1` foi medido **uma vez**, com o
+elemento em `#radix-…`. Tentei reproduzir na r61 e **nao consegui**: o elemento `Inteligente` que
+localizei estava **dentro do `#root`**, sobre fundo `srgb(0.996)` (quase branco), com contraste correto.
+
+**O que e' fato:**
+
+| Afirmacao | Estado |
+|---|---|
+| existe texto a 1.12:1 (11 px, alpha 0.66 sobre `#0d1015`) | **medido 1 vez**, elemento identificado |
+| o token `--ui-text-tertiary` esta calculado e passa AA | **verificado no fonte** |
+| o tema resolvido e' claro (`prefers-color-scheme: dark` = false, sem `dark` em `<html>`) | **medido** |
+| o violador vinha de um popover Radix | **medido 1 vez** |
+| a causa e' o portal fora do escopo do tema | **HIPOTESE — nao reproduzida** |
+
+**O defeito nao e' de design; e' de escopo de tema em conteudo portalizado.** Corrigir exige que o portal
 herde os tokens. **Nao corrigi**: preciso saber se algum popover tambem existe no tema escuro, e a
 mudanca afeta todos.
 
