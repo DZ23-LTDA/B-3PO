@@ -33,7 +33,7 @@ fase: G7
 
 | Item | Estado | Por quê |
 |---|---|---|
-| **Execução de plano da Sofia** | **NOT_READY** | a ponte cria a execução como `pendente`; **nada a executa**. É o G2 |
+| **Execução de plano da Sofia** | **PARTIAL** | a ponte cria a execução como `pendente` (honesto: quem executa é o Hermes, não a ponte), o vínculo exige sessão verificada (r38), `pendente` sem sessão expira (r39), a duração é escopada por tarefa (r43) e **o pedido chega ao composer sozinho desde a r78**. O que falta é o Hermes consumir a execução `pendente` — isso é do runtime |
 | **Benchmark** | **NOT_TESTED** | harness não existe; comparação externa exigiria contas pagas |
 | Release assinado | **NOT_READY** | `EXT-1` — sem certificado Authenticode |
 | iOS | **NOT_READY** | `EXT-2` — sem macOS |
@@ -69,7 +69,12 @@ fase: G7
 
 ## O que este documento **não** afirma
 
-- Não afirma "pronto para produção". O critério C (Sofia ponta a ponta) **não** está atendido.
+- Não afirma "pronto para produção".
+- **O critério C (Sofia ponta a ponta) está atendido nas partes que não dependem do runtime**: delegar,
+  executar com dono e prazo, vincular sessão verificada, retomar após reinício, testes de falha e — desde a
+  r78 — **o pedido chegar ao composer sem copiar e colar**. O que falta é o **Hermes consumir a execução
+  `pendente`** e a jornada terminar com artefato; isso depende do runtime e de credencial de modelo
+  (`EXT-3`). **Está declarado como PARTIAL, não como READY.**
 - Não afirma que o release é reproduzível: o backend em uso é uma **cópia** que não é reconstruída a
   cada execução, e isso já produziu um 404 real (r15).
 - Não afirma cobertura de segurança: `IDOR`, `SSRF` e `path traversal` **não foram testados**.
