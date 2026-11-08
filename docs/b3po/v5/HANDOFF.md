@@ -22,7 +22,7 @@ revisao: r48
 | `main` | `f4cf411f28` — **intacta** |
 | Gate | **14/14** |
 | Typecheck | **0 erros**, 2 projetos |
-| `axe` | **0** em 27 rotas desktop e 15 web |
+| `axe` | **5 de 39 rotas** com violacao persistente quando medido em r63; **2 restantes** dependem de `DEC-6`. O "0 em 27 rotas" do V4 **nao era reproduzivel** — ver `PLATFORM_MATRIX.md`. Corrigidas nesta sessao: `/artifacts`, `/capabilities`, `/messaging`, `#/agents`, `/webhooks`, `aria-label` do editor |
 | Console | **0 erros** em 27 rotas |
 | Docs v5 | **15 arquivos** |
 
@@ -96,6 +96,8 @@ gateway.
 | `DEC-2` | Rebrandar o web, ou declará-lo o dashboard do runtime? |
 | `DEC-3` | Portar os seis modos ao mobile? |
 | `DEC-4` | Os 3 testes que fingem `platform`: Linux-only ou `home` POSIX? |
+| `DEC-5` | Qual tema o **primeiro paint** usa antes de a configuracao ser lida (flash de 1 frame a 1.12:1) |
+| `DEC-6` | Que papel um **overlay-que-e-rota** declara — `dialog`, `region` com nome, ou dentro do `<main>` |
 
 `DEC-1` (onde vive o cliente canônico) foi **resolvida na r24**: fica no renderer; reimplementar no main
 seria reescrever, e o goal manda integrar.

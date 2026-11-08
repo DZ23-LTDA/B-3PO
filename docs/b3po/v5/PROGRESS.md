@@ -445,6 +445,38 @@ está READY, a execução de plano da Sofia está PARTIAL (nada executa), a iden
 escrito antes: **o build não é reproduzível** porque o backend em uso é uma cópia deployada que não é
 reconstruída — e isso já produziu um 404 real (r15).
 
+### r48–r67 — a auditoria dos meus próprios números
+
+Vinte rodadas em que o objeto de estudo foi **o que eu mesmo tinha afirmado**. Nenhuma delas nasceu de
+um pedido novo: todas vieram de um número que eu repetia sem ter medido naquela rodada.
+
+| Rodada | O que eu dizia | O que a medição mostrou |
+|---|---|---|
+| r48 | "regressão? não" | **regressão minha, de 28 rodadas** — as 5 chaves `connectorsReadiness` entraram no catálogo na r15 e o snapshot `_keys.desktop.json` nunca foi regerado. O teste de i18n falhava desde então |
+| r49 | "27 falhas desktop" | **30 sob carga · 17 isoladas** — o número não mudou, a suíte cresceu |
+| r50 | "a família de terminais está fechada" | `terminal:dispose` **sem checagem de posse**; a r10 fechou `write`/`resize`/`cwd` e deixou esta |
+| r51 | "criar, cancelar e devolver venda exigem permissão" (commit da r32) | **duas guardas, três canais**: o `devolver` nunca teve. Ficou 19 rodadas aberto com um commit dizendo o contrário |
+| r52 | — | auditoria mecânica das mensagens de commit: **6 de 7 verdadeiras**, a sétima era a da r32 |
+| r53 | "10 correções · 26 retratações" | **16 correções · 25 retratações** |
+| r54 | "axe 0 em 27 rotas" | **6 rotas com violação** — e o número não parava quieto |
+| r55 | "o dev server serve módulo velho" | **falso**: eu procurava `<section` no JS transformado, onde JSX vira `jsx("section")` |
+| r56 | — | primeiro censo real: **39 rotas**, e um `aria-input-field-name` **serious** (o editor sem nome acessível) |
+| r57 | "trocar `div` por `section` resolve" | **metade**: `<section>` sem nome acessível **não é landmark** |
+| r58 | "34 de 39 limpas" | **não reproduzível**: `/cron` deu 0 numa medição e 3 em duas seguidas |
+| r59 | "token de cor, decisão de design" | **token correto e calculado**; o erro estava no contexto |
+| r60 | "o portal herda o tema errado" | **hipótese**, não mecanismo medido |
+| r61 | "não consigo reproduzir" | *"não reproduzi" ≠ "não existe"* — o elemento que achei estava no `#root`, com contraste normal |
+| r62 | — | **amostragem de 40 leituras**: as violações de contraste existem **só em t=0**. É flash de primeiro paint, severidade baixa |
+| r63 | — | censo com prontidão + 3 amostras: **5 de 39 persistentes**, todas de landmark |
+| r64 | — | `/artifacts` e `/capabilities` tinham **zero headings**; `PageSearchShell` ganhou `h1` sr-only |
+| r65 | — | consertei o `heading-order` que a r64 criou |
+| r66 | — | **dois `<main>` aninhados** — `master-detail` e `mcp-editor` violavam a regra que o projeto fixou na r82 |
+| r67 | — | a raiz comum das 2 rotas restantes: `OverlayView` é `role="presentation"` |
+
+**O padrão**: todo número **medido com um comando** estava certo; todo número **escrito de memória**
+estava errado. E os três diagnósticos de acessibilidade errados tiveram a mesma forma — *ver um efeito e
+nomear uma causa* sem instrumento que separasse os dois.
+
 ### r32 — a matriz de autorização (medida, não escrita à mão) e uma falha real
 
 O G1 pede a matriz *canal × capacidade × ator × recurso × autorização × **teste***. Eu tinha a de

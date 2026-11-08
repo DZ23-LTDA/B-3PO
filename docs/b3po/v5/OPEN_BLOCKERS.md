@@ -30,6 +30,8 @@ fase: G7
 | `DEC-2` | **Identidade do web**: rebrandar o dashboard do Hermes, ou declará-lo o dashboard do runtime? | web = Hermes upstream | decisão de produto; a matriz registra o estado real |
 | `DEC-3` | **Seis modos no mobile**: portar, ou assumir o app como cliente de conversa? | ausentes | idem |
 | `DEC-4` | **Testes que fingem `platform`**: marcar como Linux-only (regra do repo) ou dar a eles um `home` POSIX? | 3 falhas permanentes no Windows | desabilitar teste exige decisão de quem cuida do CI |
+| `DEC-5` | **Primeiro paint**: qual tema a pagina usa **antes** de a configuracao ser lida. Medido na r62: tres textos a **1.12:1** existem **so no primeiro frame** (`#191d22` sobre `#0d1015`), depois o contraste passa. Nao e' falha persistente; e' flash. Opcoes: bloco inline no `index.html` com o tema inicial, ou aceitar o flash | **Bloqueia**: nada. E' severidade baixa |
+| `DEC-6` | **Overlay que e' rota**: `OverlayView` e' `role="presentation"` e o card nao tem role, entao `/cron` e `/profiles` ficam **fora do `<main>`** — dai `region` e dois `<header>` virando duas `banner`. Opcoes: `dialog`, `region` com `aria-label` (exige prop de titulo em todas as rotas de overlay), ou mover o overlay para dentro do `<main>` | **Bloqueia**: `G6` completo (2 rotas). E' a ultima pendencia de acessibilidade |
 
 ## Bloqueios de verificação (não de produto)
 
