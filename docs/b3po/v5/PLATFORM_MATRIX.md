@@ -122,6 +122,44 @@ O proprio projeto **ja tinha decidido isso** — `overlay-split-layout.tsx` regi
 `/messaging`, `/capabilities`, `/artifacts` e de forma estavel em `/cron`; e `/profiles` mantem
 `landmark-no-duplicate-banner` (dois `<header>`).
 
+### r67 — a raiz comum das rotas restantes: **overlay e' `role="presentation"`**
+
+As rotas que sobram no censo (`/cron`, `/profiles`, e parcialmente `/messaging`, `/capabilities`) tem a
+**mesma causa**, e nao e' heading nem cor. E' isto:
+
+| Medido | Valor |
+|---|---|
+| `<main>` do app | vem do **pane tree** (`renderer/index.tsx:83`) |
+| `/profiles` | conteudo em **portal** — `emPortal: true` |
+| `/cron` | no shell, mas `conteudoDentroDoMain: false` |
+| `headersDentroDoMain` | **0** nas duas |
+| root do `OverlayView` | **`role="presentation"`** |
+| card interno | `data-glass-raised`, **sem role** |
+
+`/artifacts` esta `conteudoDentroDoMain: true` — **por isso** zerou depois do fix da r64. `/cron` e
+`/profiles` renderizam como **overlay**, ao lado do pane tree e fora do `<main>`; o wrapper do overlay e'
+`role="presentation"`, entao o conteudo nao esta em landmark nenhum. Dai:
+
+- `region` — "conteudo fora de landmarks";
+- `landmark-no-duplicate-banner` — os dois `<header>` da rota ficam **fora de `<main>`**, e `<header>`
+  fora de `<main>` **e'** `banner`; dois viram duas banners.
+
+**Uma causa, tres sintomas, tres rotas.** A correcao exige decidir o que um overlay **e'**:
+
+| Opcao | Consequencia |
+|---|---|
+| `role="dialog"` | correto se for modal; estes sao rotas, nao modais |
+| `role="region"` + `aria-label` | correto para painel de pagina; precisa que o overlay saiba seu nome |
+| por o overlay **dentro** do `<main>` | muda o shell e o layout de todas as rotas |
+
+`OverlayView` hoje **nao recebe titulo** (so `closeLabel`), entao a opcao do meio exige uma prop nova e
+que cada rota informe o nome — o mesmo `t.sidebar.nav.*` que a r64 ja usou.
+
+**Registrado como `DEC-6`**: qual papel um overlay-que-e'-rota declara.
+
+**Nao corrigi**: e' a mesma classe de decisao do `page-has-heading-one` de antes, e a mudanca atinge
+**todas** as rotas de overlay de uma vez.
+
 ### Censo definitivo (r63): **5 rotas com violacao persistente de 39**
 
 O metodo que funcionou: **prontidao** (`role="status"` ausente) **+ 3 amostras com 1,2 s de intervalo**,
