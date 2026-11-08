@@ -324,7 +324,16 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
     >
       <div className="flex flex-col items-center gap-2">
         <Codicon className="text-muted-foreground/50" name={icon} size="1.25rem" />
-        {title ? <p className="text-sm font-medium text-foreground/90">{title}</p> : null}
+        {/*
+          r58 do V5 — o titulo do estado vazio e' o unico texto de cabecalho que a rota tem quando ela
+          esta vazia, e estava num `<p>`: nao e' heading nenhum. `/artifacts` e `/capabilities` falhavam
+          em `page-has-heading-one` por isso.
+
+          `<h2>` e nao `<h1>`: o `PanelHeader` usa h2 porque em overlay existe um h1 atras (o
+          `OverlayBreadcrumbHeader`). Elevar a h1 aqui criaria dois h1 nas rotas com header. O que
+          faltava era **algum** heading, nao o primeiro.
+        */}
+        {title ? <h2 className="text-sm font-medium text-foreground/90">{title}</h2> : null}
         {description ? (
           <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">{description}</p>
         ) : null}

@@ -73,6 +73,43 @@ timeout.
 | `/artifacts` | 1 | `page-has-heading-one` |
 | `/capabilities` | 1 | `page-has-heading-one` |
 
+### 🔴 O censo NAO e' reprodutivel (r58) — os numeros sao indicativos
+
+Medi `/cron` duas vezes seguidas **com o mesmo metodo** (prontidao = heading presente + DOM estavel):
+
+```
+/cron      carga1 = 3   carga2 = 3   (estavel)
+/artifacts carga1 = 1   carga2 = 1   (estavel)
+```
+
+Mas minutos antes, a mesma rota `/cron` deu **0**. **Tres medicoes da mesma rota, dois resultados.**
+
+**Por que**: a pagina tem estados que o meu sinal de prontidao nao distingue (carregando com esqueleto,
+carregando com dado parcial, vazio, pronto). "DOM parou de mudar por 600 ms" nao e' "a pagina chegou ao
+estado final" — e' "chegou a *algum* estado que durou 600 ms".
+
+**O que isso significa para os numeros acima**:
+
+| Numero | Confiavel? |
+|---|---|
+| "39 rotas medidas" | ✅ o conjunto de rotas |
+| "6 com violacao" | ❌ varia entre execucoes; ja vi 5 e 6 |
+| "34 limpas" | ❌ derivado do anterior |
+| `#/agents` 2→0 (r55) | ✅ **verificado 3 vezes, estavel** |
+| `/profiles` 6→5 (r56) | ✅ `aria-label` presente no DOM, `aria-input-field-name` sumiu |
+| `/webhooks` 1→0 (r57) | ✅ estavel em duas cargas |
+
+**As correcoes sao reais**; o **recenseamento** nao e'. A diferenca importa: eu posso afirmar que
+`#/agents`, `/webhooks` e `/profiles` melhoraram, e **nao** posso afirmar "34 de 39 estao limpas".
+
+**O que faria o censo valer**: esperar um **marcador por rota** (o elemento que so existe com o dado
+carregado), nao um timeout nem uma heuristica de estabilidade.
+
+#### E o `h2` do `PanelEmpty` (r58)
+
+Troquei o `<p>` do titulo por `<h2>`: **semanticamente correto** (um titulo de secao e' heading) e
+**sem efeito medido** — `/cron` continuou em 3. Fica pela semantica, **nao como correcao de `axe`**.
+
 **34 das 39 rotas tem `axe` 0.** As 5 restantes somam **10 nos**.
 
 ### r57 — o `section` sem nome nao era landmark
