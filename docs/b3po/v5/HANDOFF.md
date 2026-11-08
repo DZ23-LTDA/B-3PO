@@ -20,7 +20,7 @@ revisao: r68
 |---|---|
 | Branch | `b3po-brand` |
 | `main` | `f4cf411f28` — **intacta** |
-| Gate | **16/16** |
+| Gate | **17/17** |
 | Typecheck | **0 erros**, 2 projetos |
 | `axe` | **5 de 39 rotas** com violacao persistente quando medido em r63; **2 restantes** dependem de `DEC-6`. O "0 em 27 rotas" do V4 **nao era reproduzivel** — ver `PLATFORM_MATRIX.md`. Corrigidas nesta sessao: `/artifacts`, `/capabilities`, `/messaging`, `#/agents`, `/webhooks`, `aria-label` do editor |
 | Console | **0 erros em 39 rotas** — medido na r69 (`console` nivel `error` + `pageerror`), com sinal de prontidao por rota |
