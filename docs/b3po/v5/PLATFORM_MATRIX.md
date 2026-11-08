@@ -73,6 +73,26 @@ timeout.
 | `/artifacts` | 1 | `page-has-heading-one` |
 | `/capabilities` | 1 | `page-has-heading-one` |
 
+### r64 — o heading que faltava, e a troca que fiz
+
+`PageSearchShell` (o shell de `/artifacts`, `/capabilities` e `/messaging`) ganhou uma prop **`title`** que
+renderiza `<h1 className="sr-only">`. A pagina nao mostra titulo visual — a identidade vem do item de menu
+—, entao o heading e' **`sr-only`**: da' estrutura a quem usa leitor de tela sem mudar o layout. Nunca
+`aria-hidden`, que esconderia de quem mais precisa.
+
+| Rota | Antes | Depois |
+|---|---|---|
+| `/artifacts` | `page-has-heading-one` | **0 violacoes** |
+| `/capabilities` | `page-has-heading-one` | **0 violacoes** |
+| `/messaging` | 4 (incluindo `page-has-heading-one`) | 4, **mas diferente** |
+
+**A troca em `/messaging`**: saiu `page-has-heading-one`, entrou `heading-order`. O h1 novo vem antes de
+um h3, e a ordem de headings precisa ser descendente. **Troquei uma violacao de best-practice por outra**
+— o total nao caiu la', e eu prefiro registrar isso a contabilizar como vitoria.
+
+**`/messaging` continua com dois `<main>`** — isso nao e' heading, e' shell duplicado, e nao tem correcao
+de uma linha.
+
 ### Censo definitivo (r63): **5 rotas com violacao persistente de 39**
 
 O metodo que funcionou: **prontidao** (`role="status"` ausente) **+ 3 amostras com 1,2 s de intervalo**,

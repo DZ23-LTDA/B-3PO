@@ -552,6 +552,7 @@ export function MessagingView({ setStatusbarItemGroup: _setStatusbarItemGroup, .
 
   return (
     <PageSearchShell
+      title={t.sidebar.nav.messaging}
       {...props}
       onSearchChange={setQuery}
       searchHidden={(platforms?.length ?? 0) === 0}

@@ -320,6 +320,7 @@ export function ArtifactsView({ setStatusbarItemGroup: _setStatusbarItemGroup, .
 
   return (
     <PageSearchShell
+      title={t.sidebar.nav.artifacts}
       {...props}
       activeTab={kindFilter}
       onSearchChange={setQuery}

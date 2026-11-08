@@ -33,6 +33,17 @@ interface PageSearchShellProps extends React.ComponentProps<'section'> {
   /** Right-aligned control in the header's trailing cell (e.g. a refresh button)
    *  so mouse users get a visible affordance for the refresh hotkey. */
   searchTrailingAction?: ReactNode
+  /**
+   * r64 do V5 — nome da pagina como heading para leitor de tela.
+   *
+   * `/artifacts`, `/capabilities` e `/messaging` nao tinham `<h1>` NENHUM (`headings: []` no DOM) e o
+   * `axe` acusava `page-has-heading-one`; sem heading nao ha navegacao por estrutura. A pagina nao
+   * mostra um titulo visual — a identidade vem do item de menu —, entao o heading e' `sr-only`: da'
+   * estrutura a quem usa leitor de tela **sem mudar o layout**. Nao e' `aria-hidden`, que esconderia.
+   *
+   * Opcional para nao quebrar quem ja tem heading proprio (`/settings`, `/`).
+   */
+  title?: string
 }
 
 function ShellTabs({
@@ -70,6 +81,7 @@ export function PageSearchShell({
   searchHidden = false,
   tabsAlign = 'center',
   searchTrailingAction,
+  title,
   ...props
 }: PageSearchShellProps) {
   const hasTabs = (tabs?.length ?? 0) > 0
@@ -79,6 +91,8 @@ export function PageSearchShell({
       {...props}
       className={cn('flex h-full min-w-0 flex-col overflow-hidden bg-(--ui-chat-surface-background)', className)}
     >
+      {/* r64: heading da pagina sem mudanca visual — ver a doc da prop `title`. */}
+      {title ? <h1 className="sr-only">{title}</h1> : null}
       {/*
         Header lives in the page body, below the window chrome (the shell floats
         traffic lights over the top titlebar-height strip, which the `pt` clears
