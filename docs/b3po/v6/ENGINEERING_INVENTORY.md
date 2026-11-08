@@ -137,6 +137,37 @@ um botao errado.**
 **11 testes**, incluindo os casos de ausencia: pasta vazia, sem `scripts.test`, JSON invalido, manifesto
 gigante.
 
+## r9 — os canais ficaram ALCANCAVEIS, e as funcoes puras de apresentacao
+
+Na r6/r7 os canais `dev:run` e `dev:detect` existiam no **main** e **ninguem os alcancava**: nao havia
+entrada no preload. Foi exatamente o defeito da **r25 do V5** (`sofia:delegar` registrado e nao exposto,
+14 rodadas morto) — e o teste `preload-ipc-alcancavel.test.ts`, que existe para isso, apontaria.
+
+**Corrigido**: namespace `dev` no preload (`dev.detect`, `dev.run`). **13 testes** verdes, incluindo o
+invariante de alcancabilidade.
+
+**Cliente** (`api/dev.ts`), com duas funcoes puras que a UI precisa para nao mentir:
+
+| Funcao | Por que |
+|---|---|
+| `resumoDaExecucao` | "passou" vem do **exit code**. `grep` por "fail" na saida daria falso positivo em projeto que imprime a palavra por outro motivo |
+| `rotuloDoComando` | mostrar **o que vai rodar** antes de rodar |
+
+**E uma decisao que o teste obrigou**: sinal sem exit code (`SIGTERM`, timeout) vira `passou: null`, nao
+`false`. Chamar isso de "falhou" culparia o **projeto** por algo que o **app** fez.
+
+**O que continua faltando**: a **tela**. O cliente e os canais estao prontos e testados; nenhuma superficie
+os usa. As tres candidatas, com o custo de cada uma:
+
+| Superficie | Custo |
+|---|---|
+| Aba "Testes" no right-rail | novo `kind` em `PreviewTab` + renderer + persistencia |
+| Acao no command palette | `command-palette/index.tsx` tem 1.560 linhas; a acao entra na lista |
+| Botao no header do workspace | `workspace-header.tsx` e' da **sidebar**, nao do chat |
+
+**Nenhuma foi escolhida correndo**: um componente que compila e nao esta' montado e' o estado falso que o
+§4 proibe.
+
 ## r8 — TERCEIRA classificacao errada, e o padrao por trás delas
 
 Corrigi de novo o proprio inventario: **#8 (preview) e #9 (console) nao eram `MISSING`**.

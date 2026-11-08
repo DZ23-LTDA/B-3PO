@@ -107,6 +107,19 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
     list: tenantId => ipcRenderer.invoke('hermes:inventory:list', tenantId)
   },
   // r21 do GOAL V2: Sofia. Os seis canais nasceram com guarda na r19 — o bridge so repassa.
+  /*
+   * r9 da V6 — os canais de desenvolvimento.
+   *
+   * Sem isto, `hermes:dev:run` e `hermes:dev:detect` existiriam no main e **ninguem os alcancaria** —
+   * foi o defeito da r25 do V5 (`sofia:delegar` registrado e nao exposto, 14 rodadas morto). O teste
+   * `preload-ipc-alcancavel.test.ts` existe justamente para pegar isso, e pegaria.
+   *
+   * `run` recebe `argv` (lista), nunca string: nao ha shell no caminho.
+   */
+  dev: {
+    detect: payload => ipcRenderer.invoke('hermes:dev:detect', payload),
+    run: payload => ipcRenderer.invoke('hermes:dev:run', payload)
+  },
   sofia: {
     aprovar: payload => ipcRenderer.invoke('hermes:sofia:aprovar', payload),
     criar: payload => ipcRenderer.invoke('hermes:sofia:criar', payload),
